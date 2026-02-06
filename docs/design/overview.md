@@ -17,6 +17,83 @@ The goal is clarity, not exhaustiveness.
 
 ---
 
+## AI Prompt Layers
+
+AI behavior is controlled by layered prompts, each with a clear role:
+
+1. **System Prompt**
+   - Defines identity and trust
+   - Used in all AI calls
+
+2. **Task Prompt**
+   - Defines what the AI is doing (recommendation or appraisal)
+
+3. **Context Blocks**
+   - Injected data for the task (inventory, trade preferences, appraisal fields)
+
+4. **Structured Output Add-on (when required)**
+   - Enforces JSON-only output when the UI needs deterministic structure
+
+---
+
+## AI Modes
+
+### A) General Chat (Freeform)
+
+Used when the user is not selecting inventory.
+
+Prompts used:
+- docs/prompts/system.md
+
+Output:
+- plain text
+
+---
+
+### B) Concierge Recommendations (Structured)
+
+Used when the user is trying to find rugs from inventory.
+
+Prompts used (in order):
+- docs/prompts/system.md
+- docs/prompts/recommendation.md
+- Optional: trade client context
+- Inventory context (hard-coded JSON now; DB results later)
+- docs/prompts/recommendation-structured-output.md
+
+Output:
+- JSON only (assistant_message + rug cards)
+
+Inventory context is pre-filtered by hard constraints.
+See `docs/design/concierge-flow.md` for constraints and no-match logic.
+
+---
+
+### C) Appraisal Draft Mode (Internal)
+
+Used by owner/staff only.
+
+Prompts used:
+- docs/prompts/system.md
+- Appraisal Draft Prompt (TBD)
+- Appraisal context
+- Optional rug context
+- Structured output add-on (if used)
+
+Output:
+- Draft text + metadata (always reviewed before finalization)
+
+---
+
+### Trade Clients (Designers)
+
+Trade clients are context, not a separate mode:
+- preferences are injected as a context block
+- they influence ranking and phrasing
+- they do not change output structure
+
+---
+
 ## Data Layer (Supabase / Postgres)
 
 ### Multi-Tenant Design
@@ -26,8 +103,8 @@ The goal is clarity, not exhaustiveness.
   - `rug_images`
   - `trade_clients`
   - `appraisals`
-- Row Level Security (RLS) enforces tenant isolation
-- No cross-tenant data access is possible
+- Row Level Security (RLS) is intended to enforce tenant isolation
+- Cross-tenant access should be impossible once policies are fully in place
 
 This allows:
 - fast onboarding of new rug businesses
@@ -76,10 +153,10 @@ Both tables:
 
 ## Stack & Deployment
 
-- ?? **Frontend + Backend:** Next.js (App Router) + TypeScript
-- ?? **Styling:** Tailwind CSS + shadcn/ui
+- **Frontend + Backend (TBD):** Next.js (App Router) + TypeScript
+- **Styling (TBD):** Tailwind CSS + shadcn/ui
 - **Auth / DB / Storage:** Supabase
-- ?? **Hosting:** Vercel
+- **Hosting (TBD):** Vercel
 - **Repo:** Single monorepo
 
 ---
