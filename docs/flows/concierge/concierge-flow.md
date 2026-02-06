@@ -1,14 +1,15 @@
 # Concierge Flow (v1)
 
-This project has two runtime lanes:
+This project has runtime lanes:
 1) General Chat (freeform)
 2) Concierge Recommendations (structured)
+3) Appraisal mode...
 
 ## A) General Chat (freeform)
 Use when the user is not asking to match inventory (education, care, policies, etc.)
 
 Prompts:
-- 00_system_prompt.md
+- system-prompt.md
 
 Output:
 - plain text
@@ -17,11 +18,11 @@ Output:
 Use when the user is asking for rugs that fit constraints (size/budget/style/etc.)
 
 Prompts (always in this order):
-- 00_system_prompt.md
-- 10_recommendation_prompt.md
+- system-prompt.md
+- recommendation-prompt.md
 - Optional: Trade_client context
 - Inventory context (hard-coded JSON now; DB results later)
-- 11_recommendation_structured_output_addon.md
+- recommendation-structured-output.md
 
 Output:
 - JSON only (UI renders assistant_message + rug cards)
