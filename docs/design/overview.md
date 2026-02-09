@@ -123,7 +123,7 @@ Uploading a rug must be simple and fast:
 - SKU (arbitrary per store)
 - Size
 - One-line description
-- Optional photos
+- Optional hashtags, photos, (& all other fields)
 
 This supports rapid inventory movement and non-technical staff.
 
@@ -138,7 +138,7 @@ Optional enrichment includes:
 - construction
 - condition
 - origin / style
-- AI-assisted photo enrichment (suggestions only, owner-approved)
+- AI-assisted photo enrichment (suggestions only, owner-approved, PAID FEATURE)
 
 ### Inventory Tables
 - `rugs` — primary inventory record

@@ -71,6 +71,58 @@ These guide ranking and explanations only:
 
 ---
 
+## Ranking Logic (Soft Layer)
+
+Ranking happens **after** hard constraints are applied and must never eliminate rugs.
+
+### Goals
+
+- Surface the best-fitting rugs first
+- Make recommendations feel curated and honest
+- Support follow-ups without restarting the flow
+
+### What Ranking Uses
+
+Ranking is based only on:
+- the current user request
+- explicit rug attributes
+- optional trade workflow context (not taste)
+
+No assumptions or inferred preferences are allowed.
+
+### Ranking Priorities (v1)
+
+1. **Match to current request**
+   - stated style, palette, or pattern preferences
+   - stated durability needs (pets, traffic)
+
+2. **Practical fit (soft guidance only)**
+   - room/use context influences ranking
+   - never eliminates rugs
+
+3. **Trade workflow alignment (if applicable)**
+   - spec completeness
+   - availability sensitivity
+   - typical project scale
+
+4. **Tie-breakers**
+   - clearer descriptions
+   - images available
+   - controlled variety across options
+
+### Follow-Up Behavior
+
+- Follow-ups re-rank the same candidate set
+- New preferences update ranking
+- Size or budget changes trigger re-filtering
+
+### Explainability
+
+Each recommendation must include 2–3 short reasons
+based on real rug attributes and the stated request.
+
+---
+
 ## No-Match Logic (Objective)
 
 No-match is returned only when the **backend candidate set is empty** after hard constraints.
