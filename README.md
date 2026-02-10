@@ -2,6 +2,9 @@
 
 Docs: docs/README.md
 
+## Requirements
+- Node.js >= 20.9.0
+
 ## Quick Start
 
 1. Install deps
