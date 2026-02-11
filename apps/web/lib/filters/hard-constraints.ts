@@ -1,5 +1,12 @@
 import type { HardConstraints, InventoryRug } from "@/lib/types/recommendation";
 
+// PSEUDOCODE
+// For each rug:
+// - if status not available -> drop
+// - if price > budgetMax -> drop
+// - if size doesn't match (with tolerance + rotation) -> drop
+// Return remaining rugs
+
 const DEFAULT_TOLERANCE_IN = 2;
 
 function matchesSize(rug: InventoryRug, constraints: HardConstraints): boolean {

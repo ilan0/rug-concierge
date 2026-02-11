@@ -10,6 +10,9 @@ Start here.
 
 ---
 
+## Working Notes (Dev)
+- docs/working-notes.md
+
 ## Design
 - docs/design/overview.md
 - docs/design/concierge-flow.md

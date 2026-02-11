@@ -1,4 +1,9 @@
-import type { InventoryRug } from "@/lib/types/recommendation";
+import type { HardConstraints, InventoryRug } from "@/lib/types/recommendation";
+
+// PSEUDOCODE
+// If no candidates -> no_match
+// Else call OpenAI to rank/explain (TODO)
+// Return structured response
 
 export type RecommendationResponse = {
   mode: "recommendations" | "clarifying_question" | "no_match";
@@ -17,14 +22,32 @@ export type RecommendationResponse = {
 };
 
 export async function rankAndExplain(
-  _inventory: InventoryRug[]
+  inventory: InventoryRug[],
+  _constraints: HardConstraints
 ): Promise<RecommendationResponse> {
-  // Placeholder until OpenAI integration is wired.
+  // PSEUDO LOGIC (no OpenAI yet):
+  // 1) If inventory is empty after filtering, return no_match.
+  // 2) Otherwise, return recommendations (stub for now).
+
+  if (inventory.length === 0) {
+    return {
+      mode: "no_match",
+      assistant_message:
+        "Based on current inventory, nothing fits those constraints.",
+      questions: ["Would you like to adjust size or budget?"],
+      recommendations: [],
+      notes: null,
+    };
+  }
+
   return {
-    mode: "clarifying_question",
-    assistant_message: "To narrow this down, what size are you looking for?",
-    questions: ["Do you have a target size in mind?"],
-    recommendations: [],
+    mode: "recommendations",
+    assistant_message:
+      "Based on what you’re looking for, here are a few rugs that could work well:",
+    questions: [],
+    recommendations: [
+      // TODO: Replace with ranked results from OpenAI.
+    ],
     notes: null,
   };
 }

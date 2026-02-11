@@ -1,3 +1,6 @@
+// PSEUDOCODE
+// Define shared types for constraints and inventory rows.
+
 export type HardConstraints = {
   budgetMax?: number;
   size?: {
