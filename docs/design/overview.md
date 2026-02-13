@@ -14,6 +14,22 @@ The goal is clarity, not exhaustiveness.
 - **Multi-tenant via `tenant_id`**
 - **AI behavior controlled by layered prompts**
 - **Primary AI workflows: recommendations and appraisals**
+- **Backend-first chat routing (mode is chosen by backend before AI task execution)**
+
+---
+
+## Chat Entry & Mode Routing
+
+All user chat enters through backend first.
+
+Backend responsibilities:
+- determine whether the message is `general_chat` or `recommendation`
+- request clarification when intent is ambiguous
+- enforce hard constraints and inventory grounding for recommendation mode
+
+AI responsibilities:
+- in general chat: provide informational freeform responses
+- in recommendation mode: rank and explain only within backend-provided inventory candidates
 
 ---
 

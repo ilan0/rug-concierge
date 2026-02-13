@@ -14,15 +14,26 @@ Primary objective: trust and correctness over aggressive recommendations.
 ## Non-Negotiables
 
 - Inventory is the source of truth.
-- Backend enforces hard constraints.
+- Backend enforces active hard constraints.
 - AI does ranking and explanation only.
 - No-match is a valid outcome.
 - AI must not invent inventory facts.
+- User messages are routed through backend first (not directly to AI).
+
+## Chat Routing Contract (v1)
+
+- UI sends user messages to backend.
+- Backend decides mode:
+  - `general_chat` for education/care/policy conversation
+  - `recommendation` for inventory matching requests
+- In `general_chat`, backend returns freeform assistant text.
+- In `recommendation`, backend runs the recommendation pipeline and returns structured output.
+- If intent is unclear, backend asks clarifying question(s) before recommendation.
 
 Hard constraints (eliminators):
-- availability
-- budget
-- size (with tolerance, rotation allowed)
+- availability (always)
+- budget (when provided)
+- size (when provided, with tolerance and rotation)
 
 Soft signals (ranking only):
 - style
@@ -34,17 +45,19 @@ Soft signals (ranking only):
 ## Recommendation Pipeline (v1)
 
 1. Parse request.
-2. If required constraints are missing, return `clarifying_question`.
+2. Extract any stated constraints (from explicit fields and/or user text).
 3. Query Supabase with coarse hard-constraint filters.
-4. Apply final deterministic filtering in code (tolerance/rotation/null safety).
-5. If candidate set is empty, return `no_match`.
-6. Else pass candidates to AI for ranking + explanation.
-7. Return structured output for UI rendering.
+4. Apply final deterministic filtering in code (availability + optional budget/size).
+5. Shape candidate set for AI context (bounded + varied).
+6. If candidate set is empty, return `no_match`.
+7. Else pass candidates to AI for ranking + explanation.
+8. Return structured output for UI rendering.
 
 Rules:
-- Missing required constraints are checked before any inventory query.
-- Supabase query should do coarse filtering (availability/budget/size bounds).
-- In-code hard filter still runs after query for exact tolerance + rotation and safety.
+- Browse without size/budget is valid.
+- Supabase query is SQL-first and should apply active hard constraints before AI.
+- In-code hard filter still runs after query for exact tolerance + rotation + safety.
+- Candidate set sent to AI should be bounded (roughly 20-30) and deterministically ordered.
 - No-match is only when backend candidate set is empty.
 
 ## OpenAI Direction
@@ -68,7 +81,7 @@ Trade client preferences are workflow/presentation context, not modeled as aesth
 ## Near-Term Implementation Priorities
 
 1. Wire Supabase query in recommendation route.
-2. Keep pre-query missing-constraint guard.
-3. Implement candidate shaping for AI context.
+2. Support optional constraints (browse + constrained search in one flow).
+3. Keep candidate shaping simple (cap + deterministic order) for V1.
 4. Replace AI stub with OpenAI call using structured output.
 5. Validate returned IDs are subset of backend candidate set.

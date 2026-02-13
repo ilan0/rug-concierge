@@ -34,7 +34,10 @@ This is a quick, practical reference for what you’ll edit first, where things 
 
 ### Filtering / Logic
 - Hard constraints: `apps/web/lib/filters/hard-constraints.ts`
-- AI rank/explain stub: `apps/web/lib/ai/recommend.ts`
+- Shared size bounds/tolerance math: `apps/web/lib/filters/size-bounds.ts`
+- Constraint extraction: `apps/web/lib/filters/extract-constraints.ts`
+- Candidate shaping: `apps/web/lib/filters/candidate-shaping.ts`
+- AI rank/explain: `apps/web/lib/ai/recommend.ts`
 
 ### Types
 - Recommendation types: `apps/web/lib/types/recommendation.ts`
@@ -76,6 +79,10 @@ npm run dev
 
 ## Notes / Reminders
 
-- Hard constraints are applied before AI sees inventory.
+- Availability is always hard; size/budget are hard only when provided.
+- Browse without size/budget is valid recommendation behavior.
+- SQL-first filtering runs before AI sees inventory.
+- Final hard checks still run in backend after SQL query.
+- Candidate list is shaped with a simple cap + deterministic order for V1.
 - AI ranks/explains only; backend filters deterministically.
 - No RAG/vector store needed for current architecture.

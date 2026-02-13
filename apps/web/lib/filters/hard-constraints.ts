@@ -1,31 +1,25 @@
 import type { HardConstraints, InventoryRug } from "@/lib/types/recommendation";
+import { getSizeBounds, matchesSizeWithBounds } from "@/lib/filters/size-bounds";
 
 // PSEUDOCODE
 // For each rug:
-// - if status not available -> drop
-// - if price > budgetMax -> drop
+// - availability is always hard -> only `available` rugs stay
+// - if budget exists, compare against sale price (or list price fallback)
 // - if size doesn't match (with tolerance + rotation) -> drop
 // Return remaining rugs
 
-const DEFAULT_TOLERANCE_IN = 2;
-
 function matchesSize(rug: InventoryRug, constraints: HardConstraints): boolean {
-  if (!constraints.size) return true;
+  const bounds = getSizeBounds(constraints.size);
+  if (!bounds) return true;
 
-  const { widthIn, lengthIn, toleranceIn } = constraints.size;
-  const tol = toleranceIn ?? DEFAULT_TOLERANCE_IN;
+  if (
+    typeof rug.width_total_in !== "number" ||
+    typeof rug.length_total_in !== "number"
+  ) {
+    return false;
+  }
 
-  if (!rug.width_total_in || !rug.length_total_in) return false;
-
-  const w = rug.width_total_in;
-  const l = rug.length_total_in;
-
-  const directMatch =
-    Math.abs(w - widthIn) <= tol && Math.abs(l - lengthIn) <= tol;
-  const rotatedMatch =
-    Math.abs(w - lengthIn) <= tol && Math.abs(l - widthIn) <= tol;
-
-  return directMatch || rotatedMatch;
+  return matchesSizeWithBounds(rug.width_total_in, rug.length_total_in, bounds);
 }
 
 export function filterByHardConstraints(
@@ -33,12 +27,14 @@ export function filterByHardConstraints(
   constraints: HardConstraints
 ): InventoryRug[] {
   return inventory.filter((rug) => {
-    if (rug.status && rug.status !== "available") return false;
+    if (rug.status !== "available") return false;
+
+    const effectivePrice =
+      typeof rug.sale_price_usd === "number" ? rug.sale_price_usd : rug.price_usd;
 
     if (
       typeof constraints.budgetMax === "number" &&
-      typeof rug.price_usd === "number" &&
-      rug.price_usd > constraints.budgetMax
+      (typeof effectivePrice !== "number" || effectivePrice > constraints.budgetMax)
     ) {
       return false;
     }

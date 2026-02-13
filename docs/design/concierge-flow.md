@@ -1,13 +1,22 @@
 # Concierge Flow (v1)
 
+## Entry Rule
+
+All user messages route to backend first.
+
+- If backend classifies the message as general chat, this flow is not used.
+- This flow is used only when backend classifies the message as a recommendation request.
+- If intent is unclear, backend asks clarifying question(s) first.
+
 ## Quick 6-Step Flow
 
-1. Collect constraints (ask if missing)
-2. Backend filters inventory (hard constraints)
-3. If 0 results → no-match + suggest one adjustment
-4. If results → AI picks top 3 + reasons
-5. User feedback → re-rank or show next 3
-6. Budget/size change → rerun step 2
+1. Parse request + extract any constraints/preferences
+2. Backend applies SQL-first filtering (availability always; budget/size when provided)
+3. Backend applies final deterministic hard checks (tolerance + rotation + safety)
+4. Shape candidate set (bounded deterministic order for AI context)
+5. If 0 results → no-match + suggest one adjustment
+6. If results → AI picks top options + reasons
+7. Follow-ups (new constraints/preferences) rerun from step 1
 
 ---
 
@@ -33,7 +42,7 @@ Prompts (always in this order):
 - docs/prompts/system.md
 - docs/prompts/recommendation.md
 - Optional: trade client context
-- Inventory context (hard-coded JSON now; DB results later)
+- Inventory context (SQL-filtered candidate set)
 - docs/prompts/recommendation-structured-output.md
 
 Output:
@@ -43,16 +52,19 @@ Output:
 
 ## Hard Constraints (Objective)
 
-Hard constraints are the only rules that can eliminate candidates in v1:
+Hard constraints are the only rules that can eliminate candidates in v1.
+Some are always active; some are conditional:
 
 1. **Availability**
    - Rugs must be currently available (e.g., `status = available`)
 
 2. **Budget**
-   - Rugs must fit within the stated budget limits (when provided)
+   - Active only when budget is provided
+   - Rugs must fit within the stated budget limits
    - If a sale price exists, it is used instead of list price
 
 3. **Size**
+   - Active only when size is provided
    - Size may be provided as a label (e.g., “8x10”) or explicit dimensions
    - Rugs may be rotated; width and length are interchangeable
    - A small tolerance is allowed to account for handmade variation
@@ -68,6 +80,16 @@ These guide ranking and explanations only:
 - palette / color
 - pattern
 - subjective aesthetic preferences
+
+---
+
+## Browse Behavior (No Size/Budget)
+
+When size and budget are not provided:
+- recommendation mode remains valid
+- backend still enforces availability (SQL-first)
+- backend can return a bounded browse shortlist instead of forcing clarifying questions
+- AI explains options and can optionally ask one narrowing question
 
 ---
 
@@ -125,11 +147,11 @@ based on real rug attributes and the stated request.
 
 ## No-Match Logic (Objective)
 
-No-match is returned only when the **backend candidate set is empty** after hard constraints.
+No-match is returned only when the **backend candidate set is empty** after active hard constraints.
 
 Required behavior:
-- clearly state that nothing fits the current constraints in available inventory
-- name the limiting hard constraint(s) (size/budget/availability)
+- clearly state that nothing fits available inventory
+- if applicable, name the limiting hard constraint(s) (size/budget/availability)
 - suggest one adjustment or ask at most one clarifying question
 
 Structured output:

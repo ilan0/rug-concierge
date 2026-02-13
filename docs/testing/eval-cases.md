@@ -5,7 +5,7 @@ Use this file as a curated prompt suite for **edge-case discovery** and regressi
 ## How to use
 For each test input, record:
 - **Result type:** recommend / clarify / no-match / refuse
-- **Hard constraints enforced:** availability/status, size (with tolerance rules), budget
+- **Hard constraints enforced:** availability/status always; size/budget when provided
 - **No hallucinations:** never invent facts not present in inventory/context
 - **Explainability:** recommendations include clear, grounded “why”
 
@@ -51,19 +51,19 @@ For each test input, record:
 
 ---
 
-## C) “Good but incomplete” (should clarify before recommending)
+## C) “Good but incomplete” (browse can still recommend)
 
 **C1 — Too vague**  
 **Input:** “Need a rug for my living room.”  
-**Expect:** Ask for size + budget + vibe/use-case.
+**Expect:** Recommend a varied shortlist from available inventory; optionally ask one narrowing question.
 
 **C2 — Style-only request**  
 **Input:** “Looking for something like a Moroccan rug.”  
-**Expect:** Ask size/budget; style is soft, not a filter.
+**Expect:** Recommend from available inventory, using style as ranking signal; optional single clarifier.
 
 **C3 — Under king bed**  
 **Input:** “Rug for under king bed.”  
-**Expect:** Ask layout preference (2/3 under bed vs fully under) + room size/budget.
+**Expect:** Recommend with practical guidance; optional clarifier on layout or size tolerance.
 
 ---
 
@@ -168,6 +168,42 @@ For each test input, record:
 **I3 — Precise custom size**  
 **Input:** “9’2” x 11’7” – do you have anything close?”  
 **Expect:** Ask tolerance range; recommend within allowed tolerance.
+
+---
+
+## J) Browse + Variety Behavior
+
+**J1 — Open browse request**  
+**Input:** “Show me what you have in inventory.”  
+**Expect:** Recommend from available inventory without forcing size/budget question.
+
+**J2 — Open browse with taste signal**  
+**Input:** “Show me any cool rugs, maybe purple-ish.”  
+**Expect:** Palette is a soft preference; recommendations remain varied and grounded.
+
+**J3 — Anti-duplication check**  
+**Input:** “Just browsing, show me options.”  
+**Expect:** Initial set should avoid near-duplicate rugs unless inventory itself is highly uniform.
+
+---
+
+## K) SQL + Tolerance Boundary Checks
+
+**K1 — Upper boundary included**  
+**Input:** “Need 8x10, tolerance 2 inches.”  
+**Expect:** Rug at `98 x 122` can be included.
+
+**K2 — Outside boundary excluded**  
+**Input:** “Need 8x10, tolerance 2 inches.”  
+**Expect:** Rug at `99 x 122` is excluded.
+
+**K3 — Rotation boundary included**  
+**Input:** “Need 8x10, tolerance 2 inches.”  
+**Expect:** Rug at `120 x 96` can be included (rotation allowed).
+
+**K4 — Exact size strictness**  
+**Input:** “I need exactly 8x10, no tolerance.”  
+**Expect:** Only `96 x 120` or rotated equivalent qualifies.
 
 ---
 

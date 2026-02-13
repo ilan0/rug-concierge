@@ -30,5 +30,5 @@ Rules:
 
 Mode rules:
 - clarifying_question: 1–2 questions, recommendations=[]
-- recommendations: 1–3 items, questions usually []
+- recommendations: 1–8 items, questions usually []
 - no_match: recommendations=[], explain why, optionally 0–1 question
