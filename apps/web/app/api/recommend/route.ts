@@ -9,6 +9,7 @@ import {
 import { getSizeBounds } from "@/lib/filters/size-bounds";
 import { rankAndExplain } from "@/lib/ai/recommend";
 import type { HardConstraints, InventoryRug } from "@/lib/types/recommendation";
+import { logRecommendationQaEvent } from "@/lib/qa/recommendation-log";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 /**
@@ -32,6 +33,8 @@ const SQL_QUERY_LIMIT = 120;
 const AI_CANDIDATE_LIMIT = 30;
 
 export async function POST(req: Request) {
+  const requestId = crypto.randomUUID();
+
   // Parse JSON body safely. If parsing fails, `body` will be null.
   const body = await req.json().catch(() => null);
 
@@ -69,6 +72,21 @@ export async function POST(req: Request) {
   });
 
   if (inventory === null) {
+    await logRecommendationQaEvent({
+      request_id: requestId,
+      tenant_id: tenantId,
+      user_message: userMessage,
+      constraints,
+      sql_candidate_count: 0,
+      filtered_candidate_count: 0,
+      ai_candidate_count: 0,
+      response_mode: "error",
+      recommendation_ids: [],
+      notes: null,
+      error: "Unable to query inventory source",
+      created_at: new Date().toISOString(),
+    });
+
     return NextResponse.json(
       { error: "Unable to query inventory source" },
       { status: 500 }
@@ -84,6 +102,22 @@ export async function POST(req: Request) {
 
   // AI sees only pre-filtered candidates and can rank/explain among them.
   const response = await rankAndExplain(aiCandidates, constraints, userMessage);
+
+  await logRecommendationQaEvent({
+    request_id: requestId,
+    tenant_id: tenantId,
+    user_message: userMessage,
+    constraints,
+    sql_candidate_count: inventory.length,
+    filtered_candidate_count: candidates.length,
+    ai_candidate_count: aiCandidates.length,
+    response_mode: response.mode,
+    recommendation_ids: response.recommendations.map((rec) => rec.rug_id),
+    notes: response.notes,
+    error: null,
+    created_at: new Date().toISOString(),
+  });
+
   return NextResponse.json(response);
 }
 
