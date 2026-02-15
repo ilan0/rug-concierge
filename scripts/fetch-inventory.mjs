@@ -12,10 +12,10 @@ function readArg(flag, fallback = null) {
 
 async function main() {
   const supabaseUrl = process.env.SUPABASE_URL;
-  const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const supabaseSecretKey = process.env.SUPABASE_SECRET_KEY;
 
-  if (!supabaseUrl || !supabaseServiceRoleKey) {
-    throw new Error("Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY");
+  if (!supabaseUrl || !supabaseSecretKey) {
+    throw new Error("Missing SUPABASE_URL or SUPABASE_SECRET_KEY");
   }
 
   const tenantId = readArg("--tenant", "");
@@ -25,7 +25,7 @@ async function main() {
     "docs/testing/fixtures/inventory-snapshot.json"
   );
 
-  const supabase = createClient(supabaseUrl, supabaseServiceRoleKey, {
+  const supabase = createClient(supabaseUrl, supabaseSecretKey, {
     auth: { persistSession: false },
   });
 

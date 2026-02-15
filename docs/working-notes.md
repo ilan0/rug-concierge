@@ -6,7 +6,7 @@ This is a quick, practical reference for what you’ll edit first, where things 
 
 ## Core Stack (Current)
 
-- Node.js: `20.11.1` (see `.nvmrc`)
+- Node.js: latest stable (`node` via `.nvmrc`)
 - Next.js: `16.1.6`
 - TypeScript: `5.x`
 - Supabase JS: `2.95.3`
@@ -61,9 +61,9 @@ Template: `apps/web/.env.example`
 
 Required:
 - `NEXT_PUBLIC_SUPABASE_URL`
-- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
 - `SUPABASE_URL`
-- `SUPABASE_SERVICE_ROLE_KEY`
+- `SUPABASE_SECRET_KEY`
 - `OPENAI_API_KEY`
 
 ---
@@ -74,6 +74,72 @@ Required:
 npm install
 npm run dev
 ```
+
+### Inventory Fetch Script
+
+Run from repo root:
+
+```bash
+npm run qa:fetch-inventory -- --limit 50
+```
+
+With tenant filter:
+
+```bash
+npm run qa:fetch-inventory -- --tenant YOUR_TENANT_ID --limit 50
+```
+
+If env vars are not already exported in your shell, preload from app env file first:
+
+```bash
+set -a
+source apps/web/.env.local
+set +a
+npm run qa:fetch-inventory -- --limit 50
+```
+
+### E2E Smoke Test
+
+1) Start app server (terminal A):
+
+```bash
+npm run dev
+```
+
+2) Run smoke tests (terminal B, repo root):
+
+```bash
+npm run qa:e2e-smoke
+```
+
+3) Open generated report:
+
+`docs/testing/e2e-smoke-report.md`
+
+### QA Check (After E2E)
+
+Quick sequence:
+1) Run E2E smoke first to confirm routes/contracts are alive.
+2) If E2E passes, run manual QA prompts to check recommendation quality.
+3) Review QA log entries and write follow-up issues.
+
+Manual QA example requests (terminal B, while server is running):
+
+```bash
+curl -s -X POST http://localhost:3000/api/recommend \
+  -H "Content-Type: application/json" \
+  -d '{"user_message":"show me what you have"}'
+```
+
+```bash
+curl -s -X POST http://localhost:3000/api/recommend \
+  -H "Content-Type: application/json" \
+  -d '{"user_message":"I need an 8x10 rug under $2500","constraints":{"size":{"widthIn":96,"lengthIn":120,"toleranceIn":2},"budgetMax":2500}}'
+```
+
+QA log file:
+
+`apps/web/docs/testing/qa-log.ndjson`
 
 ---
 

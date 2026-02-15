@@ -12,8 +12,8 @@ Generated: 2026-02-13
 2. Supabase service env vars missing for inventory snapshot script.
 - Impact: cannot fetch DB snapshot.
 - Repro: `npm run qa:fetch-inventory -- --limit 50`
-- Error: `Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY`
-- Fix tomorrow: set `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY`, then rerun.
+- Error: `Missing SUPABASE_URL or SUPABASE_SECRET_KEY`
+- Fix tomorrow: set `SUPABASE_URL` and `SUPABASE_SECRET_KEY`, then rerun.
 
 ## P1 (Important, Not Blocking First Run)
 

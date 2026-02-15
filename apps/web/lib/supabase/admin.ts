@@ -2,16 +2,16 @@ import { createClient } from "@supabase/supabase-js";
 
 // PSEUDOCODE
 // Read server env vars
-// Create Supabase admin client (service role)
+// Create Supabase admin client (secret key)
 // Use for server-side queries
 
 const supabaseUrl = process.env.SUPABASE_URL;
-const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+const supabaseSecretKey = process.env.SUPABASE_SECRET_KEY;
 
-if (!supabaseUrl || !supabaseServiceRoleKey) {
-  throw new Error("Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY");
+if (!supabaseUrl || !supabaseSecretKey) {
+  throw new Error("Missing SUPABASE_URL or SUPABASE_SECRET_KEY");
 }
 
-export const supabaseAdmin = createClient(supabaseUrl, supabaseServiceRoleKey, {
+export const supabaseAdmin = createClient(supabaseUrl, supabaseSecretKey, {
   auth: { persistSession: false },
 });

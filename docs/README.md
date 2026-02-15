@@ -12,6 +12,7 @@ Start here.
 
 ## Working Notes (Dev)
 - docs/working-notes.md
+  - Includes run commands for inventory snapshot script (`qa:fetch-inventory`)
 
 ## Design
 - docs/design/overview.md
