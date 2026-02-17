@@ -11,6 +11,20 @@ type RouteTurnModeInput = {
 export function routeTurnMode(input: RouteTurnModeInput): ChatMode {
   const text = input.message.toLowerCase();
 
+  const appraisalKeywords = [
+    "appraisal",
+    "appraise",
+    "insurance letter",
+    "valuation",
+    "valuation letter",
+  ];
+
+  const asksForAppraisal = appraisalKeywords.some((keyword) =>
+    text.includes(keyword)
+  );
+
+  if (asksForAppraisal) return "appraisal";
+
   const recommendationKeywords = [
     "show",
     "find",
@@ -42,4 +56,3 @@ export function routeTurnMode(input: RouteTurnModeInput): ChatMode {
 
   return "general_chat";
 }
-

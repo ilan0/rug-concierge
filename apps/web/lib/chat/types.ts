@@ -1,9 +1,13 @@
 import type { HardConstraints, InventoryRug } from "@/lib/types/recommendation";
 import type { RecommendationResponse } from "@/lib/ai/recommend";
+import type {
+  AppraisalDraftResponse,
+  AppraisalInput,
+} from "@/lib/types/appraisal";
 
 export type RoleType = "retail_customer" | "trade_client" | "store_staff";
 
-export type ChatMode = "general_chat" | "recommendation";
+export type ChatMode = "general_chat" | "recommendation" | "appraisal";
 
 export type SessionMessage = {
   role: "user" | "assistant";
@@ -36,6 +40,7 @@ export type ChatTurnRequest = {
   message: string;
   constraints?: HardConstraints;
   inventory?: InventoryRug[];
+  appraisal_context?: AppraisalInput;
 };
 
 export type ChatTurnHandlerInput = {
@@ -44,6 +49,7 @@ export type ChatTurnHandlerInput = {
   mode: ChatMode;
   session: SessionData;
   inventory: InventoryRug[];
+  appraisal_context?: AppraisalInput;
 };
 
 export type GeneralChatResponse = {
@@ -56,3 +62,6 @@ export type RecommendationTurnResponse = RecommendationResponse & {
   mode: "recommendation" | "clarifying_question" | "no_match";
 };
 
+export type AppraisalTurnResponse = AppraisalDraftResponse & {
+  mode: "appraisal";
+};

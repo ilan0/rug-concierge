@@ -27,6 +27,8 @@ This is a quick, practical reference for what you’ll edit first, where things 
   - Wire Supabase query
   - Call OpenAI Responses API
   - Return structured output
+- Chat endpoint (mode routing): `apps/web/app/api/chat/route.ts`
+- Appraisal generation endpoint (staff-only): `apps/web/app/api/appraisal/generate/route.ts`
 
 ### Supabase
 - Admin client (server-only): `apps/web/lib/supabase/admin.ts`
@@ -38,9 +40,11 @@ This is a quick, practical reference for what you’ll edit first, where things 
 - Constraint extraction: `apps/web/lib/filters/extract-constraints.ts`
 - Candidate shaping: `apps/web/lib/filters/candidate-shaping.ts`
 - AI rank/explain: `apps/web/lib/ai/recommend.ts`
+- AI appraisal draft generation: `apps/web/lib/ai/appraisal.ts`
 
 ### Types
 - Recommendation types: `apps/web/lib/types/recommendation.ts`
+- Appraisal types: `apps/web/lib/types/appraisal.ts`
 
 ---
 
@@ -51,6 +55,8 @@ This is a quick, practical reference for what you’ll edit first, where things 
 - Appraisal flow: `docs/design/appraisal-flow.md`
 - Recommendation prompt: `docs/prompts/recommendation.md`
 - Structured output schema: `docs/prompts/recommendation-structured-output.md`
+- Appraisal prompt: `docs/prompts/appraisal.md`
+- Appraisal structured output schema: `docs/prompts/appraisal-structured-output.md`
 - Schema overview: `docs/data/schema.md`
 
 ---

@@ -24,7 +24,9 @@ export function buildPromptLayers(input: BuildPromptLayersInput): string[] {
   layers.push(
     input.mode === "recommendation"
       ? "TASK_PROMPT_RECOMMENDATION"
-      : "TASK_PROMPT_GENERAL_CHAT"
+      : input.mode === "appraisal"
+        ? "TASK_PROMPT_APPRAISAL"
+        : "TASK_PROMPT_GENERAL_CHAT"
   );
 
   // In production this should be a compact summary window, not full unbounded history.
@@ -35,4 +37,3 @@ export function buildPromptLayers(input: BuildPromptLayersInput): string[] {
   layers.push("LATEST_USER_MESSAGE");
   return layers;
 }
-

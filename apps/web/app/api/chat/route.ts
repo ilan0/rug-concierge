@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { handleAppraisalTurn } from "@/lib/chat/handlers/appraisal";
 import { handleGeneralChatTurn } from "@/lib/chat/handlers/general-chat";
 import { handleRecommendationTurn } from "@/lib/chat/handlers/recommendation";
 import { routeTurnMode } from "@/lib/chat/router";
@@ -19,7 +20,7 @@ import type {
  * 1) receive user message + session id + role
  * 2) load session (history + recommendation state)
  * 3) update recommendation state from this turn
- * 4) route to mode handler (general chat or recommendation)
+ * 4) route to mode handler (general chat, recommendation, or appraisal)
  * 5) persist updated session and return response
  */
 export async function POST(req: Request) {
@@ -65,13 +66,35 @@ export async function POST(req: Request) {
     role,
     session: nextSession,
     inventory: Array.isArray(body.inventory) ? body.inventory : [],
+    appraisal_context:
+      body.appraisal_context && typeof body.appraisal_context === "object"
+        ? body.appraisal_context
+        : undefined,
     mode,
   } as const;
 
   const handlerResult =
     mode === "recommendation"
       ? await handleRecommendationTurn(handlerInput)
-      : await handleGeneralChatTurn(handlerInput);
+      : mode === "appraisal"
+        ? role === "store_staff"
+          ? await handleAppraisalTurn(handlerInput)
+          : {
+              mode: "general_chat",
+              assistant_message:
+                "Appraisal generation is available only for store staff.",
+              notes: "Blocked non-staff appraisal request.",
+            }
+        : await handleGeneralChatTurn(handlerInput);
+
+  const responseMode =
+    handlerResult.mode === "recommendation" ||
+    handlerResult.mode === "clarifying_question" ||
+    handlerResult.mode === "no_match"
+      ? "recommendation"
+      : handlerResult.mode === "appraisal"
+        ? "appraisal"
+        : "general_chat";
 
   const assistantTurn: SessionMessage = {
     role: "assistant",
@@ -91,7 +114,7 @@ export async function POST(req: Request) {
   return NextResponse.json({
     session_id: sessionId,
     role,
-    mode,
+    mode: responseMode,
     recommendation_state: updatedSession.recommendation_state,
     response: handlerResult,
   });
@@ -108,4 +131,3 @@ function normalizeRole(value: unknown): RoleType {
 
   return "retail_customer";
 }
-
