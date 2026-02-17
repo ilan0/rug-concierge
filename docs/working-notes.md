@@ -139,7 +139,7 @@ curl -s -X POST http://localhost:3000/api/recommend \
 
 QA log file:
 
-`apps/web/docs/testing/qa-log.ndjson`
+`docs/testing/qa-log.ndjson`
 
 ---
 

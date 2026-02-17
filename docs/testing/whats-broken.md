@@ -9,11 +9,6 @@ Generated: 2026-02-13
 - Repro: `npm run qa:e2e-smoke`
 - Fix tomorrow: start app (`npm run dev`) before running smoke tests.
 
-2. Supabase service env vars missing for inventory snapshot script.
-- Impact: cannot fetch DB snapshot.
-- Repro: `npm run qa:fetch-inventory -- --limit 50`
-- Error: `Missing SUPABASE_URL or SUPABASE_SECRET_KEY`
-- Fix tomorrow: set `SUPABASE_URL` and `SUPABASE_SECRET_KEY`, then rerun.
 
 ## P1 (Important, Not Blocking First Run)
 
@@ -27,13 +22,5 @@ Generated: 2026-02-13
 - Current path: `docs/testing/qa-log.ndjson` (or `RECOMMENDATION_QA_LOG_PATH`).
 - Fix tomorrow: add simple parser/report script for QA log summary.
 
-## P2 (Cleanups / Nice-to-Have)
 
-1. `/api/chat` recommendation handler and `/api/recommend` are not fully unified.
-- Impact: two recommendation entry paths with different maturity.
-- Fix tomorrow: either route recommendation turns through `/api/recommend` from `/api/chat`, or formally keep `/api/chat` as scaffold-only.
-
-2. Smoke tests currently verify response contract availability, not deep ranking quality.
-- Impact: good for pipeline health, not recommendation accuracy.
-- Fix tomorrow: add assertions using fixed fixtures after inventory snapshot is available.
 

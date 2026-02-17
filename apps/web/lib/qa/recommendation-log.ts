@@ -1,4 +1,5 @@
 import { appendFile, mkdir } from "node:fs/promises";
+import { existsSync } from "node:fs";
 import path from "node:path";
 
 type RecommendationQaEvent = {
@@ -16,13 +17,33 @@ type RecommendationQaEvent = {
   created_at: string;
 };
 
+function resolveRepoRootFromCwd(): string {
+  const cwd = process.cwd();
+  const candidates = [
+    cwd,
+    path.resolve(cwd, ".."),
+    path.resolve(cwd, "..", ".."),
+  ];
+
+  for (const candidate of candidates) {
+    const hasRootPackage = existsSync(path.join(candidate, "package.json"));
+    const hasDocsDir = existsSync(path.join(candidate, "docs"));
+    if (hasRootPackage && hasDocsDir) {
+      return candidate;
+    }
+  }
+
+  return cwd;
+}
+
 function getLogPath(): string {
   const configured = process.env.RECOMMENDATION_QA_LOG_PATH;
   if (configured && configured.trim()) {
     return path.resolve(configured);
   }
 
-  return path.resolve(process.cwd(), "docs/testing/qa-log.ndjson");
+  const repoRoot = resolveRepoRootFromCwd();
+  return path.resolve(repoRoot, "docs/testing/qa-log.ndjson");
 }
 
 export async function logRecommendationQaEvent(
@@ -38,4 +59,3 @@ export async function logRecommendationQaEvent(
     console.error("[qa-log] Failed to append recommendation QA log:", details);
   }
 }
-
