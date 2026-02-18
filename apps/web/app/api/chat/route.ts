@@ -92,7 +92,6 @@ export async function POST(req: Request) {
     message: userMessage,
     role,
     session: nextSession,
-    inventory: Array.isArray(body.inventory) ? body.inventory : [],
     tenant_id: tenantId,
     appraisal_context:
       body.appraisal_context && typeof body.appraisal_context === "object"

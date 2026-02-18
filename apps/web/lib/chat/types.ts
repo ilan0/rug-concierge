@@ -1,4 +1,4 @@
-import type { HardConstraints, InventoryRug } from "@/lib/types/recommendation";
+import type { HardConstraints } from "@/lib/types/recommendation";
 import type { RecommendationResponse } from "@/lib/ai/recommend";
 import type {
   AppraisalDraftResponse,
@@ -68,7 +68,6 @@ export type ChatTurnRequest = {
   trade_preferences?: Record<string, unknown>;
   constraints?: HardConstraints;
   project_context?: Partial<ProjectContext>;
-  inventory?: InventoryRug[];
   appraisal_context?: AppraisalInput;
 };
 
@@ -77,7 +76,6 @@ export type ChatTurnHandlerInput = {
   role: RoleType;
   mode: ChatMode;
   session: SessionData;
-  inventory: InventoryRug[];
   tenant_id: string | null;
   appraisal_context?: AppraisalInput;
 };

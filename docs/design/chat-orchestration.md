@@ -5,7 +5,7 @@ This file maps where each backend chat responsibility lives.
 ## Entry Point
 
 - `apps/web/app/api/chat/route.ts`
-  - Receives user message + `session_id` + role + optional constraints/inventory
+  - Receives user message + `session_id` + role + optional constraints/context
   - Loads session
   - Updates recommendation state for this turn
   - Routes mode (`general_chat` or `recommendation`)
@@ -40,13 +40,11 @@ This file maps where each backend chat responsibility lives.
   - Placeholder freeform response path
 
 - `apps/web/lib/chat/handlers/recommendation.ts`
-  - Uses persistent recommendation state
-  - Applies hard filters and candidate shaping
-  - Calls AI recommendation pipeline
+  - Uses persistent recommendation/trade/project state
+  - Calls shared SQL-first recommendation pipeline
 
 ## Existing Recommendation Endpoint
 
 - `apps/web/app/api/recommend/route.ts`
-  - Still available as recommendation-only endpoint
-  - Can be kept for direct recommendation calls or internal reuse
-
+  - Thin recommendation-only route
+  - Uses the same shared recommendation pipeline as chat mode
