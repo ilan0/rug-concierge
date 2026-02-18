@@ -21,13 +21,30 @@ export function buildPromptLayers(input: BuildPromptLayersInput): string[] {
     layers.push("ROLE_PROMPT_RETAIL_CUSTOMER");
   }
 
-  layers.push(
-    input.mode === "recommendation"
-      ? "TASK_PROMPT_RECOMMENDATION"
-      : input.mode === "appraisal"
-        ? "TASK_PROMPT_APPRAISAL"
-        : "TASK_PROMPT_GENERAL_CHAT"
-  );
+  if (input.mode === "appraisal" && input.role !== "store_staff") {
+    layers.push("SECURITY_BLOCK_ROLE_MODE_MISMATCH");
+  } else if (input.mode === "recommendation" && input.role === "trade_client") {
+    layers.push("TASK_PROMPT_TRADE_SUPPORT");
+  } else if (input.mode === "recommendation") {
+    layers.push("TASK_PROMPT_RECOMMENDATION");
+  } else if (input.mode === "appraisal") {
+    layers.push("TASK_PROMPT_APPRAISAL");
+  } else {
+    layers.push("TASK_PROMPT_GENERAL_CHAT");
+  }
+
+  if (input.role === "trade_client") {
+    if (Object.keys(input.session.trade_context.preferences).length > 0) {
+      layers.push("TRADE_PREFERENCES_CONTEXT");
+    }
+    if (input.session.trade_context.trade_client_id) {
+      layers.push("TRADE_CLIENT_CONTEXT");
+    }
+  }
+
+  if (input.session.project_context.rooms.length > 0) {
+    layers.push("PROJECT_CONTEXT");
+  }
 
   // In production this should be a compact summary window, not full unbounded history.
   if (input.session.chat_history.length > 0) {

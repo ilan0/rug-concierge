@@ -19,6 +19,19 @@ export function getOrCreateSession(sessionId: string, role: RoleType): SessionDa
       hard_constraints: {},
       soft_preferences: {},
     },
+    trade_context: {
+      tenant_id: null,
+      trade_client_id: null,
+      preferences: {},
+      preferences_source: "none",
+    },
+    project_context: {
+      project_id: null,
+      name: null,
+      active_room_id: null,
+      rooms: [],
+      notes: [],
+    },
   };
 
   sessions.set(sessionId, session);
@@ -28,4 +41,3 @@ export function getOrCreateSession(sessionId: string, role: RoleType): SessionDa
 export function saveSession(session: SessionData): void {
   sessions.set(session.session_id, session);
 }
-

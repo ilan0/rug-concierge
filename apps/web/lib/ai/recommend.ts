@@ -12,6 +12,20 @@ const OPENAI_RESPONSES_URL = "https://api.openai.com/v1/responses";
 const OPENAI_MODEL = "gpt-4.1-mini";
 const MAX_RECOMMENDATIONS = 8;
 
+type RecommendationPromptContext = {
+  role?: "retail_customer" | "trade_client" | "store_staff";
+  trade_preferences?: Record<string, unknown>;
+  project_context?: {
+    project_name?: string | null;
+    active_room?: string | null;
+    room_count?: number;
+    rooms?: Array<{
+      room_name: string;
+      constraints: HardConstraints;
+    }>;
+  };
+};
+
 export type RecommendationResponse = {
   mode: "recommendations" | "clarifying_question" | "no_match";
   assistant_message: string;
@@ -319,7 +333,8 @@ function sanitizeResponse(
 export async function rankAndExplain(
   inventory: InventoryRug[],
   constraints: HardConstraints,
-  userMessage: string
+  userMessage: string,
+  promptContext?: RecommendationPromptContext
 ): Promise<RecommendationResponse> {
   // PSEUDOCODE
   // A) Early return for true no-match candidate set.
@@ -354,6 +369,9 @@ export async function rankAndExplain(
 
   const contextInventory = toContextInventory(inventory);
   const sparseConstraints = !hasOptionalHardConstraints(constraints);
+  const hasTradePreferences =
+    promptContext?.trade_preferences &&
+    Object.keys(promptContext.trade_preferences).length > 0;
 
   // If no user message was provided, build a plain fallback request sentence.
   const requestText =
@@ -387,8 +405,32 @@ export async function rankAndExplain(
                 ? "If constraints are sparse or open-ended, prioritize variety across style, palette, and price points."
                 : "Prioritize closest matches to the stated constraints and preferences.",
             },
+            {
+              type: "input_text",
+              text:
+                promptContext?.role === "trade_client"
+                  ? "This is a trade/designer workflow. Be concise, practical, and optimize for repeat-buyer efficiency."
+                  : "This is a general concierge workflow.",
+            },
           ],
         },
+        ...(hasTradePreferences
+          ? [
+              {
+                role: "system" as const,
+                content: [
+                  {
+                    type: "input_text" as const,
+                    text: `TRADE PREFERENCES (soft signals only):\n${JSON.stringify(
+                      promptContext?.trade_preferences,
+                      null,
+                      2
+                    )}`,
+                  },
+                ],
+              },
+            ]
+          : []),
         {
           role: "system",
           content: [
@@ -405,6 +447,8 @@ export async function rankAndExplain(
               type: "input_text",
               text: `User request:\n${requestText}\n\nHard constraints:\n${JSON.stringify(
                 constraints
+              )}\n\nProject context:\n${JSON.stringify(
+                promptContext?.project_context ?? null
               )}`,
             },
           ],

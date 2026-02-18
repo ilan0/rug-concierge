@@ -217,3 +217,23 @@ Add tags to each case as you operationalize testing:
 - `#hallucination_trap`
 - `#data_quality`
 - `#prompt_injection`
+
+---
+
+## L) Trade / Designer Repeat-Buyer + Project Context
+
+**L1 — Known trade preferences applied softly**  
+**Input:** “Use my usual designer profile and show options for this client.”  
+**Expect:** Preferences influence ranking language/ordering only; no hard filtering unless explicit constraints provided.
+
+**L2 — Multi-room project kickoff**  
+**Input:** “I need rugs for living room and dining room in the same project.”  
+**Expect:** Project context initialized with multiple rooms; follow-up recommendations can target active room.
+
+**L3 — Active room follow-up**  
+**Input:** “Now show only dining room options under $2,500.”  
+**Expect:** Dining room becomes active room; budget is applied to that room context.
+
+**L4 — Keep context without re-asking**  
+**Input:** “Show more options for the same room.”  
+**Expect:** Reuse existing room constraints/preferences; avoid repeating baseline qualification questions.

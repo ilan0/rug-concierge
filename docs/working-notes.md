@@ -41,6 +41,8 @@ This is a quick, practical reference for what you’ll edit first, where things 
 - Candidate shaping: `apps/web/lib/filters/candidate-shaping.ts`
 - AI rank/explain: `apps/web/lib/ai/recommend.ts`
 - AI appraisal draft generation: `apps/web/lib/ai/appraisal.ts`
+- Trade/project chat context: `apps/web/lib/chat/trade-context.ts`
+- Multi-room project context: `apps/web/lib/chat/project-context.ts`
 
 ### Types
 - Recommendation types: `apps/web/lib/types/recommendation.ts`
@@ -57,6 +59,7 @@ This is a quick, practical reference for what you’ll edit first, where things 
 - Structured output schema: `docs/prompts/recommendation-structured-output.md`
 - Appraisal prompt: `docs/prompts/appraisal.md`
 - Appraisal structured output schema: `docs/prompts/appraisal-structured-output.md`
+- Trade/designer support prompt: `docs/prompts/trade-support.md`
 - Schema overview: `docs/data/schema.md`
 
 ---

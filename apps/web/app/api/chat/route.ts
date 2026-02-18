@@ -5,6 +5,8 @@ import { handleRecommendationTurn } from "@/lib/chat/handlers/recommendation";
 import { routeTurnMode } from "@/lib/chat/router";
 import { getOrCreateSession, saveSession } from "@/lib/chat/session-store";
 import { updateRecommendationStateForTurn } from "@/lib/chat/state";
+import { updateTradeContextForTurn } from "@/lib/chat/trade-context";
+import { updateProjectContextForTurn } from "@/lib/chat/project-context";
 import type {
   ChatTurnRequest,
   RoleType,
@@ -18,8 +20,8 @@ import type {
  * This is the single backend entry point for user chat turns.
  * High-level flow:
  * 1) receive user message + session id + role
- * 2) load session (history + recommendation state)
- * 3) update recommendation state from this turn
+ * 2) load session (history + recommendation/trade/project context)
+ * 3) update turn state from this turn
  * 4) route to mode handler (general chat, recommendation, or appraisal)
  * 5) persist updated session and return response
  */
@@ -42,6 +44,14 @@ export async function POST(req: Request) {
 
   const role: RoleType = normalizeRole(body.role);
   const session = getOrCreateSession(sessionId, role);
+  const tenantId =
+    typeof body.tenant_id === "string" && body.tenant_id.trim()
+      ? body.tenant_id.trim()
+      : null;
+  const tradeClientId =
+    typeof body.trade_client_id === "string" && body.trade_client_id.trim()
+      ? body.trade_client_id.trim()
+      : null;
 
   const userTurn: SessionMessage = {
     role: "user",
@@ -50,9 +60,26 @@ export async function POST(req: Request) {
   };
 
   // Keep recommendation state fresh regardless of which mode this turn routes to.
-  const nextSession = updateRecommendationStateForTurn(session, {
+  const withRecommendationState = updateRecommendationStateForTurn(session, {
     message: userMessage,
     constraints: body.constraints,
+  });
+  const withTradeContext = updateTradeContextForTurn(withRecommendationState, {
+    role,
+    tenantId,
+    tradeClientId,
+    tradePreferences:
+      body.trade_preferences && typeof body.trade_preferences === "object"
+        ? body.trade_preferences
+        : undefined,
+  });
+  const nextSession = updateProjectContextForTurn(withTradeContext, {
+    message: userMessage,
+    constraints: body.constraints,
+    projectContextOverride:
+      body.project_context && typeof body.project_context === "object"
+        ? body.project_context
+        : undefined,
   });
 
   const mode = routeTurnMode({
@@ -66,6 +93,7 @@ export async function POST(req: Request) {
     role,
     session: nextSession,
     inventory: Array.isArray(body.inventory) ? body.inventory : [],
+    tenant_id: tenantId,
     appraisal_context:
       body.appraisal_context && typeof body.appraisal_context === "object"
         ? body.appraisal_context
@@ -116,6 +144,8 @@ export async function POST(req: Request) {
     role,
     mode: responseMode,
     recommendation_state: updatedSession.recommendation_state,
+    trade_context: updatedSession.trade_context,
+    project_context: updatedSession.project_context,
     response: handlerResult,
   });
 }
