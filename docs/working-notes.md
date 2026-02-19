@@ -161,3 +161,19 @@ QA log file:
 - Candidate list is shaped with a simple cap + deterministic order for V1.
 - AI ranks/explains only; backend filters deterministically.
 - No RAG/vector store needed for current architecture.
+
+### Error + Fallback Behavior (Current)
+
+- `/api/chat`
+  - Empty/missing message -> `400` with friendly error.
+  - Unexpected failure -> `500` with `CHAT_INTERNAL_ERROR`.
+  - General chat currently returns safe fallback text if no mode-specific action is needed.
+
+- `/api/recommend`
+  - Empty body or invalid request shape -> `400`.
+  - Invalid constraint values (negative/zero budget or size) -> `400`.
+  - Pipeline failure -> `500` with `RECOMMENDATION_PIPELINE_ERROR`.
+
+- Recommendation fallback behavior
+  - Missing OpenAI key, request failure, or parse failure uses deterministic fallback response.
+  - Fallback remains structured so UI can continue rendering without dead ends.

@@ -44,64 +44,71 @@ type RunRecommendationPipelineResult =
 export async function runRecommendationPipeline(
   input: RunRecommendationPipelineInput
 ): Promise<RunRecommendationPipelineResult> {
-  const requestId = input.requestId ?? crypto.randomUUID();
+  try {
+    const requestId = input.requestId ?? crypto.randomUUID();
 
-  const inventory = await fetchInventoryCandidates({
-    tenantId: input.tenantId,
-    constraints: input.constraints,
-    limit: SQL_QUERY_LIMIT,
-  });
+    const inventory = await fetchInventoryCandidates({
+      tenantId: input.tenantId,
+      constraints: input.constraints,
+      limit: SQL_QUERY_LIMIT,
+    });
 
-  if (inventory === null) {
+    if (inventory === null) {
+      await logRecommendationQaEvent({
+        request_id: requestId,
+        tenant_id: input.tenantId,
+        user_message: input.userMessage,
+        constraints: input.constraints,
+        sql_candidate_count: 0,
+        filtered_candidate_count: 0,
+        ai_candidate_count: 0,
+        response_mode: "error",
+        recommendation_ids: [],
+        notes: "PIPELINE_DB_QUERY_FAILED",
+        error: "Unable to query inventory source",
+        created_at: new Date().toISOString(),
+      });
+
+      return { ok: false, error: "Unable to query inventory source" };
+    }
+
+    const candidates = filterByHardConstraints(inventory, input.constraints);
+    const aiCandidates = shapeCandidatesForAI(candidates, {
+      maxCandidates: AI_CANDIDATE_LIMIT,
+    });
+
+    const response = await rankAndExplain(
+      aiCandidates,
+      input.constraints,
+      input.userMessage,
+      input.promptContext
+    );
+
     await logRecommendationQaEvent({
       request_id: requestId,
       tenant_id: input.tenantId,
       user_message: input.userMessage,
       constraints: input.constraints,
-      sql_candidate_count: 0,
-      filtered_candidate_count: 0,
-      ai_candidate_count: 0,
-      response_mode: "error",
-      recommendation_ids: [],
-      notes: null,
-      error: "Unable to query inventory source",
+      sql_candidate_count: inventory.length,
+      filtered_candidate_count: candidates.length,
+      ai_candidate_count: aiCandidates.length,
+      response_mode: response.mode,
+      recommendation_ids: response.recommendations.map((rec) => rec.rug_id),
+      notes: response.notes,
+      error: null,
       created_at: new Date().toISOString(),
     });
 
-    return { ok: false, error: "Unable to query inventory source" };
+    return {
+      ok: true,
+      response,
+    };
+  } catch {
+    return {
+      ok: false,
+      error: "Unexpected pipeline failure",
+    };
   }
-
-  const candidates = filterByHardConstraints(inventory, input.constraints);
-  const aiCandidates = shapeCandidatesForAI(candidates, {
-    maxCandidates: AI_CANDIDATE_LIMIT,
-  });
-
-  const response = await rankAndExplain(
-    aiCandidates,
-    input.constraints,
-    input.userMessage,
-    input.promptContext
-  );
-
-  await logRecommendationQaEvent({
-    request_id: requestId,
-    tenant_id: input.tenantId,
-    user_message: input.userMessage,
-    constraints: input.constraints,
-    sql_candidate_count: inventory.length,
-    filtered_candidate_count: candidates.length,
-    ai_candidate_count: aiCandidates.length,
-    response_mode: response.mode,
-    recommendation_ids: response.recommendations.map((rec) => rec.rug_id),
-    notes: response.notes,
-    error: null,
-    created_at: new Date().toISOString(),
-  });
-
-  return {
-    ok: true,
-    response,
-  };
 }
 
 async function fetchInventoryCandidates(input: {

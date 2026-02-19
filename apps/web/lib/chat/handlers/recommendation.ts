@@ -44,10 +44,11 @@ export async function handleRecommendationTurn(
   if (!result.ok) {
     return {
       mode: "no_match",
-      assistant_message: "Unable to query inventory source right now.",
-      questions: [],
+      assistant_message:
+        "I could not access inventory right now, so I can’t return reliable recommendations yet.",
+      questions: ["Would you like to try again in a moment?"],
       recommendations: [],
-      notes: result.error,
+      notes: `RECOMMENDATION_HANDLER_FALLBACK: ${result.error}`,
     };
   }
 

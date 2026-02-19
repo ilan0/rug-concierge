@@ -16,8 +16,7 @@ export async function handleGeneralChatTurn(
   return {
     mode: "general_chat",
     assistant_message:
-      "General chat handler placeholder. This turn did not require inventory recommendation mode.",
-    notes: `Prompt layers assembled: ${layers.join(" -> ")}`,
+      "I can help with rug care, sizing, style guidance, or recommendations. Tell me what you want to focus on.",
+    notes: `GENERAL_CHAT_FALLBACK. Prompt layers assembled: ${layers.join(" -> ")}`,
   };
 }
-

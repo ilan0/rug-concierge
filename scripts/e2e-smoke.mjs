@@ -95,6 +95,16 @@ async function run() {
   );
 
   tests.push(
+    await runCase("recommend empty input returns 400", async () => {
+      const response = await postJson(`${baseUrl}/api/recommend`, {});
+      if (response.status !== 400) {
+        throw new Error(`Expected 400, got ${response.status}`);
+      }
+      return response.body;
+    })
+  );
+
+  tests.push(
     await runCase("recommend browse request returns contract", async () => {
       const response = await postJson(`${baseUrl}/api/recommend`, {
         tenant_id: tenantId || undefined,
@@ -143,6 +153,40 @@ async function run() {
   );
 
   tests.push(
+    await runCase("recommend rejects invalid budget constraint", async () => {
+      const response = await postJson(`${baseUrl}/api/recommend`, {
+        user_message: "show rugs under budget",
+        constraints: {
+          budgetMax: 0,
+        },
+      });
+
+      if (response.status !== 400) {
+        throw new Error(`Expected 400, got ${response.status}`);
+      }
+
+      return response.body ?? response.raw;
+    })
+  );
+
+  tests.push(
+    await runCase("recommend rejects invalid size constraint", async () => {
+      const response = await postJson(`${baseUrl}/api/recommend`, {
+        user_message: "show rugs",
+        constraints: {
+          size: { widthIn: -1, lengthIn: 120, toleranceIn: 2 },
+        },
+      });
+
+      if (response.status !== 400) {
+        throw new Error(`Expected 400, got ${response.status}`);
+      }
+
+      return response.body ?? response.raw;
+    })
+  );
+
+  tests.push(
     await runCase("chat route returns session envelope", async () => {
       const response = await postJson(`${baseUrl}/api/chat`, {
         role: "retail_customer",
@@ -165,6 +209,105 @@ async function run() {
         session_id: response.body.session_id,
         mode: response.body.mode,
       };
+    })
+  );
+
+  tests.push(
+    await runCase("chat route empty message returns 400", async () => {
+      const response = await postJson(`${baseUrl}/api/chat`, {
+        role: "retail_customer",
+        message: "   ",
+      });
+
+      if (response.status !== 400) {
+        throw new Error(`Expected 400, got ${response.status}`);
+      }
+
+      return response.body ?? response.raw;
+    })
+  );
+
+  tests.push(
+    await runCase("chat trade context request returns recommendation envelope", async () => {
+      const response = await postJson(`${baseUrl}/api/chat`, {
+        role: "trade_client",
+        tenant_id: tenantId || undefined,
+        trade_client_id: "trade-client-smoke",
+        trade_preferences: {
+          palette: "muted neutrals",
+          style: "serapi",
+        },
+        message: "show options for my client",
+      });
+
+      if (response.status !== 200) {
+        throw new Error(`Expected 200, got ${response.status}`);
+      }
+
+      if (response.body?.role !== "trade_client") {
+        throw new Error("Expected trade_client role echo");
+      }
+
+      if (typeof response.body?.trade_context !== "object") {
+        throw new Error("Missing trade_context in chat response");
+      }
+
+      return {
+        role: response.body.role,
+        mode: response.body.mode,
+        trade_context: response.body.trade_context,
+      };
+    })
+  );
+
+  tests.push(
+    await runCase("chat project room follow-up updates active room", async () => {
+      const first = await postJson(`${baseUrl}/api/chat`, {
+        role: "trade_client",
+        tenant_id: tenantId || undefined,
+        message: "I need rugs for living room and dining room",
+      });
+      if (first.status !== 200 || typeof first.body?.session_id !== "string") {
+        throw new Error("Failed to start project-context session");
+      }
+
+      const second = await postJson(`${baseUrl}/api/chat`, {
+        role: "trade_client",
+        tenant_id: tenantId || undefined,
+        session_id: first.body.session_id,
+        message: "Now show dining room options under $2500",
+      });
+      if (second.status !== 200) {
+        throw new Error(`Expected 200, got ${second.status}`);
+      }
+
+      const activeRoom = second.body?.project_context?.active_room_id;
+      if (typeof activeRoom !== "string" || !activeRoom.includes("dining")) {
+        throw new Error(`Expected active dining room, got ${String(activeRoom)}`);
+      }
+
+      return {
+        session_id: second.body.session_id,
+        active_room_id: activeRoom,
+      };
+    })
+  );
+
+  tests.push(
+    await runCase("appraisal endpoint blocks non-staff", async () => {
+      const response = await postJson(`${baseUrl}/api/appraisal/generate`, {
+        role: "retail_customer",
+        appraisal_context: {
+          rug_label: "Sample Rug",
+          appraised_value: 1200,
+        },
+      });
+
+      if (response.status !== 403) {
+        throw new Error(`Expected 403, got ${response.status}`);
+      }
+
+      return response.body ?? response.raw;
     })
   );
 
@@ -207,4 +350,3 @@ run().catch((error) => {
   console.error("[e2e-smoke] Failed:", details);
   process.exit(1);
 });
-
