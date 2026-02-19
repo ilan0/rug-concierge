@@ -81,13 +81,25 @@ For each rug:
 - Rug name or identifier
 - Size
 - Price (if available)
-- 2–3 sentences explaining why it fits
+- 1–3 grounded reasons explaining why it fits
+- Confidence score + tier
+- 0–2 short “why not / caveat” notes for objection handling
 
 Explanations should reference:
 - size fit
 - style/palette alignment
 - room suitability
 - durability or practical considerations (if relevant)
+
+Confidence should reflect:
+- hard-constraint alignment (size/budget)
+- soft preference alignment
+- listing data completeness
+
+Why-not notes should:
+- be short and factual
+- call out tradeoffs or uncertainty (if any)
+- never contradict hard constraints already enforced by backend
 
 Avoid repeating the same explanation across rugs.
 

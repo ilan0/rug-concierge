@@ -11,6 +11,8 @@ import type { HardConstraints, InventoryRug } from "@/lib/types/recommendation";
 const OPENAI_RESPONSES_URL = "https://api.openai.com/v1/responses";
 const OPENAI_MODEL = "gpt-4.1-mini";
 const MAX_RECOMMENDATIONS = 8;
+const CONFIDENCE_MIN = 0.35;
+const CONFIDENCE_MAX = 0.95;
 
 type RecommendationPromptContext = {
   role?: "retail_customer" | "trade_client" | "store_staff";
@@ -38,6 +40,9 @@ export type RecommendationResponse = {
     price_usd: number | null;
     match_reasons: string[];
     confidence: number;
+    confidence_tier: "high" | "medium" | "low";
+    confidence_factors: string[];
+    why_not: string[];
   }[];
   notes: string | null;
 };
@@ -77,6 +82,9 @@ const RECOMMENDATION_SCHEMA = {
           "price_usd",
           "match_reasons",
           "confidence",
+          "confidence_tier",
+          "confidence_factors",
+          "why_not",
         ],
         properties: {
           rug_id: { type: "string" },
@@ -86,6 +94,9 @@ const RECOMMENDATION_SCHEMA = {
           price_usd: { type: ["number", "null"] },
           match_reasons: { type: "array", items: { type: "string" } },
           confidence: { type: "number" },
+          confidence_tier: { type: "string", enum: ["high", "medium", "low"] },
+          confidence_factors: { type: "array", items: { type: "string" } },
+          why_not: { type: "array", items: { type: "string" } },
         },
       },
     },
@@ -152,20 +163,253 @@ function toContextInventory(inventory: InventoryRug[]) {
   }));
 }
 
+function toPriceUsd(rug: InventoryRug): number | null {
+  return rug.sale_price_usd ?? rug.price_usd ?? null;
+}
+
+function toLower(value: string | null | undefined): string {
+  return (value ?? "").toLowerCase();
+}
+
+function collectSoftSignals(
+  promptContext: RecommendationPromptContext | undefined,
+  userMessage: string
+): string[] {
+  const signals: string[] = [];
+  const text = userMessage.toLowerCase();
+  const knownTokens = [
+    "neutral",
+    "modern",
+    "vintage",
+    "kitchen",
+    "living room",
+    "bedroom",
+    "dining",
+    "runner",
+    "kidz",
+    "pets",
+    "kidz",
+    "purple",
+    "blue",
+    "green",
+    "red",
+  ];
+
+  for (const token of knownTokens) {
+    if (text.includes(token)) signals.push(token);
+  }
+
+  const prefValues = promptContext?.trade_preferences
+    ? Object.values(promptContext.trade_preferences)
+    : [];
+  for (const value of prefValues) {
+    if (typeof value === "string" && value.trim()) {
+      signals.push(value.toLowerCase());
+    }
+  }
+
+  return [...new Set(signals)];
+}
+
+function clamp(value: number, min: number, max: number): number {
+  return Math.max(min, Math.min(max, value));
+}
+
+function getSizeDistanceIn(rug: InventoryRug, constraints: HardConstraints): number | null {
+  if (
+    !constraints.size ||
+    typeof rug.width_total_in !== "number" ||
+    typeof rug.length_total_in !== "number"
+  ) {
+    return null;
+  }
+
+  const direct =
+    Math.abs(rug.width_total_in - constraints.size.widthIn) +
+    Math.abs(rug.length_total_in - constraints.size.lengthIn);
+  const rotated =
+    Math.abs(rug.width_total_in - constraints.size.lengthIn) +
+    Math.abs(rug.length_total_in - constraints.size.widthIn);
+  return Math.min(direct, rotated);
+}
+
+function buildGroundedMatchReasons(
+  rug: InventoryRug,
+  constraints: HardConstraints,
+  promptContext: RecommendationPromptContext | undefined,
+  userMessage: string
+): string[] {
+  const reasons: string[] = [];
+  const price = toPriceUsd(rug);
+  const sizeDistanceIn = getSizeDistanceIn(rug, constraints);
+  const activeRoom = promptContext?.project_context?.active_room;
+  const signals = collectSoftSignals(promptContext, userMessage);
+  const rugText = [
+    toLower(rug.style),
+    toLower(rug.palette),
+    toLower(rug.pattern),
+    toLower(rug.best_for),
+    toLower(rug.public_description),
+  ].join(" ");
+
+  if (constraints.size && sizeDistanceIn !== null) {
+    reasons.push(
+      sizeDistanceIn <= 2
+        ? "Size closely matches your requested dimensions."
+        : "Size falls within your allowed size window."
+    );
+  }
+
+  if (typeof constraints.budgetMax === "number" && typeof price === "number") {
+    reasons.push(`Priced at $${price}, within your budget limit.`);
+  }
+
+  if (activeRoom) {
+    reasons.push(`Aligned with your active room focus: ${activeRoom}.`);
+  }
+
+  const matchedSignal = signals.find((token) => token && rugText.includes(token));
+  if (matchedSignal) {
+    reasons.push(`Matches your stated preference around "${matchedSignal}".`);
+  }
+
+  if (reasons.length === 0) {
+    reasons.push("Fits your current request in available inventory.");
+  }
+
+  return reasons.slice(0, 3);
+}
+
+function buildWhyNot(
+  rug: InventoryRug,
+  constraints: HardConstraints,
+  promptContext: RecommendationPromptContext | undefined,
+  userMessage: string
+): string[] {
+  const notes: string[] = [];
+  const price = toPriceUsd(rug);
+  const sizeDistanceIn = getSizeDistanceIn(rug, constraints);
+  const tolerance = constraints.size?.toleranceIn ?? 2;
+  const signals = collectSoftSignals(promptContext, userMessage);
+  const rugText = [
+    toLower(rug.style),
+    toLower(rug.palette),
+    toLower(rug.pattern),
+    toLower(rug.best_for),
+    toLower(rug.public_description),
+  ].join(" ");
+
+  if (constraints.size && sizeDistanceIn !== null && sizeDistanceIn > tolerance * 2) {
+    notes.push("Dimensions are not an exact match and may require compromise.");
+  }
+
+  if (typeof constraints.budgetMax === "number" && price === null) {
+    notes.push("Price data is missing, so budget fit is less certain.");
+  }
+
+  const hasSignalMatch = signals.some((token) => token && rugText.includes(token));
+  if (signals.length > 0 && !hasSignalMatch) {
+    notes.push("May not fully align with your style or palette preferences.");
+  }
+
+  return notes.slice(0, 2);
+}
+
+function buildConfidence(
+  rug: InventoryRug,
+  constraints: HardConstraints,
+  promptContext: RecommendationPromptContext | undefined,
+  userMessage: string
+): {
+  score: number;
+  tier: "high" | "medium" | "low";
+  factors: string[];
+} {
+  const factors: string[] = [];
+  let score = 0.5;
+  const price = toPriceUsd(rug);
+  const sizeDistanceIn = getSizeDistanceIn(rug, constraints);
+  const signals = collectSoftSignals(promptContext, userMessage);
+  const rugText = [
+    toLower(rug.style),
+    toLower(rug.palette),
+    toLower(rug.pattern),
+    toLower(rug.best_for),
+    toLower(rug.public_description),
+  ].join(" ");
+
+  if (constraints.size && sizeDistanceIn !== null) {
+    if (sizeDistanceIn <= 2) {
+      score += 0.2;
+      factors.push("Strong size alignment");
+    } else if (sizeDistanceIn <= 6) {
+      score += 0.12;
+      factors.push("Acceptable size alignment");
+    } else {
+      score += 0.05;
+      factors.push("Loose size alignment");
+    }
+  }
+
+  if (typeof constraints.budgetMax === "number" && typeof price === "number") {
+    score += 0.15;
+    factors.push("Within budget");
+  }
+
+  const signalMatches = signals.filter((token) => token && rugText.includes(token)).length;
+  if (signalMatches > 0) {
+    score += Math.min(0.15, signalMatches * 0.05);
+    factors.push("Matches stated preferences");
+  }
+
+  if (rug.public_description) {
+    score += 0.05;
+    factors.push("Good listing detail quality");
+  } else {
+    score -= 0.03;
+  }
+
+  const normalized = Number(clamp(score, CONFIDENCE_MIN, CONFIDENCE_MAX).toFixed(2));
+  const tier: "high" | "medium" | "low" =
+    normalized >= 0.78 ? "high" : normalized >= 0.6 ? "medium" : "low";
+
+  return {
+    score: normalized,
+    tier,
+    factors: factors.slice(0, 3),
+  };
+}
+
 // PSEUDOCODE
 // Deterministic local fallback used when AI is unavailable or invalid.
-function fallbackRecommendations(inventory: InventoryRug[]): RecommendationResponse {
+function fallbackRecommendations(
+  inventory: InventoryRug[],
+  constraints: HardConstraints,
+  promptContext: RecommendationPromptContext | undefined,
+  userMessage: string
+): RecommendationResponse {
   // If OpenAI fails, we still return a usable response so the API never
   // breaks the frontend flow.
-  const recommendations = inventory.slice(0, MAX_RECOMMENDATIONS).map((rug) => ({
-    rug_id: rug.id,
-    sku: rug.sku ?? null,
-    title: rug.label,
-    size_text: sizeText(rug),
-    price_usd: rug.sale_price_usd ?? rug.price_usd ?? null,
-    match_reasons: ["Fits your current request in available inventory."],
-    confidence: 0.55,
-  }));
+  const recommendations = inventory.slice(0, MAX_RECOMMENDATIONS).map((rug) => {
+    const confidence = buildConfidence(rug, constraints, promptContext, userMessage);
+    return {
+      rug_id: rug.id,
+      sku: rug.sku ?? null,
+      title: rug.label,
+      size_text: sizeText(rug),
+      price_usd: toPriceUsd(rug),
+      match_reasons: buildGroundedMatchReasons(
+        rug,
+        constraints,
+        promptContext,
+        userMessage
+      ),
+      confidence: confidence.score,
+      confidence_tier: confidence.tier,
+      confidence_factors: confidence.factors,
+      why_not: buildWhyNot(rug, constraints, promptContext, userMessage),
+    };
+  });
 
   return {
     mode: "recommendations",
@@ -209,7 +453,14 @@ function isRecommendationResponse(value: unknown): value is RecommendationRespon
         (typeof rec.price_usd === "number" || rec.price_usd === null) &&
         Array.isArray(rec.match_reasons) &&
         rec.match_reasons.every((r) => typeof r === "string") &&
-        typeof rec.confidence === "number"
+        typeof rec.confidence === "number" &&
+        (rec.confidence_tier === "high" ||
+          rec.confidence_tier === "medium" ||
+          rec.confidence_tier === "low") &&
+        Array.isArray(rec.confidence_factors) &&
+        rec.confidence_factors.every((r) => typeof r === "string") &&
+        Array.isArray(rec.why_not) &&
+        rec.why_not.every((r) => typeof r === "string")
       );
     })
   ) {
@@ -303,24 +554,51 @@ function parseRecommendationResponse(payload: unknown): RecommendationResponse |
 // - repair invalid no_match from model when candidates exist
 function sanitizeResponse(
   response: RecommendationResponse,
-  inventory: InventoryRug[]
+  inventory: InventoryRug[],
+  constraints: HardConstraints,
+  promptContext: RecommendationPromptContext | undefined,
+  userMessage: string
 ): RecommendationResponse {
   // Only keep rugs that definitely came from backend candidates.
   // This blocks hallucinated IDs from passing through.
   const allowedIds = new Set(inventory.map((rug) => rug.id));
+  const inventoryById = new Map(inventory.map((rug) => [rug.id, rug]));
   const recommendations = response.recommendations
     .filter((rec) => allowedIds.has(rec.rug_id))
-    .slice(0, MAX_RECOMMENDATIONS);
+    .slice(0, MAX_RECOMMENDATIONS)
+    .map((rec) => {
+      const rug = inventoryById.get(rec.rug_id);
+      if (!rug) return rec;
+
+      const confidence = buildConfidence(rug, constraints, promptContext, userMessage);
+      return {
+        ...rec,
+        sku: rug.sku ?? null,
+        title: rug.label,
+        size_text: sizeText(rug),
+        price_usd: toPriceUsd(rug),
+        match_reasons: buildGroundedMatchReasons(
+          rug,
+          constraints,
+          promptContext,
+          userMessage
+        ),
+        confidence: confidence.score,
+        confidence_tier: confidence.tier,
+        confidence_factors: confidence.factors,
+        why_not: buildWhyNot(rug, constraints, promptContext, userMessage),
+      };
+    });
 
   if (response.mode === "no_match" && inventory.length > 0) {
     return {
-      ...fallbackRecommendations(inventory),
+      ...fallbackRecommendations(inventory, constraints, promptContext, userMessage),
       notes: "Adjusted invalid no_match from model output.",
     };
   }
 
   if (response.mode === "recommendations" && recommendations.length === 0) {
-    return fallbackRecommendations(inventory);
+    return fallbackRecommendations(inventory, constraints, promptContext, userMessage);
   }
 
   return {
@@ -362,7 +640,7 @@ export async function rankAndExplain(
   if (!apiKey) {
     // Missing key should not crash the endpoint.
     return {
-      ...fallbackRecommendations(inventory),
+      ...fallbackRecommendations(inventory, constraints, promptContext, userMessage),
       notes: "Missing OPENAI_API_KEY. Returned local fallback.",
     };
   }
@@ -469,7 +747,7 @@ export async function rankAndExplain(
   if (!response || !response.ok) {
     // Network/API failure -> deterministic fallback, not a hard API error.
     return {
-      ...fallbackRecommendations(inventory),
+      ...fallbackRecommendations(inventory, constraints, promptContext, userMessage),
       notes: "OpenAI request failed. Returned local fallback.",
     };
   }
@@ -479,11 +757,11 @@ export async function rankAndExplain(
   if (!parsed) {
     // Parsing/shape failure -> deterministic fallback.
     return {
-      ...fallbackRecommendations(inventory),
+      ...fallbackRecommendations(inventory, constraints, promptContext, userMessage),
       notes: "OpenAI response parsing failed. Returned local fallback.",
     };
   }
 
   // Final safety pass before returning to API route.
-  return sanitizeResponse(parsed, inventory);
+  return sanitizeResponse(parsed, inventory, constraints, promptContext, userMessage);
 }

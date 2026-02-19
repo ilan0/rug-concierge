@@ -18,7 +18,10 @@ Return ONLY valid JSON matching this schema:
     "size_text": string|null,
     "price_usd": number|null,
     "match_reasons": string[],
-    "confidence": number
+    "confidence": number,
+    "confidence_tier": "high" | "medium" | "low",
+    "confidence_factors": string[],
+    "why_not": string[]
   }[],
   "notes": string|null
 }
@@ -32,3 +35,9 @@ Mode rules:
 - clarifying_question: 1–2 questions, recommendations=[]
 - recommendations: 1–8 items, questions usually []
 - no_match: recommendations=[], explain why, optionally 0–1 question
+
+Recommendation item rules:
+- `match_reasons`: 1–3 grounded reasons tied to known inventory/context
+- `confidence`: numeric 0–1
+- `confidence_tier`: derived trust tier for transparency
+- `why_not`: 0–2 short objection-handling caveats
