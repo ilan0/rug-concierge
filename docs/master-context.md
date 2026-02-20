@@ -15,7 +15,7 @@ Primary objective: trust and correctness over aggressive recommendations.
 
 - Inventory is the source of truth.
 - Backend enforces active hard constraints.
-- AI does ranking and explanation only.
+- AI ranks and explains only after backend candidate selection.
 - No-match is a valid outcome.
 - AI must not invent inventory facts.
 - User messages are routed through backend first (not directly to AI).
@@ -26,8 +26,10 @@ Primary objective: trust and correctness over aggressive recommendations.
 - Backend decides mode:
   - `general_chat` for education/care/policy conversation
   - `recommendation` for inventory matching requests
+  - `appraisal` for appraisal draft generation requests (store staff only)
 - In `general_chat`, backend returns freeform assistant text.
 - In `recommendation`, backend runs the recommendation pipeline and returns structured output.
+- In `appraisal`, backend enforces role access (`store_staff`) and returns structured appraisal draft output.
 - If intent is unclear, backend asks clarifying question(s) before recommendation.
 
 Hard constraints (eliminators):
@@ -42,23 +44,29 @@ Soft signals (ranking only):
 - practical needs
 - other preference language
 
-## Recommendation Pipeline (v1)
+## Recommendation Pipeline (Current)
 
 1. Parse request.
 2. Extract any stated constraints (from explicit fields and/or user text).
-3. Query Supabase with coarse hard-constraint filters.
+3. Query Supabase with SQL-first hard-constraint filters.
 4. Apply final deterministic filtering in code (availability + optional budget/size).
-5. Shape candidate set for AI context (bounded + varied).
+5. Shape candidate set for AI context (bounded + deterministic cap).
 6. If candidate set is empty, return `no_match`.
 7. Else pass candidates to AI for ranking + explanation.
-8. Return structured output for UI rendering.
+8. Run deterministic backend post-processing on AI output:
+   - grounded `match_reasons`
+   - deterministic `confidence`
+   - `confidence_tier` + `confidence_factors`
+   - `why_not` objection-handling notes
+9. Return structured output for UI rendering.
 
 Rules:
 - Browse without size/budget is valid.
-- Supabase query is SQL-first and should apply active hard constraints before AI.
+- Supabase query is SQL-first and applies active hard constraints before AI.
 - In-code hard filter still runs after query for exact tolerance + rotation + safety.
 - Candidate set sent to AI should be bounded (roughly 20-30) and deterministically ordered.
 - No-match is only when backend candidate set is empty.
+- `/api/chat` recommendation turns and `/api/recommend` both use the same shared backend pipeline.
 
 ## OpenAI Direction
 - Do not use vector store / RAG for inventory recommendations.
@@ -72,16 +80,21 @@ Rules:
 - Vercel target hosting
 - Single monorepo
 - Multi-tenant with `tenant_id` + RLS model
+- Shared recommendation pipeline module powers both chat and recommendation routes.
+- Session state includes:
+  - recommendation constraints
+  - trade context (preferences + trade client identity metadata)
+  - project context (multi-room workflow with active room)
 
 ## Data Model Direction
 
 Core entities are defined in the schema docs (`tenants`, `profiles`, `trade_clients`, `rugs`, `rug_images`, `appraisals`).
 Trade client preferences are workflow/presentation context, not modeled as aesthetic taste rules.
 
-## Near-Term Implementation Priorities
+## Reliability / UX Baseline (Current)
 
-1. Wire Supabase query in recommendation route.
-2. Support optional constraints (browse + constrained search in one flow).
-3. Keep candidate shaping simple (cap + deterministic order) for V1.
-4. Replace AI stub with OpenAI call using structured output.
-5. Validate returned IDs are subset of backend candidate set.
+1. Input validation and friendly 400 responses for bad/empty requests.
+2. Error handling with stable error codes and non-crashing fallback paths.
+3. Deterministic fallback responses when OpenAI is unavailable or invalid.
+4. QA logging for recommendation pipeline events.
+5. Smoke/integration tests covering request validation, recommendation contract, trade/project context, and appraisal access control.
