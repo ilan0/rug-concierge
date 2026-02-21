@@ -5,6 +5,10 @@ import {
   normalizeHardConstraints,
 } from "@/lib/filters/extract-constraints";
 import { runRecommendationPipeline } from "@/lib/recommend/pipeline";
+import {
+  parseE2eTraceMeta,
+  writeE2eTraceArtifact,
+} from "@/lib/qa/e2e-trace";
 import { badRequest, internalError } from "@/lib/errors/http-errors";
 import type { HardConstraints } from "@/lib/types/recommendation";
 
@@ -37,13 +41,35 @@ function hasMeaningfulConstraints(constraints: HardConstraints): boolean {
 // 7) Return structured JSON for UI.
 
 export async function POST(req: Request) {
+  const startedAt = Date.now();
   try {
     const requestId = crypto.randomUUID();
+    const traceMeta = parseE2eTraceMeta(req);
+    const routeTraceId = crypto.randomUUID();
 
     // Parse JSON body safely. If parsing fails, `body` will be null.
     const body = await req.json().catch(() => null);
 
     if (!body || typeof body !== "object") {
+      if (traceMeta) {
+        await writeE2eTraceArtifact({
+          meta: traceMeta,
+          channel: "recommend-route",
+          trace_id: routeTraceId,
+          payload: {
+            flow_path: ["/api/recommend POST", "request_validation_failed"],
+            request_id: requestId,
+            request: null,
+            response: {
+              status: 400,
+              body: { error: "Invalid request", code: "BAD_REQUEST" },
+            },
+            timing_ms: {
+              total_ms: Date.now() - startedAt,
+            },
+          },
+        });
+      }
       return badRequest("Invalid request");
     }
 
@@ -66,6 +92,33 @@ export async function POST(req: Request) {
     );
 
     if (!userMessage && !hasMeaningfulConstraints(constraints)) {
+      if (traceMeta) {
+        await writeE2eTraceArtifact({
+          meta: traceMeta,
+          channel: "recommend-route",
+          trace_id: routeTraceId,
+          payload: {
+            flow_path: ["/api/recommend POST", "request_validation_failed"],
+            request_id: requestId,
+            request: {
+              tenant_id: body.tenant_id ?? null,
+              user_message: userMessage,
+              constraints,
+            },
+            response: {
+              status: 400,
+              body: {
+                error:
+                  "Provide a message or at least one valid constraint (size and/or budget).",
+                code: "BAD_REQUEST",
+              },
+            },
+            timing_ms: {
+              total_ms: Date.now() - startedAt,
+            },
+          },
+        });
+      }
       return badRequest(
         "Provide a message or at least one valid constraint (size and/or budget)."
       );
@@ -75,6 +128,32 @@ export async function POST(req: Request) {
       typeof constraints.budgetMax === "number" &&
       (!Number.isFinite(constraints.budgetMax) || constraints.budgetMax <= 0)
     ) {
+      if (traceMeta) {
+        await writeE2eTraceArtifact({
+          meta: traceMeta,
+          channel: "recommend-route",
+          trace_id: routeTraceId,
+          payload: {
+            flow_path: ["/api/recommend POST", "request_validation_failed"],
+            request_id: requestId,
+            request: {
+              tenant_id: body.tenant_id ?? null,
+              user_message: userMessage,
+              constraints,
+            },
+            response: {
+              status: 400,
+              body: {
+                error: "budgetMax must be a positive number.",
+                code: "BAD_REQUEST",
+              },
+            },
+            timing_ms: {
+              total_ms: Date.now() - startedAt,
+            },
+          },
+        });
+      }
       return badRequest("budgetMax must be a positive number.");
     }
 
@@ -86,12 +165,64 @@ export async function POST(req: Request) {
         widthIn <= 0 ||
         lengthIn <= 0
       ) {
+        if (traceMeta) {
+          await writeE2eTraceArtifact({
+            meta: traceMeta,
+            channel: "recommend-route",
+            trace_id: routeTraceId,
+            payload: {
+              flow_path: ["/api/recommend POST", "request_validation_failed"],
+              request_id: requestId,
+              request: {
+                tenant_id: body.tenant_id ?? null,
+                user_message: userMessage,
+                constraints,
+              },
+              response: {
+                status: 400,
+                body: {
+                  error: "size widthIn/lengthIn must be positive numbers.",
+                  code: "BAD_REQUEST",
+                },
+              },
+              timing_ms: {
+                total_ms: Date.now() - startedAt,
+              },
+            },
+          });
+        }
         return badRequest("size widthIn/lengthIn must be positive numbers.");
       }
       if (
         toleranceIn !== undefined &&
         (!Number.isFinite(toleranceIn) || toleranceIn < 0)
       ) {
+        if (traceMeta) {
+          await writeE2eTraceArtifact({
+            meta: traceMeta,
+            channel: "recommend-route",
+            trace_id: routeTraceId,
+            payload: {
+              flow_path: ["/api/recommend POST", "request_validation_failed"],
+              request_id: requestId,
+              request: {
+                tenant_id: body.tenant_id ?? null,
+                user_message: userMessage,
+                constraints,
+              },
+              response: {
+                status: 400,
+                body: {
+                  error: "size toleranceIn must be zero or a positive number.",
+                  code: "BAD_REQUEST",
+                },
+              },
+              timing_ms: {
+                total_ms: Date.now() - startedAt,
+              },
+            },
+          });
+        }
         return badRequest("size toleranceIn must be zero or a positive number.");
       }
     }
@@ -107,16 +238,90 @@ export async function POST(req: Request) {
       userMessage,
       constraints,
       promptContext: undefined,
+      traceMeta: traceMeta
+        ? {
+            ...traceMeta,
+            source_route: "/api/recommend",
+            session_id: null,
+            role: null,
+          }
+        : undefined,
     });
 
     if (!result.ok) {
+      if (traceMeta) {
+        await writeE2eTraceArtifact({
+          meta: traceMeta,
+          channel: "recommend-route",
+          trace_id: routeTraceId,
+          payload: {
+            flow_path: [
+              "/api/recommend POST",
+              "runRecommendationPipeline",
+              "pipeline_failure",
+            ],
+            request_id: requestId,
+            request: {
+              tenant_id: tenantId,
+              user_message: userMessage,
+              constraints,
+            },
+            response: {
+              status: 500,
+              body: {
+                error: "Unable to run recommendation pipeline right now.",
+                code: "RECOMMENDATION_PIPELINE_ERROR",
+              },
+            },
+            timing_ms: {
+              total_ms: Date.now() - startedAt,
+            },
+          },
+        });
+      }
       return internalError(
         "Unable to run recommendation pipeline right now.",
         "RECOMMENDATION_PIPELINE_ERROR"
       );
     }
 
-    return NextResponse.json(result.response);
+    if (traceMeta) {
+      await writeE2eTraceArtifact({
+        meta: traceMeta,
+        channel: "recommend-route",
+        trace_id: routeTraceId,
+        payload: {
+          flow_path: ["/api/recommend POST", "runRecommendationPipeline"],
+          request_id: requestId,
+          request: {
+            tenant_id: tenantId,
+            user_message: userMessage,
+            constraints,
+          },
+          response: {
+            status: 200,
+            body: {
+              mode: result.response.mode,
+              notes: result.response.notes,
+              recommendation_count: result.response.recommendations.length,
+            },
+            pipeline_trace_id: result.trace_id ?? null,
+          },
+          timing_ms: {
+            total_ms: Date.now() - startedAt,
+          },
+        },
+      });
+    }
+
+    const response = NextResponse.json(result.response);
+    if (result.trace_id) {
+      response.headers.set("x-recommendation-trace-id", result.trace_id);
+    }
+    if (traceMeta) {
+      response.headers.set("x-recommend-route-trace-id", routeTraceId);
+    }
+    return response;
   } catch {
     return internalError(
       "Unable to run recommendation pipeline right now.",

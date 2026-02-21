@@ -39,6 +39,14 @@ export async function handleRecommendationTurn(
         })),
       },
     },
+    traceMeta: input.trace_meta
+      ? {
+          ...input.trace_meta,
+          source_route: "/api/chat",
+          session_id: input.session.session_id,
+          role: input.role,
+        }
+      : undefined,
   });
 
   if (!result.ok) {

@@ -4,6 +4,7 @@ import type {
   AppraisalDraftResponse,
   AppraisalInput,
 } from "@/lib/types/appraisal";
+import type { E2eTraceMeta } from "@/lib/qa/e2e-trace";
 
 export type RoleType = "retail_customer" | "trade_client" | "store_staff";
 
@@ -78,6 +79,7 @@ export type ChatTurnHandlerInput = {
   session: SessionData;
   tenant_id: string | null;
   appraisal_context?: AppraisalInput;
+  trace_meta?: E2eTraceMeta;
 };
 
 export type GeneralChatResponse = {

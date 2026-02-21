@@ -7,6 +7,11 @@ import { getOrCreateSession, saveSession } from "@/lib/chat/session-store";
 import { updateRecommendationStateForTurn } from "@/lib/chat/state";
 import { updateTradeContextForTurn } from "@/lib/chat/trade-context";
 import { updateProjectContextForTurn } from "@/lib/chat/project-context";
+import { buildPromptLayers } from "@/lib/chat/prompt-builder";
+import {
+  parseE2eTraceMeta,
+  writeE2eTraceArtifact,
+} from "@/lib/qa/e2e-trace";
 import { badRequest, internalError } from "@/lib/errors/http-errors";
 import type {
   ChatTurnRequest,
@@ -27,7 +32,20 @@ import type {
  * 5) persist updated session and return response
  */
 export async function POST(req: Request) {
+  const startedAt = Date.now();
+  const flowPath: string[] = [
+    "/api/chat POST",
+    "getOrCreateSession",
+    "updateRecommendationStateForTurn",
+    "updateTradeContextForTurn",
+    "updateProjectContextForTurn",
+    "routeTurnMode",
+    "handlerDispatch",
+    "saveSession",
+  ];
+
   try {
+    const traceMeta = parseE2eTraceMeta(req);
     const body = (await req.json().catch(() => null)) as ChatTurnRequest | null;
 
     if (!body || typeof body !== "object") {
@@ -110,6 +128,7 @@ export async function POST(req: Request) {
           ? body.appraisal_context
           : undefined,
       mode,
+      trace_meta: traceMeta ?? undefined,
     } as const;
 
     const handlerResult =
@@ -150,7 +169,59 @@ export async function POST(req: Request) {
 
     saveSession(updatedSession);
 
-    return NextResponse.json({
+    const promptLayerPreview = buildPromptLayers({
+      mode,
+      role,
+      session: nextSession,
+      userMessage,
+    });
+
+    const routeTraceId = crypto.randomUUID();
+    if (traceMeta) {
+      await writeE2eTraceArtifact({
+        meta: traceMeta,
+        channel: "chat-route",
+        trace_id: routeTraceId,
+        payload: {
+          flow_path: flowPath,
+          request: {
+            session_id: body.session_id ?? null,
+            role,
+            tenant_id: tenantId,
+            trade_client_id: tradeClientId,
+            message: userMessage,
+            constraints: body.constraints ?? null,
+            trade_preferences: body.trade_preferences ?? null,
+            project_context: body.project_context ?? null,
+            appraisal_context: body.appraisal_context ?? null,
+          },
+          routing: {
+            mode,
+            handler:
+              mode === "recommendation"
+                ? "handleRecommendationTurn"
+                : mode === "appraisal"
+                  ? role === "store_staff"
+                    ? "handleAppraisalTurn"
+                    : "non_staff_appraisal_block"
+                  : "handleGeneralChatTurn",
+            prompt_layer_preview: promptLayerPreview,
+          },
+          response: {
+            session_id: sessionId,
+            role,
+            mode: responseMode,
+            response_mode: handlerResult.mode,
+            notes: handlerResult.notes ?? null,
+          },
+          timing_ms: {
+            total_ms: Date.now() - startedAt,
+          },
+        },
+      });
+    }
+
+    const response = NextResponse.json({
       session_id: sessionId,
       role,
       mode: responseMode,
@@ -159,6 +230,10 @@ export async function POST(req: Request) {
       project_context: updatedSession.project_context,
       response: handlerResult,
     });
+    if (traceMeta) {
+      response.headers.set("x-chat-route-trace-id", routeTraceId);
+    }
+    return response;
   } catch {
     return internalError(
       "Unable to process chat turn right now. Please try again.",

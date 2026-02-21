@@ -4,7 +4,7 @@ import type {
 } from "@/lib/types/appraisal";
 
 const OPENAI_RESPONSES_URL = "https://api.openai.com/v1/responses";
-const OPENAI_MODEL = "gpt-4.1-mini";
+const OPENAI_MODEL = process.env.OPENAI_MODEL ?? "gpt-4.1-nano";
 
 const APPRAISAL_SCHEMA = {
   type: "object",

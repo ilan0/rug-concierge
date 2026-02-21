@@ -28,6 +28,15 @@ function resolveRepoRootFromCwd(): string {
   for (const candidate of candidates) {
     const hasRootPackage = existsSync(path.join(candidate, "package.json"));
     const hasDocsDir = existsSync(path.join(candidate, "docs"));
+    const hasAppsDir = existsSync(path.join(candidate, "apps"));
+    if (hasRootPackage && hasDocsDir && hasAppsDir) {
+      return candidate;
+    }
+  }
+
+  for (const candidate of candidates) {
+    const hasRootPackage = existsSync(path.join(candidate, "package.json"));
+    const hasDocsDir = existsSync(path.join(candidate, "docs"));
     if (hasRootPackage && hasDocsDir) {
       return candidate;
     }

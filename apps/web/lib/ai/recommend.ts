@@ -9,7 +9,7 @@ import type { HardConstraints, InventoryRug } from "@/lib/types/recommendation";
 // 6) If any API/parse/validation failure occurs -> return deterministic fallback.
 
 const OPENAI_RESPONSES_URL = "https://api.openai.com/v1/responses";
-const OPENAI_MODEL = "gpt-4.1-mini";
+const OPENAI_MODEL = process.env.OPENAI_MODEL ?? "gpt-4.1-nano";
 const MAX_RECOMMENDATIONS = 8;
 const CONFIDENCE_MIN = 0.35;
 const CONFIDENCE_MAX = 0.95;
@@ -26,6 +26,17 @@ type RecommendationPromptContext = {
       constraints: HardConstraints;
     }>;
   };
+};
+
+export type RecommendationAiTrace = {
+  called: boolean;
+  model: string;
+  request_payload: unknown | null;
+  response_status: number | null;
+  response_payload: unknown | null;
+  parsed_response: RecommendationResponse | null;
+  fallback_reason: string | null;
+  error: string | null;
 };
 
 export type RecommendationResponse = {
@@ -612,7 +623,8 @@ export async function rankAndExplain(
   inventory: InventoryRug[],
   constraints: HardConstraints,
   userMessage: string,
-  promptContext?: RecommendationPromptContext
+  promptContext?: RecommendationPromptContext,
+  trace?: RecommendationAiTrace
 ): Promise<RecommendationResponse> {
   // PSEUDOCODE
   // A) Early return for true no-match candidate set.
@@ -621,6 +633,16 @@ export async function rankAndExplain(
   // D) Request strict JSON schema output from model.
   // E) Parse/validate/sanitize, else return deterministic fallback.
   if (inventory.length === 0) {
+    if (trace) {
+      trace.called = false;
+      trace.model = OPENAI_MODEL;
+      trace.request_payload = null;
+      trace.response_status = null;
+      trace.response_payload = null;
+      trace.parsed_response = null;
+      trace.fallback_reason = null;
+      trace.error = null;
+    }
     // No candidates after hard filtering = real no-match.
     const constrainedSearch = hasOptionalHardConstraints(constraints);
     return {
@@ -638,6 +660,16 @@ export async function rankAndExplain(
 
   const apiKey = process.env.OPENAI_API_KEY;
   if (!apiKey) {
+    if (trace) {
+      trace.called = false;
+      trace.model = OPENAI_MODEL;
+      trace.request_payload = null;
+      trace.response_status = null;
+      trace.response_payload = null;
+      trace.parsed_response = null;
+      trace.fallback_reason = "Missing OPENAI_API_KEY";
+      trace.error = null;
+    }
     // Missing key should not crash the endpoint.
     return {
       ...fallbackRecommendations(inventory, constraints, promptContext, userMessage),
@@ -657,94 +689,116 @@ export async function rankAndExplain(
       ? userMessage.trim()
       : buildFallbackRequestText(constraints);
 
+  const requestPayload = {
+    model: OPENAI_MODEL,
+    // Message order:
+    // 1) system behavior guardrails
+    // 2) authoritative inventory context
+    // 3) user intent + hard constraints
+    input: [
+      {
+        role: "system",
+        content: [
+          {
+            type: "input_text",
+            text: "You are a rug concierge assistant. Recommend only from provided inventory. Do not invent facts.",
+          },
+          {
+            type: "input_text",
+            text: sparseConstraints
+              ? "If constraints are sparse or open-ended, prioritize variety across style, palette, and price points."
+              : "Prioritize closest matches to the stated constraints and preferences.",
+          },
+          {
+            type: "input_text",
+            text:
+              promptContext?.role === "trade_client"
+                ? "This is a trade/designer workflow. Be concise, practical, and optimize for repeat-buyer efficiency."
+                : "This is a general concierge workflow.",
+          },
+        ],
+      },
+      ...(hasTradePreferences
+        ? [
+            {
+              role: "system" as const,
+              content: [
+                {
+                  type: "input_text" as const,
+                  text: `TRADE PREFERENCES (soft signals only):\n${JSON.stringify(
+                    promptContext?.trade_preferences,
+                    null,
+                    2
+                  )}`,
+                },
+              ],
+            },
+          ]
+        : []),
+      {
+        role: "system",
+        content: [
+          {
+            type: "input_text",
+            text: `AVAILABLE INVENTORY (authoritative):\n${JSON.stringify(contextInventory, null, 2)}`,
+          },
+        ],
+      },
+      {
+        role: "user",
+        content: [
+          {
+            type: "input_text",
+            text: `User request:\n${requestText}\n\nHard constraints:\n${JSON.stringify(
+              constraints
+            )}\n\nProject context:\n${JSON.stringify(
+              promptContext?.project_context ?? null
+            )}`,
+          },
+        ],
+      },
+    ],
+    text: {
+      format: {
+        // Enforce strict schema so frontend response parsing is predictable.
+        type: "json_schema",
+        name: "recommendation_response",
+        schema: RECOMMENDATION_SCHEMA,
+        strict: true,
+      },
+    },
+  };
+
+  if (trace) {
+    trace.called = true;
+    trace.model = OPENAI_MODEL;
+    trace.request_payload = requestPayload;
+    trace.response_status = null;
+    trace.response_payload = null;
+    trace.parsed_response = null;
+    trace.fallback_reason = null;
+    trace.error = null;
+  }
+
   const response = await fetch(OPENAI_RESPONSES_URL, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${apiKey}`,
     },
-    body: JSON.stringify({
-      model: OPENAI_MODEL,
-      // Message order:
-      // 1) system behavior guardrails
-      // 2) authoritative inventory context
-      // 3) user intent + hard constraints
-      input: [
-        {
-          role: "system",
-          content: [
-            {
-              type: "input_text",
-              text: "You are a rug concierge assistant. Recommend only from provided inventory. Do not invent facts.",
-            },
-            {
-              type: "input_text",
-              text: sparseConstraints
-                ? "If constraints are sparse or open-ended, prioritize variety across style, palette, and price points."
-                : "Prioritize closest matches to the stated constraints and preferences.",
-            },
-            {
-              type: "input_text",
-              text:
-                promptContext?.role === "trade_client"
-                  ? "This is a trade/designer workflow. Be concise, practical, and optimize for repeat-buyer efficiency."
-                  : "This is a general concierge workflow.",
-            },
-          ],
-        },
-        ...(hasTradePreferences
-          ? [
-              {
-                role: "system" as const,
-                content: [
-                  {
-                    type: "input_text" as const,
-                    text: `TRADE PREFERENCES (soft signals only):\n${JSON.stringify(
-                      promptContext?.trade_preferences,
-                      null,
-                      2
-                    )}`,
-                  },
-                ],
-              },
-            ]
-          : []),
-        {
-          role: "system",
-          content: [
-            {
-              type: "input_text",
-              text: `AVAILABLE INVENTORY (authoritative):\n${JSON.stringify(contextInventory, null, 2)}`,
-            },
-          ],
-        },
-        {
-          role: "user",
-          content: [
-            {
-              type: "input_text",
-              text: `User request:\n${requestText}\n\nHard constraints:\n${JSON.stringify(
-                constraints
-              )}\n\nProject context:\n${JSON.stringify(
-                promptContext?.project_context ?? null
-              )}`,
-            },
-          ],
-        },
-      ],
-      text: {
-        format: {
-          // Enforce strict schema so frontend response parsing is predictable.
-          type: "json_schema",
-          name: "recommendation_response",
-          schema: RECOMMENDATION_SCHEMA,
-          strict: true,
-        },
-      },
-    }),
+    body: JSON.stringify(requestPayload),
   }).catch(() => null);
 
   if (!response || !response.ok) {
+    if (trace) {
+      trace.response_status = response ? response.status : null;
+      trace.response_payload = null;
+      trace.parsed_response = null;
+      trace.fallback_reason = "OpenAI request failed";
+      trace.error = response
+        ? `OpenAI request failed with status ${response.status}`
+        : "OpenAI request failed: network error";
+    }
     // Network/API failure -> deterministic fallback, not a hard API error.
     return {
       ...fallbackRecommendations(inventory, constraints, promptContext, userMessage),
@@ -753,8 +807,17 @@ export async function rankAndExplain(
   }
 
   const payload = (await response.json().catch(() => null)) as unknown;
+  if (trace) {
+    trace.response_status = response.status;
+    trace.response_payload = payload;
+  }
   const parsed = parseRecommendationResponse(payload);
   if (!parsed) {
+    if (trace) {
+      trace.parsed_response = null;
+      trace.fallback_reason = "OpenAI response parsing failed";
+      trace.error = "OpenAI response parsing failed";
+    }
     // Parsing/shape failure -> deterministic fallback.
     return {
       ...fallbackRecommendations(inventory, constraints, promptContext, userMessage),
@@ -763,5 +826,17 @@ export async function rankAndExplain(
   }
 
   // Final safety pass before returning to API route.
-  return sanitizeResponse(parsed, inventory, constraints, promptContext, userMessage);
+  const sanitized = sanitizeResponse(
+    parsed,
+    inventory,
+    constraints,
+    promptContext,
+    userMessage
+  );
+  if (trace) {
+    trace.parsed_response = sanitized;
+    trace.fallback_reason = null;
+    trace.error = null;
+  }
+  return sanitized;
 }

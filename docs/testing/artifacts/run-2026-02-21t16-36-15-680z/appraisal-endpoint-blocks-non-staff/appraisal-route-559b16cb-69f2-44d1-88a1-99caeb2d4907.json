@@ -1,0 +1,24 @@
+{
+  "trace_id": "559b16cb-69f2-44d1-88a1-99caeb2d4907",
+  "channel": "appraisal-route",
+  "created_at": "2026-02-21T16:37:19.904Z",
+  "payload": {
+    "flow_path": [
+      "/api/appraisal/generate POST",
+      "role_check_failed_non_staff_block"
+    ],
+    "request": {
+      "role": "retail_customer",
+      "appraisal_context": {
+        "rug_label": "Sample Rug",
+        "appraised_value": 1200
+      }
+    },
+    "response": {
+      "status": 403,
+      "body": {
+        "error": "Appraisal generation is available only for store staff."
+      }
+    }
+  }
+}
