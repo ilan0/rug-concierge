@@ -90,6 +90,7 @@ Rules:
   - recommendation constraints
   - trade context (preferences + trade client identity metadata)
   - project context (multi-room workflow with active room)
+- Runtime placement reference: `docs/design/architecture-map.md`
 
 ## Data Model Direction
 
@@ -119,6 +120,7 @@ Trade client preferences are workflow/presentation context, not modeled as aesth
   - human report: `docs/testing/e2e-smoke-report.md`
   - machine report: `docs/testing/e2e-smoke-report.json`
   - deep trace artifacts: `docs/testing/artifacts/<run-id>/<case-slug>/*.json`
+- Canonical artifact root is `docs/testing` (not app-local docs folders).
 - Deep artifacts include:
   - flow path/function trace
   - Supabase query variants + filters + row counts

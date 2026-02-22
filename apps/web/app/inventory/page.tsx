@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { listInventory } from "@/lib/inventory/list";
 import { isDefaultInventoryFilters } from "@/lib/inventory/filters";
+import { getServerUiRole } from "@/lib/ui/server-role";
 
 type InventoryPageProps = {
   searchParams?:
@@ -51,6 +52,17 @@ function buildQueryString(input: Record<string, string | number | null | undefin
 }
 
 export default async function InventoryPage({ searchParams }: InventoryPageProps) {
+  const role = await getServerUiRole();
+  if (role !== "store_staff") {
+    return (
+      <main className="role-guard role-guard-blocked">
+        <h1>Inventory Browser</h1>
+        <p>This page is available only to store staff.</p>
+        <Link href="/">Go Home to switch role</Link>
+      </main>
+    );
+  }
+
   const params = (await searchParams) ?? {};
   const page = toPositiveInt(readString(params.page), 1);
   const pageSize = toPositiveInt(readString(params.page_size), 50);

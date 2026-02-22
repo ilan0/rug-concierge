@@ -17,6 +17,11 @@ out
 logs
 *.log
 
+# Generated test/debug artifacts
+docs/testing/artifacts/
+docs/testing/qa-log.ndjson
+apps/web/docs/testing/
+
 # OS
 .DS_Store
 

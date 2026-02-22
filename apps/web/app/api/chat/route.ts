@@ -207,6 +207,11 @@ export async function POST(req: Request) {
                   : "handleGeneralChatTurn",
             prompt_layer_preview: promptLayerPreview,
           },
+          state_snapshot: {
+            recommendation_state: nextSession.recommendation_state,
+            trade_context: nextSession.trade_context,
+            project_context: nextSession.project_context,
+          },
           response: {
             session_id: sessionId,
             role,

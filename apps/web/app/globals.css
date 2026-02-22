@@ -107,7 +107,9 @@ a {
 }
 
 .home-page,
-.inventory-page {
+.inventory-page,
+.concierge-page,
+.appraisal-page {
   max-width: 1280px;
   margin: 0 auto;
   padding: 2rem 1.5rem 3rem;
@@ -141,6 +143,82 @@ a {
 
 .home-card h2 {
   margin-bottom: 0.35rem;
+}
+
+.home-showroom {
+  background: radial-gradient(
+      circle at 18% 14%,
+      rgba(255, 247, 234, 0.55),
+      transparent 42%
+    ),
+    linear-gradient(170deg, rgba(252, 249, 244, 0.9), rgba(236, 227, 214, 0.7));
+  border: 1px solid rgba(120, 92, 64, 0.2);
+  border-radius: 16px;
+}
+
+.home-role-panel {
+  margin-top: 1rem;
+  border: 1px solid rgba(109, 84, 57, 0.24);
+  border-radius: 12px;
+  background: rgba(255, 251, 246, 0.92);
+  padding: 0.9rem;
+}
+
+.home-role-panel h2 {
+  margin-bottom: 0.3rem;
+}
+
+.home-role-buttons {
+  margin-top: 0.65rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.home-role-btn {
+  border: 1px solid rgba(109, 84, 57, 0.35);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.92);
+  padding: 0.44rem 0.72rem;
+  cursor: pointer;
+}
+
+.home-role-btn.active {
+  border-color: rgba(127, 84, 47, 0.7);
+  background: linear-gradient(120deg, #7f542f, #a56f3f);
+  color: #fff8f1;
+}
+
+.home-role-btn.ghost {
+  background: rgba(255, 255, 255, 0.6);
+}
+
+.home-role-error {
+  margin-top: 0.45rem;
+  color: #a33232;
+  font-size: 0.85rem;
+}
+
+.home-card-muted {
+  opacity: 0.82;
+}
+
+.role-guard {
+  max-width: 920px;
+  margin: 2rem auto;
+  padding: 1rem;
+  border: 1px solid rgba(127, 127, 127, 0.35);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.8);
+}
+
+.role-guard a {
+  display: inline-block;
+  margin-top: 0.6rem;
+  border: 1px solid rgba(127, 127, 127, 0.35);
+  border-radius: 10px;
+  padding: 0.42rem 0.64rem;
+  background: rgba(255, 255, 255, 0.88);
 }
 
 .inventory-header {
@@ -328,7 +406,744 @@ a {
 
 @media (max-width: 720px) {
   .home-page,
-  .inventory-page {
+  .inventory-page,
+  .concierge-page,
+  .appraisal-page {
     padding: 1.25rem 0.9rem 2rem;
+  }
+}
+
+.concierge-nav {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 1rem 1.5rem 0;
+  display: flex;
+  gap: 0.6rem;
+}
+
+.concierge-nav a {
+  border: 1px solid rgba(84, 70, 53, 0.28);
+  border-radius: 10px;
+  padding: 0.38rem 0.66rem;
+  background: rgba(250, 244, 236, 0.72);
+}
+
+.concierge-showroom {
+  background: radial-gradient(
+      circle at 20% 15%,
+      rgba(255, 247, 234, 0.55),
+      transparent 40%
+    ),
+    linear-gradient(170deg, rgba(252, 249, 244, 0.9), rgba(236, 227, 214, 0.7));
+  border: 1px solid rgba(120, 92, 64, 0.2);
+  border-radius: 16px;
+}
+
+.concierge-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+
+.concierge-header h1 {
+  font-size: 2rem;
+  margin-top: 0.2rem;
+}
+
+.concierge-eyebrow {
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-size: 0.74rem;
+  color: rgba(79, 59, 36, 0.74);
+}
+
+.concierge-subtitle {
+  margin-top: 0.5rem;
+  max-width: 60ch;
+  color: rgba(59, 42, 24, 0.86);
+}
+
+.concierge-controls {
+  display: flex;
+  gap: 0.7rem;
+  align-items: flex-end;
+}
+
+.concierge-controls label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: 0.8rem;
+}
+
+.concierge-controls select,
+.concierge-controls button {
+  border: 1px solid rgba(84, 70, 53, 0.32);
+  border-radius: 10px;
+  background: rgba(255, 252, 247, 0.9);
+  padding: 0.48rem 0.62rem;
+}
+
+.concierge-layout {
+  margin-top: 1rem;
+  display: grid;
+  grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr);
+  gap: 1rem;
+}
+
+.concierge-main {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+.concierge-side {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+.concierge-panel {
+  border: 1px solid rgba(109, 84, 57, 0.25);
+  border-radius: 12px;
+  padding: 0.9rem;
+  background: rgba(255, 252, 248, 0.8);
+}
+
+.concierge-panel h3 {
+  margin-bottom: 0.6rem;
+}
+
+.concierge-panel dl {
+  display: grid;
+  gap: 0.6rem;
+}
+
+.concierge-panel dt {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: rgba(70, 51, 32, 0.72);
+}
+
+.concierge-panel dd {
+  font-size: 0.86rem;
+  word-break: break-all;
+}
+
+.concierge-panel ul {
+  padding-left: 1rem;
+  display: grid;
+  gap: 0.45rem;
+}
+
+.concierge-starters {
+  border: 1px solid rgba(109, 84, 57, 0.24);
+  border-radius: 12px;
+  background: rgba(255, 251, 245, 0.8);
+  padding: 0.8rem;
+}
+
+.concierge-starters p {
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 0.55rem;
+  color: rgba(70, 51, 32, 0.72);
+}
+
+.concierge-starter-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.concierge-starter-row button {
+  border: 1px solid rgba(84, 70, 53, 0.3);
+  border-radius: 999px;
+  padding: 0.4rem 0.7rem;
+  background: rgba(255, 253, 250, 0.95);
+  font-size: 0.82rem;
+}
+
+.concierge-thread {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.concierge-empty {
+  border: 1px dashed rgba(84, 70, 53, 0.35);
+  border-radius: 12px;
+  padding: 1rem;
+  background: rgba(255, 252, 248, 0.78);
+}
+
+.concierge-turn {
+  border-radius: 12px;
+  padding: 0.9rem;
+  border: 1px solid rgba(109, 84, 57, 0.2);
+}
+
+.concierge-showroom .concierge-turn {
+  transition: border-color 120ms ease, box-shadow 120ms ease;
+}
+
+.concierge-showroom .concierge-turn:hover {
+  border-color: rgba(109, 84, 57, 0.45);
+  box-shadow: 0 4px 14px rgba(77, 57, 33, 0.08);
+}
+
+.concierge-turn-user {
+  background: linear-gradient(
+    135deg,
+    rgba(237, 247, 255, 0.96),
+    rgba(224, 239, 251, 0.9)
+  );
+}
+
+.concierge-turn-assistant {
+  background: rgba(255, 252, 247, 0.9);
+}
+
+.concierge-turn-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.38rem;
+}
+
+.concierge-turn-top time {
+  font-size: 0.75rem;
+  opacity: 0.68;
+}
+
+.concierge-turn-role {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  opacity: 0.74;
+}
+
+.concierge-mode-chip {
+  display: inline-block;
+  font-size: 0.74rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  border: 1px solid rgba(84, 70, 53, 0.32);
+  border-radius: 999px;
+  padding: 0.17rem 0.5rem;
+  margin-bottom: 0.42rem;
+  background: rgba(255, 250, 242, 0.94);
+}
+
+.concierge-question-block {
+  margin-top: 0.72rem;
+}
+
+.concierge-question-block ul {
+  margin-top: 0.4rem;
+  padding-left: 1.1rem;
+}
+
+.concierge-rec-grid {
+  margin-top: 0.75rem;
+  display: grid;
+  gap: 0.7rem;
+}
+
+.concierge-rec-card {
+  border: 1px solid rgba(109, 84, 57, 0.25);
+  border-radius: 12px;
+  background: rgba(255, 253, 249, 0.95);
+  padding: 0.78rem;
+}
+
+.concierge-rec-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.7rem;
+  align-items: flex-start;
+}
+
+.concierge-rec-sku {
+  margin-top: 0.2rem;
+  font-size: 0.78rem;
+  opacity: 0.7;
+}
+
+.concierge-rec-meta-grid {
+  margin-top: 0.55rem;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.55rem;
+}
+
+.concierge-rec-meta-grid p {
+  display: flex;
+  flex-direction: column;
+  gap: 0.16rem;
+  font-size: 0.83rem;
+}
+
+.concierge-rec-meta-grid strong {
+  font-size: 0.74rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  opacity: 0.7;
+}
+
+.concierge-tier {
+  border-radius: 999px;
+  padding: 0.2rem 0.54rem;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.concierge-tier-high {
+  background: rgba(62, 178, 111, 0.2);
+}
+
+.concierge-tier-medium {
+  background: rgba(231, 160, 37, 0.23);
+}
+
+.concierge-tier-low {
+  background: rgba(224, 103, 103, 0.23);
+}
+
+.concierge-rec-section {
+  margin-top: 0.58rem;
+}
+
+.concierge-rec-section ul {
+  margin-top: 0.35rem;
+  padding-left: 1.1rem;
+}
+
+.concierge-rec-confidence {
+  margin-top: 0.52rem;
+  font-size: 0.82rem;
+  opacity: 0.84;
+}
+
+.concierge-input-wrap {
+  position: sticky;
+  bottom: 0;
+  border: 1px solid rgba(109, 84, 57, 0.28);
+  border-radius: 12px;
+  padding: 0.8rem;
+  background: rgba(255, 251, 246, 0.96);
+  backdrop-filter: blur(4px);
+}
+
+.concierge-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.62rem;
+}
+
+.concierge-form textarea {
+  border: 1px solid rgba(109, 84, 57, 0.35);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.94);
+  padding: 0.65rem;
+  resize: vertical;
+}
+
+.concierge-form-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.concierge-hint {
+  font-size: 0.76rem;
+  opacity: 0.67;
+}
+
+.concierge-form-actions button {
+  border: 1px solid rgba(109, 84, 57, 0.35);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.92);
+  padding: 0.45rem 0.78rem;
+}
+
+.concierge-loading {
+  background: rgba(255, 252, 247, 0.92);
+}
+
+.concierge-loading-bar {
+  height: 0.62rem;
+  border-radius: 8px;
+  background: linear-gradient(90deg, #ece4d8, #f8f2e8, #ece4d8);
+  background-size: 220% 100%;
+  animation: conciergeShimmer 1.8s linear infinite;
+}
+
+.concierge-loading-bar.short {
+  margin-top: 0.5rem;
+  width: 62%;
+}
+
+.concierge-error {
+  margin-top: 0.55rem;
+  color: #a33232;
+  font-size: 0.86rem;
+}
+
+.concierge-trace-panel details {
+  margin-top: 0.55rem;
+  border: 1px solid rgba(109, 84, 57, 0.25);
+  border-radius: 10px;
+  padding: 0.5rem 0.6rem;
+  background: rgba(255, 255, 255, 0.7);
+}
+
+.concierge-trace-panel summary {
+  cursor: pointer;
+  font-size: 0.84rem;
+  font-weight: 600;
+}
+
+.concierge-trace-panel pre {
+  margin-top: 0.45rem;
+  border: 1px solid rgba(109, 84, 57, 0.2);
+  border-radius: 8px;
+  background: rgba(253, 251, 247, 0.85);
+  padding: 0.55rem;
+  overflow: auto;
+  font-size: 0.74rem;
+}
+
+.concierge-trace-meta {
+  font-size: 0.8rem;
+  opacity: 0.78;
+}
+
+@keyframes conciergeShimmer {
+  from {
+    background-position: 220% 0;
+  }
+  to {
+    background-position: -220% 0;
+  }
+}
+
+@media (max-width: 1020px) {
+  .concierge-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .concierge-input-wrap {
+    position: static;
+  }
+}
+
+@media (max-width: 720px) {
+  .concierge-nav {
+    padding: 0.75rem 0.9rem 0;
+  }
+
+  .concierge-form-actions {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+.appraisal-nav {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0.9rem 1.5rem 0;
+  display: flex;
+  gap: 0.6rem;
+}
+
+.appraisal-nav a {
+  border: 1px solid rgba(84, 70, 53, 0.28);
+  border-radius: 10px;
+  padding: 0.38rem 0.66rem;
+  background: rgba(250, 244, 236, 0.72);
+}
+
+.appraisal-showroom {
+  background: radial-gradient(
+      circle at 18% 14%,
+      rgba(255, 247, 234, 0.62),
+      transparent 42%
+    ),
+    linear-gradient(170deg, rgba(252, 249, 244, 0.92), rgba(236, 227, 214, 0.76));
+  border: 1px solid rgba(120, 92, 64, 0.2);
+  border-radius: 16px;
+}
+
+.appraisal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.appraisal-eyebrow {
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-size: 0.74rem;
+  color: rgba(79, 59, 36, 0.74);
+}
+
+.appraisal-header h1 {
+  margin-top: 0.24rem;
+  font-size: 2rem;
+}
+
+.appraisal-header p {
+  margin-top: 0.42rem;
+  max-width: 68ch;
+  color: rgba(59, 42, 24, 0.86);
+}
+
+.appraisal-role-chip {
+  border: 1px solid rgba(117, 85, 46, 0.38);
+  background: rgba(255, 248, 236, 0.9);
+  border-radius: 999px;
+  padding: 0.35rem 0.7rem;
+  font-size: 0.78rem;
+  color: rgba(80, 55, 23, 0.88);
+}
+
+.appraisal-summary-chips {
+  margin-top: 0.9rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.appraisal-chip {
+  border: 1px solid rgba(109, 84, 57, 0.25);
+  border-radius: 999px;
+  background: rgba(255, 251, 246, 0.92);
+  padding: 0.32rem 0.58rem;
+  font-size: 0.78rem;
+}
+
+.appraisal-layout {
+  margin-top: 1rem;
+  display: grid;
+  grid-template-columns: minmax(340px, 0.95fr) minmax(400px, 1.05fr);
+  gap: 1rem;
+}
+
+.appraisal-form-panel,
+.appraisal-output-panel {
+  border: 1px solid rgba(109, 84, 57, 0.28);
+  border-radius: 14px;
+  background: rgba(255, 251, 246, 0.95);
+  backdrop-filter: blur(4px);
+  padding: 0.9rem;
+}
+
+.appraisal-form-panel {
+  position: sticky;
+  top: 0.9rem;
+  align-self: start;
+}
+
+.appraisal-panel-head h2,
+.appraisal-output-head h2 {
+  margin-bottom: 0.35rem;
+}
+
+.appraisal-panel-head p,
+.appraisal-output-head p {
+  font-size: 0.82rem;
+  opacity: 0.76;
+}
+
+.appraisal-form {
+  margin-top: 0.75rem;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.appraisal-form-group {
+  border: 1px solid rgba(109, 84, 57, 0.2);
+  border-radius: 12px;
+  padding: 0.72rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 0.62rem;
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.appraisal-form-group legend {
+  padding: 0 0.35rem;
+  font-size: 0.77rem;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: rgba(80, 55, 23, 0.84);
+}
+
+.appraisal-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.26rem;
+  font-size: 0.8rem;
+}
+
+.appraisal-form input,
+.appraisal-form select,
+.appraisal-form textarea {
+  border: 1px solid rgba(109, 84, 57, 0.35);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.95);
+  padding: 0.47rem 0.54rem;
+}
+
+.appraisal-form textarea {
+  min-height: 92px;
+}
+
+.appraisal-form-full {
+  grid-column: 1 / -1;
+}
+
+.appraisal-actions {
+  display: flex;
+  gap: 0.55rem;
+}
+
+.appraisal-primary-btn {
+  background: linear-gradient(120deg, #7f542f, #a56f3f);
+  color: #fff8f1;
+  border-color: rgba(127, 84, 47, 0.8) !important;
+}
+
+.appraisal-actions button,
+.appraisal-export-actions button {
+  border: 1px solid rgba(109, 84, 57, 0.35);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.94);
+  padding: 0.45rem 0.7rem;
+  cursor: pointer;
+}
+
+.appraisal-actions button:disabled,
+.appraisal-export-actions button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.appraisal-error {
+  margin-top: 0.7rem;
+  color: #a33232;
+  font-size: 0.86rem;
+}
+
+.appraisal-output-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.72rem;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+
+.appraisal-export-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.appraisal-copied {
+  margin-top: 0.52rem;
+  font-size: 0.82rem;
+  color: #216d3a;
+}
+
+.appraisal-empty {
+  margin-top: 0.8rem;
+  border: 1px dashed rgba(109, 84, 57, 0.32);
+  border-radius: 12px;
+  padding: 0.9rem;
+  background: rgba(255, 255, 255, 0.7);
+}
+
+.appraisal-draft {
+  margin-top: 0.7rem;
+  display: grid;
+  gap: 0.72rem;
+}
+
+.appraisal-assistant {
+  font-size: 0.9rem;
+  color: rgba(59, 42, 24, 0.92);
+}
+
+.appraisal-cannot {
+  border: 1px dashed rgba(109, 84, 57, 0.35);
+  border-radius: 10px;
+  padding: 0.66rem;
+  background: rgba(255, 255, 255, 0.88);
+}
+
+.appraisal-draft section {
+  border: 1px solid rgba(109, 84, 57, 0.2);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.88);
+  padding: 0.72rem;
+}
+
+.appraisal-draft section h3 {
+  margin-bottom: 0.38rem;
+}
+
+.appraisal-draft ul {
+  margin-left: 1rem;
+}
+
+.appraisal-draft details {
+  border: 1px solid rgba(109, 84, 57, 0.2);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.88);
+  padding: 0.62rem 0.72rem;
+}
+
+.appraisal-draft summary {
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.84rem;
+}
+
+.appraisal-draft pre {
+  margin-top: 0.52rem;
+  border: 1px solid rgba(109, 84, 57, 0.2);
+  border-radius: 10px;
+  padding: 0.6rem;
+  overflow: auto;
+  font-size: 0.75rem;
+  background: rgba(248, 249, 252, 0.9);
+}
+
+@media (max-width: 1020px) {
+  .appraisal-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .appraisal-form-panel {
+    position: static;
+  }
+}
+
+@media (max-width: 720px) {
+  .appraisal-nav {
+    padding: 0.75rem 0.9rem 0;
+  }
+
+  .appraisal-actions {
+    flex-direction: column;
   }
 }
