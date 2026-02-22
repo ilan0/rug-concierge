@@ -55,7 +55,7 @@ export default async function InventoryPage({ searchParams }: InventoryPageProps
   const role = await getServerUiRole();
   if (role !== "store_staff") {
     return (
-      <main className="role-guard role-guard-blocked">
+      <main className="ui-shell role-guard role-guard-blocked">
         <h1>Inventory Browser</h1>
         <p>This page is available only to store staff.</p>
         <Link href="/">Go Home to switch role</Link>
@@ -140,12 +140,12 @@ export default async function InventoryPage({ searchParams }: InventoryPageProps
   };
 
   return (
-    <main className="inventory-page">
-      <header className="inventory-header">
+    <main className="ui-shell ui-showroom inventory-page inventory-showroom">
+      <header className="ui-header inventory-header">
         <div>
-          <p className="inventory-eyebrow">Owner Transparency</p>
+          <p className="ui-kicker inventory-eyebrow">Owner Transparency</p>
           <h1>Inventory Browser</h1>
-          <p className="inventory-subtitle">
+          <p className="ui-subtitle inventory-subtitle">
             Read-only inventory view for trust review and recommendation support.
           </p>
         </div>

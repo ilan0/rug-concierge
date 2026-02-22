@@ -239,12 +239,12 @@ export function ConciergeScreen({ debug }: ConciergeScreenProps) {
     .find((turn) => turn.role === "assistant")?.responseMode;
 
   return (
-    <main className="concierge-page concierge-showroom">
-      <header className="concierge-header">
+    <main className="ui-shell ui-showroom concierge-page concierge-showroom">
+      <header className="ui-header concierge-header">
         <div>
-          <p className="concierge-eyebrow">Customer Flow</p>
+          <p className="ui-kicker concierge-eyebrow">Customer Flow</p>
           <h1>Rug Concierge</h1>
-          <p className="concierge-subtitle">
+          <p className="ui-subtitle concierge-subtitle">
             Main customer-facing chat. The backend routes each turn to general
             chat, recommendations, or appraisal mode.
           </p>

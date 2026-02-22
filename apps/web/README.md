@@ -26,6 +26,31 @@ This app is the primary UI shell for Rug Concierge MVP.
 - `/api/recommend`
 - `/api/appraisal/generate`
 
+## Styling Standard (Global)
+
+Use shared `ui-*` classes from `/apps/web/app/globals.css` for all new pages:
+
+- `ui-shell`: page container spacing + width
+- `ui-showroom`: classy gradient shell card
+- `ui-header`: top header layout
+- `ui-kicker`, `ui-subtitle`: consistent hero text hierarchy
+- `ui-nav`: top route nav with standard links
+- `ui-card`: reusable panel/card base
+- `ui-btn`, `ui-btn-primary`: standard button styling
+- `ui-empty`: standard empty state block
+
+Pattern for new pages:
+
+```tsx
+<main className="ui-shell ui-showroom">
+  <header className="ui-header">
+    <p className="ui-kicker">Section</p>
+    <h1>Page Title</h1>
+    <p className="ui-subtitle">Short supporting description.</p>
+  </header>
+</main>
+```
+
 ## Local Run
 
 ```bash

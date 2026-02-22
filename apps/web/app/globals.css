@@ -38,6 +38,22 @@
   --callout-border-rgb: 172, 175, 176;
   --card-rgb: 180, 185, 188;
   --card-border-rgb: 131, 134, 135;
+
+  /* Shared UI design tokens */
+  --ui-accent-700: #7f542f;
+  --ui-accent-600: #a56f3f;
+  --ui-ink-900: rgba(59, 42, 24, 0.92);
+  --ui-ink-700: rgba(79, 59, 36, 0.74);
+  --ui-border: rgba(109, 84, 57, 0.28);
+  --ui-border-soft: rgba(109, 84, 57, 0.2);
+  --ui-surface: rgba(255, 251, 246, 0.95);
+  --ui-surface-soft: rgba(255, 255, 255, 0.88);
+  --ui-showroom-bg: radial-gradient(
+      circle at 18% 14%,
+      rgba(255, 247, 234, 0.58),
+      transparent 42%
+    ),
+    linear-gradient(170deg, rgba(252, 249, 244, 0.92), rgba(236, 227, 214, 0.74));
 }
 
 @media (prefers-color-scheme: dark) {
@@ -100,6 +116,80 @@ a {
   text-decoration: none;
 }
 
+.ui-shell {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem 3rem;
+}
+
+.ui-showroom {
+  background: var(--ui-showroom-bg);
+  border: 1px solid rgba(120, 92, 64, 0.2);
+  border-radius: 16px;
+}
+
+.ui-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.ui-kicker {
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-size: 0.74rem;
+  color: var(--ui-ink-700);
+}
+
+.ui-subtitle {
+  margin-top: 0.45rem;
+  max-width: 68ch;
+  color: rgba(59, 42, 24, 0.86);
+}
+
+.ui-nav {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0.9rem 1.5rem 0;
+  display: flex;
+  gap: 0.6rem;
+}
+
+.ui-nav a {
+  border: 1px solid rgba(84, 70, 53, 0.28);
+  border-radius: 10px;
+  padding: 0.38rem 0.66rem;
+  background: rgba(250, 244, 236, 0.72);
+}
+
+.ui-btn {
+  border: 1px solid rgba(109, 84, 57, 0.35);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.94);
+  padding: 0.45rem 0.7rem;
+  cursor: pointer;
+}
+
+.ui-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.ui-btn-primary {
+  background: linear-gradient(120deg, var(--ui-accent-700), var(--ui-accent-600));
+  color: #fff8f1;
+  border-color: rgba(127, 84, 47, 0.8);
+}
+
+.ui-empty {
+  border: 1px dashed rgba(109, 84, 57, 0.32);
+  border-radius: 12px;
+  padding: 0.9rem;
+  background: rgba(255, 255, 255, 0.7);
+}
+
 @media (prefers-color-scheme: dark) {
   html {
     color-scheme: dark;
@@ -111,8 +201,6 @@ a {
 .concierge-page,
 .appraisal-page {
   max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem 1.5rem 3rem;
 }
 
 .home-hero h1 {
@@ -146,14 +234,7 @@ a {
 }
 
 .home-showroom {
-  background: radial-gradient(
-      circle at 18% 14%,
-      rgba(255, 247, 234, 0.55),
-      transparent 42%
-    ),
-    linear-gradient(170deg, rgba(252, 249, 244, 0.9), rgba(236, 227, 214, 0.7));
-  border: 1px solid rgba(120, 92, 64, 0.2);
-  border-radius: 16px;
+  background: var(--ui-showroom-bg);
 }
 
 .home-role-panel {
@@ -227,6 +308,10 @@ a {
   gap: 1rem;
   align-items: flex-start;
   flex-wrap: wrap;
+}
+
+.inventory-showroom {
+  background: var(--ui-showroom-bg);
 }
 
 .inventory-eyebrow {
@@ -405,6 +490,7 @@ a {
 }
 
 @media (max-width: 720px) {
+  .ui-shell,
   .home-page,
   .inventory-page,
   .concierge-page,
@@ -414,29 +500,17 @@ a {
 }
 
 .concierge-nav {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 1rem 1.5rem 0;
+  padding-top: 1rem;
   display: flex;
   gap: 0.6rem;
 }
 
 .concierge-nav a {
-  border: 1px solid rgba(84, 70, 53, 0.28);
-  border-radius: 10px;
-  padding: 0.38rem 0.66rem;
-  background: rgba(250, 244, 236, 0.72);
+  border-color: rgba(84, 70, 53, 0.28);
 }
 
 .concierge-showroom {
-  background: radial-gradient(
-      circle at 20% 15%,
-      rgba(255, 247, 234, 0.55),
-      transparent 40%
-    ),
-    linear-gradient(170deg, rgba(252, 249, 244, 0.9), rgba(236, 227, 214, 0.7));
-  border: 1px solid rgba(120, 92, 64, 0.2);
-  border-radius: 16px;
+  background: var(--ui-showroom-bg);
 }
 
 .concierge-header {
@@ -856,29 +930,15 @@ a {
 }
 
 .appraisal-nav {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 0.9rem 1.5rem 0;
-  display: flex;
-  gap: 0.6rem;
+  padding-top: 0.9rem;
 }
 
 .appraisal-nav a {
-  border: 1px solid rgba(84, 70, 53, 0.28);
-  border-radius: 10px;
-  padding: 0.38rem 0.66rem;
-  background: rgba(250, 244, 236, 0.72);
+  border-color: rgba(84, 70, 53, 0.28);
 }
 
 .appraisal-showroom {
-  background: radial-gradient(
-      circle at 18% 14%,
-      rgba(255, 247, 234, 0.62),
-      transparent 42%
-    ),
-    linear-gradient(170deg, rgba(252, 249, 244, 0.92), rgba(236, 227, 214, 0.76));
-  border: 1px solid rgba(120, 92, 64, 0.2);
-  border-radius: 16px;
+  background: var(--ui-showroom-bg);
 }
 
 .appraisal-header {

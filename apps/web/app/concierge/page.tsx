@@ -23,7 +23,7 @@ export default async function ConciergePage({ searchParams }: ConciergePageProps
 
   return (
     <>
-      <div className="concierge-nav">
+      <div className="ui-nav concierge-nav">
         <Link href="/">Home</Link>
         {role === "store_staff" ? <Link href="/inventory">Inventory</Link> : null}
         {role === "store_staff" ? <Link href="/appraisal">Appraisal</Link> : null}

@@ -109,12 +109,12 @@ export function AppraisalScreen() {
   const missingCount = result?.missing_fields.length ?? 0;
 
   return (
-    <main className="appraisal-page appraisal-showroom">
-      <header className="appraisal-header">
+    <main className="ui-shell ui-showroom appraisal-page appraisal-showroom">
+      <header className="ui-header appraisal-header">
         <div>
-          <p className="appraisal-eyebrow">Monetizable Service</p>
+          <p className="ui-kicker appraisal-eyebrow">Monetizable Service</p>
           <h1>Appraisal Draft Studio</h1>
-          <p>
+          <p className="ui-subtitle">
             Draft, review, and export appraisal output in a structured format that is
             ready for future PDF workflows.
           </p>

@@ -52,16 +52,16 @@ export function HomeScreen() {
   };
 
   return (
-    <main className="home-page home-showroom">
+    <main className="ui-shell ui-showroom home-page home-showroom">
       <section className="home-hero">
-        <p className="home-kicker">Rug Concierge</p>
+        <p className="ui-kicker home-kicker">Rug Concierge</p>
         <h1>MVP Workspace</h1>
-        <p>
+        <p className="ui-subtitle">
           Select your role first. The app then shows only the pages relevant to that role.
         </p>
       </section>
 
-      <section className="home-role-panel">
+      <section className="home-role-panel ui-card">
         <div>
           <h2>Select Role</h2>
           <p>
@@ -73,14 +73,16 @@ export function HomeScreen() {
             <button
               key={roleOption}
               type="button"
-              className={role === roleOption ? "home-role-btn active" : "home-role-btn"}
+              className={
+                role === roleOption ? "home-role-btn ui-btn active" : "home-role-btn ui-btn"
+              }
               onClick={() => chooseRole(roleOption)}
               disabled={isSyncing}
             >
               {uiRoleLabel(roleOption)}
             </button>
           ))}
-          <button type="button" className="home-role-btn ghost" onClick={clearRole}>
+          <button type="button" className="home-role-btn ui-btn ghost" onClick={clearRole}>
             Clear Role
           </button>
         </div>
@@ -89,13 +91,13 @@ export function HomeScreen() {
 
       <section className="home-grid">
         {cards.length === 0 ? (
-          <article className="home-card home-card-muted">
+          <article className="home-card ui-card home-card-muted">
             <h2>No pages yet</h2>
             <p>Choose a role to unlock your workspace routes.</p>
           </article>
         ) : (
           cards.map((card) => (
-            <Link href={card.href} className="home-card" key={card.href}>
+            <Link href={card.href} className="home-card ui-card" key={card.href}>
               <h2>{card.title}</h2>
               <p>{card.description}</p>
             </Link>
