@@ -1,0 +1,36 @@
+{
+  "trace_id": "2b8ed949-829e-422e-bba5-6c94ad97d8ec",
+  "channel": "recommend-route",
+  "created_at": "2026-02-22T01:11:45.082Z",
+  "payload": {
+    "flow_path": [
+      "/api/recommend POST",
+      "runRecommendationPipeline"
+    ],
+    "request_id": "6c22911b-0fc0-48ed-b261-d4794c4e99c4",
+    "request": {
+      "tenant_id": null,
+      "user_message": "I need an 8x10 under $2500",
+      "constraints": {
+        "budgetMax": 2500,
+        "size": {
+          "widthIn": 96,
+          "lengthIn": 120,
+          "toleranceIn": 2
+        }
+      }
+    },
+    "response": {
+      "status": 200,
+      "body": {
+        "mode": "recommendations",
+        "notes": null,
+        "recommendation_count": 3
+      },
+      "pipeline_trace_id": "6c22911b-0fc0-48ed-b261-d4794c4e99c4"
+    },
+    "timing_ms": {
+      "total_ms": 10437
+    }
+  }
+}

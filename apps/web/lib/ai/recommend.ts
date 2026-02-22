@@ -1,4 +1,5 @@
 import type { HardConstraints, InventoryRug } from "@/lib/types/recommendation";
+import { getRecommendationPromptBundle } from "@/lib/ai/prompt-library";
 
 // PSEUDOCODE
 // 1) If candidate inventory is empty -> return no_match.
@@ -78,10 +79,14 @@ const RECOMMENDATION_SCHEMA = {
     assistant_message: { type: "string" },
     questions: {
       type: "array",
+      minItems: 0,
+      maxItems: 2,
       items: { type: "string" },
     },
     recommendations: {
       type: "array",
+      minItems: 0,
+      maxItems: MAX_RECOMMENDATIONS,
       items: {
         type: "object",
         additionalProperties: false,
@@ -103,11 +108,26 @@ const RECOMMENDATION_SCHEMA = {
           title: { type: "string" },
           size_text: { type: ["string", "null"] },
           price_usd: { type: ["number", "null"] },
-          match_reasons: { type: "array", items: { type: "string" } },
+          match_reasons: {
+            type: "array",
+            minItems: 1,
+            maxItems: 3,
+            items: { type: "string" },
+          },
           confidence: { type: "number" },
           confidence_tier: { type: "string", enum: ["high", "medium", "low"] },
-          confidence_factors: { type: "array", items: { type: "string" } },
-          why_not: { type: "array", items: { type: "string" } },
+          confidence_factors: {
+            type: "array",
+            minItems: 0,
+            maxItems: 3,
+            items: { type: "string" },
+          },
+          why_not: {
+            type: "array",
+            minItems: 0,
+            maxItems: 2,
+            items: { type: "string" },
+          },
         },
       },
     },
@@ -450,28 +470,41 @@ function isRecommendationResponse(value: unknown): value is RecommendationRespon
 
   if (typeof data.assistant_message !== "string") return false;
   if (!Array.isArray(data.questions)) return false;
+  if (data.questions.length > 2) return false;
   if (!data.questions.every((q) => typeof q === "string")) return false;
   if (!Array.isArray(data.recommendations)) return false;
+  if (data.recommendations.length > MAX_RECOMMENDATIONS) return false;
   if (
     !data.recommendations.every((item) => {
       if (!item || typeof item !== "object") return false;
       const rec = item as Record<string, unknown>;
+      const matchReasons = Array.isArray(rec.match_reasons)
+        ? rec.match_reasons
+        : null;
+      const confidenceFactors = Array.isArray(rec.confidence_factors)
+        ? rec.confidence_factors
+        : null;
+      const whyNot = Array.isArray(rec.why_not) ? rec.why_not : null;
       return (
         typeof rec.rug_id === "string" &&
         (typeof rec.sku === "string" || rec.sku === null) &&
         typeof rec.title === "string" &&
         (typeof rec.size_text === "string" || rec.size_text === null) &&
         (typeof rec.price_usd === "number" || rec.price_usd === null) &&
-        Array.isArray(rec.match_reasons) &&
-        rec.match_reasons.every((r) => typeof r === "string") &&
+        matchReasons !== null &&
+        matchReasons.length >= 1 &&
+        matchReasons.length <= 3 &&
+        matchReasons.every((r) => typeof r === "string") &&
         typeof rec.confidence === "number" &&
         (rec.confidence_tier === "high" ||
           rec.confidence_tier === "medium" ||
           rec.confidence_tier === "low") &&
-        Array.isArray(rec.confidence_factors) &&
-        rec.confidence_factors.every((r) => typeof r === "string") &&
-        Array.isArray(rec.why_not) &&
-        rec.why_not.every((r) => typeof r === "string")
+        confidenceFactors !== null &&
+        confidenceFactors.length <= 3 &&
+        confidenceFactors.every((r) => typeof r === "string") &&
+        whyNot !== null &&
+        whyNot.length <= 2 &&
+        whyNot.every((r) => typeof r === "string")
       );
     })
   ) {
@@ -601,6 +634,8 @@ function sanitizeResponse(
       };
     });
 
+  const cappedQuestions = response.questions.slice(0, 2);
+
   if (response.mode === "no_match" && inventory.length > 0) {
     return {
       ...fallbackRecommendations(inventory, constraints, promptContext, userMessage),
@@ -612,9 +647,30 @@ function sanitizeResponse(
     return fallbackRecommendations(inventory, constraints, promptContext, userMessage);
   }
 
+  // Enforce mode-specific response contract for consistency with docs/schema intent.
+  if (response.mode === "clarifying_question") {
+    const normalizedQuestions = cappedQuestions.filter((q) => q.trim().length > 0);
+    if (normalizedQuestions.length === 0) {
+      return fallbackRecommendations(inventory, constraints, promptContext, userMessage);
+    }
+    return {
+      ...response,
+      questions: normalizedQuestions.slice(0, 2),
+      recommendations: [],
+    };
+  }
+
+  if (response.mode === "no_match") {
+    return {
+      ...response,
+      questions: cappedQuestions.slice(0, 1),
+      recommendations: [],
+    };
+  }
+
   return {
     ...response,
-    questions: response.questions.slice(0, 2),
+    questions: [],
     recommendations,
   };
 }
@@ -678,7 +734,7 @@ export async function rankAndExplain(
   }
 
   const contextInventory = toContextInventory(inventory);
-  const sparseConstraints = !hasOptionalHardConstraints(constraints);
+  const promptBundle = getRecommendationPromptBundle();
   const hasTradePreferences =
     promptContext?.trade_preferences &&
     Object.keys(promptContext.trade_preferences).length > 0;
@@ -701,21 +757,24 @@ export async function rankAndExplain(
         content: [
           {
             type: "input_text",
-            text: "You are a rug concierge assistant. Recommend only from provided inventory. Do not invent facts.",
+            text: promptBundle.system,
           },
           {
             type: "input_text",
-            text: sparseConstraints
-              ? "If constraints are sparse or open-ended, prioritize variety across style, palette, and price points."
-              : "Prioritize closest matches to the stated constraints and preferences.",
+            text: promptBundle.recommendation,
           },
           {
             type: "input_text",
-            text:
-              promptContext?.role === "trade_client"
-                ? "This is a trade/designer workflow. Be concise, practical, and optimize for repeat-buyer efficiency."
-                : "This is a general concierge workflow.",
+            text: promptBundle.recommendationStructuredOutput,
           },
+          ...(promptContext?.role === "trade_client"
+            ? [
+                {
+                  type: "input_text",
+                  text: promptBundle.tradeSupport,
+                },
+              ]
+            : []),
         ],
       },
       ...(hasTradePreferences

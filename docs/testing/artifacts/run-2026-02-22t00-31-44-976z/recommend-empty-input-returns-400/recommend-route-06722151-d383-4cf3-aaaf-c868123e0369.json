@@ -1,0 +1,27 @@
+{
+  "trace_id": "06722151-d383-4cf3-aaaf-c868123e0369",
+  "channel": "recommend-route",
+  "created_at": "2026-02-22T00:31:45.190Z",
+  "payload": {
+    "flow_path": [
+      "/api/recommend POST",
+      "request_validation_failed"
+    ],
+    "request_id": "ae1d0191-5723-4c34-ad01-0793208999e4",
+    "request": {
+      "tenant_id": null,
+      "user_message": "",
+      "constraints": {}
+    },
+    "response": {
+      "status": 400,
+      "body": {
+        "error": "Provide a message or at least one valid constraint (size and/or budget).",
+        "code": "BAD_REQUEST"
+      }
+    },
+    "timing_ms": {
+      "total_ms": 0
+    }
+  }
+}

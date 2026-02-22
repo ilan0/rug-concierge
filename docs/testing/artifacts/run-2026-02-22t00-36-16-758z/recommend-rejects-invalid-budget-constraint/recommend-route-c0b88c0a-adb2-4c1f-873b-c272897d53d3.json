@@ -1,0 +1,29 @@
+{
+  "trace_id": "c0b88c0a-adb2-4c1f-873b-c272897d53d3",
+  "channel": "recommend-route",
+  "created_at": "2026-02-22T00:36:36.219Z",
+  "payload": {
+    "flow_path": [
+      "/api/recommend POST",
+      "request_validation_failed"
+    ],
+    "request_id": "26fb82f4-46cb-4392-b8e0-2bcf8b68fa7a",
+    "request": {
+      "tenant_id": null,
+      "user_message": "show rugs under budget",
+      "constraints": {
+        "budgetMax": 0
+      }
+    },
+    "response": {
+      "status": 400,
+      "body": {
+        "error": "budgetMax must be a positive number.",
+        "code": "BAD_REQUEST"
+      }
+    },
+    "timing_ms": {
+      "total_ms": 1
+    }
+  }
+}

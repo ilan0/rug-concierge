@@ -1,43 +1,14 @@
 # Structured Output Add-on (Recommendation Mode Only)
 
-Use this add-on ONLY when calling the recommendation endpoint.
-When used, the model must return ONLY valid JSON.
+Use this layer only for recommendation-mode calls.
 
-## Output Requirements (Strict)
-
-Return ONLY valid JSON matching this schema:
-
-{
-  "mode": "recommendations" | "clarifying_question" | "no_match",
-  "assistant_message": string,
-  "questions": string[],
-  "recommendations": {
-    "rug_id": string,
-    "sku": string|null,
-    "title": string,
-    "size_text": string|null,
-    "price_usd": number|null,
-    "match_reasons": string[],
-    "confidence": number,
-    "confidence_tier": "high" | "medium" | "low",
-    "confidence_factors": string[],
-    "why_not": string[]
-  }[],
-  "notes": string|null
-}
+Runtime JSON schema enforcement is the source of truth.
+Follow that schema exactly and return JSON only.
 
 Rules:
 - No markdown
 - No extra keys
-- No text outside JSON
+- No explanatory text outside JSON
 
-Mode rules:
-- clarifying_question: 1–2 questions, recommendations=[]
-- recommendations: 1–8 items, questions usually []
-- no_match: recommendations=[], explain why, optionally 0–1 question
-
-Recommendation item rules:
-- `match_reasons`: 1–3 grounded reasons tied to known inventory/context
-- `confidence`: numeric 0–1
-- `confidence_tier`: derived trust tier for transparency
-- `why_not`: 0–2 short objection-handling caveats
+If a value is unknown, use allowed null fields from the runtime schema.
+Do not invent fields or shape variants.

@@ -1,0 +1,542 @@
+{
+  "trace_id": "db443d4a-4d9d-478b-9773-3e1684912b51",
+  "channel": "recommendation-pipeline",
+  "created_at": "2026-02-22T00:36:36.203Z",
+  "payload": {
+    "request_id": "db443d4a-4d9d-478b-9773-3e1684912b51",
+    "flow_path": [
+      "runRecommendationPipeline",
+      "fetchInventoryCandidates",
+      "filterByHardConstraints",
+      "shapeCandidatesForAI",
+      "rankAndExplain",
+      "logRecommendationQaEvent"
+    ],
+    "source_route": "/api/recommend",
+    "session_id": null,
+    "role": null,
+    "tenant_id": null,
+    "user_message": "I need an 8x10 under $2500",
+    "constraints": {
+      "budgetMax": 2500,
+      "size": {
+        "widthIn": 96,
+        "lengthIn": 120,
+        "toleranceIn": 2
+      }
+    },
+    "prompt_context": null,
+    "query_trace": [
+      {
+        "variant": "size_rotated_budget_sale",
+        "filters": {
+          "tenant_id": null,
+          "status": "available",
+          "limit": 120,
+          "size_bounds": {
+            "min_width_in": 94,
+            "max_width_in": 98,
+            "min_length_in": 118,
+            "max_length_in": 122,
+            "rotated": true
+          },
+          "budget_max": 2500,
+          "budget_field": "sale_price"
+        },
+        "row_count": 0,
+        "error": null
+      },
+      {
+        "variant": "size_direct_budget_sale",
+        "filters": {
+          "tenant_id": null,
+          "status": "available",
+          "limit": 120,
+          "size_bounds": {
+            "min_width_in": 94,
+            "max_width_in": 98,
+            "min_length_in": 118,
+            "max_length_in": 122,
+            "rotated": false
+          },
+          "budget_max": 2500,
+          "budget_field": "sale_price"
+        },
+        "row_count": 0,
+        "error": null
+      },
+      {
+        "variant": "size_rotated_budget_list",
+        "filters": {
+          "tenant_id": null,
+          "status": "available",
+          "limit": 120,
+          "size_bounds": {
+            "min_width_in": 94,
+            "max_width_in": 98,
+            "min_length_in": 118,
+            "max_length_in": 122,
+            "rotated": true
+          },
+          "budget_max": 2500,
+          "budget_field": "price"
+        },
+        "row_count": 0,
+        "error": null
+      },
+      {
+        "variant": "size_direct_budget_list",
+        "filters": {
+          "tenant_id": null,
+          "status": "available",
+          "limit": 120,
+          "size_bounds": {
+            "min_width_in": 94,
+            "max_width_in": 98,
+            "min_length_in": 118,
+            "max_length_in": 122,
+            "rotated": false
+          },
+          "budget_max": 2500,
+          "budget_field": "price"
+        },
+        "row_count": 3,
+        "error": null
+      }
+    ],
+    "candidate_counts": {
+      "sql_candidates": 3,
+      "hard_filtered_candidates": 3,
+      "ai_candidates": 3
+    },
+    "timing_ms": {
+      "fetch_inventory_candidates_ms": 405,
+      "filter_hard_constraints_ms": 0,
+      "shape_candidates_ms": 0,
+      "rank_and_explain_ms": 5714,
+      "qa_log_ms": 3,
+      "total_ms": 6122
+    },
+    "ai_trace": {
+      "called": true,
+      "model": "gpt-4.1-mini",
+      "request_payload": {
+        "model": "gpt-4.1-mini",
+        "input": [
+          {
+            "role": "system",
+            "content": [
+              {
+                "type": "input_text",
+                "text": "# AI System Prompt — Rug Expert Role (v1)\n\nYou are an experienced rug specialist working for an independent, high-end rug store.\nYou speak with the calm confidence of someone who has handled thousands of handmade rugs\nand works closely with designers, collectors, and repeat clients.\n\nYour goal is to be **helpful, accurate, and trustworthy**, never speculative or salesy.\n\n---\n\n## Core Identity\n\n- You are not a generic chatbot.\n- You behave like a knowledgeable in-store rug expert.\n- You respect the limits of available information.\n- You prioritize accuracy and clarity over persuasion.\n\nIf information is missing or uncertain, you say so plainly.\n\n---\n\n## Knowledge Boundaries\n\nYou may only use:\n- Information explicitly provided in the current conversation\n- Data retrieved from the store’s inventory or records\n- Trade client preferences when available\n\nYou must **never invent or assume facts**, including:\n- origin\n- age\n- materials\n- construction method\n- rarity\n- authenticity\n- value justification\n\nIf a detail is not provided, you do not include it.\n\n---\n\n## Tone & Style\n\n- Professional and measured\n- Confident but conservative\n- Clear, human, and approachable\n- No hype, no exaggeration, no filler\n\nAvoid:\n- marketing language\n- emotional persuasion\n- absolute claims\n- unnecessary jargon\n\nPreferred phrasing:\n- “Based on what’s available”\n- “As described”\n- “At the time of review”\n- “From the information provided”\n\n---\n\n## Recommendations Philosophy\n\nWhen recommending rugs:\n- Match stated needs first (size, budget, use case)\n- Use preferences as guidance, not strict rules\n- Explain *why* a rug fits the request\n- Offer alternatives when appropriate\n\nIf no suitable rug exists:\n- Say so clearly\n- Do not force a match\n\n---\n\n## Appraisal Behavior (When Applicable)\n\n- Drafts only — never final authority\n- Use factual, conservative language\n- Never imply sale price\n- Never guarantee insurance or resale outcomes\n- Clearly separate description from value\n\nIf information is incomplete:\n- Reduce specificity\n- Do not compensate with assumptions\n\n---\n\n## Trade Client Behavior (When Applicable)\n\n- Remember known preferences and past context\n- Do not restate preferences unless relevant\n- Avoid repeating basic questions unnecessarily\n- Respect time — be concise and practical\n\n---\n\n## Safety & Trust Rules\n\n- When unsure, say you’re unsure\n- When data is missing, ask or acknowledge\n- When something cannot be done, explain calmly\n\nYour credibility depends on **restraint**, not verbosity.\n\n---\n\n## Overall Objective\n\nMake the user feel they are working with:\n- a real rug professional\n- who values accuracy\n- who protects their trust\n- and who respects the craft and business of handmade rugs"
+              },
+              {
+                "type": "input_text",
+                "text": "# Recommendation Prompt — Rug Concierge (v1)\n\nYou are a knowledgeable rug specialist assisting a customer or trade client.\nYour job is to recommend rugs that genuinely fit the user’s needs, based only on\navailable inventory and provided context.\n\nYou are not a salesperson pushing inventory.\nYou are a trusted guide helping someone make a good decision.\n\n---\n\n## Inputs You May Receive\n\nYou may be given:\n- a user request (natural language)\n- structured inventory data (rugs currently in stock)\n- optional trade client preferences\n- optional session context (room type, budget, size, constraints)\n\nYou must only recommend rugs that exist in the provided inventory data.\n\n---\n\n## Core Rules (Non-Negotiable)\n\n1. **Inventory-only**\n   - Never recommend rugs that are not in inventory\n   - Never imply access to off-catalog or future pieces\n\n2. **No assumptions**\n   - Do not guess missing size, material, origin, age, or construction\n   - If a detail is not provided, do not include it\n\n3. **Explain relevance**\n   - Every recommendation must include a brief explanation of *why* it fits\n   - Tie explanations directly to stated needs or preferences\n\n4. **Conservative matching**\n   - It is acceptable to recommend fewer rugs rather than poor matches\n   - If the provided inventory list is empty, say so clearly\n\n---\n\n## Recommendation Process\n\nFollow this order internally:\n\n1. Identify **hard constraints** from the request\n   - availability is always enforced by backend\n   - size (when provided)\n   - budget (when provided)\n\n2. Identify **soft preferences**\n   - room/use case\n   - practical needs (pets, kids, durability, thickness)\n   - style\n   - palette\n   - texture\n   - overall feel (calm, bold, minimal, etc.)\n\n3. Use the **backend candidate set** (already filtered by hard constraints)\n4. Rank remaining rugs by soft preferences\n5. Select the strongest matches\n\nCandidate set notes:\n- candidate set is pre-filtered SQL-first by hard constraints\n- candidate set is bounded before it reaches the model\n\n---\n\n## Output Structure (Required)\n\n### If Suitable Rugs Exist\n\nStart with a brief grounding sentence:\n- “Based on what you’re looking for, here are a few rugs that could work well:”\n\nIf constraints are sparse (e.g., browse request), still provide breadth across available options.\n\nFor each rug:\n- Rug name or identifier\n- Size\n- Price (if available)\n- 1–3 grounded reasons explaining why it fits\n- Confidence score + tier\n- 0–2 short “why not / caveat” notes for objection handling\n\nExplanations should reference:\n- size fit\n- style/palette alignment\n- room suitability\n- durability or practical considerations (if relevant)\n\nConfidence should reflect:\n- hard-constraint alignment (size/budget)\n- soft preference alignment\n- listing data completeness\n\nWhy-not notes should:\n- be short and factual\n- call out tradeoffs or uncertainty (if any)\n- never contradict hard constraints already enforced by backend\n\nAvoid repeating the same explanation across rugs.\n\n---\n\n### If No Suitable Rugs Exist\n\nSay so clearly and professionally:\n- “Based on the current inventory, I don’t see a rug that truly fits those constraints.”\n\nUse no-match only when the inventory list is empty.\n\nThen:\n- Explain which **hard constraint** is limiting (size, budget, availability)\n- Suggest what could be adjusted, **without pressure**\n\n---\n\n## Handling Incomplete Requests\n\nIf size/budget are missing:\n- You may still recommend from available inventory (browse behavior)\n- Optionally ask **at most 1** clarifying question to improve the next round\n\nExample:\n> “If you want, I can narrow this further by size or budget.”\n\n---\n\n## Trade Client Personalization (When Applicable)\n\nIf trade preferences are provided:\n- Use them to guide ranking and phrasing\n- Do not restate preferences unless relevant\n- Do not invent preferences\n\nExample allowed:\n> “This aligns with the muted palette you typically use.”\n\n---\n\n## Tone & Voice\n\n- Calm and professional\n- Helpful, not salesy\n- Confident but not absolute\n- Human and natural\n\nAvoid:\n- hype\n- urgency\n- exaggerated claims\n- marketing language\n\n---\n\n## Trust Rules\n\n- If unsure, say you’re unsure\n- If inventory is limited, be transparent\n- If something is a compromise, explain it\n\nYour value comes from **good judgment**, not volume of recommendations.\n\n---\n\n## Goal\n\nHelp the user feel:\n- understood\n- guided by expertise\n- confident in the options presented\n\nA good recommendation builds trust — even if it results in no immediate sale."
+              },
+              {
+                "type": "input_text",
+                "text": "# Structured Output Add-on (Recommendation Mode Only)\n\nUse this add-on ONLY when calling the recommendation endpoint.\nWhen used, the model must return ONLY valid JSON.\n\n## Output Requirements (Strict)\n\nReturn ONLY valid JSON matching this schema:\n\n{\n  \"mode\": \"recommendations\" | \"clarifying_question\" | \"no_match\",\n  \"assistant_message\": string,\n  \"questions\": string[],\n  \"recommendations\": {\n    \"rug_id\": string,\n    \"sku\": string|null,\n    \"title\": string,\n    \"size_text\": string|null,\n    \"price_usd\": number|null,\n    \"match_reasons\": string[],\n    \"confidence\": number,\n    \"confidence_tier\": \"high\" | \"medium\" | \"low\",\n    \"confidence_factors\": string[],\n    \"why_not\": string[]\n  }[],\n  \"notes\": string|null\n}\n\nRules:\n- No markdown\n- No extra keys\n- No text outside JSON\n\nMode rules:\n- clarifying_question: 1–2 questions, recommendations=[]\n- recommendations: 1–8 items, questions usually []\n- no_match: recommendations=[], explain why, optionally 0–1 question\n\nRecommendation item rules:\n- `match_reasons`: 1–3 grounded reasons tied to known inventory/context\n- `confidence`: numeric 0–1\n- `confidence_tier`: derived trust tier for transparency\n- `why_not`: 0–2 short objection-handling caveats"
+              }
+            ]
+          },
+          {
+            "role": "system",
+            "content": [
+              {
+                "type": "input_text",
+                "text": "AVAILABLE INVENTORY (authoritative):\n[\n  {\n    \"id\": \"f1a7f328-6fd9-48fa-80b8-462a19177c36\",\n    \"sku\": \"B-75750\",\n    \"label\": \"8' x 10' New Serapi Rug Dark Blue\",\n    \"status\": \"available\",\n    \"price_usd\": 950,\n    \"size_text\": \"96\\\" x 120\\\"\",\n    \"width_total_in\": 96,\n    \"length_total_in\": 120,\n    \"style\": \"serapi\",\n    \"palette\": null,\n    \"pattern\": null,\n    \"best_for\": null,\n    \"description\": null\n  },\n  {\n    \"id\": \"bf63999b-884b-4893-a007-62b58fcf2816\",\n    \"sku\": \"B-75731\",\n    \"label\": \"8' x 10' Serapi Handmade Rug\",\n    \"status\": \"available\",\n    \"price_usd\": 950,\n    \"size_text\": \"96\\\" x 120\\\"\",\n    \"width_total_in\": 96,\n    \"length_total_in\": 120,\n    \"style\": \"serapi\",\n    \"palette\": null,\n    \"pattern\": null,\n    \"best_for\": null,\n    \"description\": null\n  },\n  {\n    \"id\": \"9b991ca3-ac77-4783-b7fc-2efb98dfff56\",\n    \"sku\": \"F-74909\",\n    \"label\": \"8' x 10' Serapi Heriz Rug\",\n    \"status\": \"available\",\n    \"price_usd\": 1495,\n    \"size_text\": \"96\\\" x 120\\\"\",\n    \"width_total_in\": 96,\n    \"length_total_in\": 120,\n    \"style\": \"serapi heriz\",\n    \"palette\": null,\n    \"pattern\": null,\n    \"best_for\": null,\n    \"description\": null\n  }\n]"
+              }
+            ]
+          },
+          {
+            "role": "user",
+            "content": [
+              {
+                "type": "input_text",
+                "text": "User request:\nI need an 8x10 under $2500\n\nHard constraints:\n{\"budgetMax\":2500,\"size\":{\"widthIn\":96,\"lengthIn\":120,\"toleranceIn\":2}}\n\nProject context:\nnull"
+              }
+            ]
+          }
+        ],
+        "text": {
+          "format": {
+            "type": "json_schema",
+            "name": "recommendation_response",
+            "schema": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "mode",
+                "assistant_message",
+                "questions",
+                "recommendations",
+                "notes"
+              ],
+              "properties": {
+                "mode": {
+                  "type": "string",
+                  "enum": [
+                    "recommendations",
+                    "clarifying_question",
+                    "no_match"
+                  ]
+                },
+                "assistant_message": {
+                  "type": "string"
+                },
+                "questions": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "recommendations": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                      "rug_id",
+                      "sku",
+                      "title",
+                      "size_text",
+                      "price_usd",
+                      "match_reasons",
+                      "confidence",
+                      "confidence_tier",
+                      "confidence_factors",
+                      "why_not"
+                    ],
+                    "properties": {
+                      "rug_id": {
+                        "type": "string"
+                      },
+                      "sku": {
+                        "type": [
+                          "string",
+                          "null"
+                        ]
+                      },
+                      "title": {
+                        "type": "string"
+                      },
+                      "size_text": {
+                        "type": [
+                          "string",
+                          "null"
+                        ]
+                      },
+                      "price_usd": {
+                        "type": [
+                          "number",
+                          "null"
+                        ]
+                      },
+                      "match_reasons": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "confidence": {
+                        "type": "number"
+                      },
+                      "confidence_tier": {
+                        "type": "string",
+                        "enum": [
+                          "high",
+                          "medium",
+                          "low"
+                        ]
+                      },
+                      "confidence_factors": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "why_not": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "notes": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                }
+              }
+            },
+            "strict": true
+          }
+        }
+      },
+      "response_status": 200,
+      "response_payload": {
+        "id": "resp_0d09418a7edf8b1400699a4f8e87588192ab9f8fce129cea16",
+        "object": "response",
+        "created_at": 1771720590,
+        "status": "completed",
+        "background": false,
+        "billing": {
+          "payer": "openai"
+        },
+        "completed_at": 1771720596,
+        "error": null,
+        "frequency_penalty": 0,
+        "incomplete_details": null,
+        "instructions": null,
+        "max_output_tokens": null,
+        "max_tool_calls": null,
+        "model": "gpt-4.1-mini-2025-04-14",
+        "output": [
+          {
+            "id": "msg_0d09418a7edf8b1400699a4f8ee7b88192bbdc3e56f2a43919",
+            "type": "message",
+            "status": "completed",
+            "content": [
+              {
+                "type": "output_text",
+                "annotations": [],
+                "logprobs": [],
+                "text": "{\"mode\":\"recommendations\",\"assistant_message\":\"Based on your request for an 8x10 rug under $2500, here are some options that fit your size and budget constraints:\",\"questions\":[],\"recommendations\":[{\"rug_id\":\"f1a7f328-6fd9-48fa-80b8-462a19177c36\",\"sku\":\"B-75750\",\"title\":\"8' x 10' New Serapi Rug Dark Blue\",\"size_text\":\"96\\\" x 120\\\"\",\"price_usd\":950,\"match_reasons\":[\"Fits the 8x10 size requirement within a 2-inch tolerance\",\"Price is well under the $2500 budget\",\"Classic Serapi style suitable for various decor\"],\"confidence\":0.9,\"confidence_tier\":\"high\",\"confidence_factors\":[\"exact size match\",\"price under budget\",\"style noted\"],\"why_not\":[\"Color may not suit all palettes\",\"Limited description on pattern and use case\"]},{\"rug_id\":\"bf63999b-884b-4893-a007-62b58fcf2816\",\"sku\":\"B-75731\",\"title\":\"8' x 10' Serapi Handmade Rug\",\"size_text\":\"96\\\" x 120\\\"\",\"price_usd\":950,\"match_reasons\":[\"Meets size specifications for 8x10 rugs\",\"Under the specified budget\",\"Handmade Serapi style adds authentic craftsmanship\"],\"confidence\":0.9,\"confidence_tier\":\"high\",\"confidence_factors\":[\"size compliance\",\"price compliance\",\"construction style\"],\"why_not\":[\"No specific palette information available\",\"Unclear best room usage\"]},{\"rug_id\":\"9b991ca3-ac77-4783-b7fc-2efb98dfff56\",\"sku\":\"F-74909\",\"title\":\"8' x 10' Serapi Heriz Rug\",\"size_text\":\"96\\\" x 120\\\"\",\"price_usd\":1495,\"match_reasons\":[\"Exact 8x10 size fitting your tolerance\",\"Price is within your budget\",\"Serapi Heriz style suitable for a traditional or transitional setting\"],\"confidence\":0.85,\"confidence_tier\":\"high\",\"confidence_factors\":[\"exact size\",\"price under budget\",\"style matching\"],\"why_not\":[\"Higher price than other available options\",\"Lack of detailed pattern description\"]}],\"notes\":null}"
+              }
+            ],
+            "role": "assistant"
+          }
+        ],
+        "parallel_tool_calls": true,
+        "presence_penalty": 0,
+        "previous_response_id": null,
+        "prompt_cache_key": null,
+        "prompt_cache_retention": null,
+        "reasoning": {
+          "effort": null,
+          "summary": null
+        },
+        "safety_identifier": null,
+        "service_tier": "default",
+        "store": true,
+        "temperature": 1,
+        "text": {
+          "format": {
+            "type": "json_schema",
+            "description": null,
+            "name": "recommendation_response",
+            "schema": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "mode",
+                "assistant_message",
+                "questions",
+                "recommendations",
+                "notes"
+              ],
+              "properties": {
+                "mode": {
+                  "type": "string",
+                  "enum": [
+                    "recommendations",
+                    "clarifying_question",
+                    "no_match"
+                  ]
+                },
+                "assistant_message": {
+                  "type": "string"
+                },
+                "questions": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "recommendations": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                      "rug_id",
+                      "sku",
+                      "title",
+                      "size_text",
+                      "price_usd",
+                      "match_reasons",
+                      "confidence",
+                      "confidence_tier",
+                      "confidence_factors",
+                      "why_not"
+                    ],
+                    "properties": {
+                      "rug_id": {
+                        "type": "string"
+                      },
+                      "sku": {
+                        "type": [
+                          "string",
+                          "null"
+                        ]
+                      },
+                      "title": {
+                        "type": "string"
+                      },
+                      "size_text": {
+                        "type": [
+                          "string",
+                          "null"
+                        ]
+                      },
+                      "price_usd": {
+                        "type": [
+                          "number",
+                          "null"
+                        ]
+                      },
+                      "match_reasons": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "confidence": {
+                        "type": "number"
+                      },
+                      "confidence_tier": {
+                        "type": "string",
+                        "enum": [
+                          "high",
+                          "medium",
+                          "low"
+                        ]
+                      },
+                      "confidence_factors": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "why_not": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "notes": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                }
+              }
+            },
+            "strict": true
+          },
+          "verbosity": "medium"
+        },
+        "tool_choice": "auto",
+        "tools": [],
+        "top_logprobs": 0,
+        "top_p": 1,
+        "truncation": "disabled",
+        "usage": {
+          "input_tokens": 2508,
+          "input_tokens_details": {
+            "cached_tokens": 0
+          },
+          "output_tokens": 477,
+          "output_tokens_details": {
+            "reasoning_tokens": 0
+          },
+          "total_tokens": 2985
+        },
+        "user": null,
+        "metadata": {}
+      },
+      "parsed_response": {
+        "mode": "recommendations",
+        "assistant_message": "Based on your request for an 8x10 rug under $2500, here are some options that fit your size and budget constraints:",
+        "questions": [],
+        "recommendations": [
+          {
+            "rug_id": "f1a7f328-6fd9-48fa-80b8-462a19177c36",
+            "sku": "B-75750",
+            "title": "8' x 10' New Serapi Rug Dark Blue",
+            "size_text": "96\" x 120\"",
+            "price_usd": 950,
+            "match_reasons": [
+              "Size closely matches your requested dimensions.",
+              "Priced at $950, within your budget limit."
+            ],
+            "confidence": 0.82,
+            "confidence_tier": "high",
+            "confidence_factors": [
+              "Strong size alignment",
+              "Within budget"
+            ],
+            "why_not": []
+          },
+          {
+            "rug_id": "bf63999b-884b-4893-a007-62b58fcf2816",
+            "sku": "B-75731",
+            "title": "8' x 10' Serapi Handmade Rug",
+            "size_text": "96\" x 120\"",
+            "price_usd": 950,
+            "match_reasons": [
+              "Size closely matches your requested dimensions.",
+              "Priced at $950, within your budget limit."
+            ],
+            "confidence": 0.82,
+            "confidence_tier": "high",
+            "confidence_factors": [
+              "Strong size alignment",
+              "Within budget"
+            ],
+            "why_not": []
+          },
+          {
+            "rug_id": "9b991ca3-ac77-4783-b7fc-2efb98dfff56",
+            "sku": "F-74909",
+            "title": "8' x 10' Serapi Heriz Rug",
+            "size_text": "96\" x 120\"",
+            "price_usd": 1495,
+            "match_reasons": [
+              "Size closely matches your requested dimensions.",
+              "Priced at $1495, within your budget limit."
+            ],
+            "confidence": 0.82,
+            "confidence_tier": "high",
+            "confidence_factors": [
+              "Strong size alignment",
+              "Within budget"
+            ],
+            "why_not": []
+          }
+        ],
+        "notes": null
+      },
+      "fallback_reason": null,
+      "error": null
+    },
+    "result": {
+      "mode": "recommendations",
+      "notes": null,
+      "recommendation_ids": [
+        "f1a7f328-6fd9-48fa-80b8-462a19177c36",
+        "bf63999b-884b-4893-a007-62b58fcf2816",
+        "9b991ca3-ac77-4783-b7fc-2efb98dfff56"
+      ],
+      "recommendation_count": 3
+    },
+    "error": null
+  }
+}

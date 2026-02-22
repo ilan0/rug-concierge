@@ -1,0 +1,29 @@
+{
+  "trace_id": "90129bc5-f25f-4691-892b-810caa54b24d",
+  "channel": "recommend-route",
+  "created_at": "2026-02-22T01:11:34.630Z",
+  "payload": {
+    "flow_path": [
+      "/api/recommend POST",
+      "runRecommendationPipeline"
+    ],
+    "request_id": "4558bbe6-cec0-4974-af6f-c03a3bbfbf11",
+    "request": {
+      "tenant_id": null,
+      "user_message": "show me what you have",
+      "constraints": {}
+    },
+    "response": {
+      "status": 200,
+      "body": {
+        "mode": "recommendations",
+        "notes": null,
+        "recommendation_count": 3
+      },
+      "pipeline_trace_id": "4558bbe6-cec0-4974-af6f-c03a3bbfbf11"
+    },
+    "timing_ms": {
+      "total_ms": 7049
+    }
+  }
+}

@@ -1,0 +1,48 @@
+{
+  "trace_id": "0cbf80ba-a684-419c-b31a-44cd480be8d8",
+  "channel": "chat-route",
+  "created_at": "2026-02-22T00:32:14.980Z",
+  "payload": {
+    "flow_path": [
+      "/api/chat POST",
+      "getOrCreateSession",
+      "updateRecommendationStateForTurn",
+      "updateTradeContextForTurn",
+      "updateProjectContextForTurn",
+      "routeTurnMode",
+      "handlerDispatch",
+      "saveSession"
+    ],
+    "request": {
+      "session_id": null,
+      "role": "retail_customer",
+      "tenant_id": null,
+      "trade_client_id": null,
+      "message": "show me rugs",
+      "constraints": null,
+      "trade_preferences": null,
+      "project_context": null,
+      "appraisal_context": null
+    },
+    "routing": {
+      "mode": "recommendation",
+      "handler": "handleRecommendationTurn",
+      "prompt_layer_preview": [
+        "SYSTEM_PROMPT",
+        "ROLE_PROMPT_RETAIL_CUSTOMER",
+        "TASK_PROMPT_RECOMMENDATION",
+        "LATEST_USER_MESSAGE"
+      ]
+    },
+    "response": {
+      "session_id": "9774c2ca-25f9-4ee2-b83c-dea5cfa89a11",
+      "role": "retail_customer",
+      "mode": "recommendation",
+      "response_mode": "recommendation",
+      "notes": "This selection covers a variety of sizes and styles available currently. If you provide preferences for size, style, or room use, I can refine recommendations further."
+    },
+    "timing_ms": {
+      "total_ms": 9874
+    }
+  }
+}

@@ -1,0 +1,53 @@
+{
+  "trace_id": "85c4890f-a478-4ff6-b302-15b89fffd13d",
+  "channel": "chat-route",
+  "created_at": "2026-02-22T00:05:55.714Z",
+  "payload": {
+    "flow_path": [
+      "/api/chat POST",
+      "getOrCreateSession",
+      "updateRecommendationStateForTurn",
+      "updateTradeContextForTurn",
+      "updateProjectContextForTurn",
+      "routeTurnMode",
+      "handlerDispatch",
+      "saveSession"
+    ],
+    "request": {
+      "session_id": null,
+      "role": "trade_client",
+      "tenant_id": null,
+      "trade_client_id": "trade-client-smoke",
+      "message": "show options for my client",
+      "constraints": null,
+      "trade_preferences": {
+        "palette": "muted neutrals",
+        "style": "serapi"
+      },
+      "project_context": null,
+      "appraisal_context": null
+    },
+    "routing": {
+      "mode": "recommendation",
+      "handler": "handleRecommendationTurn",
+      "prompt_layer_preview": [
+        "SYSTEM_PROMPT",
+        "ROLE_PROMPT_TRADE_CLIENT",
+        "TASK_PROMPT_TRADE_SUPPORT",
+        "TRADE_PREFERENCES_CONTEXT",
+        "TRADE_CLIENT_CONTEXT",
+        "LATEST_USER_MESSAGE"
+      ]
+    },
+    "response": {
+      "session_id": "56270bda-6d51-4976-902f-006a94723a09",
+      "role": "trade_client",
+      "mode": "recommendation",
+      "response_mode": "recommendation",
+      "notes": "If you provide size, color preferences, or budget, I can refine these recommendations further."
+    },
+    "timing_ms": {
+      "total_ms": 12679
+    }
+  }
+}

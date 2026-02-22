@@ -350,6 +350,27 @@ function buildCaseMarkdown(test) {
   ].join("\n");
 }
 
+function buildQuickSummaryMarkdown(tests) {
+  const header = [
+    "## Quick Summary",
+    "",
+    "| Case | Status | Duration (ms) | AI Used | Fallback | Failed Checks | Endpoint |",
+    "| --- | --- | ---: | --- | --- | ---: | --- |",
+  ];
+
+  const rows = tests.map((test) => {
+    const failedChecks = Array.isArray(test.checks)
+      ? test.checks.filter((check) => check.status === "fail").length
+      : 0;
+    const statusIcon = test.status === "pass" ? "PASS" : "FAIL";
+    const aiUsed = test.trace_summary.ai_used ? "yes" : "no";
+    const fallbackUsed = test.trace_summary.ai_fallback ? "yes" : "no";
+    return `| ${test.name} | ${statusIcon} | ${test.duration_ms} | ${aiUsed} | ${fallbackUsed} | ${failedChecks} | ${test.metadata.endpoint} |`;
+  });
+
+  return [...header, ...rows, ""].join("\n");
+}
+
 async function run() {
   const tests = [];
   const shouldRun = (name) =>
@@ -758,6 +779,7 @@ async function run() {
     `- Passed: ${passed}`,
     `- Failed: ${failed.length}`,
     "",
+    buildQuickSummaryMarkdown(tests),
     "## Results",
     "",
     ...tests.map((test) => buildCaseMarkdown(test)),

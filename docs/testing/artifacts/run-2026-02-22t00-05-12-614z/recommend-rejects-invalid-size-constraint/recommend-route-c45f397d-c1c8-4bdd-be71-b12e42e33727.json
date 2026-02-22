@@ -1,0 +1,33 @@
+{
+  "trace_id": "c45f397d-c1c8-4bdd-be71-b12e42e33727",
+  "channel": "recommend-route",
+  "created_at": "2026-02-22T00:05:32.466Z",
+  "payload": {
+    "flow_path": [
+      "/api/recommend POST",
+      "request_validation_failed"
+    ],
+    "request_id": "863116ef-635a-40b3-b003-0e6840e2bfb1",
+    "request": {
+      "tenant_id": null,
+      "user_message": "show rugs",
+      "constraints": {
+        "size": {
+          "widthIn": -1,
+          "lengthIn": 120,
+          "toleranceIn": 2
+        }
+      }
+    },
+    "response": {
+      "status": 400,
+      "body": {
+        "error": "size widthIn/lengthIn must be positive numbers.",
+        "code": "BAD_REQUEST"
+      }
+    },
+    "timing_ms": {
+      "total_ms": 0
+    }
+  }
+}

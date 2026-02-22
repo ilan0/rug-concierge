@@ -1,0 +1,48 @@
+{
+  "trace_id": "420622e5-6d11-4d8b-942e-600699f1cd60",
+  "channel": "chat-route",
+  "created_at": "2026-02-22T01:11:52.447Z",
+  "payload": {
+    "flow_path": [
+      "/api/chat POST",
+      "getOrCreateSession",
+      "updateRecommendationStateForTurn",
+      "updateTradeContextForTurn",
+      "updateProjectContextForTurn",
+      "routeTurnMode",
+      "handlerDispatch",
+      "saveSession"
+    ],
+    "request": {
+      "session_id": null,
+      "role": "retail_customer",
+      "tenant_id": null,
+      "trade_client_id": null,
+      "message": "show me rugs",
+      "constraints": null,
+      "trade_preferences": null,
+      "project_context": null,
+      "appraisal_context": null
+    },
+    "routing": {
+      "mode": "recommendation",
+      "handler": "handleRecommendationTurn",
+      "prompt_layer_preview": [
+        "SYSTEM_PROMPT",
+        "ROLE_PROMPT_RETAIL_CUSTOMER",
+        "TASK_PROMPT_RECOMMENDATION",
+        "LATEST_USER_MESSAGE"
+      ]
+    },
+    "response": {
+      "session_id": "1f645f7e-d35d-47a1-b7ad-35eb93644426",
+      "role": "retail_customer",
+      "mode": "recommendation",
+      "response_mode": "recommendation",
+      "notes": "If you would like, you can specify size, style, or budget preferences for more tailored recommendations."
+    },
+    "timing_ms": {
+      "total_ms": 7292
+    }
+  }
+}

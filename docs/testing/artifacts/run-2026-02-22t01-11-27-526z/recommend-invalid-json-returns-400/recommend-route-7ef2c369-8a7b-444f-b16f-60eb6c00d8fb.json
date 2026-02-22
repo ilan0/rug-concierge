@@ -1,0 +1,23 @@
+{
+  "trace_id": "7ef2c369-8a7b-444f-b16f-60eb6c00d8fb",
+  "channel": "recommend-route",
+  "created_at": "2026-02-22T01:11:27.564Z",
+  "payload": {
+    "flow_path": [
+      "/api/recommend POST",
+      "request_validation_failed"
+    ],
+    "request_id": "45958c87-7f53-439b-a75b-598eb6613ec4",
+    "request": null,
+    "response": {
+      "status": 400,
+      "body": {
+        "error": "Invalid request",
+        "code": "BAD_REQUEST"
+      }
+    },
+    "timing_ms": {
+      "total_ms": 0
+    }
+  }
+}
