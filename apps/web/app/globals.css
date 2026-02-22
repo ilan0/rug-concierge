@@ -105,3 +105,230 @@ a {
     color-scheme: dark;
   }
 }
+
+.home-page,
+.inventory-page {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem 3rem;
+}
+
+.home-hero h1 {
+  font-size: 2rem;
+  margin: 0.25rem 0 0.5rem;
+}
+
+.home-kicker {
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.75rem;
+  opacity: 0.75;
+}
+
+.home-grid {
+  margin-top: 1.25rem;
+  display: grid;
+  gap: 1rem;
+}
+
+.home-card {
+  display: block;
+  border: 1px solid rgba(127, 127, 127, 0.28);
+  border-radius: 12px;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.7);
+}
+
+.home-card h2 {
+  margin-bottom: 0.35rem;
+}
+
+.inventory-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+
+.inventory-eyebrow {
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.75rem;
+  opacity: 0.75;
+}
+
+.inventory-subtitle {
+  margin-top: 0.35rem;
+  opacity: 0.82;
+}
+
+.inventory-header-actions {
+  display: flex;
+  gap: 0.65rem;
+}
+
+.inventory-header-actions a,
+.inventory-controls a,
+.inventory-pagination a {
+  border: 1px solid rgba(127, 127, 127, 0.3);
+  padding: 0.45rem 0.7rem;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.65);
+}
+
+.inventory-meta {
+  margin-top: 1rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1rem;
+  font-size: 0.9rem;
+}
+
+.inventory-controls {
+  margin-top: 0.9rem;
+}
+
+.inventory-filters,
+.inventory-active-filters,
+.inventory-recommendation-hint {
+  margin-top: 1rem;
+  border: 1px solid rgba(127, 127, 127, 0.3);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.72);
+  padding: 0.9rem;
+}
+
+.inventory-filters h2,
+.inventory-active-filters h3,
+.inventory-recommendation-hint h3 {
+  margin-bottom: 0.6rem;
+}
+
+.inventory-filter-form {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 0.7rem;
+}
+
+.inventory-filter-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: 0.82rem;
+}
+
+.inventory-filter-form input,
+.inventory-filter-form select {
+  border: 1px solid rgba(127, 127, 127, 0.35);
+  border-radius: 8px;
+  padding: 0.45rem 0.5rem;
+  background: rgba(255, 255, 255, 0.86);
+}
+
+.inventory-filter-actions {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.55rem;
+}
+
+.inventory-filter-actions button,
+.inventory-filter-actions a {
+  border: 1px solid rgba(127, 127, 127, 0.35);
+  border-radius: 8px;
+  padding: 0.45rem 0.65rem;
+  background: rgba(255, 255, 255, 0.84);
+  cursor: pointer;
+}
+
+.inventory-chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.inventory-chip {
+  font-size: 0.76rem;
+  border: 1px solid rgba(127, 127, 127, 0.35);
+  border-radius: 999px;
+  padding: 0.22rem 0.5rem;
+  background: rgba(246, 247, 250, 0.85);
+}
+
+.inventory-recommendation-hint pre {
+  margin-top: 0.5rem;
+  border: 1px solid rgba(127, 127, 127, 0.25);
+  border-radius: 8px;
+  padding: 0.75rem;
+  overflow: auto;
+  font-size: 0.78rem;
+  background: rgba(249, 250, 252, 0.92);
+}
+
+.inventory-table-wrap {
+  margin-top: 1rem;
+  overflow: auto;
+  border: 1px solid rgba(127, 127, 127, 0.3);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.inventory-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 1100px;
+}
+
+.inventory-table th,
+.inventory-table td {
+  border-bottom: 1px solid rgba(127, 127, 127, 0.2);
+  padding: 0.55rem 0.65rem;
+  text-align: left;
+  vertical-align: top;
+  font-size: 0.88rem;
+}
+
+.inventory-table th {
+  position: sticky;
+  top: 0;
+  background: rgba(243, 246, 250, 0.95);
+  z-index: 1;
+}
+
+.inventory-label {
+  font-weight: 600;
+}
+
+.inventory-id {
+  margin-top: 0.22rem;
+  font-size: 0.72rem;
+  opacity: 0.65;
+  word-break: break-all;
+}
+
+.inventory-empty,
+.inventory-error {
+  margin-top: 1rem;
+  border: 1px solid rgba(127, 127, 127, 0.32);
+  border-radius: 10px;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.7);
+}
+
+.inventory-pagination {
+  margin-top: 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.inventory-pagination span {
+  opacity: 0.6;
+}
+
+@media (max-width: 720px) {
+  .home-page,
+  .inventory-page {
+    padding: 1.25rem 0.9rem 2rem;
+  }
+}

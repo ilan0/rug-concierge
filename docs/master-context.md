@@ -72,6 +72,11 @@ Rules:
 - Do not use vector store / RAG for inventory recommendations.
 - Use DB-filtered candidates as model context.
 - Use structured output schema for deterministic responses.
+- Runtime recommendation prompt layers are sourced from official docs prompts:
+  - `docs/prompts/system.md`
+  - `docs/prompts/recommendation.md`
+  - `docs/prompts/recommendation-structured-output.md`
+  - `docs/prompts/trade-support.md` (trade role only)
 
 ## Architecture Choices (Current)
 
@@ -98,3 +103,24 @@ Trade client preferences are workflow/presentation context, not modeled as aesth
 3. Deterministic fallback responses when OpenAI is unavailable or invalid.
 4. QA logging for recommendation pipeline events.
 5. Smoke/integration tests covering request validation, recommendation contract, trade/project context, and appraisal access control.
+
+## Structured Output Enforcement (Current)
+
+- Prompt instructions are guidance; API `json_schema` with `strict: true` is the hard contract.
+- Backend applies mode-specific normalization after model output:
+  - `clarifying_question` -> recommendations forced empty, 1-2 questions.
+  - `no_match` -> recommendations forced empty, max 1 question.
+  - `recommendations` -> recommendations bounded and questions cleared.
+- Backend sanitization also re-grounds recommendation fields against candidate inventory (IDs, confidence, reasons, caveats).
+
+## Testing Artifacts (Current)
+
+- Smoke run outputs:
+  - human report: `docs/testing/e2e-smoke-report.md`
+  - machine report: `docs/testing/e2e-smoke-report.json`
+  - deep trace artifacts: `docs/testing/artifacts/<run-id>/<case-slug>/*.json`
+- Deep artifacts include:
+  - flow path/function trace
+  - Supabase query variants + filters + row counts
+  - exact AI request payload and raw/parsed response
+  - timing breakdown and fallback/error signals
