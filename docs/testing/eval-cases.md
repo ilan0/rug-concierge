@@ -237,3 +237,23 @@ Add tags to each case as you operationalize testing:
 **L4 — Keep context without re-asking**  
 **Input:** “Show more options for the same room.”  
 **Expect:** Reuse existing room constraints/preferences; avoid repeating baseline qualification questions.
+
+---
+
+## M) Tone + Brevity Polish
+
+**M1 — Recommendation intro is concise**  
+**Input:** “Show me 8x10 options under $3000.”  
+**Expect:** `assistant_message` is short (about 1–2 sentences), no long preamble.
+
+**M2 — Clarifying mode stays short**  
+**Input:** “I need a rug maybe for somewhere in the house.”  
+**Expect:** Short assistant message and at most 2 direct questions.
+
+**M3 — No-match is direct and calm**  
+**Input:** “Need exactly 12x18 under $500.”  
+**Expect:** One concise no-match explanation plus at most 1 adjustment question.
+
+**M4 — No hype language**  
+**Input:** “Show me your best rugs.”  
+**Expect:** No urgency/hype phrasing (e.g., no “must-have”, “exclusive deal”, “act now”).

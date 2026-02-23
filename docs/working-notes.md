@@ -29,6 +29,7 @@ This is a quick, practical reference for what you’ll edit first, where things 
   - Return structured output
 - Chat endpoint (mode routing): `apps/web/app/api/chat/route.ts`
 - Appraisal generation endpoint (staff-only): `apps/web/app/api/appraisal/generate/route.ts`
+- UI role cookie sync endpoint: `apps/web/app/api/ui-role/route.ts`
 
 ### Supabase
 - Admin client (server-only): `apps/web/lib/supabase/admin.ts`
@@ -43,6 +44,7 @@ This is a quick, practical reference for what you’ll edit first, where things 
 - AI appraisal draft generation: `apps/web/lib/ai/appraisal.ts`
 - Trade/project chat context: `apps/web/lib/chat/trade-context.ts`
 - Multi-room project context: `apps/web/lib/chat/project-context.ts`
+- Shared chat UI shell (concierge + trade variant): `apps/web/components/concierge/concierge-screen.tsx`
 
 ### Types
 - Recommendation types: `apps/web/lib/types/recommendation.ts`

@@ -16,6 +16,12 @@ export type SessionMessage = {
   created_at: string;
 };
 
+export type RecommendationReviewAction =
+  | "approve"
+  | "reject"
+  | "regenerate"
+  | "override";
+
 export type RecommendationState = {
   hard_constraints: HardConstraints;
   soft_preferences: {
@@ -49,6 +55,21 @@ export type ProjectContext = {
   notes: string[];
 };
 
+export type RecommendationReviewState = {
+  last_user_message: string | null;
+  last_assistant_message: string | null;
+  last_recommendations: RecommendationResponse["recommendations"];
+  last_questions: string[];
+  last_mode: RecommendationResponse["mode"] | null;
+  last_notes: string | null;
+  decision: "none" | "approved" | "rejected" | "overridden" | "regenerated";
+  decision_notes: string | null;
+  decision_at: string | null;
+  reviewed_by_role: RoleType | null;
+  regenerate_count: number;
+  override_count: number;
+};
+
 export type SessionData = {
   session_id: string;
   role: RoleType;
@@ -56,6 +77,7 @@ export type SessionData = {
   recommendation_state: RecommendationState;
   trade_context: TradeContext;
   project_context: ProjectContext;
+  review_state: RecommendationReviewState;
   created_at: string;
   updated_at: string;
 };
@@ -70,6 +92,12 @@ export type ChatTurnRequest = {
   constraints?: HardConstraints;
   project_context?: Partial<ProjectContext>;
   appraisal_context?: AppraisalInput;
+  review_action?: RecommendationReviewAction;
+  override?: {
+    assistant_message?: string;
+    selected_rug_ids?: string[];
+    notes?: string;
+  };
 };
 
 export type ChatTurnHandlerInput = {
@@ -79,6 +107,12 @@ export type ChatTurnHandlerInput = {
   session: SessionData;
   tenant_id: string | null;
   appraisal_context?: AppraisalInput;
+  review_action?: RecommendationReviewAction;
+  override?: {
+    assistant_message?: string;
+    selected_rug_ids?: string[];
+    notes?: string;
+  };
   trace_meta?: E2eTraceMeta;
 };
 

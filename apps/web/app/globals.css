@@ -560,6 +560,12 @@ a {
   padding: 0.48rem 0.62rem;
 }
 
+.concierge-operator-open-btn {
+  border-color: rgba(127, 84, 47, 0.6) !important;
+  background: linear-gradient(120deg, #7f542f, #a56f3f) !important;
+  color: #fff8f1;
+}
+
 .concierge-layout {
   margin-top: 1rem;
   display: grid;
@@ -613,6 +619,106 @@ a {
   gap: 0.45rem;
 }
 
+.concierge-operator-view-toggle button.active {
+  border-color: rgba(127, 84, 47, 0.7);
+  background: linear-gradient(120deg, #7f542f, #a56f3f);
+  color: #fff8f1;
+}
+
+.concierge-operator-drawer-body label {
+  display: grid;
+  gap: 0.22rem;
+  font-size: 0.8rem;
+}
+
+.concierge-operator-drawer-body input,
+.concierge-operator-drawer-body textarea,
+.concierge-operator-drawer-body button {
+  border: 1px solid rgba(109, 84, 57, 0.35);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.94);
+  padding: 0.45rem 0.52rem;
+}
+
+.concierge-operator-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 45;
+  border: none;
+  background: rgba(37, 24, 12, 0.28);
+}
+
+.concierge-operator-drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  z-index: 50;
+  height: 100vh;
+  width: min(560px, 96vw);
+  border-left: 1px solid rgba(109, 84, 57, 0.25);
+  background: linear-gradient(
+    180deg,
+    rgba(255, 252, 247, 0.98),
+    rgba(250, 243, 233, 0.98)
+  );
+  padding: 0.9rem;
+  display: grid;
+  gap: 0.78rem;
+  overflow-y: auto;
+}
+
+.concierge-operator-drawer-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.8rem;
+  align-items: flex-start;
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: rgba(255, 251, 244, 0.98);
+  border-bottom: 1px solid rgba(109, 84, 57, 0.2);
+  padding-bottom: 0.6rem;
+}
+
+.concierge-operator-drawer-head h3 {
+  margin-top: 0.35rem;
+}
+
+.concierge-operator-drawer-head p {
+  font-size: 0.82rem;
+  color: rgba(70, 51, 32, 0.78);
+}
+
+.concierge-operator-drawer-head button {
+  border: 1px solid rgba(84, 70, 53, 0.32);
+  border-radius: 10px;
+  background: rgba(255, 252, 247, 0.92);
+  padding: 0.42rem 0.62rem;
+}
+
+.concierge-operator-view-toggle {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.45rem;
+}
+
+.concierge-operator-view-toggle button {
+  border: 1px solid rgba(84, 70, 53, 0.3);
+  border-radius: 10px;
+  background: rgba(255, 252, 247, 0.9);
+  padding: 0.44rem 0.52rem;
+  font-size: 0.82rem;
+}
+
+.concierge-operator-drawer-body {
+  display: grid;
+  gap: 0.72rem;
+}
+
+.concierge-operator-drawer-body .concierge-panel {
+  background: rgba(255, 254, 250, 0.94);
+}
+
 .concierge-starters {
   border: 1px solid rgba(109, 84, 57, 0.24);
   border-radius: 12px;
@@ -640,6 +746,48 @@ a {
   padding: 0.4rem 0.7rem;
   background: rgba(255, 253, 250, 0.95);
   font-size: 0.82rem;
+}
+
+.concierge-trade-context {
+  border: 1px solid rgba(109, 84, 57, 0.24);
+  border-radius: 12px;
+  background: rgba(255, 251, 245, 0.86);
+  padding: 0.82rem;
+}
+
+.concierge-trade-context h3 {
+  margin-bottom: 0.35rem;
+}
+
+.concierge-trade-context p {
+  font-size: 0.82rem;
+  opacity: 0.78;
+}
+
+.concierge-trade-grid {
+  margin-top: 0.6rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 0.56rem;
+}
+
+.concierge-trade-grid label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.24rem;
+  font-size: 0.8rem;
+}
+
+.concierge-trade-grid input,
+.concierge-trade-grid textarea {
+  border: 1px solid rgba(109, 84, 57, 0.35);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.94);
+  padding: 0.45rem 0.52rem;
+}
+
+.concierge-trade-notes {
+  grid-column: 1 / -1;
 }
 
 .concierge-thread {

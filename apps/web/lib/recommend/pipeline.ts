@@ -74,6 +74,7 @@ export async function runRecommendationPipeline(
   const aiTrace: RecommendationAiTrace = {
     called: false,
     model: process.env.OPENAI_MODEL ?? "gpt-4.1-nano",
+    prompt_layers: [],
     request_payload: null,
     response_status: null,
     response_payload: null,

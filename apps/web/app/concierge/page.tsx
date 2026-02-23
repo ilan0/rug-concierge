@@ -25,6 +25,9 @@ export default async function ConciergePage({ searchParams }: ConciergePageProps
     <>
       <div className="ui-nav concierge-nav">
         <Link href="/">Home</Link>
+        {role === "trade_client" || role === "store_staff" ? (
+          <Link href="/trade">Trade</Link>
+        ) : null}
         {role === "store_staff" ? <Link href="/inventory">Inventory</Link> : null}
         {role === "store_staff" ? <Link href="/appraisal">Appraisal</Link> : null}
         <Link href={debug ? "/concierge" : "/concierge?debug=1"}>

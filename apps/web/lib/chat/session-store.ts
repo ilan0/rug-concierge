@@ -32,6 +32,20 @@ export function getOrCreateSession(sessionId: string, role: RoleType): SessionDa
       rooms: [],
       notes: [],
     },
+    review_state: {
+      last_user_message: null,
+      last_assistant_message: null,
+      last_recommendations: [],
+      last_questions: [],
+      last_mode: null,
+      last_notes: null,
+      decision: "none",
+      decision_notes: null,
+      decision_at: null,
+      reviewed_by_role: null,
+      regenerate_count: 0,
+      override_count: 0,
+    },
   };
 
   sessions.set(sessionId, session);

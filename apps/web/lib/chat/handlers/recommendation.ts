@@ -8,6 +8,50 @@ import type {
 export async function handleRecommendationTurn(
   input: ChatTurnHandlerInput
 ): Promise<RecommendationTurnResponse> {
+  if (input.review_action === "approve") {
+    return {
+      mode: "recommendation",
+      assistant_message:
+        "Approved. I will keep these recommendations as the current set.",
+      questions: [],
+      recommendations: input.session.review_state.last_recommendations,
+      notes: "REVIEW_ACTION_APPROVE",
+    };
+  }
+
+  if (input.review_action === "reject") {
+    return {
+      mode: "recommendation",
+      assistant_message:
+        "Rejected. I can regenerate another set when you are ready.",
+      questions: [],
+      recommendations: [],
+      notes: "REVIEW_ACTION_REJECT",
+    };
+  }
+
+  if (input.review_action === "override") {
+    const priorRecommendations = input.session.review_state.last_recommendations;
+    const selectedIds = new Set(input.override?.selected_rug_ids ?? []);
+    const overriddenRecommendations =
+      selectedIds.size > 0
+        ? priorRecommendations.filter((item) => selectedIds.has(item.rug_id))
+        : priorRecommendations;
+    const overrideMessage = input.override?.assistant_message?.trim();
+    const staffMessage =
+      overrideMessage && overrideMessage.length > 0
+        ? overrideMessage
+        : "Updated by store staff review.";
+
+    return {
+      mode: "recommendation",
+      assistant_message: staffMessage,
+      questions: [],
+      recommendations: overriddenRecommendations,
+      notes: input.override?.notes?.trim() || "REVIEW_ACTION_OVERRIDE",
+    };
+  }
+
   const globalConstraints = input.session.recommendation_state.hard_constraints;
   const activeRoom = input.session.project_context.active_room_id
     ? input.session.project_context.rooms.find(
@@ -19,9 +63,15 @@ export async function handleRecommendationTurn(
     ...(activeRoom?.constraints ?? {}),
   };
 
+  const regenerateInstruction =
+    input.review_action === "regenerate" &&
+    input.session.review_state.last_recommendations.length > 0
+      ? "\n\nPlease generate a different mix from the previous set where possible."
+      : "";
+
   const result = await runRecommendationPipeline({
     tenantId: input.tenant_id,
-    userMessage: input.message,
+    userMessage: `${input.message}${regenerateInstruction}`.trim(),
     constraints,
     promptContext: {
       role: input.role,

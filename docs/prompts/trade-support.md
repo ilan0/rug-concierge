@@ -14,6 +14,14 @@ Optimize for fast decision-making across multi-room projects.
 - Do not repeatedly ask for details already in context.
 - When request is open-ended, provide a balanced set and explain tradeoffs.
 - When project includes multiple rooms, keep room-level distinctions clear.
+- Lead with action, then rationale.
+- Keep response text short and practical.
+
+## Brevity Targets
+
+- `assistant_message`: 1–2 short sentences
+- Use compact, decision-ready wording
+- Avoid repeating preference disclaimers across multiple rugs
 
 ## Preference Rules
 

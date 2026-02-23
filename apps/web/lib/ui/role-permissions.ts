@@ -1,7 +1,7 @@
 import type { UiRole } from "@/lib/types/chat-ui";
 
 export type UiRouteCard = {
-  href: "/concierge" | "/inventory" | "/appraisal";
+  href: "/concierge" | "/trade" | "/inventory" | "/appraisal";
   title: string;
   description: string;
 };
@@ -12,6 +12,12 @@ const ALL_ROUTE_CARDS: UiRouteCard[] = [
     title: "Concierge Screen",
     description:
       "Main customer-facing flow. Sends chat turns through backend routing and returns answers/recommendations.",
+  },
+  {
+    href: "/trade",
+    title: "Trade Support",
+    description:
+      "Repeat-buyer workflow for trade/design clients with project context and personalized support.",
   },
   {
     href: "/inventory",
@@ -29,8 +35,8 @@ const ALL_ROUTE_CARDS: UiRouteCard[] = [
 
 const ROLE_ALLOWED_ROUTES: Record<UiRole, UiRouteCard["href"][]> = {
   retail_customer: ["/concierge"],
-  trade_client: ["/concierge"],
-  store_staff: ["/concierge", "/inventory", "/appraisal"],
+  trade_client: ["/concierge", "/trade"],
+  store_staff: ["/concierge", "/trade", "/inventory", "/appraisal"],
 };
 
 export function getAllowedRoutesForRole(role: UiRole): UiRouteCard[] {

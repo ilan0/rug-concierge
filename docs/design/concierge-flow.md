@@ -41,9 +41,11 @@ Use when the user is asking for rugs that fit constraints (size/budget/style/etc
 Prompts (always in this order):
 - docs/prompts/system.md
 - docs/prompts/recommendation.md
-- Optional: trade client context
-- Inventory context (SQL-filtered candidate set)
 - docs/prompts/recommendation-structured-output.md
+- Optional: docs/prompts/trade-support.md (trade role only)
+- Optional: trade preferences context block (when preferences exist)
+- Inventory context (SQL-filtered candidate set)
+- User request block (includes hard constraints + project context snapshot)
 
 Output:
 - JSON only (UI renders assistant_message + rug cards)
@@ -177,13 +179,16 @@ Message stack:
 const messages = [
   { role: "system", content: AI_SYSTEM_PROMPT },
   { role: "system", content: RECOMMENDATION_PROMPT_V1 },
+  { role: "system", content: STRUCTURED_OUTPUT_ADDON },
 
-  // Optional: trade context injected only if a trade client is selected/recognized
-  { role: "system", content: TRADE_CLIENT_CONTEXT_BLOCK }, // preferences + notes (no secrets)
+  // Optional: trade support instructions for trade role
+  { role: "system", content: TRADE_SUPPORT_PROMPT },
+
+  // Optional: trade preferences context injected when present
+  { role: "system", content: TRADE_PREFERENCES_CONTEXT_BLOCK },
 
   { role: "system", content: INVENTORY_CONTEXT_BLOCK }, // hard-coded seed inventory (for now)
-  { role: "system", content: STRUCTURED_OUTPUT_ADDON }, // JSON-only schema requirement
-  { role: "user",   content: USER_MESSAGE }
+  { role: "user",   content: USER_REQUEST_WITH_HARD_AND_PROJECT_CONTEXT }
 ];
 ```
 

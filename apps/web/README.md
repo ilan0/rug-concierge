@@ -11,6 +11,10 @@ This app is the primary UI shell for Rug Concierge MVP.
   - main customer-facing input flow
   - posts user turns to `/api/chat`
   - renders general chat and recommendation responses
+- `/trade`:
+  - trade/designer repeat-buyer workflow
+  - reuses shared chat shell with trade-specific context controls
+  - injects trade and project context into `/api/chat` turns for personalization
 - `/inventory`:
   - read-only inventory browser for owner/staff transparency
   - uses server-side Supabase query from `rugs`

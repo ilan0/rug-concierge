@@ -23,13 +23,14 @@ The goal is clarity, not exhaustiveness.
 All user chat enters through backend first.
 
 Backend responsibilities:
-- determine whether the message is `general_chat` or `recommendation`
+- determine whether the message is `general_chat`, `recommendation`, or `appraisal`
 - request clarification when intent is ambiguous
 - enforce hard constraints and inventory grounding for recommendation mode
 
 AI responsibilities:
 - in general chat: provide informational freeform responses
 - in recommendation mode: rank and explain only within backend-provided inventory candidates
+- in appraisal mode: generate structured staff-only appraisal drafts
 
 ---
 
@@ -73,9 +74,11 @@ Used when the user is trying to find rugs from inventory.
 Prompts used (in order):
 - docs/prompts/system.md
 - docs/prompts/recommendation.md
-- Optional: trade client context
-- Inventory context (hard-coded JSON now; DB results later)
 - docs/prompts/recommendation-structured-output.md
+- Optional: docs/prompts/trade-support.md (trade role only)
+- Optional: trade preferences context block
+- Inventory context (SQL-filtered backend candidate set)
+- User request block with hard constraints + project context snapshot
 
 Output:
 - JSON only (assistant_message + rug cards)
@@ -90,11 +93,9 @@ See `docs/design/concierge-flow.md` for constraints and no-match logic.
 Used by owner/staff only.
 
 Prompts used:
-- docs/prompts/system.md
-- Appraisal Draft Prompt (TBD)
-- Appraisal context
-- Optional rug context
-- Structured output add-on (if used)
+- Internal appraisal system/task prompts in `apps/web/lib/ai/appraisal.ts`
+- Appraisal context payload
+- Strict JSON schema output
 
 Output:
 - Draft text + metadata (always reviewed before finalization)
@@ -169,10 +170,10 @@ Both tables:
 
 ## Stack & Deployment
 
-- **Frontend + Backend (TBD):** Next.js (App Router) + TypeScript
-- **Styling (TBD):** Tailwind CSS + shadcn/ui
+- **Frontend + Backend:** Next.js (App Router) + TypeScript
+- **Styling:** Global CSS design system (`apps/web/app/globals.css`, shared `ui-*` classes)
 - **Auth / DB / Storage:** Supabase
-- **Hosting (TBD):** Vercel
+- **Hosting:** Vercel (target)
 - **Repo:** Single monorepo
 
 ---

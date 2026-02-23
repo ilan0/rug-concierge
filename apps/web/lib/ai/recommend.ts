@@ -1,5 +1,9 @@
 import type { HardConstraints, InventoryRug } from "@/lib/types/recommendation";
 import { getRecommendationPromptBundle } from "@/lib/ai/prompt-library";
+import {
+  PROMPT_LAYER,
+  type PromptLayerId,
+} from "@/lib/prompts/layers";
 
 // PSEUDOCODE
 // 1) If candidate inventory is empty -> return no_match.
@@ -14,6 +18,10 @@ const OPENAI_MODEL = process.env.OPENAI_MODEL ?? "gpt-4.1-nano";
 const MAX_RECOMMENDATIONS = 8;
 const CONFIDENCE_MIN = 0.35;
 const CONFIDENCE_MAX = 0.95;
+const MAX_ASSISTANT_MESSAGE_CHARS = 220;
+const MAX_REASON_CHARS = 120;
+const MAX_CAVEAT_CHARS = 110;
+const MAX_FACTOR_CHARS = 64;
 
 type RecommendationPromptContext = {
   role?: "retail_customer" | "trade_client" | "store_staff";
@@ -32,6 +40,12 @@ type RecommendationPromptContext = {
 export type RecommendationAiTrace = {
   called: boolean;
   model: string;
+  prompt_layers: {
+    id: PromptLayerId;
+    role: "system" | "user";
+    chars: number;
+    preview: string;
+  }[];
   request_payload: unknown | null;
   response_status: number | null;
   response_payload: unknown | null;
@@ -244,6 +258,116 @@ function collectSoftSignals(
 
 function clamp(value: number, min: number, max: number): number {
   return Math.max(min, Math.min(max, value));
+}
+
+function normalizeText(value: string): string {
+  return value.replace(/\s+/g, " ").trim();
+}
+
+function trimText(value: string, maxChars: number): string {
+  const normalized = normalizeText(value);
+  if (normalized.length <= maxChars) return normalized;
+  return `${normalized.slice(0, maxChars - 1).trimEnd()}…`;
+}
+
+type PromptSection = {
+  id: PromptLayerId;
+  role: "system" | "user";
+  text: string;
+};
+
+function sectionPreview(value: string): string {
+  return trimText(value.replace(/\s+/g, " "), 120);
+}
+
+function groupPromptSectionsByRole(sections: PromptSection[]) {
+  const grouped: Array<{ role: "system" | "user"; content: Array<{ type: "input_text"; text: string }> }> = [];
+  for (const section of sections) {
+    const current = grouped[grouped.length - 1];
+    if (!current || current.role !== section.role) {
+      grouped.push({
+        role: section.role,
+        content: [{ type: "input_text", text: section.text }],
+      });
+      continue;
+    }
+    current.content.push({ type: "input_text", text: section.text });
+  }
+  return grouped;
+}
+
+function splitSentences(value: string): string[] {
+  return value
+    .split(/(?<=[.!?])\s+/)
+    .map((part) => normalizeText(part))
+    .filter(Boolean);
+}
+
+function shortenAssistantMessage(
+  value: string,
+  maxSentences: number,
+  maxChars: number
+): string {
+  const sentences = splitSentences(value).slice(0, maxSentences);
+  const joined = sentences.length > 0 ? sentences.join(" ") : normalizeText(value);
+  return trimText(joined, maxChars);
+}
+
+function uniqueCompactList(items: string[], maxItems: number, maxChars: number): string[] {
+  const seen = new Set<string>();
+  const output: string[] = [];
+  for (const item of items) {
+    const normalized = normalizeText(item);
+    if (!normalized) continue;
+    const dedupeKey = normalized.toLowerCase();
+    if (seen.has(dedupeKey)) continue;
+    seen.add(dedupeKey);
+    output.push(trimText(normalized, maxChars));
+    if (output.length >= maxItems) break;
+  }
+  return output;
+}
+
+function applyTonePolish(response: RecommendationResponse): RecommendationResponse {
+  if (response.mode === "clarifying_question") {
+    return {
+      ...response,
+      assistant_message: shortenAssistantMessage(
+        response.assistant_message,
+        1,
+        MAX_ASSISTANT_MESSAGE_CHARS
+      ),
+      questions: uniqueCompactList(response.questions, 2, 90),
+    };
+  }
+
+  if (response.mode === "no_match") {
+    return {
+      ...response,
+      assistant_message: shortenAssistantMessage(
+        response.assistant_message,
+        1,
+        MAX_ASSISTANT_MESSAGE_CHARS
+      ),
+      questions: uniqueCompactList(response.questions, 1, 90),
+    };
+  }
+
+  return {
+    ...response,
+    assistant_message: shortenAssistantMessage(
+      response.assistant_message,
+      2,
+      MAX_ASSISTANT_MESSAGE_CHARS
+    ),
+    questions: [],
+    recommendations: response.recommendations.map((rec) => ({
+      ...rec,
+      match_reasons: uniqueCompactList(rec.match_reasons, 3, MAX_REASON_CHARS),
+      confidence_factors: uniqueCompactList(rec.confidence_factors, 3, MAX_FACTOR_CHARS),
+      why_not: uniqueCompactList(rec.why_not, 2, MAX_CAVEAT_CHARS),
+    })),
+  };
 }
 
 function getSizeDistanceIn(rug: InventoryRug, constraints: HardConstraints): number | null {
@@ -637,42 +761,46 @@ function sanitizeResponse(
   const cappedQuestions = response.questions.slice(0, 2);
 
   if (response.mode === "no_match" && inventory.length > 0) {
-    return {
+    return applyTonePolish({
       ...fallbackRecommendations(inventory, constraints, promptContext, userMessage),
       notes: "Adjusted invalid no_match from model output.",
-    };
+    });
   }
 
   if (response.mode === "recommendations" && recommendations.length === 0) {
-    return fallbackRecommendations(inventory, constraints, promptContext, userMessage);
+    return applyTonePolish(
+      fallbackRecommendations(inventory, constraints, promptContext, userMessage)
+    );
   }
 
   // Enforce mode-specific response contract for consistency with docs/schema intent.
   if (response.mode === "clarifying_question") {
     const normalizedQuestions = cappedQuestions.filter((q) => q.trim().length > 0);
     if (normalizedQuestions.length === 0) {
-      return fallbackRecommendations(inventory, constraints, promptContext, userMessage);
+      return applyTonePolish(
+        fallbackRecommendations(inventory, constraints, promptContext, userMessage)
+      );
     }
-    return {
+    return applyTonePolish({
       ...response,
       questions: normalizedQuestions.slice(0, 2),
       recommendations: [],
-    };
+    });
   }
 
   if (response.mode === "no_match") {
-    return {
+    return applyTonePolish({
       ...response,
       questions: cappedQuestions.slice(0, 1),
       recommendations: [],
-    };
+    });
   }
 
-  return {
+  return applyTonePolish({
     ...response,
     questions: [],
     recommendations,
-  };
+  });
 }
 
 export async function rankAndExplain(
@@ -692,6 +820,7 @@ export async function rankAndExplain(
     if (trace) {
       trace.called = false;
       trace.model = OPENAI_MODEL;
+      trace.prompt_layers = [];
       trace.request_payload = null;
       trace.response_status = null;
       trace.response_payload = null;
@@ -701,7 +830,7 @@ export async function rankAndExplain(
     }
     // No candidates after hard filtering = real no-match.
     const constrainedSearch = hasOptionalHardConstraints(constraints);
-    return {
+    return applyTonePolish({
       mode: "no_match",
       assistant_message: constrainedSearch
         ? "Based on current inventory, nothing fits those constraints."
@@ -711,7 +840,7 @@ export async function rankAndExplain(
         : [],
       recommendations: [],
       notes: null,
-    };
+    });
   }
 
   const apiKey = process.env.OPENAI_API_KEY;
@@ -719,6 +848,7 @@ export async function rankAndExplain(
     if (trace) {
       trace.called = false;
       trace.model = OPENAI_MODEL;
+      trace.prompt_layers = [];
       trace.request_payload = null;
       trace.response_status = null;
       trace.response_payload = null;
@@ -727,10 +857,10 @@ export async function rankAndExplain(
       trace.error = null;
     }
     // Missing key should not crash the endpoint.
-    return {
+    return applyTonePolish({
       ...fallbackRecommendations(inventory, constraints, promptContext, userMessage),
       notes: "Missing OPENAI_API_KEY. Returned local fallback.",
-    };
+    });
   }
 
   const contextInventory = toContextInventory(inventory);
@@ -745,78 +875,63 @@ export async function rankAndExplain(
       ? userMessage.trim()
       : buildFallbackRequestText(constraints);
 
-  const requestPayload = {
-    model: OPENAI_MODEL,
-    // Message order:
-    // 1) system behavior guardrails
-    // 2) authoritative inventory context
-    // 3) user intent + hard constraints
-    input: [
-      {
-        role: "system",
-        content: [
+  const promptSections: PromptSection[] = [
+    {
+      id: PROMPT_LAYER.systemBase,
+      role: "system",
+      text: promptBundle.system,
+    },
+    {
+      id: PROMPT_LAYER.taskRecommendation,
+      role: "system",
+      text: promptBundle.recommendation,
+    },
+    {
+      id: PROMPT_LAYER.structuredRecommendation,
+      role: "system",
+      text: promptBundle.recommendationStructuredOutput,
+    },
+    ...(promptContext?.role === "trade_client"
+      ? [
           {
-            type: "input_text",
-            text: promptBundle.system,
+            id: PROMPT_LAYER.taskTradeSupport,
+            role: "system" as const,
+            text: promptBundle.tradeSupport,
           },
+        ]
+      : []),
+    ...(hasTradePreferences
+      ? [
           {
-            type: "input_text",
-            text: promptBundle.recommendation,
-          },
-          {
-            type: "input_text",
-            text: promptBundle.recommendationStructuredOutput,
-          },
-          ...(promptContext?.role === "trade_client"
-            ? [
-                {
-                  type: "input_text",
-                  text: promptBundle.tradeSupport,
-                },
-              ]
-            : []),
-        ],
-      },
-      ...(hasTradePreferences
-        ? [
-            {
-              role: "system" as const,
-              content: [
-                {
-                  type: "input_text" as const,
-                  text: `TRADE PREFERENCES (soft signals only):\n${JSON.stringify(
-                    promptContext?.trade_preferences,
-                    null,
-                    2
-                  )}`,
-                },
-              ],
-            },
-          ]
-        : []),
-      {
-        role: "system",
-        content: [
-          {
-            type: "input_text",
-            text: `AVAILABLE INVENTORY (authoritative):\n${JSON.stringify(contextInventory, null, 2)}`,
-          },
-        ],
-      },
-      {
-        role: "user",
-        content: [
-          {
-            type: "input_text",
-            text: `User request:\n${requestText}\n\nHard constraints:\n${JSON.stringify(
-              constraints
-            )}\n\nProject context:\n${JSON.stringify(
-              promptContext?.project_context ?? null
+            id: PROMPT_LAYER.contextTradePreferences,
+            role: "system" as const,
+            text: `TRADE PREFERENCES (soft signals only):\n${JSON.stringify(
+              promptContext?.trade_preferences,
+              null,
+              2
             )}`,
           },
-        ],
-      },
-    ],
+        ]
+      : []),
+    {
+      id: PROMPT_LAYER.contextInventory,
+      role: "system",
+      text: `AVAILABLE INVENTORY (authoritative):\n${JSON.stringify(contextInventory, null, 2)}`,
+    },
+    {
+      id: PROMPT_LAYER.latestUserWithConstraints,
+      role: "user",
+      text: `User request:\n${requestText}\n\nHard constraints:\n${JSON.stringify(
+        constraints
+      )}\n\nProject context:\n${JSON.stringify(promptContext?.project_context ?? null)}`,
+    },
+  ];
+
+  const requestInput = groupPromptSectionsByRole(promptSections);
+
+  const requestPayload = {
+    model: OPENAI_MODEL,
+    input: requestInput,
     text: {
       format: {
         // Enforce strict schema so frontend response parsing is predictable.
@@ -831,6 +946,12 @@ export async function rankAndExplain(
   if (trace) {
     trace.called = true;
     trace.model = OPENAI_MODEL;
+    trace.prompt_layers = promptSections.map((section) => ({
+      id: section.id,
+      role: section.role,
+      chars: section.text.length,
+      preview: sectionPreview(section.text),
+    }));
     trace.request_payload = requestPayload;
     trace.response_status = null;
     trace.response_payload = null;
@@ -859,10 +980,10 @@ export async function rankAndExplain(
         : "OpenAI request failed: network error";
     }
     // Network/API failure -> deterministic fallback, not a hard API error.
-    return {
+    return applyTonePolish({
       ...fallbackRecommendations(inventory, constraints, promptContext, userMessage),
       notes: "OpenAI request failed. Returned local fallback.",
-    };
+    });
   }
 
   const payload = (await response.json().catch(() => null)) as unknown;
@@ -878,10 +999,10 @@ export async function rankAndExplain(
       trace.error = "OpenAI response parsing failed";
     }
     // Parsing/shape failure -> deterministic fallback.
-    return {
+    return applyTonePolish({
       ...fallbackRecommendations(inventory, constraints, promptContext, userMessage),
       notes: "OpenAI response parsing failed. Returned local fallback.",
-    };
+    });
   }
 
   // Final safety pass before returning to API route.

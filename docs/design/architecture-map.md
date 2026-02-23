@@ -6,7 +6,8 @@ This is the quick orientation map for where code should live.
 
 - `apps/web/app`
   - Next.js routes and pages
-  - API entry points (`/api/chat`, `/api/recommend`, `/api/appraisal/generate`, etc.)
+  - API entry points (`/api/chat`, `/api/recommend`, `/api/appraisal/generate`, `/api/ui-role`, etc.)
+  - Primary UI routes (`/`, `/concierge`, `/trade`, `/inventory`, `/appraisal`)
 - `apps/web/components`
   - UI components only (`*-screen.tsx`, cards, forms)
 - `apps/web/lib`

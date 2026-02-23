@@ -15,6 +15,7 @@ import {
 import { badRequest, internalError } from "@/lib/errors/http-errors";
 import type {
   ChatTurnRequest,
+  RecommendationReviewAction,
   RoleType,
   SessionData,
   SessionMessage,
@@ -54,10 +55,12 @@ export async function POST(req: Request) {
 
     const userMessage =
       typeof body.message === "string" ? body.message.trim() : "";
-    if (!userMessage) {
+    const reviewAction = normalizeReviewAction(body.review_action);
+    const hasMessage = userMessage.length > 0;
+    if (!hasMessage && !reviewAction) {
       return badRequest("Please send a message so I can help.");
     }
-    if (userMessage.length > 2000) {
+    if (hasMessage && userMessage.length > 2000) {
       return badRequest("Message is too long. Please keep it under 2000 characters.");
     }
     if (
@@ -73,6 +76,22 @@ export async function POST(req: Request) {
         : crypto.randomUUID();
 
     const role: RoleType = normalizeRole(body.role);
+    if (reviewAction && role !== "store_staff") {
+      return badRequest("review_action is available only for store_staff role.");
+    }
+    if (
+      reviewAction === "override" &&
+      body.override !== undefined &&
+      (typeof body.override !== "object" || body.override === null)
+    ) {
+      return badRequest("override must be an object when provided.");
+    }
+    if (
+      body.override?.selected_rug_ids !== undefined &&
+      !Array.isArray(body.override.selected_rug_ids)
+    ) {
+      return badRequest("override.selected_rug_ids must be an array when provided.");
+    }
     const session = getOrCreateSession(sessionId, role);
     const tenantId =
       typeof body.tenant_id === "string" && body.tenant_id.trim()
@@ -85,7 +104,7 @@ export async function POST(req: Request) {
 
     const userTurn: SessionMessage = {
       role: "user",
-      content: userMessage,
+      content: hasMessage ? userMessage : `[review_action:${reviewAction}]`,
       created_at: new Date().toISOString(),
     };
 
@@ -112,14 +131,24 @@ export async function POST(req: Request) {
           : undefined,
     });
 
-    const mode = routeTurnMode({
+    const routeDecision = routeTurnMode({
       message: userMessage,
       role,
+      review_action: reviewAction,
+      last_mode:
+        nextSession.review_state.last_mode === "recommendations"
+          ? "recommendation"
+          : "general_chat",
+      has_recent_recommendations: nextSession.review_state.last_recommendations.length > 0,
       recommendation_state: nextSession.recommendation_state,
     });
+    const effectiveMode = routeDecision.mode;
 
     const handlerInput = {
-      message: userMessage,
+      message:
+        userMessage ||
+        nextSession.review_state.last_user_message ||
+        "Show me another recommendation set.",
       role,
       session: nextSession,
       tenant_id: tenantId,
@@ -127,23 +156,49 @@ export async function POST(req: Request) {
         body.appraisal_context && typeof body.appraisal_context === "object"
           ? body.appraisal_context
           : undefined,
-      mode,
+      mode: effectiveMode,
+      review_action: reviewAction,
+      override:
+        body.override && typeof body.override === "object"
+          ? {
+              assistant_message:
+                typeof body.override.assistant_message === "string"
+                  ? body.override.assistant_message
+                  : undefined,
+              selected_rug_ids: Array.isArray(body.override.selected_rug_ids)
+                ? body.override.selected_rug_ids.filter(
+                    (id): id is string => typeof id === "string" && id.trim().length > 0
+                  )
+                : undefined,
+              notes:
+                typeof body.override.notes === "string"
+                  ? body.override.notes
+                  : undefined,
+            }
+          : undefined,
       trace_meta: traceMeta ?? undefined,
     } as const;
 
     const handlerResult =
-      mode === "recommendation"
-        ? await handleRecommendationTurn(handlerInput)
-        : mode === "appraisal"
-          ? role === "store_staff"
-            ? await handleAppraisalTurn(handlerInput)
-            : {
-                mode: "general_chat",
-                assistant_message:
-                  "Appraisal generation is available only for store staff.",
-                notes: "Blocked non-staff appraisal request.",
-              }
-          : await handleGeneralChatTurn(handlerInput);
+      routeDecision.rule_id === "APPRAISAL_NON_STAFF_BLOCK"
+        ? {
+            mode: "general_chat",
+            assistant_message:
+              "Appraisal generation is available only for store staff.",
+            notes: "Blocked non-staff appraisal request.",
+          }
+        : routeDecision.needs_clarification
+          ? {
+              mode: "general_chat",
+              assistant_message:
+                "Do you want me to show inventory options, or are you asking for general rug advice?",
+              notes: "ROUTER_CLARIFICATION_REQUIRED",
+            }
+          : effectiveMode === "recommendation"
+            ? await handleRecommendationTurn(handlerInput)
+            : effectiveMode === "appraisal"
+              ? await handleAppraisalTurn(handlerInput)
+              : await handleGeneralChatTurn(handlerInput);
 
     const responseMode =
       handlerResult.mode === "recommendation" ||
@@ -165,12 +220,36 @@ export async function POST(req: Request) {
       role,
       updated_at: new Date().toISOString(),
       chat_history: [...nextSession.chat_history, userTurn, assistantTurn],
+      review_state:
+        responseMode === "recommendation"
+          ? updateReviewState(nextSession, {
+              role,
+              userMessage:
+                userMessage ||
+                nextSession.review_state.last_user_message ||
+                "Show me another recommendation set.",
+              reviewAction,
+              overrideNotes:
+                typeof body.override?.notes === "string"
+                  ? body.override.notes.trim()
+                  : null,
+              responseMode: handlerResult.mode,
+              assistantMessage: handlerResult.assistant_message,
+              recommendations:
+                "recommendations" in handlerResult
+                  ? handlerResult.recommendations
+                  : [],
+              questions:
+                "questions" in handlerResult ? handlerResult.questions : [],
+              notes: handlerResult.notes ?? null,
+            })
+          : nextSession.review_state,
     };
 
     saveSession(updatedSession);
 
     const promptLayerPreview = buildPromptLayers({
-      mode,
+      mode: effectiveMode,
       role,
       session: nextSession,
       userMessage,
@@ -194,13 +273,18 @@ export async function POST(req: Request) {
             trade_preferences: body.trade_preferences ?? null,
             project_context: body.project_context ?? null,
             appraisal_context: body.appraisal_context ?? null,
+            review_action: reviewAction,
+            override: body.override ?? null,
           },
           routing: {
-            mode,
+            mode: effectiveMode,
+            rule_id: routeDecision.rule_id,
+            confidence: routeDecision.confidence,
+            needs_clarification: routeDecision.needs_clarification,
             handler:
-              mode === "recommendation"
+              effectiveMode === "recommendation"
                 ? "handleRecommendationTurn"
-                : mode === "appraisal"
+                : effectiveMode === "appraisal"
                   ? role === "store_staff"
                     ? "handleAppraisalTurn"
                     : "non_staff_appraisal_block"
@@ -211,12 +295,14 @@ export async function POST(req: Request) {
             recommendation_state: nextSession.recommendation_state,
             trade_context: nextSession.trade_context,
             project_context: nextSession.project_context,
+            review_state: nextSession.review_state,
           },
           response: {
             session_id: sessionId,
             role,
             mode: responseMode,
             response_mode: handlerResult.mode,
+            review_action: reviewAction,
             notes: handlerResult.notes ?? null,
           },
           timing_ms: {
@@ -233,6 +319,7 @@ export async function POST(req: Request) {
       recommendation_state: updatedSession.recommendation_state,
       trade_context: updatedSession.trade_context,
       project_context: updatedSession.project_context,
+      review_state: updatedSession.review_state,
       response: handlerResult,
     });
     if (traceMeta) {
@@ -257,4 +344,61 @@ function normalizeRole(value: unknown): RoleType {
   }
 
   return "retail_customer";
+}
+
+function normalizeReviewAction(value: unknown): RecommendationReviewAction | null {
+  if (
+    value === "approve" ||
+    value === "reject" ||
+    value === "regenerate" ||
+    value === "override"
+  ) {
+    return value;
+  }
+  return null;
+}
+
+function updateReviewState(
+  session: SessionData,
+  input: {
+    role: RoleType;
+    userMessage: string;
+    reviewAction: RecommendationReviewAction | null;
+    overrideNotes: string | null;
+    responseMode: "recommendation" | "clarifying_question" | "no_match";
+    assistantMessage: string;
+    recommendations: SessionData["review_state"]["last_recommendations"];
+    questions: string[];
+    notes: string | null;
+  }
+): SessionData["review_state"] {
+  const now = new Date().toISOString();
+  const prior = session.review_state;
+  const decision =
+    input.reviewAction === "approve"
+      ? "approved"
+      : input.reviewAction === "reject"
+        ? "rejected"
+        : input.reviewAction === "override"
+          ? "overridden"
+          : input.reviewAction === "regenerate"
+            ? "regenerated"
+            : "none";
+
+  return {
+    ...prior,
+    last_user_message: input.userMessage,
+    last_assistant_message: input.assistantMessage,
+    last_recommendations: input.recommendations,
+    last_questions: input.questions,
+    last_mode: input.responseMode,
+    last_notes: input.notes,
+    decision,
+    decision_notes: input.overrideNotes,
+    decision_at: input.reviewAction ? now : prior.decision_at,
+    reviewed_by_role: input.reviewAction ? input.role : prior.reviewed_by_role,
+    regenerate_count:
+      prior.regenerate_count + (input.reviewAction === "regenerate" ? 1 : 0),
+    override_count: prior.override_count + (input.reviewAction === "override" ? 1 : 0),
+  };
 }
