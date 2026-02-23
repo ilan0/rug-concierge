@@ -9,7 +9,9 @@ import {
   parseE2eTraceMeta,
   writeE2eTraceArtifact,
 } from "@/lib/qa/e2e-trace";
-import { badRequest, internalError } from "@/lib/errors/http-errors";
+import { badRequest, forbidden, internalError } from "@/lib/errors/http-errors";
+import { resolveRequestRole } from "@/lib/auth/request-role";
+import { roleHasCapability } from "@/lib/auth/capabilities";
 import type { HardConstraints } from "@/lib/types/recommendation";
 
 function hasMeaningfulConstraints(constraints: HardConstraints): boolean {
@@ -71,6 +73,26 @@ export async function POST(req: Request) {
         });
       }
       return badRequest("Invalid request");
+    }
+
+    const roleResolution = await resolveRequestRole({
+      requestedRole: (body as { role?: unknown }).role,
+      defaultRole: "retail_customer",
+    });
+    if (roleResolution.mismatch) {
+      return forbidden("Role mismatch between cookie and request payload.");
+    }
+    if (
+      roleResolution.source !== "cookie" &&
+      (roleResolution.role === "store_staff" || roleResolution.role === "developer")
+    ) {
+      return forbidden(
+        "Privileged roles require a synced role cookie from the UI session."
+      );
+    }
+    const role = roleResolution.role;
+    if (!roleHasCapability(role, "chat.recommend")) {
+      return forbidden("This role is not allowed to request recommendations.");
     }
 
     // `user_message` is preferred, but we also accept `message`.

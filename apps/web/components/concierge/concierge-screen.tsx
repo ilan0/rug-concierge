@@ -19,10 +19,12 @@ import type {
   UiRecommendationItem,
 } from "@/lib/types/chat-ui";
 import { getUiRole, setUiRole, syncRoleCookie } from "@/lib/ui/role-session";
+import { UI_ROLES } from "@/lib/ui/roles";
 import {
   DEFAULT_TRADE_SUPPORT_CONTEXT,
   type TradeSupportDraftContext,
 } from "@/lib/types/trade-ui";
+import { canRoleUseReviewControls } from "@/lib/auth/policy";
 
 type DebugTraceSummary = {
   routeTrace: unknown | null;
@@ -148,7 +150,11 @@ export function ConciergeScreen({
     const storedRole = getUiRole();
     if (!storedRole) return;
     if (variant === "trade") {
-      if (storedRole === "trade_client" || storedRole === "store_staff") {
+      if (
+        storedRole === "trade_client" ||
+        storedRole === "store_staff" ||
+        storedRole === "developer"
+      ) {
         setRole(storedRole);
       }
       return;
@@ -170,6 +176,18 @@ export function ConciergeScreen({
   const starterPrompts = useMemo(
     () =>
       variant === "trade" ? STARTER_PROMPTS_TRADE : STARTER_PROMPTS_CONCIERGE,
+    [variant]
+  );
+  const roleOptions = useMemo(
+    () =>
+      variant === "trade"
+        ? UI_ROLES.filter(
+            (candidate) =>
+              candidate === "trade_client" ||
+              candidate === "store_staff" ||
+              candidate === "developer"
+          )
+        : UI_ROLES,
     [variant]
   );
 
@@ -368,7 +386,7 @@ export function ConciergeScreen({
     .reverse()
     .find((turn) => turn.role === "assistant")?.responseMode;
 
-  const canUseReviewControls = role === "store_staff" && Boolean(sessionId);
+  const canUseReviewControls = canRoleUseReviewControls(role) && Boolean(sessionId);
 
   const onReviewAction = async (
     action: "approve" | "reject" | "regenerate" | "override"
@@ -519,18 +537,11 @@ export function ConciergeScreen({
               onChange={(event) => void onRoleChange(event.target.value as UiRole)}
               disabled={isLoading}
             >
-              {variant === "trade" ? (
-                <>
-                  <option value="trade_client">trade_client</option>
-                  <option value="store_staff">store_staff</option>
-                </>
-              ) : (
-                <>
-                  <option value="retail_customer">retail_customer</option>
-                  <option value="trade_client">trade_client</option>
-                  <option value="store_staff">store_staff</option>
-                </>
-              )}
+              {roleOptions.map((roleOption) => (
+                <option value={roleOption} key={roleOption}>
+                  {roleOption}
+                </option>
+              ))}
             </select>
           </label>
           <button
@@ -838,7 +849,8 @@ export function ConciergeScreen({
                   <h3>Review Controls</h3>
                   {!canUseReviewControls ? (
                     <p>
-                      Review controls are available only for <code>store_staff</code>.
+                      Review controls are available only for{" "}
+                      <code>store_staff</code> or <code>developer</code>.
                     </p>
                   ) : (
                     <>

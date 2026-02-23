@@ -58,13 +58,17 @@ export function getChatLayerPreview(input: {
   const layers: PromptLayerId[] = [PROMPT_LAYER.systemBase];
   if (input.role === "trade_client") {
     layers.push(PROMPT_LAYER.roleTrade);
-  } else if (input.role === "store_staff") {
+  } else if (input.role === "store_staff" || input.role === "developer") {
     layers.push(PROMPT_LAYER.roleStaff);
   } else {
     layers.push(PROMPT_LAYER.roleRetail);
   }
 
-  if (input.mode === "appraisal" && input.role !== "store_staff") {
+  if (
+    input.mode === "appraisal" &&
+    input.role !== "store_staff" &&
+    input.role !== "developer"
+  ) {
     layers.push(PROMPT_LAYER.securityRoleModeMismatch);
   } else if (input.mode === "appraisal") {
     layers.push(PROMPT_LAYER.taskAppraisal);

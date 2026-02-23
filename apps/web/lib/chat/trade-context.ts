@@ -10,12 +10,16 @@ type UpdateTradeContextInput = {
 // PSEUDOCODE
 // Build trade context each turn.
 // Request-provided preferences override previous session values.
-// Non-trade roles always get empty trade context.
+// Roles without trade support always get empty trade context.
 export function updateTradeContextForTurn(
   session: SessionData,
   input: UpdateTradeContextInput
 ): SessionData {
-  if (input.role !== "trade_client") {
+  if (
+    input.role !== "trade_client" &&
+    input.role !== "store_staff" &&
+    input.role !== "developer"
+  ) {
     return {
       ...session,
       trade_context: {

@@ -119,7 +119,7 @@ export function AppraisalScreen() {
             ready for future PDF workflows.
           </p>
         </div>
-        <div className="appraisal-role-chip">Role locked: store_staff</div>
+        <div className="appraisal-role-chip">Role locked: store_staff / developer</div>
       </header>
 
       <section className="appraisal-summary-chips" aria-label="Appraisal summary">

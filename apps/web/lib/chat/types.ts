@@ -5,8 +5,9 @@ import type {
   AppraisalInput,
 } from "@/lib/types/appraisal";
 import type { E2eTraceMeta } from "@/lib/qa/e2e-trace";
+import type { AppRole } from "@/lib/auth/roles";
 
-export type RoleType = "retail_customer" | "trade_client" | "store_staff";
+export type RoleType = AppRole;
 
 export type ChatMode = "general_chat" | "recommendation" | "appraisal";
 
@@ -122,10 +123,10 @@ export type GeneralChatResponse = {
   notes: string | null;
 };
 
-export type RecommendationTurnResponse = RecommendationResponse & {
+export type RecommendationTurnResponse = Omit<RecommendationResponse, "mode"> & {
   mode: "recommendation" | "clarifying_question" | "no_match";
 };
 
-export type AppraisalTurnResponse = AppraisalDraftResponse & {
+export type AppraisalTurnResponse = Omit<AppraisalDraftResponse, "mode"> & {
   mode: "appraisal";
 };

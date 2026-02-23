@@ -1,7 +1,9 @@
 import Link from "next/link";
+import { WorkspaceNav } from "@/components/shell/workspace-nav";
 import { listInventory } from "@/lib/inventory/list";
 import { isDefaultInventoryFilters } from "@/lib/inventory/filters";
 import { getServerUiRole } from "@/lib/ui/server-role";
+import { canRoleAccessRoute } from "@/lib/auth/policy";
 
 type InventoryPageProps = {
   searchParams?:
@@ -53,11 +55,11 @@ function buildQueryString(input: Record<string, string | number | null | undefin
 
 export default async function InventoryPage({ searchParams }: InventoryPageProps) {
   const role = await getServerUiRole();
-  if (role !== "store_staff") {
+  if (!role || !canRoleAccessRoute(role, "/inventory")) {
     return (
       <main className="ui-shell role-guard role-guard-blocked">
         <h1>Inventory Browser</h1>
-        <p>This page is available only to store staff.</p>
+        <p>This page is available only to store staff and developers.</p>
         <Link href="/">Go Home to switch role</Link>
       </main>
     );
@@ -140,8 +142,10 @@ export default async function InventoryPage({ searchParams }: InventoryPageProps
   };
 
   return (
-    <main className="ui-shell ui-showroom inventory-page inventory-showroom">
-      <header className="ui-header inventory-header">
+    <>
+      <WorkspaceNav role={role} currentPath="/inventory" />
+      <main className="ui-shell ui-showroom inventory-page inventory-showroom">
+        <header className="ui-header inventory-header">
         <div>
           <p className="ui-kicker inventory-eyebrow">Owner Transparency</p>
           <h1>Inventory Browser</h1>
@@ -150,10 +154,9 @@ export default async function InventoryPage({ searchParams }: InventoryPageProps
           </p>
         </div>
         <div className="inventory-header-actions">
-          <Link href="/">Back Home</Link>
           <Link href={`${pageBase}&page=1`}>Refresh</Link>
         </div>
-      </header>
+        </header>
 
       <section className="inventory-meta">
         <span>
@@ -364,6 +367,7 @@ export default async function InventoryPage({ searchParams }: InventoryPageProps
           <span>Next</span>
         )}
       </footer>
-    </main>
+      </main>
+    </>
   );
 }

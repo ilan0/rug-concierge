@@ -29,6 +29,7 @@ This is a quick, practical reference for what you’ll edit first, where things 
   - Return structured output
 - Chat endpoint (mode routing): `apps/web/app/api/chat/route.ts`
 - Appraisal generation endpoint (staff-only): `apps/web/app/api/appraisal/generate/route.ts`
+- Debug trace endpoint (developer-only): `apps/web/app/api/debug/trace/route.ts`
 - UI role cookie sync endpoint: `apps/web/app/api/ui-role/route.ts`
 
 ### Supabase
@@ -44,6 +45,7 @@ This is a quick, practical reference for what you’ll edit first, where things 
 - AI appraisal draft generation: `apps/web/lib/ai/appraisal.ts`
 - Trade/project chat context: `apps/web/lib/chat/trade-context.ts`
 - Multi-room project context: `apps/web/lib/chat/project-context.ts`
+- Role/capability policy: `apps/web/lib/auth/*`
 - Shared chat UI shell (concierge + trade variant): `apps/web/components/concierge/concierge-screen.tsx`
 
 ### Types
@@ -54,9 +56,12 @@ This is a quick, practical reference for what you’ll edit first, where things 
 
 ## Docs You’ll Reference Most
 
+- Docs index: `docs/README.md`
 - System overview + prompt layers: `docs/design/overview.md`
 - Concierge flow (constraints + ranking + no-match): `docs/design/concierge-flow.md`
 - Appraisal flow: `docs/design/appraisal-flow.md`
+- Chat orchestration map: `docs/design/chat-orchestration.md`
+- Role capability matrix: `docs/design/role-capability-matrix.md`
 - Recommendation prompt: `docs/prompts/recommendation.md`
 - Structured output schema: `docs/prompts/recommendation-structured-output.md`
 - Appraisal prompt: `docs/prompts/appraisal.md`
@@ -121,6 +126,12 @@ npm run dev
 
 ```bash
 npm run qa:e2e-smoke
+```
+
+Run a single smoke case:
+
+```bash
+npm run qa:e2e-smoke -- --case "recommend browse request returns contract"
 ```
 
 3) Open generated report:

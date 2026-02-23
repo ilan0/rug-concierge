@@ -1,11 +1,11 @@
 import { cookies } from "next/headers";
-import type { UiRole } from "@/lib/types/chat-ui";
-import { isUiRole } from "@/lib/ui/roles";
+import type { AppRole } from "@/lib/auth/roles";
+import { isAppRole } from "@/lib/auth/roles";
 import { uiRoleCookieName } from "@/lib/ui/role-session";
 
-export async function getServerUiRole(): Promise<UiRole | null> {
+export async function getServerUiRole(): Promise<AppRole | null> {
   const cookieStore = await cookies();
   const raw = cookieStore.get(uiRoleCookieName)?.value;
-  if (!raw || !isUiRole(raw)) return null;
+  if (!raw || !isAppRole(raw)) return null;
   return raw;
 }

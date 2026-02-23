@@ -10,7 +10,17 @@ import {
   syncRoleCookie,
 } from "@/lib/ui/role-session";
 import { getAllowedRoutesForRole } from "@/lib/ui/role-permissions";
-import { UI_ROLES, uiRoleLabel } from "@/lib/ui/roles";
+import { UI_ROLES, isUiRole, uiRoleLabel } from "@/lib/ui/roles";
+
+const ROLE_SWITCHER_ENABLED =
+  process.env.NEXT_PUBLIC_ENABLE_ROLE_SWITCHER === "1" ||
+  process.env.NODE_ENV !== "production";
+
+const DEFAULT_PILOT_ROLE: UiRole = isUiRole(
+  process.env.NEXT_PUBLIC_PILOT_DEFAULT_ROLE
+)
+  ? process.env.NEXT_PUBLIC_PILOT_DEFAULT_ROLE
+  : "store_staff";
 
 export function HomeScreen() {
   const [role, setRoleState] = useState<UiRole | null>(null);
@@ -18,7 +28,28 @@ export function HomeScreen() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    setRoleState(getUiRole());
+    const storedRole = getUiRole();
+    if (storedRole) {
+      setRoleState(storedRole);
+      return;
+    }
+
+    if (!ROLE_SWITCHER_ENABLED) {
+      const nextRole = DEFAULT_PILOT_ROLE;
+      setRoleState(nextRole);
+      setIsSyncing(true);
+      setUiRole(nextRole);
+      void syncRoleCookie(nextRole)
+        .catch(() => {
+          setError("Unable to initialize pilot role on this device.");
+        })
+        .finally(() => {
+          setIsSyncing(false);
+        });
+      return;
+    }
+
+    setRoleState(null);
   }, []);
 
   const cards = useMemo(() => (role ? getAllowedRoutesForRole(role) : []), [role]);
@@ -63,29 +94,35 @@ export function HomeScreen() {
 
       <section className="home-role-panel ui-card">
         <div>
-          <h2>Select Role</h2>
+          <h2>{ROLE_SWITCHER_ENABLED ? "Select Role" : "Pilot Role"}</h2>
           <p>
             Current role: <strong>{role ? uiRoleLabel(role) : "Not selected"}</strong>
           </p>
         </div>
-        <div className="home-role-buttons">
-          {UI_ROLES.map((roleOption) => (
-            <button
-              key={roleOption}
-              type="button"
-              className={
-                role === roleOption ? "home-role-btn ui-btn active" : "home-role-btn ui-btn"
-              }
-              onClick={() => chooseRole(roleOption)}
-              disabled={isSyncing}
-            >
-              {uiRoleLabel(roleOption)}
+        {ROLE_SWITCHER_ENABLED ? (
+          <div className="home-role-buttons">
+            {UI_ROLES.map((roleOption) => (
+              <button
+                key={roleOption}
+                type="button"
+                className={
+                  role === roleOption ? "home-role-btn ui-btn active" : "home-role-btn ui-btn"
+                }
+                onClick={() => chooseRole(roleOption)}
+                disabled={isSyncing}
+              >
+                {uiRoleLabel(roleOption)}
+              </button>
+            ))}
+            <button type="button" className="home-role-btn ui-btn ghost" onClick={clearRole}>
+              Clear Role
             </button>
-          ))}
-          <button type="button" className="home-role-btn ui-btn ghost" onClick={clearRole}>
-            Clear Role
-          </button>
-        </div>
+          </div>
+        ) : (
+          <p className="home-role-helper">
+            Role switching is hidden in pilot mode for a simpler owner experience.
+          </p>
+        )}
         {error ? <p className="home-role-error">{error}</p> : null}
       </section>
 

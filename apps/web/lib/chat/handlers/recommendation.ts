@@ -8,6 +8,8 @@ import type {
 export async function handleRecommendationTurn(
   input: ChatTurnHandlerInput
 ): Promise<RecommendationTurnResponse> {
+  const promptRole = input.role === "developer" ? "store_staff" : input.role;
+
   if (input.review_action === "approve") {
     return {
       mode: "recommendation",
@@ -74,9 +76,9 @@ export async function handleRecommendationTurn(
     userMessage: `${input.message}${regenerateInstruction}`.trim(),
     constraints,
     promptContext: {
-      role: input.role,
+      role: promptRole,
       trade_preferences:
-        input.role === "trade_client"
+        promptRole === "trade_client"
           ? input.session.trade_context.preferences
           : undefined,
       project_context: {
@@ -94,7 +96,7 @@ export async function handleRecommendationTurn(
           ...input.trace_meta,
           source_route: "/api/chat",
           session_id: input.session.session_id,
-          role: input.role,
+          role: promptRole,
         }
       : undefined,
   });

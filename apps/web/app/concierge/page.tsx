@@ -1,6 +1,7 @@
-import Link from "next/link";
 import { ConciergeScreen } from "@/components/concierge/concierge-screen";
+import { WorkspaceNav } from "@/components/shell/workspace-nav";
 import { getServerUiRole } from "@/lib/ui/server-role";
+import { canRoleReadDebugTrace } from "@/lib/auth/policy";
 
 type ConciergePageProps = {
   searchParams?:
@@ -19,21 +20,20 @@ function readString(
 export default async function ConciergePage({ searchParams }: ConciergePageProps) {
   const role = await getServerUiRole();
   const params = (await searchParams) ?? {};
-  const debug = readString(params.debug) === "1";
+  const debugAllowed = role ? canRoleReadDebugTrace(role) : false;
+  const debug = debugAllowed && readString(params.debug) === "1";
 
   return (
     <>
-      <div className="ui-nav concierge-nav">
-        <Link href="/">Home</Link>
-        {role === "trade_client" || role === "store_staff" ? (
-          <Link href="/trade">Trade</Link>
-        ) : null}
-        {role === "store_staff" ? <Link href="/inventory">Inventory</Link> : null}
-        {role === "store_staff" ? <Link href="/appraisal">Appraisal</Link> : null}
-        <Link href={debug ? "/concierge" : "/concierge?debug=1"}>
-          {debug ? "Debug Off" : "Debug On"}
-        </Link>
-      </div>
+      <WorkspaceNav
+        role={role}
+        currentPath="/concierge"
+        debugToggle={{
+          enabled: debug,
+          hrefOn: "/concierge?debug=1",
+          hrefOff: "/concierge",
+        }}
+      />
       <ConciergeScreen debug={debug} />
     </>
   );

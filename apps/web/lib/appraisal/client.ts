@@ -1,16 +1,18 @@
 import type { AppraisalDraftResponse } from "@/lib/types/appraisal";
 import type { AppraisalInput } from "@/lib/types/appraisal";
+import { getUiRole } from "@/lib/ui/role-session";
 
 export async function generateAppraisalDraftClient(
   appraisalContext: AppraisalInput
 ): Promise<AppraisalDraftResponse> {
+  const activeRole = getUiRole() ?? "store_staff";
   const response = await fetch("/api/appraisal/generate", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      role: "store_staff",
+      role: activeRole,
       appraisal_context: appraisalContext,
     }),
   });

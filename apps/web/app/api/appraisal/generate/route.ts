@@ -4,12 +4,14 @@ import {
   parseE2eTraceMeta,
   writeE2eTraceArtifact,
 } from "@/lib/qa/e2e-trace";
+import { resolveRequestRole } from "@/lib/auth/request-role";
+import { canRoleGenerateAppraisal } from "@/lib/auth/policy";
 import type { AppraisalInput } from "@/lib/types/appraisal";
 import type { RoleType } from "@/lib/chat/types";
 
 /**
  * POST /api/appraisal/generate
- * Staff-only endpoint for generating structured appraisal drafts.
+ * Staff/developer endpoint for generating structured appraisal drafts.
  * This response is designed to be stable for future PDF/export mapping.
  */
 export async function POST(req: Request) {
@@ -40,7 +42,31 @@ export async function POST(req: Request) {
     return response;
   }
 
-  if (body.role !== "store_staff") {
+  const roleResolution = await resolveRequestRole({
+    requestedRole: body.role,
+    defaultRole: "retail_customer",
+  });
+  if (roleResolution.mismatch) {
+    const response = NextResponse.json(
+      { error: "Role mismatch between cookie and request payload." },
+      { status: 403 }
+    );
+    if (traceMeta) response.headers.set("x-appraisal-trace-id", traceId);
+    return response;
+  }
+  if (
+    roleResolution.source !== "cookie" &&
+    (roleResolution.role === "store_staff" || roleResolution.role === "developer")
+  ) {
+    const response = NextResponse.json(
+      { error: "Privileged roles require a synced role cookie from the UI session." },
+      { status: 403 }
+    );
+    if (traceMeta) response.headers.set("x-appraisal-trace-id", traceId);
+    return response;
+  }
+
+  if (!canRoleGenerateAppraisal(roleResolution.role)) {
     if (traceMeta) {
       await writeE2eTraceArtifact({
         meta: traceMeta,
@@ -51,16 +77,21 @@ export async function POST(req: Request) {
             "/api/appraisal/generate POST",
             "role_check_failed_non_staff_block",
           ],
-          request: body,
+          request: {
+            ...body,
+            resolved_role: roleResolution.role,
+          },
           response: {
             status: 403,
-            body: { error: "Appraisal generation is available only for store staff." },
+            body: {
+              error: "Appraisal generation is available only for store staff or developer.",
+            },
           },
         },
       });
     }
     const response = NextResponse.json(
-      { error: "Appraisal generation is available only for store staff." },
+      { error: "Appraisal generation is available only for store staff or developer." },
       { status: 403 }
     );
     if (traceMeta) response.headers.set("x-appraisal-trace-id", traceId);

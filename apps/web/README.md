@@ -7,6 +7,9 @@ This app is the primary UI shell for Rug Concierge MVP.
 - `/`:
   - role selection + workspace entry
   - selected role controls visible routes and access
+  - developer role option is controlled by `NEXT_PUBLIC_ENABLE_DEVELOPER_ROLE`
+  - role switcher visibility is controlled by `NEXT_PUBLIC_ENABLE_ROLE_SWITCHER`
+  - when role switcher is hidden, `NEXT_PUBLIC_PILOT_DEFAULT_ROLE` is auto-synced
 - `/concierge`:
   - main customer-facing input flow
   - posts user turns to `/api/chat`
@@ -29,6 +32,18 @@ This app is the primary UI shell for Rug Concierge MVP.
 - `/api/chat`
 - `/api/recommend`
 - `/api/appraisal/generate`
+- `/api/debug/trace` (developer-only trace reader)
+- `/api/ui-role` (syncs role cookie used by API authorization)
+
+## Role Policy
+
+- Central role/capability policy lives in:
+  - `/apps/web/lib/auth/roles.ts`
+  - `/apps/web/lib/auth/capabilities.ts`
+  - `/apps/web/lib/auth/policy.ts`
+  - `/apps/web/lib/auth/request-role.ts`
+- API routes resolve role from cookie first and reject cookie/body mismatch.
+- Privileged roles (`store_staff`, `developer`) require cookie-resolved role.
 
 ## Styling Standard (Global)
 
@@ -55,8 +70,21 @@ Pattern for new pages:
 </main>
 ```
 
+## Shared Workspace Shell
+
+- Shared role-aware navigation:
+  - `/apps/web/components/shell/workspace-nav.tsx`
+- Used by concierge/trade/inventory/appraisal pages for consistent workspace routing.
+
 ## Local Run
 
 ```bash
 npm run dev
+```
+
+## Build Validation
+
+```bash
+npm --workspace apps/web run lint
+npm --workspace apps/web run build
 ```

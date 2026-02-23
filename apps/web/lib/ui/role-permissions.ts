@@ -1,7 +1,11 @@
 import type { UiRole } from "@/lib/types/chat-ui";
+import {
+  canRoleAccessRoute,
+  type AppRoutePath,
+} from "@/lib/auth/policy";
 
 export type UiRouteCard = {
-  href: "/concierge" | "/trade" | "/inventory" | "/appraisal";
+  href: AppRoutePath;
   title: string;
   description: string;
 };
@@ -33,20 +37,13 @@ const ALL_ROUTE_CARDS: UiRouteCard[] = [
   },
 ];
 
-const ROLE_ALLOWED_ROUTES: Record<UiRole, UiRouteCard["href"][]> = {
-  retail_customer: ["/concierge"],
-  trade_client: ["/concierge", "/trade"],
-  store_staff: ["/concierge", "/trade", "/inventory", "/appraisal"],
-};
-
 export function getAllowedRoutesForRole(role: UiRole): UiRouteCard[] {
-  const allowed = new Set(ROLE_ALLOWED_ROUTES[role]);
-  return ALL_ROUTE_CARDS.filter((card) => allowed.has(card.href));
+  return ALL_ROUTE_CARDS.filter((card) => canRoleAccessRoute(role, card.href));
 }
 
 export function roleCanAccessRoute(
   role: UiRole,
   route: UiRouteCard["href"]
 ): boolean {
-  return ROLE_ALLOWED_ROUTES[role].includes(route);
+  return canRoleAccessRoute(role, route);
 }

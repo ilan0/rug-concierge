@@ -1,6 +1,7 @@
 import type { HardConstraints } from "@/lib/types/recommendation";
+import type { AppRole } from "@/lib/auth/roles";
 
-export type UiRole = "retail_customer" | "trade_client" | "store_staff";
+export type UiRole = AppRole;
 
 export type UiProjectRoomContext = {
   room_id: string;

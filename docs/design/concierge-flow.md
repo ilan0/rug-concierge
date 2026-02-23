@@ -1,230 +1,79 @@
 # Concierge Flow (v1)
 
-## Entry Rule
+Recommendation flow is backend-first and inventory-grounded.
 
-All user messages route to backend first.
+## Entry Contract
 
-- If backend classifies the message as general chat, this flow is not used.
-- This flow is used only when backend classifies the message as a recommendation request.
-- If intent is unclear, backend asks clarifying question(s) first.
+- All chat messages go to backend first.
+- Router decides whether the turn is:
+  - `general_chat`
+  - `recommendation`
+  - `appraisal`
+- This flow applies only to recommendation turns.
+- If intent is ambiguous, backend returns a clarifying question before running recommendation.
 
-## Quick 6-Step Flow
+## Recommendation Pipeline (Current)
 
-1. Parse request + extract any constraints/preferences
-2. Backend applies SQL-first filtering (availability always; budget/size when provided)
-3. Backend applies final deterministic hard checks (tolerance + rotation + safety)
-4. Shape candidate set (bounded deterministic order for AI context)
-5. If 0 results → no-match + suggest one adjustment
-6. If results → AI picks top options + reasons
-7. Follow-ups (new constraints/preferences) rerun from step 1
+1. Parse request body and merge constraints:
+   - explicit constraints from request
+   - inferred hard constraints from message text
+   - session/project context where applicable
+2. SQL-first Supabase query with active hard constraints.
+3. Deterministic in-code hard check pass (safety + tolerance + rotation).
+4. Candidate shaping (bounded deterministic set).
+5. If no candidates -> `no_match`.
+6. If candidates exist -> AI ranking/explanation over candidate set only.
+7. Backend sanitizes and normalizes AI output to strict schema.
+8. Backend applies deterministic confidence and `why_not` fields.
 
----
+## Hard Constraints (Eliminators)
 
-## Modes
+- availability (always)
+- size (when provided, with tolerance and rotation support)
+- budget (when provided; sale/list logic handled in pipeline)
 
-### A) General Chat (Freeform)
+## Soft Signals (Ranking Only)
 
-Use when the user is not asking to match inventory (education, care, policies, etc.).
-
-Prompts:
-- docs/prompts/system.md
-
-Output:
-- plain text
-
----
-
-### B) Concierge Recommendations (Structured)
-
-Use when the user is asking for rugs that fit constraints (size/budget/style/etc.).
-
-Prompts (always in this order):
-- docs/prompts/system.md
-- docs/prompts/recommendation.md
-- docs/prompts/recommendation-structured-output.md
-- Optional: docs/prompts/trade-support.md (trade role only)
-- Optional: trade preferences context block (when preferences exist)
-- Inventory context (SQL-filtered candidate set)
-- User request block (includes hard constraints + project context snapshot)
-
-Output:
-- JSON only (UI renders assistant_message + rug cards)
-
----
-
-## Hard Constraints (Objective)
-
-Hard constraints are the only rules that can eliminate candidates in v1.
-Some are always active; some are conditional:
-
-1. **Availability**
-   - Rugs must be currently available (e.g., `status = available`)
-
-2. **Budget**
-   - Active only when budget is provided
-   - Rugs must fit within the stated budget limits
-   - If a sale price exists, it is used instead of list price
-
-3. **Size**
-   - Active only when size is provided
-   - Size may be provided as a label (e.g., “8x10”) or explicit dimensions
-   - Rugs may be rotated; width and length are interchangeable
-   - A small tolerance is allowed to account for handmade variation
-
-Backend filtering applies these constraints **before** the AI sees inventory.
-
-### Soft Preferences (Never Hard Filters)
-
-These guide ranking and explanations only:
-- room / use case
-- practical needs (pets, kids, durability, thickness)
 - style
-- palette / color
-- pattern
-- subjective aesthetic preferences
+- palette/color
+- room/use-case
+- practical preference language
+- trade preferences
 
----
+Soft signals never remove candidates.
 
 ## Browse Behavior (No Size/Budget)
 
-When size and budget are not provided:
-- recommendation mode remains valid
-- backend still enforces availability (SQL-first)
-- backend can return a bounded browse shortlist instead of forcing clarifying questions
-- AI explains options and can optionally ask one narrowing question
+- Recommendation mode is still valid.
+- Backend still enforces availability.
+- Candidate set is built for variety and passed to AI for ranking/explanation.
+- Optional clarifying question can follow if useful.
 
----
+## Prompt Layering (Recommendation Mode)
 
-## Ranking Logic (Soft Layer)
+Runtime layer order:
+1. system prompt (`docs/prompts/system.md`)
+2. recommendation task prompt (`docs/prompts/recommendation.md`)
+3. structured-output guidance prompt (`docs/prompts/recommendation-structured-output.md`)
+4. optional trade-support prompt (`docs/prompts/trade-support.md`) for trade role
+5. optional trade preferences context block
+6. inventory candidate context block
+7. latest user request block (with hard constraints + project context snapshot)
 
-Ranking happens **after** hard constraints are applied and must never eliminate rugs.
+Important:
+- API-level JSON schema (`strict: true`) is the hard response contract.
+- Prompt structured-output instructions are guidance, not the enforcement mechanism.
 
-### Goals
+## Output Contract
 
-- Surface the best-fitting rugs first
-- Make recommendations feel curated and honest
-- Support follow-ups without restarting the flow
+Recommendation endpoint output modes:
+- `recommendations`
+- `clarifying_question`
+- `no_match`
 
-### What Ranking Uses
+Chat route maps recommendation output for chat UI response handling while preserving recommendation state.
 
-Ranking is based only on:
-- the current user request
-- explicit rug attributes
-- optional trade workflow context (not taste)
+## No-Match Rule
 
-No assumptions or inferred preferences are allowed.
-
-### Ranking Priorities (v1)
-
-1. **Match to current request**
-   - stated style, palette, or pattern preferences
-   - stated durability needs (pets, traffic)
-
-2. **Practical fit (soft guidance only)**
-   - room/use context influences ranking
-   - never eliminates rugs
-
-3. **Trade workflow alignment (if applicable)**
-   - spec completeness
-   - availability sensitivity
-   - typical project scale
-
-4. **Tie-breakers**
-   - clearer descriptions
-   - images available
-   - controlled variety across options
-
-### Follow-Up Behavior
-
-- Follow-ups re-rank the same candidate set
-- New preferences update ranking
-- Size or budget changes trigger re-filtering
-
-### Explainability
-
-Each recommendation must include 2–3 short reasons
-based on real rug attributes and the stated request.
-
----
-
-## No-Match Logic (Objective)
-
-No-match is returned only when the **backend candidate set is empty** after active hard constraints.
-
-Required behavior:
-- clearly state that nothing fits available inventory
-- if applicable, name the limiting hard constraint(s) (size/budget/availability)
-- suggest one adjustment or ask at most one clarifying question
-
-Structured output:
-- `mode = "no_match"`
-- `recommendations = []`
-- `assistant_message` explains the limitation
-- `questions` may include 0–1 adjustment question
-
----
-
-## Inventory Context
-
-In recommendation mode, the backend injects an "AVAILABLE INVENTORY" JSON list.
-The assistant must recommend ONLY from this list.
-
----
-
-## Implementation Reference (Optional)
-
-Message stack:
-
-```js
-const messages = [
-  { role: "system", content: AI_SYSTEM_PROMPT },
-  { role: "system", content: RECOMMENDATION_PROMPT_V1 },
-  { role: "system", content: STRUCTURED_OUTPUT_ADDON },
-
-  // Optional: trade support instructions for trade role
-  { role: "system", content: TRADE_SUPPORT_PROMPT },
-
-  // Optional: trade preferences context injected when present
-  { role: "system", content: TRADE_PREFERENCES_CONTEXT_BLOCK },
-
-  { role: "system", content: INVENTORY_CONTEXT_BLOCK }, // hard-coded seed inventory (for now)
-  { role: "user",   content: USER_REQUEST_WITH_HARD_AND_PROJECT_CONTEXT }
-];
-```
-
-Inventory context block (example):
-
-```js
-const INVENTORY_CONTEXT_BLOCK = `
-AVAILABLE INVENTORY (authoritative – recommend ONLY from this list):
-
-${JSON.stringify(
-  inventoryRows.map(rug => ({
-    id: rug.id,
-    sku: rug.sku,
-    label: rug.intake_label,
-    size: {
-      width_ft: rug.width_ft,
-      width_in: rug.width_in,
-      length_ft: rug.length_ft,
-      length_in: rug.length_in,
-      width_total_in: rug.width_total_in,
-      length_total_in: rug.length_total_in
-    },
-    price_usd: rug.price,
-    style: rug.style,
-    origin_country: rug.origin_country,
-    condition: rug.condition,
-    palette: rug.palette,
-    pattern: rug.pattern,
-    notes: rug.public_description ?? null
-  })),
-  null,
-  2
-)}
-`;
-```
-
-Why normalize fields:
-- prevent the AI from latching onto internal data
-- control which facts are allowed to appear in recommendations
+`no_match` is returned only when backend candidate set is empty after hard filtering.
+The response explains the limiting factor and can include at most one follow-up question.

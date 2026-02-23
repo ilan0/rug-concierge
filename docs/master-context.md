@@ -1,128 +1,147 @@
 # Rug Concierge Master Context
 
-This file is the source of truth for starting a fresh chat.
+This file is the one-page source of truth for a fresh chat.
 
-## Product
+## Product Goal
 
 Build an AI Rug Concierge for independent rug stores that:
 - recommends rugs from real inventory
-- supports retail + trade workflows
-- drafts appraisal text for internal review
+- supports retail and trade workflows
+- drafts appraisal documents for internal staff workflows
 
-Primary objective: trust and correctness over aggressive recommendations.
+Primary objective: trust, correctness, and operational usefulness.
 
 ## Non-Negotiables
 
 - Inventory is the source of truth.
-- Backend enforces active hard constraints.
-- AI ranks and explains only after backend candidate selection.
-- No-match is a valid outcome.
+- User chat always goes to backend first.
+- Backend owns routing, policy checks, and hard filtering.
+- AI ranks/explains only after backend candidate selection.
 - AI must not invent inventory facts.
-- User messages are routed through backend first (not directly to AI).
+- `no_match` is a valid outcome.
 
-## Chat Routing Contract (v1)
+## Current Runtime Surfaces
 
-- UI sends user messages to backend.
-- Backend decides mode:
-  - `general_chat` for education/care/policy conversation
-  - `recommendation` for inventory matching requests
-  - `appraisal` for appraisal draft generation requests (store staff only)
-- In `general_chat`, backend returns freeform assistant text.
-- In `recommendation`, backend runs the recommendation pipeline and returns structured output.
-- In `appraisal`, backend enforces role access (`store_staff`) and returns structured appraisal draft output.
-- If intent is unclear, backend asks clarifying question(s) before recommendation.
+- UI pages: `/`, `/concierge`, `/trade`, `/inventory`, `/appraisal`
+- API routes:
+  - `/api/chat`
+  - `/api/recommend`
+  - `/api/appraisal/generate`
+  - `/api/debug/trace` (developer-only)
+  - `/api/ui-role` (cookie sync)
 
-Hard constraints (eliminators):
-- availability (always)
-- budget (when provided)
-- size (when provided, with tolerance and rotation)
+## Role + Capability Model (Current)
 
-Soft signals (ranking only):
-- style
-- palette/color
-- room/use-case
-- practical needs
-- other preference language
+Roles:
+- `retail_customer`
+- `trade_client`
+- `store_staff`
+- `developer`
 
-## Recommendation Pipeline (Current)
+Policy source of truth:
+- `apps/web/lib/auth/roles.ts`
+- `apps/web/lib/auth/capabilities.ts`
+- `apps/web/lib/auth/policy.ts`
+- `apps/web/lib/auth/request-role.ts`
 
-1. Parse request.
-2. Extract any stated constraints (from explicit fields and/or user text).
-3. Query Supabase with SQL-first hard-constraint filters.
-4. Apply final deterministic filtering in code (availability + optional budget/size).
-5. Shape candidate set for AI context (bounded + deterministic cap).
-6. If candidate set is empty, return `no_match`.
-7. Else pass candidates to AI for ranking + explanation.
-8. Run deterministic backend post-processing on AI output:
-   - grounded `match_reasons`
-   - deterministic `confidence`
-   - `confidence_tier` + `confidence_factors`
-   - `why_not` objection-handling notes
-9. Return structured output for UI rendering.
+Authorization rules:
+- Server resolves role from cookie first (`rug_ui_role`), request role second.
+- Cookie/request mismatch is `403`.
+- Privileged roles (`store_staff`, `developer`) require cookie-resolved role.
 
-Rules:
-- Browse without size/budget is valid.
-- Supabase query is SQL-first and applies active hard constraints before AI.
-- In-code hard filter still runs after query for exact tolerance + rotation + safety.
-- Candidate set sent to AI should be bounded (roughly 20-30) and deterministically ordered.
-- No-match is only when backend candidate set is empty.
-- `/api/chat` recommendation turns and `/api/recommend` both use the same shared backend pipeline.
+## Chat Routing Contract (Current)
 
-## OpenAI Direction
-- Do not use vector store / RAG for inventory recommendations.
-- Use DB-filtered candidates as model context.
-- Use structured output schema for deterministic responses.
-- Runtime recommendation prompt layers are sourced from official docs prompts:
-  - `docs/prompts/system.md`
-  - `docs/prompts/recommendation.md`
-  - `docs/prompts/recommendation-structured-output.md`
-  - `docs/prompts/trade-support.md` (trade role only)
+Single entry: `POST /api/chat`
 
-## Architecture Choices (Current)
+Per turn:
+1. Validate request.
+2. Resolve/enforce role.
+3. Load or create session.
+4. Update recommendation, trade, and project context.
+5. Route mode via router table:
+   - `general_chat`
+   - `recommendation`
+   - `appraisal`
+6. Run mode handler.
+7. Persist updated session.
+8. Return session envelope + handler response.
 
-- Next.js App Router + TypeScript
-- Supabase (Postgres + Auth + Storage)
-- Vercel target hosting
-- Single monorepo
-- Multi-tenant with `tenant_id` + RLS model
-- Shared recommendation pipeline module powers both chat and recommendation routes.
-- Session state includes:
-  - recommendation constraints
-  - trade context (preferences + trade client identity metadata)
-  - project context (multi-room workflow with active room)
-- Runtime placement reference: `docs/design/architecture-map.md`
+Router behavior:
+- Review actions force recommendation mode.
+- Appraisal intent routes to appraisal only for roles with `appraisal.generate`.
+- Ambiguous messages with constraint signals return clarifying question path.
 
-## Data Model Direction
+## Session Model (Current)
 
-Core entities are defined in the schema docs (`tenants`, `profiles`, `trade_clients`, `rugs`, `rug_images`, `appraisals`).
-Trade client preferences are workflow/presentation context, not modeled as aesthetic taste rules.
+Session state stores:
+- `chat_history`
+- `recommendation_state` (hard constraints + soft prefs)
+- `trade_context` (trade identity metadata + preferences)
+- `project_context` (multi-room, active room)
+- `review_state` (last recommendations + review actions)
 
-## Reliability / UX Baseline (Current)
+This supports mixed conversations without relying on model memory.
 
-1. Input validation and friendly 400 responses for bad/empty requests.
-2. Error handling with stable error codes and non-crashing fallback paths.
-3. Deterministic fallback responses when OpenAI is unavailable or invalid.
-4. QA logging for recommendation pipeline events.
-5. Smoke/integration tests covering request validation, recommendation contract, trade/project context, and appraisal access control.
+## Recommendation Pipeline (Shared)
 
-## Structured Output Enforcement (Current)
+Used by both `/api/recommend` and recommendation turns in `/api/chat`.
 
-- Prompt instructions are guidance; API `json_schema` with `strict: true` is the hard contract.
-- Backend applies mode-specific normalization after model output:
-  - `clarifying_question` -> recommendations forced empty, 1-2 questions.
-  - `no_match` -> recommendations forced empty, max 1 question.
-  - `recommendations` -> recommendations bounded and questions cleared.
-- Backend sanitization also re-grounds recommendation fields against candidate inventory (IDs, confidence, reasons, caveats).
+1. Parse input + merge constraints (explicit fields + extracted text hints).
+2. Query Supabase with SQL-first hard filters:
+   - availability always
+   - budget when provided
+   - size when provided (tolerance + rotation support)
+3. Apply deterministic in-code hard checks as safety.
+4. Shape bounded candidate set for AI.
+5. If empty: return `no_match`.
+6. If non-empty: send candidate context + prompt layers to AI.
+7. Sanitize and normalize AI output to strict schema.
+8. Apply deterministic confidence, confidence tier/factors, and `why_not`.
+9. Return structured response.
 
-## Testing Artifacts (Current)
+## AI Prompting Direction
 
-- Smoke run outputs:
-  - human report: `docs/testing/e2e-smoke-report.md`
-  - machine report: `docs/testing/e2e-smoke-report.json`
-  - deep trace artifacts: `docs/testing/artifacts/<run-id>/<case-slug>/*.json`
-- Canonical artifact root is `docs/testing` (not app-local docs folders).
-- Deep artifacts include:
-  - flow path/function trace
-  - Supabase query variants + filters + row counts
-  - exact AI request payload and raw/parsed response
-  - timing breakdown and fallback/error signals
+Recommendation prompt stack uses official prompt docs plus runtime context blocks.
+Primary docs:
+- `docs/prompts/system.md`
+- `docs/prompts/recommendation.md`
+- `docs/prompts/recommendation-structured-output.md`
+- `docs/prompts/trade-support.md` (trade role only)
+
+Contract enforcement:
+- API-level `json_schema` (`strict: true`) is the hard output contract.
+- Prompt structured-output instructions are behavior guidance.
+
+## Appraisal Draft Flow (Current)
+
+- Entry: `/api/appraisal/generate` and appraisal mode in `/api/chat`.
+- Allowed roles: `store_staff`, `developer`.
+- Output is a structured draft for human review/export, never final authority.
+
+## Pilot UI Shell (Current)
+
+- Home screen selects role and syncs cookie.
+- Role switcher is environment-controlled for pilot simplicity:
+  - `NEXT_PUBLIC_ENABLE_ROLE_SWITCHER`
+  - `NEXT_PUBLIC_PILOT_DEFAULT_ROLE`
+  - `NEXT_PUBLIC_ENABLE_DEVELOPER_ROLE`
+- Shared role-aware nav component used across workspace pages.
+
+## Testing + QA Artifacts
+
+- Smoke reports:
+  - `docs/testing/e2e-smoke-report.md`
+  - `docs/testing/e2e-smoke-report.json`
+- Deep trace artifacts:
+  - `docs/testing/artifacts/<run-id>/<case-id>/*.json`
+- QA event log:
+  - `docs/testing/qa-log.ndjson`
+
+Canonical testing root: `docs/testing`.
+
+## Pointers
+
+- Architecture/file placement: `docs/design/architecture-map.md`
+- Chat flow map: `docs/design/chat-orchestration.md`
+- Role policy map: `docs/design/role-capability-matrix.md`
+- Recommendation behavior: `docs/design/concierge-flow.md`

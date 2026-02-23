@@ -4,6 +4,7 @@ import type {
   RecommendationState,
   RoleType,
 } from "@/lib/chat/types";
+import { canRoleGenerateAppraisal } from "@/lib/auth/policy";
 
 type RouteTurnModeInput = {
   message: string;
@@ -42,7 +43,7 @@ export function routeTurnMode(input: RouteTurnModeInput): RouteDecision {
   }
 
   if (isAppraisalIntent(text)) {
-    if (input.role === "store_staff") {
+    if (canRoleGenerateAppraisal(input.role)) {
       return {
         mode: "appraisal",
         rule_id: "APPRAISAL_STAFF",

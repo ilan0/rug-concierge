@@ -20,3 +20,10 @@ npm run dev
 ```
 
 The Next.js app lives in `apps/web`.
+
+## Validation
+
+```bash
+npm --workspace apps/web run lint
+npm --workspace apps/web run build
+```

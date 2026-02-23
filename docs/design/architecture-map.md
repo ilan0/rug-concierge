@@ -1,57 +1,63 @@
 # Architecture Map (MVP)
 
-This is the quick orientation map for where code should live.
+Quick placement map for where code and docs belong.
 
 ## Runtime Code
 
 - `apps/web/app`
-  - Next.js routes and pages
-  - API entry points (`/api/chat`, `/api/recommend`, `/api/appraisal/generate`, `/api/ui-role`, etc.)
-  - Primary UI routes (`/`, `/concierge`, `/trade`, `/inventory`, `/appraisal`)
+  - Next.js pages and API route entry points.
+  - Key routes:
+    - UI: `/`, `/concierge`, `/trade`, `/inventory`, `/appraisal`
+    - API: `/api/chat`, `/api/recommend`, `/api/appraisal/generate`, `/api/debug/trace`, `/api/ui-role`
+
 - `apps/web/components`
-  - UI components only (`*-screen.tsx`, cards, forms)
+  - UI components only.
+  - Shared workspace shell/navigation lives under `apps/web/components/shell`.
+
 - `apps/web/lib`
-  - Domain logic, pipeline code, adapters, and shared helpers
-  - Keep side-effect heavy code isolated in clear modules (AI, Supabase, QA trace)
+  - Business/domain logic modules.
+  - Keep route files thin: parse/validate -> call lib module -> return response.
+  - Key domains:
+    - `lib/chat/*` orchestration + state
+    - `lib/recommend/*` shared recommendation pipeline
+    - `lib/ai/*` model adapters
+    - `lib/filters/*` deterministic filtering helpers
+    - `lib/supabase/*` data access
+    - `lib/auth/*` role/capability policy
+    - `lib/qa/*` trace and QA logging
+
 - `apps/web/lib/types`
-  - Shared contracts and response/request types
+  - Shared response/request contracts.
 
 ## Documentation
 
 - `docs/master-context.md`
-  - One-pager source of truth
-- `docs/design`
-  - Flow and architecture decisions
-- `docs/prompts`
-  - Official prompt layers used at runtime
-- `docs/testing`
-  - Reports, eval cases, and testing notes
+  - One-page source of truth.
+- `docs/design/*`
+  - Architecture, routing, and behavior docs.
+- `docs/prompts/*`
+  - Official prompt documents used by runtime prompt builder.
+- `docs/testing/*`
+  - Smoke reports, eval cases, artifacts, and QA logs.
+- `docs/README.md`
+  - Docs index.
 
 ## Scripts
 
-- `scripts`
-  - Local helpers and smoke runs (non-runtime)
-  - Examples: fetch inventory snapshot, run e2e smoke report
+- `scripts/*`
+  - Local non-runtime helpers (inventory snapshot, smoke run).
 
 ## Data / Schema
 
 - `packages/db`
-  - SQL migrations and seed data
+  - SQL migrations and seed scaffolding.
 - `packages/shared`
-  - Shared package code (if needed across apps)
+  - Shared package code when needed across apps.
 
 ## Placement Rules
 
-- Do not add generated artifacts under `apps/web` docs folders.
-- Keep generated QA/e2e files under `docs/testing` only.
-- Keep API route files thin: parse/validate -> call lib module -> return response.
-- Prefer adding new business logic in `apps/web/lib/*` rather than inside route files.
-
-## Canonical Testing Artifact Paths
-
-- `docs/testing/e2e-smoke-report.md`
-- `docs/testing/e2e-smoke-report.json`
-- `docs/testing/artifacts/<run-id>/<case-id>/*.json`
-- `docs/testing/whats-broken.md`
-
-(Generated artifacts and QA logs are intentionally ignored in git.)
+- Keep generated testing artifacts under `docs/testing` only.
+- Do not create app-local docs artifact folders for runtime logs.
+- Keep auth policy centralized in `apps/web/lib/auth/*`.
+- Keep session/routing rules centralized in `apps/web/lib/chat/*`.
+- Reuse the shared recommendation pipeline for any recommendation execution path.

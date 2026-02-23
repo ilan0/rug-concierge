@@ -12,7 +12,12 @@ import {
   parseE2eTraceMeta,
   writeE2eTraceArtifact,
 } from "@/lib/qa/e2e-trace";
-import { badRequest, internalError } from "@/lib/errors/http-errors";
+import { badRequest, forbidden, internalError } from "@/lib/errors/http-errors";
+import { resolveRequestRole } from "@/lib/auth/request-role";
+import {
+  canRoleGenerateAppraisal,
+} from "@/lib/auth/policy";
+import { roleHasCapability } from "@/lib/auth/capabilities";
 import type {
   ChatTurnRequest,
   RecommendationReviewAction,
@@ -46,7 +51,7 @@ export async function POST(req: Request) {
   ];
 
   try {
-    const traceMeta = parseE2eTraceMeta(req);
+    const requestedTraceMeta = parseE2eTraceMeta(req);
     const body = (await req.json().catch(() => null)) as ChatTurnRequest | null;
 
     if (!body || typeof body !== "object") {
@@ -75,9 +80,30 @@ export async function POST(req: Request) {
         ? body.session_id.trim()
         : crypto.randomUUID();
 
-    const role: RoleType = normalizeRole(body.role);
-    if (reviewAction && role !== "store_staff") {
-      return badRequest("review_action is available only for store_staff role.");
+    const roleResolution = await resolveRequestRole({
+      requestedRole: body.role,
+      defaultRole: "retail_customer",
+    });
+    if (roleResolution.mismatch) {
+      return forbidden("Role mismatch between cookie and request payload.");
+    }
+    if (
+      roleResolution.source !== "cookie" &&
+      (roleResolution.role === "store_staff" || roleResolution.role === "developer")
+    ) {
+      return forbidden(
+        "Privileged roles require a synced role cookie from the UI session."
+      );
+    }
+    const role: RoleType = roleResolution.role;
+    const traceMeta = requestedTraceMeta;
+
+    if (!roleHasCapability(role, "chat.general")) {
+      return forbidden("This role is not allowed to use chat.");
+    }
+
+    if (reviewAction && !roleHasCapability(role, "review.controls")) {
+      return forbidden("review_action is available only for staff or developer roles.");
     }
     if (
       reviewAction === "override" &&
@@ -134,7 +160,7 @@ export async function POST(req: Request) {
     const routeDecision = routeTurnMode({
       message: userMessage,
       role,
-      review_action: reviewAction,
+      review_action: reviewAction ?? undefined,
       last_mode:
         nextSession.review_state.last_mode === "recommendations"
           ? "recommendation"
@@ -143,6 +169,12 @@ export async function POST(req: Request) {
       recommendation_state: nextSession.recommendation_state,
     });
     const effectiveMode = routeDecision.mode;
+    if (
+      effectiveMode === "recommendation" &&
+      !roleHasCapability(role, "chat.recommend")
+    ) {
+      return forbidden("This role is not allowed to request recommendations.");
+    }
 
     const handlerInput = {
       message:
@@ -157,7 +189,7 @@ export async function POST(req: Request) {
           ? body.appraisal_context
           : undefined,
       mode: effectiveMode,
-      review_action: reviewAction,
+      review_action: reviewAction ?? undefined,
       override:
         body.override && typeof body.override === "object"
           ? {
@@ -196,8 +228,15 @@ export async function POST(req: Request) {
             }
           : effectiveMode === "recommendation"
             ? await handleRecommendationTurn(handlerInput)
-            : effectiveMode === "appraisal"
-              ? await handleAppraisalTurn(handlerInput)
+          : effectiveMode === "appraisal"
+              ? canRoleGenerateAppraisal(role)
+                ? await handleAppraisalTurn(handlerInput)
+                : {
+                    mode: "general_chat",
+                    assistant_message:
+                      "Appraisal generation is available only for store staff.",
+                    notes: "Blocked non-staff appraisal request.",
+                  }
               : await handleGeneralChatTurn(handlerInput);
 
     const responseMode =
@@ -214,6 +253,16 @@ export async function POST(req: Request) {
       content: handlerResult.assistant_message,
       created_at: new Date().toISOString(),
     };
+    const recommendationResponseMode =
+      handlerResult.mode === "recommendation" ||
+      handlerResult.mode === "clarifying_question" ||
+      handlerResult.mode === "no_match"
+        ? handlerResult.mode
+        : "recommendation";
+    const recommendationStateMode: NonNullable<SessionData["review_state"]["last_mode"]> =
+      recommendationResponseMode === "recommendation"
+        ? "recommendations"
+        : recommendationResponseMode;
 
     const updatedSession: SessionData = {
       ...nextSession,
@@ -233,7 +282,7 @@ export async function POST(req: Request) {
                 typeof body.override?.notes === "string"
                   ? body.override.notes.trim()
                   : null,
-              responseMode: handlerResult.mode,
+              responseMode: recommendationStateMode,
               assistantMessage: handlerResult.assistant_message,
               recommendations:
                 "recommendations" in handlerResult
@@ -285,7 +334,7 @@ export async function POST(req: Request) {
               effectiveMode === "recommendation"
                 ? "handleRecommendationTurn"
                 : effectiveMode === "appraisal"
-                  ? role === "store_staff"
+                  ? canRoleGenerateAppraisal(role)
                     ? "handleAppraisalTurn"
                     : "non_staff_appraisal_block"
                   : "handleGeneralChatTurn",
@@ -334,18 +383,6 @@ export async function POST(req: Request) {
   }
 }
 
-function normalizeRole(value: unknown): RoleType {
-  if (
-    value === "retail_customer" ||
-    value === "trade_client" ||
-    value === "store_staff"
-  ) {
-    return value;
-  }
-
-  return "retail_customer";
-}
-
 function normalizeReviewAction(value: unknown): RecommendationReviewAction | null {
   if (
     value === "approve" ||
@@ -365,7 +402,7 @@ function updateReviewState(
     userMessage: string;
     reviewAction: RecommendationReviewAction | null;
     overrideNotes: string | null;
-    responseMode: "recommendation" | "clarifying_question" | "no_match";
+    responseMode: NonNullable<SessionData["review_state"]["last_mode"]>;
     assistantMessage: string;
     recommendations: SessionData["review_state"]["last_recommendations"];
     questions: string[];

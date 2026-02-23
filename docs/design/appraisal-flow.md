@@ -11,7 +11,7 @@ All drafts require human review before being finalized or printed.
 ## Scope
 
 - One appraisal = one rug
-- Appraisals are created by store owner/staff only (not customers)
+- Appraisals are created by authorized internal roles only (`store_staff`, `developer`)
 - Appraisals may be for:
   - an inventory-listed rug, or
   - a customer-owned rug brought into the store
@@ -168,3 +168,12 @@ This document exists to:
 - Keep AI output aligned with real rug industry practices
 
 When in doubt, the AI should **say less, not more**.
+
+---
+
+## Runtime Notes (Current)
+
+- Main endpoint: `POST /api/appraisal/generate`
+- Chat appraisal path: appraisal mode in `POST /api/chat`
+- Non-authorized roles are blocked before generation
+- Output is always treated as draft content for human review/export
