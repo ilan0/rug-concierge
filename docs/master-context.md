@@ -16,6 +16,7 @@ Primary objective: trust, correctness, and operational usefulness.
 - Inventory is the source of truth.
 - User chat always goes to backend first.
 - Backend owns routing, policy checks, and hard filtering.
+- Recommendation flows require tenant context (`tenant_id`) and never query cross-tenant inventory.
 - AI ranks/explains only after backend candidate selection.
 - AI must not invent inventory facts.
 - `no_match` is a valid outcome.
@@ -29,6 +30,7 @@ Primary objective: trust, correctness, and operational usefulness.
   - `/api/appraisal/generate`
   - `/api/debug/trace` (developer-only)
   - `/api/ui-role` (cookie sync)
+  - `/api/ui-access` (optional pilot access gate)
 
 ## Role + Capability Model (Current)
 
@@ -48,6 +50,7 @@ Authorization rules:
 - Server resolves role from cookie first (`rug_ui_role`), request role second.
 - Cookie/request mismatch is `403`.
 - Privileged roles (`store_staff`, `developer`) require cookie-resolved role.
+- Request contract uses `role` as canonical field. `user_role` is accepted as a compatibility alias only.
 
 ## Chat Routing Contract (Current)
 
@@ -70,6 +73,8 @@ Router behavior:
 - Review actions force recommendation mode.
 - Appraisal intent routes to appraisal only for roles with `appraisal.generate`.
 - Ambiguous messages with constraint signals return clarifying question path.
+- Recommendation mode requires tenant context. Missing tenant returns `400`.
+- Existing sessions are tenant-bound; tenant mismatch on the same `session_id` returns `403`.
 
 ## Session Model (Current)
 
@@ -81,23 +86,26 @@ Session state stores:
 - `review_state` (last recommendations + review actions)
 
 This supports mixed conversations without relying on model memory.
+Session state is persisted in Supabase tables (`chat_sessions`, `chat_messages`) for durability across restarts.
 
 ## Recommendation Pipeline (Shared)
 
 Used by both `/api/recommend` and recommendation turns in `/api/chat`.
 
 1. Parse input + merge constraints (explicit fields + extracted text hints).
-2. Query Supabase with SQL-first hard filters:
+2. Validate tenant context (request tenant or existing session-bound tenant).
+3. Query Supabase with SQL-first hard filters:
    - availability always
    - budget when provided
    - size when provided (tolerance + rotation support)
-3. Apply deterministic in-code hard checks as safety.
-4. Shape bounded candidate set for AI.
-5. If empty: return `no_match`.
-6. If non-empty: send candidate context + prompt layers to AI.
-7. Sanitize and normalize AI output to strict schema.
-8. Apply deterministic confidence, confidence tier/factors, and `why_not`.
-9. Return structured response.
+   - tenant filter always
+4. Apply deterministic in-code hard checks as safety.
+5. Shape bounded candidate set for AI.
+6. If empty: return `no_match`.
+7. If non-empty: send candidate context + prompt layers to AI.
+8. Sanitize and normalize AI output to strict schema.
+9. Apply deterministic confidence, confidence tier/factors, and `why_not`.
+10. Return structured response.
 
 ## AI Prompting Direction
 
@@ -121,17 +129,23 @@ Contract enforcement:
 ## Pilot UI Shell (Current)
 
 - Home screen selects role and syncs cookie.
+- Home screen sets tenant context (`tenant_id`) and syncs tenant cookie.
 - Role switcher is environment-controlled for pilot simplicity:
   - `NEXT_PUBLIC_ENABLE_ROLE_SWITCHER`
   - `NEXT_PUBLIC_PILOT_DEFAULT_ROLE`
   - `NEXT_PUBLIC_ENABLE_DEVELOPER_ROLE`
+- Optional hosted pilot gate:
+  - `PILOT_ACCESS_PASSCODE`
 - Shared role-aware nav component used across workspace pages.
+- Developer-only debug trace affordances are hidden from non-developer roles.
+- Staff review controls are shown only in recommendation context turns.
 
 ## Testing + QA Artifacts
 
 - Smoke reports:
   - `docs/testing/e2e-smoke-report.md`
   - `docs/testing/e2e-smoke-report.json`
+- Full smoke suite recommendation cases require `SMOKE_TENANT_ID`.
 - Deep trace artifacts:
   - `docs/testing/artifacts/<run-id>/<case-id>/*.json`
 - QA event log:

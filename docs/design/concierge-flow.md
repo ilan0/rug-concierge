@@ -10,6 +10,9 @@ Recommendation flow is backend-first and inventory-grounded.
   - `recommendation`
   - `appraisal`
 - This flow applies only to recommendation turns.
+- Recommendation execution requires tenant context.
+  - `/api/recommend`: `tenant_id` is required in request.
+  - `/api/chat`: recommendation turns use request `tenant_id` or an existing session-bound tenant.
 - If intent is ambiguous, backend returns a clarifying question before running recommendation.
 
 ## Recommendation Pipeline (Current)
@@ -31,6 +34,7 @@ Recommendation flow is backend-first and inventory-grounded.
 - availability (always)
 - size (when provided, with tolerance and rotation support)
 - budget (when provided; sale/list logic handled in pipeline)
+- tenant_id scoping (always)
 
 ## Soft Signals (Ranking Only)
 
@@ -77,3 +81,8 @@ Chat route maps recommendation output for chat UI response handling while preser
 
 `no_match` is returned only when backend candidate set is empty after hard filtering.
 The response explains the limiting factor and can include at most one follow-up question.
+
+## Tenant Safety Rule
+
+- Recommendation requests never run against cross-tenant inventory.
+- Session tenant mismatch is rejected with `403`.

@@ -15,7 +15,7 @@ const AI_CANDIDATE_LIMIT = 30;
 
 type RunRecommendationPipelineInput = {
   requestId?: string;
-  tenantId: string | null;
+  tenantId: string;
   userMessage: string;
   constraints: HardConstraints;
   promptContext?: {
@@ -245,7 +245,7 @@ export async function runRecommendationPipeline(
 }
 
 async function fetchInventoryCandidates(input: {
-  tenantId: string | null;
+  tenantId: string;
   constraints: HardConstraints;
   limit: number;
   queryTrace: PipelineQueryTrace[];
@@ -334,7 +334,7 @@ function buildQueryVariants(input: {
 
 async function runCandidateQuery(input: {
   supabase: SupabaseClient;
-  tenantId: string | null;
+  tenantId: string;
   limit: number;
   budgetMax: number | undefined;
   sizeBounds: ReturnType<typeof getSizeBounds>;
@@ -358,9 +358,7 @@ async function runCandidateQuery(input: {
     .eq("status", "available")
     .limit(input.limit);
 
-  if (input.tenantId) {
-    query = query.eq("tenant_id", input.tenantId);
-  }
+  query = query.eq("tenant_id", input.tenantId);
 
   const bounds = input.sizeBounds;
   const budgetMax = input.budgetMax;

@@ -1,4 +1,5 @@
 import type { UiChatRequest, UiChatResponseBody } from "@/lib/types/chat-ui";
+import { mapApiErrorToFriendlyMessage } from "@/lib/ui/error-messages";
 
 type DebugTraceMeta = {
   runId: string;
@@ -20,6 +21,7 @@ export async function sendChatTurn(
   input: UiChatRequest,
   options: SendChatTurnOptions = {}
 ): Promise<SendChatTurnResult> {
+  // `role` is the canonical request field for chat clients.
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
   };
@@ -43,10 +45,22 @@ export async function sendChatTurn(
   }
 
   if (!response.ok) {
-    const message =
+    const payloadError =
       payload && typeof payload === "object" && "error" in payload
         ? String((payload as { error: unknown }).error)
-        : "Unable to process chat request right now.";
+        : null;
+    const payloadCode =
+      payload && typeof payload === "object" && "code" in payload
+        ? String((payload as { code: unknown }).code)
+        : null;
+    const message =
+      mapApiErrorToFriendlyMessage({
+        status: response.status,
+        code: payloadCode,
+        rawMessage: payloadError,
+        context: "chat",
+        fallbackMessage: "Unable to process chat request right now.",
+      });
     throw new Error(message);
   }
 
@@ -74,7 +88,23 @@ export async function fetchChatDebugTrace(
 
   const payload = (await response.json().catch(() => null)) as unknown;
   if (!response.ok) {
-    throw new Error("Unable to load debug trace payload.");
+    const payloadError =
+      payload && typeof payload === "object" && "error" in payload
+        ? String((payload as { error: unknown }).error)
+        : null;
+    const payloadCode =
+      payload && typeof payload === "object" && "code" in payload
+        ? String((payload as { code: unknown }).code)
+        : null;
+    throw new Error(
+      mapApiErrorToFriendlyMessage({
+        status: response.status,
+        code: payloadCode,
+        rawMessage: payloadError,
+        context: "debug_trace",
+        fallbackMessage: "Unable to load debug trace payload.",
+      })
+    );
   }
   return payload;
 }

@@ -98,6 +98,41 @@ Used internally only. AI generates drafts; staff approves final.
 
 ---
 
+## chat_sessions
+Backend-owned session state for chat orchestration.
+
+- `session_id` (primary key)
+- `tenant_id` (nullable for non-tenant test flows)
+- `role`
+- `session_data` (JSONB)
+  - chat history
+  - recommendation state
+  - trade context
+  - project context
+  - review state
+- `created_at`
+- `updated_at`
+
+Used to persist mode/routing context across server restarts.
+
+---
+
+## chat_messages
+Append-only turn history linked to a chat session.
+
+- `id`
+- `session_id`
+- `tenant_id`
+- `role` (`user` | `assistant`)
+- `mode` (`general_chat` | `recommendation` | `appraisal`)
+- `content`
+- `metadata` (JSONB; includes review action context when present)
+- `created_at`
+
+Used for replay/debug/history and later analytics.
+
+---
+
 ## Notes
 - All business-owned tables include `tenant_id`
 - RLS enforces isolation

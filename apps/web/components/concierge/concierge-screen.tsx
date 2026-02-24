@@ -18,13 +18,18 @@ import type {
   UiRole,
   UiRecommendationItem,
 } from "@/lib/types/chat-ui";
-import { getUiRole, setUiRole, syncRoleCookie } from "@/lib/ui/role-session";
+import {
+  getUiRole,
+  getUiTenantId,
+  setUiRole,
+  syncUiSession,
+} from "@/lib/ui/role-session";
 import { UI_ROLES } from "@/lib/ui/roles";
 import {
   DEFAULT_TRADE_SUPPORT_CONTEXT,
   type TradeSupportDraftContext,
 } from "@/lib/types/trade-ui";
-import { canRoleUseReviewControls } from "@/lib/auth/policy";
+import { canRoleReadDebugTrace, canRoleUseReviewControls } from "@/lib/auth/policy";
 
 type DebugTraceSummary = {
   routeTrace: unknown | null;
@@ -56,6 +61,7 @@ type OperatorView = "debug" | "review";
 type ConciergeScreenProps = {
   debug: boolean;
   variant?: "concierge" | "trade";
+  tenantId: string;
 };
 
 const STARTER_PROMPTS_CONCIERGE = [
@@ -126,6 +132,7 @@ function summarizeTracePayload(payload: unknown): DebugTraceSummary {
 export function ConciergeScreen({
   debug,
   variant = "concierge",
+  tenantId,
 }: ConciergeScreenProps) {
   const [role, setRole] = useState<UiRole>(
     variant === "trade" ? "trade_client" : "retail_customer"
@@ -145,6 +152,11 @@ export function ConciergeScreen({
   const [tradeContext, setTradeContext] = useState<TradeSupportDraftContext>(
     DEFAULT_TRADE_SUPPORT_CONTEXT
   );
+  const [showSlowNotice, setShowSlowNotice] = useState(false);
+
+  const roleSwitcherVisible =
+    process.env.NEXT_PUBLIC_ENABLE_ROLE_SWITCHER === "1" ||
+    process.env.NODE_ENV !== "production";
 
   useEffect(() => {
     const storedRole = getUiRole();
@@ -161,6 +173,15 @@ export function ConciergeScreen({
     }
     setRole(storedRole);
   }, [variant]);
+
+  useEffect(() => {
+    if (!isLoading) {
+      setShowSlowNotice(false);
+      return undefined;
+    }
+    const timer = window.setTimeout(() => setShowSlowNotice(true), 8000);
+    return () => window.clearTimeout(timer);
+  }, [isLoading]);
 
   const debugRunId = useMemo(
     () =>
@@ -210,7 +231,10 @@ export function ConciergeScreen({
     setRole(nextRole);
     setUiRole(nextRole);
     try {
-      await syncRoleCookie(nextRole);
+      await syncUiSession({
+        role: nextRole,
+        tenant_id: getUiTenantId() ?? tenantId,
+      });
     } catch {
       // Keep chat usable even if cookie sync fails.
     }
@@ -224,15 +248,14 @@ export function ConciergeScreen({
       session_id: sessionId ?? undefined,
       role: activeRole,
       message: userMessage,
+      tenant_id: getUiTenantId() ?? tenantId,
     };
 
     if (variant !== "trade") {
       return payload;
     }
 
-    if (tradeContext.tenant_id.trim()) {
-      payload.tenant_id = tradeContext.tenant_id.trim();
-    }
+    payload.tenant_id = tradeContext.tenant_id.trim() || payload.tenant_id;
     if (tradeContext.trade_client_id.trim()) {
       payload.trade_client_id = tradeContext.trade_client_id.trim();
     }
@@ -288,7 +311,7 @@ export function ConciergeScreen({
     setIsLoading(true);
     setMessage("");
 
-    const debugCaseId = debug
+    const debugCaseId = debug && canUseDebugTrace
       ? toSlug(`turn-${Date.now()}-${crypto.randomUUID().slice(0, 8)}`)
       : null;
 
@@ -303,7 +326,7 @@ export function ConciergeScreen({
     try {
       const { payload, headers } = await sendChatTurn(
         buildChatRequestPayload(userMessage, role),
-        debug && debugCaseId
+        debug && canUseDebugTrace && debugCaseId
           ? {
               debugTrace: {
                 runId: debugRunId,
@@ -316,7 +339,7 @@ export function ConciergeScreen({
       setSessionId(payload.session_id);
 
       let debugMeta: DebugMeta | null = null;
-      if (debug && debugCaseId) {
+      if (debug && canUseDebugTrace && debugCaseId) {
         try {
           const tracePayload = await fetchChatDebugTrace(debugRunId, debugCaseId);
           debugMeta = {
@@ -386,12 +409,33 @@ export function ConciergeScreen({
     .reverse()
     .find((turn) => turn.role === "assistant")?.responseMode;
 
-  const canUseReviewControls = canRoleUseReviewControls(role) && Boolean(sessionId);
+  const canUseDebugTrace = canRoleReadDebugTrace(role);
+  const canUseReviewRoleControls = canRoleUseReviewControls(role) && Boolean(sessionId);
+  const isRecommendationContext = latestAssistantMode === "recommendation";
+  const canUseReviewControls = canUseReviewRoleControls && isRecommendationContext;
+  const canOpenOperator = canUseDebugTrace || canUseReviewRoleControls;
+
+  useEffect(() => {
+    if (!canOpenOperator && operatorOpen) {
+      setOperatorOpen(false);
+      return;
+    }
+    if (operatorView === "debug" && !canUseDebugTrace) {
+      setOperatorView("review");
+    }
+    if (operatorView === "review" && !canUseReviewRoleControls && canUseDebugTrace) {
+      setOperatorView("debug");
+    }
+  }, [canOpenOperator, canUseDebugTrace, canUseReviewRoleControls, operatorOpen, operatorView]);
 
   const onReviewAction = async (
     action: "approve" | "reject" | "regenerate" | "override"
   ) => {
     if (!sessionId) return;
+    if (!isRecommendationContext) {
+      setError("Review actions are available after a recommendation response.");
+      return;
+    }
     if (action === "override" && !overrideMessage.trim() && !overrideRugIds.trim()) {
       setError("Override needs a custom message or selected rug IDs.");
       return;
@@ -419,7 +463,7 @@ export function ConciergeScreen({
       },
     ]);
 
-    const debugCaseId = debug
+    const debugCaseId = debug && canUseDebugTrace
       ? toSlug(`turn-${Date.now()}-${crypto.randomUUID().slice(0, 8)}`)
       : null;
 
@@ -432,6 +476,7 @@ export function ConciergeScreen({
       session_id: sessionId,
       role,
       message: "",
+      tenant_id: getUiTenantId() ?? tenantId,
       review_action: action,
       ...(action === "override"
         ? {
@@ -461,7 +506,7 @@ export function ConciergeScreen({
       setReviewState(responsePayload.review_state ?? null);
 
       let debugMeta: DebugMeta | null = null;
-      if (debug && debugCaseId) {
+      if (debug && canUseDebugTrace && debugCaseId) {
         try {
           const tracePayload = await fetchChatDebugTrace(debugRunId, debugCaseId);
           debugMeta = {
@@ -530,27 +575,33 @@ export function ConciergeScreen({
           </p>
         </div>
         <div className="concierge-controls">
-          <label>
-            Role
-            <select
-              value={role}
-              onChange={(event) => void onRoleChange(event.target.value as UiRole)}
-              disabled={isLoading}
+          {roleSwitcherVisible ? (
+            <label>
+              Role
+              <select
+                value={role}
+                onChange={(event) => void onRoleChange(event.target.value as UiRole)}
+                disabled={isLoading}
+              >
+                {roleOptions.map((roleOption) => (
+                  <option value={roleOption} key={roleOption}>
+                    {roleOption}
+                  </option>
+                ))}
+              </select>
+            </label>
+          ) : (
+            <p className="concierge-mode-chip">Role: {role}</p>
+          )}
+          {canOpenOperator ? (
+            <button
+              type="button"
+              onClick={() => setOperatorOpen(true)}
+              className="concierge-operator-open-btn"
             >
-              {roleOptions.map((roleOption) => (
-                <option value={roleOption} key={roleOption}>
-                  {roleOption}
-                </option>
-              ))}
-            </select>
-          </label>
-          <button
-            type="button"
-            onClick={() => setOperatorOpen(true)}
-            className="concierge-operator-open-btn"
-          >
-            Operator
-          </button>
+              Operator
+            </button>
+          ) : null}
           <button type="button" onClick={onReset} disabled={isLoading}>
             New Session
           </button>
@@ -714,6 +765,12 @@ export function ConciergeScreen({
               <article className="concierge-turn concierge-turn-assistant concierge-loading">
                 <div className="concierge-loading-bar" />
                 <div className="concierge-loading-bar short" />
+                {showSlowNotice ? (
+                  <p className="concierge-hint">
+                    Still working on this request. Large inventory queries may take 10-20
+                    seconds.
+                  </p>
+                ) : null}
               </article>
             ) : null}
           </section>
@@ -756,6 +813,10 @@ export function ConciergeScreen({
                 <dd>{sessionId ?? "(new)"}</dd>
               </div>
               <div>
+                <dt>Tenant</dt>
+                <dd>{getUiTenantId() ?? tenantId}</dd>
+              </div>
+              <div>
                 <dt>Role</dt>
                 <dd>{role}</dd>
               </div>
@@ -767,7 +828,7 @@ export function ConciergeScreen({
                 <dt>Total Turns</dt>
                 <dd>{turns.length}</dd>
               </div>
-              {debug ? (
+              {debug && canUseDebugTrace ? (
                 <div>
                   <dt>Debug Run</dt>
                   <dd>{debugRunId}</dd>
@@ -827,27 +888,36 @@ export function ConciergeScreen({
             </div>
 
             <div className="concierge-operator-view-toggle">
-              <button
-                type="button"
-                className={operatorView === "review" ? "active" : ""}
-                onClick={() => setOperatorView("review")}
-              >
-                Review
-              </button>
-              <button
-                type="button"
-                className={operatorView === "debug" ? "active" : ""}
-                onClick={() => setOperatorView("debug")}
-              >
-                Debug
-              </button>
+              {canUseReviewRoleControls ? (
+                <button
+                  type="button"
+                  className={operatorView === "review" ? "active" : ""}
+                  onClick={() => setOperatorView("review")}
+                >
+                  Review
+                </button>
+              ) : null}
+              {canUseDebugTrace ? (
+                <button
+                  type="button"
+                  className={operatorView === "debug" ? "active" : ""}
+                  onClick={() => setOperatorView("debug")}
+                >
+                  Debug
+                </button>
+              ) : null}
             </div>
 
-            {operatorView === "review" ? (
+            {operatorView === "review" && canUseReviewRoleControls ? (
               <div className="concierge-operator-drawer-body">
                 <section className="concierge-panel">
                   <h3>Review Controls</h3>
-                  {!canUseReviewControls ? (
+                  {!isRecommendationContext ? (
+                    <p>
+                      Review controls become available after a recommendation-mode
+                      assistant turn.
+                    </p>
+                  ) : !canUseReviewControls ? (
                     <p>
                       Review controls are available only for{" "}
                       <code>store_staff</code> or <code>developer</code>.
@@ -919,7 +989,7 @@ export function ConciergeScreen({
               </div>
             ) : null}
 
-            {operatorView === "debug" ? (
+            {operatorView === "debug" && canUseDebugTrace ? (
               <div className="concierge-operator-drawer-body concierge-trace-panel">
                 {!debug ? (
                   <section className="concierge-panel">

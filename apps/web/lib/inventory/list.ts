@@ -9,6 +9,7 @@ const DEFAULT_PAGE_SIZE = 50;
 const MAX_PAGE_SIZE = 100;
 
 type ListInventoryInput = {
+  tenantId?: string | null;
   page?: number;
   pageSize?: number;
   filters?: InventoryFilterInput;
@@ -18,12 +19,29 @@ type ListInventoryInput = {
 export async function listInventory(
   input: ListInventoryInput = {}
 ): Promise<InventoryListResult> {
+  const tenantId =
+    typeof input.tenantId === "string" && input.tenantId.trim().length > 0
+      ? input.tenantId.trim()
+      : null;
   const page = toPositiveInt(input.page, 1);
   const requestedPageSize = toPositiveInt(input.pageSize, DEFAULT_PAGE_SIZE);
   const pageSize = Math.min(requestedPageSize, MAX_PAGE_SIZE);
   const filters = normalizeInventoryFilters(input.filters);
   const from = (page - 1) * pageSize;
   const to = from + pageSize - 1;
+
+  if (!tenantId) {
+    return {
+      rows: [],
+      total: 0,
+      page,
+      pageSize,
+      totalPages: 0,
+      filters,
+      loadedAt: new Date().toISOString(),
+      error: "Tenant context is required to load inventory.",
+    };
+  }
 
   const supabase = await getSupabaseAdminSafe();
   if (!supabase) {
@@ -45,6 +63,7 @@ export async function listInventory(
       "id, sku, intake_label, status, price, sale_price, width_total_in, length_total_in, style, palette, pattern, best_for, public_description",
       { count: "exact" }
     )
+    .eq("tenant_id", tenantId)
     .order("id", { ascending: false })
     .range(from, to);
 

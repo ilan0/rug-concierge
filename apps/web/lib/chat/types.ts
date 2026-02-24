@@ -73,6 +73,7 @@ export type RecommendationReviewState = {
 
 export type SessionData = {
   session_id: string;
+  tenant_id: string | null;
   role: RoleType;
   chat_history: SessionMessage[];
   recommendation_state: RecommendationState;
@@ -86,6 +87,7 @@ export type SessionData = {
 export type ChatTurnRequest = {
   session_id?: string;
   role?: RoleType;
+  user_role?: RoleType;
   message: string;
   tenant_id?: string;
   trade_client_id?: string;

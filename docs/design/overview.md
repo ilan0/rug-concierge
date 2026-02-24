@@ -56,6 +56,7 @@ API-level strict JSON schema is the hard response contract where structured outp
 ## Recommendation Model
 
 - SQL-first filtering for active hard constraints.
+- Tenant scoping is always applied for inventory-backed recommendation queries.
 - Deterministic backend filtering and candidate shaping.
 - AI ranking/explanation only after backend candidate selection.
 - Deterministic post-processing for confidence and objection fields.
@@ -71,6 +72,8 @@ No RAG/vector search is used for MVP recommendation behavior.
 ## UI Shell
 
 - Home route sets/syncs role.
+- Home route also sets/syncs tenant context (`tenant_id`) for owner/staff flows.
+- Optional pilot passcode gate can be enabled with `PILOT_ACCESS_PASSCODE`.
 - Role-aware workspace pages:
   - concierge
   - trade

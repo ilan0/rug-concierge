@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, type ChangeEvent, type FormEvent } from "react";
+import { useEffect, useMemo, useState, type ChangeEvent, type FormEvent } from "react";
 import {
   appraisalToPlainText,
   copyTextToClipboard,
@@ -35,9 +35,14 @@ function formatGeneratedAt(value: string | null): string {
   return parsed.toLocaleString();
 }
 
-export function AppraisalScreen() {
+type AppraisalScreenProps = {
+  tenantId: string;
+};
+
+export function AppraisalScreen({ tenantId }: AppraisalScreenProps) {
   const [form, setForm] = useState<AppraisalFormState>(DEFAULT_FORM);
   const [isLoading, setIsLoading] = useState(false);
+  const [showSlowNotice, setShowSlowNotice] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<AppraisalUiResult | null>(null);
   const [feedback, setFeedback] = useState<string | null>(null);
@@ -61,6 +66,15 @@ export function AppraisalScreen() {
       }));
     };
 
+  useEffect(() => {
+    if (!isLoading) {
+      setShowSlowNotice(false);
+      return undefined;
+    }
+    const timer = window.setTimeout(() => setShowSlowNotice(true), 8000);
+    return () => window.clearTimeout(timer);
+  }, [isLoading]);
+
   const onSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setError(null);
@@ -68,14 +82,16 @@ export function AppraisalScreen() {
     setIsLoading(true);
 
     try {
-      const payload = await generateAppraisalDraftClient(toAppraisalInput(form));
+      const payload = await generateAppraisalDraftClient(toAppraisalInput(form), {
+        tenantId,
+      });
       setResult(payload);
       setLastGeneratedAt(new Date().toISOString());
     } catch (nextError) {
       setError(
         nextError instanceof Error
           ? nextError.message
-          : "Unable to generate appraisal draft."
+          : "We couldn't generate the draft right now. Please review inputs and try again."
       );
     } finally {
       setIsLoading(false);
@@ -96,7 +112,7 @@ export function AppraisalScreen() {
       setFeedback(label === "text" ? "Copied draft text." : "Copied raw JSON.");
       setTimeout(() => setFeedback((prev) => (prev ? null : prev)), 1400);
     } catch {
-      setError("Unable to copy to clipboard.");
+      setError("Clipboard access failed. Please copy directly from the preview text.");
     }
   };
 
@@ -123,6 +139,9 @@ export function AppraisalScreen() {
       </header>
 
       <section className="appraisal-summary-chips" aria-label="Appraisal summary">
+        <span className="appraisal-chip">
+          <strong>Tenant:</strong> {tenantId}
+        </span>
         <span className="appraisal-chip">
           <strong>Status:</strong> {result?.mode ?? "idle"}
         </span>
@@ -246,6 +265,11 @@ export function AppraisalScreen() {
               </button>
             </div>
           </form>
+          {isLoading && showSlowNotice ? (
+            <p className="appraisal-cannot">
+              Still generating. Large prompts can take 10-20 seconds.
+            </p>
+          ) : null}
           {error ? <p className="appraisal-error">{error}</p> : null}
         </section>
 

@@ -1,10 +1,13 @@
 import type { AppraisalDraftResponse } from "@/lib/types/appraisal";
 import type { AppraisalInput } from "@/lib/types/appraisal";
 import { getUiRole } from "@/lib/ui/role-session";
+import { mapApiErrorToFriendlyMessage } from "@/lib/ui/error-messages";
 
 export async function generateAppraisalDraftClient(
-  appraisalContext: AppraisalInput
+  appraisalContext: AppraisalInput,
+  options?: { tenantId?: string | null }
 ): Promise<AppraisalDraftResponse> {
+  // `role` is the canonical request field. `user_role` is server-side compatibility only.
   const activeRole = getUiRole() ?? "store_staff";
   const response = await fetch("/api/appraisal/generate", {
     method: "POST",
@@ -13,16 +16,29 @@ export async function generateAppraisalDraftClient(
     },
     body: JSON.stringify({
       role: activeRole,
+      tenant_id: options?.tenantId ?? null,
       appraisal_context: appraisalContext,
     }),
   });
 
   const payload = (await response.json().catch(() => null)) as unknown;
   if (!response.ok) {
-    const errorMessage =
+    const payloadError =
       payload && typeof payload === "object" && "error" in payload
         ? String((payload as { error: unknown }).error)
-        : "Unable to generate appraisal draft.";
+        : null;
+    const payloadCode =
+      payload && typeof payload === "object" && "code" in payload
+        ? String((payload as { code: unknown }).code)
+        : null;
+    const errorMessage =
+      mapApiErrorToFriendlyMessage({
+        status: response.status,
+        code: payloadCode,
+        rawMessage: payloadError,
+        context: "appraisal",
+        fallbackMessage: "Unable to generate appraisal draft.",
+      });
     throw new Error(errorMessage);
   }
 

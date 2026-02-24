@@ -23,6 +23,13 @@ const artifactsRoot = path.resolve(
   runIdSlug
 );
 
+function requireSmokeTenant(caseName) {
+  if (tenantId && tenantId.trim().length > 0) return tenantId.trim();
+  throw new Error(
+    `${caseName} requires SMOKE_TENANT_ID because recommendation flows now enforce tenant_id.`
+  );
+}
+
 function nowIso() {
   return new Date().toISOString();
 }
@@ -410,6 +417,29 @@ async function run() {
     );
   }
 
+  if (shouldRun("recommend missing tenant returns 400")) {
+    tests.push(
+      await runCase(
+        "recommend missing tenant returns 400",
+        { endpoint: "/api/recommend", method: "POST" },
+        async ({ assert, traceMeta }) => {
+          const response = await postJson(
+            `${baseUrl}/api/recommend`,
+            {
+              user_message: "show me rugs",
+            },
+            traceMeta
+          );
+          assert(response.status === 400, "status is 400", {
+            expected: 400,
+            actual: response.status,
+          });
+          return response.body ?? response.raw;
+        }
+      )
+    );
+  }
+
   if (shouldRun("recommend browse request returns contract")) {
     tests.push(
       await runCase(
@@ -419,7 +449,7 @@ async function run() {
           const response = await postJson(
             `${baseUrl}/api/recommend`,
             {
-              tenant_id: tenantId || undefined,
+              tenant_id: requireSmokeTenant("recommend browse request returns contract"),
               user_message: "show me what you have",
             },
             traceMeta
@@ -457,7 +487,9 @@ async function run() {
           const response = await postJson(
             `${baseUrl}/api/recommend`,
             {
-              tenant_id: tenantId || undefined,
+              tenant_id: requireSmokeTenant(
+                "recommend constrained request returns contract"
+              ),
               user_message: "I need an 8x10 under $2500",
               constraints: {
                 size: { widthIn: 96, lengthIn: 120, toleranceIn: 2 },
@@ -556,6 +588,7 @@ async function run() {
             `${baseUrl}/api/chat`,
             {
               role: "retail_customer",
+              tenant_id: requireSmokeTenant("chat route returns session envelope"),
               message: "show me rugs",
             },
             traceMeta
@@ -622,7 +655,9 @@ async function run() {
             `${baseUrl}/api/chat`,
             {
               role: "trade_client",
-              tenant_id: tenantId || undefined,
+              tenant_id: requireSmokeTenant(
+                "chat trade context request returns recommendation envelope"
+              ),
               trade_client_id: "trade-client-smoke",
               trade_preferences: {
                 palette: "muted neutrals",
@@ -667,7 +702,9 @@ async function run() {
             `${baseUrl}/api/chat`,
             {
               role: "trade_client",
-              tenant_id: tenantId || undefined,
+              tenant_id: requireSmokeTenant(
+                "chat project room follow-up updates active room"
+              ),
               message: "I need rugs for living room and dining room",
             },
             traceMeta
@@ -686,7 +723,9 @@ async function run() {
             `${baseUrl}/api/chat`,
             {
               role: "trade_client",
-              tenant_id: tenantId || undefined,
+              tenant_id: requireSmokeTenant(
+                "chat project room follow-up updates active room"
+              ),
               session_id: first.body.session_id,
               message: "Now show dining room options under $2500",
             },
@@ -725,6 +764,7 @@ async function run() {
             `${baseUrl}/api/appraisal/generate`,
             {
               role: "retail_customer",
+              tenant_id: requireSmokeTenant("appraisal endpoint blocks non-staff"),
               appraisal_context: {
                 rug_label: "Sample Rug",
                 appraised_value: 1200,

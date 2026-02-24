@@ -1,4 +1,5 @@
 import { runRecommendationPipeline } from "@/lib/recommend/pipeline";
+import { hasTenantId } from "@/lib/auth/tenant";
 import type {
   ChatTurnHandlerInput,
   RecommendationTurnResponse,
@@ -70,6 +71,17 @@ export async function handleRecommendationTurn(
     input.session.review_state.last_recommendations.length > 0
       ? "\n\nPlease generate a different mix from the previous set where possible."
       : "";
+
+  if (!hasTenantId(input.tenant_id)) {
+    return {
+      mode: "no_match",
+      assistant_message:
+        "I need tenant context before I can query inventory recommendations.",
+      questions: [],
+      recommendations: [],
+      notes: "TENANT_CONTEXT_REQUIRED",
+    };
+  }
 
   const result = await runRecommendationPipeline({
     tenantId: input.tenant_id,

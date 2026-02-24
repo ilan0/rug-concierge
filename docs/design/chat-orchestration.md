@@ -7,6 +7,7 @@ Backend chat is centralized in one turn processor.
 - `apps/web/app/api/chat/route.ts`
   - Validates request.
   - Resolves role from cookie/request and enforces policy.
+  - Resolves tenant context (`tenant_id` request value or session-bound tenant).
   - Loads session (`getOrCreateSession`).
   - Updates recommendation/trade/project context.
   - Routes mode for current turn.
@@ -16,6 +17,9 @@ Backend chat is centralized in one turn processor.
 Request notes:
 - `review_action` is a string enum (`approve|reject|regenerate|override`), not an object.
 - `override` is an optional object used with `review_action: "override"`.
+- Recommendation turns require tenant context; missing tenant returns `400`.
+- Session tenant mismatch (`session_id` reused with different `tenant_id`) returns `403`.
+- For hosted pilots with `PILOT_ACCESS_PASSCODE`, API calls require access unlock before chat routes are available.
 
 ## Role and Capability Enforcement
 
@@ -29,7 +33,13 @@ Request notes:
 ## Session and Context State
 
 - `apps/web/lib/chat/session-store.ts`
-  - In-memory session store placeholder.
+  - Session store facade with Supabase-backed persistence.
+  - Falls back to in-memory only if persistence tables are unavailable.
+  - Enforces tenant binding per session ID.
+
+- `apps/web/lib/chat/session-repo.ts`
+  - Direct DB load/upsert for `chat_sessions`.
+  - Append-only turn persistence for `chat_messages`.
 
 - `apps/web/lib/chat/state.ts`
   - Updates recommendation state every turn.

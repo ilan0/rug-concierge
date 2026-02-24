@@ -34,6 +34,15 @@ This app is the primary UI shell for Rug Concierge MVP.
 - `/api/appraisal/generate`
 - `/api/debug/trace` (developer-only trace reader)
 - `/api/ui-role` (syncs role cookie used by API authorization)
+- `/api/ui-access` (optional pilot access passcode gate)
+
+Recommendation API note:
+- `/api/recommend` now requires `tenant_id`.
+- `/api/chat` recommendation turns require tenant context (request tenant or session-bound tenant).
+- `/inventory` is tenant-scoped via UI tenant cookie context.
+
+Pilot access note:
+- If `PILOT_ACCESS_PASSCODE` is set, API routes/pages require passcode unlock via Home.
 
 ## Role Policy
 

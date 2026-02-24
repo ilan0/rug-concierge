@@ -2,8 +2,9 @@ import Link from "next/link";
 import { WorkspaceNav } from "@/components/shell/workspace-nav";
 import { listInventory } from "@/lib/inventory/list";
 import { isDefaultInventoryFilters } from "@/lib/inventory/filters";
-import { getServerUiRole } from "@/lib/ui/server-role";
+import { getServerUiRole, getServerUiTenantId } from "@/lib/ui/server-role";
 import { canRoleAccessRoute } from "@/lib/auth/policy";
+import { getPilotAccessState } from "@/lib/auth/pilot-access";
 
 type InventoryPageProps = {
   searchParams?:
@@ -54,6 +55,17 @@ function buildQueryString(input: Record<string, string | number | null | undefin
 }
 
 export default async function InventoryPage({ searchParams }: InventoryPageProps) {
+  const access = await getPilotAccessState();
+  if (access.required && !access.verified) {
+    return (
+      <main className="ui-shell role-guard role-guard-blocked">
+        <h1>Pilot Access Required</h1>
+        <p>Please unlock pilot access on Home before using inventory.</p>
+        <Link href="/">Go Home</Link>
+      </main>
+    );
+  }
+
   const role = await getServerUiRole();
   if (!role || !canRoleAccessRoute(role, "/inventory")) {
     return (
@@ -61,6 +73,16 @@ export default async function InventoryPage({ searchParams }: InventoryPageProps
         <h1>Inventory Browser</h1>
         <p>This page is available only to store staff and developers.</p>
         <Link href="/">Go Home to switch role</Link>
+      </main>
+    );
+  }
+  const tenantId = await getServerUiTenantId();
+  if (!tenantId) {
+    return (
+      <main className="ui-shell role-guard role-guard-blocked">
+        <h1>Store Tenant Required</h1>
+        <p>Select your store tenant on Home before browsing inventory.</p>
+        <Link href="/">Go Home</Link>
       </main>
     );
   }
@@ -82,6 +104,7 @@ export default async function InventoryPage({ searchParams }: InventoryPageProps
   };
 
   const result = await listInventory({
+    tenantId,
     page,
     pageSize,
     filters: filtersInput,
@@ -161,6 +184,9 @@ export default async function InventoryPage({ searchParams }: InventoryPageProps
       <section className="inventory-meta">
         <span>
           <strong>Data Source:</strong> Supabase `rugs` table
+        </span>
+        <span>
+          <strong>Tenant:</strong> {tenantId}
         </span>
         <span>
           <strong>Records:</strong> {result.total}

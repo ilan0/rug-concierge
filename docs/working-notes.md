@@ -46,6 +46,7 @@ This is a quick, practical reference for what you’ll edit first, where things 
 - Trade/project chat context: `apps/web/lib/chat/trade-context.ts`
 - Multi-room project context: `apps/web/lib/chat/project-context.ts`
 - Role/capability policy: `apps/web/lib/auth/*`
+- Session persistence repo: `apps/web/lib/chat/session-repo.ts`
 - Shared chat UI shell (concierge + trade variant): `apps/web/components/concierge/concierge-screen.tsx`
 
 ### Types
@@ -82,6 +83,9 @@ Required:
 - `SUPABASE_SECRET_KEY`
 - `OPENAI_API_KEY`
 
+Optional (hosted owner pilot):
+- `PILOT_ACCESS_PASSCODE`
+
 ---
 
 ## How to Run
@@ -90,6 +94,12 @@ Required:
 npm install
 npm run dev
 ```
+
+### DB Migration (Session Persistence)
+
+Apply migration before expecting durable chat sessions:
+
+`packages/db/migrations/20260223_chat_sessions.sql`
 
 ### Inventory Fetch Script
 
@@ -125,18 +135,28 @@ npm run dev
 2) Run smoke tests (terminal B, repo root):
 
 ```bash
-npm run qa:e2e-smoke
+SMOKE_TENANT_ID=YOUR_TENANT_ID npm run qa:e2e-smoke
 ```
 
 Run a single smoke case:
 
 ```bash
-npm run qa:e2e-smoke -- --case "recommend browse request returns contract"
+SMOKE_TENANT_ID=YOUR_TENANT_ID npm run qa:e2e-smoke -- --case "recommend browse request returns contract"
 ```
 
 3) Open generated report:
 
 `docs/testing/e2e-smoke-report.md`
+
+### Demo Rehearsal (Owner Flow)
+
+```bash
+SMOKE_TENANT_ID=YOUR_TENANT_ID npm run qa:demo-rehearsal
+```
+
+Outputs:
+- `docs/testing/demo-rehearsal-report.md`
+- checklist: `docs/testing/demo-rehearsal-checklist.md`
 
 ### QA Check (After E2E)
 
@@ -150,13 +170,13 @@ Manual QA example requests (terminal B, while server is running):
 ```bash
 curl -s -X POST http://localhost:3000/api/recommend \
   -H "Content-Type: application/json" \
-  -d '{"user_message":"show me what you have"}'
+  -d '{"tenant_id":"YOUR_TENANT_ID","user_message":"show me what you have"}'
 ```
 
 ```bash
 curl -s -X POST http://localhost:3000/api/recommend \
   -H "Content-Type: application/json" \
-  -d '{"user_message":"I need an 8x10 rug under $2500","constraints":{"size":{"widthIn":96,"lengthIn":120,"toleranceIn":2},"budgetMax":2500}}'
+  -d '{"tenant_id":"YOUR_TENANT_ID","user_message":"I need an 8x10 rug under $2500","constraints":{"size":{"widthIn":96,"lengthIn":120,"toleranceIn":2},"budgetMax":2500}}'
 ```
 
 QA log file:
@@ -168,6 +188,7 @@ QA log file:
 ## Notes / Reminders
 
 - Availability is always hard; size/budget are hard only when provided.
+- Tenant scoping is always hard for recommendation flows.
 - Browse without size/budget is valid recommendation behavior.
 - SQL-first filtering runs before AI sees inventory.
 - Final hard checks still run in backend after SQL query.
@@ -190,3 +211,46 @@ QA log file:
 - Recommendation fallback behavior
   - Missing OpenAI key, request failure, or parse failure uses deterministic fallback response.
   - Fallback remains structured so UI can continue rendering without dead ends.
+
+### Request Contract Clarification (Current)
+
+- Canonical role field for UI/API requests is `role`.
+- `user_role` is still accepted server-side for compatibility, but should not be used by new client code.
+
+### Micro-Phase Validation Checklist (Pilot UX + Reliability)
+
+Run these after UI/contract guardrail changes:
+
+```bash
+npm --workspace apps/web run lint
+npm --workspace apps/web run build
+```
+
+Targeted API checks:
+
+```bash
+curl -s -X POST http://localhost:3000/api/chat \
+  -H "Content-Type: application/json" \
+  -H "Cookie: rug_ui_role=retail_customer" \
+  -d '{"tenant_id":"YOUR_TENANT_ID","role":"store_staff","message":"show rugs"}'
+```
+
+```bash
+curl -s -X POST http://localhost:3000/api/recommend \
+  -H "Content-Type: application/json" \
+  -H "Cookie: rug_ui_role=retail_customer" \
+  -d '{"tenant_id":"YOUR_TENANT_ID","role":"retail_customer","user_message":"show rugs","constraints":"bad"}'
+```
+
+```bash
+curl -s "http://localhost:3000/api/debug/trace?run=RUN_ID&case=CASE_ID" \
+  -H "Cookie: rug_ui_role=trade_client"
+```
+
+Latest validation status (2026-02-23):
+- `lint`: pass
+- `build`: pass
+- `role` mismatch check (`/api/chat`): `403` pass
+- malformed `constraints` check (`/api/recommend`): `400` pass
+- debug trace access: non-developer `403`, developer `200` pass
+- staff review flow: recommendation turn + regenerate review action both `200` pass

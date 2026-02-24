@@ -10,6 +10,41 @@ export type ResolvedRequestRole = {
   mismatch: boolean;
 };
 
+export type RequestRoleFields = {
+  role?: unknown;
+  user_role?: unknown;
+};
+
+export function getRequestedRoleFromBody(input: RequestRoleFields): {
+  requestedRole: unknown;
+  error: string | null;
+} {
+  const roleValue =
+    typeof input.role === "string" ? input.role.trim() : input.role;
+  const userRoleValue =
+    typeof input.user_role === "string"
+      ? input.user_role.trim()
+      : input.user_role;
+  const hasRole = roleValue !== undefined && roleValue !== null && roleValue !== "";
+  const hasUserRole =
+    userRoleValue !== undefined && userRoleValue !== null && userRoleValue !== "";
+
+  if (hasRole && hasUserRole && roleValue !== userRoleValue) {
+    return {
+      requestedRole: roleValue,
+      error: "role and user_role must match when both are provided.",
+    };
+  }
+
+  if (hasRole) {
+    return { requestedRole: roleValue, error: null };
+  }
+  if (hasUserRole) {
+    return { requestedRole: userRoleValue, error: null };
+  }
+  return { requestedRole: undefined, error: null };
+}
+
 export async function getRequestCookieRole(): Promise<AppRole | null> {
   const cookieStore = await cookies();
   const raw = cookieStore.get(uiRoleCookieName)?.value;
