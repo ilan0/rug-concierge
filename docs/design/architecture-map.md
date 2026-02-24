@@ -8,7 +8,7 @@ Quick placement map for where code and docs belong.
   - Next.js pages and API route entry points.
   - Key routes:
     - UI: `/`, `/concierge`, `/trade`, `/inventory`, `/appraisal`
-    - API: `/api/chat`, `/api/recommend`, `/api/appraisal/generate`, `/api/debug/trace`, `/api/ui-role`
+    - API: `/api/chat`, `/api/recommend`, `/api/appraisal/generate`, `/api/debug/trace`, `/api/ui-role`, `/api/ui-access`
 
 - `apps/web/components`
   - UI components only.
@@ -19,8 +19,10 @@ Quick placement map for where code and docs belong.
   - Keep route files thin: parse/validate -> call lib module -> return response.
   - Key domains:
     - `lib/chat/*` orchestration + state
+      - includes Supabase-backed session persistence (`session-store.ts`, `session-repo.ts`)
     - `lib/recommend/*` shared recommendation pipeline
     - `lib/ai/*` model adapters
+    - `lib/http/*` shared API request validators and guards
     - `lib/filters/*` deterministic filtering helpers
     - `lib/supabase/*` data access
     - `lib/auth/*` role/capability policy

@@ -3,7 +3,11 @@ import { handleAppraisalTurn } from "@/lib/chat/handlers/appraisal";
 import { handleGeneralChatTurn } from "@/lib/chat/handlers/general-chat";
 import { handleRecommendationTurn } from "@/lib/chat/handlers/recommendation";
 import { routeTurnMode } from "@/lib/chat/router";
-import { getOrCreateSession, saveSession } from "@/lib/chat/session-store";
+import {
+  getOrCreateSession,
+  saveSession,
+  SessionTenantMismatchError,
+} from "@/lib/chat/session-store";
 import { updateRecommendationStateForTurn } from "@/lib/chat/state";
 import { updateTradeContextForTurn } from "@/lib/chat/trade-context";
 import { updateProjectContextForTurn } from "@/lib/chat/project-context";
@@ -13,11 +17,24 @@ import {
   writeE2eTraceArtifact,
 } from "@/lib/qa/e2e-trace";
 import { badRequest, forbidden, internalError } from "@/lib/errors/http-errors";
-import { resolveRequestRole } from "@/lib/auth/request-role";
 import {
   canRoleGenerateAppraisal,
 } from "@/lib/auth/policy";
-import { roleHasCapability } from "@/lib/auth/capabilities";
+import {
+  hasTenantId,
+  normalizeTenantId,
+  requireTenantId,
+} from "@/lib/auth/tenant";
+import { requirePilotAccessApi } from "@/lib/auth/pilot-access";
+import {
+  requireRoleCapabilityOrError,
+  resolveApiRoleOrError,
+} from "@/lib/http/guards";
+import {
+  parseJsonObjectBody,
+  readTrimmedString,
+  validateOptionalObjectField,
+} from "@/lib/http/validators";
 import type {
   ChatTurnRequest,
   RecommendationReviewAction,
@@ -38,6 +55,9 @@ import type {
  * 5) persist updated session and return response
  */
 export async function POST(req: Request) {
+  const pilotBlocked = await requirePilotAccessApi();
+  if (pilotBlocked) return pilotBlocked;
+
   const startedAt = Date.now();
   const flowPath: string[] = [
     "/api/chat POST",
@@ -52,14 +72,13 @@ export async function POST(req: Request) {
 
   try {
     const requestedTraceMeta = parseE2eTraceMeta(req);
-    const body = (await req.json().catch(() => null)) as ChatTurnRequest | null;
+    const parsedBody = await parseJsonObjectBody<
+      ChatTurnRequest & Record<string, unknown>
+    >(req);
+    if (!parsedBody.ok) return parsedBody.response;
+    const body = parsedBody.body as ChatTurnRequest;
 
-    if (!body || typeof body !== "object") {
-      return badRequest("Invalid request body");
-    }
-
-    const userMessage =
-      typeof body.message === "string" ? body.message.trim() : "";
+    const userMessage = readTrimmedString(body.message);
     const reviewAction = normalizeReviewAction(body.review_action);
     const hasMessage = userMessage.length > 0;
     if (!hasMessage && !reviewAction) {
@@ -68,42 +87,40 @@ export async function POST(req: Request) {
     if (hasMessage && userMessage.length > 2000) {
       return badRequest("Message is too long. Please keep it under 2000 characters.");
     }
-    if (
-      body.trade_preferences !== undefined &&
-      (!body.trade_preferences || typeof body.trade_preferences !== "object")
-    ) {
-      return badRequest("trade_preferences must be an object when provided.");
-    }
+    const tradePreferencesError = validateOptionalObjectField(
+      body.trade_preferences,
+      "trade_preferences"
+    );
+    if (tradePreferencesError) return badRequest(tradePreferencesError);
+    const constraintsError = validateOptionalObjectField(
+      body.constraints,
+      "constraints"
+    );
+    if (constraintsError) return badRequest(constraintsError);
 
     const sessionId =
       typeof body.session_id === "string" && body.session_id.trim()
         ? body.session_id.trim()
         : crypto.randomUUID();
 
-    const roleResolution = await resolveRequestRole({
-      requestedRole: body.role,
+    const roleResult = await resolveApiRoleOrError({
+      role: body.role,
+      user_role: body.user_role,
       defaultRole: "retail_customer",
+      requiredCapability: "chat.general",
+      capabilityErrorMessage: "This role is not allowed to use chat.",
     });
-    if (roleResolution.mismatch) {
-      return forbidden("Role mismatch between cookie and request payload.");
-    }
-    if (
-      roleResolution.source !== "cookie" &&
-      (roleResolution.role === "store_staff" || roleResolution.role === "developer")
-    ) {
-      return forbidden(
-        "Privileged roles require a synced role cookie from the UI session."
-      );
-    }
-    const role: RoleType = roleResolution.role;
+    if (!roleResult.ok) return roleResult.response;
+    const role: RoleType = roleResult.role;
     const traceMeta = requestedTraceMeta;
 
-    if (!roleHasCapability(role, "chat.general")) {
-      return forbidden("This role is not allowed to use chat.");
-    }
-
-    if (reviewAction && !roleHasCapability(role, "review.controls")) {
-      return forbidden("review_action is available only for staff or developer roles.");
+    if (reviewAction) {
+      const reviewCapabilityError = requireRoleCapabilityOrError(
+        role,
+        "review.controls",
+        "review_action is available only for staff or developer roles."
+      );
+      if (reviewCapabilityError) return reviewCapabilityError;
     }
     if (
       reviewAction === "override" &&
@@ -118,15 +135,15 @@ export async function POST(req: Request) {
     ) {
       return badRequest("override.selected_rug_ids must be an array when provided.");
     }
-    const session = getOrCreateSession(sessionId, role);
-    const tenantId =
-      typeof body.tenant_id === "string" && body.tenant_id.trim()
-        ? body.tenant_id.trim()
-        : null;
+    const requestedTenantId = normalizeTenantId(body.tenant_id);
     const tradeClientId =
       typeof body.trade_client_id === "string" && body.trade_client_id.trim()
         ? body.trade_client_id.trim()
         : null;
+    const session = await getOrCreateSession(sessionId, role, {
+      tenantId: requestedTenantId,
+    });
+    const tenantId = session.tenant_id ?? requestedTenantId ?? null;
 
     const userTurn: SessionMessage = {
       role: "user",
@@ -169,11 +186,22 @@ export async function POST(req: Request) {
       recommendation_state: nextSession.recommendation_state,
     });
     const effectiveMode = routeDecision.mode;
-    if (
-      effectiveMode === "recommendation" &&
-      !roleHasCapability(role, "chat.recommend")
-    ) {
-      return forbidden("This role is not allowed to request recommendations.");
+    if (effectiveMode === "recommendation") {
+      const recommendationCapabilityError = requireRoleCapabilityOrError(
+        role,
+        "chat.recommend",
+        "This role is not allowed to request recommendations."
+      );
+      if (recommendationCapabilityError) return recommendationCapabilityError;
+    }
+    if (effectiveMode === "recommendation") {
+      const tenantError = requireTenantId(tenantId, "inventory-backed flow");
+      if (tenantError) {
+        return badRequest(tenantError);
+      }
+    }
+    if (effectiveMode === "recommendation" && !hasTenantId(tenantId)) {
+      return badRequest("tenant_id is required for this inventory-backed request.");
     }
 
     const handlerInput = {
@@ -295,7 +323,12 @@ export async function POST(req: Request) {
           : nextSession.review_state,
     };
 
-    saveSession(updatedSession);
+    await saveSession(updatedSession, {
+      tenantId,
+      mode: responseMode,
+      turns: [userTurn, assistantTurn],
+      reviewAction: reviewAction ?? undefined,
+    });
 
     const promptLayerPreview = buildPromptLayers({
       mode: effectiveMode,
@@ -315,6 +348,7 @@ export async function POST(req: Request) {
           request: {
             session_id: body.session_id ?? null,
             role,
+            requested_tenant_id: requestedTenantId,
             tenant_id: tenantId,
             trade_client_id: tradeClientId,
             message: userMessage,
@@ -375,7 +409,10 @@ export async function POST(req: Request) {
       response.headers.set("x-chat-route-trace-id", routeTraceId);
     }
     return response;
-  } catch {
+  } catch (error) {
+    if (error instanceof SessionTenantMismatchError) {
+      return forbidden("tenant_id does not match the existing session tenant.");
+    }
     return internalError(
       "Unable to process chat turn right now. Please try again.",
       "CHAT_INTERNAL_ERROR"

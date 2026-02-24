@@ -9,9 +9,19 @@ import {
   parseE2eTraceMeta,
   writeE2eTraceArtifact,
 } from "@/lib/qa/e2e-trace";
-import { badRequest, forbidden, internalError } from "@/lib/errors/http-errors";
-import { resolveRequestRole } from "@/lib/auth/request-role";
-import { roleHasCapability } from "@/lib/auth/capabilities";
+import { badRequest, internalError } from "@/lib/errors/http-errors";
+import {
+  hasTenantId,
+  normalizeTenantId,
+  requireTenantId,
+} from "@/lib/auth/tenant";
+import { requirePilotAccessApi } from "@/lib/auth/pilot-access";
+import { resolveApiRoleOrError } from "@/lib/http/guards";
+import {
+  parseJsonObjectBody,
+  readUserMessage,
+  validateOptionalObjectField,
+} from "@/lib/http/validators";
 import type { HardConstraints } from "@/lib/types/recommendation";
 
 function hasMeaningfulConstraints(constraints: HardConstraints): boolean {
@@ -28,7 +38,7 @@ function hasMeaningfulConstraints(constraints: HardConstraints): boolean {
 /**
  * POST /api/recommend
  * Recommendation-mode route only.
- * Input: optional `constraints`, optional `user_message`/`message`, and optional `tenant_id`.
+ * Input: optional `constraints`, optional `user_message`/`message`, and required `tenant_id`.
  * Behavior: query Supabase with active hard constraints first, run backend hard checks, then ask AI to rank/explain.
  * Not for freeform chat; inventory truth stays in backend.
  */
@@ -43,16 +53,20 @@ function hasMeaningfulConstraints(constraints: HardConstraints): boolean {
 // 7) Return structured JSON for UI.
 
 export async function POST(req: Request) {
+  const pilotBlocked = await requirePilotAccessApi();
+  if (pilotBlocked) return pilotBlocked;
+
   const startedAt = Date.now();
   try {
     const requestId = crypto.randomUUID();
     const traceMeta = parseE2eTraceMeta(req);
     const routeTraceId = crypto.randomUUID();
 
-    // Parse JSON body safely. If parsing fails, `body` will be null.
-    const body = await req.json().catch(() => null);
-
-    if (!body || typeof body !== "object") {
+    const parsedBody = await parseJsonObjectBody<Record<string, unknown>>(
+      req,
+      "Invalid request"
+    );
+    if (!parsedBody.ok) {
       if (traceMeta) {
         await writeE2eTraceArtifact({
           meta: traceMeta,
@@ -72,36 +86,80 @@ export async function POST(req: Request) {
           },
         });
       }
-      return badRequest("Invalid request");
+      return parsedBody.response;
     }
+    const body = parsedBody.body;
 
-    const roleResolution = await resolveRequestRole({
-      requestedRole: (body as { role?: unknown }).role,
+    const roleResult = await resolveApiRoleOrError({
+      role: body.role,
+      user_role: body.user_role,
       defaultRole: "retail_customer",
+      requiredCapability: "chat.recommend",
+      capabilityErrorMessage: "This role is not allowed to request recommendations.",
     });
-    if (roleResolution.mismatch) {
-      return forbidden("Role mismatch between cookie and request payload.");
-    }
-    if (
-      roleResolution.source !== "cookie" &&
-      (roleResolution.role === "store_staff" || roleResolution.role === "developer")
-    ) {
-      return forbidden(
-        "Privileged roles require a synced role cookie from the UI session."
-      );
-    }
-    const role = roleResolution.role;
-    if (!roleHasCapability(role, "chat.recommend")) {
-      return forbidden("This role is not allowed to request recommendations.");
+    if (!roleResult.ok) {
+      if (traceMeta) {
+        await writeE2eTraceArtifact({
+          meta: traceMeta,
+          channel: "recommend-route",
+          trace_id: routeTraceId,
+          payload: {
+            flow_path: ["/api/recommend POST", "request_validation_failed"],
+            request_id: requestId,
+            request: null,
+            response: {
+              status: roleResult.response.status,
+              body: {
+                error: "Role validation failed.",
+                code:
+                  roleResult.response.status === 400 ? "BAD_REQUEST" : "FORBIDDEN",
+              },
+            },
+            timing_ms: {
+              total_ms: Date.now() - startedAt,
+            },
+          },
+        });
+      }
+      return roleResult.response;
     }
 
     // `user_message` is preferred, but we also accept `message`.
-    const userMessage =
-      typeof body.user_message === "string"
-        ? body.user_message.trim()
-        : typeof body.message === "string"
-          ? body.message.trim()
-          : "";
+    const userMessage = readUserMessage(body);
+
+    const constraintsError = validateOptionalObjectField(
+      body.constraints,
+      "constraints"
+    );
+    if (constraintsError) {
+      if (traceMeta) {
+        await writeE2eTraceArtifact({
+          meta: traceMeta,
+          channel: "recommend-route",
+          trace_id: routeTraceId,
+          payload: {
+            flow_path: ["/api/recommend POST", "request_validation_failed"],
+            request_id: requestId,
+            request: {
+              tenant_id: body.tenant_id ?? null,
+              user_message: userMessage,
+              constraints: body.constraints,
+            },
+            response: {
+              status: 400,
+              body: {
+                error: constraintsError,
+                code: "BAD_REQUEST",
+              },
+            },
+            timing_ms: {
+              total_ms: Date.now() - startedAt,
+            },
+          },
+        });
+      }
+      return badRequest(constraintsError);
+    }
 
     // Explicit request constraints come from UI payload.
     const explicitConstraints = normalizeHardConstraints(body.constraints);
@@ -249,10 +307,41 @@ export async function POST(req: Request) {
       }
     }
 
-    const tenantId =
-      typeof body.tenant_id === "string" && body.tenant_id.trim()
-        ? body.tenant_id.trim()
-        : null;
+    const tenantId = normalizeTenantId(body.tenant_id);
+    const tenantError = requireTenantId(tenantId, "recommendation");
+    if (tenantError) {
+      if (traceMeta) {
+        await writeE2eTraceArtifact({
+          meta: traceMeta,
+          channel: "recommend-route",
+          trace_id: routeTraceId,
+          payload: {
+            flow_path: ["/api/recommend POST", "request_validation_failed"],
+            request_id: requestId,
+            request: {
+              tenant_id: body.tenant_id ?? null,
+              user_message: userMessage,
+              constraints,
+            },
+            response: {
+              status: 400,
+              body: {
+                error: tenantError,
+                code: "BAD_REQUEST",
+              },
+            },
+            timing_ms: {
+              total_ms: Date.now() - startedAt,
+            },
+          },
+        });
+      }
+      return badRequest(tenantError);
+    }
+
+    if (!hasTenantId(tenantId)) {
+      return badRequest("tenant_id is required for recommendation requests.");
+    }
 
     const result = await runRecommendationPipeline({
       requestId,
