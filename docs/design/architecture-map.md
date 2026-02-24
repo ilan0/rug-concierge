@@ -36,6 +36,8 @@ Quick placement map for where code and docs belong.
 
 - `docs/master-context.md`
   - One-page source of truth.
+- `docs/contributor-map.md`
+  - Feature-area edit ownership map for onboarding.
 - `docs/design/*`
   - Architecture, routing, and behavior docs.
 - `docs/prompts/*`
@@ -64,3 +66,4 @@ Quick placement map for where code and docs belong.
 - Keep auth policy centralized in `apps/web/lib/auth/*`.
 - Keep session/routing rules centralized in `apps/web/lib/chat/*`.
 - Reuse the shared recommendation pipeline for any recommendation execution path.
+- Maintain one npm lockfile at repo root (`package-lock.json`).

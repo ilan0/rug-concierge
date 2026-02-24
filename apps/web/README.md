@@ -85,6 +85,19 @@ Pattern for new pages:
   - `/apps/web/components/shell/workspace-nav.tsx`
 - Used by concierge/trade/inventory/appraisal pages for consistent workspace routing.
 
+## Contributor Onboarding
+
+- Repo-level feature map:
+  - `/Users/ilannabatkhorian/Documents/rug-concierge/docs/contributor-map.md`
+- One-page project truth:
+  - `/Users/ilannabatkhorian/Documents/rug-concierge/docs/master-context.md`
+
+## Lockfile Policy
+
+- Use npm workspaces from repo root.
+- Canonical lockfile is root `package-lock.json`.
+- Do not commit `apps/web/package-lock.json`.
+
 ## Local Run
 
 ```bash

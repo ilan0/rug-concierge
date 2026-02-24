@@ -6,6 +6,8 @@ Use this file as the quick entry point.
 
 - `docs/master-context.md`  
   One-page source of truth for current product behavior and architecture.
+- `docs/contributor-map.md`  
+  Feature-by-feature "where to edit" map for faster onboarding.
 - `docs/working-notes.md`  
   Practical dev notes, env vars, and local run/testing commands.
 

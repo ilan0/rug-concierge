@@ -18,6 +18,12 @@ This is a quick, practical reference for what you’ll edit first, where things 
 
 - Next.js app: `apps/web`
 
+## Workspace Policy
+
+- Run npm from repo root (workspace mode).
+- Canonical lockfile: `package-lock.json` at repo root.
+- Do not commit `apps/web/package-lock.json`.
+
 ---
 
 ## Files You’ll Edit First (Primary)

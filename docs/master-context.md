@@ -153,6 +153,22 @@ Contract enforcement:
 
 Canonical testing root: `docs/testing`.
 
+## Contributor Onboarding
+
+- Primary edit map:
+  - `docs/contributor-map.md`
+- New contributors should start with:
+  1. `docs/master-context.md`
+  2. `docs/contributor-map.md`
+  3. `docs/design/chat-orchestration.md`
+
+## Lockfile + Workspace Policy
+
+- Package manager: npm workspaces from repo root.
+- Canonical lockfile: `package-lock.json` (repo root only).
+- App-level lockfiles are not part of repo policy.
+- Next workspace root is pinned in `apps/web/next.config.mjs` to avoid root inference drift.
+
 ## Pointers
 
 - Architecture/file placement: `docs/design/architecture-map.md`
