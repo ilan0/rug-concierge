@@ -49,6 +49,10 @@ Recommendation mode includes:
 6. inventory context
 7. user request with constraint/project snapshot
 
+Implementation note:
+- Recommendation prompt layer ordering is centralized in `apps/web/lib/prompts/recommendation-stack.ts`
+  and reused by both debug preview and runtime AI request assembly.
+
 Appraisal mode uses appraisal prompts + appraisal context payload.
 
 API-level strict JSON schema is the hard response contract where structured output is required.

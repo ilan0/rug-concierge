@@ -1,8 +1,6 @@
 import type { ChatMode, RoleType, SessionData } from "@/lib/chat/types";
-import {
-  getChatLayerPreview,
-  getRecommendationLayerPreview,
-} from "@/lib/prompts/layers";
+import { getChatLayerPreview } from "@/lib/prompts/layers";
+import { getRecommendationLayerPreview } from "@/lib/prompts/recommendation-stack";
 
 type BuildPromptLayersInput = {
   mode: ChatMode;

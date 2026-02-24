@@ -22,6 +22,7 @@ Quick placement map for where code and docs belong.
       - includes Supabase-backed session persistence (`session-store.ts`, `session-repo.ts`)
     - `lib/recommend/*` shared recommendation pipeline
     - `lib/ai/*` model adapters
+    - `lib/prompts/*` prompt-layer IDs and shared stack builders
     - `lib/http/*` shared API request validators and guards
     - `lib/filters/*` deterministic filtering helpers
     - `lib/supabase/*` data access

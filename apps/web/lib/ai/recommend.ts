@@ -1,9 +1,10 @@
 import type { HardConstraints, InventoryRug } from "@/lib/types/recommendation";
 import { getRecommendationPromptBundle } from "@/lib/ai/prompt-library";
+import type { PromptLayerId } from "@/lib/prompts/layer-ids";
 import {
-  PROMPT_LAYER,
-  type PromptLayerId,
-} from "@/lib/prompts/layers";
+  buildRecommendationPromptSections,
+  groupPromptSectionsByRole,
+} from "@/lib/prompts/recommendation-stack";
 
 // PSEUDOCODE
 // 1) If candidate inventory is empty -> return no_match.
@@ -270,30 +271,8 @@ function trimText(value: string, maxChars: number): string {
   return `${normalized.slice(0, maxChars - 1).trimEnd()}…`;
 }
 
-type PromptSection = {
-  id: PromptLayerId;
-  role: "system" | "user";
-  text: string;
-};
-
 function sectionPreview(value: string): string {
   return trimText(value.replace(/\s+/g, " "), 120);
-}
-
-function groupPromptSectionsByRole(sections: PromptSection[]) {
-  const grouped: Array<{ role: "system" | "user"; content: Array<{ type: "input_text"; text: string }> }> = [];
-  for (const section of sections) {
-    const current = grouped[grouped.length - 1];
-    if (!current || current.role !== section.role) {
-      grouped.push({
-        role: section.role,
-        content: [{ type: "input_text", text: section.text }],
-      });
-      continue;
-    }
-    current.content.push({ type: "input_text", text: section.text });
-  }
-  return grouped;
 }
 
 function splitSentences(value: string): string[] {
@@ -865,9 +844,10 @@ export async function rankAndExplain(
 
   const contextInventory = toContextInventory(inventory);
   const promptBundle = getRecommendationPromptBundle();
-  const hasTradePreferences =
+  const hasTradePreferences = Boolean(
     promptContext?.trade_preferences &&
-    Object.keys(promptContext.trade_preferences).length > 0;
+      Object.keys(promptContext.trade_preferences).length > 0
+  );
 
   // If no user message was provided, build a plain fallback request sentence.
   const requestText =
@@ -875,57 +855,21 @@ export async function rankAndExplain(
       ? userMessage.trim()
       : buildFallbackRequestText(constraints);
 
-  const promptSections: PromptSection[] = [
-    {
-      id: PROMPT_LAYER.systemBase,
-      role: "system",
-      text: promptBundle.system,
+  const promptSections = buildRecommendationPromptSections({
+    role: promptContext?.role ?? "retail_customer",
+    hasTradePreferences,
+    prompts: {
+      system: promptBundle.system,
+      recommendation: promptBundle.recommendation,
+      structuredOutput: promptBundle.recommendationStructuredOutput,
+      tradeSupport: promptBundle.tradeSupport,
     },
-    {
-      id: PROMPT_LAYER.taskRecommendation,
-      role: "system",
-      text: promptBundle.recommendation,
-    },
-    {
-      id: PROMPT_LAYER.structuredRecommendation,
-      role: "system",
-      text: promptBundle.recommendationStructuredOutput,
-    },
-    ...(promptContext?.role === "trade_client"
-      ? [
-          {
-            id: PROMPT_LAYER.taskTradeSupport,
-            role: "system" as const,
-            text: promptBundle.tradeSupport,
-          },
-        ]
-      : []),
-    ...(hasTradePreferences
-      ? [
-          {
-            id: PROMPT_LAYER.contextTradePreferences,
-            role: "system" as const,
-            text: `TRADE PREFERENCES (soft signals only):\n${JSON.stringify(
-              promptContext?.trade_preferences,
-              null,
-              2
-            )}`,
-          },
-        ]
-      : []),
-    {
-      id: PROMPT_LAYER.contextInventory,
-      role: "system",
-      text: `AVAILABLE INVENTORY (authoritative):\n${JSON.stringify(contextInventory, null, 2)}`,
-    },
-    {
-      id: PROMPT_LAYER.latestUserWithConstraints,
-      role: "user",
-      text: `User request:\n${requestText}\n\nHard constraints:\n${JSON.stringify(
-        constraints
-      )}\n\nProject context:\n${JSON.stringify(promptContext?.project_context ?? null)}`,
-    },
-  ];
+    tradePreferences: promptContext?.trade_preferences,
+    inventoryContext: contextInventory,
+    userMessage: requestText,
+    constraints,
+    projectContext: promptContext?.project_context ?? null,
+  });
 
   const requestInput = groupPromptSectionsByRole(promptSections);
 

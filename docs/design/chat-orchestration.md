@@ -88,4 +88,5 @@ Request notes:
 - Debug-friendly prompt-layer previews are built by:
   - `apps/web/lib/chat/prompt-builder.ts`
   - `apps/web/lib/prompts/layers.ts`
+  - `apps/web/lib/prompts/recommendation-stack.ts` (shared recommendation layer source)
 - Recommendation trace artifacts also capture actual prompt payload and parsed response.
