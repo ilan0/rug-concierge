@@ -36,6 +36,11 @@ type RecommendationPromptContext = {
       constraints: HardConstraints;
     }>;
   };
+  chat_context?: {
+    structured_state?: unknown;
+    conversation_memory?: unknown;
+    recent_turns?: unknown[];
+  };
 };
 
 export type RecommendationAiTrace = {
@@ -858,6 +863,11 @@ export async function rankAndExplain(
   const promptSections = buildRecommendationPromptSections({
     role: promptContext?.role ?? "retail_customer",
     hasTradePreferences,
+    hasProjectContext: Boolean(promptContext?.project_context),
+    hasChatMemoryContext: Boolean(promptContext?.chat_context),
+    hasRecentTurnsContext:
+      Array.isArray(promptContext?.chat_context?.recent_turns) &&
+      (promptContext?.chat_context?.recent_turns?.length ?? 0) > 0,
     prompts: {
       system: promptBundle.system,
       recommendation: promptBundle.recommendation,
@@ -865,6 +875,7 @@ export async function rankAndExplain(
       tradeSupport: promptBundle.tradeSupport,
     },
     tradePreferences: promptContext?.trade_preferences,
+    chatContext: promptContext?.chat_context,
     inventoryContext: contextInventory,
     userMessage: requestText,
     constraints,

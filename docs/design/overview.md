@@ -22,7 +22,7 @@ Backend responsibilities:
 - call mode handler and persist session
 
 AI responsibilities:
-- general chat: freeform guidance
+- general chat: AI-backed guidance with bounded memory context
 - recommendation: rank/explain from provided candidates only
 - appraisal: generate structured draft from provided facts only
 
@@ -40,14 +40,25 @@ Role policy is centralized under `apps/web/lib/auth/*` and applied across UI rou
 
 Prompt stack is layered by mode and role.
 
+General chat mode includes:
+1. system prompt
+2. general-chat task prompt
+3. role prompt
+4. optional trade/project context
+5. chat memory context
+6. recent turns context
+7. latest user message
+
 Recommendation mode includes:
 1. system prompt
 2. recommendation task prompt
 3. structured-output guidance prompt
 4. optional trade support prompt
 5. optional trade preferences context
-6. inventory context
-7. user request with constraint/project snapshot
+6. optional project context
+7. optional chat memory/recent turns context
+8. inventory context
+9. user request with constraint/project snapshot
 
 Implementation note:
 - Recommendation prompt layer ordering is centralized in `apps/web/lib/prompts/recommendation-stack.ts`
@@ -64,6 +75,7 @@ API-level strict JSON schema is the hard response contract where structured outp
 - Deterministic backend filtering and candidate shaping.
 - AI ranking/explanation only after backend candidate selection.
 - Deterministic post-processing for confidence and objection fields.
+- Constraints remain sticky across turns until explicitly changed/cleared by user.
 
 No RAG/vector search is used for MVP recommendation behavior.
 

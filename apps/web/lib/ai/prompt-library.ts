@@ -7,6 +7,7 @@ type RecommendationPromptBundle = {
   recommendation: string;
   recommendationStructuredOutput: string;
   tradeSupport: string;
+  generalChat: string;
 };
 
 let cachedBundle: RecommendationPromptBundle | null = null;
@@ -69,6 +70,10 @@ export function getRecommendationPromptBundle(): RecommendationPromptBundle {
     tradeSupport: readPromptFileOrFallback(
       path.resolve(promptsDir, "trade-support.md"),
       "Trade workflow: be concise and practical while using known preferences."
+    ),
+    generalChat: readPromptFileOrFallback(
+      path.resolve(promptsDir, "general-chat.md"),
+      "Handle freeform rug questions clearly and practically without inventing facts."
     ),
   };
 

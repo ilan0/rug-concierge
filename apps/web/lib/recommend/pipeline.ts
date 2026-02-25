@@ -30,6 +30,11 @@ type RunRecommendationPipelineInput = {
         constraints: HardConstraints;
       }>;
     };
+    chat_context?: {
+      structured_state?: unknown;
+      conversation_memory?: unknown;
+      recent_turns?: unknown[];
+    };
   };
   traceMeta?: E2eTraceMeta & {
     source_route: "/api/recommend" | "/api/chat";

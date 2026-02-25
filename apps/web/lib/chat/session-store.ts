@@ -1,5 +1,10 @@
 import type { RoleType, SessionData } from "@/lib/chat/types";
 import {
+  buildInitialConversationMemory,
+  ensureConversationMemory,
+  trimChatHistory,
+} from "@/lib/chat/memory";
+import {
   appendTurnsToDb,
   loadSessionFromDb,
   upsertSessionToDb,
@@ -34,6 +39,7 @@ function buildEmptySession(sessionId: string, role: RoleType): SessionData {
     created_at: now,
     updated_at: now,
     chat_history: [],
+    conversation_memory: buildInitialConversationMemory(now),
     recommendation_state: {
       hard_constraints: {},
       soft_preferences: {},
@@ -68,6 +74,14 @@ function buildEmptySession(sessionId: string, role: RoleType): SessionData {
   };
 }
 
+function normalizeSessionDataShape(session: SessionData): SessionData {
+  return {
+    ...session,
+    chat_history: trimChatHistory(session.chat_history),
+    conversation_memory: ensureConversationMemory(session.conversation_memory),
+  };
+}
+
 export async function getOrCreateSession(
   sessionId: string,
   role: RoleType,
@@ -87,10 +101,11 @@ export async function getOrCreateSession(
   const fromDb = await loadSessionFromDb(sessionId);
   if (fromDb) {
     const tenantId = resolveTenantBinding(fromDb.tenantId, input.tenantId);
-    const next: SessionData =
+    const hydrated: SessionData =
       fromDb.session.tenant_id === tenantId
         ? fromDb.session
         : { ...fromDb.session, tenant_id: tenantId };
+    const next = normalizeSessionDataShape(hydrated);
     sessions.set(sessionId, next);
     return next;
   }
@@ -108,12 +123,13 @@ export async function saveSession(
   session: SessionData,
   input: SaveSessionInput
 ): Promise<void> {
+  const normalized = normalizeSessionDataShape(session);
   const tenantId = resolveTenantBinding(session.tenant_id, input.tenantId);
   const next: SessionData =
-    tenantId === session.tenant_id
-      ? session
+    tenantId === normalized.tenant_id
+      ? normalized
       : {
-          ...session,
+          ...normalized,
           tenant_id: tenantId,
         };
   sessions.set(session.session_id, next);

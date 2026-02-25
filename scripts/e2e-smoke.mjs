@@ -163,6 +163,7 @@ function summarizeTrace(traces) {
   const summary = {
     ai_used: false,
     ai_fallback: false,
+    general_chat_runtime: "unknown",
     flow_paths: [],
     supabase_variants: [],
     ai_request_payloads: [],
@@ -177,6 +178,23 @@ function summarizeTrace(traces) {
 
     const flowPath = Array.isArray(payload.flow_path) ? payload.flow_path : null;
     if (flowPath) summary.flow_paths.push(flowPath);
+
+    const responseNotes =
+      payload?.response &&
+      typeof payload.response === "object" &&
+      typeof payload.response.notes === "string"
+        ? payload.response.notes
+        : "";
+    const runtimeMatch = responseNotes.match(/GENERAL_CHAT_AI_RUNTIME:([a-z_]+)/i);
+    if (runtimeMatch) {
+      const runtime = runtimeMatch[1].toLowerCase();
+      summary.general_chat_runtime = runtime;
+      if (runtime === "real") {
+        summary.ai_used = true;
+      } else if (runtime.startsWith("fallback")) {
+        summary.ai_fallback = true;
+      }
+    }
 
     if (Array.isArray(payload.query_trace)) {
       summary.supabase_variants.push(...payload.query_trace);
@@ -331,6 +349,7 @@ function buildCaseMarkdown(test) {
     `- Method: ${test.metadata.method}`,
     `- AI Used: ${test.trace_summary.ai_used ? "yes" : "no"}`,
     `- AI Fallback Used: ${test.trace_summary.ai_fallback ? "yes" : "no"}`,
+    `- General Chat Runtime: ${test.trace_summary.general_chat_runtime}`,
     `- Details: \`${JSON.stringify(test.details).slice(0, 500)}\``,
     checksMarkdown,
     "- Trace Files:",
@@ -640,6 +659,325 @@ async function run() {
           });
 
           return response.body ?? response.raw;
+        }
+      )
+    );
+  }
+
+  if (shouldRun("chat general advice uses ai_or_fallback_contract")) {
+    tests.push(
+      await runCase(
+        "chat general advice uses ai_or_fallback_contract",
+        { endpoint: "/api/chat", method: "POST" },
+        async ({ assert, traceMeta }) => {
+          const response = await postJson(
+            `${baseUrl}/api/chat`,
+            {
+              role: "retail_customer",
+              tenant_id: requireSmokeTenant(
+                "chat general advice uses ai_or_fallback_contract"
+              ),
+              message: "tell me about rug maintenance for a living room setup",
+            },
+            traceMeta
+          );
+
+          assert(response.status === 200, "status is 200", {
+            expected: 200,
+            actual: response.status,
+          });
+          assert(response.body?.mode === "general_chat", "mode is general_chat", {
+            actual: response.body?.mode,
+          });
+
+          const notes = response.body?.response?.notes;
+          assert(
+            typeof notes === "string" && notes.includes("GENERAL_CHAT_AI_RUNTIME:"),
+            "notes include general chat runtime marker",
+            { actual: notes }
+          );
+
+          return {
+            mode: response.body?.mode,
+            notes,
+            response_headers: response.headers,
+          };
+        }
+      )
+    );
+  }
+
+  if (shouldRun("chat mixed flow preserves sticky constraints")) {
+    tests.push(
+      await runCase(
+        "chat mixed flow preserves sticky constraints",
+        { endpoint: "/api/chat", method: "POST" },
+        async ({ assert, traceMeta }) => {
+          const first = await postJson(
+            `${baseUrl}/api/chat`,
+            {
+              role: "retail_customer",
+              tenant_id: requireSmokeTenant("chat mixed flow preserves sticky constraints"),
+              message: "show me 8x10 rugs under $2500",
+            },
+            traceMeta
+          );
+          assert(first.status === 200, "initial call status is 200", {
+            expected: 200,
+            actual: first.status,
+          });
+          assert(
+            typeof first.body?.session_id === "string",
+            "initial call returns session_id",
+            { actual: first.body?.session_id }
+          );
+
+          const second = await postJson(
+            `${baseUrl}/api/chat`,
+            {
+              role: "retail_customer",
+              tenant_id: requireSmokeTenant("chat mixed flow preserves sticky constraints"),
+              session_id: first.body.session_id,
+              message: "is 8x10 good for my living room?",
+            },
+            traceMeta
+          );
+          assert(second.status === 200, "advice turn status is 200", {
+            expected: 200,
+            actual: second.status,
+          });
+          assert(second.body?.mode === "general_chat", "advice turn is general_chat", {
+            actual: second.body?.mode,
+          });
+
+          const hard = second.body?.recommendation_state?.hard_constraints ?? {};
+          assert(Boolean(hard.size), "size constraint remains sticky", { actual: hard.size });
+          assert(
+            typeof hard.budgetMax === "number",
+            "budget constraint remains sticky",
+            { actual: hard.budgetMax }
+          );
+
+          return {
+            session_id: second.body?.session_id,
+            mode: second.body?.mode,
+            hard_constraints: hard,
+            first_response_headers: first.headers,
+            second_response_headers: second.headers,
+          };
+        }
+      )
+    );
+  }
+
+  if (shouldRun("chat clear budget preserves size")) {
+    tests.push(
+      await runCase(
+        "chat clear budget preserves size",
+        { endpoint: "/api/chat", method: "POST" },
+        async ({ assert, traceMeta }) => {
+          const first = await postJson(
+            `${baseUrl}/api/chat`,
+            {
+              role: "retail_customer",
+              tenant_id: requireSmokeTenant("chat clear budget preserves size"),
+              message: "show me options",
+              constraints: {
+                size: { widthIn: 96, lengthIn: 120, toleranceIn: 2 },
+                budgetMax: 2500,
+              },
+            },
+            traceMeta
+          );
+          assert(first.status === 200, "initial call status is 200", {
+            expected: 200,
+            actual: first.status,
+          });
+
+          const second = await postJson(
+            `${baseUrl}/api/chat`,
+            {
+              role: "retail_customer",
+              tenant_id: requireSmokeTenant("chat clear budget preserves size"),
+              session_id: first.body.session_id,
+              message: "clear budget",
+            },
+            traceMeta
+          );
+          assert(second.status === 200, "clear budget turn status is 200", {
+            expected: 200,
+            actual: second.status,
+          });
+
+          const hard = second.body?.recommendation_state?.hard_constraints ?? {};
+          assert(
+            hard.budgetMax === undefined,
+            "budget is cleared from recommendation_state",
+            { actual: hard.budgetMax }
+          );
+          assert(Boolean(hard.size), "size remains after budget clear", { actual: hard.size });
+
+          return {
+            session_id: second.body?.session_id,
+            hard_constraints: hard,
+            first_response_headers: first.headers,
+            second_response_headers: second.headers,
+          };
+        }
+      )
+    );
+  }
+
+  if (shouldRun("chat clear size preserves budget")) {
+    tests.push(
+      await runCase(
+        "chat clear size preserves budget",
+        { endpoint: "/api/chat", method: "POST" },
+        async ({ assert, traceMeta }) => {
+          const first = await postJson(
+            `${baseUrl}/api/chat`,
+            {
+              role: "retail_customer",
+              tenant_id: requireSmokeTenant("chat clear size preserves budget"),
+              message: "show me options",
+              constraints: {
+                size: { widthIn: 96, lengthIn: 120, toleranceIn: 2 },
+                budgetMax: 2500,
+              },
+            },
+            traceMeta
+          );
+          assert(first.status === 200, "initial call status is 200", {
+            expected: 200,
+            actual: first.status,
+          });
+
+          const second = await postJson(
+            `${baseUrl}/api/chat`,
+            {
+              role: "retail_customer",
+              tenant_id: requireSmokeTenant("chat clear size preserves budget"),
+              session_id: first.body.session_id,
+              message: "remove size",
+            },
+            traceMeta
+          );
+          assert(second.status === 200, "clear size turn status is 200", {
+            expected: 200,
+            actual: second.status,
+          });
+
+          const hard = second.body?.recommendation_state?.hard_constraints ?? {};
+          assert(hard.size === undefined, "size is cleared from recommendation_state", {
+            actual: hard.size,
+          });
+          assert(
+            typeof hard.budgetMax === "number",
+            "budget remains after size clear",
+            { actual: hard.budgetMax }
+          );
+
+          return {
+            session_id: second.body?.session_id,
+            hard_constraints: hard,
+            first_response_headers: first.headers,
+            second_response_headers: second.headers,
+          };
+        }
+      )
+    );
+  }
+
+  if (shouldRun("chat start over constraints clears hard constraints")) {
+    tests.push(
+      await runCase(
+        "chat start over constraints clears hard constraints",
+        { endpoint: "/api/chat", method: "POST" },
+        async ({ assert, traceMeta }) => {
+          const first = await postJson(
+            `${baseUrl}/api/chat`,
+            {
+              role: "retail_customer",
+              tenant_id: requireSmokeTenant(
+                "chat start over constraints clears hard constraints"
+              ),
+              message: "show me options",
+              constraints: {
+                size: { widthIn: 96, lengthIn: 120, toleranceIn: 2 },
+                budgetMax: 2500,
+              },
+            },
+            traceMeta
+          );
+          assert(first.status === 200, "initial call status is 200", {
+            expected: 200,
+            actual: first.status,
+          });
+
+          const second = await postJson(
+            `${baseUrl}/api/chat`,
+            {
+              role: "retail_customer",
+              tenant_id: requireSmokeTenant(
+                "chat start over constraints clears hard constraints"
+              ),
+              session_id: first.body.session_id,
+              message: "start over constraints",
+            },
+            traceMeta
+          );
+          assert(second.status === 200, "start over turn status is 200", {
+            expected: 200,
+            actual: second.status,
+          });
+
+          const hard = second.body?.recommendation_state?.hard_constraints ?? {};
+          assert(hard.size === undefined, "size is cleared", { actual: hard.size });
+          assert(hard.budgetMax === undefined, "budget is cleared", {
+            actual: hard.budgetMax,
+          });
+
+          return {
+            session_id: second.body?.session_id,
+            hard_constraints: hard,
+            first_response_headers: first.headers,
+            second_response_headers: second.headers,
+          };
+        }
+      )
+    );
+  }
+
+  if (shouldRun("router advice phrase does not misroute to recommendation")) {
+    tests.push(
+      await runCase(
+        "router advice phrase does not misroute to recommendation",
+        { endpoint: "/api/chat", method: "POST" },
+        async ({ assert, traceMeta }) => {
+          const response = await postJson(
+            `${baseUrl}/api/chat`,
+            {
+              role: "retail_customer",
+              tenant_id: requireSmokeTenant(
+                "router advice phrase does not misroute to recommendation"
+              ),
+              message: "tell me about rugs",
+            },
+            traceMeta
+          );
+
+          assert(response.status === 200, "status is 200", {
+            expected: 200,
+            actual: response.status,
+          });
+          assert(response.body?.mode === "general_chat", "mode is general_chat", {
+            actual: response.body?.mode,
+          });
+
+          return {
+            mode: response.body?.mode,
+            response_headers: response.headers,
+          };
         }
       )
     );

@@ -1,6 +1,7 @@
 import {
   extractConstraintsFromUserMessage,
   normalizeHardConstraints,
+  parseConstraintResetDirectives,
 } from "@/lib/filters/extract-constraints";
 import type { SessionData } from "@/lib/chat/types";
 import type { HardConstraints } from "@/lib/types/recommendation";
@@ -17,7 +18,12 @@ export function updateRecommendationStateForTurn(
 ): SessionData {
   const explicit = normalizeHardConstraints(input.constraints);
   const inferred = extractConstraintsFromUserMessage(input.message);
+  const resets = parseConstraintResetDirectives(input.message);
   const existing = session.recommendation_state.hard_constraints;
+  const resetAdjustedExisting: HardConstraints = {
+    budgetMax: resets.clearBudget ? undefined : existing.budgetMax,
+    size: resets.clearSize ? undefined : existing.size,
+  };
 
   const merged: HardConstraints = {
     budgetMax:
@@ -25,8 +31,8 @@ export function updateRecommendationStateForTurn(
         ? explicit.budgetMax
         : typeof inferred.budgetMax === "number"
           ? inferred.budgetMax
-          : existing.budgetMax,
-    size: explicit.size ?? inferred.size ?? existing.size,
+          : resetAdjustedExisting.budgetMax,
+    size: explicit.size ?? inferred.size ?? resetAdjustedExisting.size,
   };
 
   return {

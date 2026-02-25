@@ -79,7 +79,8 @@ Router behavior:
 ## Session Model (Current)
 
 Session state stores:
-- `chat_history`
+- `chat_history` (bounded tail; not sent in full to model)
+- `conversation_memory` (summary + stable facts + open threads)
 - `recommendation_state` (hard constraints + soft prefs)
 - `trade_context` (trade identity metadata + preferences)
 - `project_context` (multi-room, active room)
@@ -87,6 +88,13 @@ Session state stores:
 
 This supports mixed conversations without relying on model memory.
 Session state is persisted in Supabase tables (`chat_sessions`, `chat_messages`) for durability across restarts.
+
+Memory behavior:
+- Constraints remain sticky until changed/cleared by user.
+- Reset intents supported:
+  - `clear/remove/ignore budget`
+  - `clear/remove/ignore size`
+  - `start over constraints` (clears size + budget)
 
 ## Recommendation Pipeline (Shared)
 
@@ -102,16 +110,27 @@ Used by both `/api/recommend` and recommendation turns in `/api/chat`.
 4. Apply deterministic in-code hard checks as safety.
 5. Shape bounded candidate set for AI.
 6. If empty: return `no_match`.
-7. If non-empty: send candidate context + prompt layers to AI.
+7. If non-empty: send candidate context + bounded chat context packet + prompt layers to AI.
 8. Sanitize and normalize AI output to strict schema.
 9. Apply deterministic confidence, confidence tier/factors, and `why_not`.
 10. Return structured response.
+
+General chat model behavior:
+- `general_chat` also uses OpenAI when enabled.
+- Request includes bounded context packet only:
+  - conversation memory
+  - structured state
+  - recent turns (last 2 user/assistant pairs)
+  - latest user message
+- Full transcript is never sent to model.
+- Deterministic fallback is used when key/request/parse fails.
 
 ## AI Prompting Direction
 
 Recommendation prompt stack uses official prompt docs plus runtime context blocks.
 Primary docs:
 - `docs/prompts/system.md`
+- `docs/prompts/general-chat.md`
 - `docs/prompts/recommendation.md`
 - `docs/prompts/recommendation-structured-output.md`
 - `docs/prompts/trade-support.md` (trade role only)

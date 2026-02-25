@@ -119,19 +119,30 @@ function isAppraisalIntent(text: string): boolean {
 }
 
 function isExplicitRecommendationRequest(text: string): boolean {
-  const requestSignals = [
-    "show me",
-    "show",
-    "find",
-    "recommend",
-    "what do you have",
-    "inventory",
-    "options",
-    "available rugs",
-    "rugs",
-    "rug options",
+  const clearAdviceIntent =
+    /\b(how to|how do i|tell me about|difference between|is this good|would this look good|what do you think)\b/.test(
+      text
+    );
+  if (clearAdviceIntent) return false;
+
+  const explicitPhrases = [
+    "show me what you have",
+    "what do you have in inventory",
+    "show inventory",
+    "show available rugs",
+    "recommend rugs",
+    "find me a rug",
+    "show rug options",
   ];
-  return requestSignals.some((signal) => text.includes(signal));
+  if (explicitPhrases.some((phrase) => text.includes(phrase))) return true;
+
+  const shoppingVerb = /\b(show|show me|find|recommend|browse|search for|look for)\b/.test(
+    text
+  );
+  const rugObject = /\b(rug|rugs|runner|inventory|options)\b/.test(text);
+  if (shoppingVerb && rugObject) return true;
+
+  return false;
 }
 
 function isRecommendationFollowup(text: string): boolean {

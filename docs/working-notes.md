@@ -48,7 +48,10 @@ This is a quick, practical reference for what you’ll edit first, where things 
 - Constraint extraction: `apps/web/lib/filters/extract-constraints.ts`
 - Candidate shaping: `apps/web/lib/filters/candidate-shaping.ts`
 - AI rank/explain: `apps/web/lib/ai/recommend.ts`
+- AI general chat: `apps/web/lib/ai/general-chat.ts`
 - AI appraisal draft generation: `apps/web/lib/ai/appraisal.ts`
+- Conversation memory + compaction: `apps/web/lib/chat/memory.ts`
+- AI context packet builder: `apps/web/lib/chat/context-packet.ts`
 - Trade/project chat context: `apps/web/lib/chat/trade-context.ts`
 - Multi-room project context: `apps/web/lib/chat/project-context.ts`
 - Role/capability policy: `apps/web/lib/auth/*`
@@ -70,6 +73,7 @@ This is a quick, practical reference for what you’ll edit first, where things 
 - Chat orchestration map: `docs/design/chat-orchestration.md`
 - Role capability matrix: `docs/design/role-capability-matrix.md`
 - Recommendation prompt: `docs/prompts/recommendation.md`
+- General chat prompt: `docs/prompts/general-chat.md`
 - Structured output schema: `docs/prompts/recommendation-structured-output.md`
 - Appraisal prompt: `docs/prompts/appraisal.md`
 - Appraisal structured output schema: `docs/prompts/appraisal-structured-output.md`
@@ -91,6 +95,8 @@ Required:
 
 Optional (hosted owner pilot):
 - `PILOT_ACCESS_PASSCODE`
+- `ENABLE_GENERAL_CHAT_AI` (`1` default; set `0` to force fallback)
+- `CHAT_MEMORY_V1` (`1` default; set `0` to disable memory updates/context injection)
 
 ---
 
@@ -231,7 +237,7 @@ QA log file:
 - `/api/chat`
   - Empty/missing message -> `400` with friendly error.
   - Unexpected failure -> `500` with `CHAT_INTERNAL_ERROR`.
-  - General chat currently returns safe fallback text if no mode-specific action is needed.
+  - General chat uses AI with bounded context packet and deterministic fallback.
 
 - `/api/recommend`
   - Empty body or invalid request shape -> `400`.

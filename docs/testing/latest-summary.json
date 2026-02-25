@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-02-24T02:30:35.923Z",
+  "generated_at": "2026-02-25T22:24:47.707Z",
   "base_url": "http://127.0.0.1:3100",
   "tenant_id": "0a175457-6194-4ae9-bf4e-1a785d754c4b",
-  "openai_runtime": "fallback",
+  "openai_runtime": "real",
   "overall": "GO",
   "passed": 11,
   "failed": 0,
@@ -22,7 +22,7 @@
     {
       "name": "lint",
       "status": "pass",
-      "duration_ms": 2876,
+      "duration_ms": 3000,
       "details": {
         "exit_code": 0,
         "stdout_tail": "\n> web@0.1.0 lint\n> eslint .\n\n",
@@ -33,19 +33,19 @@
     {
       "name": "build",
       "status": "pass",
-      "duration_ms": 4385,
+      "duration_ms": 4439,
       "details": {
-        "preview": "{\"exit_code\":0,\"stdout_tail\":\"\\n> web@0.1.0 build\\n> next build\\n\\n▲ Next.js 16.1.6 (Turbopack)\\n- Environments: .env.local\\n\\n  Creating an optimized production build ...\\n✓ Compiled successfully in 1128.6ms\\n  Running TypeScript ...\\n  Collecting page data using 9 workers ...\\n  Generating static pages using 9 workers (0/14) ...\\n  Generating static pages using 9 workers (3/14) \\r\\n  Generating static pages using 9 workers (6/14) \\r\\n  Generating static pages using 9 workers (10/14) \\r\\n✓ Generating static pages using 9 workers (14/14) in 130.2ms\\n  Finalizing page optimization ...\\n\\nRoute (app)\\n┌ ○ /\\n├ ○ /_not-found\\n├ ƒ /api/appraisal/generate\\n├ ƒ /api/chat\\n├ ƒ /api/debug/trace\\n├ ƒ /api/recommend\\n├ ƒ /api/ui-access\\n├ ƒ /api/ui-role\\n├ ƒ /appraisal\\n├ ƒ /concierge\\n├ ƒ /inventor..."
+        "preview": "{\"exit_code\":0,\"stdout_tail\":\"\\n> web@0.1.0 build\\n> next build\\n\\n▲ Next.js 16.1.6 (Turbopack)\\n- Environments: .env.local\\n\\n  Creating an optimized production build ...\\n✓ Compiled successfully in 1030.9ms\\n  Running TypeScript ...\\n  Collecting page data using 9 workers ...\\n  Generating static pages using 9 workers (0/14) ...\\n  Generating static pages using 9 workers (3/14) \\r\\n  Generating static pages using 9 workers (6/14) \\r\\n  Generating static pages using 9 workers (10/14) \\r\\n✓ Generating static pages using 9 workers (14/14) in 129.9ms\\n  Finalizing page optimization ...\\n\\nRoute (app)\\n┌ ○ /\\n├ ○ /_not-found\\n├ ƒ /api/appraisal/generate\\n├ ƒ /api/chat\\n├ ƒ /api/debug/trace\\n├ ƒ /api/recommend\\n├ ƒ /api/ui-access\\n├ ƒ /api/ui-role\\n├ ƒ /appraisal\\n├ ƒ /concierge\\n├ ƒ /inventor..."
       },
       "command": "npm --workspace apps/web run build"
     },
     {
       "name": "start server",
       "status": "pass",
-      "duration_ms": 564,
+      "duration_ms": 551,
       "details": {
         "status": 200,
-        "stdout_tail": "\n> web@0.1.0 start\n> next start\n\n▲ Next.js 16.1.6\n- Local:         http://localhost:3100\n- Network:       http://192.168.1.167:3100\n\n✓ Starting...\n✓ Ready in 130ms\n",
+        "stdout_tail": "\n> web@0.1.0 start\n> next start\n\n▲ Next.js 16.1.6\n- Local:         http://localhost:3100\n- Network:       http://192.168.1.167:3100\n\n✓ Starting...\n✓ Ready in 136ms\n",
         "stderr_tail": null,
         "base_url": "http://127.0.0.1:3100",
         "port": "3100"
@@ -55,10 +55,10 @@
     {
       "name": "e2e smoke",
       "status": "pass",
-      "duration_ms": 5405,
+      "duration_ms": 53149,
       "details": {
         "exit_code": 0,
-        "stdout_tail": "\n> qa:e2e-smoke\n> node scripts/e2e-smoke.mjs\n\nSmoke report written to /Users/ilannabatkhorian/Documents/rug-concierge/docs/testing/e2e-smoke-report.md\nJSON report written to /Users/ilannabatkhorian/Documents/rug-concierge/docs/testing/e2e-smoke-report.json\nPassed 12/12\n",
+        "stdout_tail": "\n> qa:e2e-smoke\n> node scripts/e2e-smoke.mjs\n\nSmoke report written to /Users/ilannabatkhorian/Documents/rug-concierge/docs/testing/e2e-smoke-report.md\nJSON report written to /Users/ilannabatkhorian/Documents/rug-concierge/docs/testing/e2e-smoke-report.json\nPassed 18/18\n",
         "stderr_tail": null
       },
       "command": "npm run qa:e2e-smoke"
@@ -66,9 +66,9 @@
     {
       "name": "demo rehearsal",
       "status": "pass",
-      "duration_ms": 2288,
+      "duration_ms": 26240,
       "details": {
-        "preview": "{\"exit_code\":0,\"stdout_tail\":\"\\n> qa:demo-rehearsal\\n> node scripts/demo-rehearsal.mjs\\n\\n# Demo Rehearsal Report\\n\\n- Generated: 2026-02-24T02:30:35.883Z\\n- Base URL: http://127.0.0.1:3100\\n- Tenant ID: 0a175457-6194-4ae9-bf4e-1a785d754c4b\\n- Passed: 7\\n- Failed: 0\\n\\n| Scenario | Result | Details |\\n| --- | --- | --- |\\n| Staff recommendation turn | PASS | status=200, mode=recommendation |\\n| Staff follow-up recommendation | PASS | status=200, mode=recommendation |\\n| Staff review regenerate action | PASS | status=200, decision=regenerated |\\n| Staff appraisal draft generation | PASS | status=200, mode=appraisal_draft |\\n| Retail appraisal blocked | PASS | status=403 |\\n| Retail debug trace blocked | PASS | status=404 |\\n| Developer debug trace allowed | PASS | status=200 |\\n\",\"stderr_ta..."
+        "preview": "{\"exit_code\":0,\"stdout_tail\":\"\\n> qa:demo-rehearsal\\n> node scripts/demo-rehearsal.mjs\\n\\n# Demo Rehearsal Report\\n\\n- Generated: 2026-02-25T22:24:47.666Z\\n- Base URL: http://127.0.0.1:3100\\n- Tenant ID: 0a175457-6194-4ae9-bf4e-1a785d754c4b\\n- Passed: 7\\n- Failed: 0\\n\\n| Scenario | Result | Details |\\n| --- | --- | --- |\\n| Staff recommendation turn | PASS | status=200, mode=recommendation |\\n| Staff follow-up recommendation | PASS | status=200, mode=recommendation |\\n| Staff review regenerate action | PASS | status=200, decision=regenerated |\\n| Staff appraisal draft generation | PASS | status=200, mode=appraisal_draft |\\n| Retail appraisal blocked | PASS | status=403 |\\n| Retail debug trace blocked | PASS | status=404 |\\n| Developer debug trace allowed | PASS | status=200 |\\n\",\"stderr_ta..."
       },
       "command": "npm run qa:demo-rehearsal"
     },
@@ -130,12 +130,12 @@
     {
       "name": "cleanup artifacts",
       "status": "pass",
-      "duration_ms": 3,
+      "duration_ms": 6,
       "details": {
-        "kept": "run-2026-02-24t02-30-28-338z",
+        "kept": "run-2026-02-25t22-23-28-420z",
         "removed_count": 1,
         "removed": [
-          "run-2026-02-24t02-29-52-745z"
+          "run-2026-02-25t22-10-48-232z"
         ]
       },
       "command": null

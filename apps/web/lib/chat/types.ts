@@ -17,6 +17,15 @@ export type SessionMessage = {
   created_at: string;
 };
 
+export type ConversationMemory = {
+  summary_text: string;
+  stable_facts: string[];
+  open_threads: string[];
+  last_user_intent: "general_chat" | "recommendation" | "appraisal" | "unknown";
+  updated_at: string;
+  version: "v1";
+};
+
 export type RecommendationReviewAction =
   | "approve"
   | "reject"
@@ -76,6 +85,7 @@ export type SessionData = {
   tenant_id: string | null;
   role: RoleType;
   chat_history: SessionMessage[];
+  conversation_memory: ConversationMemory;
   recommendation_state: RecommendationState;
   trade_context: TradeContext;
   project_context: ProjectContext;
@@ -108,6 +118,7 @@ export type ChatTurnHandlerInput = {
   role: RoleType;
   mode: ChatMode;
   session: SessionData;
+  ai_context_packet?: import("@/lib/chat/context-packet").ChatAiContextPacket;
   tenant_id: string | null;
   appraisal_context?: AppraisalInput;
   review_action?: RecommendationReviewAction;

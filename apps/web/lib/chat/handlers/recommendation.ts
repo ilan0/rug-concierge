@@ -102,6 +102,13 @@ export async function handleRecommendationTurn(
           constraints: room.constraints,
         })),
       },
+      chat_context: input.ai_context_packet
+        ? {
+            structured_state: input.ai_context_packet.structured_state,
+            conversation_memory: input.ai_context_packet.conversation_memory,
+            recent_turns: input.ai_context_packet.recent_turns,
+          }
+        : undefined,
     },
     traceMeta: input.trace_meta
       ? {

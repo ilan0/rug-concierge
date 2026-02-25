@@ -20,11 +20,19 @@ type RecommendationPromptBundleInput = {
 type RecommendationLayerContext = {
   role: RoleType;
   hasTradePreferences: boolean;
+  hasProjectContext: boolean;
+  hasChatMemoryContext: boolean;
+  hasRecentTurnsContext: boolean;
 };
 
 type BuildRecommendationPromptSectionsInput = RecommendationLayerContext & {
   prompts: RecommendationPromptBundleInput;
   tradePreferences?: Record<string, unknown>;
+  chatContext?: {
+    structured_state?: unknown;
+    conversation_memory?: unknown;
+    recent_turns?: unknown[];
+  };
   inventoryContext: unknown[];
   userMessage: string;
   constraints: HardConstraints;
@@ -70,6 +78,38 @@ const RECOMMENDATION_LAYER_DEFINITIONS: RecommendationLayerDefinition[] = [
     text: (input) =>
       `TRADE PREFERENCES (soft signals only):\n${JSON.stringify(
         input.tradePreferences ?? {},
+        null,
+        2
+      )}`,
+  },
+  {
+    id: PROMPT_LAYER.contextProject,
+    role: "system",
+    include: (input) => input.hasProjectContext,
+    text: (input) =>
+      `PROJECT CONTEXT:\n${JSON.stringify(input.projectContext, null, 2)}`,
+  },
+  {
+    id: PROMPT_LAYER.contextChatMemory,
+    role: "system",
+    include: (input) => input.hasChatMemoryContext,
+    text: (input) =>
+      `CHAT MEMORY CONTEXT:\n${JSON.stringify(
+        {
+          structured_state: input.chatContext?.structured_state ?? null,
+          conversation_memory: input.chatContext?.conversation_memory ?? null,
+        },
+        null,
+        2
+      )}`,
+  },
+  {
+    id: PROMPT_LAYER.contextRecentTurns,
+    role: "system",
+    include: (input) => input.hasRecentTurnsContext,
+    text: (input) =>
+      `RECENT TURNS CONTEXT:\n${JSON.stringify(
+        input.chatContext?.recent_turns ?? [],
         null,
         2
       )}`,

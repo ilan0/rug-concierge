@@ -11,16 +11,33 @@ type BuildPromptLayersInput = {
 
 // Placeholder to show where prompt layering is assembled each turn.
 export function buildPromptLayers(input: BuildPromptLayersInput): string[] {
+  const hasMemoryContext =
+    input.session.conversation_memory.summary_text.length > 0 ||
+    input.session.conversation_memory.stable_facts.length > 0 ||
+    input.session.conversation_memory.open_threads.length > 0;
+
   if (input.mode === "recommendation") {
     return getRecommendationLayerPreview({
       role: input.role,
       hasTradePreferences: Object.keys(input.session.trade_context.preferences).length > 0,
+      hasProjectContext:
+        Boolean(input.session.project_context.name) ||
+        Boolean(input.session.project_context.active_room_id) ||
+        input.session.project_context.rooms.length > 0,
+      hasChatMemoryContext: true,
+      hasRecentTurnsContext: input.session.chat_history.length > 0,
     });
   }
 
   return getChatLayerPreview({
     mode: input.mode,
     role: input.role,
-    hasChatHistory: input.session.chat_history.length > 0,
+    hasTradePreferences: Object.keys(input.session.trade_context.preferences).length > 0,
+    hasProjectContext:
+      Boolean(input.session.project_context.name) ||
+      Boolean(input.session.project_context.active_room_id) ||
+      input.session.project_context.rooms.length > 0,
+    hasChatMemoryContext: hasMemoryContext,
+    hasRecentTurnsContext: input.session.chat_history.length > 0,
   });
 }

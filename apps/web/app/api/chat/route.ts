@@ -13,6 +13,15 @@ import { updateTradeContextForTurn } from "@/lib/chat/trade-context";
 import { updateProjectContextForTurn } from "@/lib/chat/project-context";
 import { buildPromptLayers } from "@/lib/chat/prompt-builder";
 import {
+  buildAiContextPacket,
+  getAiContextPacketStats,
+} from "@/lib/chat/context-packet";
+import {
+  buildInitialConversationMemory,
+  mergeConversationMemory,
+  trimChatHistory,
+} from "@/lib/chat/memory";
+import {
   parseE2eTraceMeta,
   writeE2eTraceArtifact,
 } from "@/lib/qa/e2e-trace";
@@ -67,6 +76,7 @@ export async function POST(req: Request) {
     "updateProjectContextForTurn",
     "routeTurnMode",
     "handlerDispatch",
+    "updateConversationMemory",
     "saveSession",
   ];
 
@@ -165,7 +175,7 @@ export async function POST(req: Request) {
           ? body.trade_preferences
           : undefined,
     });
-    const nextSession = updateProjectContextForTurn(withTradeContext, {
+    const nextSessionBase = updateProjectContextForTurn(withTradeContext, {
       message: userMessage,
       constraints: body.constraints,
       projectContextOverride:
@@ -173,6 +183,11 @@ export async function POST(req: Request) {
           ? body.project_context
           : undefined,
     });
+    const nextSession: SessionData = {
+      ...nextSessionBase,
+      conversation_memory:
+        nextSessionBase.conversation_memory ?? buildInitialConversationMemory(),
+    };
 
     const routeDecision = routeTurnMode({
       message: userMessage,
@@ -186,6 +201,7 @@ export async function POST(req: Request) {
       recommendation_state: nextSession.recommendation_state,
     });
     const effectiveMode = routeDecision.mode;
+    const memoryEnabled = process.env.CHAT_MEMORY_V1 !== "0";
     if (effectiveMode === "recommendation") {
       const recommendationCapabilityError = requireRoleCapabilityOrError(
         role,
@@ -204,13 +220,33 @@ export async function POST(req: Request) {
       return badRequest("tenant_id is required for this inventory-backed request.");
     }
 
+    const turnMessage =
+      userMessage ||
+      nextSession.review_state.last_user_message ||
+      "Show me another recommendation set.";
+    const contextSessionForAi = memoryEnabled
+      ? nextSession
+      : {
+          ...nextSession,
+          conversation_memory: buildInitialConversationMemory(),
+          chat_history: [],
+        };
+    const aiContextPacket =
+      effectiveMode === "recommendation" || effectiveMode === "general_chat"
+        ? buildAiContextPacket({
+            session: contextSessionForAi,
+            latestUserMessage: turnMessage,
+          })
+        : null;
+    const aiContextPacketStats = aiContextPacket
+      ? getAiContextPacketStats(aiContextPacket)
+      : null;
+
     const handlerInput = {
-      message:
-        userMessage ||
-        nextSession.review_state.last_user_message ||
-        "Show me another recommendation set.",
+      message: turnMessage,
       role,
       session: nextSession,
+      ai_context_packet: aiContextPacket ?? undefined,
       tenant_id: tenantId,
       appraisal_context:
         body.appraisal_context && typeof body.appraisal_context === "object"
@@ -291,12 +327,20 @@ export async function POST(req: Request) {
       recommendationResponseMode === "recommendation"
         ? "recommendations"
         : recommendationResponseMode;
+    const nextConversationMemory = memoryEnabled
+      ? mergeConversationMemory(nextSession.conversation_memory, {
+          userMessage: userTurn.content,
+          assistantMessage: handlerResult.assistant_message,
+          lastUserIntent: responseMode,
+        })
+      : nextSession.conversation_memory;
 
     const updatedSession: SessionData = {
       ...nextSession,
       role,
       updated_at: new Date().toISOString(),
-      chat_history: [...nextSession.chat_history, userTurn, assistantTurn],
+      chat_history: trimChatHistory([...nextSession.chat_history, userTurn, assistantTurn]),
+      conversation_memory: nextConversationMemory,
       review_state:
         responseMode === "recommendation"
           ? updateReviewState(nextSession, {
@@ -378,8 +422,12 @@ export async function POST(req: Request) {
             recommendation_state: nextSession.recommendation_state,
             trade_context: nextSession.trade_context,
             project_context: nextSession.project_context,
+            conversation_memory: nextSession.conversation_memory,
             review_state: nextSession.review_state,
           },
+          memory_snapshot_before: nextSession.conversation_memory,
+          memory_snapshot_after: updatedSession.conversation_memory,
+          ai_context_packet_stats: aiContextPacketStats,
           response: {
             session_id: sessionId,
             role,

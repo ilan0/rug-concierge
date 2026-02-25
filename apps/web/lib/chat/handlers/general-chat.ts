@@ -1,7 +1,9 @@
 import { buildPromptLayers } from "@/lib/chat/prompt-builder";
+import { generateGeneralChatResponse } from "@/lib/ai/general-chat";
+import { buildAiContextPacket } from "@/lib/chat/context-packet";
 import type { ChatTurnHandlerInput, GeneralChatResponse } from "@/lib/chat/types";
 
-// Placeholder handler for general/freeform chat mode.
+// General/freeform chat mode.
 export async function handleGeneralChatTurn(
   input: ChatTurnHandlerInput
 ): Promise<GeneralChatResponse> {
@@ -12,11 +14,24 @@ export async function handleGeneralChatTurn(
     userMessage: input.message,
   });
 
-  // TODO: replace placeholder with real OpenAI freeform call.
+  const contextPacket =
+    input.ai_context_packet ??
+    buildAiContextPacket({
+      session: input.session,
+      latestUserMessage: input.message,
+    });
+
+  const modelResponse = await generateGeneralChatResponse({
+    role: input.role,
+    contextPacket,
+  });
+
   return {
     mode: "general_chat",
-    assistant_message:
-      "I can help with rug care, sizing, style guidance, or recommendations. Tell me what you want to focus on.",
-    notes: `GENERAL_CHAT_FALLBACK. Prompt layers assembled: ${layers.join(" -> ")}`,
+    assistant_message: modelResponse.assistant_message,
+    notes: [
+      modelResponse.notes ?? "GENERAL_CHAT_AI_RUNTIME:real",
+      `Prompt layers assembled: ${layers.join(" -> ")}`,
+    ].join(" | "),
   };
 }

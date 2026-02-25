@@ -1,6 +1,6 @@
 # Demo Rehearsal Report
 
-- Generated: 2026-02-24T02:30:35.883Z
+- Generated: 2026-02-25T22:24:47.666Z
 - Base URL: http://127.0.0.1:3100
 - Tenant ID: 0a175457-6194-4ae9-bf4e-1a785d754c4b
 - Passed: 7

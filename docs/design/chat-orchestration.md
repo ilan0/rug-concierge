@@ -43,6 +43,14 @@ Request notes:
 
 - `apps/web/lib/chat/state.ts`
   - Updates recommendation state every turn.
+  - Supports explicit size/budget reset commands.
+
+- `apps/web/lib/chat/memory.ts`
+  - Maintains bounded conversation memory summary/facts/open threads.
+  - Trims `chat_history` tail to keep context bounded.
+
+- `apps/web/lib/chat/context-packet.ts`
+  - Builds bounded model context packets (memory + structured state + recent turns).
 
 - `apps/web/lib/chat/trade-context.ts`
   - Updates trade metadata/preferences for trade/staff/developer flows.
@@ -68,7 +76,7 @@ Request notes:
 ## Mode Handlers
 
 - `apps/web/lib/chat/handlers/general-chat.ts`
-  - General chat fallback response path.
+  - Real OpenAI-backed general chat handler with deterministic fallback.
 
 - `apps/web/lib/chat/handlers/recommendation.ts`
   - Applies review actions and state merges.
@@ -88,5 +96,10 @@ Request notes:
 - Debug-friendly prompt-layer previews are built by:
   - `apps/web/lib/chat/prompt-builder.ts`
   - `apps/web/lib/prompts/layers.ts`
+  - `apps/web/lib/prompts/general-chat-stack.ts`
   - `apps/web/lib/prompts/recommendation-stack.ts` (shared recommendation layer source)
 - Recommendation trace artifacts also capture actual prompt payload and parsed response.
+- Chat route trace captures memory snapshots and context-packet stats:
+  - `memory_snapshot_before`
+  - `memory_snapshot_after`
+  - `ai_context_packet_stats`

@@ -87,6 +87,39 @@ function parseSizeFromMessage(userMessage: string): HardConstraints["size"] | un
   };
 }
 
+export type ConstraintResetDirectives = {
+  clearBudget: boolean;
+  clearSize: boolean;
+  clearAll: boolean;
+};
+
+function includesAnyPhrase(text: string, phrases: string[]): boolean {
+  return phrases.some((phrase) => text.includes(phrase));
+}
+
+export function parseConstraintResetDirectives(
+  userMessage: string
+): ConstraintResetDirectives {
+  const text = userMessage.toLowerCase();
+  const clearAll = includesAnyPhrase(text, [
+    "start over constraints",
+    "reset constraints",
+    "clear constraints",
+  ]);
+
+  const clearBudget =
+    clearAll ||
+    /(?:clear|remove|ignore|drop|reset)\s+(?:the\s+)?budget/i.test(text);
+  const clearSize =
+    clearAll || /(?:clear|remove|ignore|drop|reset)\s+(?:the\s+)?size/i.test(text);
+
+  return {
+    clearBudget,
+    clearSize,
+    clearAll,
+  };
+}
+
 export function extractConstraintsFromUserMessage(
   userMessage: string
 ): Partial<HardConstraints> {
