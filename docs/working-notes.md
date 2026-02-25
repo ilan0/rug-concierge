@@ -154,6 +154,30 @@ SMOKE_TENANT_ID=YOUR_TENANT_ID npm run qa:e2e-smoke -- --case "recommend browse 
 
 `docs/testing/e2e-smoke-report.md`
 
+### One-Command Comprehensive QA
+
+Run the full stack in one command:
+
+```bash
+SMOKE_TENANT_ID=YOUR_TENANT_ID npm run qa:all
+```
+
+What it runs:
+1) `lint`
+2) `build`
+3) `qa:e2e-smoke`
+4) `qa:demo-rehearsal`
+5) targeted contract/security checks
+6) artifact cleanup (keeps latest run folder)
+
+Read this first:
+- `docs/testing/latest-summary.md`
+
+Deep debug only if needed:
+- `docs/testing/e2e-smoke-report.md`
+- `docs/testing/demo-rehearsal-report.md`
+- `docs/testing/artifacts/`
+
 ### Demo Rehearsal (Owner Flow)
 
 ```bash

@@ -9,6 +9,7 @@
     "dev": "npm --workspace apps/web run dev",
     "build": "npm --workspace apps/web run build",
     "lint": "npm --workspace apps/web run lint",
+    "qa:all": "node scripts/qa-all.mjs",
     "qa:fetch-inventory": "node scripts/fetch-inventory.mjs",
     "qa:e2e-smoke": "node scripts/e2e-smoke.mjs",
     "qa:demo-rehearsal": "node scripts/demo-rehearsal.mjs"

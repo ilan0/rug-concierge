@@ -52,3 +52,19 @@ Run smoke:
 ```bash
 SMOKE_TENANT_ID=YOUR_TENANT_ID npm run qa:e2e-smoke
 ```
+
+## Daily Comprehensive Test
+
+Run one command for full validation:
+
+```bash
+SMOKE_TENANT_ID=YOUR_TENANT_ID npm run qa:all
+```
+
+Read first:
+- `/Users/ilannabatkhorian/Documents/rug-concierge/docs/testing/latest-summary.md`
+
+Deep debug (only if needed):
+- `/Users/ilannabatkhorian/Documents/rug-concierge/docs/testing/e2e-smoke-report.md`
+- `/Users/ilannabatkhorian/Documents/rug-concierge/docs/testing/demo-rehearsal-report.md`
+- `/Users/ilannabatkhorian/Documents/rug-concierge/docs/testing/artifacts/`
