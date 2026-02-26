@@ -7,8 +7,10 @@ type MessageComposerProps = {
   isLoading: boolean;
   canSubmit: boolean;
   error: string | null;
+  canRetry: boolean;
   onMessageChange: (value: string) => void;
   onSubmit: (event: FormEvent<HTMLFormElement>) => void;
+  onRetry: () => void;
 };
 
 export function MessageComposer(input: MessageComposerProps) {
@@ -18,8 +20,10 @@ export function MessageComposer(input: MessageComposerProps) {
     isLoading,
     canSubmit,
     error,
+    canRetry,
     onMessageChange,
     onSubmit,
+    onRetry,
   } = input;
 
   return (
@@ -43,12 +47,24 @@ export function MessageComposer(input: MessageComposerProps) {
               ? "Trade context is included with each message."
               : "Enter to send, Shift+Enter for new line"}
           </span>
-          <button type="submit" disabled={!canSubmit}>
+          <button type="submit" disabled={!canSubmit} className="ui-btn--primary">
             {isLoading ? "Sending..." : "Send"}
           </button>
         </div>
       </form>
-      {error ? <p className="concierge-error">{error}</p> : null}
+      {error ? (
+        <div className="concierge-error-row">
+          <p className="concierge-error">{error}</p>
+          <button
+            type="button"
+            className="ui-btn--ghost"
+            disabled={!canRetry || isLoading}
+            onClick={onRetry}
+          >
+            Retry
+          </button>
+        </div>
+      ) : null}
     </section>
   );
 }

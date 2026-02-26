@@ -20,7 +20,7 @@ const OPENAI_RESPONSES_URL = "https://api.openai.com/v1/responses";
 const OPENAI_MODEL = process.env.OPENAI_MODEL ?? "gpt-4.1-nano";
 const MAX_ASSISTANT_MESSAGE_CHARS = 420;
 const MAX_NOTE_CHARS = 220;
-const MAX_FOLLOW_UP_QUESTION_CHARS = 140;
+const MAX_FOLLOW_UP_QUESTION_CHARS = 220;
 const MAX_HINTS = 6;
 const MAX_HINT_CHARS = 90;
 const RETRY_SYSTEM_INSTRUCTION =
@@ -274,13 +274,37 @@ function sanitizeHints(hints: string[]): string[] {
   return output;
 }
 
+function normalizeFollowUpQuestion(
+  assistantMessage: string,
+  followUpQuestion: string | null
+): string | null {
+  if (!followUpQuestion) return null;
+  const normalizedFollowUp = normalizeText(followUpQuestion);
+  if (!normalizedFollowUp) return null;
+
+  const assistant = normalizeText(assistantMessage).toLowerCase();
+  const followUp = normalizedFollowUp.toLowerCase();
+  if (assistant === followUp) return null;
+  if (assistant.includes(followUp)) return null;
+  if (followUp.includes(assistant)) return null;
+
+  const maybeQuestion = /\?$/.test(normalizedFollowUp)
+    ? normalizedFollowUp
+    : `${normalizedFollowUp}?`;
+  if (maybeQuestion.length > MAX_FOLLOW_UP_QUESTION_CHARS) return null;
+
+  return maybeQuestion;
+}
+
 function sanitizeResponse(response: GeneralChatModelResponse): GeneralChatModelResponse {
+  const assistantMessage = normalizeText(response.assistant_message);
   return {
-    assistant_message: normalizeText(response.assistant_message),
+    assistant_message: assistantMessage,
     notes: response.notes ? normalizeText(response.notes) : null,
-    follow_up_question: response.follow_up_question
-      ? normalizeText(response.follow_up_question)
-      : null,
+    follow_up_question: normalizeFollowUpQuestion(
+      assistantMessage,
+      response.follow_up_question
+    ),
     memory_hints: sanitizeHints(response.memory_hints),
   };
 }
@@ -298,6 +322,7 @@ function fallbackResponse(reason: string): GeneralChatModelResponse {
 export async function generateGeneralChatResponse(input: {
   role: RoleType;
   contextPacket: ChatAiContextPacket;
+  forceClarification?: boolean;
   trace?: GeneralChatAiTrace;
 }): Promise<GeneralChatModelResponse> {
   const generalChatEnabled = process.env.ENABLE_GENERAL_CHAT_AI !== "0";
@@ -348,6 +373,12 @@ export async function generateGeneralChatResponse(input: {
     Boolean(projectContext.name) ||
     projectContext.rooms.length > 0 ||
     Boolean(projectContext.active_room_id);
+  const hasRecommendationHardConstraints =
+    Boolean(input.contextPacket.structured_state.recommendation_state.hard_constraints.size) ||
+    typeof input.contextPacket.structured_state.recommendation_state.hard_constraints
+      .budgetMax === "number";
+  const hasStructuredStateContext =
+    hasRecommendationHardConstraints || hasTradePreferences || hasProjectContext;
   const hasMemoryContext =
     input.contextPacket.conversation_memory.summary_text.length > 0 ||
     input.contextPacket.conversation_memory.stable_facts.length > 0 ||
@@ -357,6 +388,7 @@ export async function generateGeneralChatResponse(input: {
     role: input.role,
     hasTradePreferences,
     hasProjectContext,
+    hasStructuredStateContext,
     hasMemoryContext,
     hasRecentTurns: input.contextPacket.recent_turns.length > 0,
     prompts: {
@@ -369,7 +401,23 @@ export async function generateGeneralChatResponse(input: {
 
   const requestPayload = {
     model: OPENAI_MODEL,
-    input: groupGeneralChatSectionsByRole(promptSections),
+    input: [
+      ...groupGeneralChatSectionsByRole(promptSections),
+      ...(input.forceClarification
+        ? [
+            {
+              role: "system" as const,
+              content: [
+                {
+                  type: "input_text" as const,
+                  text:
+                    "Routing context: the user shared constraints but intent is unclear. Ask one concise clarifying question to choose between inventory recommendations vs general advice.",
+                },
+              ],
+            },
+          ]
+        : []),
+    ],
     max_output_tokens: getMaxOutputTokens("general_chat"),
     text: {
       format: {

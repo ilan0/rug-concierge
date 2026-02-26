@@ -14,12 +14,53 @@ type ConciergeScreenProps = {
   tenantId: string;
 };
 
+function formatConstraintSummary(input: {
+  size?: { widthIn: number; lengthIn: number; toleranceIn?: number };
+  budgetMax?: number;
+  style?: string;
+  palette?: string;
+}) {
+  const toFeetLabel = (inches: number): string => {
+    const feet = Math.floor(inches / 12);
+    const remainder = Math.round(inches - feet * 12);
+    if (remainder === 0) return `${feet}'`;
+    return `${feet}'${remainder}"`;
+  };
+
+  const items: string[] = [];
+  if (input.size) {
+    items.push(
+      `Size ${toFeetLabel(input.size.widthIn)}×${toFeetLabel(input.size.lengthIn)}${
+        typeof input.size.toleranceIn === "number" ? ` \u00b1${input.size.toleranceIn}"` : ""
+      }`
+    );
+  }
+  if (typeof input.budgetMax === "number") {
+    items.push(`Budget up to $${input.budgetMax.toLocaleString()}`);
+  }
+  if (input.style) {
+    items.push(`Style ${input.style}`);
+  }
+  if (input.palette) {
+    items.push(`Palette ${input.palette}`);
+  }
+  return items.slice(0, 4);
+}
+
 export function ConciergeScreen({
   debug,
   variant = "concierge",
   tenantId,
 }: ConciergeScreenProps) {
   const controller = useConciergeController({ debug, variant, tenantId });
+  const activeConstraintItems = controller.recommendationState
+    ? formatConstraintSummary({
+        size: controller.recommendationState.hard_constraints.size,
+        budgetMax: controller.recommendationState.hard_constraints.budgetMax,
+        style: controller.recommendationState.soft_preferences?.style,
+        palette: controller.recommendationState.soft_preferences?.palette,
+      })
+    : [];
 
   return (
     <main className="ui-shell ui-showroom concierge-page concierge-showroom">
@@ -172,6 +213,53 @@ export function ConciergeScreen({
             </section>
           ) : null}
 
+          {controller.recommendationState ? (
+            <section className="ui-card concierge-constraint-bar">
+              <div>
+                <p className="ui-kicker">Active Constraints</p>
+                <div className="concierge-constraint-pills">
+                  {activeConstraintItems.length > 0 ? (
+                    activeConstraintItems.map((item) => (
+                      <span key={item} className="ui-pill">
+                        {item}
+                      </span>
+                    ))
+                  ) : (
+                    <span className="ui-pill">No hard constraints yet</span>
+                  )}
+                </div>
+              </div>
+              <div className="concierge-constraint-actions">
+                <button
+                  type="button"
+                  className="ui-btn--ghost"
+                  onClick={() => void controller.onConstraintAction("clear_budget")}
+                  disabled={controller.isLoading}
+                >
+                  Clear budget
+                </button>
+                <button
+                  type="button"
+                  className="ui-btn--ghost"
+                  onClick={() => void controller.onConstraintAction("clear_size")}
+                  disabled={controller.isLoading}
+                >
+                  Clear size
+                </button>
+                <button
+                  type="button"
+                  className="ui-btn--ghost"
+                  onClick={() =>
+                    void controller.onConstraintAction("start_over_constraints")
+                  }
+                  disabled={controller.isLoading}
+                >
+                  Start over constraints
+                </button>
+              </div>
+            </section>
+          ) : null}
+
           <ChatThread
             turns={controller.turns}
             isLoading={controller.isLoading}
@@ -185,8 +273,10 @@ export function ConciergeScreen({
             isLoading={controller.isLoading}
             canSubmit={controller.canSubmit}
             error={controller.error}
+            canRetry={Boolean(controller.lastFailedMessage)}
             onMessageChange={controller.setMessage}
             onSubmit={controller.onSubmit}
+            onRetry={() => void controller.onRetryLastMessage()}
           />
         </section>
 

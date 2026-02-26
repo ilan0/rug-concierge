@@ -10,6 +10,12 @@ import type { AppRole } from "@/lib/auth/roles";
 export type RoleType = AppRole;
 
 export type ChatMode = "general_chat" | "recommendation" | "appraisal";
+export type ChatFineMode =
+  | "general_chat"
+  | "recommendation"
+  | "clarifying_question"
+  | "no_match"
+  | "appraisal";
 
 export type SessionMessage = {
   role: "user" | "assistant";
@@ -128,12 +134,14 @@ export type ChatTurnHandlerInput = {
     notes?: string;
   };
   trace_meta?: E2eTraceMeta;
+  needs_clarification?: boolean;
 };
 
 export type GeneralChatResponse = {
-  mode: "general_chat";
+  mode: "general_chat" | "clarifying_question";
   assistant_message: string;
   notes: string | null;
+  follow_up_question?: string | null;
 };
 
 export type RecommendationTurnResponse = Omit<RecommendationResponse, "mode"> & {

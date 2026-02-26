@@ -1,7 +1,6 @@
 import type {
   ChatMode,
   RecommendationReviewAction,
-  RecommendationState,
   RoleType,
 } from "@/lib/chat/types";
 import { canRoleGenerateAppraisal } from "@/lib/auth/policy";
@@ -12,7 +11,6 @@ type RouteTurnModeInput = {
   review_action?: RecommendationReviewAction | null;
   last_mode?: ChatMode | null;
   has_recent_recommendations?: boolean;
-  recommendation_state: RecommendationState;
 };
 
 export type RouteDecision = {
@@ -30,72 +28,108 @@ export type RouteDecision = {
   needs_clarification: boolean;
 };
 
-export function routeTurnMode(input: RouteTurnModeInput): RouteDecision {
-  const text = input.message.toLowerCase().trim();
+type RouteRule = {
+  id: RouteDecision["rule_id"];
+  when: (input: RouteTurnModeInput, text: string) => boolean;
+  decide: (input: RouteTurnModeInput, text: string) => Omit<RouteDecision, "rule_id">;
+};
 
-  if (input.review_action) {
-    return {
+export const ROUTE_RULE_PRECEDENCE: RouteDecision["rule_id"][] = [
+  "REVIEW_ACTION_CONTROL",
+  "APPRAISAL_STAFF",
+  "APPRAISAL_NON_STAFF_BLOCK",
+  "EXPLICIT_RECOMMENDATION_REQUEST",
+  "RECOMMENDATION_FOLLOWUP",
+  "GENERAL_ADVICE_OR_EDUCATION",
+  "AMBIGUOUS_WITH_CONSTRAINTS_ONLY",
+  "DEFAULT_GENERAL_CHAT",
+];
+
+const ROUTE_RULES: RouteRule[] = [
+  {
+    id: "REVIEW_ACTION_CONTROL",
+    when: (input) => Boolean(input.review_action),
+    decide: () => ({
       mode: "recommendation",
-      rule_id: "REVIEW_ACTION_CONTROL",
       confidence: "high",
       needs_clarification: false,
-    };
-  }
-
-  if (isAppraisalIntent(text)) {
-    if (canRoleGenerateAppraisal(input.role)) {
-      return {
-        mode: "appraisal",
-        rule_id: "APPRAISAL_STAFF",
-        confidence: "high",
-        needs_clarification: false,
-      };
-    }
-    return {
+    }),
+  },
+  {
+    id: "APPRAISAL_STAFF",
+    when: (input, text) => isAppraisalIntent(text) && canRoleGenerateAppraisal(input.role),
+    decide: () => ({
+      mode: "appraisal",
+      confidence: "high",
+      needs_clarification: false,
+    }),
+  },
+  {
+    id: "APPRAISAL_NON_STAFF_BLOCK",
+    when: (input, text) => isAppraisalIntent(text) && !canRoleGenerateAppraisal(input.role),
+    decide: () => ({
       mode: "general_chat",
-      rule_id: "APPRAISAL_NON_STAFF_BLOCK",
       confidence: "high",
       needs_clarification: false,
-    };
-  }
-
-  if (isExplicitRecommendationRequest(text)) {
-    return {
+    }),
+  },
+  {
+    id: "EXPLICIT_RECOMMENDATION_REQUEST",
+    when: (_input, text) => isExplicitRecommendationRequest(text),
+    decide: () => ({
       mode: "recommendation",
-      rule_id: "EXPLICIT_RECOMMENDATION_REQUEST",
       confidence: "high",
       needs_clarification: false,
-    };
-  }
-
-  if (
-    isRecommendationFollowup(text) &&
-    (input.last_mode === "recommendation" ||
-      Boolean(input.has_recent_recommendations))
-  ) {
-    return {
+    }),
+  },
+  {
+    id: "RECOMMENDATION_FOLLOWUP",
+    when: (input, text) =>
+      isRecommendationFollowup(text) &&
+      (input.last_mode === "recommendation" || Boolean(input.has_recent_recommendations)),
+    decide: () => ({
       mode: "recommendation",
-      rule_id: "RECOMMENDATION_FOLLOWUP",
       confidence: "medium",
       needs_clarification: false,
-    };
-  }
-
-  if (isGeneralAdviceOrEducation(text)) {
-    return {
+    }),
+  },
+  {
+    id: "GENERAL_ADVICE_OR_EDUCATION",
+    when: (_input, text) => isGeneralAdviceOrEducation(text),
+    decide: () => ({
       mode: "general_chat",
-      rule_id: "GENERAL_ADVICE_OR_EDUCATION",
       confidence: "high",
       needs_clarification: false,
-    };
-  }
-
-  if (hasConstraintSignals(text, input.recommendation_state)) {
-    return {
+    }),
+  },
+  {
+    id: "AMBIGUOUS_WITH_CONSTRAINTS_ONLY",
+    when: (_input, text) => isConstraintOnlyWithoutIntent(text),
+    decide: () => ({
       mode: "general_chat",
-      rule_id: "AMBIGUOUS_WITH_CONSTRAINTS_ONLY",
       confidence: "low",
       needs_clarification: true,
+    }),
+  },
+  {
+    id: "DEFAULT_GENERAL_CHAT",
+    when: () => true,
+    decide: () => ({
+      mode: "general_chat",
+      confidence: "medium",
+      needs_clarification: false,
+    }),
+  },
+];
+
+export function routeTurnMode(input: RouteTurnModeInput): RouteDecision {
+  const text = input.message.toLowerCase().trim();
+  for (const rule of ROUTE_RULES) {
+    if (!rule.when(input, text)) continue;
+    const decision = rule.decide(input, text);
+    return {
+      ...decision,
+      rule_id: rule.id,
     };
   }
 
@@ -135,6 +169,12 @@ function isExplicitRecommendationRequest(text: string): boolean {
     "show rug options",
   ];
   if (explicitPhrases.some((phrase) => text.includes(phrase))) return true;
+
+  const needBasedRecommendationIntent =
+    /\b(i need|i want|looking for|look for|find me|show me)\b/.test(text);
+  if (needBasedRecommendationIntent && hasConstraintSignalsInMessage(text)) {
+    return true;
+  }
 
   const shoppingVerb = /\b(show|show me|find|recommend|browse|search for|look for)\b/.test(
     text
@@ -177,14 +217,19 @@ function isGeneralAdviceOrEducation(text: string): boolean {
   return adviceSignals.some((signal) => text.includes(signal));
 }
 
-function hasConstraintSignals(
-  text: string,
-  recommendationState: RecommendationState
-): boolean {
-  const hasSessionHardConstraints =
-    Boolean(recommendationState.hard_constraints.size) ||
-    typeof recommendationState.hard_constraints.budgetMax === "number";
-  const hasMessageConstraintSignals =
-    /(\d+\s*x\s*\d+)|(\$\s*\d+)|\b(budget|size|palette|style|room)\b/i.test(text);
-  return hasSessionHardConstraints || hasMessageConstraintSignals;
+function isConstraintOnlyWithoutIntent(text: string): boolean {
+  const hasConstraintSignals = hasConstraintSignalsInMessage(text);
+  if (!hasConstraintSignals) return false;
+
+  const hasIntentVerb =
+    /\b(show|find|recommend|browse|search|look|need|want|help|tell|explain|compare|is|are|would|should|can|do)\b/i.test(
+      text
+    );
+  return !hasIntentVerb;
+}
+
+function hasConstraintSignalsInMessage(text: string): boolean {
+  return /(\d+\s*[x×]\s*\d+)|(\$\s*\d+)|\b(under|below|budget|max|maximum|size|palette|style|room|neutral|modern)\b/i.test(
+    text
+  );
 }

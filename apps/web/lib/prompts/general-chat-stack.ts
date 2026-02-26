@@ -15,6 +15,7 @@ type GeneralChatLayerContext = {
   role: RoleType;
   hasTradePreferences: boolean;
   hasProjectContext: boolean;
+  hasStructuredStateContext: boolean;
   hasMemoryContext: boolean;
   hasRecentTurns: boolean;
 };
@@ -77,6 +78,17 @@ const GENERAL_CHAT_LAYER_DEFINITIONS: GeneralChatLayerDefinition[] = [
     role: "system",
     include: (input) => input.role === "store_staff" || input.role === "developer",
     text: (input) => input.rolePrompt,
+  },
+  {
+    id: PROMPT_LAYER.contextStructuredState,
+    role: "system",
+    include: (input) => input.hasStructuredStateContext,
+    text: (input) =>
+      `STRUCTURED STATE CONTEXT:\n${JSON.stringify(
+        input.contextPacket.structured_state,
+        null,
+        2
+      )}`,
   },
   {
     id: PROMPT_LAYER.contextTradePreferences,

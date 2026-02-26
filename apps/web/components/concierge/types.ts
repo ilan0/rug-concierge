@@ -18,9 +18,11 @@ export type Turn = {
   id: string;
   role: "user" | "assistant";
   text: string;
-  responseMode?: UiChatResponseBody["mode"];
+  coarseMode?: UiChatResponseBody["mode"];
+  fineMode?: UiChatResponseBody["fine_mode"];
   recommendations?: UiRecommendationItem[];
   questions?: string[];
+  followUpQuestion?: string | null;
   createdAt: string;
   debug?: DebugMeta | null;
 };

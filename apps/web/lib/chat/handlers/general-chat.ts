@@ -50,8 +50,14 @@ export async function handleGeneralChatTurn(
   const modelResponse = await generateGeneralChatResponse({
     role: input.role,
     contextPacket,
+    forceClarification: Boolean(input.needs_clarification),
     trace: aiTrace,
   });
+  const followUpQuestion =
+    modelResponse.follow_up_question ??
+    (input.needs_clarification
+      ? "Would you like inventory recommendations right now, or general rug guidance first?"
+      : null);
   const generationTimeMs = Date.now() - startedAt;
 
   if (input.trace_meta) {
@@ -97,8 +103,9 @@ export async function handleGeneralChatTurn(
   }
 
   return {
-    mode: "general_chat",
+    mode: input.needs_clarification ? "clarifying_question" : "general_chat",
     assistant_message: modelResponse.assistant_message,
+    follow_up_question: followUpQuestion,
     notes: [
       modelResponse.notes ?? "GENERAL_CHAT_AI_RUNTIME:real",
       `Prompt layers assembled: ${layers.join(" -> ")}`,

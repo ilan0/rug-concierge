@@ -198,7 +198,6 @@ export async function POST(req: Request) {
           ? "recommendation"
           : "general_chat",
       has_recent_recommendations: nextSession.review_state.last_recommendations.length > 0,
-      recommendation_state: nextSession.recommendation_state,
     });
     const effectiveMode = routeDecision.mode;
     const memoryEnabled = process.env.CHAT_MEMORY_V1 !== "0";
@@ -254,6 +253,7 @@ export async function POST(req: Request) {
           : undefined,
       mode: effectiveMode,
       review_action: reviewAction ?? undefined,
+      needs_clarification: routeDecision.needs_clarification,
       override:
         body.override && typeof body.override === "object"
           ? {
@@ -283,14 +283,7 @@ export async function POST(req: Request) {
               "Appraisal generation is available only for store staff.",
             notes: "Blocked non-staff appraisal request.",
           }
-        : routeDecision.needs_clarification
-          ? {
-              mode: "general_chat",
-              assistant_message:
-                "Do you want me to show inventory options, or are you asking for general rug advice?",
-              notes: "ROUTER_CLARIFICATION_REQUIRED",
-            }
-          : effectiveMode === "recommendation"
+        : effectiveMode === "recommendation"
             ? await handleRecommendationTurn(handlerInput)
           : effectiveMode === "appraisal"
               ? canRoleGenerateAppraisal(role)
@@ -303,14 +296,11 @@ export async function POST(req: Request) {
                   }
               : await handleGeneralChatTurn(handlerInput);
 
-    const responseMode =
-      handlerResult.mode === "recommendation" ||
-      handlerResult.mode === "clarifying_question" ||
-      handlerResult.mode === "no_match"
-        ? "recommendation"
-        : handlerResult.mode === "appraisal"
-          ? "appraisal"
-          : "general_chat";
+    const responseMode = effectiveMode;
+    const fineMode =
+      routeDecision.needs_clarification && effectiveMode === "general_chat"
+        ? "clarifying_question"
+        : handlerResult.mode;
 
     const assistantTurn: SessionMessage = {
       role: "assistant",
@@ -318,10 +308,10 @@ export async function POST(req: Request) {
       created_at: new Date().toISOString(),
     };
     const recommendationResponseMode =
-      handlerResult.mode === "recommendation" ||
-      handlerResult.mode === "clarifying_question" ||
-      handlerResult.mode === "no_match"
-        ? handlerResult.mode
+      fineMode === "recommendation" ||
+      fineMode === "clarifying_question" ||
+      fineMode === "no_match"
+        ? fineMode
         : "recommendation";
     const recommendationStateMode: NonNullable<SessionData["review_state"]["last_mode"]> =
       recommendationResponseMode === "recommendation"
@@ -432,6 +422,7 @@ export async function POST(req: Request) {
             session_id: sessionId,
             role,
             mode: responseMode,
+            fine_mode: fineMode,
             response_mode: handlerResult.mode,
             review_action: reviewAction,
             notes: handlerResult.notes ?? null,
@@ -447,6 +438,7 @@ export async function POST(req: Request) {
       session_id: sessionId,
       role,
       mode: responseMode,
+      fine_mode: fineMode,
       recommendation_state: updatedSession.recommendation_state,
       trade_context: updatedSession.trade_context,
       project_context: updatedSession.project_context,

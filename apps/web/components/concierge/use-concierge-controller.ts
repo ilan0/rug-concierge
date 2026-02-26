@@ -8,7 +8,7 @@ import {
   type FormEvent,
 } from "react";
 import { fetchChatDebugTrace, sendChatTurn } from "@/lib/concierge/client";
-import type { UiChatRequest, UiRole } from "@/lib/types/chat-ui";
+import type { UiChatRequest, UiChatResponseBody, UiRole } from "@/lib/types/chat-ui";
 import {
   getUiRole,
   getUiTenantId,
@@ -40,6 +40,8 @@ type UseConciergeControllerInput = {
   tenantId: string;
 };
 
+type UiRecommendationState = NonNullable<UiChatResponseBody["recommendation_state"]>;
+
 export function useConciergeController(input: UseConciergeControllerInput) {
   const { debug, variant, tenantId } = input;
 
@@ -53,6 +55,9 @@ export function useConciergeController(input: UseConciergeControllerInput) {
   const [error, setError] = useState<string | null>(null);
   const [selectedTurnId, setSelectedTurnId] = useState<string | null>(null);
   const [reviewState, setReviewState] = useState<UiReviewState | null>(null);
+  const [recommendationState, setRecommendationState] =
+    useState<UiRecommendationState | null>(null);
+  const [lastFailedMessage, setLastFailedMessage] = useState<string | null>(null);
   const [operatorOpen, setOperatorOpen] = useState(false);
   const [operatorView, setOperatorView] = useState<OperatorView>("review");
   const [overrideMessage, setOverrideMessage] = useState("");
@@ -117,13 +122,15 @@ export function useConciergeController(input: UseConciergeControllerInput) {
   );
 
   const selectedTurn = turns.find((turn) => turn.id === selectedTurnId) ?? null;
-  const latestAssistantMode = [...turns]
+  const latestAssistantTurn = [...turns]
     .reverse()
-    .find((turn) => turn.role === "assistant")?.responseMode;
+    .find((turn) => turn.role === "assistant");
+  const latestAssistantMode = latestAssistantTurn?.fineMode;
+  const latestAssistantCoarseMode = latestAssistantTurn?.coarseMode;
 
   const canUseDebugTrace = canRoleReadDebugTrace(role);
   const canUseReviewRoleControls = canRoleUseReviewControls(role) && Boolean(sessionId);
-  const isRecommendationContext = latestAssistantMode === "recommendation";
+  const isRecommendationContext = latestAssistantCoarseMode === "recommendation";
   const canUseReviewControls = canUseReviewRoleControls && isRecommendationContext;
   const canOpenOperator = canUseDebugTrace || canUseReviewRoleControls;
 
@@ -224,14 +231,11 @@ export function useConciergeController(input: UseConciergeControllerInput) {
     return payload;
   };
 
-  const onSubmit = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    const userMessage = message.trim();
-    if (!userMessage) return;
-
+  const sendUserTurn = async (userMessage: string) => {
+    if (!userMessage.trim()) return;
     setError(null);
     setIsLoading(true);
-    setMessage("");
+    setLastFailedMessage(null);
 
     const debugCaseId =
       debug && canUseDebugTrace
@@ -260,6 +264,7 @@ export function useConciergeController(input: UseConciergeControllerInput) {
       );
 
       setSessionId(payload.session_id);
+      setRecommendationState(payload.recommendation_state ?? null);
 
       let debugMeta: Turn["debug"] = null;
       if (debug && canUseDebugTrace && debugCaseId) {
@@ -292,10 +297,13 @@ export function useConciergeController(input: UseConciergeControllerInput) {
         id: crypto.randomUUID(),
         role: "assistant",
         text: response.assistant_message,
-        responseMode: payload.mode,
+        coarseMode: payload.mode,
+        fineMode: payload.fine_mode,
         recommendations:
           "recommendations" in response ? response.recommendations : undefined,
         questions: "questions" in response ? response.questions : undefined,
+        followUpQuestion:
+          "follow_up_question" in response ? response.follow_up_question : null,
         createdAt: new Date().toISOString(),
         debug: debugMeta,
       };
@@ -306,9 +314,38 @@ export function useConciergeController(input: UseConciergeControllerInput) {
       const details =
         nextError instanceof Error ? nextError.message : "Failed to send message.";
       setError(details);
+      setLastFailedMessage(userMessage);
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const onSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const userMessage = message.trim();
+    if (!userMessage) return;
+    setMessage("");
+    await sendUserTurn(userMessage);
+  };
+
+  const onRetryLastMessage = async () => {
+    if (!lastFailedMessage || isLoading) return;
+    await sendUserTurn(lastFailedMessage);
+  };
+
+  const onConstraintAction = async (
+    action: "clear_budget" | "clear_size" | "start_over_constraints"
+  ) => {
+    if (isLoading) return;
+    if (action === "clear_budget") {
+      await sendUserTurn("clear budget");
+      return;
+    }
+    if (action === "clear_size") {
+      await sendUserTurn("clear size");
+      return;
+    }
+    await sendUserTurn("start over constraints");
   };
 
   const onReset = () => {
@@ -316,8 +353,10 @@ export function useConciergeController(input: UseConciergeControllerInput) {
     setTurns([]);
     setMessage("");
     setError(null);
+    setLastFailedMessage(null);
     setSelectedTurnId(null);
     setReviewState(null);
+    setRecommendationState(null);
     setOverrideMessage("");
     setOverrideRugIds("");
     setOverrideNotes("");
@@ -403,6 +442,7 @@ export function useConciergeController(input: UseConciergeControllerInput) {
 
       setSessionId(responsePayload.session_id);
       setReviewState(responsePayload.review_state ?? null);
+      setRecommendationState(responsePayload.recommendation_state ?? null);
 
       let debugMeta: Turn["debug"] = null;
       if (debug && canUseDebugTrace && debugCaseId) {
@@ -434,10 +474,13 @@ export function useConciergeController(input: UseConciergeControllerInput) {
         id: crypto.randomUUID(),
         role: "assistant",
         text: assistant.assistant_message,
-        responseMode: responsePayload.mode,
+        coarseMode: responsePayload.mode,
+        fineMode: responsePayload.fine_mode,
         recommendations:
           "recommendations" in assistant ? assistant.recommendations : undefined,
         questions: "questions" in assistant ? assistant.questions : undefined,
+        followUpQuestion:
+          "follow_up_question" in assistant ? assistant.follow_up_question : null,
         createdAt: new Date().toISOString(),
         debug: debugMeta,
       };
@@ -470,6 +513,7 @@ export function useConciergeController(input: UseConciergeControllerInput) {
     selectedTurnId,
     setSelectedTurnId,
     reviewState,
+    recommendationState,
     operatorOpen,
     setOperatorOpen,
     operatorView,
@@ -485,6 +529,7 @@ export function useConciergeController(input: UseConciergeControllerInput) {
     showSlowNotice,
     debugRunId,
     canSubmit,
+    lastFailedMessage,
     starterPrompts,
     latestAssistantMode,
     canUseDebugTrace,
@@ -494,6 +539,8 @@ export function useConciergeController(input: UseConciergeControllerInput) {
     canOpenOperator,
     onRoleChange,
     onSubmit,
+    onRetryLastMessage,
+    onConstraintAction,
     onReset,
     onReviewAction,
     pushStarterPrompt: setMessage,

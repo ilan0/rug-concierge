@@ -11,6 +11,7 @@ export const PROMPT_LAYER = {
   securityRoleModeMismatch: "SECURITY_BLOCK_ROLE_MODE_MISMATCH",
   contextTradePreferences: "TRADE_PREFERENCES_CONTEXT",
   contextProject: "PROJECT_CONTEXT",
+  contextStructuredState: "STRUCTURED_STATE_CONTEXT",
   contextChatMemory: "CHAT_MEMORY_CONTEXT",
   contextRecentTurns: "RECENT_TURNS_CONTEXT",
   contextInventory: "INVENTORY_CONTEXT",

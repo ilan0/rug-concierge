@@ -75,8 +75,8 @@ export function OperatorDrawer(input: OperatorDrawerProps) {
         <div className="concierge-operator-drawer-head">
           <div>
             <p className="concierge-mode-chip">
-              {input.selectedTurn?.responseMode
-                ? modeLabel(input.selectedTurn.responseMode)
+              {input.selectedTurn?.fineMode
+                ? modeLabel(input.selectedTurn.fineMode)
                 : "no turn selected"}
             </p>
             <h3>Operator</h3>

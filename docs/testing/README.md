@@ -1,33 +1,26 @@
-# Testing Guide
+# Testing (Current)
 
-Use one command for full validation:
+Use only two suites:
+
+1. Functionality (app runs + APIs work)
+2. Quality (core chat behavior)
+
+## Run
 
 ```bash
-SMOKE_TENANT_ID=YOUR_TENANT_ID npm run qa:all
+TENANT_ID=<tenant-uuid> npm run qa:functional
+TENANT_ID=<tenant-uuid> npm run qa:quality
 ```
 
-## Read This First
+Default shortcut:
 
-- `docs/testing/latest-summary.md`
+```bash
+TENANT_ID=<tenant-uuid> npm run qa
+```
 
-## Deep Debug (Only If Needed)
+## Outputs (overwritten each run)
 
-- `docs/testing/e2e-smoke-report.md`
-- `docs/testing/e2e-smoke-report.json`
-- `docs/testing/demo-rehearsal-report.md`
-- `docs/testing/artifacts/`
-- `docs/testing/qa-log.ndjson`
+- `scripts/testing/functionality/latest.md`
+- `scripts/testing/quality/latest.md`
 
-## Stable Test Docs (Tracked)
-
-- `docs/testing/eval-cases.md`
-- `docs/testing/whats-broken.md`
-- `docs/testing/fixtures/`
-- `docs/testing/archive/`
-
-## Notes
-
-- `latest-summary.*`, `e2e-smoke-report.*`, `demo-rehearsal-report.md`, and `qa-log.ndjson` are generated outputs.
-- Treat generated files as run artifacts, not long-term documentation.
-- Debug trace artifacts now include `general-chat-ai` and `appraisal-ai` in addition to `chat-route` and `recommendation-pipeline`.
-- Developer debug drawer uses a unified AI panel: recommendation trace first, then general-chat trace when recommendation trace is absent.
+No historical run folders are kept by the QA scripts.

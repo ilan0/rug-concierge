@@ -11,6 +11,7 @@ export function getChatLayerPreview(input: {
   role: RoleType;
   hasTradePreferences: boolean;
   hasProjectContext: boolean;
+  hasRecommendationHardConstraints: boolean;
   hasChatMemoryContext: boolean;
   hasRecentTurnsContext: boolean;
 }): PromptLayerId[] {
@@ -29,6 +30,10 @@ export function getChatLayerPreview(input: {
       role: input.role,
       hasTradePreferences: input.hasTradePreferences,
       hasProjectContext: input.hasProjectContext,
+      hasStructuredStateContext:
+        input.hasRecommendationHardConstraints ||
+        input.hasTradePreferences ||
+        input.hasProjectContext,
       hasMemoryContext: input.hasChatMemoryContext,
       hasRecentTurns: input.hasRecentTurnsContext,
     });

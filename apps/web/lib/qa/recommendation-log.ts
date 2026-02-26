@@ -58,6 +58,7 @@ function getLogPath(): string {
 export async function logRecommendationQaEvent(
   event: RecommendationQaEvent
 ): Promise<void> {
+  if (process.env.QA_MODE === "1") return;
   try {
     const outputPath = getLogPath();
     await mkdir(path.dirname(outputPath), { recursive: true });

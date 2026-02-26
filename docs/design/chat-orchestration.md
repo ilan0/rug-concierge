@@ -63,6 +63,7 @@ Request notes:
 - `apps/web/lib/chat/router.ts`
   - Table-driven first-match rule engine.
   - Returns: `mode`, `rule_id`, `confidence`, `needs_clarification`.
+  - Rule precedence is explicit in `ROUTE_RULE_PRECEDENCE`.
   - Current rule order:
     - `REVIEW_ACTION_CONTROL`
     - `APPRAISAL_STAFF`
@@ -79,6 +80,7 @@ Request notes:
   - Real OpenAI-backed general chat handler with deterministic fallback.
   - No backend char clipping on user-facing assistant text.
   - One retry on incomplete/invalid structured output before fallback.
+  - Surfaces optional `follow_up_question` for UI rendering.
 
 - `apps/web/lib/chat/handlers/recommendation.ts`
   - Applies review actions and state merges.
@@ -117,3 +119,9 @@ Request notes:
   - `memory_snapshot_before`
   - `memory_snapshot_after`
   - `ai_context_packet_stats`
+
+## Response Contract Notes
+
+- `/api/chat` returns both coarse and fine mode semantics:
+  - `mode` (coarse)
+  - `fine_mode` (fine-grained turn outcome)

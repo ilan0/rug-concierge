@@ -189,6 +189,62 @@ a {
   border-color: rgba(127, 84, 47, 0.8);
 }
 
+.ui-btn--primary {
+  border: 1px solid rgba(127, 84, 47, 0.8);
+  border-radius: 10px;
+  padding: 0.46rem 0.74rem;
+  cursor: pointer;
+  background: linear-gradient(120deg, var(--ui-accent-700), var(--ui-accent-600));
+  color: #fff8f1;
+}
+
+.ui-btn--ghost {
+  border: 1px solid rgba(109, 84, 57, 0.35);
+  border-radius: 10px;
+  padding: 0.42rem 0.68rem;
+  cursor: pointer;
+  background: rgba(255, 255, 255, 0.72);
+  color: var(--ui-ink-900);
+}
+
+.ui-btn--primary:disabled,
+.ui-btn--ghost:disabled {
+  opacity: 0.52;
+  cursor: not-allowed;
+}
+
+.ui-card {
+  border: 1px solid var(--ui-border);
+  border-radius: 12px;
+  background: var(--ui-surface);
+  box-shadow: 0 8px 24px rgba(52, 34, 13, 0.06);
+}
+
+.ui-badge {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid rgba(127, 84, 47, 0.35);
+  border-radius: 999px;
+  background: rgba(255, 248, 240, 0.84);
+  color: rgba(69, 45, 20, 0.86);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  padding: 0.18rem 0.55rem;
+}
+
+.ui-pill {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid rgba(127, 84, 47, 0.24);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.82);
+  color: rgba(60, 39, 19, 0.88);
+  font-size: 0.76rem;
+  padding: 0.2rem 0.56rem;
+  line-height: 1.2;
+}
+
 .ui-empty {
   border: 1px dashed rgba(109, 84, 57, 0.32);
   border-radius: 12px;
@@ -589,6 +645,7 @@ a {
   display: flex;
   flex-direction: column;
   gap: 0.9rem;
+  min-height: 0;
 }
 
 .concierge-side {
@@ -806,6 +863,11 @@ a {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
+  max-height: 58vh;
+  overflow-y: auto;
+  padding-right: 0.28rem;
+  scroll-behavior: smooth;
+  position: relative;
 }
 
 .concierge-empty {
@@ -875,6 +937,25 @@ a {
 
 .concierge-question-block {
   margin-top: 0.72rem;
+}
+
+.concierge-follow-up-block {
+  margin-top: 0.62rem;
+  border: 1px dashed rgba(127, 84, 47, 0.36);
+  border-radius: 10px;
+  padding: 0.56rem;
+  background: rgba(255, 249, 241, 0.92);
+}
+
+.concierge-follow-up-block strong {
+  font-size: 0.73rem;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: rgba(79, 57, 32, 0.86);
+}
+
+.concierge-follow-up-block p {
+  margin-top: 0.24rem;
 }
 
 .concierge-question-block ul {
@@ -974,6 +1055,14 @@ a {
   backdrop-filter: blur(4px);
 }
 
+.concierge-error-row {
+  margin-top: 0.52rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+}
+
 .concierge-form {
   display: flex;
   flex-direction: column;
@@ -1000,7 +1089,7 @@ a {
   opacity: 0.67;
 }
 
-.concierge-form-actions button {
+.concierge-form-actions button:not(.ui-btn--primary):not(.ui-btn--ghost) {
   border: 1px solid rgba(109, 84, 57, 0.35);
   border-radius: 10px;
   background: rgba(255, 255, 255, 0.92);
@@ -1025,9 +1114,37 @@ a {
 }
 
 .concierge-error {
-  margin-top: 0.55rem;
   color: #a33232;
   font-size: 0.86rem;
+}
+
+.concierge-jump-pill {
+  position: sticky;
+  align-self: center;
+  bottom: 0.55rem;
+  cursor: pointer;
+}
+
+.concierge-constraint-bar {
+  padding: 0.72rem;
+  display: flex;
+  justify-content: space-between;
+  gap: 0.72rem;
+  flex-wrap: wrap;
+}
+
+.concierge-constraint-pills {
+  margin-top: 0.42rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.42rem;
+}
+
+.concierge-constraint-actions {
+  display: flex;
+  gap: 0.45rem;
+  flex-wrap: wrap;
+  align-items: center;
 }
 
 .concierge-trace-panel details {

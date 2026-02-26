@@ -69,6 +69,10 @@ Per turn:
 7. Persist updated session.
 8. Return session envelope + handler response.
 
+Response semantics:
+- `mode` = coarse route mode (`general_chat` | `recommendation` | `appraisal`).
+- `fine_mode` = fine-grained turn mode (`general_chat`, `recommendation`, `clarifying_question`, `no_match`, `appraisal`).
+
 Router behavior:
 - Review actions force recommendation mode.
 - Appraisal intent routes to appraisal only for roles with `appraisal.generate`.
@@ -119,9 +123,9 @@ General chat model behavior:
 - `general_chat` also uses OpenAI when enabled.
 - Request includes bounded context packet only:
   - conversation memory
-  - structured state
   - recent turns (last 2 user/assistant pairs)
   - latest user message
+- Structured state context is included only when active (hard constraints and/or trade/project context).
 - Full transcript is never sent to model.
 - Deterministic fallback is used when key/request/parse fails.
 - Backend does not hard-truncate user-facing response text by character count.

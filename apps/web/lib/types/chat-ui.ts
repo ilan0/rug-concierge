@@ -50,9 +50,10 @@ export type UiRecommendationItem = {
 };
 
 type UiGeneralResponse = {
-  mode: "general_chat";
+  mode: "general_chat" | "clarifying_question";
   assistant_message: string;
   notes: string | null;
+  follow_up_question?: string | null;
 };
 
 type UiRecommendationResponse = {
@@ -66,6 +67,8 @@ type UiRecommendationResponse = {
 type UiAppraisalResponse = {
   mode: "appraisal";
   assistant_message: string;
+  draft?: unknown;
+  missing_fields?: string[];
   notes: string | null;
 };
 
@@ -73,6 +76,34 @@ export type UiChatResponseBody = {
   session_id: string;
   role: UiRole;
   mode: "general_chat" | "recommendation" | "appraisal";
+  fine_mode:
+    | "general_chat"
+    | "recommendation"
+    | "clarifying_question"
+    | "no_match"
+    | "appraisal";
+  recommendation_state?: {
+    hard_constraints: HardConstraints;
+    soft_preferences?: {
+      style?: string;
+      palette?: string;
+      room?: string;
+      notes?: string[];
+    };
+  };
+  trade_context?: {
+    tenant_id: string | null;
+    trade_client_id: string | null;
+    preferences: Record<string, unknown>;
+    preferences_source: "none" | "request" | "session";
+  };
+  project_context?: {
+    project_id: string | null;
+    name: string | null;
+    active_room_id: string | null;
+    rooms: UiProjectRoomContext[];
+    notes: string[];
+  };
   review_state?: {
     last_user_message: string | null;
     last_assistant_message: string | null;

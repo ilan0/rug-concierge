@@ -317,9 +317,13 @@ function applyTonePolish(response: RecommendationResponse): RecommendationRespon
   }
 
   if (response.mode === "no_match") {
+    const noMatchMessage = normalizeText(response.assistant_message);
+    const withGuidance = /\b(adjust|widen|broaden|change|try|refine)\b/i.test(noMatchMessage)
+      ? noMatchMessage
+      : `${noMatchMessage} Try widening size, budget, or style filters and I can suggest alternatives.`;
     return {
       ...response,
-      assistant_message: normalizeText(response.assistant_message),
+      assistant_message: withGuidance,
       questions: uniqueCompactList(response.questions, 1),
     };
   }
@@ -844,7 +848,7 @@ export async function rankAndExplain(
     return applyTonePolish({
       mode: "no_match",
       assistant_message: constrainedSearch
-        ? "Based on current inventory, nothing fits those constraints."
+        ? "Based on current inventory, nothing fits those constraints. Try widening size, budget, or style filters and I can suggest alternatives."
         : "I do not see any available rugs in the current inventory list.",
       questions: constrainedSearch
         ? ["Would you like to adjust size or budget?"]
