@@ -86,6 +86,10 @@ export async function runRecommendationPipeline(
     parsed_response: null,
     fallback_reason: null,
     error: null,
+    incomplete_detected: false,
+    retry_attempted: false,
+    retry_succeeded: false,
+    text_postprocess_applied: false,
   };
 
   const writeTrace = async (payload: unknown) => {

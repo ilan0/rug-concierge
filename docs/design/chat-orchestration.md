@@ -77,13 +77,17 @@ Request notes:
 
 - `apps/web/lib/chat/handlers/general-chat.ts`
   - Real OpenAI-backed general chat handler with deterministic fallback.
+  - No backend char clipping on user-facing assistant text.
+  - One retry on incomplete/invalid structured output before fallback.
 
 - `apps/web/lib/chat/handlers/recommendation.ts`
   - Applies review actions and state merges.
   - Calls shared recommendation pipeline (`runRecommendationPipeline`).
+  - Recommendation output text is bounded by schema/prompt/token budgets, not post-trimmed.
 
 - `apps/web/lib/chat/handlers/appraisal.ts`
   - Generates structured appraisal drafts for authorized roles.
+  - Uses same retry/fallback response-quality policy as other AI handlers.
 
 ## Recommendation Route Reuse
 
@@ -105,6 +109,10 @@ Request notes:
   - parsed response
   - fallback reason (when used)
   - context-packet stats and timing
+- Appraisal trace artifacts capture bounded AI debug details:
+  - request/response previews
+  - parsed response preview
+  - retry/incomplete/fallback flags
 - Chat route trace captures memory snapshots and context-packet stats:
   - `memory_snapshot_before`
   - `memory_snapshot_after`

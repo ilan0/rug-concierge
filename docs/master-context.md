@@ -124,6 +124,9 @@ General chat model behavior:
   - latest user message
 - Full transcript is never sent to model.
 - Deterministic fallback is used when key/request/parse fails.
+- Backend does not hard-truncate user-facing response text by character count.
+- Output brevity is controlled by schema `maxLength` + prompt rules + `max_output_tokens`.
+- AI calls use one retry on incomplete/invalid structured output before fallback.
 
 ## AI Prompting Direction
 
@@ -133,6 +136,7 @@ Primary docs:
 - `docs/prompts/general-chat.md`
 - `docs/prompts/recommendation.md`
 - `docs/prompts/recommendation-structured-output.md`
+- `docs/prompts/appraisal.md`
 - `docs/prompts/trade-support.md` (trade role only)
 
 Contract enforcement:
@@ -171,6 +175,7 @@ Contract enforcement:
     - `chat-route`
     - `recommendation-pipeline`
     - `general-chat-ai` (bounded prompt/response preview + context packet stats)
+    - `appraisal-ai` (bounded prompt/response preview + retry/fallback flags)
 - QA event log:
   - `docs/testing/qa-log.ndjson`
 

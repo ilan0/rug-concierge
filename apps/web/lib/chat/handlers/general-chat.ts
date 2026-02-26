@@ -40,6 +40,10 @@ export async function handleGeneralChatTurn(
     parsed_response: null,
     fallback_reason: null,
     error: null,
+    incomplete_detected: false,
+    retry_attempted: false,
+    retry_succeeded: false,
+    text_postprocess_applied: false,
   };
   const startedAt = Date.now();
 
@@ -79,6 +83,10 @@ export async function handleGeneralChatTurn(
           parsed_response: aiTrace.parsed_response,
           fallback_reason: aiTrace.fallback_reason,
           error: aiTrace.error,
+          incomplete_detected: aiTrace.incomplete_detected,
+          retry_attempted: aiTrace.retry_attempted,
+          retry_succeeded: aiTrace.retry_succeeded,
+          text_postprocess_applied: aiTrace.text_postprocess_applied,
         },
         context_packet_stats: getAiContextPacketStats(contextPacket),
         timing_ms: {

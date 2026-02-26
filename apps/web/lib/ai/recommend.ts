@@ -1,5 +1,13 @@
 import type { HardConstraints, InventoryRug } from "@/lib/types/recommendation";
 import { getRecommendationPromptBundle } from "@/lib/ai/prompt-library";
+import {
+  getMaxOutputTokens,
+  normalizeText,
+  postOpenAiResponses,
+  shouldRetryAfterAttempt,
+  toPreviewText,
+  withRetryInstruction,
+} from "@/lib/ai/response-quality";
 import type { PromptLayerId } from "@/lib/prompts/layer-ids";
 import {
   buildRecommendationPromptSections,
@@ -19,10 +27,16 @@ const OPENAI_MODEL = process.env.OPENAI_MODEL ?? "gpt-4.1-nano";
 const MAX_RECOMMENDATIONS = 8;
 const CONFIDENCE_MIN = 0.35;
 const CONFIDENCE_MAX = 0.95;
-const MAX_ASSISTANT_MESSAGE_CHARS = 220;
-const MAX_REASON_CHARS = 120;
-const MAX_CAVEAT_CHARS = 110;
-const MAX_FACTOR_CHARS = 64;
+const MAX_ASSISTANT_MESSAGE_CHARS = 420;
+const MAX_QUESTION_CHARS = 140;
+const MAX_TITLE_CHARS = 160;
+const MAX_SIZE_TEXT_CHARS = 64;
+const MAX_REASON_CHARS = 180;
+const MAX_CAVEAT_CHARS = 160;
+const MAX_FACTOR_CHARS = 100;
+const MAX_NOTES_CHARS = 220;
+const RETRY_SYSTEM_INSTRUCTION =
+  "Retry and return one complete JSON object that matches the schema exactly. Keep answers concise and finish all sentences.";
 
 type RecommendationPromptContext = {
   role?: "retail_customer" | "trade_client" | "store_staff";
@@ -58,6 +72,10 @@ export type RecommendationAiTrace = {
   parsed_response: RecommendationResponse | null;
   fallback_reason: string | null;
   error: string | null;
+  incomplete_detected: boolean;
+  retry_attempted: boolean;
+  retry_succeeded: boolean;
+  text_postprocess_applied: boolean;
 };
 
 export type RecommendationResponse = {
@@ -96,12 +114,16 @@ const RECOMMENDATION_SCHEMA = {
       type: "string",
       enum: ["recommendations", "clarifying_question", "no_match"],
     },
-    assistant_message: { type: "string" },
+    assistant_message: {
+      type: "string",
+      minLength: 1,
+      maxLength: MAX_ASSISTANT_MESSAGE_CHARS,
+    },
     questions: {
       type: "array",
       minItems: 0,
       maxItems: 2,
-      items: { type: "string" },
+      items: { type: "string", maxLength: MAX_QUESTION_CHARS },
     },
     recommendations: {
       type: "array",
@@ -123,16 +145,16 @@ const RECOMMENDATION_SCHEMA = {
           "why_not",
         ],
         properties: {
-          rug_id: { type: "string" },
-          sku: { type: ["string", "null"] },
-          title: { type: "string" },
-          size_text: { type: ["string", "null"] },
+          rug_id: { type: "string", minLength: 1, maxLength: 80 },
+          sku: { type: ["string", "null"], maxLength: 80 },
+          title: { type: "string", minLength: 1, maxLength: MAX_TITLE_CHARS },
+          size_text: { type: ["string", "null"], maxLength: MAX_SIZE_TEXT_CHARS },
           price_usd: { type: ["number", "null"] },
           match_reasons: {
             type: "array",
             minItems: 1,
             maxItems: 3,
-            items: { type: "string" },
+            items: { type: "string", minLength: 1, maxLength: MAX_REASON_CHARS },
           },
           confidence: { type: "number" },
           confidence_tier: { type: "string", enum: ["high", "medium", "low"] },
@@ -140,18 +162,18 @@ const RECOMMENDATION_SCHEMA = {
             type: "array",
             minItems: 0,
             maxItems: 3,
-            items: { type: "string" },
+            items: { type: "string", minLength: 1, maxLength: MAX_FACTOR_CHARS },
           },
           why_not: {
             type: "array",
             minItems: 0,
             maxItems: 2,
-            items: { type: "string" },
+            items: { type: "string", minLength: 1, maxLength: MAX_CAVEAT_CHARS },
           },
         },
       },
     },
-    notes: { type: ["string", "null"] },
+    notes: { type: ["string", "null"], maxLength: MAX_NOTES_CHARS },
   },
 } as const;
 
@@ -266,38 +288,11 @@ function clamp(value: number, min: number, max: number): number {
   return Math.max(min, Math.min(max, value));
 }
 
-function normalizeText(value: string): string {
-  return value.replace(/\s+/g, " ").trim();
-}
-
-function trimText(value: string, maxChars: number): string {
-  const normalized = normalizeText(value);
-  if (normalized.length <= maxChars) return normalized;
-  return `${normalized.slice(0, maxChars - 1).trimEnd()}…`;
-}
-
 function sectionPreview(value: string): string {
-  return trimText(value.replace(/\s+/g, " "), 120);
+  return toPreviewText(value.replace(/\s+/g, " "), 120);
 }
 
-function splitSentences(value: string): string[] {
-  return value
-    .split(/(?<=[.!?])\s+/)
-    .map((part) => normalizeText(part))
-    .filter(Boolean);
-}
-
-function shortenAssistantMessage(
-  value: string,
-  maxSentences: number,
-  maxChars: number
-): string {
-  const sentences = splitSentences(value).slice(0, maxSentences);
-  const joined = sentences.length > 0 ? sentences.join(" ") : normalizeText(value);
-  return trimText(joined, maxChars);
-}
-
-function uniqueCompactList(items: string[], maxItems: number, maxChars: number): string[] {
+function uniqueCompactList(items: string[], maxItems: number): string[] {
   const seen = new Set<string>();
   const output: string[] = [];
   for (const item of items) {
@@ -306,7 +301,7 @@ function uniqueCompactList(items: string[], maxItems: number, maxChars: number):
     const dedupeKey = normalized.toLowerCase();
     if (seen.has(dedupeKey)) continue;
     seen.add(dedupeKey);
-    output.push(trimText(normalized, maxChars));
+    output.push(normalized);
     if (output.length >= maxItems) break;
   }
   return output;
@@ -316,40 +311,28 @@ function applyTonePolish(response: RecommendationResponse): RecommendationRespon
   if (response.mode === "clarifying_question") {
     return {
       ...response,
-      assistant_message: shortenAssistantMessage(
-        response.assistant_message,
-        1,
-        MAX_ASSISTANT_MESSAGE_CHARS
-      ),
-      questions: uniqueCompactList(response.questions, 2, 90),
+      assistant_message: normalizeText(response.assistant_message),
+      questions: uniqueCompactList(response.questions, 2),
     };
   }
 
   if (response.mode === "no_match") {
     return {
       ...response,
-      assistant_message: shortenAssistantMessage(
-        response.assistant_message,
-        1,
-        MAX_ASSISTANT_MESSAGE_CHARS
-      ),
-      questions: uniqueCompactList(response.questions, 1, 90),
+      assistant_message: normalizeText(response.assistant_message),
+      questions: uniqueCompactList(response.questions, 1),
     };
   }
 
   return {
     ...response,
-    assistant_message: shortenAssistantMessage(
-      response.assistant_message,
-      2,
-      MAX_ASSISTANT_MESSAGE_CHARS
-    ),
+    assistant_message: normalizeText(response.assistant_message),
     questions: [],
     recommendations: response.recommendations.map((rec) => ({
       ...rec,
-      match_reasons: uniqueCompactList(rec.match_reasons, 3, MAX_REASON_CHARS),
-      confidence_factors: uniqueCompactList(rec.confidence_factors, 3, MAX_FACTOR_CHARS),
-      why_not: uniqueCompactList(rec.why_not, 2, MAX_CAVEAT_CHARS),
+      match_reasons: uniqueCompactList(rec.match_reasons, 3),
+      confidence_factors: uniqueCompactList(rec.confidence_factors, 3),
+      why_not: uniqueCompactList(rec.why_not, 2),
     })),
   };
 }
@@ -576,10 +559,25 @@ function isRecommendationResponse(value: unknown): value is RecommendationRespon
     return false;
   }
 
-  if (typeof data.assistant_message !== "string") return false;
+  if (
+    typeof data.assistant_message !== "string" ||
+    normalizeText(data.assistant_message).length === 0 ||
+    normalizeText(data.assistant_message).length > MAX_ASSISTANT_MESSAGE_CHARS
+  ) {
+    return false;
+  }
   if (!Array.isArray(data.questions)) return false;
   if (data.questions.length > 2) return false;
-  if (!data.questions.every((q) => typeof q === "string")) return false;
+  if (
+    !data.questions.every(
+      (q) =>
+        typeof q === "string" &&
+        normalizeText(q).length > 0 &&
+        normalizeText(q).length <= MAX_QUESTION_CHARS
+    )
+  ) {
+    return false;
+  }
   if (!Array.isArray(data.recommendations)) return false;
   if (data.recommendations.length > MAX_RECOMMENDATIONS) return false;
   if (
@@ -595,30 +593,55 @@ function isRecommendationResponse(value: unknown): value is RecommendationRespon
       const whyNot = Array.isArray(rec.why_not) ? rec.why_not : null;
       return (
         typeof rec.rug_id === "string" &&
-        (typeof rec.sku === "string" || rec.sku === null) &&
+        normalizeText(rec.rug_id).length > 0 &&
+        normalizeText(rec.rug_id).length <= 80 &&
+        ((typeof rec.sku === "string" && normalizeText(rec.sku).length <= 80) ||
+          rec.sku === null) &&
         typeof rec.title === "string" &&
-        (typeof rec.size_text === "string" || rec.size_text === null) &&
+        normalizeText(rec.title).length > 0 &&
+        normalizeText(rec.title).length <= MAX_TITLE_CHARS &&
+        ((typeof rec.size_text === "string" &&
+          normalizeText(rec.size_text).length <= MAX_SIZE_TEXT_CHARS) ||
+          rec.size_text === null) &&
         (typeof rec.price_usd === "number" || rec.price_usd === null) &&
         matchReasons !== null &&
         matchReasons.length >= 1 &&
         matchReasons.length <= 3 &&
-        matchReasons.every((r) => typeof r === "string") &&
+        matchReasons.every(
+          (r) =>
+            typeof r === "string" &&
+            normalizeText(r).length > 0 &&
+            normalizeText(r).length <= MAX_REASON_CHARS
+        ) &&
         typeof rec.confidence === "number" &&
         (rec.confidence_tier === "high" ||
           rec.confidence_tier === "medium" ||
           rec.confidence_tier === "low") &&
         confidenceFactors !== null &&
         confidenceFactors.length <= 3 &&
-        confidenceFactors.every((r) => typeof r === "string") &&
+        confidenceFactors.every(
+          (r) =>
+            typeof r === "string" &&
+            normalizeText(r).length > 0 &&
+            normalizeText(r).length <= MAX_FACTOR_CHARS
+        ) &&
         whyNot !== null &&
         whyNot.length <= 2 &&
-        whyNot.every((r) => typeof r === "string")
+        whyNot.every(
+          (r) =>
+            typeof r === "string" &&
+            normalizeText(r).length > 0 &&
+            normalizeText(r).length <= MAX_CAVEAT_CHARS
+        )
       );
     })
   ) {
     return false;
   }
   if (!(typeof data.notes === "string" || data.notes === null)) return false;
+  if (typeof data.notes === "string" && normalizeText(data.notes).length > MAX_NOTES_CHARS) {
+    return false;
+  }
 
   return true;
 }
@@ -811,6 +834,10 @@ export async function rankAndExplain(
       trace.parsed_response = null;
       trace.fallback_reason = null;
       trace.error = null;
+      trace.incomplete_detected = false;
+      trace.retry_attempted = false;
+      trace.retry_succeeded = false;
+      trace.text_postprocess_applied = false;
     }
     // No candidates after hard filtering = real no-match.
     const constrainedSearch = hasOptionalHardConstraints(constraints);
@@ -839,6 +866,10 @@ export async function rankAndExplain(
       trace.parsed_response = null;
       trace.fallback_reason = "Missing OPENAI_API_KEY";
       trace.error = null;
+      trace.incomplete_detected = false;
+      trace.retry_attempted = false;
+      trace.retry_succeeded = false;
+      trace.text_postprocess_applied = false;
     }
     // Missing key should not crash the endpoint.
     return applyTonePolish({
@@ -887,6 +918,7 @@ export async function rankAndExplain(
   const requestPayload = {
     model: OPENAI_MODEL,
     input: requestInput,
+    max_output_tokens: getMaxOutputTokens("recommendation"),
     text: {
       format: {
         // Enforce strict schema so frontend response parsing is predictable.
@@ -913,26 +945,29 @@ export async function rankAndExplain(
     trace.parsed_response = null;
     trace.fallback_reason = null;
     trace.error = null;
+    trace.incomplete_detected = false;
+    trace.retry_attempted = false;
+    trace.retry_succeeded = false;
+    trace.text_postprocess_applied = false;
   }
 
-  const response = await fetch(OPENAI_RESPONSES_URL, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${apiKey}`,
-    },
-    body: JSON.stringify(requestPayload),
-  }).catch(() => null);
+  const firstAttempt = await postOpenAiResponses({
+    url: OPENAI_RESPONSES_URL,
+    apiKey,
+    requestPayload,
+  });
 
-  if (!response || !response.ok) {
+  if (trace) {
+    trace.response_status = firstAttempt.response_status;
+    trace.response_payload = firstAttempt.response_payload;
+    trace.incomplete_detected = firstAttempt.incomplete_detected;
+  }
+
+  if (!firstAttempt.ok) {
     if (trace) {
-      trace.response_status = response ? response.status : null;
-      trace.response_payload = null;
       trace.parsed_response = null;
       trace.fallback_reason = "OpenAI request failed";
-      trace.error = response
-        ? `OpenAI request failed with status ${response.status}`
-        : "OpenAI request failed: network error";
+      trace.error = firstAttempt.error;
     }
     // Network/API failure -> deterministic fallback, not a hard API error.
     return applyTonePolish({
@@ -941,12 +976,43 @@ export async function rankAndExplain(
     });
   }
 
-  const payload = (await response.json().catch(() => null)) as unknown;
-  if (trace) {
-    trace.response_status = response.status;
-    trace.response_payload = payload;
+  let parsed = parseRecommendationResponse(firstAttempt.response_payload);
+  const shouldRetry = shouldRetryAfterAttempt({
+    attempt: firstAttempt,
+    parseSucceeded: Boolean(parsed),
+    alreadyRetried: false,
+  });
+
+  if (shouldRetry) {
+    if (trace) {
+      trace.retry_attempted = true;
+    }
+
+    const retryPayload = withRetryInstruction(
+      requestPayload,
+      RETRY_SYSTEM_INSTRUCTION
+    );
+    const retryAttempt = await postOpenAiResponses({
+      url: OPENAI_RESPONSES_URL,
+      apiKey,
+      requestPayload: retryPayload,
+    });
+
+    if (trace) {
+      trace.response_status = retryAttempt.response_status;
+      trace.response_payload = retryAttempt.response_payload;
+      trace.incomplete_detected =
+        firstAttempt.incomplete_detected || retryAttempt.incomplete_detected;
+    }
+
+    if (retryAttempt.ok) {
+      parsed = parseRecommendationResponse(retryAttempt.response_payload);
+      if (trace) {
+        trace.retry_succeeded = Boolean(parsed);
+      }
+    }
   }
-  const parsed = parseRecommendationResponse(payload);
+
   if (!parsed) {
     if (trace) {
       trace.parsed_response = null;

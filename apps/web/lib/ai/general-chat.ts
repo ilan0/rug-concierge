@@ -1,4 +1,12 @@
 import { getRecommendationPromptBundle } from "@/lib/ai/prompt-library";
+import {
+  getMaxOutputTokens,
+  normalizeText,
+  postOpenAiResponses,
+  shouldRetryAfterAttempt,
+  toPreviewText,
+  withRetryInstruction,
+} from "@/lib/ai/response-quality";
 import type { ChatAiContextPacket } from "@/lib/chat/context-packet";
 import type { RoleType } from "@/lib/chat/types";
 import {
@@ -10,24 +18,30 @@ import type { PromptLayerId } from "@/lib/prompts/layer-ids";
 
 const OPENAI_RESPONSES_URL = "https://api.openai.com/v1/responses";
 const OPENAI_MODEL = process.env.OPENAI_MODEL ?? "gpt-4.1-nano";
-const MAX_ASSISTANT_MESSAGE_CHARS = 260;
+const MAX_ASSISTANT_MESSAGE_CHARS = 420;
 const MAX_NOTE_CHARS = 220;
+const MAX_FOLLOW_UP_QUESTION_CHARS = 140;
 const MAX_HINTS = 6;
 const MAX_HINT_CHARS = 90;
+const RETRY_SYSTEM_INSTRUCTION =
+  "Retry and return one complete JSON object that matches the schema exactly. Keep wording concise and finish all sentences.";
 
 const GENERAL_CHAT_SCHEMA = {
   type: "object",
   additionalProperties: false,
   required: ["assistant_message", "notes", "follow_up_question", "memory_hints"],
   properties: {
-    assistant_message: { type: "string" },
-    notes: { type: ["string", "null"] },
-    follow_up_question: { type: ["string", "null"] },
+    assistant_message: { type: "string", minLength: 1, maxLength: MAX_ASSISTANT_MESSAGE_CHARS },
+    notes: { type: ["string", "null"], maxLength: MAX_NOTE_CHARS },
+    follow_up_question: {
+      type: ["string", "null"],
+      maxLength: MAX_FOLLOW_UP_QUESTION_CHARS,
+    },
     memory_hints: {
       type: "array",
       minItems: 0,
       maxItems: MAX_HINTS,
-      items: { type: "string" },
+      items: { type: "string", maxLength: MAX_HINT_CHARS },
     },
   },
 } as const;
@@ -54,6 +68,10 @@ export type GeneralChatAiTrace = {
   parsed_response: GeneralChatModelResponse | null;
   fallback_reason: string | null;
   error: string | null;
+  incomplete_detected: boolean;
+  retry_attempted: boolean;
+  retry_succeeded: boolean;
+  text_postprocess_applied: boolean;
 };
 
 export type GeneralChatRequestPayloadPreview = {
@@ -65,6 +83,7 @@ export type GeneralChatRequestPayloadPreview = {
   user_blocks: number;
   schema_name: string | null;
   schema_strict: boolean | null;
+  max_output_tokens: number | null;
 };
 
 export type GeneralChatResponsePayloadPreview = {
@@ -75,18 +94,8 @@ export type GeneralChatResponsePayloadPreview = {
   error_type: string | null;
 };
 
-function normalizeText(value: string): string {
-  return value.replace(/\s+/g, " ").trim();
-}
-
-function trimToChars(value: string, maxChars: number): string {
-  const normalized = normalizeText(value);
-  if (normalized.length <= maxChars) return normalized;
-  return `${normalized.slice(0, maxChars - 1).trimEnd()}…`;
-}
-
 function sectionPreview(value: string): string {
-  return trimToChars(value, 120);
+  return toPreviewText(value, 120);
 }
 
 function parseOutputText(payload: unknown): string | null {
@@ -144,7 +153,10 @@ export function toGeneralChatRequestPayloadPreview(
     }
   }
 
-  const text = data.text && typeof data.text === "object" ? (data.text as Record<string, unknown>) : null;
+  const text =
+    data.text && typeof data.text === "object"
+      ? (data.text as Record<string, unknown>)
+      : null;
   const format =
     text?.format && typeof text.format === "object"
       ? (text.format as Record<string, unknown>)
@@ -159,6 +171,8 @@ export function toGeneralChatRequestPayloadPreview(
     user_blocks: userBlocks,
     schema_name: typeof format?.name === "string" ? format.name : null,
     schema_strict: typeof format?.strict === "boolean" ? format.strict : null,
+    max_output_tokens:
+      typeof data.max_output_tokens === "number" ? data.max_output_tokens : null,
   };
 }
 
@@ -197,13 +211,35 @@ function isGeneralChatResponse(value: unknown): value is GeneralChatModelRespons
   const data = value as Record<string, unknown>;
 
   if (typeof data.assistant_message !== "string") return false;
+  const assistant = normalizeText(data.assistant_message);
+  if (assistant.length === 0 || assistant.length > MAX_ASSISTANT_MESSAGE_CHARS) return false;
+
   if (!(typeof data.notes === "string" || data.notes === null)) return false;
+  if (typeof data.notes === "string") {
+    const notes = normalizeText(data.notes);
+    if (notes.length > MAX_NOTE_CHARS) return false;
+  }
+
   if (!(typeof data.follow_up_question === "string" || data.follow_up_question === null)) {
     return false;
   }
+  if (typeof data.follow_up_question === "string") {
+    const question = normalizeText(data.follow_up_question);
+    if (question.length === 0 || question.length > MAX_FOLLOW_UP_QUESTION_CHARS) {
+      return false;
+    }
+  }
 
   if (!Array.isArray(data.memory_hints)) return false;
-  if (!data.memory_hints.every((item) => typeof item === "string")) return false;
+  if (data.memory_hints.length > MAX_HINTS) return false;
+  if (
+    !data.memory_hints.every(
+      (item) =>
+        typeof item === "string" && normalizeText(item).length > 0 && normalizeText(item).length <= MAX_HINT_CHARS
+    )
+  ) {
+    return false;
+  }
 
   return true;
 }
@@ -226,8 +262,8 @@ function sanitizeHints(hints: string[]): string[] {
   const output: string[] = [];
 
   for (const hint of hints) {
-    const normalized = trimToChars(hint, MAX_HINT_CHARS);
-    if (!normalized) continue;
+    const normalized = normalizeText(hint);
+    if (!normalized || normalized.length > MAX_HINT_CHARS) continue;
     const key = normalized.toLowerCase();
     if (seen.has(key)) continue;
     seen.add(key);
@@ -239,25 +275,12 @@ function sanitizeHints(hints: string[]): string[] {
 }
 
 function sanitizeResponse(response: GeneralChatModelResponse): GeneralChatModelResponse {
-  const assistantMessage = trimToChars(response.assistant_message, MAX_ASSISTANT_MESSAGE_CHARS);
-  const followUp = response.follow_up_question
-    ? trimToChars(response.follow_up_question, 120)
-    : null;
-  const notes = response.notes ? trimToChars(response.notes, MAX_NOTE_CHARS) : null;
-  const mergedAssistant = (() => {
-    if (!followUp) return assistantMessage;
-    const assistantLower = assistantMessage.toLowerCase();
-    const followUpLower = followUp.toLowerCase();
-    if (assistantLower.endsWith(followUpLower)) {
-      return assistantMessage;
-    }
-    return `${assistantMessage} ${followUp}`.replace(/\s+/g, " ").trim();
-  })();
-
   return {
-    assistant_message: mergedAssistant,
-    notes,
-    follow_up_question: followUp,
+    assistant_message: normalizeText(response.assistant_message),
+    notes: response.notes ? normalizeText(response.notes) : null,
+    follow_up_question: response.follow_up_question
+      ? normalizeText(response.follow_up_question)
+      : null,
     memory_hints: sanitizeHints(response.memory_hints),
   };
 }
@@ -289,6 +312,10 @@ export async function generateGeneralChatResponse(input: {
       input.trace.parsed_response = null;
       input.trace.fallback_reason = "General chat AI disabled via ENABLE_GENERAL_CHAT_AI";
       input.trace.error = null;
+      input.trace.incomplete_detected = false;
+      input.trace.retry_attempted = false;
+      input.trace.retry_succeeded = false;
+      input.trace.text_postprocess_applied = false;
     }
     return fallbackResponse("GENERAL_CHAT_AI_RUNTIME:fallback_disabled");
   }
@@ -305,6 +332,10 @@ export async function generateGeneralChatResponse(input: {
       input.trace.parsed_response = null;
       input.trace.fallback_reason = "Missing OPENAI_API_KEY";
       input.trace.error = null;
+      input.trace.incomplete_detected = false;
+      input.trace.retry_attempted = false;
+      input.trace.retry_succeeded = false;
+      input.trace.text_postprocess_applied = false;
     }
     return fallbackResponse("GENERAL_CHAT_AI_RUNTIME:fallback_missing_api_key");
   }
@@ -339,6 +370,7 @@ export async function generateGeneralChatResponse(input: {
   const requestPayload = {
     model: OPENAI_MODEL,
     input: groupGeneralChatSectionsByRole(promptSections),
+    max_output_tokens: getMaxOutputTokens("general_chat"),
     text: {
       format: {
         type: "json_schema",
@@ -364,37 +396,71 @@ export async function generateGeneralChatResponse(input: {
     input.trace.parsed_response = null;
     input.trace.fallback_reason = null;
     input.trace.error = null;
+    input.trace.incomplete_detected = false;
+    input.trace.retry_attempted = false;
+    input.trace.retry_succeeded = false;
+    input.trace.text_postprocess_applied = false;
   }
 
-  const response = await fetch(OPENAI_RESPONSES_URL, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${apiKey}`,
-    },
-    body: JSON.stringify(requestPayload),
-  }).catch(() => null);
+  const firstAttempt = await postOpenAiResponses({
+    url: OPENAI_RESPONSES_URL,
+    apiKey,
+    requestPayload,
+  });
 
-  if (!response || !response.ok) {
+  if (input.trace) {
+    input.trace.response_status = firstAttempt.response_status;
+    input.trace.response_payload = firstAttempt.response_payload;
+    input.trace.incomplete_detected = firstAttempt.incomplete_detected;
+  }
+
+  if (!firstAttempt.ok) {
     if (input.trace) {
-      input.trace.response_status = response ? response.status : null;
-      input.trace.response_payload = null;
       input.trace.parsed_response = null;
       input.trace.fallback_reason = "OpenAI request failed";
-      input.trace.error = response
-        ? `OpenAI request failed with status ${response.status}`
-        : "OpenAI request failed: network error";
+      input.trace.error = firstAttempt.error;
     }
     return fallbackResponse("GENERAL_CHAT_AI_RUNTIME:fallback_request_failed");
   }
 
-  const payload = (await response.json().catch(() => null)) as unknown;
-  if (input.trace) {
-    input.trace.response_status = response.status;
-    input.trace.response_payload = payload;
+  let parsed = parseGeneralChatResponse(firstAttempt.response_payload);
+
+  const shouldRetry = shouldRetryAfterAttempt({
+    attempt: firstAttempt,
+    parseSucceeded: Boolean(parsed),
+    alreadyRetried: false,
+  });
+
+  if (shouldRetry) {
+    if (input.trace) {
+      input.trace.retry_attempted = true;
+    }
+
+    const retryPayload = withRetryInstruction(
+      requestPayload,
+      RETRY_SYSTEM_INSTRUCTION
+    );
+    const retryAttempt = await postOpenAiResponses({
+      url: OPENAI_RESPONSES_URL,
+      apiKey,
+      requestPayload: retryPayload,
+    });
+
+    if (input.trace) {
+      input.trace.response_status = retryAttempt.response_status;
+      input.trace.response_payload = retryAttempt.response_payload;
+      input.trace.incomplete_detected =
+        firstAttempt.incomplete_detected || retryAttempt.incomplete_detected;
+    }
+
+    if (retryAttempt.ok) {
+      parsed = parseGeneralChatResponse(retryAttempt.response_payload);
+      if (input.trace) {
+        input.trace.retry_succeeded = Boolean(parsed);
+      }
+    }
   }
 
-  const parsed = parseGeneralChatResponse(payload);
   if (!parsed) {
     if (input.trace) {
       input.trace.parsed_response = null;

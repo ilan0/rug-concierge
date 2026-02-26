@@ -1,5 +1,10 @@
 import { NextResponse } from "next/server";
-import { generateAppraisalDraft } from "@/lib/ai/appraisal";
+import {
+  generateAppraisalDraft,
+  toAppraisalRequestPayloadPreview,
+  toAppraisalResponsePayloadPreview,
+  type AppraisalAiTrace,
+} from "@/lib/ai/appraisal";
 import {
   parseE2eTraceMeta,
   writeE2eTraceArtifact,
@@ -116,7 +121,21 @@ export async function POST(req: Request) {
       ? body.appraisal_context
       : {};
 
-  const result = await generateAppraisalDraft(context);
+  const aiTrace: AppraisalAiTrace = {
+    called: false,
+    model: process.env.OPENAI_MODEL ?? "gpt-4.1-nano",
+    request_payload: null,
+    response_status: null,
+    response_payload: null,
+    parsed_response: null,
+    fallback_reason: null,
+    error: null,
+    incomplete_detected: false,
+    retry_attempted: false,
+    retry_succeeded: false,
+    text_postprocess_applied: false,
+  };
+  const result = await generateAppraisalDraft(context, aiTrace);
   if (traceMeta) {
     await writeE2eTraceArtifact({
       meta: traceMeta,
@@ -125,6 +144,24 @@ export async function POST(req: Request) {
       payload: {
         flow_path: ["/api/appraisal/generate POST", "generateAppraisalDraft"],
         request: body,
+        ai_trace: {
+          called: aiTrace.called,
+          model: aiTrace.model,
+          request_payload_preview: toAppraisalRequestPayloadPreview(
+            aiTrace.request_payload
+          ),
+          response_status: aiTrace.response_status,
+          response_payload_preview: toAppraisalResponsePayloadPreview(
+            aiTrace.response_payload
+          ),
+          parsed_response: aiTrace.parsed_response,
+          fallback_reason: aiTrace.fallback_reason,
+          error: aiTrace.error,
+          incomplete_detected: aiTrace.incomplete_detected,
+          retry_attempted: aiTrace.retry_attempted,
+          retry_succeeded: aiTrace.retry_succeeded,
+          text_postprocess_applied: aiTrace.text_postprocess_applied,
+        },
         response: {
           status: 200,
           body: result,

@@ -162,6 +162,7 @@ Brevity targets:
 - `match_reasons`: short phrases/sentences (1 line each)
 - `why_not`: short factual caveats only
 - `questions`: direct and minimal
+- Never end any field with an unfinished trailing fragment.
 
 ---
 

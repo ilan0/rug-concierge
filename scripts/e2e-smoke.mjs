@@ -62,13 +62,14 @@ function makeAssert(checks) {
   };
 }
 
-async function postJson(url, body, traceMeta) {
+async function postJson(url, body, traceMeta, extraHeaders = {}) {
   const response = await fetch(url, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       "x-e2e-trace-run": traceMeta.runId,
       "x-e2e-trace-case": traceMeta.caseId,
+      ...extraHeaders,
     },
     body: JSON.stringify(body),
   });
@@ -95,13 +96,14 @@ async function postJson(url, body, traceMeta) {
   };
 }
 
-async function postRaw(url, rawBody, traceMeta) {
+async function postRaw(url, rawBody, traceMeta, extraHeaders = {}) {
   const response = await fetch(url, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       "x-e2e-trace-run": traceMeta.runId,
       "x-e2e-trace-case": traceMeta.caseId,
+      ...extraHeaders,
     },
     body: rawBody,
   });
@@ -167,6 +169,9 @@ function summarizeTrace(traces) {
     general_chat_trace_present: false,
     general_chat_trace_ai_called: false,
     general_chat_trace_fallback_reason: null,
+    appraisal_trace_present: false,
+    appraisal_trace_ai_called: false,
+    appraisal_trace_fallback_reason: null,
     flow_paths: [],
     supabase_variants: [],
     ai_request_payloads: [],
@@ -183,8 +188,18 @@ function summarizeTrace(traces) {
     if (channel === "general-chat-ai") {
       summary.general_chat_trace_present = true;
     }
+    if (channel === "appraisal-ai") {
+      summary.appraisal_trace_present = true;
+    }
     const payload = trace.parsed?.payload ?? null;
     if (!payload || typeof payload !== "object") continue;
+    if (
+      channel === "appraisal-route" &&
+      payload.ai_trace &&
+      typeof payload.ai_trace === "object"
+    ) {
+      summary.appraisal_trace_present = true;
+    }
 
     const flowPath = Array.isArray(payload.flow_path) ? payload.flow_path : null;
     if (flowPath) summary.flow_paths.push(flowPath);
@@ -216,10 +231,16 @@ function summarizeTrace(traces) {
       if (channel === "general-chat-ai" && aiTrace.called) {
         summary.general_chat_trace_ai_called = true;
       }
+      if ((channel === "appraisal-ai" || channel === "appraisal-route") && aiTrace.called) {
+        summary.appraisal_trace_ai_called = true;
+      }
       if (typeof aiTrace.fallback_reason === "string" && aiTrace.fallback_reason) {
         summary.ai_fallback = true;
         if (channel === "general-chat-ai") {
           summary.general_chat_trace_fallback_reason = aiTrace.fallback_reason;
+        }
+        if (channel === "appraisal-ai" || channel === "appraisal-route") {
+          summary.appraisal_trace_fallback_reason = aiTrace.fallback_reason;
         }
       }
       if (aiTrace.request_payload) {
@@ -371,6 +392,11 @@ function buildCaseMarkdown(test) {
     `- General Chat Trace Fallback Reason: ${
       test.trace_summary.general_chat_trace_fallback_reason ?? "(none)"
     }`,
+    `- Appraisal Trace Present: ${test.trace_summary.appraisal_trace_present ? "yes" : "no"}`,
+    `- Appraisal Trace AI Called: ${test.trace_summary.appraisal_trace_ai_called ? "yes" : "no"}`,
+    `- Appraisal Trace Fallback Reason: ${
+      test.trace_summary.appraisal_trace_fallback_reason ?? "(none)"
+    }`,
     `- Details: \`${JSON.stringify(test.details).slice(0, 500)}\``,
     checksMarkdown,
     "- Trace Files:",
@@ -506,6 +532,13 @@ async function run() {
               ["recommendations", "clarifying_question", "no_match"].includes(mode),
               "mode is valid recommendation contract",
               { actual: mode }
+            );
+            const assistantMessage = response.body?.assistant_message;
+            assert(
+              typeof assistantMessage === "string" &&
+                !/(?:\u2026|\.{3})\s*$/.test(assistantMessage),
+              "assistant message does not end with truncation ellipsis",
+              { actual: assistantMessage }
             );
           }
 
@@ -722,6 +755,12 @@ async function run() {
             typeof assistantMessage === "string" &&
               !/[?.!][A-Z]/.test(assistantMessage),
             "assistant message avoids missing-space punctuation joins",
+            { actual: assistantMessage }
+          );
+          assert(
+            typeof assistantMessage === "string" &&
+              !/(?:\u2026|\.{3})\s*$/.test(assistantMessage),
+            "assistant message does not end with truncation ellipsis",
             { actual: assistantMessage }
           );
           const traces = await readTraceArtifacts(traceMeta.caseId);
@@ -1162,6 +1201,89 @@ async function run() {
             expected: 403,
             actual: response.status,
           });
+
+          return {
+            response_body: response.body ?? response.raw,
+            response_headers: response.headers,
+          };
+        }
+      )
+    );
+  }
+
+  if (shouldRun("appraisal endpoint returns structured draft")) {
+    tests.push(
+      await runCase(
+        "appraisal endpoint returns structured draft",
+        { endpoint: "/api/appraisal/generate", method: "POST" },
+        async ({ assert, traceMeta }) => {
+          const response = await postJson(
+            `${baseUrl}/api/appraisal/generate`,
+            {
+              role: "store_staff",
+              tenant_id: requireSmokeTenant(
+                "appraisal endpoint returns structured draft"
+              ),
+              appraisal_context: {
+                rug_label: "Heriz Runner",
+                rug_size_text: "3'2 x 10'0",
+                condition: "Good vintage condition with minor wear.",
+                appraised_value: 1800,
+                currency: "USD",
+                customer_name: "Sample Client",
+              },
+            },
+            traceMeta,
+            {
+              Cookie: "rug_ui_role=store_staff",
+            }
+          );
+
+          assert(response.status === 200, "status is 200", {
+            expected: 200,
+            actual: response.status,
+          });
+
+          const mode = response.body?.mode;
+          assert(
+            ["appraisal_draft", "cannot_generate"].includes(mode),
+            "mode is valid appraisal contract",
+            { actual: mode }
+          );
+
+          const assistantMessage = response.body?.assistant_message;
+          assert(
+            typeof assistantMessage === "string" &&
+              !/(?:\u2026|\.{3})\s*$/.test(assistantMessage),
+            "assistant message does not end with truncation ellipsis",
+            { actual: assistantMessage }
+          );
+
+          if (mode === "appraisal_draft") {
+            assert(
+              response.body?.draft?.value_section?.label === "Appraised Value",
+              "value section label is Appraised Value",
+              { actual: response.body?.draft?.value_section?.label }
+            );
+          }
+
+          const traces = await readTraceArtifacts(traceMeta.caseId);
+          const traceSummary = summarizeTrace(traces);
+          assert(
+            traceSummary.appraisal_trace_present,
+            "appraisal-ai trace artifact is present",
+            { trace_files: traceSummary.trace_files.length }
+          );
+          assert(
+            traceSummary.appraisal_trace_ai_called ||
+              typeof traceSummary.appraisal_trace_fallback_reason === "string",
+            "appraisal trace records ai call or fallback reason",
+            {
+              appraisal_trace_ai_called: traceSummary.appraisal_trace_ai_called,
+              appraisal_trace_fallback_reason:
+                traceSummary.appraisal_trace_fallback_reason,
+            }
+          );
 
           return {
             response_body: response.body ?? response.raw,
