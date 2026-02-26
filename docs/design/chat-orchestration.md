@@ -99,6 +99,12 @@ Request notes:
   - `apps/web/lib/prompts/general-chat-stack.ts`
   - `apps/web/lib/prompts/recommendation-stack.ts` (shared recommendation layer source)
 - Recommendation trace artifacts also capture actual prompt payload and parsed response.
+- General chat trace artifacts capture bounded AI debug details:
+  - prompt-layer metadata
+  - request/response previews
+  - parsed response
+  - fallback reason (when used)
+  - context-packet stats and timing
 - Chat route trace captures memory snapshots and context-packet stats:
   - `memory_snapshot_before`
   - `memory_snapshot_after`

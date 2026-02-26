@@ -3,6 +3,7 @@ import type { UiChatResponseBody, UiRecommendationItem } from "@/lib/types/chat-
 export type DebugTraceSummary = {
   routeTrace: unknown | null;
   pipelineTrace: unknown | null;
+  generalChatTrace: unknown | null;
 };
 
 export type DebugMeta = {

@@ -56,6 +56,25 @@ export type GeneralChatAiTrace = {
   error: string | null;
 };
 
+export type GeneralChatRequestPayloadPreview = {
+  model: string | null;
+  message_groups: number;
+  system_groups: number;
+  user_groups: number;
+  system_blocks: number;
+  user_blocks: number;
+  schema_name: string | null;
+  schema_strict: boolean | null;
+};
+
+export type GeneralChatResponsePayloadPreview = {
+  has_output_text: boolean;
+  output_items: number;
+  content_blocks: number;
+  has_error: boolean;
+  error_type: string | null;
+};
+
 function normalizeText(value: string): string {
   return value.replace(/\s+/g, " ").trim();
 }
@@ -95,6 +114,82 @@ function parseOutputText(payload: unknown): string | null {
   }
 
   return null;
+}
+
+export function toGeneralChatRequestPayloadPreview(
+  payload: unknown
+): GeneralChatRequestPayloadPreview | null {
+  if (!payload || typeof payload !== "object") return null;
+  const data = payload as Record<string, unknown>;
+  const inputBlocks = Array.isArray(data.input) ? data.input : [];
+
+  let systemGroups = 0;
+  let userGroups = 0;
+  let systemBlocks = 0;
+  let userBlocks = 0;
+
+  for (const block of inputBlocks) {
+    if (!block || typeof block !== "object") continue;
+    const item = block as Record<string, unknown>;
+    const role = item.role === "system" || item.role === "user" ? item.role : null;
+    if (!role) continue;
+
+    const content = Array.isArray(item.content) ? item.content : [];
+    if (role === "system") {
+      systemGroups += 1;
+      systemBlocks += content.length;
+    } else {
+      userGroups += 1;
+      userBlocks += content.length;
+    }
+  }
+
+  const text = data.text && typeof data.text === "object" ? (data.text as Record<string, unknown>) : null;
+  const format =
+    text?.format && typeof text.format === "object"
+      ? (text.format as Record<string, unknown>)
+      : null;
+
+  return {
+    model: typeof data.model === "string" ? data.model : null,
+    message_groups: inputBlocks.length,
+    system_groups: systemGroups,
+    user_groups: userGroups,
+    system_blocks: systemBlocks,
+    user_blocks: userBlocks,
+    schema_name: typeof format?.name === "string" ? format.name : null,
+    schema_strict: typeof format?.strict === "boolean" ? format.strict : null,
+  };
+}
+
+export function toGeneralChatResponsePayloadPreview(
+  payload: unknown
+): GeneralChatResponsePayloadPreview | null {
+  if (!payload || typeof payload !== "object") return null;
+  const data = payload as Record<string, unknown>;
+  const output = Array.isArray(data.output) ? data.output : [];
+  let contentBlocks = 0;
+
+  for (const outputItem of output) {
+    if (!outputItem || typeof outputItem !== "object") continue;
+    const item = outputItem as Record<string, unknown>;
+    if (!Array.isArray(item.content)) continue;
+    contentBlocks += item.content.length;
+  }
+
+  const error =
+    data.error && typeof data.error === "object"
+      ? (data.error as Record<string, unknown>)
+      : null;
+
+  return {
+    has_output_text:
+      typeof data.output_text === "string" && data.output_text.trim().length > 0,
+    output_items: output.length,
+    content_blocks: contentBlocks,
+    has_error: Boolean(error),
+    error_type: typeof error?.type === "string" ? error.type : null,
+  };
 }
 
 function isGeneralChatResponse(value: unknown): value is GeneralChatModelResponse {
@@ -149,11 +244,18 @@ function sanitizeResponse(response: GeneralChatModelResponse): GeneralChatModelR
     ? trimToChars(response.follow_up_question, 120)
     : null;
   const notes = response.notes ? trimToChars(response.notes, MAX_NOTE_CHARS) : null;
+  const mergedAssistant = (() => {
+    if (!followUp) return assistantMessage;
+    const assistantLower = assistantMessage.toLowerCase();
+    const followUpLower = followUp.toLowerCase();
+    if (assistantLower.endsWith(followUpLower)) {
+      return assistantMessage;
+    }
+    return `${assistantMessage} ${followUp}`.replace(/\s+/g, " ").trim();
+  })();
 
   return {
-    assistant_message: followUp
-      ? `${assistantMessage}${assistantMessage.endsWith("?") ? "" : " "}${followUp}`
-      : assistantMessage,
+    assistant_message: mergedAssistant,
     notes,
     follow_up_question: followUp,
     memory_hints: sanitizeHints(response.memory_hints),

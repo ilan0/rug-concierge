@@ -167,6 +167,10 @@ Contract enforcement:
 - Full smoke suite recommendation cases require `SMOKE_TENANT_ID`.
 - Deep trace artifacts:
   - `docs/testing/artifacts/<run-id>/<case-id>/*.json`
+  - Trace channels:
+    - `chat-route`
+    - `recommendation-pipeline`
+    - `general-chat-ai` (bounded prompt/response preview + context packet stats)
 - QA event log:
   - `docs/testing/qa-log.ndjson`
 

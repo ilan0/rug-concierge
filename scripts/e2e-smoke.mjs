@@ -164,6 +164,9 @@ function summarizeTrace(traces) {
     ai_used: false,
     ai_fallback: false,
     general_chat_runtime: "unknown",
+    general_chat_trace_present: false,
+    general_chat_trace_ai_called: false,
+    general_chat_trace_fallback_reason: null,
     flow_paths: [],
     supabase_variants: [],
     ai_request_payloads: [],
@@ -173,6 +176,13 @@ function summarizeTrace(traces) {
   };
 
   for (const trace of traces) {
+    const channel =
+      trace.parsed && typeof trace.parsed.channel === "string"
+        ? trace.parsed.channel
+        : null;
+    if (channel === "general-chat-ai") {
+      summary.general_chat_trace_present = true;
+    }
     const payload = trace.parsed?.payload ?? null;
     if (!payload || typeof payload !== "object") continue;
 
@@ -203,8 +213,14 @@ function summarizeTrace(traces) {
     const aiTrace = payload.ai_trace;
     if (aiTrace && typeof aiTrace === "object") {
       if (aiTrace.called) summary.ai_used = true;
+      if (channel === "general-chat-ai" && aiTrace.called) {
+        summary.general_chat_trace_ai_called = true;
+      }
       if (typeof aiTrace.fallback_reason === "string" && aiTrace.fallback_reason) {
         summary.ai_fallback = true;
+        if (channel === "general-chat-ai") {
+          summary.general_chat_trace_fallback_reason = aiTrace.fallback_reason;
+        }
       }
       if (aiTrace.request_payload) {
         summary.ai_request_payloads.push(aiTrace.request_payload);
@@ -350,6 +366,11 @@ function buildCaseMarkdown(test) {
     `- AI Used: ${test.trace_summary.ai_used ? "yes" : "no"}`,
     `- AI Fallback Used: ${test.trace_summary.ai_fallback ? "yes" : "no"}`,
     `- General Chat Runtime: ${test.trace_summary.general_chat_runtime}`,
+    `- General Chat Trace Present: ${test.trace_summary.general_chat_trace_present ? "yes" : "no"}`,
+    `- General Chat Trace AI Called: ${test.trace_summary.general_chat_trace_ai_called ? "yes" : "no"}`,
+    `- General Chat Trace Fallback Reason: ${
+      test.trace_summary.general_chat_trace_fallback_reason ?? "(none)"
+    }`,
     `- Details: \`${JSON.stringify(test.details).slice(0, 500)}\``,
     checksMarkdown,
     "- Trace Files:",
@@ -691,14 +712,40 @@ async function run() {
           });
 
           const notes = response.body?.response?.notes;
+          const assistantMessage = response.body?.response?.assistant_message;
           assert(
             typeof notes === "string" && notes.includes("GENERAL_CHAT_AI_RUNTIME:"),
             "notes include general chat runtime marker",
             { actual: notes }
           );
+          assert(
+            typeof assistantMessage === "string" &&
+              !/[?.!][A-Z]/.test(assistantMessage),
+            "assistant message avoids missing-space punctuation joins",
+            { actual: assistantMessage }
+          );
+          const traces = await readTraceArtifacts(traceMeta.caseId);
+          const traceSummary = summarizeTrace(traces);
+          assert(
+            traceSummary.general_chat_trace_present,
+            "general-chat-ai trace artifact is present",
+            { trace_files: traceSummary.trace_files.length }
+          );
+          assert(
+            traceSummary.general_chat_trace_ai_called ||
+              typeof traceSummary.general_chat_trace_fallback_reason === "string",
+            "general chat trace records ai call or fallback reason",
+            {
+              general_chat_trace_ai_called:
+                traceSummary.general_chat_trace_ai_called,
+              general_chat_trace_fallback_reason:
+                traceSummary.general_chat_trace_fallback_reason,
+            }
+          );
 
           return {
             mode: response.body?.mode,
+            assistant_message: assistantMessage,
             notes,
             response_headers: response.headers,
           };

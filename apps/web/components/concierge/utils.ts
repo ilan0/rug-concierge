@@ -48,14 +48,14 @@ export function toSlug(value: string): string {
 
 export function summarizeTracePayload(payload: unknown): DebugTraceSummary {
   if (!payload || typeof payload !== "object") {
-    return { routeTrace: null, pipelineTrace: null };
+    return { routeTrace: null, pipelineTrace: null, generalChatTrace: null };
   }
 
   const data = payload as {
     traces?: Array<{ channel?: string | null; payload?: unknown }>;
   };
   if (!Array.isArray(data.traces)) {
-    return { routeTrace: null, pipelineTrace: null };
+    return { routeTrace: null, pipelineTrace: null, generalChatTrace: null };
   }
 
   const routeTrace =
@@ -63,6 +63,9 @@ export function summarizeTracePayload(payload: unknown): DebugTraceSummary {
   const pipelineTrace =
     data.traces.find((trace) => trace?.channel === "recommendation-pipeline")
       ?.payload ?? null;
+  const generalChatTrace =
+    data.traces.find((trace) => trace?.channel === "general-chat-ai")?.payload ??
+    null;
 
-  return { routeTrace, pipelineTrace };
+  return { routeTrace, pipelineTrace, generalChatTrace };
 }

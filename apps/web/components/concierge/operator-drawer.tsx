@@ -26,6 +26,43 @@ type OperatorDrawerProps = {
 export function OperatorDrawer(input: OperatorDrawerProps) {
   if (!input.open) return null;
 
+  const routeTrace =
+    (input.selectedTurn?.debug?.trace?.routeTrace as {
+      routing?: unknown;
+      state_snapshot?: unknown;
+      ai_context_packet_stats?: unknown;
+      timing_ms?: unknown;
+    } | null) ?? null;
+  const pipelineTrace =
+    (input.selectedTurn?.debug?.trace?.pipelineTrace as {
+      ai_trace?: unknown;
+      candidate_counts?: unknown;
+      timing_ms?: unknown;
+      query_trace?: unknown;
+    } | null) ?? null;
+  const generalChatTrace =
+    (input.selectedTurn?.debug?.trace?.generalChatTrace as {
+      ai_trace?: unknown;
+      context_packet_stats?: unknown;
+      timing_ms?: unknown;
+    } | null) ?? null;
+  const unifiedAiTrace = pipelineTrace?.ai_trace ?? generalChatTrace?.ai_trace ?? null;
+  const unifiedMetrics = pipelineTrace
+    ? {
+        candidate_counts: pipelineTrace.candidate_counts ?? null,
+        query_trace: pipelineTrace.query_trace ?? null,
+        timing_ms: pipelineTrace.timing_ms ?? null,
+      }
+    : generalChatTrace
+      ? {
+          context_packet_stats: generalChatTrace.context_packet_stats ?? null,
+          timing_ms: generalChatTrace.timing_ms ?? null,
+        }
+      : {
+          context_packet_stats: routeTrace?.ai_context_packet_stats ?? null,
+          timing_ms: routeTrace?.timing_ms ?? null,
+        };
+
   return (
     <>
       <button
@@ -179,61 +216,19 @@ export function OperatorDrawer(input: OperatorDrawerProps) {
               <>
                 <section className="concierge-panel">
                   <h3>Routing + Decision</h3>
-                  <pre>
-                    {JSON.stringify(
-                      (
-                        input.selectedTurn.debug.trace.routeTrace as {
-                          routing?: unknown;
-                        } | null
-                      )?.routing ?? null,
-                      null,
-                      2
-                    )}
-                  </pre>
+                  <pre>{JSON.stringify(routeTrace?.routing ?? null, null, 2)}</pre>
                 </section>
                 <section className="concierge-panel">
-                  <h3>Pipeline Metrics</h3>
-                  <pre>
-                    {JSON.stringify(
-                      (
-                        input.selectedTurn.debug.trace.pipelineTrace as {
-                          candidate_counts?: unknown;
-                          timing_ms?: unknown;
-                          query_trace?: unknown;
-                        } | null
-                      ) ?? null,
-                      null,
-                      2
-                    )}
-                  </pre>
+                  <h3>Pipeline / Context Metrics</h3>
+                  <pre>{JSON.stringify(unifiedMetrics, null, 2)}</pre>
                 </section>
                 <section className="concierge-panel">
                   <h3>AI Request + Response</h3>
-                  <pre>
-                    {JSON.stringify(
-                      (
-                        input.selectedTurn.debug.trace.pipelineTrace as {
-                          ai_trace?: unknown;
-                        } | null
-                      )?.ai_trace ?? null,
-                      null,
-                      2
-                    )}
-                  </pre>
+                  <pre>{JSON.stringify(unifiedAiTrace, null, 2)}</pre>
                 </section>
                 <section className="concierge-panel">
                   <h3>Session Snapshot</h3>
-                  <pre>
-                    {JSON.stringify(
-                      (
-                        input.selectedTurn.debug.trace.routeTrace as {
-                          state_snapshot?: unknown;
-                        } | null
-                      )?.state_snapshot ?? null,
-                      null,
-                      2
-                    )}
-                  </pre>
+                  <pre>{JSON.stringify(routeTrace?.state_snapshot ?? null, null, 2)}</pre>
                 </section>
               </>
             ) : (

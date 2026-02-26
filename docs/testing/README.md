@@ -29,3 +29,5 @@ SMOKE_TENANT_ID=YOUR_TENANT_ID npm run qa:all
 
 - `latest-summary.*`, `e2e-smoke-report.*`, `demo-rehearsal-report.md`, and `qa-log.ndjson` are generated outputs.
 - Treat generated files as run artifacts, not long-term documentation.
+- Debug trace artifacts now include `general-chat-ai` in addition to `chat-route` and `recommendation-pipeline`.
+- Developer debug drawer uses a unified AI panel: recommendation trace first, then general-chat trace when recommendation trace is absent.
