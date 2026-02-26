@@ -184,6 +184,9 @@ Deep debug only if needed:
 - `docs/testing/demo-rehearsal-report.md`
 - `docs/testing/artifacts/`
 
+Testing hub:
+- `docs/testing/README.md`
+
 ### Demo Rehearsal (Owner Flow)
 
 ```bash
@@ -192,7 +195,6 @@ SMOKE_TENANT_ID=YOUR_TENANT_ID npm run qa:demo-rehearsal
 
 Outputs:
 - `docs/testing/demo-rehearsal-report.md`
-- checklist: `docs/testing/demo-rehearsal-checklist.md`
 
 ### QA Check (After E2E)
 

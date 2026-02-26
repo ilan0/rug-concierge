@@ -7,11 +7,11 @@
 - Tenant used: `0a175457-6194-4ae9-bf4e-1a785d754c4b`
 - OpenAI runtime mode (verification run): `real`
 - Scope reviewed:
-  - `/Users/ilannabatkhorian/Documents/rug-concierge/apps/web/app/*`
-  - `/Users/ilannabatkhorian/Documents/rug-concierge/apps/web/lib/*`
-  - `/Users/ilannabatkhorian/Documents/rug-concierge/apps/web/components/*`
-  - `/Users/ilannabatkhorian/Documents/rug-concierge/docs/*`
-  - `/Users/ilannabatkhorian/Documents/rug-concierge/scripts/*`
+  - `apps/web/app/*`
+  - `apps/web/lib/*`
+  - `apps/web/components/*`
+  - `docs/*`
+  - `scripts/*`
 
 ## 2) Gate Table
 

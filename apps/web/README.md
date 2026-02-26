@@ -88,9 +88,9 @@ Pattern for new pages:
 ## Contributor Onboarding
 
 - Repo-level feature map:
-  - `/Users/ilannabatkhorian/Documents/rug-concierge/docs/contributor-map.md`
+  - `../../docs/contributor-map.md`
 - One-page project truth:
-  - `/Users/ilannabatkhorian/Documents/rug-concierge/docs/master-context.md`
+  - `../../docs/master-context.md`
 
 ## Lockfile Policy
 

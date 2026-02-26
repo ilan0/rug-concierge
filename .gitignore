@@ -21,6 +21,11 @@ logs
 # Generated test/debug artifacts
 docs/testing/artifacts/
 docs/testing/qa-log.ndjson
+docs/testing/latest-summary.md
+docs/testing/latest-summary.json
+docs/testing/e2e-smoke-report.md
+docs/testing/e2e-smoke-report.json
+docs/testing/demo-rehearsal-report.md
 apps/web/docs/testing/
 
 # OS
