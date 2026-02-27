@@ -168,24 +168,31 @@ Contract enforcement:
 - Shared role-aware nav component used across workspace pages.
 - Developer-only debug trace affordances are hidden from non-developer roles.
 - Staff review controls are shown only in recommendation context turns.
+- Frontend styling stack:
+  - Tailwind CSS
+  - shadcn/ui component layer (Radix primitives)
+  - shared app primitives (`AppShell`, `PageHeader`, `SectionCard`, `FormField`)
+- Appraisal page is Appraisal Studio v3:
+  - step-based (source -> essentials -> actions -> optional details)
+  - advanced tools hidden by default
+  - finalized drafts are locked and require new-draft-copy for edits
 
 ## Testing + QA Artifacts
 
-- Smoke reports:
-  - `docs/testing/e2e-smoke-report.md`
-  - `docs/testing/e2e-smoke-report.json`
-- Full smoke suite recommendation cases require `SMOKE_TENANT_ID`.
-- Deep trace artifacts:
-  - `docs/testing/artifacts/<run-id>/<case-id>/*.json`
-  - Trace channels:
-    - `chat-route`
-    - `recommendation-pipeline`
-    - `general-chat-ai` (bounded prompt/response preview + context packet stats)
-    - `appraisal-ai` (bounded prompt/response preview + retry/fallback flags)
-- QA event log:
-  - `docs/testing/qa-log.ndjson`
-
-Canonical testing root: `docs/testing`.
+- Two canonical QA suites:
+  1. Functionality (`TENANT_ID=<tenant> npm run qa:functional`)
+  2. Quality (`TENANT_ID=<tenant> npm run qa:quality`)
+- Optional extended quality:
+  - `TENANT_ID=<tenant> node scripts/qa.mjs quality --extended`
+  - if model latency spikes: `QA_CHAT_TIMEOUT_MS=90000`
+- Latest outputs are overwritten each run:
+  - `scripts/testing/functionality/latest-functional.md`
+  - `scripts/testing/quality/latest-quality.md`
+- Trace channels remain available for developer debug flows:
+  - `chat-route`
+  - `recommendation-pipeline`
+  - `general-chat-ai`
+  - `appraisal-ai`
 
 ## Contributor Onboarding
 

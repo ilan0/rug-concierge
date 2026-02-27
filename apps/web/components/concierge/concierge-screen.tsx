@@ -7,6 +7,15 @@ import { OperatorDrawer } from "@/components/concierge/operator-drawer";
 import { useConciergeController } from "@/components/concierge/use-concierge-controller";
 import { modeLabel } from "@/components/concierge/utils";
 import type { ConciergeVariant } from "@/components/concierge/types";
+import { AppShell } from "@/components/ui/app-shell";
+import { PageHeader } from "@/components/ui/page-header";
+import { SectionCard } from "@/components/ui/section-card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+
 
 type ConciergeScreenProps = {
   debug: boolean;
@@ -31,7 +40,7 @@ function formatConstraintSummary(input: {
   if (input.size) {
     items.push(
       `Size ${toFeetLabel(input.size.widthIn)}×${toFeetLabel(input.size.lengthIn)}${
-        typeof input.size.toleranceIn === "number" ? ` \u00b1${input.size.toleranceIn}"` : ""
+        typeof input.size.toleranceIn === "number" ? ` ±${input.size.toleranceIn}"` : ""
       }`
     );
   }
@@ -63,201 +72,205 @@ export function ConciergeScreen({
     : [];
 
   return (
-    <main className="ui-shell ui-showroom concierge-page concierge-showroom">
-      <header className="ui-header concierge-header">
-        <div>
-          <p className="ui-kicker concierge-eyebrow">
-            {variant === "trade" ? "Trade Workflow" : "Customer Flow"}
-          </p>
-          <h1>{variant === "trade" ? "Trade Support" : "Rug Concierge"}</h1>
-          <p className="ui-subtitle concierge-subtitle">
-            {variant === "trade"
-              ? "Repeat-buyer workflow for designers and trade clients with context-driven personalization."
-              : "Main customer-facing chat. The backend routes each turn to general chat or recommendation mode."}
-          </p>
-        </div>
-        <div className="concierge-controls">
-          {controller.roleSwitcherVisible ? (
-            <label>
-              Role
-              <select
-                value={controller.role}
-                onChange={(event) =>
-                  void controller.onRoleChange(event.target.value as UiRole)
-                }
-                disabled={controller.isLoading}
+    <AppShell>
+      <PageHeader
+        kicker={variant === "trade" ? "Trade Workflow" : "Customer Flow"}
+        title={variant === "trade" ? "Trade Support" : "Rug Concierge"}
+        subtitle={
+          variant === "trade"
+            ? "Repeat-buyer workflow for designers and trade clients with context-driven personalization."
+            : "Main customer-facing chat. The backend routes each turn to general chat or recommendation mode."
+        }
+        actions={
+          <div className="flex flex-wrap items-end justify-end gap-2">
+            {controller.roleSwitcherVisible ? (
+              <label className="space-y-1">
+                <span className="text-xs font-medium uppercase tracking-[0.08em] text-muted-foreground">Role</span>
+                <select
+                  value={controller.role}
+                  onChange={(event) =>
+                    void controller.onRoleChange(event.target.value as UiRole)
+                  }
+                  disabled={controller.isLoading}
+                  className="h-10 rounded-md border border-input bg-background px-3 text-sm"
+                >
+                  {controller.roleOptions.map((roleOption) => (
+                    <option value={roleOption} key={roleOption}>
+                      {roleOption}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            ) : (
+              <Badge variant="secondary">Role: {controller.role}</Badge>
+            )}
+            {controller.canOpenOperator ? (
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => controller.setOperatorOpen(true)}
               >
-                {controller.roleOptions.map((roleOption) => (
-                  <option value={roleOption} key={roleOption}>
-                    {roleOption}
-                  </option>
-                ))}
-              </select>
-            </label>
-          ) : (
-            <p className="concierge-mode-chip">Role: {controller.role}</p>
-          )}
-          {controller.canOpenOperator ? (
-            <button
+                Operator
+              </Button>
+            ) : null}
+            <Button
               type="button"
-              onClick={() => controller.setOperatorOpen(true)}
-              className="concierge-operator-open-btn"
+              variant="secondary"
+              onClick={controller.onReset}
+              disabled={controller.isLoading}
             >
-              Operator
-            </button>
-          ) : null}
-          <button
-            type="button"
-            onClick={controller.onReset}
-            disabled={controller.isLoading}
-          >
-            New Session
-          </button>
-        </div>
-      </header>
+              New Session
+            </Button>
+          </div>
+        }
+      />
 
-      <div className="concierge-layout">
-        <section className="concierge-main">
-          <section className="concierge-starters">
-            <p>Quick starts</p>
-            <div className="concierge-starter-row">
+      <div className="grid gap-5 xl:grid-cols-[minmax(0,1.65fr)_minmax(0,1fr)]">
+        <section className="space-y-4">
+          <SectionCard title="Quick Starts">
+            <div className="flex flex-wrap gap-2">
               {controller.starterPrompts.map((starter) => (
-                <button
+                <Button
                   key={starter}
                   type="button"
+                  variant="outline"
+                  size="sm"
                   onClick={() => controller.pushStarterPrompt(starter)}
                   disabled={controller.isLoading}
                 >
                   {starter}
-                </button>
+                </Button>
               ))}
             </div>
-          </section>
+          </SectionCard>
 
           {variant === "trade" ? (
-            <section className="concierge-trade-context">
-              <h3>Designer Context</h3>
-              <p>
-                Add trade/project context once. It is injected each turn for
-                personalized responses.
-              </p>
-              <div className="concierge-trade-grid">
-                <label>
-                  Tenant ID
-                  <input
+            <SectionCard
+              title="Designer Context"
+              description="Set project context once; it will be included in each turn."
+            >
+              <div className="grid gap-3 md:grid-cols-2">
+                <div className="space-y-2">
+                  <Label htmlFor="trade-tenant-id">Tenant ID</Label>
+                  <Input
+                    id="trade-tenant-id"
                     value={controller.tradeContext.tenant_id}
                     onChange={controller.onTradeContextField("tenant_id")}
                     placeholder="optional"
                   />
-                </label>
-                <label>
-                  Trade Client ID
-                  <input
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="trade-client-id">Trade Client ID</Label>
+                  <Input
+                    id="trade-client-id"
                     value={controller.tradeContext.trade_client_id}
                     onChange={controller.onTradeContextField("trade_client_id")}
                     placeholder="designer account id"
                   />
-                </label>
-                <label>
-                  Project Name
-                  <input
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="project-name">Project Name</Label>
+                  <Input
+                    id="project-name"
                     value={controller.tradeContext.project_name}
                     onChange={controller.onTradeContextField("project_name")}
                     placeholder="Lakeside Residence"
                   />
-                </label>
-                <label>
-                  Active Room
-                  <input
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="active-room">Active Room</Label>
+                  <Input
+                    id="active-room"
                     value={controller.tradeContext.active_room}
                     onChange={controller.onTradeContextField("active_room")}
                     placeholder="living room"
                   />
-                </label>
-                <label>
-                  Preferred Styles
-                  <input
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="preferred-style">Preferred Styles</Label>
+                  <Input
+                    id="preferred-style"
                     value={controller.tradeContext.preferred_styles}
                     onChange={controller.onTradeContextField("preferred_styles")}
                     placeholder="Kazak, Oushak"
                   />
-                </label>
-                <label>
-                  Preferred Palette
-                  <input
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="preferred-palette">Preferred Palette</Label>
+                  <Input
+                    id="preferred-palette"
                     value={controller.tradeContext.preferred_palette}
                     onChange={controller.onTradeContextField("preferred_palette")}
                     placeholder="earthy, muted blues"
                   />
-                </label>
-                <label>
-                  Budget Max
-                  <input
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="budget-max">Budget Max</Label>
+                  <Input
+                    id="budget-max"
                     type="number"
                     min="0"
                     value={controller.tradeContext.budget_max}
                     onChange={controller.onTradeContextField("budget_max")}
                     placeholder="4000"
                   />
-                </label>
-                <label className="concierge-trade-notes">
-                  Notes
-                  <textarea
+                </div>
+                <div className="space-y-2 md:col-span-2">
+                  <Label htmlFor="trade-notes">Notes</Label>
+                  <Textarea
+                    id="trade-notes"
                     rows={2}
                     value={controller.tradeContext.notes}
                     onChange={controller.onTradeContextField("notes")}
-                    placeholder="client avoids bright reds..."
+                    placeholder="Client avoids bright reds..."
                   />
-                </label>
+                </div>
               </div>
-            </section>
+            </SectionCard>
           ) : null}
 
           {controller.recommendationState ? (
-            <section className="ui-card concierge-constraint-bar">
-              <div>
-                <p className="ui-kicker">Active Constraints</p>
-                <div className="concierge-constraint-pills">
-                  {activeConstraintItems.length > 0 ? (
-                    activeConstraintItems.map((item) => (
-                      <span key={item} className="ui-pill">
-                        {item}
-                      </span>
-                    ))
-                  ) : (
-                    <span className="ui-pill">No hard constraints yet</span>
-                  )}
-                </div>
+            <SectionCard title="Active Constraints">
+              <div className="flex flex-wrap gap-2">
+                {activeConstraintItems.length > 0 ? (
+                  activeConstraintItems.map((item) => (
+                    <Badge key={item} variant="outline">
+                      {item}
+                    </Badge>
+                  ))
+                ) : (
+                  <Badge variant="outline">No hard constraints yet</Badge>
+                )}
               </div>
-              <div className="concierge-constraint-actions">
-                <button
+              <div className="mt-3 flex flex-wrap gap-2">
+                <Button
                   type="button"
-                  className="ui-btn--ghost"
+                  variant="ghost"
                   onClick={() => void controller.onConstraintAction("clear_budget")}
                   disabled={controller.isLoading}
                 >
                   Clear budget
-                </button>
-                <button
+                </Button>
+                <Button
                   type="button"
-                  className="ui-btn--ghost"
+                  variant="ghost"
                   onClick={() => void controller.onConstraintAction("clear_size")}
                   disabled={controller.isLoading}
                 >
                   Clear size
-                </button>
-                <button
+                </Button>
+                <Button
                   type="button"
-                  className="ui-btn--ghost"
+                  variant="ghost"
                   onClick={() =>
                     void controller.onConstraintAction("start_over_constraints")
                   }
                   disabled={controller.isLoading}
                 >
                   Start over constraints
-                </button>
+                </Button>
               </div>
-            </section>
+            </SectionCard>
           ) : null}
 
           <ChatThread
@@ -280,46 +293,44 @@ export function ConciergeScreen({
           />
         </section>
 
-        <aside className="concierge-side">
-          <section className="concierge-panel">
-            <h3>Session Context</h3>
-            <dl>
+        <aside className="space-y-4">
+          <SectionCard title="Session Context">
+            <dl className="grid gap-3 text-sm">
               <div>
-                <dt>Session ID</dt>
-                <dd>{controller.sessionId ?? "(new)"}</dd>
+                <dt className="text-xs uppercase tracking-[0.08em] text-muted-foreground">Session ID</dt>
+                <dd className="break-all">{controller.sessionId ?? "(new)"}</dd>
               </div>
               <div>
-                <dt>Tenant</dt>
+                <dt className="text-xs uppercase tracking-[0.08em] text-muted-foreground">Tenant</dt>
                 <dd>{controller.effectiveTenantId}</dd>
               </div>
               <div>
-                <dt>Role</dt>
+                <dt className="text-xs uppercase tracking-[0.08em] text-muted-foreground">Role</dt>
                 <dd>{controller.role}</dd>
               </div>
               <div>
-                <dt>Latest Mode</dt>
+                <dt className="text-xs uppercase tracking-[0.08em] text-muted-foreground">Latest Mode</dt>
                 <dd>{modeLabel(controller.latestAssistantMode) ?? "(none yet)"}</dd>
               </div>
               <div>
-                <dt>Total Turns</dt>
+                <dt className="text-xs uppercase tracking-[0.08em] text-muted-foreground">Total Turns</dt>
                 <dd>{controller.turns.length}</dd>
               </div>
               {debug && controller.canUseDebugTrace ? (
                 <div>
-                  <dt>Debug Run</dt>
-                  <dd>{controller.debugRunId}</dd>
+                  <dt className="text-xs uppercase tracking-[0.08em] text-muted-foreground">Debug Run</dt>
+                  <dd className="break-all">{controller.debugRunId}</dd>
                 </div>
               ) : null}
             </dl>
-          </section>
+          </SectionCard>
 
-          <section className="concierge-panel">
-            <h3>{variant === "trade" ? "Trade Tips" : "Demo Tips"}</h3>
-            <ul>
+          <SectionCard title={variant === "trade" ? "Trade Tips" : "Demo Tips"}>
+            <ul className="list-disc space-y-2 pl-5 text-sm text-muted-foreground">
               {variant === "trade" ? (
                 <>
-                  <li>Set project + room first, then ask for multi-option sets.</li>
-                  <li>Use style/palette notes to personalize ranking behavior.</li>
+                  <li>Set project and room first, then ask for option sets.</li>
+                  <li>Use style and palette notes to personalize ranking.</li>
                   <li>Adjust budget in context for fast repeat requests.</li>
                 </>
               ) : (
@@ -330,7 +341,7 @@ export function ConciergeScreen({
                 </>
               )}
             </ul>
-          </section>
+          </SectionCard>
         </aside>
       </div>
 
@@ -355,6 +366,6 @@ export function ConciergeScreen({
         setOverrideNotes={controller.setOverrideNotes}
         reviewState={controller.reviewState}
       />
-    </main>
+    </AppShell>
   );
 }

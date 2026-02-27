@@ -1,5 +1,12 @@
 import Link from "next/link";
 import { WorkspaceNav } from "@/components/shell/workspace-nav";
+import { AccessGuard } from "@/components/ui/access-guard";
+import { AppShell } from "@/components/ui/app-shell";
+import { PageHeader } from "@/components/ui/page-header";
+import { SectionCard } from "@/components/ui/section-card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 import { listInventory } from "@/lib/inventory/list";
 import { isDefaultInventoryFilters } from "@/lib/inventory/filters";
 import { getServerUiRole, getServerUiTenantId } from "@/lib/ui/server-role";
@@ -58,32 +65,31 @@ export default async function InventoryPage({ searchParams }: InventoryPageProps
   const access = await getPilotAccessState();
   if (access.required && !access.verified) {
     return (
-      <main className="ui-shell role-guard role-guard-blocked">
-        <h1>Pilot Access Required</h1>
-        <p>Please unlock pilot access on Home before using inventory.</p>
-        <Link href="/">Go Home</Link>
-      </main>
+      <AccessGuard
+        title="Pilot Access Required"
+        description="Please unlock pilot access on Home before using inventory."
+      />
     );
   }
 
   const role = await getServerUiRole();
   if (!role || !canRoleAccessRoute(role, "/inventory")) {
     return (
-      <main className="ui-shell role-guard role-guard-blocked">
-        <h1>Inventory Browser</h1>
-        <p>This page is available only to store staff and developers.</p>
-        <Link href="/">Go Home to switch role</Link>
-      </main>
+      <AccessGuard
+        title="Inventory Browser"
+        description="This page is available only to store staff and developers."
+        ctaLabel="Go Home to switch role"
+      />
     );
   }
+
   const tenantId = await getServerUiTenantId();
   if (!tenantId) {
     return (
-      <main className="ui-shell role-guard role-guard-blocked">
-        <h1>Store Tenant Required</h1>
-        <p>Select your store tenant on Home before browsing inventory.</p>
-        <Link href="/">Go Home</Link>
-      </main>
+      <AccessGuard
+        title="Store Tenant Required"
+        description="Select your store tenant on Home before browsing inventory."
+      />
     );
   }
 
@@ -167,233 +173,185 @@ export default async function InventoryPage({ searchParams }: InventoryPageProps
   return (
     <>
       <WorkspaceNav role={role} currentPath="/inventory" />
-      <main className="ui-shell ui-showroom inventory-page inventory-showroom">
-        <header className="ui-header inventory-header">
-        <div>
-          <p className="ui-kicker inventory-eyebrow">Owner Transparency</p>
-          <h1>Inventory Browser</h1>
-          <p className="ui-subtitle inventory-subtitle">
-            Read-only inventory view for trust review and recommendation support.
-          </p>
-        </div>
-        <div className="inventory-header-actions">
-          <Link href={`${pageBase}&page=1`}>Refresh</Link>
-        </div>
-        </header>
+      <AppShell>
+        <PageHeader
+          kicker="Owner Transparency"
+          title="Inventory Browser"
+          subtitle="Read-only inventory view for trust review and recommendation support."
+          actions={
+            <Button asChild variant="secondary">
+              <Link href={`${pageBase}&page=1`}>Refresh</Link>
+            </Button>
+          }
+        />
 
-      <section className="inventory-meta">
-        <span>
-          <strong>Data Source:</strong> Supabase `rugs` table
-        </span>
-        <span>
-          <strong>Tenant:</strong> {tenantId}
-        </span>
-        <span>
-          <strong>Records:</strong> {result.total}
-        </span>
-        <span>
-          <strong>Page:</strong> {result.totalPages === 0 ? 0 : result.page} /{" "}
-          {result.totalPages}
-        </span>
-        <span>
-          <strong>Loaded:</strong> {new Date(result.loadedAt).toLocaleString()}
-        </span>
-      </section>
-
-      <section className="inventory-filters">
-        <h2>Search + Filters</h2>
-        <form method="GET" action="/inventory" className="inventory-filter-form">
-          <input type="hidden" name="page" value="1" />
-          <input type="hidden" name="page_size" value={result.pageSize} />
-
-          <label>
-            Search
-            <input
-              name="q"
-              defaultValue={result.filters.q}
-              placeholder="SKU, label, style, palette..."
-            />
-          </label>
-
-          <label>
-            Status
-            <select name="status" defaultValue={result.filters.status}>
-              <option value="available">available</option>
-              <option value="all">all</option>
-              <option value="sold">sold</option>
-              <option value="on_hold">on_hold</option>
-            </select>
-          </label>
-
-          <label>
-            Sort
-            <select name="sort" defaultValue={result.filters.sort}>
-              <option value="newest">newest</option>
-              <option value="oldest">oldest</option>
-              <option value="price_low">price low</option>
-              <option value="price_high">price high</option>
-            </select>
-          </label>
-
-          <label>
-            Min Price
-            <input
-              name="price_min"
-              type="number"
-              min="0"
-              step="1"
-              defaultValue={result.filters.priceMin ?? ""}
-            />
-          </label>
-
-          <label>
-            Max Price
-            <input
-              name="price_max"
-              type="number"
-              min="0"
-              step="1"
-              defaultValue={result.filters.priceMax ?? ""}
-            />
-          </label>
-
-          <label>
-            Min Width (in)
-            <input
-              name="width_min"
-              type="number"
-              min="0"
-              step="1"
-              defaultValue={result.filters.widthMin ?? ""}
-            />
-          </label>
-
-          <label>
-            Max Width (in)
-            <input
-              name="width_max"
-              type="number"
-              min="0"
-              step="1"
-              defaultValue={result.filters.widthMax ?? ""}
-            />
-          </label>
-
-          <label>
-            Min Length (in)
-            <input
-              name="length_min"
-              type="number"
-              min="0"
-              step="1"
-              defaultValue={result.filters.lengthMin ?? ""}
-            />
-          </label>
-
-          <label>
-            Max Length (in)
-            <input
-              name="length_max"
-              type="number"
-              min="0"
-              step="1"
-              defaultValue={result.filters.lengthMax ?? ""}
-            />
-          </label>
-
-          <div className="inventory-filter-actions">
-            <button type="submit">Apply Filters</button>
-            <Link href={clearFiltersLink}>Clear</Link>
+        <SectionCard>
+          <div className="flex flex-wrap gap-2 text-sm">
+            <Badge variant="secondary">Source: Supabase rugs</Badge>
+            <Badge variant="outline">Tenant: {tenantId}</Badge>
+            <Badge variant="outline">Records: {result.total}</Badge>
+            <Badge variant="outline">
+              Page: {result.totalPages === 0 ? 0 : result.page} / {result.totalPages}
+            </Badge>
+            <Badge variant="outline">
+              Loaded: {new Date(result.loadedAt).toLocaleString()}
+            </Badge>
           </div>
-        </form>
-      </section>
+        </SectionCard>
 
-      {!isDefaultInventoryFilters(result.filters) ? (
-        <section className="inventory-active-filters">
-          <h3>Active Filters</h3>
-          <div className="inventory-chip-row">
-            {activeFilterItems.map((item) => (
-              <span key={item} className="inventory-chip">
-                {item}
-              </span>
-            ))}
+        <div className="mt-5 space-y-5">
+          <SectionCard title="Search and Filters">
+            <form method="GET" action="/inventory" className="grid gap-3 md:grid-cols-3 xl:grid-cols-5">
+              <input type="hidden" name="page" value="1" />
+              <input type="hidden" name="page_size" value={result.pageSize} />
+
+              <div className="space-y-2 xl:col-span-2">
+                <label className="text-sm font-medium" htmlFor="q">Search</label>
+                <Input id="q" name="q" defaultValue={result.filters.q} placeholder="SKU, label, style, palette" />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium" htmlFor="status">Status</label>
+                <select id="status" name="status" defaultValue={result.filters.status} className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm">
+                  <option value="available">available</option>
+                  <option value="all">all</option>
+                  <option value="sold">sold</option>
+                  <option value="on_hold">on_hold</option>
+                </select>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium" htmlFor="sort">Sort</label>
+                <select id="sort" name="sort" defaultValue={result.filters.sort} className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm">
+                  <option value="newest">newest</option>
+                  <option value="oldest">oldest</option>
+                  <option value="price_low">price low</option>
+                  <option value="price_high">price high</option>
+                </select>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium" htmlFor="price_min">Min Price</label>
+                <Input id="price_min" name="price_min" type="number" min="0" step="1" defaultValue={result.filters.priceMin ?? ""} />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium" htmlFor="price_max">Max Price</label>
+                <Input id="price_max" name="price_max" type="number" min="0" step="1" defaultValue={result.filters.priceMax ?? ""} />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium" htmlFor="width_min">Min Width (in)</label>
+                <Input id="width_min" name="width_min" type="number" min="0" step="1" defaultValue={result.filters.widthMin ?? ""} />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium" htmlFor="width_max">Max Width (in)</label>
+                <Input id="width_max" name="width_max" type="number" min="0" step="1" defaultValue={result.filters.widthMax ?? ""} />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium" htmlFor="length_min">Min Length (in)</label>
+                <Input id="length_min" name="length_min" type="number" min="0" step="1" defaultValue={result.filters.lengthMin ?? ""} />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium" htmlFor="length_max">Max Length (in)</label>
+                <Input id="length_max" name="length_max" type="number" min="0" step="1" defaultValue={result.filters.lengthMax ?? ""} />
+              </div>
+
+              <div className="flex flex-wrap items-end gap-2 md:col-span-3 xl:col-span-5">
+                <Button type="submit">Apply Filters</Button>
+                <Button asChild variant="ghost">
+                  <Link href={clearFiltersLink}>Clear</Link>
+                </Button>
+              </div>
+            </form>
+          </SectionCard>
+
+          {!isDefaultInventoryFilters(result.filters) ? (
+            <SectionCard title="Active Filters">
+              <div className="flex flex-wrap gap-2">
+                {activeFilterItems.map((item) => (
+                  <Badge key={item} variant="outline">
+                    {item}
+                  </Badge>
+                ))}
+              </div>
+            </SectionCard>
+          ) : null}
+
+          <SectionCard title="Recommendation Support Snapshot">
+            <p className="text-sm text-muted-foreground">
+              Current filter-derived hard-constraint hint for recommendation testing:
+            </p>
+            <pre className="mt-3 overflow-auto rounded-xl border border-border bg-muted/40 p-4 text-xs">
+              {JSON.stringify(recommendationHint, null, 2)}
+            </pre>
+          </SectionCard>
+
+          {result.error ? (
+            <SectionCard title="Could not load inventory" description={result.error} />
+          ) : result.rows.length === 0 ? (
+            <SectionCard
+              title="No inventory rows found"
+              description="No rugs matched current filters. Adjust search or broaden constraints."
+            />
+          ) : (
+            <SectionCard title="Inventory">
+              <div className="overflow-x-auto rounded-xl border border-border">
+                <table className="min-w-[1100px] w-full border-collapse text-sm">
+                  <thead className="bg-secondary/50 text-left">
+                    <tr>
+                      <th className="p-3">SKU</th>
+                      <th className="p-3">Label</th>
+                      <th className="p-3">Status</th>
+                      <th className="p-3">Price</th>
+                      <th className="p-3">Sale Price</th>
+                      <th className="p-3">Size</th>
+                      <th className="p-3">Style</th>
+                      <th className="p-3">Palette</th>
+                      <th className="p-3">Pattern</th>
+                      <th className="p-3">Best For</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {result.rows.map((rug) => (
+                      <tr key={rug.id} className="border-t border-border">
+                        <td className="p-3">{rug.sku ?? "-"}</td>
+                        <td className="p-3">
+                          <p className="font-medium">{rug.intake_label}</p>
+                          <p className="mt-1 text-xs text-muted-foreground">{rug.id}</p>
+                        </td>
+                        <td className="p-3">{rug.status ?? "-"}</td>
+                        <td className="p-3">{formatPrice(rug.price)}</td>
+                        <td className="p-3">{formatPrice(rug.sale_price)}</td>
+                        <td className="p-3">{formatSize(rug.width_total_in, rug.length_total_in)}</td>
+                        <td className="p-3">{rug.style ?? "-"}</td>
+                        <td className="p-3">{rug.palette ?? "-"}</td>
+                        <td className="p-3">{rug.pattern ?? "-"}</td>
+                        <td className="p-3">{rug.best_for ?? "-"}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </SectionCard>
+          )}
+
+          <div className="flex items-center justify-between">
+            {prevPage ? (
+              <Button asChild variant="secondary">
+                <Link href={`${pageBase}&page=${prevPage}`}>Previous</Link>
+              </Button>
+            ) : (
+              <span className="text-sm text-muted-foreground">Previous</span>
+            )}
+            {nextPage ? (
+              <Button asChild variant="secondary">
+                <Link href={`${pageBase}&page=${nextPage}`}>Next</Link>
+              </Button>
+            ) : (
+              <span className="text-sm text-muted-foreground">Next</span>
+            )}
           </div>
-        </section>
-      ) : null}
-
-      <section className="inventory-recommendation-hint">
-        <h3>Recommendation Support Snapshot</h3>
-        <p>
-          Current filter-derived hard-constraint hint for recommendation testing:
-        </p>
-        <pre>{JSON.stringify(recommendationHint, null, 2)}</pre>
-      </section>
-
-      {result.error ? (
-        <section className="inventory-error">
-          <h2>Could not load inventory</h2>
-          <p>{result.error}</p>
-        </section>
-      ) : result.rows.length === 0 ? (
-        <section className="inventory-empty">
-          <h2>No inventory rows found</h2>
-          <p>
-            No rugs matched current filters. Adjust search or broaden constraints.
-          </p>
-        </section>
-      ) : (
-        <section className="inventory-table-wrap">
-          <table className="inventory-table">
-            <thead>
-              <tr>
-                <th>SKU</th>
-                <th>Label</th>
-                <th>Status</th>
-                <th>Price</th>
-                <th>Sale Price</th>
-                <th>Size</th>
-                <th>Style</th>
-                <th>Palette</th>
-                <th>Pattern</th>
-                <th>Best For</th>
-              </tr>
-            </thead>
-            <tbody>
-              {result.rows.map((rug) => (
-                <tr key={rug.id}>
-                  <td>{rug.sku ?? "-"}</td>
-                  <td>
-                    <div className="inventory-label">{rug.intake_label}</div>
-                    <div className="inventory-id">{rug.id}</div>
-                  </td>
-                  <td>{rug.status ?? "-"}</td>
-                  <td>{formatPrice(rug.price)}</td>
-                  <td>{formatPrice(rug.sale_price)}</td>
-                  <td>{formatSize(rug.width_total_in, rug.length_total_in)}</td>
-                  <td>{rug.style ?? "-"}</td>
-                  <td>{rug.palette ?? "-"}</td>
-                  <td>{rug.pattern ?? "-"}</td>
-                  <td>{rug.best_for ?? "-"}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </section>
-      )}
-
-      <footer className="inventory-pagination">
-        {prevPage ? (
-          <Link href={`${pageBase}&page=${prevPage}`}>Previous</Link>
-        ) : (
-          <span>Previous</span>
-        )}
-        {nextPage ? (
-          <Link href={`${pageBase}&page=${nextPage}`}>Next</Link>
-        ) : (
-          <span>Next</span>
-        )}
-      </footer>
-      </main>
+        </div>
+      </AppShell>
     </>
   );
 }

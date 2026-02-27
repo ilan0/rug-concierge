@@ -1,6 +1,6 @@
 import { ConciergeScreen } from "@/components/concierge/concierge-screen";
 import { WorkspaceNav } from "@/components/shell/workspace-nav";
-import Link from "next/link";
+import { AccessGuard } from "@/components/ui/access-guard";
 import { getServerUiRole, getServerUiTenantId } from "@/lib/ui/server-role";
 import { canRoleAccessRoute, canRoleReadDebugTrace } from "@/lib/auth/policy";
 import { getPilotAccessState } from "@/lib/auth/pilot-access";
@@ -23,33 +23,30 @@ export default async function ConciergePage({ searchParams }: ConciergePageProps
   const access = await getPilotAccessState();
   if (access.required && !access.verified) {
     return (
-      <main className="ui-shell role-guard role-guard-blocked">
-        <h1>Pilot Access Required</h1>
-        <p>Please unlock pilot access on Home before using concierge.</p>
-        <Link href="/">Go Home</Link>
-      </main>
+      <AccessGuard
+        title="Pilot Access Required"
+        description="Please unlock pilot access on Home before using concierge."
+      />
     );
   }
 
   const role = await getServerUiRole();
   if (!role || !canRoleAccessRoute(role, "/concierge")) {
     return (
-      <main className="ui-shell role-guard role-guard-blocked">
-        <h1>Rug Concierge</h1>
-        <p>Please choose an allowed role on Home to use concierge.</p>
-        <Link href="/">Go Home</Link>
-      </main>
+      <AccessGuard
+        title="Rug Concierge"
+        description="Please choose an allowed role on Home to use concierge."
+      />
     );
   }
 
   const tenantId = await getServerUiTenantId();
   if (!tenantId) {
     return (
-      <main className="ui-shell role-guard role-guard-blocked">
-        <h1>Store Tenant Required</h1>
-        <p>Select your store tenant on Home before using concierge.</p>
-        <Link href="/">Go Home</Link>
-      </main>
+      <AccessGuard
+        title="Store Tenant Required"
+        description="Select your store tenant on Home before using concierge."
+      />
     );
   }
 

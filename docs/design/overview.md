@@ -95,4 +95,8 @@ No RAG/vector search is used for MVP recommendation behavior.
   - trade
   - inventory
   - appraisal
-- Shared workspace navigation and standardized global styling (`ui-*` classes).
+- Shared workspace navigation and standardized UI primitives:
+  - `AppShell`
+  - `PageHeader`
+  - `SectionCard`
+  - Tailwind + shadcn/ui component layer.

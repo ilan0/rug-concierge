@@ -23,9 +23,10 @@ This app is the primary UI shell for Rug Concierge MVP.
   - uses server-side Supabase query from `rugs`
   - supports URL-driven search + filters (status, price range, size range, sort) and pagination
 - `/appraisal`:
-  - staff-facing appraisal draft screen
-  - posts appraisal context to `/api/appraisal/generate`
-  - supports copy/export of draft text and JSON
+  - staff-facing Appraisal Studio v3 (step-based flow)
+  - uses source toggle: store rug vs customer rug
+  - supports generate/save/finalize with finalized lock behavior
+  - advanced tools (copy/export/internal metadata) are collapsed by default
 
 ## API Routes (same project)
 
@@ -56,28 +57,23 @@ Pilot access note:
 
 ## Styling Standard (Global)
 
-Use shared `ui-*` classes from `/apps/web/app/globals.css` for all new pages:
+UI stack is now:
+- Tailwind CSS
+- shadcn/ui components (Radix primitives under the hood)
+- CSS variable theme in `/apps/web/app/globals.css`
 
-- `ui-shell`: page container spacing + width
-- `ui-showroom`: classy gradient shell card
-- `ui-header`: top header layout
-- `ui-kicker`, `ui-subtitle`: consistent hero text hierarchy
-- `ui-nav`: top route nav with standard links
-- `ui-card`: reusable panel/card base
-- `ui-btn`, `ui-btn-primary`: standard button styling
-- `ui-empty`: standard empty state block
+Use these shared primitives first:
+- `/apps/web/components/ui/app-shell.tsx`
+- `/apps/web/components/ui/page-header.tsx`
+- `/apps/web/components/ui/section-card.tsx`
+- `/apps/web/components/ui/form-field.tsx`
+- standard controls in `/apps/web/components/ui/*` (`button`, `input`, `textarea`, `sheet`, etc.)
 
-Pattern for new pages:
-
-```tsx
-<main className="ui-shell ui-showroom">
-  <header className="ui-header">
-    <p className="ui-kicker">Section</p>
-    <h1>Page Title</h1>
-    <p className="ui-subtitle">Short supporting description.</p>
-  </header>
-</main>
-```
+For any new page:
+1. Wrap with `AppShell`
+2. Add `PageHeader`
+3. Compose sections from `SectionCard`
+4. Avoid page-specific CSS unless absolutely necessary
 
 ## Shared Workspace Shell
 

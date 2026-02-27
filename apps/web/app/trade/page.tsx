@@ -1,6 +1,6 @@
-import Link from "next/link";
 import { ConciergeScreen } from "@/components/concierge/concierge-screen";
 import { WorkspaceNav } from "@/components/shell/workspace-nav";
+import { AccessGuard } from "@/components/ui/access-guard";
 import { getServerUiRole, getServerUiTenantId } from "@/lib/ui/server-role";
 import { canRoleAccessRoute, canRoleReadDebugTrace } from "@/lib/auth/policy";
 import { getPilotAccessState } from "@/lib/auth/pilot-access";
@@ -23,32 +23,31 @@ export default async function TradePage({ searchParams }: TradePageProps) {
   const access = await getPilotAccessState();
   if (access.required && !access.verified) {
     return (
-      <main className="ui-shell role-guard role-guard-blocked">
-        <h1>Pilot Access Required</h1>
-        <p>Please unlock pilot access on Home before using trade support.</p>
-        <Link href="/">Go Home</Link>
-      </main>
+      <AccessGuard
+        title="Pilot Access Required"
+        description="Please unlock pilot access on Home before using trade support."
+      />
     );
   }
 
   const role = await getServerUiRole();
   if (!role || !canRoleAccessRoute(role, "/trade")) {
     return (
-      <main className="ui-shell role-guard role-guard-blocked">
-        <h1>Trade Support</h1>
-        <p>This page is available only to trade clients, staff, or developers.</p>
-        <Link href="/">Go Home to switch role</Link>
-      </main>
+      <AccessGuard
+        title="Trade Support"
+        description="This page is available only to trade clients, staff, or developers."
+        ctaLabel="Go Home to switch role"
+      />
     );
   }
+
   const tenantId = await getServerUiTenantId();
   if (!tenantId) {
     return (
-      <main className="ui-shell role-guard role-guard-blocked">
-        <h1>Store Tenant Required</h1>
-        <p>Select your store tenant on Home before using trade support.</p>
-        <Link href="/">Go Home</Link>
-      </main>
+      <AccessGuard
+        title="Store Tenant Required"
+        description="Select your store tenant on Home before using trade support."
+      />
     );
   }
 
@@ -61,11 +60,15 @@ export default async function TradePage({ searchParams }: TradePageProps) {
       <WorkspaceNav
         role={role}
         currentPath="/trade"
-        debugToggle={{
-          enabled: debug,
-          hrefOn: "/trade?debug=1",
-          hrefOff: "/trade",
-        }}
+        debugToggle={
+          debugAllowed
+            ? {
+                enabled: debug,
+                hrefOn: "/trade?debug=1",
+                hrefOff: "/trade",
+              }
+            : undefined
+        }
       />
       <ConciergeScreen debug={debug} variant="trade" tenantId={tenantId} />
     </>

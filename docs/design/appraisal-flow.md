@@ -181,3 +181,14 @@ When in doubt, the AI should **say less, not more**.
 - Appraisal is dedicated to appraisal APIs/pages. Chat does not route to appraisal mode.
 - Non-authorized roles are blocked before generation
 - Output is always treated as draft content for human review/export
+
+## Appraisal Studio v3 UI (Current)
+
+- Route: `/appraisal` (staff/developer only).
+- Step-based flow:
+  1. Source (`Use Store Rug` or `Customer Rug`)
+  2. Essentials (4 always-visible fields)
+  3. Actions (`Generate Draft`, `Save Draft`, `Mark Final`, `New Appraisal`)
+  4. `More details (optional)` collapsed by default.
+- `Advanced tools` are collapsed and hide JSON/debug-style controls from default staff UX.
+- Finalized records are shown as locked in UI; edits/regeneration are disabled until creating a new draft copy.

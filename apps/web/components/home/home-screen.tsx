@@ -15,6 +15,14 @@ import {
 } from "@/lib/ui/role-session";
 import { getAllowedRoutesForRole } from "@/lib/ui/role-permissions";
 import { UI_ROLES, isUiRole, uiRoleLabel } from "@/lib/ui/roles";
+import { AppShell } from "@/components/ui/app-shell";
+import { PageHeader } from "@/components/ui/page-header";
+import { SectionCard } from "@/components/ui/section-card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
 
 const ROLE_SWITCHER_ENABLED =
   process.env.NEXT_PUBLIC_ENABLE_ROLE_SWITCHER === "1" ||
@@ -188,139 +196,140 @@ export function HomeScreen() {
 
   if (accessLoading) {
     return (
-      <main className="ui-shell ui-showroom home-page home-showroom">
-        <section className="ui-card home-role-panel">
-          <h2>Preparing workspace...</h2>
-          <p>Loading pilot access status.</p>
-        </section>
-      </main>
+      <AppShell>
+        <SectionCard title="Preparing workspace" description="Loading pilot access status." />
+      </AppShell>
     );
   }
 
   if (accessRequired && !accessVerified) {
     return (
-      <main className="ui-shell ui-showroom home-page home-showroom">
-        <section className="home-hero">
-          <p className="ui-kicker home-kicker">Rug Concierge</p>
-          <h1>Pilot Access</h1>
-          <p className="ui-subtitle">
-            Enter your owner pilot access code to continue.
-          </p>
-        </section>
-        <section className="home-role-panel ui-card">
-          <label>
-            Access Code
-            <input
-              type="password"
-              value={passcode}
-              onChange={(event) => setPasscode(event.target.value)}
-              placeholder="Enter code"
-            />
-          </label>
-          <div className="home-role-buttons">
-            <button
+      <AppShell>
+        <PageHeader
+          kicker="Rug Concierge"
+          title="Pilot Access"
+          subtitle="Enter your owner pilot access code to continue."
+        />
+        <SectionCard title="Unlock Pilot" description="Access code is required for hosted pilot mode.">
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="access-code">Access Code</Label>
+              <Input
+                id="access-code"
+                type="password"
+                value={passcode}
+                onChange={(event) => setPasscode(event.target.value)}
+                placeholder="Enter code"
+              />
+            </div>
+            <Button
               type="button"
-              className="home-role-btn ui-btn active"
               onClick={() => void submitPasscode()}
               disabled={isSyncing}
             >
               {isSyncing ? "Verifying..." : "Unlock Pilot"}
-            </button>
+            </Button>
+            {passcodeError ? (
+              <Alert variant="destructive">
+                <AlertTitle>Access failed</AlertTitle>
+                <AlertDescription>{passcodeError}</AlertDescription>
+              </Alert>
+            ) : null}
           </div>
-          {passcodeError ? <p className="home-role-error">{passcodeError}</p> : null}
-        </section>
-      </main>
+        </SectionCard>
+      </AppShell>
     );
   }
 
   return (
-    <main className="ui-shell ui-showroom home-page home-showroom">
-      <section className="home-hero">
-        <p className="ui-kicker home-kicker">Rug Concierge</p>
-        <h1>MVP Workspace</h1>
-        <p className="ui-subtitle">
-          Select store tenant and role. The app then shows only pages relevant to that role.
-        </p>
-      </section>
+    <AppShell>
+      <PageHeader
+        kicker="Rug Concierge"
+        title="MVP Workspace"
+        subtitle="Select your store tenant and role. You will only see pages for that role."
+      />
 
-      <section className="home-role-panel ui-card">
-        <div>
-          <h2>{ROLE_SWITCHER_ENABLED ? "Select Role + Store" : "Pilot Setup"}</h2>
-          <p>
-            Current role: <strong>{role ? uiRoleLabel(role) : "Not selected"}</strong>
-          </p>
-          <p>
-            Tenant ID: <strong>{tenantId.trim() || "Not set"}</strong>
-          </p>
-        </div>
-        <label>
-          Store Tenant ID
-          <input
-            value={tenantId}
-            onChange={(event) => setTenantState(event.target.value)}
-            placeholder="tenant UUID"
-          />
-        </label>
-        <div className="home-role-buttons">
-          <button
-            type="button"
-            className="home-role-btn ui-btn"
-            onClick={() => void saveTenant()}
-            disabled={isSyncing}
-          >
-            Save Store
-          </button>
-          <button
-            type="button"
-            className="home-role-btn ui-btn ghost"
-            onClick={() => void clearTenant()}
-            disabled={isSyncing}
-          >
-            Clear Store
-          </button>
-        </div>
-        {ROLE_SWITCHER_ENABLED ? (
-          <div className="home-role-buttons">
-            {UI_ROLES.map((roleOption) => (
-              <button
-                key={roleOption}
-                type="button"
-                className={
-                  role === roleOption ? "home-role-btn ui-btn active" : "home-role-btn ui-btn"
-                }
-                onClick={() => chooseRole(roleOption)}
-                disabled={isSyncing || !tenantId.trim()}
-              >
-                {uiRoleLabel(roleOption)}
-              </button>
-            ))}
-            <button type="button" className="home-role-btn ui-btn ghost" onClick={clearRole}>
-              Clear Role
-            </button>
+      <div className="grid gap-5 lg:grid-cols-[1.1fr_1fr]">
+        <SectionCard title={ROLE_SWITCHER_ENABLED ? "Select Role + Store" : "Pilot Setup"}>
+          <div className="space-y-4">
+            <div className="flex flex-wrap items-center gap-2">
+              <Badge variant="secondary">Role: {role ? uiRoleLabel(role) : "Not selected"}</Badge>
+              <Badge variant="outline">Tenant: {tenantId.trim() || "Not set"}</Badge>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="tenant-id">Store Tenant ID</Label>
+              <Input
+                id="tenant-id"
+                value={tenantId}
+                onChange={(event) => setTenantState(event.target.value)}
+                placeholder="Paste tenant UUID"
+              />
+              <div className="flex flex-wrap gap-2">
+                <Button type="button" variant="secondary" onClick={() => void saveTenant()} disabled={isSyncing}>
+                  Save Tenant
+                </Button>
+                <Button type="button" variant="ghost" onClick={() => void clearTenant()} disabled={isSyncing}>
+                  Clear Tenant
+                </Button>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <p className="text-sm font-medium">Role</p>
+              <div className="flex flex-wrap gap-2">
+                {roleOptions().map((candidate) => (
+                  <Button
+                    key={candidate}
+                    type="button"
+                    variant={role === candidate ? "default" : "outline"}
+                    onClick={() => void chooseRole(candidate)}
+                    disabled={isSyncing}
+                  >
+                    {uiRoleLabel(candidate)}
+                  </Button>
+                ))}
+                <Button type="button" variant="ghost" onClick={() => void clearRole()} disabled={isSyncing}>
+                  Clear Role
+                </Button>
+              </div>
+            </div>
+
+            {error ? (
+              <Alert variant="destructive">
+                <AlertTitle>Update issue</AlertTitle>
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            ) : null}
           </div>
-        ) : (
-          <p className="home-role-helper">
-            Role switching is hidden in pilot mode for a simpler owner experience.
-          </p>
-        )}
-        {error ? <p className="home-role-error">{error}</p> : null}
-      </section>
+        </SectionCard>
 
-      <section className="home-grid">
-        {cards.length === 0 ? (
-          <article className="home-card ui-card home-card-muted">
-            <h2>No pages yet</h2>
-            <p>Set tenant + role to unlock your workspace routes.</p>
-          </article>
-        ) : (
-          cards.map((card) => (
-            <Link href={card.href} className="home-card ui-card" key={card.href}>
-              <h2>{card.title}</h2>
-              <p>{card.description}</p>
-            </Link>
-          ))
-        )}
-      </section>
-    </main>
+        <SectionCard title="Workspace Pages" description="Available pages for the selected role.">
+          {cards.length === 0 ? (
+            <p className="text-sm text-muted-foreground">
+              Set role and tenant to unlock pages.
+            </p>
+          ) : (
+            <div className="grid gap-3">
+              {cards.map((card) => (
+                <Link
+                  key={card.href}
+                  href={card.href}
+                  className="rounded-xl border border-border/80 bg-secondary/30 p-4 transition hover:bg-accent"
+                >
+                  <p className="font-medium">{card.title}</p>
+                  <p className="mt-1 text-sm text-muted-foreground">{card.description}</p>
+                </Link>
+              ))}
+            </div>
+          )}
+        </SectionCard>
+      </div>
+    </AppShell>
   );
+}
+
+function roleOptions(): UiRole[] {
+  if (!ROLE_SWITCHER_ENABLED) return [DEFAULT_PILOT_ROLE];
+  return UI_ROLES;
 }

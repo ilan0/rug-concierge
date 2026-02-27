@@ -1,5 +1,8 @@
 import type { FormEvent } from "react";
 import type { ConciergeVariant } from "@/components/concierge/types";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 type MessageComposerProps = {
   variant: ConciergeVariant;
@@ -27,42 +30,40 @@ export function MessageComposer(input: MessageComposerProps) {
   } = input;
 
   return (
-    <section className="concierge-input-wrap">
-      <form onSubmit={onSubmit} className="concierge-form">
-        <textarea
+    <section className="sticky bottom-3 rounded-2xl border border-border bg-card/95 p-4 shadow-sm backdrop-blur">
+      <form onSubmit={onSubmit} className="space-y-3">
+        <Textarea
           value={message}
           onChange={(event) => onMessageChange(event.target.value)}
           placeholder={
             variant === "trade"
-              ? "Type a trade/design request..."
-              : "Type your rug request..."
+              ? "Type a trade or designer request..."
+              : "Type your rug question or request..."
           }
           rows={3}
           maxLength={2000}
           disabled={isLoading}
         />
-        <div className="concierge-form-actions">
-          <span className="concierge-hint">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <span className="text-xs text-muted-foreground">
             {variant === "trade"
               ? "Trade context is included with each message."
               : "Enter to send, Shift+Enter for new line"}
           </span>
-          <button type="submit" disabled={!canSubmit} className="ui-btn--primary">
+          <Button type="submit" disabled={!canSubmit}>
             {isLoading ? "Sending..." : "Send"}
-          </button>
+          </Button>
         </div>
       </form>
       {error ? (
-        <div className="concierge-error-row">
-          <p className="concierge-error">{error}</p>
-          <button
-            type="button"
-            className="ui-btn--ghost"
-            disabled={!canRetry || isLoading}
-            onClick={onRetry}
-          >
+        <div className="mt-3 space-y-2">
+          <Alert variant="destructive">
+            <AlertTitle>Message failed</AlertTitle>
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+          <Button type="button" variant="outline" disabled={!canRetry || isLoading} onClick={onRetry}>
             Retry
-          </button>
+          </Button>
         </div>
       ) : null}
     </section>
