@@ -20,7 +20,7 @@ TENANT_ID=<tenant-uuid> npm run qa
 
 ## Outputs (overwritten each run)
 
-- `scripts/testing/functionality/latest.md`
-- `scripts/testing/quality/latest.md`
+- `scripts/testing/functionality/latest-functional.md`
+- `scripts/testing/quality/latest-quality.md`
 
 No historical run folders are kept by the QA scripts.

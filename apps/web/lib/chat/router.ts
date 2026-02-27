@@ -171,7 +171,9 @@ function isExplicitRecommendationRequest(text: string): boolean {
   if (explicitPhrases.some((phrase) => text.includes(phrase))) return true;
 
   const needBasedRecommendationIntent =
-    /\b(i need|i want|looking for|look for|find me|show me)\b/.test(text);
+    /\b(i need|need|i want|want|i would like|would like|looking for|look for|i am searching for|searching for|find me|show me|find|recommend|search for)\b/.test(
+      text
+    );
   if (needBasedRecommendationIntent && hasConstraintSignalsInMessage(text)) {
     return true;
   }
@@ -180,7 +182,7 @@ function isExplicitRecommendationRequest(text: string): boolean {
     text
   );
   const rugObject = /\b(rug|rugs|runner|inventory|options)\b/.test(text);
-  if (shoppingVerb && rugObject) return true;
+  if (shoppingVerb && (rugObject || hasConstraintSignalsInMessage(text))) return true;
 
   return false;
 }

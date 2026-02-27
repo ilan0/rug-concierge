@@ -50,7 +50,9 @@ function parseBudgetMax(userMessage: string): number | undefined {
   const text = userMessage.toLowerCase();
   const budgetPattern =
     /\b(?:under|below|up to|max|maximum|at most|budget(?:\s*(?:is|:))?)\s*\$?\s*([\d,.]+)\s*(k)?\b/i;
-  const match = text.match(budgetPattern);
+  const amountBeforeBudgetPattern =
+    /\$?\s*([\d,.]+)\s*(k)?\s*(?:budget|max|maximum)\b/i;
+  const match = text.match(budgetPattern) ?? text.match(amountBeforeBudgetPattern);
   if (!match) return undefined;
 
   const base = Number.parseFloat(match[1].replaceAll(",", ""));
@@ -109,9 +111,15 @@ export function parseConstraintResetDirectives(
 
   const clearBudget =
     clearAll ||
-    /(?:clear|remove|ignore|drop|reset)\s+(?:the\s+)?budget/i.test(text);
+    /(?:clear|remove|ignore|drop|reset)\s+(?:the\s+)?budget/i.test(text) ||
+    /\b(?:no|without)\s+budget(?:\s+limit)?\b/i.test(text) ||
+    /\bbudget\s+(?:doesn'?t matter|is flexible|is open)\b/i.test(text) ||
+    /\bany\s+budget\b/i.test(text);
   const clearSize =
-    clearAll || /(?:clear|remove|ignore|drop|reset)\s+(?:the\s+)?size/i.test(text);
+    clearAll ||
+    /(?:clear|remove|ignore|drop|reset)\s+(?:the\s+)?size/i.test(text) ||
+    /\b(?:no|without)\s+size(?:\s+limit)?\b/i.test(text) ||
+    /\bany\s+size\b/i.test(text);
 
   return {
     clearBudget,

@@ -6,7 +6,10 @@ import path from "node:path";
 const args = process.argv.slice(2);
 const baseUrl = readArg("--base-url") ?? "http://127.0.0.1:3100";
 const tenantId = (process.env.TENANT_ID ?? "").trim();
-const outputPath = path.resolve(process.cwd(), "scripts/testing/functionality/latest.md");
+const outputPath = path.resolve(
+  process.cwd(),
+  "scripts/testing/functionality/latest-functional.md"
+);
 
 if (!tenantId) {
   console.error("Missing TENANT_ID");
@@ -69,9 +72,15 @@ async function postJson(endpoint, body, extraHeaders = {}) {
   }
 
   return {
+    endpoint,
     status: response.status,
     json,
     raw,
+    headers: {
+      chat_route_trace_id: response.headers.get("x-chat-route-trace-id"),
+      recommendation_trace_id: response.headers.get("x-recommendation-trace-id"),
+      appraisal_trace_id: response.headers.get("x-appraisal-trace-id"),
+    },
   };
 }
 
@@ -91,7 +100,11 @@ async function run() {
     results,
     "chat endpoint returns 200 + valid envelope",
     general.status === 200 && hasChatEnvelope(general.json),
-    { status: general.status }
+    {
+      endpoint: general.endpoint,
+      status: general.status,
+      debug: general.headers,
+    }
   );
 
   const recommendation = await postJson("/api/recommend", {
@@ -103,7 +116,11 @@ async function run() {
     results,
     "recommend endpoint returns 200 + valid envelope",
     recommendation.status === 200 && hasRecommendEnvelope(recommendation.json),
-    { status: recommendation.status }
+    {
+      endpoint: recommendation.endpoint,
+      status: recommendation.status,
+      debug: recommendation.headers,
+    }
   );
 
   const appraisalStaff = await postJson(
@@ -124,7 +141,11 @@ async function run() {
     results,
     "appraisal endpoint allows staff and returns structured JSON",
     appraisalStaff.status === 200 && hasAppraisalEnvelope(appraisalStaff.json),
-    { status: appraisalStaff.status }
+    {
+      endpoint: appraisalStaff.endpoint,
+      status: appraisalStaff.status,
+      debug: appraisalStaff.headers,
+    }
   );
 
   const appraisalRetail = await postJson("/api/appraisal/generate", {
@@ -138,7 +159,11 @@ async function run() {
     results,
     "appraisal endpoint blocks retail (403, no 500)",
     appraisalRetail.status === 403,
-    { status: appraisalRetail.status }
+    {
+      endpoint: appraisalRetail.endpoint,
+      status: appraisalRetail.status,
+      debug: appraisalRetail.headers,
+    }
   );
 
   const roleMismatch = await postJson(
@@ -156,7 +181,11 @@ async function run() {
     results,
     "role mismatch is rejected (403, no 500)",
     roleMismatch.status === 403,
-    { status: roleMismatch.status }
+    {
+      endpoint: roleMismatch.endpoint,
+      status: roleMismatch.status,
+      debug: roleMismatch.headers,
+    }
   );
 
   const sessionStart = await postJson("/api/chat", {
@@ -172,13 +201,18 @@ async function run() {
         tenant_id: "00000000-0000-0000-0000-000000000000",
         message: "show me more",
       })
-    : { status: 0 };
+    : { endpoint: "/api/chat", status: 0, headers: null };
 
   pushResult(
     results,
     "tenant mismatch on existing session is rejected (403)",
     Boolean(sessionId) && tenantMismatch.status === 403,
-    { status: tenantMismatch.status, session_id_present: Boolean(sessionId) }
+    {
+      endpoint: tenantMismatch.endpoint,
+      status: tenantMismatch.status,
+      session_id_present: Boolean(sessionId),
+      debug: tenantMismatch.headers,
+    }
   );
 
   const recommendMissingTenant = await postJson("/api/recommend", {
@@ -189,7 +223,11 @@ async function run() {
     results,
     "recommend missing tenant returns 400 (no 500)",
     recommendMissingTenant.status === 400,
-    { status: recommendMissingTenant.status }
+    {
+      endpoint: recommendMissingTenant.endpoint,
+      status: recommendMissingTenant.status,
+      debug: recommendMissingTenant.headers,
+    }
   );
 
   const passed = results.filter((row) => row.pass).length;
@@ -212,7 +250,19 @@ async function run() {
   ];
 
   await writeFile(outputPath, `${lines.join("\n")}\n`, "utf8");
-  console.log(`Wrote ${outputPath}`);
+
+  console.log(`FUNCTIONAL ${failed === 0 ? "PASS" : "FAIL"}: ${passed}/${results.length}`);
+  console.log(`Output: ${outputPath}`);
+  if (failed > 0) {
+    console.log("Failed checks:");
+    for (const row of results.filter((item) => !item.pass)) {
+      console.log(
+        `- ${row.name} | endpoint=${row.details?.endpoint ?? "unknown"} | status=${
+          row.details?.status ?? "unknown"
+        } | debug=${JSON.stringify(row.details?.debug ?? null)}`
+      );
+    }
+  }
 
   if (failed > 0) process.exit(1);
 }

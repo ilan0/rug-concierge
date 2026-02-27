@@ -4,16 +4,22 @@ import { spawn } from "node:child_process";
 import { once } from "node:events";
 
 const mode = (process.argv[2] ?? "functional").toLowerCase();
+const modeArgs = process.argv.slice(3);
 const VALID_MODES = new Set(["functional", "quality"]);
 const tenantId = (process.env.TENANT_ID ?? "").trim();
 const port = 3100;
 const baseUrl = `http://127.0.0.1:${port}`;
+const FUNCTIONAL_OUTPUT = "scripts/testing/functionality/latest-functional.md";
+const QUALITY_OUTPUT = "scripts/testing/quality/latest-quality.md";
 
 function usage(message = "") {
   if (message) console.error(message);
   console.error("Usage:");
-  console.error("  TENANT_ID=<uuid> node scripts/qa.mjs functional");
-  console.error("  TENANT_ID=<uuid> node scripts/qa.mjs quality");
+  console.error("  TENANT_ID=<uuid> npm run qa:functional");
+  console.error("  TENANT_ID=<uuid> npm run qa:quality");
+  console.error("  TENANT_ID=<uuid> npm run qa:all");
+  console.error("Notes:");
+  console.error("  Requires TENANT_ID env var.");
   process.exit(1);
 }
 
@@ -118,6 +124,7 @@ async function runFunctional() {
 }
 
 async function runQuality() {
+  const extended = modeArgs.includes("--extended");
   const server = await startServer();
   if (!server) {
     console.error(`Failed to start server at ${baseUrl}`);
@@ -134,6 +141,7 @@ async function runQuality() {
         baseUrl,
         "--cases",
         "scripts/testing/quality/chat-check.ndjson",
+        ...(extended ? ["--extended"] : []),
       ],
       {
         TENANT_ID: tenantId,
@@ -160,10 +168,15 @@ async function main() {
   }
 
   console.log(`QA mode: ${mode}`);
+  if (mode === "quality" && modeArgs.includes("--extended")) {
+    console.log("Quality scope: extended");
+  }
   console.log(`Base URL: ${baseUrl}`);
   console.log(`TENANT_ID: ${tenantId}`);
 
   const code = mode === "quality" ? await runQuality() : await runFunctional();
+  const outputPath = mode === "quality" ? QUALITY_OUTPUT : FUNCTIONAL_OUTPUT;
+  console.log(`Output: ${outputPath}`);
   process.exit(code);
 }
 
