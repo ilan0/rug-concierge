@@ -73,7 +73,7 @@ export function ConciergeScreen({
           <p className="ui-subtitle concierge-subtitle">
             {variant === "trade"
               ? "Repeat-buyer workflow for designers and trade clients with context-driven personalization."
-              : "Main customer-facing chat. The backend routes each turn to general chat, recommendations, or appraisal mode."}
+              : "Main customer-facing chat. The backend routes each turn to general chat or recommendation mode."}
           </p>
         </div>
         <div className="concierge-controls">

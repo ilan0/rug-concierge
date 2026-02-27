@@ -37,7 +37,6 @@ export function modeLabel(
   if (mode === "clarifying_question") return "clarifying question";
   if (mode === "no_match") return "no match";
   if (mode === "general_chat") return "general chat";
-  if (mode === "appraisal") return "appraisal";
   return mode;
 }
 

@@ -64,18 +64,16 @@ Per turn:
 5. Route mode via router table:
    - `general_chat`
    - `recommendation`
-   - `appraisal`
 6. Run mode handler.
 7. Persist updated session.
 8. Return session envelope + handler response.
 
 Response semantics:
-- `mode` = coarse route mode (`general_chat` | `recommendation` | `appraisal`).
-- `fine_mode` = fine-grained turn mode (`general_chat`, `recommendation`, `clarifying_question`, `no_match`, `appraisal`).
+- `mode` = coarse route mode (`general_chat` | `recommendation`).
+- `fine_mode` = fine-grained turn mode (`general_chat`, `recommendation`, `clarifying_question`, `no_match`).
 
 Router behavior:
 - Review actions force recommendation mode.
-- Appraisal intent routes to appraisal only for roles with `appraisal.generate`.
 - Ambiguous messages with constraint signals return clarifying question path.
 - Recommendation mode requires tenant context. Missing tenant returns `400`.
 - Existing sessions are tenant-bound; tenant mismatch on the same `session_id` returns `403`.
@@ -149,9 +147,13 @@ Contract enforcement:
 
 ## Appraisal Draft Flow (Current)
 
-- Entry: `/api/appraisal/generate` and appraisal mode in `/api/chat`.
+- Entry: dedicated appraisal APIs only:
+  - `/api/appraisal/generate`
+  - `/api/appraisal/rugs`
+  - `/api/appraisal/drafts`
 - Allowed roles: `store_staff`, `developer`.
 - Output is a structured draft for human review/export, never final authority.
+- Chat does not route to appraisal mode.
 
 ## Pilot UI Shell (Current)
 

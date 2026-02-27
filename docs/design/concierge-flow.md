@@ -8,7 +8,6 @@ Recommendation flow is backend-first and inventory-grounded.
 - Router decides whether the turn is:
   - `general_chat`
   - `recommendation`
-  - `appraisal`
 - This flow applies only to recommendation turns.
 - Recommendation execution requires tenant context.
   - `/api/recommend`: `tenant_id` is required in request.

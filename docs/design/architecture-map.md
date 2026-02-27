@@ -8,7 +8,7 @@ Quick placement map for where code and docs belong.
   - Next.js pages and API route entry points.
   - Key routes:
     - UI: `/`, `/concierge`, `/trade`, `/inventory`, `/appraisal`
-    - API: `/api/chat`, `/api/recommend`, `/api/appraisal/generate`, `/api/debug/trace`, `/api/ui-role`, `/api/ui-access`
+    - API: `/api/chat`, `/api/recommend`, `/api/appraisal/generate`, `/api/appraisal/rugs`, `/api/appraisal/drafts`, `/api/debug/trace`, `/api/ui-role`, `/api/ui-access`
 
 - `apps/web/components`
   - UI components only.

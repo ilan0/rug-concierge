@@ -74,20 +74,6 @@ If no suitable rug exists:
 
 ---
 
-## Appraisal Behavior (When Applicable)
-
-- Drafts only — never final authority
-- Use factual, conservative language
-- Never imply sale price
-- Never guarantee insurance or resale outcomes
-- Clearly separate description from value
-
-If information is incomplete:
-- Reduce specificity
-- Do not compensate with assumptions
-
----
-
 ## Trade Client Behavior (When Applicable)
 
 - Remember known preferences and past context

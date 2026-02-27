@@ -251,8 +251,7 @@ export function ensureConversationMemory(
     open_threads: compactList(memory.open_threads ?? [], MAX_OPEN_THREADS, MAX_OPEN_THREAD_CHARS),
     last_user_intent:
       memory.last_user_intent === "general_chat" ||
-      memory.last_user_intent === "recommendation" ||
-      memory.last_user_intent === "appraisal"
+      memory.last_user_intent === "recommendation"
         ? memory.last_user_intent
         : "unknown",
     updated_at: typeof memory.updated_at === "string" ? memory.updated_at : new Date().toISOString(),

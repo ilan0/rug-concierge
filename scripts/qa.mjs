@@ -2,13 +2,12 @@
 
 import { spawn } from "node:child_process";
 import { once } from "node:events";
+import net from "node:net";
 
 const mode = (process.argv[2] ?? "functional").toLowerCase();
 const modeArgs = process.argv.slice(3);
 const VALID_MODES = new Set(["functional", "quality"]);
 const tenantId = (process.env.TENANT_ID ?? "").trim();
-const port = 3100;
-const baseUrl = `http://127.0.0.1:${port}`;
 const FUNCTIONAL_OUTPUT = "scripts/testing/functionality/latest-functional.md";
 const QUALITY_OUTPUT = "scripts/testing/quality/latest-quality.md";
 
@@ -54,7 +53,26 @@ async function waitForServerReady(url, timeoutMs = 90000) {
   return false;
 }
 
-async function startServer() {
+async function findOpenPort() {
+  return await new Promise((resolve) => {
+    const server = net.createServer();
+    server.unref();
+    server.on("error", () => resolve(3100));
+    server.listen({ port: 0 }, () => {
+      const address = server.address();
+      const resolvedPort =
+        address && typeof address === "object" ? address.port : 3100;
+      server.close(() => resolve(resolvedPort));
+    });
+  });
+}
+
+async function resolveQaPort() {
+  return await findOpenPort();
+}
+
+async function startServer(port) {
+  const baseUrl = `http://127.0.0.1:${port}`;
   const child = spawn("npm", ["--workspace", "apps/web", "run", "start"], {
     env: {
       ...process.env,
@@ -75,7 +93,7 @@ async function startServer() {
     return null;
   }
 
-  return child;
+  return { child, baseUrl };
 }
 
 async function stopServer(child) {
@@ -93,19 +111,22 @@ async function runFunctional() {
     TENANT_ID: tenantId,
     QA_MODE: "1",
   });
-  if (!lint.ok) return lint.code;
+  if (!lint.ok) return { code: lint.code, baseUrl: null };
 
   const build = await runCommand("build", "npm", ["run", "build"], {
     TENANT_ID: tenantId,
     QA_MODE: "1",
   });
-  if (!build.ok) return build.code;
+  if (!build.ok) return { code: build.code, baseUrl: null };
 
-  const server = await startServer();
-  if (!server) {
+  const port = await resolveQaPort();
+  const started = await startServer(port);
+  if (!started) {
+    const baseUrl = `http://127.0.0.1:${port}`;
     console.error(`Failed to start server at ${baseUrl}`);
-    return 1;
+    return { code: 1, baseUrl };
   }
+  const { child, baseUrl } = started;
 
   try {
     const check = await runCommand(
@@ -117,19 +138,22 @@ async function runFunctional() {
         QA_MODE: "1",
       }
     );
-    return check.ok ? 0 : check.code;
+    return { code: check.ok ? 0 : check.code, baseUrl };
   } finally {
-    await stopServer(server);
+    await stopServer(child);
   }
 }
 
 async function runQuality() {
   const extended = modeArgs.includes("--extended");
-  const server = await startServer();
-  if (!server) {
+  const port = await resolveQaPort();
+  const started = await startServer(port);
+  if (!started) {
+    const baseUrl = `http://127.0.0.1:${port}`;
     console.error(`Failed to start server at ${baseUrl}`);
-    return 1;
+    return { code: 1, baseUrl };
   }
+  const { child, baseUrl } = started;
 
   try {
     const check = await runCommand(
@@ -148,9 +172,9 @@ async function runQuality() {
         QA_MODE: "1",
       }
     );
-    return check.ok ? 0 : check.code;
+    return { code: check.ok ? 0 : check.code, baseUrl };
   } finally {
-    await stopServer(server);
+    await stopServer(child);
   }
 }
 
@@ -171,13 +195,15 @@ async function main() {
   if (mode === "quality" && modeArgs.includes("--extended")) {
     console.log("Quality scope: extended");
   }
-  console.log(`Base URL: ${baseUrl}`);
   console.log(`TENANT_ID: ${tenantId}`);
 
-  const code = mode === "quality" ? await runQuality() : await runFunctional();
+  const result = mode === "quality" ? await runQuality() : await runFunctional();
+  if (result.baseUrl) {
+    console.log(`Base URL: ${result.baseUrl}`);
+  }
   const outputPath = mode === "quality" ? QUALITY_OUTPUT : FUNCTIONAL_OUTPUT;
   console.log(`Output: ${outputPath}`);
-  process.exit(code);
+  process.exit(result.code);
 }
 
 main().catch((error) => {

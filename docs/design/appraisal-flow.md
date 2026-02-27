@@ -174,6 +174,10 @@ When in doubt, the AI should **say less, not more**.
 ## Runtime Notes (Current)
 
 - Main endpoint: `POST /api/appraisal/generate`
-- Chat appraisal path: appraisal mode in `POST /api/chat`
+- Supporting endpoints:
+  - `GET /api/appraisal/rugs`
+  - `GET /api/appraisal/drafts`
+  - `POST /api/appraisal/drafts`
+- Appraisal is dedicated to appraisal APIs/pages. Chat does not route to appraisal mode.
 - Non-authorized roles are blocked before generation
 - Output is always treated as draft content for human review/export

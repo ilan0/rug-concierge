@@ -3,7 +3,6 @@ import type {
   RecommendationReviewAction,
   RoleType,
 } from "@/lib/chat/types";
-import { canRoleGenerateAppraisal } from "@/lib/auth/policy";
 
 type RouteTurnModeInput = {
   message: string;
@@ -17,8 +16,6 @@ export type RouteDecision = {
   mode: ChatMode;
   rule_id:
     | "REVIEW_ACTION_CONTROL"
-    | "APPRAISAL_STAFF"
-    | "APPRAISAL_NON_STAFF_BLOCK"
     | "EXPLICIT_RECOMMENDATION_REQUEST"
     | "RECOMMENDATION_FOLLOWUP"
     | "GENERAL_ADVICE_OR_EDUCATION"
@@ -36,8 +33,6 @@ type RouteRule = {
 
 export const ROUTE_RULE_PRECEDENCE: RouteDecision["rule_id"][] = [
   "REVIEW_ACTION_CONTROL",
-  "APPRAISAL_STAFF",
-  "APPRAISAL_NON_STAFF_BLOCK",
   "EXPLICIT_RECOMMENDATION_REQUEST",
   "RECOMMENDATION_FOLLOWUP",
   "GENERAL_ADVICE_OR_EDUCATION",
@@ -51,24 +46,6 @@ const ROUTE_RULES: RouteRule[] = [
     when: (input) => Boolean(input.review_action),
     decide: () => ({
       mode: "recommendation",
-      confidence: "high",
-      needs_clarification: false,
-    }),
-  },
-  {
-    id: "APPRAISAL_STAFF",
-    when: (input, text) => isAppraisalIntent(text) && canRoleGenerateAppraisal(input.role),
-    decide: () => ({
-      mode: "appraisal",
-      confidence: "high",
-      needs_clarification: false,
-    }),
-  },
-  {
-    id: "APPRAISAL_NON_STAFF_BLOCK",
-    when: (input, text) => isAppraisalIntent(text) && !canRoleGenerateAppraisal(input.role),
-    decide: () => ({
-      mode: "general_chat",
       confidence: "high",
       needs_clarification: false,
     }),
@@ -139,17 +116,6 @@ export function routeTurnMode(input: RouteTurnModeInput): RouteDecision {
     confidence: "medium",
     needs_clarification: false,
   };
-}
-
-function isAppraisalIntent(text: string): boolean {
-  const appraisalKeywords = [
-    "appraisal",
-    "appraise",
-    "insurance letter",
-    "valuation",
-    "valuation letter",
-  ];
-  return appraisalKeywords.some((keyword) => text.includes(keyword));
 }
 
 function isExplicitRecommendationRequest(text: string): boolean {

@@ -1,21 +1,17 @@
 import type { HardConstraints } from "@/lib/types/recommendation";
 import type { RecommendationResponse } from "@/lib/ai/recommend";
-import type {
-  AppraisalDraftResponse,
-  AppraisalInput,
-} from "@/lib/types/appraisal";
+import type { AppraisalInput } from "@/lib/types/appraisal";
 import type { E2eTraceMeta } from "@/lib/qa/e2e-trace";
 import type { AppRole } from "@/lib/auth/roles";
 
 export type RoleType = AppRole;
 
-export type ChatMode = "general_chat" | "recommendation" | "appraisal";
+export type ChatMode = "general_chat" | "recommendation";
 export type ChatFineMode =
   | "general_chat"
   | "recommendation"
   | "clarifying_question"
-  | "no_match"
-  | "appraisal";
+  | "no_match";
 
 export type SessionMessage = {
   role: "user" | "assistant";
@@ -27,7 +23,7 @@ export type ConversationMemory = {
   summary_text: string;
   stable_facts: string[];
   open_threads: string[];
-  last_user_intent: "general_chat" | "recommendation" | "appraisal" | "unknown";
+  last_user_intent: "general_chat" | "recommendation" | "unknown";
   updated_at: string;
   version: "v1";
 };
@@ -110,6 +106,7 @@ export type ChatTurnRequest = {
   trade_preferences?: Record<string, unknown>;
   constraints?: HardConstraints;
   project_context?: Partial<ProjectContext>;
+  // Deprecated compatibility field. Accepted but ignored by chat routing/handlers.
   appraisal_context?: AppraisalInput;
   review_action?: RecommendationReviewAction;
   override?: {
@@ -126,7 +123,6 @@ export type ChatTurnHandlerInput = {
   session: SessionData;
   ai_context_packet?: import("@/lib/chat/context-packet").ChatAiContextPacket;
   tenant_id: string | null;
-  appraisal_context?: AppraisalInput;
   review_action?: RecommendationReviewAction;
   override?: {
     assistant_message?: string;
@@ -146,8 +142,4 @@ export type GeneralChatResponse = {
 
 export type RecommendationTurnResponse = Omit<RecommendationResponse, "mode"> & {
   mode: "recommendation" | "clarifying_question" | "no_match";
-};
-
-export type AppraisalTurnResponse = Omit<AppraisalDraftResponse, "mode"> & {
-  mode: "appraisal";
 };

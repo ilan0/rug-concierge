@@ -124,7 +124,7 @@ Append-only turn history linked to a chat session.
 - `session_id`
 - `tenant_id`
 - `role` (`user` | `assistant`)
-- `mode` (`general_chat` | `recommendation` | `appraisal`)
+- `mode` (currently `general_chat` | `recommendation`; historical rows may include `appraisal`)
 - `content`
 - `metadata` (JSONB; includes review action context when present)
 - `created_at`

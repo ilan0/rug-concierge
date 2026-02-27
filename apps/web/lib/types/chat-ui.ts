@@ -64,24 +64,16 @@ type UiRecommendationResponse = {
   notes: string | null;
 };
 
-type UiAppraisalResponse = {
-  mode: "appraisal";
-  assistant_message: string;
-  draft?: unknown;
-  missing_fields?: string[];
-  notes: string | null;
-};
-
 export type UiChatResponseBody = {
   session_id: string;
   role: UiRole;
-  mode: "general_chat" | "recommendation" | "appraisal";
+  // Appraisal is a dedicated endpoint/page workflow. Chat emits only these coarse modes.
+  mode: "general_chat" | "recommendation";
   fine_mode:
     | "general_chat"
     | "recommendation"
     | "clarifying_question"
-    | "no_match"
-    | "appraisal";
+    | "no_match";
   recommendation_state?: {
     hard_constraints: HardConstraints;
     soft_preferences?: {
@@ -118,5 +110,5 @@ export type UiChatResponseBody = {
     regenerate_count: number;
     override_count: number;
   };
-  response: UiGeneralResponse | UiRecommendationResponse | UiAppraisalResponse;
+  response: UiGeneralResponse | UiRecommendationResponse;
 };

@@ -18,13 +18,13 @@ All user turns enter backend first (`/api/chat`).
 Backend responsibilities:
 - validate request + enforce role/capability policy
 - load/update session context
-- route turn mode (`general_chat`, `recommendation`, `appraisal`)
+- route turn mode (`general_chat`, `recommendation`)
 - call mode handler and persist session
 
 AI responsibilities:
 - general chat: AI-backed guidance with bounded memory context
 - recommendation: rank/explain from provided candidates only
-- appraisal: generate structured draft from provided facts only
+- appraisal: generate structured draft from provided facts only via dedicated appraisal APIs
 
 ## Role Model
 
@@ -64,7 +64,7 @@ Implementation note:
 - Recommendation prompt layer ordering is centralized in `apps/web/lib/prompts/recommendation-stack.ts`
   and reused by both debug preview and runtime AI request assembly.
 
-Appraisal mode uses appraisal prompts + appraisal context payload.
+Appraisal drafting uses dedicated appraisal APIs + appraisal prompt/context payload.
 
 API-level strict JSON schema is the hard response contract where structured output is required.
 

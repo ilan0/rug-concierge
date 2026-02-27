@@ -47,18 +47,7 @@ export function getChatLayerPreview(input: {
   } else {
     layers.push(PROMPT_LAYER.roleRetail);
   }
-
-  if (
-    input.mode === "appraisal" &&
-    input.role !== "store_staff" &&
-    input.role !== "developer"
-  ) {
-    layers.push(PROMPT_LAYER.securityRoleModeMismatch);
-  } else if (input.mode === "appraisal") {
-    layers.push(PROMPT_LAYER.taskAppraisal);
-  } else {
-    layers.push(PROMPT_LAYER.taskGeneral);
-  }
+  layers.push(PROMPT_LAYER.taskGeneral);
 
   if (input.hasChatMemoryContext) {
     layers.push(PROMPT_LAYER.contextChatMemory);

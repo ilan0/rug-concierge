@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import { handleAppraisalTurn } from "@/lib/chat/handlers/appraisal";
 import { handleGeneralChatTurn } from "@/lib/chat/handlers/general-chat";
 import { handleRecommendationTurn } from "@/lib/chat/handlers/recommendation";
 import { routeTurnMode } from "@/lib/chat/router";
@@ -26,9 +25,6 @@ import {
   writeE2eTraceArtifact,
 } from "@/lib/qa/e2e-trace";
 import { badRequest, forbidden, internalError } from "@/lib/errors/http-errors";
-import {
-  canRoleGenerateAppraisal,
-} from "@/lib/auth/policy";
 import {
   hasTenantId,
   normalizeTenantId,
@@ -60,7 +56,7 @@ import type {
  * 1) receive user message + session id + role
  * 2) load session (history + recommendation/trade/project context)
  * 3) update turn state from this turn
- * 4) route to mode handler (general chat, recommendation, or appraisal)
+ * 4) route to mode handler (general chat or recommendation)
  * 5) persist updated session and return response
  */
 export async function POST(req: Request) {
@@ -247,10 +243,6 @@ export async function POST(req: Request) {
       session: nextSession,
       ai_context_packet: aiContextPacket ?? undefined,
       tenant_id: tenantId,
-      appraisal_context:
-        body.appraisal_context && typeof body.appraisal_context === "object"
-          ? body.appraisal_context
-          : undefined,
       mode: effectiveMode,
       review_action: reviewAction ?? undefined,
       needs_clarification: routeDecision.needs_clarification,
@@ -276,25 +268,9 @@ export async function POST(req: Request) {
     } as const;
 
     const handlerResult =
-      routeDecision.rule_id === "APPRAISAL_NON_STAFF_BLOCK"
-        ? {
-            mode: "general_chat",
-            assistant_message:
-              "Appraisal generation is available only for store staff.",
-            notes: "Blocked non-staff appraisal request.",
-          }
-        : effectiveMode === "recommendation"
-            ? await handleRecommendationTurn(handlerInput)
-          : effectiveMode === "appraisal"
-              ? canRoleGenerateAppraisal(role)
-                ? await handleAppraisalTurn(handlerInput)
-                : {
-                    mode: "general_chat",
-                    assistant_message:
-                      "Appraisal generation is available only for store staff.",
-                    notes: "Blocked non-staff appraisal request.",
-                  }
-              : await handleGeneralChatTurn(handlerInput);
+      effectiveMode === "recommendation"
+        ? await handleRecommendationTurn(handlerInput)
+        : await handleGeneralChatTurn(handlerInput);
 
     const responseMode = effectiveMode;
     const fineMode =
@@ -389,7 +365,6 @@ export async function POST(req: Request) {
             constraints: body.constraints ?? null,
             trade_preferences: body.trade_preferences ?? null,
             project_context: body.project_context ?? null,
-            appraisal_context: body.appraisal_context ?? null,
             review_action: reviewAction,
             override: body.override ?? null,
           },
@@ -401,11 +376,7 @@ export async function POST(req: Request) {
             handler:
               effectiveMode === "recommendation"
                 ? "handleRecommendationTurn"
-                : effectiveMode === "appraisal"
-                  ? canRoleGenerateAppraisal(role)
-                    ? "handleAppraisalTurn"
-                    : "non_staff_appraisal_block"
-                  : "handleGeneralChatTurn",
+                : "handleGeneralChatTurn",
             prompt_layer_preview: promptLayerPreview,
           },
           state_snapshot: {

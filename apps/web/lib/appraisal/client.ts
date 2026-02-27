@@ -1,55 +1,176 @@
-import type { AppraisalDraftResponse } from "@/lib/types/appraisal";
-import type { AppraisalInput } from "@/lib/types/appraisal";
+import type {
+  AppraisalDraftResponse,
+  AppraisalGenerateResponse,
+  AppraisalInput,
+  AppraisalSourceType,
+  AppraisalStatus,
+} from "@/lib/types/appraisal";
+import type {
+  AppraisalDraftListResult,
+  AppraisalDraftSaveResult,
+  AppraisalRugLookupResult,
+} from "@/lib/types/appraisal-ui";
 import { getUiRole } from "@/lib/ui/role-session";
 import { mapApiErrorToFriendlyMessage } from "@/lib/ui/error-messages";
 
+function resolveRole(): string {
+  return getUiRole() ?? "store_staff";
+}
+
+async function parseJsonSafe(response: Response): Promise<unknown> {
+  return (await response.json().catch(() => null)) as unknown;
+}
+
+function throwFriendlyError(payload: unknown, response: Response, fallback: string): never {
+  const payloadError =
+    payload && typeof payload === "object" && "error" in payload
+      ? String((payload as { error: unknown }).error)
+      : null;
+  const payloadCode =
+    payload && typeof payload === "object" && "code" in payload
+      ? String((payload as { code: unknown }).code)
+      : null;
+  const errorMessage = mapApiErrorToFriendlyMessage({
+    status: response.status,
+    code: payloadCode,
+    rawMessage: payloadError,
+    context: "appraisal",
+    fallbackMessage: fallback,
+  });
+  throw new Error(errorMessage);
+}
+
 export async function generateAppraisalDraftClient(
   appraisalContext: AppraisalInput,
-  options?: { tenantId?: string | null }
-): Promise<AppraisalDraftResponse> {
-  // `role` is the canonical request field. `user_role` is server-side compatibility only.
-  const activeRole = getUiRole() ?? "store_staff";
+  options: {
+    tenantId: string;
+    sourceType: AppraisalSourceType;
+    rugId?: string | null;
+    appraisalId?: string | null;
+    persist?: boolean;
+  }
+): Promise<AppraisalGenerateResponse> {
   const response = await fetch("/api/appraisal/generate", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      role: activeRole,
-      tenant_id: options?.tenantId ?? null,
+      role: resolveRole(),
+      tenant_id: options.tenantId,
+      source_type: options.sourceType,
+      rug_id: options.rugId ?? null,
+      appraisal_id: options.appraisalId ?? null,
+      persist: options.persist ?? true,
       appraisal_context: appraisalContext,
     }),
   });
 
-  const payload = (await response.json().catch(() => null)) as unknown;
+  const payload = await parseJsonSafe(response);
   if (!response.ok) {
-    const payloadError =
-      payload && typeof payload === "object" && "error" in payload
-        ? String((payload as { error: unknown }).error)
-        : null;
-    const payloadCode =
-      payload && typeof payload === "object" && "code" in payload
-        ? String((payload as { code: unknown }).code)
-        : null;
-    const errorMessage =
-      mapApiErrorToFriendlyMessage({
-        status: response.status,
-        code: payloadCode,
-        rawMessage: payloadError,
-        context: "appraisal",
-        fallbackMessage: "Unable to generate appraisal draft.",
-      });
-    throw new Error(errorMessage);
+    throwFriendlyError(payload, response, "Unable to generate appraisal draft.");
   }
 
   if (!payload || typeof payload !== "object") {
     throw new Error("Invalid appraisal response payload.");
   }
 
-  return payload as AppraisalDraftResponse;
+  return payload as AppraisalGenerateResponse;
 }
 
-export function appraisalToPlainText(result: AppraisalDraftResponse): string {
+export async function listAppraisalRugsClient(input: {
+  tenantId: string;
+  q?: string;
+  status?: string;
+  limit?: number;
+}): Promise<AppraisalRugLookupResult> {
+  const search = new URLSearchParams({
+    tenant_id: input.tenantId,
+    role: resolveRole(),
+  });
+  if (input.q?.trim()) search.set("q", input.q.trim());
+  if (input.status?.trim()) search.set("status", input.status.trim());
+  if (typeof input.limit === "number" && Number.isFinite(input.limit)) {
+    search.set("limit", String(Math.floor(input.limit)));
+  }
+
+  const response = await fetch(`/api/appraisal/rugs?${search.toString()}`);
+  const payload = await parseJsonSafe(response);
+  if (!response.ok) {
+    throwFriendlyError(payload, response, "Unable to load inventory rugs.");
+  }
+  if (!payload || typeof payload !== "object") {
+    throw new Error("Invalid appraisal rug lookup payload.");
+  }
+  return payload as AppraisalRugLookupResult;
+}
+
+export async function listAppraisalDraftsClient(input: {
+  tenantId: string;
+  status?: AppraisalStatus | null;
+  limit?: number;
+}): Promise<AppraisalDraftListResult> {
+  const search = new URLSearchParams({
+    tenant_id: input.tenantId,
+    role: resolveRole(),
+  });
+  if (input.status) search.set("status", input.status);
+  if (typeof input.limit === "number" && Number.isFinite(input.limit)) {
+    search.set("limit", String(Math.floor(input.limit)));
+  }
+
+  const response = await fetch(`/api/appraisal/drafts?${search.toString()}`);
+  const payload = await parseJsonSafe(response);
+  if (!response.ok) {
+    throwFriendlyError(payload, response, "Unable to load saved appraisal drafts.");
+  }
+  if (!payload || typeof payload !== "object") {
+    throw new Error("Invalid appraisal drafts payload.");
+  }
+  return payload as AppraisalDraftListResult;
+}
+
+export async function saveAppraisalDraftClient(input: {
+  tenantId: string;
+  sourceType: AppraisalSourceType;
+  appraisalId?: string | null;
+  rugId?: string | null;
+  status: AppraisalStatus;
+  appraisalContext: AppraisalInput;
+  draftPayload: AppraisalGenerateResponse | AppraisalDraftResponse | Record<string, unknown>;
+  draftText?: string | null;
+  finalText?: string | null;
+}): Promise<AppraisalDraftSaveResult> {
+  const response = await fetch("/api/appraisal/drafts", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      role: resolveRole(),
+      tenant_id: input.tenantId,
+      source_type: input.sourceType,
+      appraisal_id: input.appraisalId ?? null,
+      rug_id: input.rugId ?? null,
+      status: input.status,
+      appraisal_context: input.appraisalContext,
+      draft_payload: input.draftPayload,
+      draft_text: input.draftText ?? null,
+      final_text: input.finalText ?? null,
+    }),
+  });
+
+  const payload = await parseJsonSafe(response);
+  if (!response.ok) {
+    throwFriendlyError(payload, response, "Unable to save appraisal draft.");
+  }
+  if (!payload || typeof payload !== "object") {
+    throw new Error("Invalid appraisal save response payload.");
+  }
+  return payload as AppraisalDraftSaveResult;
+}
+
+export function appraisalToPlainText(result: AppraisalGenerateResponse | AppraisalDraftResponse): string {
   if (result.mode === "cannot_generate" || !result.draft) {
     return [
       "APPRAISAL DRAFT STATUS",
@@ -119,3 +240,4 @@ export function downloadTextFile(filename: string, content: string): void {
   anchor.click();
   URL.revokeObjectURL(url);
 }
+

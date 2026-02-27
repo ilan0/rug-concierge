@@ -28,7 +28,6 @@ Request notes:
   - baseline `chat.general`
   - `chat.recommend` when routed to recommendation
   - `review.controls` for review actions
-  - appraisal role checks for appraisal mode
 
 ## Session and Context State
 
@@ -66,8 +65,6 @@ Request notes:
   - Rule precedence is explicit in `ROUTE_RULE_PRECEDENCE`.
   - Current rule order:
     - `REVIEW_ACTION_CONTROL`
-    - `APPRAISAL_STAFF`
-    - `APPRAISAL_NON_STAFF_BLOCK`
     - `EXPLICIT_RECOMMENDATION_REQUEST`
     - `RECOMMENDATION_FOLLOWUP`
     - `GENERAL_ADVICE_OR_EDUCATION`
@@ -86,10 +83,6 @@ Request notes:
   - Applies review actions and state merges.
   - Calls shared recommendation pipeline (`runRecommendationPipeline`).
   - Recommendation output text is bounded by schema/prompt/token budgets, not post-trimmed.
-
-- `apps/web/lib/chat/handlers/appraisal.ts`
-  - Generates structured appraisal drafts for authorized roles.
-  - Uses same retry/fallback response-quality policy as other AI handlers.
 
 ## Recommendation Route Reuse
 
@@ -115,6 +108,7 @@ Request notes:
   - request/response previews
   - parsed response preview
   - retry/incomplete/fallback flags
+  - emitted from dedicated appraisal APIs, not `/api/chat`
 - Chat route trace captures memory snapshots and context-packet stats:
   - `memory_snapshot_before`
   - `memory_snapshot_after`
