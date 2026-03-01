@@ -86,6 +86,8 @@ export type RecommendationResponse = {
     rug_id: string;
     sku: string | null;
     title: string;
+    primary_image_url: string | null;
+    primary_image_caption: string | null;
     size_text: string | null;
     price_usd: number | null;
     match_reasons: string[];
@@ -223,6 +225,7 @@ function toContextInventory(inventory: InventoryRug[]) {
     id: rug.id,
     sku: rug.sku ?? null,
     label: rug.label,
+    primary_image_url: toImageUrl(rug),
     status: rug.status ?? null,
     price_usd: rug.sale_price_usd ?? rug.price_usd ?? null,
     size_text: sizeText(rug),
@@ -238,6 +241,20 @@ function toContextInventory(inventory: InventoryRug[]) {
 
 function toPriceUsd(rug: InventoryRug): number | null {
   return rug.sale_price_usd ?? rug.price_usd ?? null;
+}
+
+function toImageUrl(rug: InventoryRug): string | null {
+  return typeof rug.primary_image_url === "string" &&
+    rug.primary_image_url.trim().length > 0
+    ? rug.primary_image_url
+    : null;
+}
+
+function toImageCaption(rug: InventoryRug): string | null {
+  return typeof rug.primary_image_caption === "string" &&
+    rug.primary_image_caption.trim().length > 0
+    ? rug.primary_image_caption
+    : null;
 }
 
 function toLower(value: string | null | undefined): string {
@@ -522,6 +539,8 @@ function fallbackRecommendations(
       rug_id: rug.id,
       sku: rug.sku ?? null,
       title: rug.label,
+      primary_image_url: toImageUrl(rug),
+      primary_image_caption: toImageCaption(rug),
       size_text: sizeText(rug),
       price_usd: toPriceUsd(rug),
       match_reasons: buildGroundedMatchReasons(
@@ -754,6 +773,8 @@ function sanitizeResponse(
         ...rec,
         sku: rug.sku ?? null,
         title: rug.label,
+        primary_image_url: toImageUrl(rug),
+        primary_image_caption: toImageCaption(rug),
         size_text: sizeText(rug),
         price_usd: toPriceUsd(rug),
         match_reasons: buildGroundedMatchReasons(

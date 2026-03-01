@@ -7,6 +7,7 @@ import { SectionCard } from "@/components/ui/section-card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import { RugImage } from "@/components/ui/rug-image";
 import { listInventory } from "@/lib/inventory/list";
 import { isDefaultInventoryFilters } from "@/lib/inventory/filters";
 import { getServerUiRole, getServerUiTenantId } from "@/lib/ui/server-role";
@@ -298,6 +299,7 @@ export default async function InventoryPage({ searchParams }: InventoryPageProps
                 <table className="min-w-[1100px] w-full border-collapse text-sm">
                   <thead className="bg-secondary/50 text-left">
                     <tr>
+                      <th className="p-3">Image</th>
                       <th className="p-3">SKU</th>
                       <th className="p-3">Label</th>
                       <th className="p-3">Status</th>
@@ -313,6 +315,14 @@ export default async function InventoryPage({ searchParams }: InventoryPageProps
                   <tbody>
                     {result.rows.map((rug) => (
                       <tr key={rug.id} className="border-t border-border">
+                        <td className="p-3">
+                          <div className="h-16 w-16 overflow-hidden rounded-md border border-border/70 bg-muted">
+                            <RugImage
+                              src={rug.primary_image_url}
+                              alt={rug.intake_label}
+                            />
+                          </div>
+                        </td>
                         <td className="p-3">{rug.sku ?? "-"}</td>
                         <td className="p-3">
                           <p className="font-medium">{rug.intake_label}</p>

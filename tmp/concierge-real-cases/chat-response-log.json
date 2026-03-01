@@ -1,0 +1,74 @@
+[
+  {
+    "browser": "chromium",
+    "viewport": "desktop",
+    "status": 200,
+    "message": "I need an 8x10 rug under $2500 for a warm neutral living room.",
+    "mode": "recommendation",
+    "recommendationCount": 0,
+    "recommendations": []
+  },
+  {
+    "browser": "chromium",
+    "viewport": "desktop",
+    "status": 200,
+    "message": "Show me three options to compare with images.",
+    "mode": "recommendation",
+    "recommendationCount": 0,
+    "recommendations": []
+  },
+  {
+    "browser": "chromium",
+    "viewport": "mobile",
+    "status": 200,
+    "message": "I need an 8x10 rug under $2500 for a warm neutral living room.",
+    "mode": "recommendation",
+    "recommendationCount": 0,
+    "recommendations": []
+  },
+  {
+    "browser": "chromium",
+    "viewport": "mobile",
+    "status": 200,
+    "message": "Show me three options to compare with images.",
+    "mode": "recommendation",
+    "recommendationCount": 0,
+    "recommendations": []
+  },
+  {
+    "browser": "webkit",
+    "viewport": "desktop",
+    "status": 200,
+    "message": "I need an 8x10 rug under $2500 for a warm neutral living room.",
+    "mode": "recommendation",
+    "recommendationCount": 0,
+    "recommendations": []
+  },
+  {
+    "browser": "webkit",
+    "viewport": "desktop",
+    "status": 200,
+    "message": "Show me three options to compare with images.",
+    "mode": "recommendation",
+    "recommendationCount": 0,
+    "recommendations": []
+  },
+  {
+    "browser": "webkit",
+    "viewport": "mobile",
+    "status": 200,
+    "message": "I need an 8x10 rug under $2500 for a warm neutral living room.",
+    "mode": "recommendation",
+    "recommendationCount": 0,
+    "recommendations": []
+  },
+  {
+    "browser": "webkit",
+    "viewport": "mobile",
+    "status": 200,
+    "message": "Show me three options to compare with images.",
+    "mode": "recommendation",
+    "recommendationCount": 0,
+    "recommendations": []
+  }
+]

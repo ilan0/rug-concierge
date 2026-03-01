@@ -3,6 +3,7 @@ import {
   normalizeInventoryFilters,
   type InventoryFilterInput,
 } from "@/lib/inventory/filters";
+import { fetchPrimaryRugImagesForRugs } from "@/lib/storage/rug-images";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 const DEFAULT_PAGE_SIZE = 50;
@@ -144,9 +145,22 @@ export async function listInventory(
     };
   }
 
-  const rows = data
+  const baseRows = data
     .map((row) => toBrowserRow(row))
     .filter((row): row is InventoryBrowserRow => row !== null);
+  const imageMap = await fetchPrimaryRugImagesForRugs({
+    supabase,
+    tenantId,
+    rugIds: baseRows.map((row) => row.id),
+  });
+  const rows = baseRows.map((row) => {
+    const image = imageMap.get(row.id);
+    return {
+      ...row,
+      primary_image_url: image?.primary_image_url ?? null,
+      primary_image_caption: image?.primary_image_caption ?? null,
+    };
+  });
   const total = typeof count === "number" ? count : rows.length;
   const totalPages = total === 0 ? 0 : Math.ceil(total / pageSize);
 
@@ -177,6 +191,8 @@ function toBrowserRow(row: Record<string, unknown>): InventoryBrowserRow | null 
     id: row.id,
     sku: typeof row.sku === "string" ? row.sku : null,
     intake_label: row.intake_label,
+    primary_image_url: null,
+    primary_image_caption: null,
     status: typeof row.status === "string" ? row.status : null,
     price: toNumberOrNull(row.price),
     sale_price: toNumberOrNull(row.sale_price),

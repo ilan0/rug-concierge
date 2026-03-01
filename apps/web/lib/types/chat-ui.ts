@@ -40,6 +40,8 @@ export type UiRecommendationItem = {
   rug_id: string;
   sku: string | null;
   title: string;
+  primary_image_url: string | null;
+  primary_image_caption: string | null;
   size_text: string | null;
   price_usd: number | null;
   match_reasons: string[];

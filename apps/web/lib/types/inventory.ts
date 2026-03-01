@@ -22,6 +22,8 @@ export type InventoryBrowserRow = {
   id: string;
   sku: string | null;
   intake_label: string;
+  primary_image_url: string | null;
+  primary_image_caption: string | null;
   status: string | null;
   price: number | null;
   sale_price: number | null;

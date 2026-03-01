@@ -1,6 +1,7 @@
 import { filterByHardConstraints } from "@/lib/filters/hard-constraints";
 import { shapeCandidatesForAI } from "@/lib/filters/candidate-shaping";
 import { getSizeBounds } from "@/lib/filters/size-bounds";
+import { fetchPrimaryRugImagesForRugs } from "@/lib/storage/rug-images";
 import { rankAndExplain } from "@/lib/ai/recommend";
 import type { RecommendationAiTrace } from "@/lib/ai/recommend";
 import { logRecommendationQaEvent } from "@/lib/qa/recommendation-log";
@@ -294,8 +295,26 @@ async function fetchInventoryCandidates(input: {
       merged.set(row.id, row);
     }
   }
+  const primaryImageMap = await fetchPrimaryRugImagesForRugs({
+    supabase,
+    tenantId: input.tenantId,
+    rugIds: [...merged.keys()],
+  });
 
-  return [...merged.values()];
+  const enriched = [...merged.values()].map((rug) => {
+    const image = primaryImageMap.get(rug.id);
+    return {
+      ...rug,
+      primary_image_url: image?.primary_image_url ?? null,
+      primary_image_caption: image?.primary_image_caption ?? null,
+    };
+  });
+
+  return enriched.filter(
+    (rug) =>
+      typeof rug.primary_image_url === "string" &&
+      rug.primary_image_url.trim().length > 0
+  );
 }
 
 async function getSupabaseAdminSafe(): Promise<SupabaseClient | null> {

@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 type WorkspaceNavProps = {
   role: AppRole | null;
   currentPath: "/concierge" | "/trade" | "/inventory" | "/appraisal";
+  variant?: "default" | "concierge-minimal";
   debugToggle?: {
     enabled: boolean;
     hrefOn: string;
@@ -20,9 +21,17 @@ const WORKSPACE_LINKS = [
   { href: "/appraisal", label: "Appraisal" },
 ] as const;
 
-function navLinkClass(active: boolean): string {
+function navLinkClass(active: boolean, variant: "default" | "concierge-minimal"): string {
+  if (variant === "concierge-minimal") {
+    return cn(
+      "inline-flex min-h-9 items-center rounded-full border px-3 py-1.5 text-sm font-medium leading-5 transition-colors",
+      active
+        ? "border-border/70 bg-background/75 text-foreground"
+        : "border-border/20 bg-background/35 text-muted-foreground hover:border-border/40 hover:bg-background/60 hover:text-foreground"
+    );
+  }
   return cn(
-    "inline-flex items-center rounded-full border px-3 py-1.5 text-sm font-medium transition-colors",
+    "inline-flex items-center rounded-full border px-3 py-1.5 text-sm font-medium leading-5 transition-colors",
     active
       ? "border-primary bg-primary text-primary-foreground"
       : "border-border bg-card/70 text-foreground hover:bg-accent"
@@ -31,11 +40,17 @@ function navLinkClass(active: boolean): string {
 
 export function WorkspaceNav(props: WorkspaceNavProps) {
   const role = props.role;
+  const variant = props.variant ?? "default";
   const debugAllowed = role ? canRoleReadDebugTrace(role) : false;
 
   return (
-    <div className="mx-auto mt-4 flex w-full max-w-6xl flex-wrap items-center gap-2 px-4 sm:px-6 lg:px-8">
-      <Link href="/" className={navLinkClass(false)}>
+    <div
+      className={cn(
+        "mx-auto flex w-full max-w-6xl flex-wrap items-center gap-2 px-4 sm:px-6 lg:px-8",
+        variant === "concierge-minimal" ? "mt-2 opacity-95" : "mt-4"
+      )}
+    >
+      <Link href="/" className={navLinkClass(false, variant)}>
         Home
       </Link>
       {WORKSPACE_LINKS.filter((link) => {
@@ -46,7 +61,7 @@ export function WorkspaceNav(props: WorkspaceNavProps) {
         <Link
           href={link.href}
           key={link.href}
-          className={navLinkClass(props.currentPath === link.href)}
+          className={navLinkClass(props.currentPath === link.href, variant)}
         >
           {link.label}
         </Link>
@@ -55,10 +70,15 @@ export function WorkspaceNav(props: WorkspaceNavProps) {
         <Link
           href={props.debugToggle.enabled ? props.debugToggle.hrefOff : props.debugToggle.hrefOn}
           className={cn(
-            "ml-auto inline-flex items-center rounded-full border px-3 py-1.5 text-sm font-medium",
+            "ml-auto inline-flex items-center rounded-full border font-medium",
+            variant === "concierge-minimal"
+              ? "min-h-9 px-3 py-1.5 text-sm"
+              : "px-3 py-1.5 text-sm",
             props.debugToggle.enabled
-              ? "border-amber-500 bg-amber-100 text-amber-900"
-              : "border-border bg-card/70 hover:bg-accent"
+              ? "border-amber-500/70 bg-amber-100/70 text-amber-900"
+              : variant === "concierge-minimal"
+                ? "border-border/40 bg-background/50 text-muted-foreground hover:text-foreground"
+                : "border-border bg-card/70 hover:bg-accent"
           )}
         >
           {props.debugToggle.enabled ? "Debug On" : "Debug Off"}

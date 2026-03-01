@@ -21,6 +21,8 @@ export type InventoryRug = {
   sku?: string | null;
   // Human-readable rug title/label shown in UI.
   label: string;
+  primary_image_url?: string | null;
+  primary_image_caption?: string | null;
   // Inventory status (ex: available, sold, on_hold).
   status?: string | null;
   // Base price and optional sale price.

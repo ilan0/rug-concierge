@@ -2,7 +2,7 @@ import { ConciergeScreen } from "@/components/concierge/concierge-screen";
 import { WorkspaceNav } from "@/components/shell/workspace-nav";
 import { AccessGuard } from "@/components/ui/access-guard";
 import { getServerUiRole, getServerUiTenantId } from "@/lib/ui/server-role";
-import { canRoleAccessRoute, canRoleReadDebugTrace } from "@/lib/auth/policy";
+import { canRoleAccessRoute } from "@/lib/auth/policy";
 import { getPilotAccessState } from "@/lib/auth/pilot-access";
 
 type ConciergePageProps = {
@@ -51,7 +51,7 @@ export default async function ConciergePage({ searchParams }: ConciergePageProps
   }
 
   const params = (await searchParams) ?? {};
-  const debugAllowed = role ? canRoleReadDebugTrace(role) : false;
+  const debugAllowed = role === "developer";
   const debug = debugAllowed && readString(params.debug) === "1";
   const debugToggle = debugAllowed
     ? {
@@ -66,6 +66,7 @@ export default async function ConciergePage({ searchParams }: ConciergePageProps
       <WorkspaceNav
         role={role}
         currentPath="/concierge"
+        variant="concierge-minimal"
         debugToggle={debugToggle}
       />
       <ConciergeScreen debug={debug} tenantId={tenantId} />

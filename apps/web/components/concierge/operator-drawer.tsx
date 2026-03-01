@@ -17,6 +17,7 @@ type OperatorDrawerProps = {
   open: boolean;
   selectedTurn: Turn | null;
   debug: boolean;
+  showReviewControls?: boolean;
   canUseDebugTrace: boolean;
   canUseReviewRoleControls: boolean;
   canUseReviewControls: boolean;
@@ -36,6 +37,7 @@ type OperatorDrawerProps = {
 };
 
 export function OperatorDrawer(input: OperatorDrawerProps) {
+  const showReviewControls = input.showReviewControls ?? true;
   const routeTrace =
     (input.selectedTurn?.debug?.trace?.routeTrace as {
       routing?: unknown;
@@ -100,8 +102,8 @@ export function OperatorDrawer(input: OperatorDrawerProps) {
           </SheetDescription>
         </SheetHeader>
 
-        <div className="grid grid-cols-2 gap-2">
-          {input.canUseReviewRoleControls ? (
+        <div className={showReviewControls ? "grid grid-cols-2 gap-2" : "grid grid-cols-1 gap-2"}>
+          {showReviewControls && input.canUseReviewRoleControls ? (
             <Button
               type="button"
               variant={input.operatorView === "review" ? "default" : "outline"}
@@ -122,7 +124,9 @@ export function OperatorDrawer(input: OperatorDrawerProps) {
         </div>
 
         <div className="flex-1 space-y-3 overflow-y-auto pr-1">
-          {input.operatorView === "review" && input.canUseReviewRoleControls ? (
+          {showReviewControls &&
+          input.operatorView === "review" &&
+          input.canUseReviewRoleControls ? (
             <>
               <SectionCard title="Review Controls">
                 {!input.isRecommendationContext ? (

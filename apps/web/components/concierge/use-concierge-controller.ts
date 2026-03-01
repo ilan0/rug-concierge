@@ -59,7 +59,9 @@ export function useConciergeController(input: UseConciergeControllerInput) {
     useState<UiRecommendationState | null>(null);
   const [lastFailedMessage, setLastFailedMessage] = useState<string | null>(null);
   const [operatorOpen, setOperatorOpen] = useState(false);
-  const [operatorView, setOperatorView] = useState<OperatorView>("review");
+  const [operatorView, setOperatorView] = useState<OperatorView>(
+    variant === "trade" ? "review" : "debug"
+  );
   const [overrideMessage, setOverrideMessage] = useState("");
   const [overrideRugIds, setOverrideRugIds] = useState("");
   const [overrideNotes, setOverrideNotes] = useState("");
@@ -128,15 +130,25 @@ export function useConciergeController(input: UseConciergeControllerInput) {
   const latestAssistantMode = latestAssistantTurn?.fineMode;
   const latestAssistantCoarseMode = latestAssistantTurn?.coarseMode;
 
-  const canUseDebugTrace = canRoleReadDebugTrace(role);
-  const canUseReviewRoleControls = canRoleUseReviewControls(role) && Boolean(sessionId);
+  const isDeveloperRole = role === "developer";
+  const canUseDebugTrace =
+    variant === "concierge" ? isDeveloperRole : canRoleReadDebugTrace(role);
+  const canUseReviewRoleControls =
+    variant === "concierge"
+      ? false
+      : canRoleUseReviewControls(role) && Boolean(sessionId);
   const isRecommendationContext = latestAssistantCoarseMode === "recommendation";
   const canUseReviewControls = canUseReviewRoleControls && isRecommendationContext;
-  const canOpenOperator = canUseDebugTrace || canUseReviewRoleControls;
+  const canOpenOperator =
+    variant === "concierge" ? isDeveloperRole : canUseDebugTrace || canUseReviewRoleControls;
 
   useEffect(() => {
     if (!canOpenOperator && operatorOpen) {
       setOperatorOpen(false);
+      return;
+    }
+    if (variant === "concierge") {
+      if (operatorView !== "debug") setOperatorView("debug");
       return;
     }
     if (operatorView === "debug" && !canUseDebugTrace) {
@@ -145,7 +157,18 @@ export function useConciergeController(input: UseConciergeControllerInput) {
     if (operatorView === "review" && !canUseReviewRoleControls && canUseDebugTrace) {
       setOperatorView("debug");
     }
-  }, [canOpenOperator, canUseDebugTrace, canUseReviewRoleControls, operatorOpen, operatorView]);
+  }, [
+    canOpenOperator,
+    canUseDebugTrace,
+    canUseReviewRoleControls,
+    operatorOpen,
+    operatorView,
+    variant,
+  ]);
+
+  const getConstraintSnapshot = (
+    nextState: UiRecommendationState | null | undefined
+  ): Turn["constraintSnapshot"] => nextState ?? null;
 
   const onTradeContextField =
     (field: keyof TradeSupportDraftContext) =>
@@ -304,6 +327,7 @@ export function useConciergeController(input: UseConciergeControllerInput) {
         questions: "questions" in response ? response.questions : undefined,
         followUpQuestion:
           "follow_up_question" in response ? response.follow_up_question : null,
+        constraintSnapshot: getConstraintSnapshot(payload.recommendation_state),
         createdAt: new Date().toISOString(),
         debug: debugMeta,
       };
@@ -481,6 +505,7 @@ export function useConciergeController(input: UseConciergeControllerInput) {
         questions: "questions" in assistant ? assistant.questions : undefined,
         followUpQuestion:
           "follow_up_question" in assistant ? assistant.follow_up_question : null,
+        constraintSnapshot: getConstraintSnapshot(responsePayload.recommendation_state),
         createdAt: new Date().toISOString(),
         debug: debugMeta,
       };
@@ -532,6 +557,7 @@ export function useConciergeController(input: UseConciergeControllerInput) {
     lastFailedMessage,
     starterPrompts,
     latestAssistantMode,
+    isDeveloperRole,
     canUseDebugTrace,
     canUseReviewRoleControls,
     isRecommendationContext,
