@@ -105,7 +105,7 @@ export function ConciergeScreen({
         />
 
         <header
-          className="mx-auto [text-size-adjust:100%] [-webkit-text-size-adjust:100%] pt-6 text-center"
+          className="mx-auto [text-size-adjust:100%] [-webkit-text-size-adjust:100%] pt-5 text-center"
           style={railStyle}
         >
           <div className="mb-2 flex min-h-7 items-center justify-end">
@@ -132,9 +132,8 @@ export function ConciergeScreen({
 
         <div
           className={cn(
-            "mx-auto mt-2 [text-size-adjust:100%] [-webkit-text-size-adjust:100%]",
-            isShortThreadStage &&
-              "flex min-h-[clamp(500px,66vh,740px)] flex-col justify-end"
+            "mx-auto mt-4 [text-size-adjust:100%] [-webkit-text-size-adjust:100%]",
+            isShortThreadStage && "min-h-[clamp(60px,12vh,120px)]"
           )}
           style={railStyle}
         >

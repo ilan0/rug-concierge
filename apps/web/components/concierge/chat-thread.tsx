@@ -110,10 +110,10 @@ export function ChatThread(input: ChatThreadProps) {
 
   return (
     <section className="relative">
-      <section className="flex flex-col gap-5">
+      <section className="flex flex-col gap-8">
         {turns.length === 0 ? (
-          <article className="max-w-full rounded-2xl bg-background/45 px-3 py-3">
-            <div className="mb-2 flex items-center justify-between gap-2">
+          <article className="max-w-full rounded-3xl bg-background/55 px-5 py-5">
+            <div className="mb-3 flex items-center justify-between gap-2">
               <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
                 assistant
               </p>
@@ -121,13 +121,13 @@ export function ChatThread(input: ChatThreadProps) {
             <p className={cn("whitespace-pre-wrap text-foreground", bodyTextClassName)}>
               Tell me what kind of rug you&apos;re looking for.
             </p>
-            <div className="mt-4 flex flex-wrap">
+            <div className="mt-5 flex flex-wrap gap-3">
               {emptyStatePrompts.map((prompt) => (
                 <Button
                   key={prompt}
                   type="button"
                   variant="outline"
-                  className="mb-3 mr-3 h-[52px] rounded-full border-border/55 bg-background/70 px-5 text-[18px] leading-[1.35] text-foreground"
+                  className="h-[52px] rounded-full border-border/55 bg-background/70 px-6 text-[18px] leading-[1.35] text-foreground"
                   onClick={() => onChoosePrompt(prompt)}
                 >
                   {prompt}
@@ -141,8 +141,8 @@ export function ChatThread(input: ChatThreadProps) {
               key={turn.id}
               className={
                 turn.role === "user"
-                  ? "ml-auto max-w-[92%] rounded-2xl bg-[#e7dccf]/80 px-5 py-4 shadow-[0_1px_2px_rgba(50,30,12,0.12)] sm:max-w-[86%]"
-                  : "max-w-full rounded-2xl bg-background/45 px-2 py-2 sm:px-3"
+                  ? "ml-auto max-w-[92%] rounded-3xl bg-[#e7dccf]/82 px-6 py-5 shadow-[0_1px_2px_rgba(50,30,12,0.12)] sm:max-w-[86%]"
+                  : "max-w-full rounded-3xl bg-background/55 px-4 py-4 sm:px-5 sm:py-5"
               }
               onClick={() =>
                 turn.role === "assistant" ? onSelectTurn(turn.id) : undefined
@@ -156,7 +156,7 @@ export function ChatThread(input: ChatThreadProps) {
               </div>
 
               {turn.role === "assistant" && turn.coarseMode === "recommendation" ? (
-                <div className="mb-2 flex flex-wrap gap-2">
+                <div className="mb-3 flex flex-wrap gap-2">
                   {formatConstraintSummary(turn.constraintSnapshot).map((item) => (
                     <Badge
                       key={`${turn.id}-${item}`}
@@ -179,14 +179,14 @@ export function ChatThread(input: ChatThreadProps) {
 
               {turn.role === "assistant" &&
               shouldRenderFollowUpQuestion(turn.text, turn.followUpQuestion) ? (
-                <div className="mt-3 rounded-lg border border-amber-200 bg-amber-50 p-3">
+                <div className="mt-5 rounded-lg border border-amber-200 bg-amber-50 p-3">
                   <p className="text-xs font-semibold uppercase tracking-[0.08em] text-amber-800">Suggested Next Step</p>
                   <p className="mt-1 text-sm text-amber-900">{turn.followUpQuestion}</p>
                 </div>
               ) : null}
 
               {turn.role === "assistant" && turn.questions && turn.questions.length > 0 ? (
-                <div className="mt-3">
+                <div className="mt-5">
                   <p className="text-xs font-semibold uppercase tracking-[0.08em] text-muted-foreground">Clarifying Questions</p>
                   <ul className="mt-1 list-disc space-y-1 pl-5 text-[18px] leading-[1.65]">
                     {turn.questions.map((question) => (
@@ -197,7 +197,7 @@ export function ChatThread(input: ChatThreadProps) {
               ) : null}
 
               {turn.role === "assistant" && turn.recommendations && turn.recommendations.length > 0 ? (
-                <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                <div className="mt-6 grid grid-cols-1 gap-5 md:grid-cols-2">
                   {turn.recommendations.map((item) => (
                     <RecommendationCard
                       item={item}
@@ -213,7 +213,7 @@ export function ChatThread(input: ChatThreadProps) {
         )}
 
         {isLoading ? (
-          <article className="rounded-2xl bg-background/60 p-4">
+          <article className="rounded-3xl bg-background/60 p-5">
             <div className="h-3 w-full animate-pulse rounded-md bg-muted" />
             <div className="mt-2 h-3 w-2/3 animate-pulse rounded-md bg-muted" />
             {showSlowNotice ? (

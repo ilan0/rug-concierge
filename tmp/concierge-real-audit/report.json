@@ -1,5 +1,5 @@
 {
-  "executed_at": "2026-03-01T03:04:24.188Z",
+  "executed_at": "2026-03-01T03:40:58.054Z",
   "base_url": "http://127.0.0.1:3000",
   "tenant_id_used_for_capture": "0a175457-6194-4ae9-bf4e-1a785d754c4b",
   "db_image_coverage_by_tenant": [
@@ -42,8 +42,8 @@
   "chat_image_summary": {
     "total_chat_responses": 10,
     "recommendation_responses": 6,
-    "total_recommendations": 27,
-    "recommendations_with_image_url": 27,
+    "total_recommendations": 29,
+    "recommendations_with_image_url": 29,
     "recommendations_without_image_url": 0,
     "by_scenario": {
       "chromium:desktop:recommendation": {
@@ -63,8 +63,8 @@
       "webkit:desktop:recommendation": {
         "chat_responses": 2,
         "recommendation_responses": 2,
-        "total_recommendations": 8,
-        "recommendations_with_image_url": 8,
+        "total_recommendations": 11,
+        "recommendations_with_image_url": 11,
         "recommendations_without_image_url": 0
       },
       "webkit:desktop:strict_no_match": {
@@ -77,8 +77,8 @@
       "chromium:mobile:recommendation": {
         "chat_responses": 1,
         "recommendation_responses": 1,
-        "total_recommendations": 8,
-        "recommendations_with_image_url": 8,
+        "total_recommendations": 5,
+        "recommendations_with_image_url": 5,
         "recommendations_without_image_url": 0
       },
       "chromium:mobile:strict_no_match": {
@@ -91,8 +91,8 @@
       "webkit:mobile:recommendation": {
         "chat_responses": 1,
         "recommendation_responses": 1,
-        "total_recommendations": 3,
-        "recommendations_with_image_url": 3,
+        "total_recommendations": 5,
+        "recommendations_with_image_url": 5,
         "recommendations_without_image_url": 0
       },
       "webkit:mobile:strict_no_match": {
@@ -146,8 +146,8 @@
       "viewport": "desktop",
       "scenario": "recommendation",
       "noRugImagePlaceholders": 0,
-      "recommendationCards": 8,
-      "whyThisFitsHeadings": 8,
+      "recommendationCards": 11,
+      "whyThisFitsHeadings": 11,
       "jumpButtons": 0
     },
     {
@@ -173,8 +173,8 @@
       "viewport": "mobile",
       "scenario": "recommendation",
       "noRugImagePlaceholders": 0,
-      "recommendationCards": 8,
-      "whyThisFitsHeadings": 8,
+      "recommendationCards": 5,
+      "whyThisFitsHeadings": 5,
       "jumpButtons": 0
     },
     {
@@ -200,8 +200,8 @@
       "viewport": "mobile",
       "scenario": "recommendation",
       "noRugImagePlaceholders": 0,
-      "recommendationCards": 3,
-      "whyThisFitsHeadings": 3,
+      "recommendationCards": 5,
+      "whyThisFitsHeadings": 5,
       "jumpButtons": 0
     },
     {
@@ -217,16 +217,20 @@
   "screenshots": [
     "chromium-desktop-empty.png",
     "chromium-desktop-recommendation-followup.png",
+    "chromium-desktop-recommendation-vivid.png",
     "chromium-desktop-recommendation.png",
     "chromium-desktop-strict-no-match.png",
     "chromium-mobile-empty.png",
+    "chromium-mobile-recommendation-vivid.png",
     "chromium-mobile-recommendation.png",
     "chromium-mobile-strict-no-match.png",
     "webkit-desktop-empty.png",
     "webkit-desktop-recommendation-followup.png",
+    "webkit-desktop-recommendation-vivid.png",
     "webkit-desktop-recommendation.png",
     "webkit-desktop-strict-no-match.png",
     "webkit-mobile-empty.png",
+    "webkit-mobile-recommendation-vivid.png",
     "webkit-mobile-recommendation.png",
     "webkit-mobile-strict-no-match.png"
   ]
