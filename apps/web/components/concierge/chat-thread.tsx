@@ -81,8 +81,8 @@ export function ChatThread(input: ChatThreadProps) {
     const distanceToBottom = doc.scrollHeight - (window.scrollY + window.innerHeight);
     const pinned = distanceToBottom <= thresholdPx;
     setIsPinnedToBottom(pinned);
-    setShowJumpToLatest(!pinned);
-  }, []);
+    setShowJumpToLatest(!pinned && turns.length > 0);
+  }, [turns.length]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;

@@ -39,7 +39,7 @@ export default async function AppraisalPage() {
 
   return (
     <>
-      <WorkspaceNav role={role} currentPath="/appraisal" />
+      <WorkspaceNav role={role} currentPath="/appraisal" variant="workspace-soft" />
       <AppraisalScreen tenantId={tenantId} />
     </>
   );

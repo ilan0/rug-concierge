@@ -60,6 +60,7 @@ export default async function TradePage({ searchParams }: TradePageProps) {
       <WorkspaceNav
         role={role}
         currentPath="/trade"
+        variant="workspace-soft"
         debugToggle={
           debugAllowed
             ? {

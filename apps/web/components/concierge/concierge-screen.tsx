@@ -98,7 +98,10 @@ export function ConciergeScreen({
 
   if (variant === "concierge") {
     return (
-      <AppShell className="relative min-h-[calc(100svh-2rem)] !min-h-[calc(100dvh-2rem)] pb-6 [text-size-adjust:100%] [-webkit-text-size-adjust:100%]">
+      <AppShell
+        variant="conversational"
+        className="relative min-h-[calc(100svh-2rem)] !min-h-[calc(100dvh-2rem)] pb-6 [text-size-adjust:100%] [-webkit-text-size-adjust:100%]"
+      >
         <div
           aria-hidden="true"
           className="pointer-events-none fixed inset-0 -z-10 bg-[radial-gradient(circle_at_12%_8%,rgba(255,241,218,0.55),transparent_40%),radial-gradient(circle_at_88%_12%,rgba(236,219,198,0.35),transparent_42%),linear-gradient(180deg,rgba(250,245,238,0.88),rgba(244,236,225,0.9))]"
@@ -196,11 +199,12 @@ export function ConciergeScreen({
   }
 
   return (
-    <AppShell className="pb-6">
+    <AppShell variant="workflow" className="pb-6">
       <PageHeader
         kicker="Trade Workflow"
         title="Trade Support"
         subtitle="Repeat-buyer workflow for designers and trade clients with context-driven personalization."
+        variant="workflow"
         actions={
           <div className="flex flex-wrap items-end justify-end gap-2">
             {controller.roleSwitcherVisible ? (
@@ -212,7 +216,7 @@ export function ConciergeScreen({
                     void controller.onRoleChange(event.target.value as UiRole)
                   }
                   disabled={controller.isLoading}
-                  className="h-10 rounded-md border border-input bg-background px-3 text-sm"
+                  className="h-11 rounded-md border border-input bg-background px-3 text-base"
                 >
                   {controller.roleOptions.map((roleOption) => (
                     <option value={roleOption} key={roleOption}>
@@ -235,9 +239,10 @@ export function ConciergeScreen({
             ) : null}
             <Button
               type="button"
-              variant="secondary"
+              variant="outline"
               onClick={controller.onReset}
               disabled={controller.isLoading}
+              className="h-11 px-4 text-base"
             >
               New Session
             </Button>
@@ -245,28 +250,35 @@ export function ConciergeScreen({
         }
       />
 
-      <div className="mx-auto w-full max-w-[820px] space-y-4">
-        <SectionCard title="Quick starts" className="border-border/60">
-          <div className="flex flex-wrap gap-2">
-            {controller.starterPrompts.map((starter) => (
-              <Button
-                key={starter}
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() => controller.pushStarterPrompt(starter)}
-                disabled={controller.isLoading}
-              >
-                {starter}
-              </Button>
-            ))}
-          </div>
-        </SectionCard>
+      <div className="mx-auto w-full max-w-[860px] space-y-4">
+        {controller.turns.length === 0 ? (
+          <SectionCard title="Quick starts" className="border-border/60" tone="soft" density="compact">
+            <div className="flex flex-wrap gap-2">
+              {controller.starterPrompts.map((starter, index) => (
+                <Button
+                  key={starter}
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className={cn(
+                    "h-auto whitespace-normal py-2 text-left leading-6",
+                    index > 1 ? "hidden sm:inline-flex" : ""
+                  )}
+                  onClick={() => controller.pushStarterPrompt(starter)}
+                  disabled={controller.isLoading}
+                >
+                  {starter}
+                </Button>
+              ))}
+            </div>
+          </SectionCard>
+        ) : null}
 
         <SectionCard
           title="Designer Context"
           description="Set project context once; it will be included in each turn."
           className="border-border/60"
+          tone="soft"
         >
           <div className="grid gap-3 md:grid-cols-2">
             <div className="space-y-2">

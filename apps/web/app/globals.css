@@ -22,7 +22,7 @@
   --border: 26 30% 80%;
   --input: 26 30% 84%;
   --ring: 24 43% 34%;
-  --radius: 0.9rem;
+  --radius: 1rem;
 }
 
 * {
@@ -34,6 +34,11 @@ html {
 }
 
 body {
+  color: hsl(var(--foreground));
+  font-size: 16px;
+  line-height: 1.6;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
   background:
     radial-gradient(circle at 10% 10%, rgba(255, 241, 220, 0.7), transparent 38%),
     radial-gradient(circle at 95% 15%, rgba(233, 215, 194, 0.42), transparent 40%),
@@ -50,6 +55,13 @@ body {
 
   p {
     @apply text-foreground;
+  }
+
+  input,
+  select,
+  textarea,
+  button {
+    font-size: 16px;
   }
 }
 

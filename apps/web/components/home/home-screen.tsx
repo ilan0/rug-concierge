@@ -196,21 +196,32 @@ export function HomeScreen() {
 
   if (accessLoading) {
     return (
-      <AppShell>
-        <SectionCard title="Preparing workspace" description="Loading pilot access status." />
+      <AppShell variant="setup">
+        <SectionCard
+          title="Preparing workspace"
+          description="Loading pilot access status."
+          tone="soft"
+          density="compact"
+        />
       </AppShell>
     );
   }
 
   if (accessRequired && !accessVerified) {
     return (
-      <AppShell>
+      <AppShell variant="setup">
         <PageHeader
           kicker="Rug Concierge"
           title="Pilot Access"
           subtitle="Enter your owner pilot access code to continue."
+          variant="setup"
         />
-        <SectionCard title="Unlock Pilot" description="Access code is required for hosted pilot mode.">
+        <SectionCard
+          title="Unlock Pilot"
+          description="Access code is required for hosted pilot mode."
+          tone="soft"
+          className="mx-auto w-full max-w-3xl"
+        >
           <div className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="access-code">Access Code</Label>
@@ -242,15 +253,20 @@ export function HomeScreen() {
   }
 
   return (
-    <AppShell>
+    <AppShell variant="setup">
       <PageHeader
         kicker="Rug Concierge"
         title="MVP Workspace"
-        subtitle="Select your store tenant and role. You will only see pages for that role."
+        subtitle="Select your store tenant and role to open only the pages your role can use."
+        variant="setup"
       />
 
-      <div className="grid gap-5 lg:grid-cols-[1.1fr_1fr]">
-        <SectionCard title={ROLE_SWITCHER_ENABLED ? "Select Role + Store" : "Pilot Setup"}>
+      <div className="mx-auto w-full max-w-4xl space-y-5">
+        <SectionCard
+          title={ROLE_SWITCHER_ENABLED ? "Select Role + Store" : "Pilot Setup"}
+          tone="soft"
+          className="border-border/55"
+        >
           <div className="space-y-4">
             <div className="flex flex-wrap items-center gap-2">
               <Badge variant="secondary">Role: {role ? uiRoleLabel(role) : "Not selected"}</Badge>
@@ -264,12 +280,25 @@ export function HomeScreen() {
                 value={tenantId}
                 onChange={(event) => setTenantState(event.target.value)}
                 placeholder="Paste tenant UUID"
+                className="h-11 text-base"
               />
               <div className="flex flex-wrap gap-2">
-                <Button type="button" variant="secondary" onClick={() => void saveTenant()} disabled={isSyncing}>
+                <Button
+                  type="button"
+                  variant="secondary"
+                  onClick={() => void saveTenant()}
+                  disabled={isSyncing}
+                  className="h-11 px-5 text-base"
+                >
                   Save Tenant
                 </Button>
-                <Button type="button" variant="ghost" onClick={() => void clearTenant()} disabled={isSyncing}>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  onClick={() => void clearTenant()}
+                  disabled={isSyncing}
+                  className="h-11 px-5 text-base"
+                >
                   Clear Tenant
                 </Button>
               </div>
@@ -285,11 +314,18 @@ export function HomeScreen() {
                     variant={role === candidate ? "default" : "outline"}
                     onClick={() => void chooseRole(candidate)}
                     disabled={isSyncing}
+                    className="h-11 px-5 text-base"
                   >
                     {uiRoleLabel(candidate)}
                   </Button>
                 ))}
-                <Button type="button" variant="ghost" onClick={() => void clearRole()} disabled={isSyncing}>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  onClick={() => void clearRole()}
+                  disabled={isSyncing}
+                  className="h-11 px-5 text-base"
+                >
                   Clear Role
                 </Button>
               </div>
@@ -304,9 +340,14 @@ export function HomeScreen() {
           </div>
         </SectionCard>
 
-        <SectionCard title="Workspace Pages" description="Available pages for the selected role.">
+        <SectionCard
+          title="Workspace Pages"
+          description="Available pages for the selected role."
+          tone="soft"
+          className="border-border/55"
+        >
           {cards.length === 0 ? (
-            <p className="text-sm text-muted-foreground">
+            <p className="text-base text-muted-foreground">
               Set role and tenant to unlock pages.
             </p>
           ) : (
@@ -315,10 +356,10 @@ export function HomeScreen() {
                 <Link
                   key={card.href}
                   href={card.href}
-                  className="rounded-xl border border-border/80 bg-secondary/30 p-4 transition hover:bg-accent"
+                  className="rounded-2xl border border-border/65 bg-background/70 p-5 transition hover:bg-accent/40"
                 >
-                  <p className="font-medium">{card.title}</p>
-                  <p className="mt-1 text-sm text-muted-foreground">{card.description}</p>
+                  <p className="text-lg font-semibold">{card.title}</p>
+                  <p className="mt-1 text-base leading-7 text-muted-foreground">{card.description}</p>
                 </Link>
               ))}
             </div>

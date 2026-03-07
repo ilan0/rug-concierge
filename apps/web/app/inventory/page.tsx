@@ -160,60 +160,66 @@ export default async function InventoryPage({ searchParams }: InventoryPageProps
     result.filters.sort !== "newest" ? `Sort: ${result.filters.sort}` : null,
   ].filter((item): item is string => Boolean(item));
 
-  const recommendationHint = {
-    budgetMax: result.filters.priceMax,
-    size:
-      result.filters.widthMin !== null && result.filters.lengthMin !== null
-        ? {
-            widthIn: result.filters.widthMin,
-            lengthIn: result.filters.lengthMin,
-          }
-        : null,
-  };
-
   return (
     <>
-      <WorkspaceNav role={role} currentPath="/inventory" />
-      <AppShell>
+      <WorkspaceNav role={role} currentPath="/inventory" variant="workspace-soft" />
+      <AppShell variant="catalog">
         <PageHeader
-          kicker="Owner Transparency"
+          kicker="Catalog"
           title="Inventory Browser"
-          subtitle="Read-only inventory view for trust review and recommendation support."
+          subtitle="Browse store inventory with simple filters and recommendation context."
+          variant="catalog"
           actions={
-            <Button asChild variant="secondary">
+            <Button asChild variant="outline">
               <Link href={`${pageBase}&page=1`}>Refresh</Link>
             </Button>
           }
         />
 
-        <SectionCard>
-          <div className="flex flex-wrap gap-2 text-sm">
+        <SectionCard tone="transparent" density="compact">
+          <div className="flex flex-wrap gap-2 text-[0.95rem]">
             <Badge variant="secondary">Source: Supabase rugs</Badge>
-            <Badge variant="outline">Tenant: {tenantId}</Badge>
+            <Badge
+              variant="outline"
+              className="max-w-[17rem] overflow-hidden text-ellipsis whitespace-nowrap"
+            >
+              Tenant: {tenantId}
+            </Badge>
             <Badge variant="outline">Records: {result.total}</Badge>
             <Badge variant="outline">
               Page: {result.totalPages === 0 ? 0 : result.page} / {result.totalPages}
             </Badge>
-            <Badge variant="outline">
+            <Badge variant="outline" className="hidden md:inline-flex">
               Loaded: {new Date(result.loadedAt).toLocaleString()}
             </Badge>
           </div>
         </SectionCard>
 
         <div className="mt-5 space-y-5">
-          <SectionCard title="Search and Filters">
+          <SectionCard title="Search and Filters" tone="soft" className="border-border/55">
             <form method="GET" action="/inventory" className="grid gap-3 md:grid-cols-3 xl:grid-cols-5">
               <input type="hidden" name="page" value="1" />
               <input type="hidden" name="page_size" value={result.pageSize} />
 
               <div className="space-y-2 xl:col-span-2">
                 <label className="text-sm font-medium" htmlFor="q">Search</label>
-                <Input id="q" name="q" defaultValue={result.filters.q} placeholder="SKU, label, style, palette" />
+                <Input
+                  id="q"
+                  name="q"
+                  defaultValue={result.filters.q}
+                  placeholder="SKU, label, style, palette"
+                  className="h-11 text-base"
+                />
               </div>
 
               <div className="space-y-2">
                 <label className="text-sm font-medium" htmlFor="status">Status</label>
-                <select id="status" name="status" defaultValue={result.filters.status} className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm">
+                <select
+                  id="status"
+                  name="status"
+                  defaultValue={result.filters.status}
+                  className="h-11 w-full rounded-md border border-input bg-background px-3 text-base"
+                >
                   <option value="available">available</option>
                   <option value="all">all</option>
                   <option value="sold">sold</option>
@@ -223,7 +229,12 @@ export default async function InventoryPage({ searchParams }: InventoryPageProps
 
               <div className="space-y-2">
                 <label className="text-sm font-medium" htmlFor="sort">Sort</label>
-                <select id="sort" name="sort" defaultValue={result.filters.sort} className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm">
+                <select
+                  id="sort"
+                  name="sort"
+                  defaultValue={result.filters.sort}
+                  className="h-11 w-full rounded-md border border-input bg-background px-3 text-base"
+                >
                   <option value="newest">newest</option>
                   <option value="oldest">oldest</option>
                   <option value="price_low">price low</option>
@@ -233,31 +244,87 @@ export default async function InventoryPage({ searchParams }: InventoryPageProps
 
               <div className="space-y-2">
                 <label className="text-sm font-medium" htmlFor="price_min">Min Price</label>
-                <Input id="price_min" name="price_min" type="number" min="0" step="1" defaultValue={result.filters.priceMin ?? ""} />
+                <Input
+                  id="price_min"
+                  name="price_min"
+                  type="number"
+                  min="0"
+                  step="1"
+                  defaultValue={result.filters.priceMin ?? ""}
+                  className="h-11 text-base"
+                />
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-medium" htmlFor="price_max">Max Price</label>
-                <Input id="price_max" name="price_max" type="number" min="0" step="1" defaultValue={result.filters.priceMax ?? ""} />
-              </div>
-              <div className="space-y-2">
-                <label className="text-sm font-medium" htmlFor="width_min">Min Width (in)</label>
-                <Input id="width_min" name="width_min" type="number" min="0" step="1" defaultValue={result.filters.widthMin ?? ""} />
-              </div>
-              <div className="space-y-2">
-                <label className="text-sm font-medium" htmlFor="width_max">Max Width (in)</label>
-                <Input id="width_max" name="width_max" type="number" min="0" step="1" defaultValue={result.filters.widthMax ?? ""} />
-              </div>
-              <div className="space-y-2">
-                <label className="text-sm font-medium" htmlFor="length_min">Min Length (in)</label>
-                <Input id="length_min" name="length_min" type="number" min="0" step="1" defaultValue={result.filters.lengthMin ?? ""} />
-              </div>
-              <div className="space-y-2">
-                <label className="text-sm font-medium" htmlFor="length_max">Max Length (in)</label>
-                <Input id="length_max" name="length_max" type="number" min="0" step="1" defaultValue={result.filters.lengthMax ?? ""} />
+                <Input
+                  id="price_max"
+                  name="price_max"
+                  type="number"
+                  min="0"
+                  step="1"
+                  defaultValue={result.filters.priceMax ?? ""}
+                  className="h-11 text-base"
+                />
               </div>
 
+              <details className="rounded-xl border border-border/60 bg-background/55 p-3 md:col-span-3 xl:col-span-5">
+                <summary className="cursor-pointer text-sm font-semibold text-foreground">
+                  Size filters (optional)
+                </summary>
+                <div className="mt-3 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium" htmlFor="width_min">Min Width (in)</label>
+                    <Input
+                      id="width_min"
+                      name="width_min"
+                      type="number"
+                      min="0"
+                      step="1"
+                      defaultValue={result.filters.widthMin ?? ""}
+                      className="h-11 text-base"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium" htmlFor="width_max">Max Width (in)</label>
+                    <Input
+                      id="width_max"
+                      name="width_max"
+                      type="number"
+                      min="0"
+                      step="1"
+                      defaultValue={result.filters.widthMax ?? ""}
+                      className="h-11 text-base"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium" htmlFor="length_min">Min Length (in)</label>
+                    <Input
+                      id="length_min"
+                      name="length_min"
+                      type="number"
+                      min="0"
+                      step="1"
+                      defaultValue={result.filters.lengthMin ?? ""}
+                      className="h-11 text-base"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium" htmlFor="length_max">Max Length (in)</label>
+                    <Input
+                      id="length_max"
+                      name="length_max"
+                      type="number"
+                      min="0"
+                      step="1"
+                      defaultValue={result.filters.lengthMax ?? ""}
+                      className="h-11 text-base"
+                    />
+                  </div>
+                </div>
+              </details>
+
               <div className="flex flex-wrap items-end gap-2 md:col-span-3 xl:col-span-5">
-                <Button type="submit">Apply Filters</Button>
+                <Button type="submit" className="h-11 px-5 text-base">Apply Filters</Button>
                 <Button asChild variant="ghost">
                   <Link href={clearFiltersLink}>Clear</Link>
                 </Button>
@@ -266,7 +333,7 @@ export default async function InventoryPage({ searchParams }: InventoryPageProps
           </SectionCard>
 
           {!isDefaultInventoryFilters(result.filters) ? (
-            <SectionCard title="Active Filters">
+            <SectionCard title="Active Filters" tone="transparent" density="compact">
               <div className="flex flex-wrap gap-2">
                 {activeFilterItems.map((item) => (
                   <Badge key={item} variant="outline">
@@ -277,15 +344,6 @@ export default async function InventoryPage({ searchParams }: InventoryPageProps
             </SectionCard>
           ) : null}
 
-          <SectionCard title="Recommendation Support Snapshot">
-            <p className="text-sm text-muted-foreground">
-              Current filter-derived hard-constraint hint for recommendation testing:
-            </p>
-            <pre className="mt-3 overflow-auto rounded-xl border border-border bg-muted/40 p-4 text-xs">
-              {JSON.stringify(recommendationHint, null, 2)}
-            </pre>
-          </SectionCard>
-
           {result.error ? (
             <SectionCard title="Could not load inventory" description={result.error} />
           ) : result.rows.length === 0 ? (
@@ -294,28 +352,63 @@ export default async function InventoryPage({ searchParams }: InventoryPageProps
               description="No rugs matched current filters. Adjust search or broaden constraints."
             />
           ) : (
-            <SectionCard title="Inventory">
-              <div className="overflow-x-auto rounded-xl border border-border">
-                <table className="min-w-[1100px] w-full border-collapse text-sm">
+            <SectionCard title="Inventory" tone="soft" className="border-border/55">
+              <div className="space-y-3 md:hidden">
+                {result.rows.map((rug) => (
+                  <article
+                    key={rug.id}
+                    className="rounded-xl border border-border/65 bg-background/80 p-3"
+                  >
+                    <div className="mb-2 flex items-start gap-3">
+                      <div className="h-16 w-16 shrink-0 overflow-hidden rounded-md border border-border/70 bg-muted">
+                        <RugImage src={rug.primary_image_url} alt={rug.intake_label} />
+                      </div>
+                      <div>
+                        <p className="text-base font-semibold">{rug.intake_label}</p>
+                        <p className="text-xs text-muted-foreground">{rug.sku ?? rug.id}</p>
+                        <p className="mt-1 text-sm text-muted-foreground">{rug.status ?? "-"}</p>
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2 text-sm">
+                      <p>
+                        <span className="font-semibold">Price:</span> {formatPrice(rug.price)}
+                      </p>
+                      <p>
+                        <span className="font-semibold">Sale:</span> {formatPrice(rug.sale_price)}
+                      </p>
+                      <p>
+                        <span className="font-semibold">Size:</span>{" "}
+                        {formatSize(rug.width_total_in, rug.length_total_in)}
+                      </p>
+                      <p>
+                        <span className="font-semibold">Style:</span> {rug.style ?? "-"}
+                      </p>
+                    </div>
+                  </article>
+                ))}
+              </div>
+
+              <div className="hidden overflow-x-auto rounded-xl border border-border/70 md:block">
+                <table className="w-full min-w-[1080px] border-collapse text-[0.95rem]">
                   <thead className="bg-secondary/50 text-left">
                     <tr>
-                      <th className="p-3">Image</th>
-                      <th className="p-3">SKU</th>
-                      <th className="p-3">Label</th>
-                      <th className="p-3">Status</th>
-                      <th className="p-3">Price</th>
-                      <th className="p-3">Sale Price</th>
-                      <th className="p-3">Size</th>
-                      <th className="p-3">Style</th>
-                      <th className="p-3">Palette</th>
-                      <th className="p-3">Pattern</th>
-                      <th className="p-3">Best For</th>
+                      <th className="p-3 font-semibold">Image</th>
+                      <th className="p-3 font-semibold">SKU</th>
+                      <th className="p-3 font-semibold">Label</th>
+                      <th className="p-3 font-semibold">Status</th>
+                      <th className="p-3 font-semibold">Price</th>
+                      <th className="p-3 font-semibold">Sale Price</th>
+                      <th className="p-3 font-semibold">Size</th>
+                      <th className="p-3 font-semibold">Style</th>
+                      <th className="p-3 font-semibold">Palette</th>
+                      <th className="p-3 font-semibold">Pattern</th>
+                      <th className="p-3 font-semibold">Best For</th>
                     </tr>
                   </thead>
                   <tbody>
                     {result.rows.map((rug) => (
                       <tr key={rug.id} className="border-t border-border">
-                        <td className="p-3">
+                        <td className="p-3 align-top">
                           <div className="h-16 w-16 overflow-hidden rounded-md border border-border/70 bg-muted">
                             <RugImage
                               src={rug.primary_image_url}
@@ -324,7 +417,7 @@ export default async function InventoryPage({ searchParams }: InventoryPageProps
                           </div>
                         </td>
                         <td className="p-3">{rug.sku ?? "-"}</td>
-                        <td className="p-3">
+                        <td className="p-3 align-top">
                           <p className="font-medium">{rug.intake_label}</p>
                           <p className="mt-1 text-xs text-muted-foreground">{rug.id}</p>
                         </td>
@@ -344,7 +437,7 @@ export default async function InventoryPage({ searchParams }: InventoryPageProps
             </SectionCard>
           )}
 
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between gap-3">
             {prevPage ? (
               <Button asChild variant="secondary">
                 <Link href={`${pageBase}&page=${prevPage}`}>Previous</Link>

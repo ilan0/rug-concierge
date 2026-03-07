@@ -17,9 +17,14 @@ export function AccessGuard({
   ctaHref = "/",
 }: AccessGuardProps) {
   return (
-    <AppShell className="flex items-center">
-      <SectionCard title={title} description={description} className="mx-auto w-full max-w-2xl">
-        <Button asChild variant="secondary">
+    <AppShell variant="setup" className="flex items-center">
+      <SectionCard
+        title={title}
+        description={description}
+        tone="soft"
+        className="mx-auto w-full max-w-2xl"
+      >
+        <Button asChild variant="secondary" className="h-11 px-5 text-base">
           <Link href={ctaHref}>{ctaLabel}</Link>
         </Button>
       </SectionCard>

@@ -519,15 +519,18 @@ export function AppraisalScreen({ tenantId }: AppraisalScreenProps) {
   };
 
   return (
-    <AppShell>
+    <AppShell variant="workflow">
       <PageHeader
         kicker="Staff Workflow"
         title="Appraisal Studio"
         subtitle="Build clean, client-ready appraisal drafts from store rugs or customer rugs."
+        variant="workflow"
         actions={
           <div className="flex flex-wrap gap-2">
             <Badge variant="secondary">Role: Staff</Badge>
-            <Badge variant="outline">Tenant: {tenantId}</Badge>
+            <Badge variant="outline" className="hidden max-w-[18rem] truncate sm:inline-flex">
+              Tenant: {tenantId}
+            </Badge>
             <Badge variant={isFinalized ? "warning" : "outline"}>
               Status: {toReadableStatus(form.status)}
             </Badge>
@@ -535,7 +538,7 @@ export function AppraisalScreen({ tenantId }: AppraisalScreenProps) {
         }
       />
 
-      <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+      <div className="grid gap-6 xl:grid-cols-[minmax(0,1.12fr)_minmax(340px,0.88fr)]">
         <section className="space-y-4">
           {isFinalized ? (
             <Alert>
@@ -569,7 +572,12 @@ export function AppraisalScreen({ tenantId }: AppraisalScreenProps) {
           ) : null}
 
           <form onSubmit={onGenerate} className="space-y-4">
-            <SectionCard title="Step A · Choose Source" description="Tell us where this rug record is coming from.">
+            <SectionCard
+              title="Step A · Choose Source"
+              description="Tell us where this rug record is coming from."
+              tone="soft"
+              className="border-border/55"
+            >
               <div className="grid gap-2 sm:grid-cols-2">
                 <Button
                   type="button"
@@ -645,7 +653,12 @@ export function AppraisalScreen({ tenantId }: AppraisalScreenProps) {
               )}
             </SectionCard>
 
-            <SectionCard title="Step B · Essentials" description="Keep this simple. Start with these 4 fields.">
+            <SectionCard
+              title="Step B · Essentials"
+              description="Keep this simple. Start with these 4 fields."
+              tone="soft"
+              className="border-border/55"
+            >
               <div className="grid gap-3 md:grid-cols-2">
                 <div className="space-y-2">
                   <Label htmlFor="essential-appraised-value">Appraised Value (USD)</Label>
@@ -708,7 +721,7 @@ export function AppraisalScreen({ tenantId }: AppraisalScreenProps) {
               </div>
             </SectionCard>
 
-            <SectionCard title="Step C · Actions">
+            <SectionCard title="Step C · Actions" tone="soft" className="border-border/55">
               <div className="flex flex-wrap gap-2">
                 <Button type="submit" disabled={isLoading || isFinalized}>
                   {isLoading ? "Generating..." : "Generate Draft"}
@@ -744,7 +757,7 @@ export function AppraisalScreen({ tenantId }: AppraisalScreenProps) {
             </SectionCard>
           </form>
 
-          <SectionCard>
+          <SectionCard tone="transparent" density="compact">
             <Accordion
               type="single"
               collapsible
@@ -757,7 +770,12 @@ export function AppraisalScreen({ tenantId }: AppraisalScreenProps) {
                 </AccordionTrigger>
                 <AccordionContent className="pt-4">
                   <div className="grid gap-4">
-                    <SectionCard title="Customer details" contentClassName="space-y-3">
+                    <SectionCard
+                      title="Customer details"
+                      contentClassName="space-y-3"
+                      tone="transparent"
+                      density="compact"
+                    >
                       <div className="grid gap-3 md:grid-cols-2">
                         <div className="space-y-2">
                           <Label htmlFor="customer-phone">Phone</Label>
@@ -794,7 +812,12 @@ export function AppraisalScreen({ tenantId }: AppraisalScreenProps) {
                       </div>
                     </SectionCard>
 
-                    <SectionCard title="Rug details and overrides" contentClassName="space-y-3">
+                    <SectionCard
+                      title="Rug details and overrides"
+                      contentClassName="space-y-3"
+                      tone="transparent"
+                      density="compact"
+                    >
                       <div className="grid gap-3 md:grid-cols-2">
                         <div className="space-y-2">
                           <Label htmlFor="rug-type-label">Rug label/type</Label>
@@ -843,7 +866,12 @@ export function AppraisalScreen({ tenantId }: AppraisalScreenProps) {
                       </div>
                     </SectionCard>
 
-                    <SectionCard title="Staff notes" contentClassName="space-y-3">
+                    <SectionCard
+                      title="Staff notes"
+                      contentClassName="space-y-3"
+                      tone="transparent"
+                      density="compact"
+                    >
                       <Textarea
                         id="staff-notes"
                         value={form.staff_notes}
@@ -853,7 +881,7 @@ export function AppraisalScreen({ tenantId }: AppraisalScreenProps) {
                       />
                     </SectionCard>
 
-                    <SectionCard>
+                    <SectionCard tone="transparent" density="compact">
                       <Accordion type="single" collapsible>
                         <AccordionItem value="advanced" className="border-0">
                           <AccordionTrigger className="py-0 text-sm font-semibold hover:no-underline">
@@ -892,7 +920,12 @@ export function AppraisalScreen({ tenantId }: AppraisalScreenProps) {
         </section>
 
         <section className="space-y-4">
-          <SectionCard title="Preview" description="Client-facing draft format.">
+          <SectionCard
+            title="Preview"
+            description="Client-facing draft format."
+            tone="soft"
+            className="border-border/55"
+          >
             {!result ? (
               <div className="rounded-lg border border-dashed border-border bg-background/70 p-5 text-sm text-muted-foreground">
                 Generate a draft to view the document preview.
@@ -943,12 +976,22 @@ export function AppraisalScreen({ tenantId }: AppraisalScreenProps) {
                 </TabsContent>
 
                 <TabsContent value="internal" className="mt-3 space-y-3">
-                  <SectionCard title="Generation Notes" contentClassName="space-y-2">
+                  <SectionCard
+                    title="Generation Notes"
+                    contentClassName="space-y-2"
+                    tone="transparent"
+                    density="compact"
+                  >
                     <p className="text-sm">{result.assistant_message}</p>
                     {result.notes ? <p className="text-sm text-muted-foreground">{result.notes}</p> : null}
                   </SectionCard>
 
-                  <SectionCard title="Missing Fields" contentClassName="space-y-2">
+                  <SectionCard
+                    title="Missing Fields"
+                    contentClassName="space-y-2"
+                    tone="transparent"
+                    density="compact"
+                  >
                     <p className="text-sm"><strong>Required:</strong> {result.quality.missing_required_fields.join(", ") || "None"}</p>
                     <p className="text-sm"><strong>Recommended:</strong> {result.quality.missing_recommended_fields.join(", ") || "None"}</p>
                     <p className="text-sm"><strong>Evidence used:</strong> {result.quality.evidence_fields_used.join(", ") || "None"}</p>
@@ -958,7 +1001,12 @@ export function AppraisalScreen({ tenantId }: AppraisalScreenProps) {
             )}
           </SectionCard>
 
-          <SectionCard title="Recent Drafts" description={draftsLoading ? "Loading..." : `${draftRows.length} drafts`}>
+          <SectionCard
+            title="Recent Drafts"
+            description={draftsLoading ? "Loading..." : `${draftRows.length} drafts`}
+            tone="soft"
+            className="border-border/55"
+          >
             {draftRows.length === 0 ? (
               <p className="text-sm text-muted-foreground">No drafts yet.</p>
             ) : (
