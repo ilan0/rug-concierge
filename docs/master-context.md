@@ -23,10 +23,11 @@ Primary objective: trust, correctness, and operational usefulness.
 
 ## Current Runtime Surfaces
 
-- UI pages: `/`, `/concierge`, `/trade`, `/inventory`, `/appraisal`
+- UI pages: `/`, `/concierge`, `/trade`, `/inventory`, `/intake`, `/appraisal`
 - API routes:
   - `/api/chat`
   - `/api/recommend`
+  - `/api/inventory/intake`
   - `/api/appraisal/generate`
   - `/api/debug/trace` (developer-only)
   - `/api/ui-role` (cookie sync)

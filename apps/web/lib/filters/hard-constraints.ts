@@ -30,11 +30,15 @@ export function filterByHardConstraints(
     if (rug.status !== "available") return false;
 
     const effectivePrice =
-      typeof rug.sale_price_usd === "number" ? rug.sale_price_usd : rug.price_usd;
+      typeof rug.sale_price_usd === "number"
+        ? rug.sale_price_usd
+        : typeof rug.price_usd === "number"
+          ? rug.price_usd
+          : 0;
 
     if (
       typeof constraints.budgetMax === "number" &&
-      (typeof effectivePrice !== "number" || effectivePrice > constraints.budgetMax)
+      effectivePrice > constraints.budgetMax
     ) {
       return false;
     }

@@ -119,6 +119,34 @@ async function getJson(endpoint, extraHeaders = {}) {
   };
 }
 
+async function postMultipart(endpoint, formData, extraHeaders = {}) {
+  const response = await fetch(`${baseUrl}${endpoint}`, {
+    method: "POST",
+    headers: {
+      ...extraHeaders,
+    },
+    body: formData,
+  });
+
+  const raw = await response.text();
+  let json = null;
+  try {
+    json = JSON.parse(raw);
+  } catch {
+    json = null;
+  }
+
+  return {
+    endpoint,
+    status: response.status,
+    json,
+    raw,
+    headers: {
+      intake_trace_id: response.headers.get("x-intake-route-trace-id"),
+    },
+  };
+}
+
 function pushResult(results, name, pass, details) {
   results.push({ name, pass, details });
 }
@@ -317,6 +345,164 @@ async function run() {
       endpoint: recommendMissingTenant.endpoint,
       status: recommendMissingTenant.status,
       debug: recommendMissingTenant.headers,
+    }
+  );
+
+  const intakeBaseForm = new FormData();
+  intakeBaseForm.set("role", "store_staff");
+  intakeBaseForm.set("tenant_id", tenantId);
+  intakeBaseForm.set("intake_label", `QA Intake ${Date.now()}`);
+  intakeBaseForm.set("width_ft", "8");
+  intakeBaseForm.set("width_in", "0");
+  intakeBaseForm.set("length_ft", "10");
+  intakeBaseForm.set("length_in", "0");
+  intakeBaseForm.set(
+    "image",
+    new File([new Uint8Array([137, 80, 78, 71, 13, 10, 26, 10])], "qa.png", {
+      type: "image/png",
+    })
+  );
+  const intakeHappyPath = await postMultipart(
+    "/api/inventory/intake",
+    intakeBaseForm,
+    {
+      Cookie: "rug_ui_role=store_staff",
+    }
+  );
+  pushResult(
+    results,
+    "inventory intake happy path returns 200 and rug envelope",
+    intakeHappyPath.status === 200 &&
+      intakeHappyPath.json &&
+      typeof intakeHappyPath.json === "object" &&
+      typeof intakeHappyPath.json.rug === "object" &&
+      intakeHappyPath.json.rug &&
+      typeof intakeHappyPath.json.rug.id === "string",
+    {
+      endpoint: intakeHappyPath.endpoint,
+      status: intakeHappyPath.status,
+      debug: intakeHappyPath.headers,
+    }
+  );
+
+  const intakeMissingImageForm = new FormData();
+  intakeMissingImageForm.set("role", "store_staff");
+  intakeMissingImageForm.set("tenant_id", tenantId);
+  intakeMissingImageForm.set("intake_label", "QA Missing Image");
+  intakeMissingImageForm.set("width_ft", "5");
+  intakeMissingImageForm.set("width_in", "0");
+  intakeMissingImageForm.set("length_ft", "7");
+  intakeMissingImageForm.set("length_in", "6");
+  const intakeMissingImage = await postMultipart(
+    "/api/inventory/intake",
+    intakeMissingImageForm,
+    {
+      Cookie: "rug_ui_role=store_staff",
+    }
+  );
+  pushResult(
+    results,
+    "inventory intake missing image fails validation (400)",
+    intakeMissingImage.status === 400,
+    {
+      endpoint: intakeMissingImage.endpoint,
+      status: intakeMissingImage.status,
+      debug: intakeMissingImage.headers,
+    }
+  );
+
+  const intakeInvalidInchesForm = new FormData();
+  intakeInvalidInchesForm.set("role", "store_staff");
+  intakeInvalidInchesForm.set("tenant_id", tenantId);
+  intakeInvalidInchesForm.set("intake_label", "QA Invalid Inches");
+  intakeInvalidInchesForm.set("width_ft", "5");
+  intakeInvalidInchesForm.set("width_in", "15");
+  intakeInvalidInchesForm.set("length_ft", "7");
+  intakeInvalidInchesForm.set("length_in", "6");
+  intakeInvalidInchesForm.set(
+    "image",
+    new File([new Uint8Array([137, 80, 78, 71])], "qa-invalid.png", {
+      type: "image/png",
+    })
+  );
+  const intakeInvalidInches = await postMultipart(
+    "/api/inventory/intake",
+    intakeInvalidInchesForm,
+    {
+      Cookie: "rug_ui_role=store_staff",
+    }
+  );
+  pushResult(
+    results,
+    "inventory intake rejects invalid inch ranges (400)",
+    intakeInvalidInches.status === 400,
+    {
+      endpoint: intakeInvalidInches.endpoint,
+      status: intakeInvalidInches.status,
+      debug: intakeInvalidInches.headers,
+    }
+  );
+
+  const intakeMissingTenantForm = new FormData();
+  intakeMissingTenantForm.set("role", "store_staff");
+  intakeMissingTenantForm.set("intake_label", "QA Missing Tenant");
+  intakeMissingTenantForm.set("width_ft", "5");
+  intakeMissingTenantForm.set("width_in", "0");
+  intakeMissingTenantForm.set("length_ft", "7");
+  intakeMissingTenantForm.set("length_in", "6");
+  intakeMissingTenantForm.set(
+    "image",
+    new File([new Uint8Array([137, 80, 78, 71])], "qa-missing-tenant.png", {
+      type: "image/png",
+    })
+  );
+  const intakeMissingTenant = await postMultipart(
+    "/api/inventory/intake",
+    intakeMissingTenantForm,
+    {
+      Cookie: "rug_ui_role=store_staff",
+    }
+  );
+  pushResult(
+    results,
+    "inventory intake requires tenant context (400)",
+    intakeMissingTenant.status === 400,
+    {
+      endpoint: intakeMissingTenant.endpoint,
+      status: intakeMissingTenant.status,
+      debug: intakeMissingTenant.headers,
+    }
+  );
+
+  const intakeRoleMismatchForm = new FormData();
+  intakeRoleMismatchForm.set("role", "store_staff");
+  intakeRoleMismatchForm.set("tenant_id", tenantId);
+  intakeRoleMismatchForm.set("intake_label", "QA Role Mismatch");
+  intakeRoleMismatchForm.set("width_ft", "5");
+  intakeRoleMismatchForm.set("width_in", "0");
+  intakeRoleMismatchForm.set("length_ft", "7");
+  intakeRoleMismatchForm.set("length_in", "6");
+  intakeRoleMismatchForm.set(
+    "image",
+    new File([new Uint8Array([255, 216, 255, 224])], "qa.jpg", {
+      type: "image/jpeg",
+    })
+  );
+  const intakeRoleMismatch = await postMultipart(
+    "/api/inventory/intake",
+    intakeRoleMismatchForm,
+    {
+      Cookie: "rug_ui_role=retail_customer",
+    }
+  );
+  pushResult(
+    results,
+    "inventory intake role mismatch rejected (403)",
+    intakeRoleMismatch.status === 403,
+    {
+      endpoint: intakeRoleMismatch.endpoint,
+      status: intakeRoleMismatch.status,
+      debug: intakeRoleMismatch.headers,
     }
   );
 

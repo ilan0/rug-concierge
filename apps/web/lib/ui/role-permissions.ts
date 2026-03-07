@@ -30,6 +30,12 @@ const ALL_ROUTE_CARDS: UiRouteCard[] = [
       "Read-only owner/staff screen for trust and transparency across loaded inventory.",
   },
   {
+    href: "/intake",
+    title: "Inventory Intake",
+    description:
+      "Fast mobile-first workflow to intake a rug with photo, label, and dimensions.",
+  },
+  {
     href: "/appraisal",
     title: "Appraisal Draft Studio",
     description:

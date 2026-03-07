@@ -19,6 +19,7 @@ Use this map first when you start a task. Goal: find the right files in under 15
 | Chat API orchestration | `apps/web/app/api/chat/route.ts` | `apps/web/lib/chat/router.ts`, `apps/web/lib/chat/handlers/` | smoke suite + targeted curl |
 | Recommendation endpoint | `apps/web/app/api/recommend/route.ts` | `apps/web/lib/recommend/pipeline.ts`, `apps/web/lib/filters/` | `TENANT_ID=<tenant> npm run qa:functional` + quality route cases |
 | Supabase inventory query | `apps/web/lib/inventory/list.ts` | `apps/web/lib/supabase/admin.ts`, `apps/web/lib/recommend/pipeline.ts` | inventory page + smoke |
+| Inventory intake workflow | `apps/web/app/api/inventory/intake/route.ts` | `apps/web/app/intake/page.tsx`, `apps/web/components/intake/intake-screen.tsx` | manual `/intake` + functional suite |
 | Session persistence | `apps/web/lib/chat/session-store.ts` | `apps/web/lib/chat/session-repo.ts`, `packages/db/migrations/20260223_chat_sessions.sql` | session curl sequence + DB check |
 | Prompt layering | `apps/web/lib/prompts/recommendation-stack.ts` | `apps/web/lib/prompts/layers.ts`, `apps/web/lib/chat/prompt-builder.ts`, `docs/prompts/` | smoke report `prompt_layer_preview` + artifacts |
 | Role/auth policy | `apps/web/lib/auth/policy.ts` | `apps/web/lib/auth/request-role.ts`, `apps/web/app/api/ui-role/route.ts` | cookie mismatch curl checks |
