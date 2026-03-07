@@ -1,6 +1,7 @@
 type ErrorMappingContext =
   | "chat"
   | "appraisal"
+  | "intake"
   | "debug_trace"
   | "generic";
 
@@ -53,6 +54,19 @@ export function mapApiErrorToFriendlyMessage(
     if (input.context === "appraisal") {
       return "Please review appraisal input fields and try again.";
     }
+    if (input.context === "intake") {
+      if (
+        includesAny(raw, [
+          "image",
+          "width",
+          "length",
+          "intake_label",
+        ])
+      ) {
+        return "Please complete the required intake fields and try again.";
+      }
+      return "Please review intake inputs and try again.";
+    }
     return "Your request needs a quick fix before it can be processed. Please review and try again.";
   }
 
@@ -62,6 +76,9 @@ export function mapApiErrorToFriendlyMessage(
     }
     if (input.context === "appraisal") {
       return "Appraisal generation is temporarily unavailable. Please try again shortly.";
+    }
+    if (input.context === "intake") {
+      return "Intake save failed right now. Please retry in a moment.";
     }
   }
 

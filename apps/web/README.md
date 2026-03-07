@@ -22,6 +22,10 @@ This app is the primary UI shell for Rug Concierge MVP.
   - read-only inventory browser for owner/staff transparency
   - uses server-side Supabase query from `rugs`
   - supports URL-driven search + filters (status, price range, size range, sort) and pagination
+- `/intake`:
+  - mobile-first staff intake workflow
+  - captures required photo, one-line label, and size
+  - posts multipart payload to `/api/inventory/intake` and keeps save-next loop in-page
 - `/appraisal`:
   - staff-facing Appraisal Studio v3 (step-based flow)
   - uses source toggle: store rug vs customer rug
@@ -34,6 +38,7 @@ This app is the primary UI shell for Rug Concierge MVP.
 - `/api/recommend`
 - `/api/appraisal/generate`
 - `/api/debug/trace` (developer-only trace reader)
+- `/api/inventory/intake`
 - `/api/ui-role` (syncs role cookie used by API authorization)
 - `/api/ui-access` (optional pilot access passcode gate)
 

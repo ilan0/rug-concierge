@@ -21,6 +21,7 @@ Implementation modules:
 - `chat.recommend`
 - `chat.trade_support`
 - `inventory.read`
+- `inventory.intake`
 - `appraisal.generate`
 - `review.controls`
 - `debug.trace.read`
@@ -28,18 +29,19 @@ Implementation modules:
 
 ## Capability Matrix
 
-| Role | General Chat | Recommendations | Trade Support | Inventory | Appraisal | Review Controls | Debug Trace |
-| --- | --- | --- | --- | --- | --- | --- | --- |
-| `retail_customer` | yes | yes | no | no | no | no | no |
-| `trade_client` | yes | yes | yes | no | no | no | no |
-| `store_staff` | yes | yes | yes | yes | yes | yes | no |
-| `developer` | yes | yes | yes | yes | yes | yes | yes |
+| Role | General Chat | Recommendations | Trade Support | Inventory Read | Inventory Intake | Appraisal | Review Controls | Debug Trace |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| `retail_customer` | yes | yes | no | no | no | no | no | no |
+| `trade_client` | yes | yes | yes | no | no | no | no | no |
+| `store_staff` | yes | yes | yes | yes | yes | yes | yes | no |
+| `developer` | yes | yes | yes | yes | yes | yes | yes | yes |
 
 ## UI Route Policy
 
 - `/concierge` -> `chat.general`
 - `/trade` -> `chat.trade_support`
 - `/inventory` -> `inventory.read`
+- `/intake` -> `inventory.intake`
 - `/appraisal` -> `appraisal.generate`
 
 Home screen and workspace navigation use this same policy map for visibility.
@@ -54,6 +56,7 @@ Home screen and workspace navigation use this same policy map for visibility.
 - Privileged roles (`store_staff`, `developer`) require cookie-resolved role.
 - `/api/chat` enforces mode-specific capabilities and review controls.
 - `/api/recommend` enforces `chat.recommend`.
+- `/api/inventory/intake` enforces `inventory.intake`.
 - `/api/appraisal/generate` enforces `appraisal.generate`.
 - `/api/debug/trace` enforces `debug.trace.read`  
   - unauthorized returns `403` in development and `404` in production.

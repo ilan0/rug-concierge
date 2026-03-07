@@ -33,6 +33,7 @@ Recommendation flow is backend-first and inventory-grounded.
 - availability (always)
 - size (when provided, with tolerance and rotation support)
 - budget (when provided; sale/list logic handled in pipeline)
+  - intake policy: when both sale/list price are missing, candidate is treated as `$0` for budget filtering
 - tenant_id scoping (always)
 
 ## Soft Signals (Ranking Only)

@@ -414,7 +414,10 @@ async function runCandidateQuery(input: {
     }
 
     if (wantsBudgetList) {
-      query = query.is("sale_price", null).lte("price", budgetMax);
+      query = query
+        .is("sale_price", null)
+        // Intake policy: null list price is treated as zero for budget eligibility.
+        .or(`price.lte.${budgetMax},price.is.null`);
     }
   }
 
@@ -442,7 +445,7 @@ async function runCandidateQuery(input: {
             : wantsBudgetSale
               ? "sale_price"
               : wantsBudgetList
-                ? "price"
+                ? "price_or_null_zero"
                 : null,
       },
       row_count: 0,
@@ -473,7 +476,7 @@ async function runCandidateQuery(input: {
           : wantsBudgetSale
             ? "sale_price"
             : wantsBudgetList
-              ? "price"
+              ? "price_or_null_zero"
               : null,
     },
     row_count: data.length,

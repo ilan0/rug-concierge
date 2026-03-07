@@ -4,12 +4,18 @@ import {
 } from "@/lib/auth/capabilities";
 import type { AppRole } from "@/lib/auth/roles";
 
-export type AppRoutePath = "/concierge" | "/trade" | "/inventory" | "/appraisal";
+export type AppRoutePath =
+  | "/concierge"
+  | "/trade"
+  | "/inventory"
+  | "/intake"
+  | "/appraisal";
 
 const ROUTE_CAPABILITY_REQUIREMENT: Record<AppRoutePath, AppCapability> = {
   "/concierge": "chat.general",
   "/trade": "chat.trade_support",
   "/inventory": "inventory.read",
+  "/intake": "inventory.intake",
   "/appraisal": "appraisal.generate",
 };
 

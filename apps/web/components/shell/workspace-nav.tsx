@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 
 type WorkspaceNavProps = {
   role: AppRole | null;
-  currentPath: "/concierge" | "/trade" | "/inventory" | "/appraisal";
+  currentPath: "/concierge" | "/trade" | "/inventory" | "/intake" | "/appraisal";
   variant?: "default" | "workspace-soft" | "concierge-minimal";
   debugToggle?: {
     enabled: boolean;
@@ -18,6 +18,7 @@ const WORKSPACE_LINKS = [
   { href: "/concierge", label: "Concierge" },
   { href: "/trade", label: "Trade" },
   { href: "/inventory", label: "Inventory" },
+  { href: "/intake", label: "Intake" },
   { href: "/appraisal", label: "Appraisal" },
 ] as const;
 
