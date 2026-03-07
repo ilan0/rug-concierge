@@ -1,103 +1,56 @@
 # Web App (Next.js)
 
-This app is the primary UI shell for Rug Concierge MVP.
+Primary UI shell for Rug Concierge MVP.
 
 ## Routes
 
-- `/`:
-  - role selection + workspace entry
-  - selected role controls visible routes and access
-  - developer role option is controlled by `NEXT_PUBLIC_ENABLE_DEVELOPER_ROLE`
-  - role switcher visibility is controlled by `NEXT_PUBLIC_ENABLE_ROLE_SWITCHER`
-  - when role switcher is hidden, `NEXT_PUBLIC_PILOT_DEFAULT_ROLE` is auto-synced
-- `/concierge`:
-  - main customer-facing input flow
-  - posts user turns to `/api/chat`
-  - renders general chat and recommendation responses
-- `/trade`:
-  - trade/designer repeat-buyer workflow
-  - reuses shared chat shell with trade-specific context controls
-  - injects trade and project context into `/api/chat` turns for personalization
-- `/inventory`:
-  - read-only inventory browser for owner/staff transparency
-  - uses server-side Supabase query from `rugs`
-  - supports URL-driven search + filters (status, price range, size range, sort) and pagination
-- `/intake`:
-  - mobile-first staff intake workflow
-  - captures required photo, one-line label, and size
-  - posts multipart payload to `/api/inventory/intake` and keeps save-next loop in-page
-- `/appraisal`:
-  - staff-facing Appraisal Studio v3 (step-based flow)
-  - uses source toggle: store rug vs customer rug
-  - supports generate/save/finalize with finalized lock behavior
-  - advanced tools (copy/export/internal metadata) are collapsed by default
+- `/`: role/tenant setup + workspace entry
+- `/concierge`: retail/staff chat workflow via `/api/chat`
+- `/trade`: trade workflow via `/api/chat`
+- `/inventory`: tenant-scoped inventory browser
+- `/intake`: staff/developer mobile-first intake workflow
+- `/appraisal`: staff/developer appraisal workflow
 
-## API Routes (same project)
+## API Routes
 
 - `/api/chat`
 - `/api/recommend`
-- `/api/appraisal/generate`
-- `/api/debug/trace` (developer-only trace reader)
 - `/api/inventory/intake`
-- `/api/ui-role` (syncs role cookie used by API authorization)
-- `/api/ui-access` (optional pilot access passcode gate)
-
-Recommendation API note:
-- `/api/recommend` now requires `tenant_id`.
-- `/api/chat` recommendation turns require tenant context (request tenant or session-bound tenant).
-- `/inventory` is tenant-scoped via UI tenant cookie context.
-
-Pilot access note:
-- If `PILOT_ACCESS_PASSCODE` is set, API routes/pages require passcode unlock via Home.
+- `/api/appraisal/generate`
+- `/api/appraisal/rugs`
+- `/api/appraisal/drafts`
+- `/api/debug/trace`
+- `/api/ui-role`
+- `/api/ui-access`
 
 ## Role Policy
 
-- Central role/capability policy lives in:
-  - `/apps/web/lib/auth/roles.ts`
-  - `/apps/web/lib/auth/capabilities.ts`
-  - `/apps/web/lib/auth/policy.ts`
-  - `/apps/web/lib/auth/request-role.ts`
-- API routes resolve role from cookie first and reject cookie/body mismatch.
-- Privileged roles (`store_staff`, `developer`) require cookie-resolved role.
+Policy source:
+- `/apps/web/lib/auth/roles.ts`
+- `/apps/web/lib/auth/capabilities.ts`
+- `/apps/web/lib/auth/policy.ts`
+- `/apps/web/lib/auth/request-role.ts`
 
-## Styling Standard (Global)
+Rules:
+- cookie role first
+- cookie/body mismatch rejected
+- privileged roles require cookie role
 
-UI stack is now:
+## Styling
+
 - Tailwind CSS
-- shadcn/ui components (Radix primitives under the hood)
-- CSS variable theme in `/apps/web/app/globals.css`
+- shadcn/ui components
+- shared primitives in `/apps/web/components/ui/*`
 
-Use these shared primitives first:
-- `/apps/web/components/ui/app-shell.tsx`
-- `/apps/web/components/ui/page-header.tsx`
-- `/apps/web/components/ui/section-card.tsx`
-- `/apps/web/components/ui/form-field.tsx`
-- standard controls in `/apps/web/components/ui/*` (`button`, `input`, `textarea`, `sheet`, etc.)
+## Workspace Nav
 
-For any new page:
-1. Wrap with `AppShell`
-2. Add `PageHeader`
-3. Compose sections from `SectionCard`
-4. Avoid page-specific CSS unless absolutely necessary
+Shared role-aware nav:
+- `/apps/web/components/shell/workspace-nav.tsx`
 
-## Shared Workspace Shell
+## Core Docs
 
-- Shared role-aware navigation:
-  - `/apps/web/components/shell/workspace-nav.tsx`
-- Used by concierge/trade/inventory/appraisal pages for consistent workspace routing.
-
-## Contributor Onboarding
-
-- Repo-level feature map:
-  - `../../docs/contributor-map.md`
-- One-page project truth:
-  - `../../docs/master-context.md`
-
-## Lockfile Policy
-
-- Use npm workspaces from repo root.
-- Canonical lockfile is root `package-lock.json`.
-- Do not commit `apps/web/package-lock.json`.
+- `../../docs/master-context.md`
+- `../../docs/testing/README.md`
 
 ## Local Run
 
@@ -110,4 +63,13 @@ npm run dev
 ```bash
 npm --workspace apps/web run lint
 npm --workspace apps/web run build
+```
+
+## QA (Repo Root)
+
+```bash
+TENANT_ID=<tenant-uuid> npm run qa:functional
+TENANT_ID=<tenant-uuid> npm run qa:quality
+TENANT_ID=<tenant-uuid> npm run qa:intake
+TENANT_ID=<tenant-uuid> npm run qa:intake:loop
 ```

@@ -1,140 +1,98 @@
-# Schema (MVP)
+# Data Schema (Runtime Contract View)
 
-## tenants
-Represents a rug business.
+This doc describes the data shape expected by current runtime code.
+It is a practical contract, not a full migration history.
+
+## Multi-Tenant Rule
+
+Business tables are tenant scoped via `tenant_id`.
+Inventory-backed APIs must never cross tenant boundaries.
+
+## Core Tables
+
+### `tenants`
 
 - `id`
 - `name`
 - `settings` (JSON)
-  - branding (logo, letterhead refs)
-  - trade defaults (workflow preferences, optional)
-- Used for multi-tenancy and isolation
 
----
-
-## profiles
-Maps authenticated users to a tenant.
-
-- `id`
-- `user_id` (auth)
-- `tenant_id`
-- `role` (v1: internal / public)
-
----
-
-## trade_clients
-Designers and repeat trade buyers.
+### `trade_clients`
 
 - `id`
 - `tenant_id`
 - `name`
 - `company`
 - `contact_info`
-- `preferences` (JSON)
-  - workflow & presentation preferences
-  - NOT personal aesthetic taste
-- Used for continuity and efficiency, not filtering
+- `preferences` (JSON; soft signals only)
 
----
+### `rugs`
 
-## rugs
-One row per physical rug in inventory.
-
-Required:
+Runtime-required fields:
 - `id`
 - `tenant_id`
 - `intake_label`
-- `status` (available, sold, on_hold)
-- `width_ft`, `width_in`
-- `length_ft`, `length_in`
-- `width_total_in`
-- `length_total_in`
-- `price`
-- `sale_price` (optional)
+- `status` (`available`, `sold`, `on_hold`)
+- `width_ft`, `width_in`, `length_ft`, `length_in`
+- `width_total_in`, `length_total_in`
+- `price` (nullable)
+- `sale_price` (nullable)
 
-Optional / enrichable:
+Optional enrichment fields:
+- `sku`
 - `style`
 - `origin_country`
 - `palette`
 - `pattern`
 - `condition`
-- `best_for` (soft guidance only)
-- hashtags (text[])
+- `best_for`
+- `hashtags`
 - `public_description`
 - `internal_notes`
-- `custom_fields` (JSON)
+- `custom_fields`
 
-Designed for fast intake + later enrichment.
+Intake V1 write defaults:
+- `status = "available"`
+- `price = null`
+- `sale_price = null`
 
----
+### `rug_images`
 
-## rug_images
-Image metadata for rugs.
-
-- `id`
+Runtime-used fields:
 - `tenant_id`
 - `rug_id`
-- `storage_path`
-- `sort_order`
+- `path` (storage object key, not full URL)
 - `is_primary`
+- `sort_order`
 
-Actual image files live in Supabase Storage.
-
----
-
-## appraisals
-Appraisal drafts and finals.
+### `appraisals`
 
 - `id`
 - `tenant_id`
 - `rug_id` (nullable for customer-owned rugs)
-- `customer_info`
-- `description_text`
-- `appraised_value`
-- `status` (draft, finalized)
-- `custom_fields` (JSON)
+- `status` (`draft`, `finalized`, plus workflow statuses)
+- appraisal context/payload fields used by appraisal APIs
 
-Used internally only. AI generates drafts; staff approves final.
+### `chat_sessions`
 
----
-
-## chat_sessions
-Backend-owned session state for chat orchestration.
-
-- `session_id` (primary key)
-- `tenant_id` (nullable for non-tenant test flows)
+- `session_id`
+- `tenant_id` (nullable in limited non-tenant flows)
 - `role`
 - `session_data` (JSONB)
-  - chat history
-  - recommendation state
-  - trade context
-  - project context
-  - review state
-- `created_at`
-- `updated_at`
+- `created_at`, `updated_at`
 
-Used to persist mode/routing context across server restarts.
-
----
-
-## chat_messages
-Append-only turn history linked to a chat session.
+### `chat_messages`
 
 - `id`
 - `session_id`
 - `tenant_id`
-- `role` (`user` | `assistant`)
-- `mode` (currently `general_chat` | `recommendation`; historical rows may include `appraisal`)
+- `role` (`user` or `assistant`)
+- `mode`
 - `content`
-- `metadata` (JSONB; includes review action context when present)
+- `metadata` (JSONB)
 - `created_at`
 
-Used for replay/debug/history and later analytics.
+## Storage
 
----
-
-## Notes
-- All business-owned tables include `tenant_id`
-- RLS enforces isolation
-- No schema assumes complete data
-- AI operates only on explicit fields
+- Supabase bucket: `rug-images`
+- Object key convention: `TENANT_UUID/RUG_UUID/<filename>`
+- Public URL generated at runtime from bucket + key

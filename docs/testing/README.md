@@ -1,26 +1,31 @@
-# Testing (Current)
+# Testing Guide
 
-Use only two suites:
+All suites require `TENANT_ID=<tenant-uuid>`.
 
-1. Functionality (app runs + APIs work)
-2. Quality (core chat behavior)
+## Canonical Suites
 
-## Run
+1. `npm run qa:functional`
+2. `npm run qa:quality`
+3. `npm run qa:intake`
 
-```bash
-TENANT_ID=<tenant-uuid> npm run qa:functional
-TENANT_ID=<tenant-uuid> npm run qa:quality
-```
+Shortcuts:
+- `npm run qa` -> functional
+- `npm run qa:all` -> functional + quality
+- `npm run qa:intake:loop` -> gated intake loop
 
-Default shortcut:
+## Intake Loop Gates
 
-```bash
-TENANT_ID=<tenant-uuid> npm run qa
-```
+`qa:intake:loop` requires:
+- intake matrix pass
+- functional pass
+- quality pass
+- two consecutive green cycles
+- zero open P0/P1 intake defects
 
-## Outputs (overwritten each run)
+## Output Files
 
-- `scripts/testing/functionality/latest-functional.md`
-- `scripts/testing/quality/latest-quality.md`
-
-No historical run folders are kept by the QA scripts.
+- Functional: `scripts/testing/functionality/latest-functional.md`
+- Quality: `scripts/testing/quality/latest-quality.md`
+- Intake matrix: `scripts/testing/intake/latest-intake.md`
+- Intake loop: `scripts/testing/intake/latest-intake-loop.md`
+- Intake artifacts: `docs/testing/artifacts/intake/<run-id>/...`

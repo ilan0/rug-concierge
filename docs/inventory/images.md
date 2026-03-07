@@ -1,35 +1,36 @@
-# Rug Images (MVP)
+# Rug Images
 
-Rug images are read from Supabase Storage bucket `rug-images` and mapped from `rug_images` table rows.
+Runtime image model for inventory and intake.
 
-## Table Expectations
+## Storage
 
-- Table: `rug_images`
-- Required columns used by runtime:
-  - `tenant_id`
-  - `rug_id`
-  - `path`
-  - `is_primary`
-  - `sort_order`
-  - `created_at`
+- Bucket: `rug-images`
+- `rug_images.path` stores object keys only (no full URL)
+- Path convention:
+  - `TENANT_UUID/RUG_UUID/front.jpg`
+  - `TENANT_UUID/RUG_UUID/detail-1.jpg`
 
-Runtime always filters by `tenant_id` and by target `rug_id` list.
+Public URLs are generated at runtime with Supabase storage API.
 
-## Path Convention
+## `rug_images` Runtime Fields
 
-Store only object keys in `rug_images.path` (not full URLs), for example:
+- `tenant_id`
+- `rug_id`
+- `path`
+- `is_primary`
+- `sort_order`
 
-- `TENANT_UUID/RUG_UUID/front.jpg`
-- `TENANT_UUID/RUG_UUID/detail-1.jpg`
+## Selection Behavior (Current MVP)
 
-Public URLs are generated at runtime with Supabase `storage.from("rug-images").getPublicUrl(path)`.
+- Runtime queries `rug_images` by `tenant_id` + rug IDs.
+- Expected data shape is one primary image row per rug.
+- If multiple valid rows exist for a rug, first valid row returned is used.
+- If no valid image row exists, UI falls back to placeholder.
 
-## Primary Image Selection
+## Intake Interaction
 
-Per rug, the selected image is the first by this priority:
+`POST /api/inventory/intake` writes:
+- storage object to `rug-images`
+- one `rug_images` row with `is_primary=true`, `sort_order=0`
 
-1. `is_primary DESC`
-2. `sort_order ASC`
-3. `created_at ASC`
-
-If no image row exists (or URL cannot be generated), UI falls back to a placeholder.
+On downstream failure, intake performs compensating cleanup to avoid orphan rows/files.

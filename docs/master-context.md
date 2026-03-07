@@ -1,39 +1,45 @@
 # Rug Concierge Master Context
 
-This file is the one-page source of truth for a fresh chat.
+Canonical source of truth for current runtime behavior.
 
 ## Product Goal
 
-Build an AI Rug Concierge for independent rug stores that:
-- recommends rugs from real inventory
-- supports retail and trade workflows
-- drafts appraisal documents for internal staff workflows
-
-Primary objective: trust, correctness, and operational usefulness.
+AI Rug Concierge for independent rug stores:
+- inventory-grounded recommendations
+- retail and trade conversation workflows
+- staff appraisal drafting
+- fast staff inventory intake
 
 ## Non-Negotiables
 
-- Inventory is the source of truth.
-- User chat always goes to backend first.
-- Backend owns routing, policy checks, and hard filtering.
-- Recommendation flows require tenant context (`tenant_id`) and never query cross-tenant inventory.
+- Inventory is source of truth.
+- Backend owns auth, tenant scoping, routing, and hard filtering.
 - AI ranks/explains only after backend candidate selection.
-- AI must not invent inventory facts.
-- `no_match` is a valid outcome.
+- No fabricated inventory facts.
+- Tenant isolation is mandatory for inventory-backed routes.
 
-## Current Runtime Surfaces
+## Runtime Surfaces
 
-- UI pages: `/`, `/concierge`, `/trade`, `/inventory`, `/intake`, `/appraisal`
-- API routes:
-  - `/api/chat`
-  - `/api/recommend`
-  - `/api/inventory/intake`
-  - `/api/appraisal/generate`
-  - `/api/debug/trace` (developer-only)
-  - `/api/ui-role` (cookie sync)
-  - `/api/ui-access` (optional pilot access gate)
+UI routes:
+- `/`
+- `/concierge`
+- `/trade`
+- `/inventory`
+- `/intake`
+- `/appraisal`
 
-## Role + Capability Model (Current)
+API routes:
+- `/api/chat`
+- `/api/recommend`
+- `/api/inventory/intake`
+- `/api/appraisal/generate`
+- `/api/appraisal/rugs`
+- `/api/appraisal/drafts`
+- `/api/debug/trace`
+- `/api/ui-role`
+- `/api/ui-access`
+
+## Roles and Capabilities
 
 Roles:
 - `retail_customer`
@@ -41,179 +47,128 @@ Roles:
 - `store_staff`
 - `developer`
 
-Policy source of truth:
+Policy source files:
 - `apps/web/lib/auth/roles.ts`
 - `apps/web/lib/auth/capabilities.ts`
 - `apps/web/lib/auth/policy.ts`
 - `apps/web/lib/auth/request-role.ts`
 
-Authorization rules:
-- Server resolves role from cookie first (`rug_ui_role`), request role second.
-- Cookie/request mismatch is `403`.
-- Privileged roles (`store_staff`, `developer`) require cookie-resolved role.
-- Request contract uses `role` as canonical field. `user_role` is accepted as a compatibility alias only.
+Auth rules:
+- cookie role first, request role second
+- cookie/request mismatch -> `403`
+- privileged roles require cookie-resolved role
+- `role` is canonical request field (`user_role` compatibility alias only)
 
-## Chat Routing Contract (Current)
+## Inventory Intake (V1)
 
-Single entry: `POST /api/chat`
+- UI: `/intake` (`store_staff`, `developer`)
+- API: `POST /api/inventory/intake` (`multipart/form-data`)
+- Capability: `inventory.intake`
 
-Per turn:
-1. Validate request.
-2. Resolve/enforce role.
-3. Load or create session.
-4. Update recommendation, trade, and project context.
-5. Route mode via router table:
-   - `general_chat`
-   - `recommendation`
-6. Run mode handler.
-7. Persist updated session.
-8. Return session envelope + handler response.
+Required fields:
+- image
+- `intake_label`
+- width feet/inches
+- length feet/inches
+- tenant context
 
-Response semantics:
-- `mode` = coarse route mode (`general_chat` | `recommendation`).
-- `fine_mode` = fine-grained turn mode (`general_chat`, `recommendation`, `clarifying_question`, `no_match`).
+Defaults on create:
+- `status = "available"`
+- `price = null`
+- `sale_price = null`
 
-Router behavior:
-- Review actions force recommendation mode.
-- Ambiguous messages with constraint signals return clarifying question path.
-- Recommendation mode requires tenant context. Missing tenant returns `400`.
-- Existing sessions are tenant-bound; tenant mismatch on the same `session_id` returns `403`.
+Budget policy:
+- if both sale/list prices are null, rug is treated as `0` for budget filtering
 
-## Session Model (Current)
+Image writes:
+- storage upload to `rug-images`
+- primary `rug_images` row (`is_primary=true`, `sort_order=0`)
+- compensating rollback on downstream failure
 
-Session state stores:
-- `chat_history` (bounded tail; not sent in full to model)
-- `conversation_memory` (summary + stable facts + open threads)
-- `recommendation_state` (hard constraints + soft prefs)
-- `trade_context` (trade identity metadata + preferences)
-- `project_context` (multi-room, active room)
-- `review_state` (last recommendations + review actions)
+## Chat Orchestration
 
-This supports mixed conversations without relying on model memory.
-Session state is persisted in Supabase tables (`chat_sessions`, `chat_messages`) for durability across restarts.
+Entry: `POST /api/chat`
 
-Memory behavior:
-- Constraints remain sticky until changed/cleared by user.
-- Reset intents supported:
-  - `clear/remove/ignore budget`
-  - `clear/remove/ignore size`
-  - `start over constraints` (clears size + budget)
+Turn flow:
+1. validate request
+2. resolve/enforce role
+3. resolve tenant context
+4. load/create session
+5. update recommendation/trade/project context
+6. route mode (`general_chat` or `recommendation`)
+7. run handler
+8. persist session
+9. return envelope
 
-## Recommendation Pipeline (Shared)
+Mode semantics:
+- `mode`: coarse mode
+- `fine_mode`: specific outcome (`general_chat`, `recommendation`, `clarifying_question`, `no_match`)
 
-Used by both `/api/recommend` and recommendation turns in `/api/chat`.
+Session rules:
+- constraints remain sticky until changed/cleared
+- reset intents supported for budget and size
+- tenant mismatch on reused session id -> `403`
 
-1. Parse input + merge constraints (explicit fields + extracted text hints).
-2. Validate tenant context (request tenant or existing session-bound tenant).
-3. Query Supabase with SQL-first hard filters:
-   - availability always
-   - budget when provided
-   - size when provided (tolerance + rotation support)
-   - tenant filter always
-4. Apply deterministic in-code hard checks as safety.
-5. Shape bounded candidate set for AI.
-6. If empty: return `no_match`.
-7. If non-empty: send candidate context + bounded chat context packet + prompt layers to AI.
-8. Sanitize and normalize AI output to strict schema.
-9. Apply deterministic confidence, confidence tier/factors, and `why_not`.
-10. Return structured response.
+## Recommendation Pipeline
 
-General chat model behavior:
-- `general_chat` also uses OpenAI when enabled.
-- Request includes bounded context packet only:
-  - conversation memory
-  - recent turns (last 2 user/assistant pairs)
-  - latest user message
-- Structured state context is included only when active (hard constraints and/or trade/project context).
-- Full transcript is never sent to model.
-- Deterministic fallback is used when key/request/parse fails.
-- Backend does not hard-truncate user-facing response text by character count.
-- Output brevity is controlled by schema `maxLength` + prompt rules + `max_output_tokens`.
-- AI calls use one retry on incomplete/invalid structured output before fallback.
+Used by `/api/recommend` and recommendation turns in `/api/chat`.
 
-## AI Prompting Direction
+Flow:
+1. merge explicit + inferred constraints
+2. validate tenant scope
+3. SQL-first query
+4. deterministic hard filter pass
+5. candidate shaping
+6. `no_match` if empty
+7. AI rank/explain if non-empty
+8. deterministic post-processing
 
-Recommendation prompt stack uses official prompt docs plus runtime context blocks.
-Primary docs:
-- `docs/prompts/system.md`
-- `docs/prompts/general-chat.md`
-- `docs/prompts/recommendation.md`
-- `docs/prompts/recommendation-structured-output.md`
-- `docs/prompts/appraisal.md`
-- `docs/prompts/trade-support.md` (trade role only)
+Hard constraints:
+- availability
+- tenant scope
+- budget (if provided)
+- size (if provided; tolerance + rotation)
 
-Contract enforcement:
-- API-level `json_schema` (`strict: true`) is the hard output contract.
-- Prompt structured-output instructions are behavior guidance.
+## Appraisal Flow
 
-## Appraisal Draft Flow (Current)
+Appraisal is dedicated API/page workflow, not chat mode.
 
-- Entry: dedicated appraisal APIs only:
-  - `/api/appraisal/generate`
-  - `/api/appraisal/rugs`
-  - `/api/appraisal/drafts`
-- Allowed roles: `store_staff`, `developer`.
-- Output is a structured draft for human review/export, never final authority.
-- Chat does not route to appraisal mode.
+Endpoints:
+- `POST /api/appraisal/generate`
+- `GET /api/appraisal/rugs`
+- `GET /api/appraisal/drafts`
+- `POST /api/appraisal/drafts`
 
-## Pilot UI Shell (Current)
+Rules:
+- roles: `store_staff`, `developer`
+- AI output is draft text for human review
+- finalized records are locked from edits/regeneration
 
-- Home screen selects role and syncs cookie.
-- Home screen sets tenant context (`tenant_id`) and syncs tenant cookie.
-- Role switcher is environment-controlled for pilot simplicity:
-  - `NEXT_PUBLIC_ENABLE_ROLE_SWITCHER`
-  - `NEXT_PUBLIC_PILOT_DEFAULT_ROLE`
-  - `NEXT_PUBLIC_ENABLE_DEVELOPER_ROLE`
-- Optional hosted pilot gate:
-  - `PILOT_ACCESS_PASSCODE`
-- Shared role-aware nav component used across workspace pages.
-- Developer-only debug trace affordances are hidden from non-developer roles.
-- Staff review controls are shown only in recommendation context turns.
-- Frontend styling stack:
-  - Tailwind CSS
-  - shadcn/ui component layer (Radix primitives)
-  - shared app primitives (`AppShell`, `PageHeader`, `SectionCard`, `FormField`)
-- Appraisal page is Appraisal Studio v3:
-  - step-based (source -> essentials -> actions -> optional details)
-  - advanced tools hidden by default
-  - finalized drafts are locked and require new-draft-copy for edits
+## QA and Testing
 
-## Testing + QA Artifacts
+Canonical suites:
+1. `TENANT_ID=<tenant> npm run qa:functional`
+2. `TENANT_ID=<tenant> npm run qa:quality`
+3. `TENANT_ID=<tenant> npm run qa:intake`
 
-- Two canonical QA suites:
-  1. Functionality (`TENANT_ID=<tenant> npm run qa:functional`)
-  2. Quality (`TENANT_ID=<tenant> npm run qa:quality`)
-- Optional extended quality:
-  - `TENANT_ID=<tenant> node scripts/qa.mjs quality --extended`
-  - if model latency spikes: `QA_CHAT_TIMEOUT_MS=90000`
-- Latest outputs are overwritten each run:
-  - `scripts/testing/functionality/latest-functional.md`
-  - `scripts/testing/quality/latest-quality.md`
-- Trace channels remain available for developer debug flows:
-  - `chat-route`
-  - `recommendation-pipeline`
-  - `general-chat-ai`
-  - `appraisal-ai`
+Intake gated loop:
+- `TENANT_ID=<tenant> npm run qa:intake:loop`
+- up to 10 cycles
+- requires two consecutive green cycles for intake + functional + quality
+- requires zero open P0/P1 intake defects
 
-## Contributor Onboarding
+Latest output files:
+- `scripts/testing/functionality/latest-functional.md`
+- `scripts/testing/quality/latest-quality.md`
+- `scripts/testing/intake/latest-intake.md`
+- `scripts/testing/intake/latest-intake-loop.md`
 
-- Primary edit map:
-  - `docs/contributor-map.md`
-- New contributors should start with:
-  1. `docs/master-context.md`
-  2. `docs/contributor-map.md`
-  3. `docs/design/chat-orchestration.md`
+Intake artifacts:
+- `docs/testing/artifacts/intake/<run-id>/...`
 
-## Lockfile + Workspace Policy
+## Minimal Doc Set
 
-- Package manager: npm workspaces from repo root.
-- Canonical lockfile: `package-lock.json` (repo root only).
-- App-level lockfiles are not part of repo policy.
-- Next workspace root is pinned in `apps/web/next.config.mjs` to avoid root inference drift.
-
-## Pointers
-
-- Architecture/file placement: `docs/design/architecture-map.md`
-- Chat flow map: `docs/design/chat-orchestration.md`
-- Role policy map: `docs/design/role-capability-matrix.md`
-- Recommendation behavior: `docs/design/concierge-flow.md`
+Use only:
+1. `docs/master-context.md`
+2. `docs/testing/README.md`
+3. relevant design/data/prompt file from `docs/`
