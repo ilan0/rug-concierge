@@ -29,6 +29,7 @@ import {
   hasTenantId,
   normalizeTenantId,
   requireTenantId,
+  resolveAuthoritativeTenantForServer,
 } from "@/lib/auth/tenant";
 import { requirePilotAccessApi } from "@/lib/auth/pilot-access";
 import {
@@ -142,14 +143,17 @@ export async function POST(req: Request) {
       return badRequest("override.selected_rug_ids must be an array when provided.");
     }
     const requestedTenantId = normalizeTenantId(body.tenant_id);
+    const authoritativeTenantId = resolveAuthoritativeTenantForServer({
+      requestTenantId: requestedTenantId,
+    });
     const tradeClientId =
       typeof body.trade_client_id === "string" && body.trade_client_id.trim()
         ? body.trade_client_id.trim()
         : null;
     const session = await getOrCreateSession(sessionId, role, {
-      tenantId: requestedTenantId,
+      tenantId: authoritativeTenantId,
     });
-    const tenantId = session.tenant_id ?? requestedTenantId ?? null;
+    const tenantId = session.tenant_id ?? authoritativeTenantId ?? null;
 
     const userTurn: SessionMessage = {
       role: "user",

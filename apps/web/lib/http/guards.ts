@@ -6,6 +6,7 @@ import {
   resolveRequestRole,
   type RequestRoleFields,
 } from "@/lib/auth/request-role";
+import { getServerDeploymentType } from "@/lib/auth/deployment";
 import type { AppRole } from "@/lib/auth/roles";
 import { badRequest, forbidden } from "@/lib/errors/http-errors";
 
@@ -53,6 +54,15 @@ export async function resolveApiRoleOrError(
     defaultRole: input.defaultRole ?? "retail_customer",
   });
 
+  if (resolution.blocked_non_retail_request) {
+    return {
+      ok: false,
+      status: 403,
+      message: "Non-retail roles require a signed access cookie from /join.",
+      response: forbidden("Non-retail roles require a signed access cookie from /join."),
+    };
+  }
+
   if (resolution.mismatch) {
     return {
       ok: false,
@@ -63,6 +73,14 @@ export async function resolveApiRoleOrError(
   }
 
   if (isPrivilegedRole(resolution.role) && resolution.source !== "cookie") {
+    const deploymentType = getServerDeploymentType();
+    if (deploymentType === "developer") {
+      return {
+        ok: true,
+        role: resolution.role,
+        source: resolution.source,
+      };
+    }
     return {
       ok: false,
       status: 403,

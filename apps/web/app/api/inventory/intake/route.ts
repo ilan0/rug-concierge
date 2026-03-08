@@ -2,7 +2,10 @@ import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { rugImagePathToPublicUrl } from "@/lib/storage/rug-images";
 import { badRequest, forbidden, internalError } from "@/lib/errors/http-errors";
-import { normalizeTenantId } from "@/lib/auth/tenant";
+import {
+  normalizeTenantId,
+  resolveAuthoritativeTenantForServer,
+} from "@/lib/auth/tenant";
 import { requirePilotAccessApi } from "@/lib/auth/pilot-access";
 import { resolveApiRoleOrError } from "@/lib/http/guards";
 import { parseE2eTraceMeta, writeE2eTraceArtifact } from "@/lib/qa/e2e-trace";
@@ -240,7 +243,9 @@ export async function POST(req: Request) {
     }
     flowPath.push("resolve_role");
 
-    tenantId = parsed.form.tenantId;
+    tenantId = resolveAuthoritativeTenantForServer({
+      requestTenantId: parsed.form.tenantId,
+    });
     if (!tenantId) {
       return withIntakeHeaders(badRequest("tenant_id is required."));
     }

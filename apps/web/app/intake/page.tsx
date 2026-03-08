@@ -4,8 +4,11 @@ import { AccessGuard } from "@/components/ui/access-guard";
 import { getServerUiRole, getServerUiTenantId } from "@/lib/ui/server-role";
 import { canRoleAccessRoute } from "@/lib/auth/policy";
 import { getPilotAccessState } from "@/lib/auth/pilot-access";
+import { getServerDeploymentType } from "@/lib/auth/deployment";
+import { redirect } from "next/navigation";
 
 export default async function IntakePage() {
+  const deploymentType = getServerDeploymentType();
   const access = await getPilotAccessState();
   if (access.required && !access.verified) {
     return (
@@ -17,6 +20,10 @@ export default async function IntakePage() {
   }
 
   const role = await getServerUiRole();
+  if (deploymentType === "staff" && !role) {
+    redirect("/join");
+  }
+
   if (!role || !canRoleAccessRoute(role, "/intake")) {
     return (
       <AccessGuard

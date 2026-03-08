@@ -33,6 +33,11 @@ const DEFAULT_PILOT_ROLE: UiRole = isUiRole(
 )
   ? process.env.NEXT_PUBLIC_PILOT_DEFAULT_ROLE
   : "store_staff";
+const ENV_TENANT_ID =
+  typeof process.env.NEXT_PUBLIC_TENANT_ID === "string" &&
+  process.env.NEXT_PUBLIC_TENANT_ID.trim().length > 0
+    ? process.env.NEXT_PUBLIC_TENANT_ID.trim()
+    : "";
 
 export function HomeScreen() {
   const [role, setRoleState] = useState<UiRole | null>(null);
@@ -48,14 +53,30 @@ export function HomeScreen() {
   useEffect(() => {
     const storedRole = getUiRole();
     const storedTenant = getUiTenantId();
+    const initialRole = storedRole
+      ? storedRole
+      : !ROLE_SWITCHER_ENABLED
+        ? DEFAULT_PILOT_ROLE
+        : null;
+
     if (storedRole) {
       setRoleState(storedRole);
     } else if (!ROLE_SWITCHER_ENABLED) {
       setRoleState(DEFAULT_PILOT_ROLE);
       setUiRole(DEFAULT_PILOT_ROLE);
     }
-    if (storedTenant) {
-      setTenantState(storedTenant);
+    const initialTenant = storedTenant || ENV_TENANT_ID;
+    if (initialTenant) {
+      setTenantState(initialTenant);
+      setUiTenantId(initialTenant);
+      if (initialRole) {
+        void syncUiSession({
+          role: initialRole,
+          tenant_id: initialTenant,
+        }).catch(() => {
+          // Keep local setup usable even if cookie sync fails.
+        });
+      }
     }
 
     void fetch("/api/ui-access")

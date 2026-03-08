@@ -1,6 +1,9 @@
 import { cookies } from "next/headers";
 import { isAppRole, normalizeAppRole, type AppRole } from "@/lib/auth/roles";
-import { uiRoleCookieName } from "@/lib/ui/role-session";
+import { verifySignedRoleCookieValue } from "@/lib/auth/role-cookie";
+import { resolveAuthoritativeTenantForServer } from "@/lib/auth/tenant";
+import { getServerDeploymentType, type DeploymentType } from "@/lib/auth/deployment";
+import { uiRoleCookieName, uiTenantCookieName } from "@/lib/ui/role-session";
 
 export type ResolvedRequestRole = {
   role: AppRole;
@@ -8,6 +11,7 @@ export type ResolvedRequestRole = {
   cookie_role: AppRole | null;
   request_role: AppRole | null;
   mismatch: boolean;
+  blocked_non_retail_request: boolean;
 };
 
 export type RequestRoleFields = {
@@ -47,9 +51,15 @@ export function getRequestedRoleFromBody(input: RequestRoleFields): {
 
 export async function getRequestCookieRole(): Promise<AppRole | null> {
   const cookieStore = await cookies();
-  const raw = cookieStore.get(uiRoleCookieName)?.value;
-  if (!raw || !isAppRole(raw)) return null;
-  return raw;
+  const rawRoleCookie = cookieStore.get(uiRoleCookieName)?.value ?? null;
+  const cookieTenantId = cookieStore.get(uiTenantCookieName)?.value ?? null;
+  const tenantId = resolveAuthoritativeTenantForServer({
+    cookieTenantId,
+  });
+  return verifySignedRoleCookieValue({
+    rawCookieValue: rawRoleCookie,
+    tenantId,
+  });
 }
 
 export async function resolveRequestRole(input?: {
@@ -61,35 +71,67 @@ export async function resolveRequestRole(input?: {
     input?.requestedRole && isAppRole(input.requestedRole)
       ? input.requestedRole
       : null;
+  return resolveRoleFromInputs({
+    deploymentType: getServerDeploymentType(),
+    cookieRole,
+    requestRole,
+    defaultRole: input?.defaultRole,
+  });
+}
+
+export function resolveRoleFromInputs(input: {
+  deploymentType: DeploymentType;
+  cookieRole: AppRole | null;
+  requestRole: AppRole | null;
+  defaultRole?: AppRole;
+}): ResolvedRequestRole {
   const mismatch = Boolean(
-    cookieRole && requestRole && cookieRole !== requestRole
+    input.cookieRole && input.requestRole && input.cookieRole !== input.requestRole
   );
 
-  if (cookieRole) {
+  if (input.cookieRole) {
     return {
-      role: cookieRole,
+      role: input.cookieRole,
       source: "cookie",
-      cookie_role: cookieRole,
-      request_role: requestRole,
+      cookie_role: input.cookieRole,
+      request_role: input.requestRole,
       mismatch,
+      blocked_non_retail_request: false,
     };
   }
 
-  if (requestRole) {
+  if (
+    input.deploymentType !== "developer" &&
+    input.requestRole &&
+    input.requestRole !== "retail_customer"
+  ) {
     return {
-      role: requestRole,
+      role: "retail_customer",
+      source: "default",
+      cookie_role: null,
+      request_role: input.requestRole,
+      mismatch: false,
+      blocked_non_retail_request: true,
+    };
+  }
+
+  if (input.requestRole) {
+    return {
+      role: input.requestRole,
       source: "request",
       cookie_role: null,
-      request_role: requestRole,
+      request_role: input.requestRole,
       mismatch: false,
+      blocked_non_retail_request: false,
     };
   }
 
   return {
-    role: normalizeAppRole(input?.defaultRole, "retail_customer"),
+    role: normalizeAppRole(input.defaultRole, "retail_customer"),
     source: "default",
     cookie_role: null,
     request_role: null,
     mismatch: false,
+    blocked_non_retail_request: false,
   };
 }

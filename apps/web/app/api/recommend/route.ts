@@ -14,6 +14,7 @@ import {
   hasTenantId,
   normalizeTenantId,
   requireTenantId,
+  resolveAuthoritativeTenantForServer,
 } from "@/lib/auth/tenant";
 import { requirePilotAccessApi } from "@/lib/auth/pilot-access";
 import { resolveApiRoleOrError } from "@/lib/http/guards";
@@ -307,7 +308,9 @@ export async function POST(req: Request) {
       }
     }
 
-    const tenantId = normalizeTenantId(body.tenant_id);
+    const tenantId = resolveAuthoritativeTenantForServer({
+      requestTenantId: normalizeTenantId(body.tenant_id),
+    });
     const tenantError = requireTenantId(tenantId, "recommendation");
     if (tenantError) {
       if (traceMeta) {

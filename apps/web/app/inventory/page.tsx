@@ -13,6 +13,8 @@ import { isDefaultInventoryFilters } from "@/lib/inventory/filters";
 import { getServerUiRole, getServerUiTenantId } from "@/lib/ui/server-role";
 import { canRoleAccessRoute } from "@/lib/auth/policy";
 import { getPilotAccessState } from "@/lib/auth/pilot-access";
+import { getServerDeploymentType } from "@/lib/auth/deployment";
+import { redirect } from "next/navigation";
 
 type InventoryPageProps = {
   searchParams?:
@@ -63,6 +65,7 @@ function buildQueryString(input: Record<string, string | number | null | undefin
 }
 
 export default async function InventoryPage({ searchParams }: InventoryPageProps) {
+  const deploymentType = getServerDeploymentType();
   const access = await getPilotAccessState();
   if (access.required && !access.verified) {
     return (
@@ -74,6 +77,10 @@ export default async function InventoryPage({ searchParams }: InventoryPageProps
   }
 
   const role = await getServerUiRole();
+  if (deploymentType === "staff" && !role) {
+    redirect("/join");
+  }
+
   if (!role || !canRoleAccessRoute(role, "/inventory")) {
     return (
       <AccessGuard

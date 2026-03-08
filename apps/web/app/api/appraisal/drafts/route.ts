@@ -4,7 +4,7 @@ import {
   saveManualAppraisalDraft,
 } from "@/lib/appraisal/service";
 import { requirePilotAccessApi } from "@/lib/auth/pilot-access";
-import { normalizeTenantId } from "@/lib/auth/tenant";
+import { normalizeTenantId, resolveAuthoritativeTenantForServer } from "@/lib/auth/tenant";
 import { canRoleGenerateAppraisal } from "@/lib/auth/policy";
 import { resolveApiRoleOrError } from "@/lib/http/guards";
 import { parseJsonObjectBody } from "@/lib/http/validators";
@@ -66,7 +66,9 @@ export async function GET(req: Request) {
     );
   }
 
-  const tenantId = normalizeTenantId(searchParams.get("tenant_id"));
+  const tenantId = resolveAuthoritativeTenantForServer({
+    requestTenantId: normalizeTenantId(searchParams.get("tenant_id")),
+  });
   if (!tenantId) {
     return NextResponse.json(
       { error: "tenant_id is required.", code: "BAD_REQUEST" },
@@ -136,7 +138,9 @@ export async function POST(req: Request) {
     );
   }
 
-  const tenantId = normalizeTenantId(body.tenant_id);
+  const tenantId = resolveAuthoritativeTenantForServer({
+    requestTenantId: normalizeTenantId(body.tenant_id),
+  });
   if (!tenantId) {
     return NextResponse.json(
       { error: "tenant_id is required.", code: "BAD_REQUEST" },

@@ -67,6 +67,9 @@ export async function GET(req: Request) {
     );
   }
 
+  // Tenant enforcement is intentionally skipped for this route.
+  // This endpoint is developer-only and reads local debug artifact files,
+  // not tenant-scoped production data from Supabase.
   const repoRoot = resolveRepoRootFromCwd();
   const traceDir = path.resolve(
     repoRoot,
