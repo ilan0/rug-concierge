@@ -70,6 +70,6 @@ npm --workspace apps/web run build
 ```bash
 TENANT_ID=<tenant-uuid> npm run qa:functional
 TENANT_ID=<tenant-uuid> npm run qa:quality
-TENANT_ID=<tenant-uuid> npm run qa:intake
-TENANT_ID=<tenant-uuid> npm run qa:intake:loop
 ```
+
+`qa:functional` includes intake matrix validation.

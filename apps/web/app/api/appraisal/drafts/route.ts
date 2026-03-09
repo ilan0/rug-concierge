@@ -3,8 +3,7 @@ import {
   fetchAppraisalDrafts,
   saveManualAppraisalDraft,
 } from "@/lib/appraisal/service";
-import { requirePilotAccessApi } from "@/lib/auth/pilot-access";
-import { normalizeTenantId } from "@/lib/auth/tenant";
+import { normalizeTenantId, resolveAuthoritativeTenantForServer } from "@/lib/auth/tenant";
 import { canRoleGenerateAppraisal } from "@/lib/auth/policy";
 import { resolveApiRoleOrError } from "@/lib/http/guards";
 import { parseJsonObjectBody } from "@/lib/http/validators";
@@ -35,9 +34,6 @@ function statusForErrorCode(code: string): number {
  * Read recent persisted appraisal drafts for tenant-scoped staff workflows.
  */
 export async function GET(req: Request) {
-  const pilotBlocked = await requirePilotAccessApi();
-  if (pilotBlocked) return pilotBlocked;
-
   const { searchParams } = new URL(req.url);
   const role = searchParams.get("role") ?? undefined;
   const userRole = searchParams.get("user_role") ?? undefined;
@@ -66,7 +62,9 @@ export async function GET(req: Request) {
     );
   }
 
-  const tenantId = normalizeTenantId(searchParams.get("tenant_id"));
+  const tenantId = resolveAuthoritativeTenantForServer({
+    requestTenantId: normalizeTenantId(searchParams.get("tenant_id")),
+  });
   if (!tenantId) {
     return NextResponse.json(
       { error: "tenant_id is required.", code: "BAD_REQUEST" },
@@ -93,9 +91,6 @@ export async function GET(req: Request) {
  * Persist manual save/review/finalize actions for appraisal records.
  */
 export async function POST(req: Request) {
-  const pilotBlocked = await requirePilotAccessApi();
-  if (pilotBlocked) return pilotBlocked;
-
   const parsed = await parseJsonObjectBody<{
     role?: RoleType;
     user_role?: RoleType;
@@ -136,7 +131,9 @@ export async function POST(req: Request) {
     );
   }
 
-  const tenantId = normalizeTenantId(body.tenant_id);
+  const tenantId = resolveAuthoritativeTenantForServer({
+    requestTenantId: normalizeTenantId(body.tenant_id),
+  });
   if (!tenantId) {
     return NextResponse.json(
       { error: "tenant_id is required.", code: "BAD_REQUEST" },

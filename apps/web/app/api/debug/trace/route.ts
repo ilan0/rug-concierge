@@ -4,7 +4,6 @@ import { readdir, readFile } from "node:fs/promises";
 import path from "node:path";
 import { resolveRequestRole } from "@/lib/auth/request-role";
 import { canRoleReadDebugTrace } from "@/lib/auth/policy";
-import { requirePilotAccessApi } from "@/lib/auth/pilot-access";
 
 function slug(value: string): string {
   return value
@@ -36,9 +35,6 @@ function resolveRepoRootFromCwd(): string {
 }
 
 export async function GET(req: Request) {
-  const pilotBlocked = await requirePilotAccessApi();
-  if (pilotBlocked) return pilotBlocked;
-
   const roleResolution = await resolveRequestRole({
     defaultRole: "retail_customer",
   });
@@ -67,6 +63,9 @@ export async function GET(req: Request) {
     );
   }
 
+  // Tenant enforcement is intentionally skipped for this route.
+  // This endpoint is developer-only and reads local debug artifact files,
+  // not tenant-scoped production data from Supabase.
   const repoRoot = resolveRepoRootFromCwd();
   const traceDir = path.resolve(
     repoRoot,

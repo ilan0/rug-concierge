@@ -1,3 +1,5 @@
+import { getServerDeploymentType, getRequiredTenantIdForDeployment } from "@/lib/auth/deployment";
+
 export function normalizeTenantId(value: unknown): string | null {
   if (typeof value !== "string") return null;
   const normalized = value.trim();
@@ -17,4 +19,26 @@ export function requireTenantId(
     return "tenant_id is required for recommendation requests.";
   }
   return "tenant_id is required for this inventory-backed request.";
+}
+
+export function resolveAuthoritativeTenantForServer(input: {
+  requestTenantId?: unknown;
+  cookieTenantId?: unknown;
+}): string | null {
+  const deploymentType = getServerDeploymentType();
+  if (deploymentType === "customer" || deploymentType === "staff") {
+    return getRequiredTenantIdForDeployment();
+  }
+  return (
+    normalizeTenantId(input.requestTenantId) ??
+    normalizeTenantId(input.cookieTenantId) ??
+    null
+  );
+}
+
+export function tenantMatchesDeploymentTenant(tenantId: string | null): boolean {
+  const deploymentType = getServerDeploymentType();
+  if (deploymentType === "developer") return true;
+  const deploymentTenantId = getRequiredTenantIdForDeployment();
+  return tenantId === deploymentTenantId;
 }

@@ -2,8 +2,10 @@ import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { rugImagePathToPublicUrl } from "@/lib/storage/rug-images";
 import { badRequest, forbidden, internalError } from "@/lib/errors/http-errors";
-import { normalizeTenantId } from "@/lib/auth/tenant";
-import { requirePilotAccessApi } from "@/lib/auth/pilot-access";
+import {
+  normalizeTenantId,
+  resolveAuthoritativeTenantForServer,
+} from "@/lib/auth/tenant";
 import { resolveApiRoleOrError } from "@/lib/http/guards";
 import { parseE2eTraceMeta, writeE2eTraceArtifact } from "@/lib/qa/e2e-trace";
 import {
@@ -15,21 +17,6 @@ import {
 import type { RoleType } from "@/lib/chat/types";
 
 const RUG_IMAGES_BUCKET = "rug-images";
-const QA_FAIL_STEP_HEADER = "x-intake-test-fail-step";
-const QA_RUG_ID_HEADER = "x-intake-test-rug-id";
-const QA_MODE_ENABLED = process.env.QA_MODE === "1";
-
-const INTAKE_FAIL_STEPS = [
-  "before_insert_rug",
-  "after_insert_rug",
-  "before_upload_image",
-  "after_upload_image",
-  "before_insert_rug_image",
-  "after_insert_rug_image",
-  "throw_after_upload",
-] as const;
-
-type IntakeFailStep = (typeof INTAKE_FAIL_STEPS)[number];
 
 type ParsedIntakeForm = {
   role?: RoleType;
@@ -58,30 +45,6 @@ type CleanupResult = {
 function readTrimmedString(value: FormDataEntryValue | null): string {
   if (typeof value !== "string") return "";
   return value.trim();
-}
-
-function readQaFailStep(req: Request): IntakeFailStep | null {
-  if (!QA_MODE_ENABLED) return null;
-  const raw = req.headers.get(QA_FAIL_STEP_HEADER)?.trim() ?? "";
-  if (!raw) return null;
-  return INTAKE_FAIL_STEPS.find((step) => step === raw) ?? null;
-}
-
-function readQaRugId(req: Request): string | null {
-  if (!QA_MODE_ENABLED) return null;
-  const raw = req.headers.get(QA_RUG_ID_HEADER)?.trim() ?? "";
-  if (!raw) return null;
-  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(raw)) {
-    return null;
-  }
-  return raw.toLowerCase();
-}
-
-function isFailStep(
-  requestedStep: IntakeFailStep | null,
-  currentStep: IntakeFailStep
-): boolean {
-  return requestedStep === currentStep;
 }
 
 function extensionForImage(image: File): string {
@@ -188,8 +151,6 @@ export async function POST(req: Request) {
   const startedAt = Date.now();
   const traceMeta = parseE2eTraceMeta(req);
   const traceId = crypto.randomUUID();
-  const failStep = readQaFailStep(req);
-  const qaRequestedRugId = readQaRugId(req);
   const flowPath: string[] = ["/api/inventory/intake POST"];
 
   let tenantId: string | null = null;
@@ -201,17 +162,8 @@ export async function POST(req: Request) {
     if (rugId) {
       response.headers.set("x-intake-rug-id", rugId);
     }
-    if (storagePath) {
-      response.headers.set("x-intake-storage-path", storagePath);
-    }
-    if (QA_MODE_ENABLED && failStep) {
-      response.headers.set(QA_FAIL_STEP_HEADER, failStep);
-    }
     return response;
   };
-
-  const pilotBlocked = await requirePilotAccessApi();
-  if (pilotBlocked) return withIntakeHeaders(pilotBlocked);
 
   try {
     const formData = await req.formData().catch(() => null);
@@ -240,19 +192,15 @@ export async function POST(req: Request) {
     }
     flowPath.push("resolve_role");
 
-    tenantId = parsed.form.tenantId;
+    tenantId = resolveAuthoritativeTenantForServer({
+      requestTenantId: parsed.form.tenantId,
+    });
     if (!tenantId) {
       return withIntakeHeaders(badRequest("tenant_id is required."));
     }
     flowPath.push("normalize_tenant");
 
-    rugId = qaRequestedRugId ?? crypto.randomUUID();
-
-    if (isFailStep(failStep, "before_insert_rug")) {
-      return withIntakeHeaders(
-        internalError("Unable to create intake record.", "CHAT_INTERNAL_ERROR")
-      );
-    }
+    rugId = crypto.randomUUID();
 
     const insertedRug = await supabaseAdmin
       .from("rugs")
@@ -280,75 +228,7 @@ export async function POST(req: Request) {
     }
     flowPath.push("insert_rug");
 
-    if (isFailStep(failStep, "after_insert_rug")) {
-      const cleanup = await cleanupIntakeWrite({
-        tenantId,
-        rugId,
-        storagePath: null,
-      });
-      if (traceMeta) {
-        await writeE2eTraceArtifact({
-          meta: traceMeta,
-          channel: "inventory-intake-route",
-          trace_id: traceId,
-          payload: {
-            flow_path: [...flowPath, "forced_after_insert_rug", "rollback"],
-            request: {
-              tenant_id: tenantId,
-              rug_id: rugId,
-            },
-            rollback: cleanup,
-            response: {
-              status: 500,
-              body: {
-                error: "Unable to upload intake image.",
-                code: "CHAT_INTERNAL_ERROR",
-              },
-            },
-            timing_ms: {
-              total_ms: Date.now() - startedAt,
-            },
-          },
-        });
-      }
-      return withIntakeHeaders(internalError("Unable to upload intake image."));
-    }
-
     storagePath = buildStoragePath(tenantId, rugId, parsed.form.image);
-
-    if (isFailStep(failStep, "before_upload_image")) {
-      const cleanup = await cleanupIntakeWrite({
-        tenantId,
-        rugId,
-        storagePath: null,
-      });
-      if (traceMeta) {
-        await writeE2eTraceArtifact({
-          meta: traceMeta,
-          channel: "inventory-intake-route",
-          trace_id: traceId,
-          payload: {
-            flow_path: [...flowPath, "forced_before_upload_image", "rollback"],
-            request: {
-              tenant_id: tenantId,
-              rug_id: rugId,
-            },
-            rollback: cleanup,
-            response: {
-              status: 500,
-              body: {
-                error: "Unable to upload intake image.",
-                code: "CHAT_INTERNAL_ERROR",
-              },
-            },
-            timing_ms: {
-              total_ms: Date.now() - startedAt,
-            },
-          },
-        });
-      }
-      return withIntakeHeaders(internalError("Unable to upload intake image."));
-    }
 
     const imageBuffer = Buffer.from(await parsed.form.image.arrayBuffer());
     const upload = await supabaseAdmin.storage
@@ -357,7 +237,7 @@ export async function POST(req: Request) {
         contentType: parsed.form.image.type || "application/octet-stream",
         upsert: false,
       });
-    if (upload.error || isFailStep(failStep, "after_upload_image")) {
+    if (upload.error) {
       const cleanup = await cleanupIntakeWrite({
         tenantId,
         rugId,
@@ -392,47 +272,6 @@ export async function POST(req: Request) {
     }
     flowPath.push("upload_image");
 
-    if (isFailStep(failStep, "throw_after_upload")) {
-      throw new Error("Forced intake failure after upload");
-    }
-
-    if (isFailStep(failStep, "before_insert_rug_image")) {
-      const cleanup = await cleanupIntakeWrite({
-        tenantId,
-        rugId,
-        storagePath,
-      });
-      if (traceMeta) {
-        await writeE2eTraceArtifact({
-          meta: traceMeta,
-          channel: "inventory-intake-route",
-          trace_id: traceId,
-          payload: {
-            flow_path: [...flowPath, "forced_before_insert_rug_image", "rollback"],
-            request: {
-              tenant_id: tenantId,
-              rug_id: rugId,
-              storage_path: storagePath,
-            },
-            rollback: cleanup,
-            response: {
-              status: 500,
-              body: {
-                error: "Unable to finalize intake image metadata.",
-                code: "CHAT_INTERNAL_ERROR",
-              },
-            },
-            timing_ms: {
-              total_ms: Date.now() - startedAt,
-            },
-          },
-        });
-      }
-      return withIntakeHeaders(
-        internalError("Unable to finalize intake image metadata.")
-      );
-    }
-
     const imageInsert = await supabaseAdmin
       .from("rug_images")
       .insert({
@@ -444,11 +283,7 @@ export async function POST(req: Request) {
       })
       .select("rug_id")
       .single();
-    if (
-      imageInsert.error ||
-      !imageInsert.data ||
-      isFailStep(failStep, "after_insert_rug_image")
-    ) {
+    if (imageInsert.error || !imageInsert.data) {
       const cleanup = await cleanupIntakeWrite({
         tenantId,
         rugId,

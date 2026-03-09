@@ -20,6 +20,12 @@ If docs conflict, `docs/master-context.md` wins.
 - `docs/data/schema.md`
 - `docs/inventory/images.md`
 
+## Deployment
+
+- `docs/deployment/overview.md`
+- `docs/deployment/env-vars.md`
+- `docs/deployment/runbook.md`
+
 ## Prompt Contracts
 
 - `docs/prompts/system.md`

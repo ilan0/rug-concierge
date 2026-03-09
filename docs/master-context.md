@@ -149,22 +149,13 @@ Rules:
 Canonical suites:
 1. `TENANT_ID=<tenant> npm run qa:functional`
 2. `TENANT_ID=<tenant> npm run qa:quality`
-3. `TENANT_ID=<tenant> npm run qa:intake`
 
-Intake gated loop:
-- `TENANT_ID=<tenant> npm run qa:intake:loop`
-- up to 10 cycles
-- requires two consecutive green cycles for intake + functional + quality
-- requires zero open P0/P1 intake defects
+Notes:
+- Functional and quality are the only canonical QA suites.
 
 Latest output files:
 - `scripts/testing/functionality/latest-functional.md`
 - `scripts/testing/quality/latest-quality.md`
-- `scripts/testing/intake/latest-intake.md`
-- `scripts/testing/intake/latest-intake-loop.md`
-
-Intake artifacts:
-- `docs/testing/artifacts/intake/<run-id>/...`
 
 ## Minimal Doc Set
 

@@ -27,6 +27,9 @@ docs/testing/e2e-smoke-report.md
 docs/testing/e2e-smoke-report.json
 docs/testing/demo-rehearsal-report.md
 apps/web/docs/testing/
+playwright-report/
+test-results/
+tests/e2e/config.ts
 
 # OS
 .DS_Store

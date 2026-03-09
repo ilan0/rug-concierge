@@ -5,9 +5,8 @@ import {
   writeE2eTraceArtifact,
 } from "@/lib/qa/e2e-trace";
 import { forbidden } from "@/lib/errors/http-errors";
-import { normalizeTenantId } from "@/lib/auth/tenant";
+import { normalizeTenantId, resolveAuthoritativeTenantForServer } from "@/lib/auth/tenant";
 import { canRoleGenerateAppraisal } from "@/lib/auth/policy";
-import { requirePilotAccessApi } from "@/lib/auth/pilot-access";
 import { resolveApiRoleOrError } from "@/lib/http/guards";
 import { parseJsonObjectBody } from "@/lib/http/validators";
 import type { AppraisalGenerateRequest } from "@/lib/types/appraisal";
@@ -25,9 +24,6 @@ function statusForErrorCode(code: string): number {
  * Supports inventory-linked and customer-owned source modes.
  */
 export async function POST(req: Request) {
-  const pilotBlocked = await requirePilotAccessApi();
-  if (pilotBlocked) return pilotBlocked;
-
   const traceMeta = parseE2eTraceMeta(req);
   const traceId = crypto.randomUUID();
   const parsedBody = await parseJsonObjectBody<{
@@ -109,7 +105,9 @@ export async function POST(req: Request) {
     return deny;
   }
 
-  const tenantId = normalizeTenantId(body.tenant_id);
+  const tenantId = resolveAuthoritativeTenantForServer({
+    requestTenantId: normalizeTenantId(body.tenant_id),
+  });
   if (!tenantId) {
     const response = NextResponse.json(
       { error: "tenant_id is required for appraisal generation.", code: "BAD_REQUEST" },

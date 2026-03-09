@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import { fetchInventoryLinkedRugs } from "@/lib/appraisal/service";
-import { requirePilotAccessApi } from "@/lib/auth/pilot-access";
-import { normalizeTenantId } from "@/lib/auth/tenant";
+import { normalizeTenantId, resolveAuthoritativeTenantForServer } from "@/lib/auth/tenant";
 import { canRoleGenerateAppraisal } from "@/lib/auth/policy";
 import { resolveApiRoleOrError } from "@/lib/http/guards";
 import type { RoleType } from "@/lib/chat/types";
@@ -11,9 +10,6 @@ import type { RoleType } from "@/lib/chat/types";
  * Tenant-scoped rug selector endpoint for inventory-linked appraisal flows.
  */
 export async function GET(req: Request) {
-  const pilotBlocked = await requirePilotAccessApi();
-  if (pilotBlocked) return pilotBlocked;
-
   const { searchParams } = new URL(req.url);
   const role = searchParams.get("role") ?? undefined;
   const userRole = searchParams.get("user_role") ?? undefined;
@@ -42,7 +38,9 @@ export async function GET(req: Request) {
     );
   }
 
-  const tenantId = normalizeTenantId(searchParams.get("tenant_id"));
+  const tenantId = resolveAuthoritativeTenantForServer({
+    requestTenantId: normalizeTenantId(searchParams.get("tenant_id")),
+  });
   if (!tenantId) {
     return NextResponse.json(
       { error: "tenant_id is required.", code: "BAD_REQUEST" },

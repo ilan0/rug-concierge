@@ -1,11 +1,13 @@
 #!/usr/bin/env node
 
 import { writeFile } from "node:fs/promises";
+import { createHmac } from "node:crypto";
 import path from "node:path";
 
 const args = process.argv.slice(2);
 const baseUrl = readArg("--base-url") ?? "http://127.0.0.1:3100";
 const tenantId = (process.env.TENANT_ID ?? "").trim();
+const cookieSecret = (process.env.COOKIE_SECRET ?? "").trim();
 const outputPath = path.resolve(
   process.cwd(),
   "scripts/testing/functionality/latest-functional.md"
@@ -24,6 +26,20 @@ function readArg(flag) {
 
 function nowIso() {
   return new Date().toISOString();
+}
+
+function signedRoleCookie(role, tenant) {
+  if (!cookieSecret) {
+    throw new Error("Missing COOKIE_SECRET");
+  }
+  const signature = createHmac("sha256", cookieSecret)
+    .update(`${role}:${tenant}`)
+    .digest("base64url");
+  return `${role}.${signature}`;
+}
+
+function signedRoleCookieHeader(role, tenant) {
+  return `rug_ui_role=${signedRoleCookie(role, tenant)}; rug_ui_tenant_id=${tenant}`;
 }
 
 function hasChatEnvelope(body) {
@@ -266,7 +282,7 @@ async function run() {
       message: "show me what you have",
     },
     {
-      Cookie: "rug_ui_role=retail_customer",
+      Cookie: signedRoleCookieHeader("retail_customer", tenantId),
     }
   );
   pushResult(
@@ -492,7 +508,7 @@ async function run() {
     "/api/inventory/intake",
     intakeRoleMismatchForm,
     {
-      Cookie: "rug_ui_role=retail_customer",
+      Cookie: signedRoleCookieHeader("retail_customer", tenantId),
     }
   );
   pushResult(
