@@ -69,7 +69,6 @@ Do not use legacy Supabase key names (`SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROL
 
 ## QA / CI Only
 
-- `QA_MODE=1`
 - `RECOMMENDATION_QA_LOG_PATH` optional
 
 ## Notes

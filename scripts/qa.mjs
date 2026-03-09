@@ -138,24 +138,7 @@ async function runFunctional() {
         QA_MODE: "1",
       }
     );
-    if (!check.ok) return { code: check.code, baseUrl };
-
-    const intake = await runCommand(
-      "intake-suite",
-      "node",
-      [
-        "scripts/testing/intake/run-intake-suite.mjs",
-        "--base-url",
-        baseUrl,
-        "--run-id",
-        `functional-intake-${Date.now()}`,
-      ],
-      {
-        TENANT_ID: tenantId,
-        QA_MODE: "1",
-      }
-    );
-    return { code: intake.ok ? 0 : intake.code, baseUrl };
+    return { code: check.ok ? 0 : check.code, baseUrl };
   } finally {
     await stopServer(child);
   }

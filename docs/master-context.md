@@ -151,15 +151,11 @@ Canonical suites:
 2. `TENANT_ID=<tenant> npm run qa:quality`
 
 Notes:
-- Functional includes intake matrix coverage.
+- Functional and quality are the only canonical QA suites.
 
 Latest output files:
 - `scripts/testing/functionality/latest-functional.md`
 - `scripts/testing/quality/latest-quality.md`
-- `scripts/testing/intake/latest-intake.md`
-
-Intake artifacts:
-- `docs/testing/artifacts/intake/<run-id>/...`
 
 ## Minimal Doc Set
 
