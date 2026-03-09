@@ -204,9 +204,6 @@ export async function POST(req: Request) {
     if (rugId) {
       response.headers.set("x-intake-rug-id", rugId);
     }
-    if (storagePath) {
-      response.headers.set("x-intake-storage-path", storagePath);
-    }
     if (QA_MODE_ENABLED && failStep) {
       response.headers.set(QA_FAIL_STEP_HEADER, failStep);
     }

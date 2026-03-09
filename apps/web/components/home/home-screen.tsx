@@ -27,6 +27,7 @@ import { Badge } from "@/components/ui/badge";
 const ROLE_SWITCHER_ENABLED =
   process.env.NEXT_PUBLIC_ENABLE_ROLE_SWITCHER === "1" ||
   process.env.NODE_ENV !== "production";
+const DEPLOYMENT_TYPE = process.env.NEXT_PUBLIC_DEPLOYMENT_TYPE;
 
 const DEFAULT_PILOT_ROLE: UiRole = isUiRole(
   process.env.NEXT_PUBLIC_PILOT_DEFAULT_ROLE
@@ -208,6 +209,9 @@ export function HomeScreen() {
       }
       setAccessVerified(true);
       setPasscode("");
+      if (DEPLOYMENT_TYPE === "staff") {
+        window.location.assign("/");
+      }
     } catch {
       setPasscodeError("Access verification failed. Try again.");
     } finally {

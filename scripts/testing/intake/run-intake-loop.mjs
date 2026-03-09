@@ -112,7 +112,7 @@ async function writeBlocker(summary) {
     "",
     "## Remediation Options",
     "1. Inspect `scripts/testing/intake/latest-intake.md` and per-suite reports under `docs/testing/artifacts/intake/<run-id>/`.",
-    "2. Fix top-severity failing checks first (P0/P1), rerun `npm run qa:intake:loop`.",
+    "2. Fix top-severity failing checks first (P0/P1), rerun `npm run qa:functional` and `npm run qa:quality`.",
     "3. If failures are flaky, isolate with direct suite command (`node scripts/testing/intake/run-intake-suite.mjs --base-url ... --run-id ...`).",
   ].filter(Boolean);
 
@@ -135,14 +135,7 @@ async function run() {
     const intakeRunId = `${loopRunId}-cycle-${cycle}`;
     console.log(`\\n[INTAKE LOOP] Cycle ${cycle}/${maxCycles}`);
 
-    const intake = await runCommand("intake", [
-      "scripts/qa.mjs",
-      "intake",
-      "--run-id",
-      intakeRunId,
-      "--cycle",
-      String(cycle),
-    ]);
+    const functional = await runCommand("functional", ["scripts/qa.mjs", "functional"]);
 
     const intakeLatest = await readJsonSafe(intakeLatestJson);
     const intakeOpenP0P1 =
@@ -151,7 +144,12 @@ async function run() {
         : null;
     latestOpenP0P1 = intakeOpenP0P1;
 
-    const functional = await runCommand("functional", ["scripts/qa.mjs", "functional"]);
+    const intake = {
+      name: "intake",
+      ok: functional.ok && intakeOpenP0P1 === 0,
+      code: functional.code,
+      duration_ms: functional.duration_ms,
+    };
     const quality = await runCommand("quality", ["scripts/qa.mjs", "quality"]);
 
     streaks.intake = intake.ok ? streaks.intake + 1 : 0;

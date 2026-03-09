@@ -114,6 +114,16 @@ export function proxy(request: NextRequest) {
 
   if (pathname === "/") {
     if (hasPilotAccess) {
+      const role = extractRoleFromCookie(request.cookies.get(ROLE_COOKIE_NAME)?.value);
+      if (role === "store_staff") {
+        return withCanonicalTenantCookie(request, redirectTo(request, "/inventory"));
+      }
+      if (role === "trade_client") {
+        return withCanonicalTenantCookie(request, redirectTo(request, "/trade"));
+      }
+      if (role === "developer") {
+        return withCanonicalTenantCookie(request, NextResponse.next());
+      }
       return withCanonicalTenantCookie(request, redirectTo(request, "/join"));
     }
     return withCanonicalTenantCookie(request, NextResponse.next());

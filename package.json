@@ -12,8 +12,6 @@
     "qa": "npm run qa:functional",
     "qa:functional": "node scripts/qa.mjs functional",
     "qa:quality": "node scripts/qa.mjs quality",
-    "qa:intake": "node scripts/qa.mjs intake",
-    "qa:intake:loop": "node scripts/testing/intake/run-intake-loop.mjs --max-cycles 10",
     "qa:all": "npm run qa:functional && npm run qa:quality"
   },
   "engines": {
@@ -21,6 +19,7 @@
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.11.1",
+    "@playwright/test": "^1.58.2",
     "fast-check": "^4.5.3",
     "pixelmatch": "^7.1.0",
     "playwright": "^1.58.2",

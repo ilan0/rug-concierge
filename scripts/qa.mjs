@@ -6,18 +6,16 @@ import net from "node:net";
 
 const mode = (process.argv[2] ?? "functional").toLowerCase();
 const modeArgs = process.argv.slice(3);
-const VALID_MODES = new Set(["functional", "quality", "intake"]);
+const VALID_MODES = new Set(["functional", "quality"]);
 const tenantId = (process.env.TENANT_ID ?? "").trim();
 const FUNCTIONAL_OUTPUT = "scripts/testing/functionality/latest-functional.md";
 const QUALITY_OUTPUT = "scripts/testing/quality/latest-quality.md";
-const INTAKE_OUTPUT = "scripts/testing/intake/latest-intake.md";
 
 function usage(message = "") {
   if (message) console.error(message);
   console.error("Usage:");
   console.error("  TENANT_ID=<uuid> npm run qa:functional");
   console.error("  TENANT_ID=<uuid> npm run qa:quality");
-  console.error("  TENANT_ID=<uuid> npm run qa:intake");
   console.error("  TENANT_ID=<uuid> npm run qa:all");
   console.error("Notes:");
   console.error("  Requires TENANT_ID env var.");
@@ -140,7 +138,24 @@ async function runFunctional() {
         QA_MODE: "1",
       }
     );
-    return { code: check.ok ? 0 : check.code, baseUrl };
+    if (!check.ok) return { code: check.code, baseUrl };
+
+    const intake = await runCommand(
+      "intake-suite",
+      "node",
+      [
+        "scripts/testing/intake/run-intake-suite.mjs",
+        "--base-url",
+        baseUrl,
+        "--run-id",
+        `functional-intake-${Date.now()}`,
+      ],
+      {
+        TENANT_ID: tenantId,
+        QA_MODE: "1",
+      }
+    );
+    return { code: intake.ok ? 0 : intake.code, baseUrl };
   } finally {
     await stopServer(child);
   }
@@ -180,43 +195,6 @@ async function runQuality() {
   }
 }
 
-async function runIntake() {
-  const build = await runCommand("build", "npm", ["run", "build"], {
-    TENANT_ID: tenantId,
-    QA_MODE: "1",
-  });
-  if (!build.ok) return { code: build.code, baseUrl: null };
-
-  const port = await resolveQaPort();
-  const started = await startServer(port);
-  if (!started) {
-    const baseUrl = `http://127.0.0.1:${port}`;
-    console.error(`Failed to start server at ${baseUrl}`);
-    return { code: 1, baseUrl };
-  }
-  const { child, baseUrl } = started;
-
-  try {
-    const check = await runCommand(
-      "intake-suite",
-      "node",
-      [
-        "scripts/testing/intake/run-intake-suite.mjs",
-        "--base-url",
-        baseUrl,
-        ...modeArgs,
-      ],
-      {
-        TENANT_ID: tenantId,
-        QA_MODE: "1",
-      }
-    );
-    return { code: check.ok ? 0 : check.code, baseUrl };
-  } finally {
-    await stopServer(child);
-  }
-}
-
 async function main() {
   if (!VALID_MODES.has(mode)) {
     usage(`Invalid mode: ${mode}`);
@@ -234,26 +212,13 @@ async function main() {
   if (mode === "quality" && modeArgs.includes("--extended")) {
     console.log("Quality scope: extended");
   }
-  if (mode === "intake") {
-    console.log("Intake scope: full matrix");
-  }
   console.log(`TENANT_ID: ${tenantId}`);
 
-  const result =
-    mode === "quality"
-      ? await runQuality()
-      : mode === "intake"
-        ? await runIntake()
-        : await runFunctional();
+  const result = mode === "quality" ? await runQuality() : await runFunctional();
   if (result.baseUrl) {
     console.log(`Base URL: ${result.baseUrl}`);
   }
-  const outputPath =
-    mode === "quality"
-      ? QUALITY_OUTPUT
-      : mode === "intake"
-        ? INTAKE_OUTPUT
-        : FUNCTIONAL_OUTPUT;
+  const outputPath = mode === "quality" ? QUALITY_OUTPUT : FUNCTIONAL_OUTPUT;
   console.log(`Output: ${outputPath}`);
   process.exit(result.code);
 }

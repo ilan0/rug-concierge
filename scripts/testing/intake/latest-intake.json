@@ -1,80 +1,84 @@
 {
-  "generated_at": "2026-03-06T21:39:54.103Z",
-  "run_id": "intake-loop-1772832998600-cycle-2",
-  "cycle": "2",
-  "base_url": "http://127.0.0.1:58712",
+  "generated_at": "2026-03-08T01:36:22.831Z",
+  "run_id": "functional-intake-1772933731519",
+  "cycle": null,
+  "base_url": "http://127.0.0.1:62250",
   "tenant_id": "0a175457-6194-4ae9-bf4e-1a785d754c4b",
-  "artifact_root": "/Users/ilannabatkhorian/.codex/worktrees/07e6/rug-concierge/docs/testing/artifacts/intake/intake-loop-1772832998600-cycle-2",
-  "passed_all": true,
-  "open_p0_p1": 0,
-  "failed_suites": [],
+  "artifact_root": "/Users/ilannabatkhorian/.codex/worktrees/93e2/rug-concierge/docs/testing/artifacts/intake/functional-intake-1772933731519",
+  "passed_all": false,
+  "open_p0_p1": 3,
+  "failed_suites": [
+    "api-contract",
+    "integration",
+    "ui-e2e"
+  ],
   "checks": {
-    "passed": 96,
-    "failed": 0,
+    "passed": 76,
+    "failed": 3,
     "failed_by_severity": {
       "P0": 0,
-      "P1": 0
+      "P1": 3
     }
   },
   "suite_execution": [
     {
       "name": "api-contract",
-      "code": 0,
-      "duration_ms": 3152,
-      "ok": true,
-      "jsonPath": "/Users/ilannabatkhorian/.codex/worktrees/07e6/rug-concierge/docs/testing/artifacts/intake/intake-loop-1772832998600-cycle-2/api-contract/report.json"
+      "code": 1,
+      "duration_ms": 2992,
+      "ok": false,
+      "jsonPath": "/Users/ilannabatkhorian/.codex/worktrees/93e2/rug-concierge/docs/testing/artifacts/intake/functional-intake-1772933731519/api-contract/report.json"
     },
     {
       "name": "rollback",
       "code": 0,
-      "duration_ms": 11034,
+      "duration_ms": 10260,
       "ok": true,
-      "jsonPath": "/Users/ilannabatkhorian/.codex/worktrees/07e6/rug-concierge/docs/testing/artifacts/intake/intake-loop-1772832998600-cycle-2/rollback/report.json"
+      "jsonPath": "/Users/ilannabatkhorian/.codex/worktrees/93e2/rug-concierge/docs/testing/artifacts/intake/functional-intake-1772933731519/rollback/report.json"
     },
     {
       "name": "integration",
-      "code": 0,
-      "duration_ms": 5629,
-      "ok": true,
-      "jsonPath": "/Users/ilannabatkhorian/.codex/worktrees/07e6/rug-concierge/docs/testing/artifacts/intake/intake-loop-1772832998600-cycle-2/integration/report.json"
+      "code": 1,
+      "duration_ms": 4714,
+      "ok": false,
+      "jsonPath": "/Users/ilannabatkhorian/.codex/worktrees/93e2/rug-concierge/docs/testing/artifacts/intake/functional-intake-1772933731519/integration/report.json"
     },
     {
       "name": "ui-e2e",
-      "code": 0,
-      "duration_ms": 14206,
-      "ok": true,
-      "jsonPath": "/Users/ilannabatkhorian/.codex/worktrees/07e6/rug-concierge/docs/testing/artifacts/intake/intake-loop-1772832998600-cycle-2/ui-e2e/report.json"
+      "code": 1,
+      "duration_ms": 32667,
+      "ok": false,
+      "jsonPath": "/Users/ilannabatkhorian/.codex/worktrees/93e2/rug-concierge/docs/testing/artifacts/intake/functional-intake-1772933731519/ui-e2e/report.json"
     },
     {
       "name": "property-validation",
       "code": 0,
-      "duration_ms": 522,
+      "duration_ms": 598,
       "ok": true,
-      "jsonPath": "/Users/ilannabatkhorian/.codex/worktrees/07e6/rug-concierge/docs/testing/artifacts/intake/intake-loop-1772832998600-cycle-2/property-validation/report.json"
+      "jsonPath": "/Users/ilannabatkhorian/.codex/worktrees/93e2/rug-concierge/docs/testing/artifacts/intake/functional-intake-1772933731519/property-validation/report.json"
     }
   ],
   "suite_summaries": [
     {
       "name": "api-contract",
-      "json_path": "/Users/ilannabatkhorian/.codex/worktrees/07e6/rug-concierge/docs/testing/artifacts/intake/intake-loop-1772832998600-cycle-2/api-contract/report.json",
+      "json_path": "/Users/ilannabatkhorian/.codex/worktrees/93e2/rug-concierge/docs/testing/artifacts/intake/functional-intake-1772933731519/api-contract/report.json",
       "summary": {
-        "passed": 33,
-        "failed": 0,
+        "passed": 31,
+        "failed": 2,
         "failedBySeverity": {
           "P0": 0,
-          "P1": 0,
+          "P1": 2,
           "P2": 0,
           "P3": 0
         },
-        "openP0P1": 0,
-        "passedAll": true
+        "openP0P1": 2,
+        "passedAll": false
       },
-      "generated_at": "2026-03-06T21:39:22.696Z",
+      "generated_at": "2026-03-08T01:35:34.583Z",
       "has_report": true
     },
     {
       "name": "rollback",
-      "json_path": "/Users/ilannabatkhorian/.codex/worktrees/07e6/rug-concierge/docs/testing/artifacts/intake/intake-loop-1772832998600-cycle-2/rollback/report.json",
+      "json_path": "/Users/ilannabatkhorian/.codex/worktrees/93e2/rug-concierge/docs/testing/artifacts/intake/functional-intake-1772933731519/rollback/report.json",
       "summary": {
         "passed": 30,
         "failed": 0,
@@ -87,48 +91,37 @@
         "openP0P1": 0,
         "passedAll": true
       },
-      "generated_at": "2026-03-06T21:39:33.734Z",
+      "generated_at": "2026-03-08T01:35:44.842Z",
       "has_report": true
     },
     {
       "name": "integration",
-      "json_path": "/Users/ilannabatkhorian/.codex/worktrees/07e6/rug-concierge/docs/testing/artifacts/intake/intake-loop-1772832998600-cycle-2/integration/report.json",
+      "json_path": "/Users/ilannabatkhorian/.codex/worktrees/93e2/rug-concierge/docs/testing/artifacts/intake/functional-intake-1772933731519/integration/report.json",
       "summary": {
-        "passed": 10,
-        "failed": 0,
+        "passed": 9,
+        "failed": 1,
         "failedBySeverity": {
           "P0": 0,
-          "P1": 0,
+          "P1": 1,
           "P2": 0,
           "P3": 0
         },
-        "openP0P1": 0,
-        "passedAll": true
+        "openP0P1": 1,
+        "passedAll": false
       },
-      "generated_at": "2026-03-06T21:39:39.363Z",
+      "generated_at": "2026-03-08T01:35:49.557Z",
       "has_report": true
     },
     {
       "name": "ui-e2e",
-      "json_path": "/Users/ilannabatkhorian/.codex/worktrees/07e6/rug-concierge/docs/testing/artifacts/intake/intake-loop-1772832998600-cycle-2/ui-e2e/report.json",
-      "summary": {
-        "passed": 17,
-        "failed": 0,
-        "failedBySeverity": {
-          "P0": 0,
-          "P1": 0,
-          "P2": 0,
-          "P3": 0
-        },
-        "openP0P1": 0,
-        "passedAll": true
-      },
-      "generated_at": "2026-03-06T21:39:53.557Z",
+      "json_path": "/Users/ilannabatkhorian/.codex/worktrees/93e2/rug-concierge/docs/testing/artifacts/intake/functional-intake-1772933731519/ui-e2e/report.json",
+      "summary": null,
+      "generated_at": "2026-03-08T01:36:22.224Z",
       "has_report": true
     },
     {
       "name": "property-validation",
-      "json_path": "/Users/ilannabatkhorian/.codex/worktrees/07e6/rug-concierge/docs/testing/artifacts/intake/intake-loop-1772832998600-cycle-2/property-validation/report.json",
+      "json_path": "/Users/ilannabatkhorian/.codex/worktrees/93e2/rug-concierge/docs/testing/artifacts/intake/functional-intake-1772933731519/property-validation/report.json",
       "summary": {
         "passed": 6,
         "failed": 0,
@@ -141,7 +134,7 @@
         "openP0P1": 0,
         "passedAll": true
       },
-      "generated_at": "2026-03-06T21:39:54.089Z",
+      "generated_at": "2026-03-08T01:36:22.814Z",
       "has_report": true
     }
   ]
