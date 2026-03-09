@@ -55,8 +55,6 @@ test.describe("Staff Deployment Unauthenticated", () => {
 
     await page.locator("#access-code").fill(PILOT_PASSCODE);
     await page.getByRole("button", { name: /Unlock Pilot/i }).click();
-
-    await page.goto(`/join?token=${STAFF_TOKEN}`);
     await expectPath(page, "/inventory");
     await expect(page.getByRole("heading", { name: /Inventory Browser/i })).toBeVisible();
     await expect(page.getByText(new RegExp(`Tenant:\\s*${TENANT_ID}`))).toBeVisible();

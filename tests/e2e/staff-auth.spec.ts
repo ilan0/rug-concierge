@@ -82,7 +82,6 @@ test.describe("Staff Deployment Authenticated", () => {
 
       await page.locator("#access-code").fill(PILOT_PASSCODE);
       await page.getByRole("button", { name: /Unlock Pilot/i }).click();
-      await page.goto(`${STAFF_URL}/join`);
       await expectPath(page, "/join");
 
       await page.goto(`${STAFF_URL}/join?token=${STAFF_TOKEN}`);
