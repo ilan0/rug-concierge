@@ -3,7 +3,6 @@ import { WorkspaceNav } from "@/components/shell/workspace-nav";
 import { AccessGuard } from "@/components/ui/access-guard";
 import { getServerUiRole, getServerUiTenantId } from "@/lib/ui/server-role";
 import { canRoleAccessRoute, canRoleReadDebugTrace } from "@/lib/auth/policy";
-import { getPilotAccessState } from "@/lib/auth/pilot-access";
 import { getServerDeploymentType } from "@/lib/auth/deployment";
 import { redirect } from "next/navigation";
 
@@ -23,19 +22,13 @@ function readString(
 
 export default async function TradePage({ searchParams }: TradePageProps) {
   const deploymentType = getServerDeploymentType();
-  const access = await getPilotAccessState();
-  if (access.required && !access.verified) {
-    return (
-      <AccessGuard
-        title="Pilot Access Required"
-        description="Please unlock pilot access on Home before using trade support."
-      />
-    );
+  if (deploymentType === "staff") {
+    redirect("/inventory");
   }
 
   const role = await getServerUiRole();
-  if (deploymentType === "staff" && !role) {
-    redirect("/join");
+  if (deploymentType === "customer" && role !== "trade_client") {
+    redirect("/concierge");
   }
 
   if (!role || !canRoleAccessRoute(role, "/trade")) {

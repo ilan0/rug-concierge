@@ -3,14 +3,23 @@
 ## Model
 
 - Each store uses two Vercel deployments backed by one shared Supabase instance:
-- Customer deployment: public concierge entry.
-- Staff deployment: passcode + signed-token role entry.
+- Customer deployment: `retail_customer` (open) + `trade_client` (token entry).
+- Staff deployment: `store_staff` + `developer` (token entry).
 
 ## Role Entry
 
-- Customer deployment auto-enters `retail_customer`.
-- Staff/trade/developer roles are issued only through `/join?token=...`.
+- Customer URL (`/`) enters retail experience with no setup.
+- Trade role is issued from customer deployment `/join?token=<TRADE_ACCESS_TOKEN>`.
+- Staff/developer roles are issued from staff deployment `/join?token=...`.
 - `/join` maps token to role server-side, sets signed cookies, then redirects to role portal.
+- No passcode gate. Join token is the only hosted access gate.
+
+## Persona Links
+
+- Retail customer: `https://<customer-domain>/`
+- Trade/design client: `https://<customer-domain>/join?token=<TRADE_ACCESS_TOKEN>`
+- Store staff/owner: `https://<staff-domain>/join?token=<STAFF_ACCESS_TOKEN>`
+- Developer: `https://<staff-domain>/join?token=<DEV_ACCESS_TOKEN>`
 
 ## Cookie Security
 
@@ -32,3 +41,13 @@
 - `NEXT_PUBLIC_DEPLOYMENT_TYPE` (client): UI behavior only.
 - Middleware performs lightweight presence/routing checks only.
 - Signature verification and authorization remain in server runtime utilities/routes.
+
+## Customer Role Cap
+
+- Customer deployment allows cookie roles: `retail_customer`, `trade_client`.
+- Customer deployment rejects cookie roles: `store_staff`, `developer` (fallback to retail flow).
+
+## Secret Rotation
+
+- Rotating `COOKIE_SECRET` invalidates all existing signed role cookies.
+- Expected behavior: users re-enter through their `/join` link (or customer root for retail).

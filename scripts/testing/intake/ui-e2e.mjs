@@ -10,6 +10,7 @@ import {
   cleanupRugArtifacts,
   ensureDir,
   getSupabaseAdmin,
+  makeSignedRoleCookieValue,
   nowIso,
   pushCheck,
   renderMarkdownReport,
@@ -45,7 +46,7 @@ function cookieSet(hostname, tenant) {
   return [
     {
       name: "rug_ui_role",
-      value: "store_staff",
+      value: makeSignedRoleCookieValue("store_staff", tenant),
       domain: hostname,
       path: "/",
       sameSite: "Lax",
@@ -53,13 +54,6 @@ function cookieSet(hostname, tenant) {
     {
       name: "rug_ui_tenant_id",
       value: tenant,
-      domain: hostname,
-      path: "/",
-      sameSite: "Lax",
-    },
-    {
-      name: "rug_pilot_access",
-      value: "1",
       domain: hostname,
       path: "/",
       sameSite: "Lax",

@@ -1,19 +1,17 @@
 import { expect, test } from "@playwright/test";
-import { PILOT_PASSCODE, STAFF_TOKEN, STAFF_URL, TENANT_ID } from "./config";
+import { DEV_TOKEN, STAFF_TOKEN, STAFF_URL, TENANT_ID } from "./config";
 import { cookieByName, expectPath } from "./helpers/common";
 
 test.describe("Staff Deployment Unauthenticated", () => {
   test.use({ baseURL: STAFF_URL });
 
-  test("pilot gate protects workspace routes", async ({ page }) => {
+  test("staff routes require join cookie", async ({ page }) => {
     await page.goto("/");
-    await expect(page.getByRole("heading", { name: /Pilot Access/i })).toBeVisible();
-    await expect(page.getByText(/MVP Workspace/i)).toHaveCount(0);
+    await expectPath(page, "/join");
 
-    for (const path of ["/inventory", "/concierge", "/intake", "/appraisal"]) {
+    for (const path of ["/inventory", "/concierge", "/intake", "/appraisal", "/trade"]) {
       await page.goto(path);
-      await expectPath(page, "/");
-      await expect(page.getByRole("heading", { name: /Pilot Access/i })).toBeVisible();
+      await expectPath(page, "/join");
     }
   });
 
@@ -45,18 +43,22 @@ test.describe("Staff Deployment Unauthenticated", () => {
     }
   });
 
-  test("valid staff token flow reaches inventory after passcode", async ({ page, context }) => {
+  test("valid staff token flow reaches inventory", async ({ page, context }) => {
     await page.goto(`/join?token=${STAFF_TOKEN}`);
-    await expectPath(page, "/");
-    await expect(page.getByRole("heading", { name: /Pilot Access/i })).toBeVisible();
-
-    const prePilotRole = await cookieByName(context, STAFF_URL, "rug_ui_role");
-    expect(prePilotRole?.value.startsWith("store_staff.")).toBeTruthy();
-
-    await page.locator("#access-code").fill(PILOT_PASSCODE);
-    await page.getByRole("button", { name: /Unlock Pilot/i }).click();
     await expectPath(page, "/inventory");
     await expect(page.getByRole("heading", { name: /Inventory Browser/i })).toBeVisible();
     await expect(page.getByText(new RegExp(`Tenant:\\s*${TENANT_ID}`))).toBeVisible();
+
+    const roleCookie = await cookieByName(context, STAFF_URL, "rug_ui_role");
+    expect(roleCookie?.value.startsWith("store_staff.")).toBeTruthy();
+  });
+
+  test("valid developer token flow lands on home", async ({ page, context }) => {
+    await page.goto(`/join?token=${DEV_TOKEN}`);
+    await expectPath(page, "/");
+    await expect(page.getByText(/MVP Workspace/i)).toBeVisible();
+
+    const roleCookie = await cookieByName(context, STAFF_URL, "rug_ui_role");
+    expect(roleCookie?.value.startsWith("developer.")).toBeTruthy();
   });
 });

@@ -3,7 +3,6 @@ import {
   fetchAppraisalDrafts,
   saveManualAppraisalDraft,
 } from "@/lib/appraisal/service";
-import { requirePilotAccessApi } from "@/lib/auth/pilot-access";
 import { normalizeTenantId, resolveAuthoritativeTenantForServer } from "@/lib/auth/tenant";
 import { canRoleGenerateAppraisal } from "@/lib/auth/policy";
 import { resolveApiRoleOrError } from "@/lib/http/guards";
@@ -35,9 +34,6 @@ function statusForErrorCode(code: string): number {
  * Read recent persisted appraisal drafts for tenant-scoped staff workflows.
  */
 export async function GET(req: Request) {
-  const pilotBlocked = await requirePilotAccessApi();
-  if (pilotBlocked) return pilotBlocked;
-
   const { searchParams } = new URL(req.url);
   const role = searchParams.get("role") ?? undefined;
   const userRole = searchParams.get("user_role") ?? undefined;
@@ -95,9 +91,6 @@ export async function GET(req: Request) {
  * Persist manual save/review/finalize actions for appraisal records.
  */
 export async function POST(req: Request) {
-  const pilotBlocked = await requirePilotAccessApi();
-  if (pilotBlocked) return pilotBlocked;
-
   const parsed = await parseJsonObjectBody<{
     role?: RoleType;
     user_role?: RoleType;

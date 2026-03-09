@@ -7,6 +7,7 @@ import {
   cleanupRugArtifacts,
   getSupabaseAdmin,
   makeImageFile,
+  makeSignedRoleCookie,
   nowIso,
   postMultipart,
   pushCheck,
@@ -49,11 +50,11 @@ const IntakeResponseSchema = z.object({
 });
 
 function staffCookie(tenant) {
-  return `rug_ui_role=store_staff; rug_ui_tenant_id=${tenant}; rug_pilot_access=1`;
+  return makeSignedRoleCookie("store_staff", tenant);
 }
 
 function retailCookie(tenant) {
-  return `rug_ui_role=retail_customer; rug_ui_tenant_id=${tenant}; rug_pilot_access=1`;
+  return makeSignedRoleCookie("retail_customer", tenant);
 }
 
 function basePayload(label) {

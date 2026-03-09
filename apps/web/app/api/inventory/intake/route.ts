@@ -6,7 +6,6 @@ import {
   normalizeTenantId,
   resolveAuthoritativeTenantForServer,
 } from "@/lib/auth/tenant";
-import { requirePilotAccessApi } from "@/lib/auth/pilot-access";
 import { resolveApiRoleOrError } from "@/lib/http/guards";
 import { parseE2eTraceMeta, writeE2eTraceArtifact } from "@/lib/qa/e2e-trace";
 import {
@@ -212,9 +211,6 @@ export async function POST(req: Request) {
     }
     return response;
   };
-
-  const pilotBlocked = await requirePilotAccessApi();
-  if (pilotBlocked) return withIntakeHeaders(pilotBlocked);
 
   try {
     const formData = await req.formData().catch(() => null);

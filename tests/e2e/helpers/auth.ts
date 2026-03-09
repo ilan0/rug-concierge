@@ -1,7 +1,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { expect, type Browser, type BrowserContext, type Page } from "@playwright/test";
-import { STAFF_TOKEN, STAFF_URL, TRADE_TOKEN } from "../config";
+import { CUSTOMER_URL, STAFF_TOKEN, STAFF_URL, TRADE_TOKEN } from "../config";
 
 const AUTH_DIR = path.resolve(process.cwd(), "test-results/.auth");
 
@@ -35,6 +35,7 @@ export async function removeCookiesByName(
 
 async function createStaffLikeState(input: {
   browser: Browser;
+  baseUrl: string;
   token: string;
   expectedPath: "/inventory" | "/trade";
   stateName: "staff" | "trade";
@@ -43,20 +44,8 @@ async function createStaffLikeState(input: {
   const statePath = targetStatePath(input.stateName);
 
   const context = await input.browser.newContext();
-  const host = new URL(STAFF_URL).hostname;
-  await context.addCookies([
-    {
-      name: "rug_pilot_access",
-      value: "1",
-      domain: host,
-      path: "/",
-      secure: true,
-      httpOnly: false,
-      sameSite: "Lax",
-    },
-  ]);
   const page = await context.newPage();
-  await page.goto(`${STAFF_URL}/join?token=${input.token}`, {
+  await page.goto(`${input.baseUrl}/join?token=${input.token}`, {
     waitUntil: "domcontentloaded",
   });
 
@@ -72,6 +61,7 @@ async function createStaffLikeState(input: {
 export async function staffAuthContext(browser: Browser): Promise<string> {
   return createStaffLikeState({
     browser,
+    baseUrl: STAFF_URL,
     token: STAFF_TOKEN,
     expectedPath: "/inventory",
     stateName: "staff",
@@ -85,6 +75,7 @@ export async function tradeAuthContext(browser: Browser): Promise<string> {
 
   return createStaffLikeState({
     browser,
+    baseUrl: CUSTOMER_URL,
     token: TRADE_TOKEN,
     expectedPath: "/trade",
     stateName: "trade",

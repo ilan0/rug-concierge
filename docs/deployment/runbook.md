@@ -2,64 +2,69 @@
 
 ## 1. Prepare Tenant
 
-1. Create or confirm tenant row in Supabase.
-2. Capture tenant UUID for env configuration.
-3. Seed initial inventory if needed.
+1. Create/confirm tenant row in Supabase.
+2. Capture tenant UUID.
+3. Seed inventory if needed.
 
-## 2. Create Customer Deployment
+## 2. Create Customer Deployment (`<store>-customer`)
 
-1. Create Vercel project: `<store>-customer`.
-2. Connect to this repo/branch.
-3. Configure env vars:
-4. Set shared vars from [`env-vars.md`](./env-vars.md).
-5. Set `DEPLOYMENT_TYPE=customer`, `NEXT_PUBLIC_DEPLOYMENT_TYPE=customer`.
-6. Set `TENANT_ID` and `NEXT_PUBLIC_TENANT_ID` to store tenant UUID.
-7. Disable role switcher: `NEXT_PUBLIC_ENABLE_ROLE_SWITCHER=0`.
-8. Deploy and verify `/` lands on `/concierge`.
+1. Create Vercel project and connect this repo.
+2. Set env vars from [`env-vars.md`](./env-vars.md).
+3. Required role token on customer deployment:
+4. `TRADE_ACCESS_TOKEN=<TRADE_ACCESS_TOKEN>`
+5. Deploy.
+6. Verify:
+7. `/` lands on `/concierge`.
+8. `/join?token=<TRADE_ACCESS_TOKEN>` lands on `/trade`.
 
-## 3. Create Staff Deployment
+## 3. Create Staff Deployment (`<store>-staff`)
 
-1. Create Vercel project: `<store>-staff`.
-2. Connect to this repo/branch.
-3. Generate secrets:
-4. `COOKIE_SECRET`: `openssl rand -hex 32`
-5. `STAFF_ACCESS_TOKEN`: `openssl rand -hex 32`
-6. `TRADE_ACCESS_TOKEN`: `openssl rand -hex 32`
-7. `DEV_ACCESS_TOKEN`: `openssl rand -hex 32`
-8. Configure env vars:
-9. Set shared vars from [`env-vars.md`](./env-vars.md).
-10. Set `DEPLOYMENT_TYPE=staff`, `NEXT_PUBLIC_DEPLOYMENT_TYPE=staff`.
-11. Set `TENANT_ID` and `NEXT_PUBLIC_TENANT_ID`.
-12. Set `PILOT_ACCESS_PASSCODE`.
-13. Set all three access tokens.
-14. Set `NEXT_PUBLIC_ENABLE_ROLE_SWITCHER=0`.
-15. Deploy and verify passcode gate appears on `/`.
+1. Create Vercel project and connect this repo.
+2. Generate/store secrets:
+3. `COOKIE_SECRET` (same as customer deployment for the same store)
+4. `STAFF_ACCESS_TOKEN`
+5. `DEV_ACCESS_TOKEN`
+6. Set env vars from [`env-vars.md`](./env-vars.md).
+7. Deploy.
+8. Verify:
+9. `/join?token=<STAFF_ACCESS_TOKEN>` lands on `/inventory`.
+10. `/join?token=<DEV_ACCESS_TOKEN>` lands on `/`.
 
-## 4. Create Join Links
+## 4. Persona Link Distribution
 
-1. Staff: `https://<staff-domain>/join?token=<STAFF_ACCESS_TOKEN>`
-2. Trade: `https://<staff-domain>/join?token=<TRADE_ACCESS_TOKEN>`
-3. Developer: `https://<staff-domain>/join?token=<DEV_ACCESS_TOKEN>`
+1. Retail customer: `https://<customer-domain>/`
+2. Trade/design client: `https://<customer-domain>/join?token=<TRADE_ACCESS_TOKEN>`
+3. Store staff/owner: `https://<staff-domain>/join?token=<STAFF_ACCESS_TOKEN>`
+4. Developer/support: `https://<staff-domain>/join?token=<DEV_ACCESS_TOKEN>`
+5. Tell trade/staff/dev users to bookmark their join link.
 
-## 5. Distribution To Humans
+## 5. Vercel Env Actions (Dashboard)
 
-1. Retail customers: share customer URL only.
-2. Trade clients: share trade join link only.
-3. Store staff: share staff join link + pilot passcode.
-4. Store owner/demo presenter: same as staff; optionally keep dev link private for support.
-5. Tell staff and trade users to bookmark their `/join?token=...` URL. Cookie recovery is re-clicking that bookmark.
+After changing env vars, redeploy both projects.
 
-## 6. Smoke Tests
+Customer deployment:
+1. Add `TRADE_ACCESS_TOKEN=<TRADE_ACCESS_TOKEN>`
+2. Ensure `COOKIE_SECRET` matches staff deployment for that store
+3. Do not set `PILOT_ACCESS_PASSCODE`
 
-1. Customer `/` -> `/concierge`, no setup UI.
-2. Customer `/inventory` -> redirected `/concierge`.
-3. Staff `/` -> passcode gate.
-4. After passcode, staff join link -> `/inventory`.
-5. Trade join link -> `/trade`.
-6. Clear role cookie only (keep pilot cookie) -> staff URL routes to `/join` recovery.
-7. Clear both role + pilot cookies -> passcode gate first, then join recovery.
+Staff deployment:
+1. Add `STAFF_ACCESS_TOKEN=<STAFF_ACCESS_TOKEN>`
+2. Add `DEV_ACCESS_TOKEN=<DEV_ACCESS_TOKEN>`
+3. Remove `TRADE_ACCESS_TOKEN`
+4. Remove `PILOT_ACCESS_PASSCODE`
+
+## 6. Smoke Test Checklist
+
+1. Customer `/` with no cookies -> `/concierge`
+2. Customer `/join?token=<TRADE_ACCESS_TOKEN>` -> `/trade`
+3. Customer `/trade` with no trade cookie -> `/concierge`
+4. Staff `/join?token=<STAFF_ACCESS_TOKEN>` -> `/inventory`
+5. Staff `/join?token=<DEV_ACCESS_TOKEN>` -> `/`
+6. Staff `/` with staff cookie -> `/inventory`
+7. Staff `/trade` -> `/inventory`
+8. Clear role cookie and reopen bookmarked join link -> back to portal
 
 ## 7. Rotation
 
-1. Rotate access token: update env var, redeploy, redistribute new join link.
-2. Rotate `COOKIE_SECRET`: all role cookies invalidated; users re-enter through `/join`.
+1. Rotate any access token -> update env, redeploy, redistribute new link.
+2. Rotate `COOKIE_SECRET` -> all signed role cookies invalidated, users re-enter via join link.

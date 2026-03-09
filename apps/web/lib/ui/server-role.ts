@@ -1,5 +1,7 @@
 import { cookies } from "next/headers";
+import { getServerDeploymentType } from "@/lib/auth/deployment";
 import type { AppRole } from "@/lib/auth/roles";
+import { capRoleForDeployment } from "@/lib/auth/roles";
 import { verifySignedRoleCookieValue } from "@/lib/auth/role-cookie";
 import { resolveAuthoritativeTenantForServer } from "@/lib/auth/tenant";
 import { uiRoleCookieName, uiTenantCookieName } from "@/lib/ui/role-session";
@@ -10,10 +12,11 @@ export async function getServerUiRole(): Promise<AppRole | null> {
   const tenantId = resolveAuthoritativeTenantForServer({
     cookieTenantId: cookieStore.get(uiTenantCookieName)?.value ?? null,
   });
-  return verifySignedRoleCookieValue({
+  const verifiedRole = verifySignedRoleCookieValue({
     rawCookieValue: rawRoleCookie,
     tenantId,
   });
+  return capRoleForDeployment(verifiedRole, getServerDeploymentType());
 }
 
 export async function getServerUiTenantId(): Promise<string | null> {

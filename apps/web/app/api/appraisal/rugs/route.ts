@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
 import { fetchInventoryLinkedRugs } from "@/lib/appraisal/service";
-import { requirePilotAccessApi } from "@/lib/auth/pilot-access";
 import { normalizeTenantId, resolveAuthoritativeTenantForServer } from "@/lib/auth/tenant";
 import { canRoleGenerateAppraisal } from "@/lib/auth/policy";
 import { resolveApiRoleOrError } from "@/lib/http/guards";
@@ -11,9 +10,6 @@ import type { RoleType } from "@/lib/chat/types";
  * Tenant-scoped rug selector endpoint for inventory-linked appraisal flows.
  */
 export async function GET(req: Request) {
-  const pilotBlocked = await requirePilotAccessApi();
-  if (pilotBlocked) return pilotBlocked;
-
   const { searchParams } = new URL(req.url);
   const role = searchParams.get("role") ?? undefined;
   const userRole = searchParams.get("user_role") ?? undefined;

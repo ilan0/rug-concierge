@@ -31,7 +31,6 @@ import {
   requireTenantId,
   resolveAuthoritativeTenantForServer,
 } from "@/lib/auth/tenant";
-import { requirePilotAccessApi } from "@/lib/auth/pilot-access";
 import {
   requireRoleCapabilityOrError,
   resolveApiRoleOrError,
@@ -61,9 +60,6 @@ import type {
  * 5) persist updated session and return response
  */
 export async function POST(req: Request) {
-  const pilotBlocked = await requirePilotAccessApi();
-  if (pilotBlocked) return pilotBlocked;
-
   const startedAt = Date.now();
   const flowPath: string[] = [
     "/api/chat POST",

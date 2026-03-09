@@ -27,7 +27,6 @@ import { Badge } from "@/components/ui/badge";
 const ROLE_SWITCHER_ENABLED =
   process.env.NEXT_PUBLIC_ENABLE_ROLE_SWITCHER === "1" ||
   process.env.NODE_ENV !== "production";
-const DEPLOYMENT_TYPE = process.env.NEXT_PUBLIC_DEPLOYMENT_TYPE;
 
 const DEFAULT_PILOT_ROLE: UiRole = isUiRole(
   process.env.NEXT_PUBLIC_PILOT_DEFAULT_ROLE
@@ -45,11 +44,6 @@ export function HomeScreen() {
   const [tenantId, setTenantState] = useState("");
   const [isSyncing, setIsSyncing] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [accessLoading, setAccessLoading] = useState(true);
-  const [accessRequired, setAccessRequired] = useState(false);
-  const [accessVerified, setAccessVerified] = useState(false);
-  const [passcode, setPasscode] = useState("");
-  const [passcodeError, setPasscodeError] = useState<string | null>(null);
 
   useEffect(() => {
     const storedRole = getUiRole();
@@ -79,22 +73,6 @@ export function HomeScreen() {
         });
       }
     }
-
-    void fetch("/api/ui-access")
-      .then(async (response) => {
-        const payload = (await response.json().catch(() => null)) as
-          | { required?: boolean; verified?: boolean }
-          | null;
-        setAccessRequired(Boolean(payload?.required));
-        setAccessVerified(Boolean(payload?.verified));
-      })
-      .catch(() => {
-        setAccessRequired(false);
-        setAccessVerified(true);
-      })
-      .finally(() => {
-        setAccessLoading(false);
-      });
   }, []);
 
   const cards = useMemo(
@@ -185,98 +163,6 @@ export function HomeScreen() {
     }
   };
 
-  const submitPasscode = async () => {
-    if (!passcode.trim()) {
-      setPasscodeError("Enter the access code.");
-      return;
-    }
-    setPasscodeError(null);
-    setIsSyncing(true);
-    try {
-      const response = await fetch("/api/ui-access", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ passcode }),
-      });
-      const payload = (await response.json().catch(() => null)) as
-        | { verified?: boolean; error?: string }
-        | null;
-      if (!response.ok || !payload?.verified) {
-        setPasscodeError(payload?.error ?? "Invalid access code.");
-        return;
-      }
-      setAccessVerified(true);
-      setPasscode("");
-      if (DEPLOYMENT_TYPE === "staff") {
-        window.location.assign("/");
-      }
-    } catch {
-      setPasscodeError("Access verification failed. Try again.");
-    } finally {
-      setIsSyncing(false);
-    }
-  };
-
-  if (accessLoading) {
-    return (
-      <AppShell variant="setup">
-        <SectionCard
-          title="Preparing workspace"
-          description="Loading pilot access status."
-          tone="soft"
-          density="compact"
-        />
-      </AppShell>
-    );
-  }
-
-  if (accessRequired && !accessVerified) {
-    return (
-      <AppShell variant="setup">
-        <PageHeader
-          kicker="Rug Concierge"
-          title="Pilot Access"
-          subtitle="Enter your owner pilot access code to continue."
-          variant="setup"
-        />
-        <SectionCard
-          title="Unlock Pilot"
-          description="Access code is required for hosted pilot mode."
-          tone="soft"
-          className="mx-auto w-full max-w-3xl"
-        >
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="access-code">Access Code</Label>
-              <Input
-                id="access-code"
-                type="password"
-                value={passcode}
-                onChange={(event) => setPasscode(event.target.value)}
-                placeholder="Enter code"
-              />
-            </div>
-            <Button
-              type="button"
-              onClick={() => void submitPasscode()}
-              disabled={isSyncing}
-            >
-              {isSyncing ? "Verifying..." : "Unlock Pilot"}
-            </Button>
-            {passcodeError ? (
-              <Alert variant="destructive">
-                <AlertTitle>Access failed</AlertTitle>
-                <AlertDescription>{passcodeError}</AlertDescription>
-              </Alert>
-            ) : null}
-          </div>
-        </SectionCard>
-      </AppShell>
-    );
-  }
-
   return (
     <AppShell variant="setup">
       <PageHeader
@@ -288,7 +174,7 @@ export function HomeScreen() {
 
       <div className="mx-auto w-full max-w-4xl space-y-5">
         <SectionCard
-          title={ROLE_SWITCHER_ENABLED ? "Select Role + Store" : "Pilot Setup"}
+          title={ROLE_SWITCHER_ENABLED ? "Select Role + Store" : "Workspace Setup"}
           tone="soft"
           className="border-border/55"
         >

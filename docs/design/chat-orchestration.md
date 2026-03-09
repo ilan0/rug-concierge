@@ -19,7 +19,6 @@ Request notes:
 - `override` is an optional object used with `review_action: "override"`.
 - Recommendation turns require tenant context; missing tenant returns `400`.
 - Session tenant mismatch (`session_id` reused with different `tenant_id`) returns `403`.
-- For hosted pilots with `PILOT_ACCESS_PASSCODE`, API calls require access unlock before chat routes are available.
 
 ## Role and Capability Enforcement
 

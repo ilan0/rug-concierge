@@ -9,6 +9,7 @@ import {
   getText,
   lookupRugArtifacts,
   makeImageFile,
+  makeSignedRoleCookie,
   nowIso,
   postJson,
   postMultipart,
@@ -42,7 +43,7 @@ const RecommendResponseSchema = z.object({
 });
 
 function staffCookie(tenant) {
-  return `rug_ui_role=store_staff; rug_ui_tenant_id=${tenant}; rug_pilot_access=1`;
+  return makeSignedRoleCookie("store_staff", tenant);
 }
 
 async function run() {

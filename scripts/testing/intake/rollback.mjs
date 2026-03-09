@@ -6,6 +6,7 @@ import {
   cleanupRugArtifacts,
   getSupabaseAdmin,
   makeImageFile,
+  makeSignedRoleCookie,
   nowIso,
   postMultipart,
   pushCheck,
@@ -29,7 +30,7 @@ const reportPath = path.resolve(outputRoot, "report.md");
 const jsonPath = path.resolve(outputRoot, "report.json");
 
 function staffCookie(tenant) {
-  return `rug_ui_role=store_staff; rug_ui_tenant_id=${tenant}; rug_pilot_access=1`;
+  return makeSignedRoleCookie("store_staff", tenant);
 }
 
 function isOrphanFree(artifacts) {

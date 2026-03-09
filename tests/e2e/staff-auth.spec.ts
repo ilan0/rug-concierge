@@ -5,7 +5,7 @@ import {
   type BrowserContext,
   type Page,
 } from "@playwright/test";
-import { PILOT_PASSCODE, STAFF_TOKEN, STAFF_URL } from "./config";
+import { STAFF_TOKEN, STAFF_URL } from "./config";
 import {
   cookieHeaderForContext,
   removeCookiesByName,
@@ -49,8 +49,6 @@ test.describe("Staff Deployment Authenticated", () => {
         ["/inventory", /Inventory Browser/i],
         ["/intake", /Inventory Intake/i],
         ["/appraisal", /Appraisal Draft Studio|Appraisal Studio/i],
-        ["/concierge", /Rug Concierge/i],
-        ["/trade", /Trade Support/i],
       ];
 
       for (const [path, heading] of routeChecks) {
@@ -60,12 +58,18 @@ test.describe("Staff Deployment Authenticated", () => {
         await expect(page.getByRole("link", { name: /^Home$/i })).toBeVisible();
       }
 
+      await page.goto(`${STAFF_URL}/concierge`);
+      await expectPath(page, "/inventory");
+
+      await page.goto(`${STAFF_URL}/trade`);
+      await expectPath(page, "/inventory");
+
       await page.getByRole("link", { name: /^Home$/i }).click();
       await expectPath(page, "/inventory");
     });
   });
 
-  test("cookie loss recovery works with and without pilot cookie", async ({ browser }) => {
+  test("cookie loss recovery works via join link", async ({ browser }) => {
     await withStaffPage(browser, async (page, context) => {
       await removeCookiesByName(context, ["rug_ui_role"]);
       await page.goto(`${STAFF_URL}/inventory`);
@@ -73,22 +77,8 @@ test.describe("Staff Deployment Authenticated", () => {
 
       await page.goto(`${STAFF_URL}/join?token=${STAFF_TOKEN}`);
       await expectPath(page, "/inventory");
-      await expect(page.getByRole("heading", { name: /Pilot Access/i })).toHaveCount(0);
-
-      await removeCookiesByName(context, ["rug_ui_role", "rug_pilot_access"]);
-      await page.goto(`${STAFF_URL}/inventory`);
-      await expectPath(page, "/");
-      await expect(page.getByRole("heading", { name: /Pilot Access/i })).toBeVisible();
-
-      await page.locator("#access-code").fill(PILOT_PASSCODE);
-      await page.getByRole("button", { name: /Unlock Pilot/i }).click();
-      await expectPath(page, "/join");
-
-      await page.goto(`${STAFF_URL}/join?token=${STAFF_TOKEN}`);
-      await expectPath(page, "/inventory");
 
       const cookieHeader = await cookieHeaderForContext(context, STAFF_URL);
-      expect(cookieHeader).toContain("rug_pilot_access=1");
       expect(cookieHeader).toContain("rug_ui_role=");
     });
   });

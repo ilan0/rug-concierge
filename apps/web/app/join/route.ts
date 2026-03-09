@@ -2,9 +2,11 @@ import { createHash, timingSafeEqual } from "node:crypto";
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import type { AppRole } from "@/lib/auth/roles";
+import { capRoleForDeployment } from "@/lib/auth/roles";
 import {
   getRequiredTenantIdForDeployment,
   getServerDeploymentType,
+  type DeploymentType,
 } from "@/lib/auth/deployment";
 import {
   createSignedRoleCookieValue,
@@ -36,16 +38,48 @@ function safeTokenCompare(input: string, expected: string): boolean {
   return timingSafeEqual(left, right);
 }
 
-function evaluateJoinToken(token: string): JoinTokenMatch[] {
-  const staffToken = process.env.STAFF_ACCESS_TOKEN?.trim() ?? "";
-  const tradeToken = process.env.TRADE_ACCESS_TOKEN?.trim() ?? "";
-  const devToken = process.env.DEV_ACCESS_TOKEN?.trim() ?? "";
+function evaluateJoinToken(
+  token: string,
+  deploymentType: DeploymentType
+): JoinTokenMatch[] {
+  const candidates: Array<{ role: AppRole; token: string }> =
+    deploymentType === "customer"
+      ? [
+          {
+            role: "trade_client",
+            token: process.env.TRADE_ACCESS_TOKEN?.trim() ?? "",
+          },
+        ]
+      : deploymentType === "staff"
+        ? [
+            {
+              role: "store_staff",
+              token: process.env.STAFF_ACCESS_TOKEN?.trim() ?? "",
+            },
+            {
+              role: "developer",
+              token: process.env.DEV_ACCESS_TOKEN?.trim() ?? "",
+            },
+          ]
+        : [
+            {
+              role: "store_staff",
+              token: process.env.STAFF_ACCESS_TOKEN?.trim() ?? "",
+            },
+            {
+              role: "trade_client",
+              token: process.env.TRADE_ACCESS_TOKEN?.trim() ?? "",
+            },
+            {
+              role: "developer",
+              token: process.env.DEV_ACCESS_TOKEN?.trim() ?? "",
+            },
+          ];
 
-  return [
-    { role: "store_staff", matched: safeTokenCompare(token, staffToken) },
-    { role: "trade_client", matched: safeTokenCompare(token, tradeToken) },
-    { role: "developer", matched: safeTokenCompare(token, devToken) },
-  ];
+  return candidates.map((candidate) => ({
+    role: candidate.role,
+    matched: safeTokenCompare(token, candidate.token),
+  }));
 }
 
 function renderHtmlPage(input: {
@@ -106,16 +140,19 @@ function setRoleAndTenantCookies(
   });
 }
 
-async function getExistingVerifiedCookieRole(): Promise<AppRole | null> {
+async function getExistingVerifiedCookieRole(
+  deploymentType: DeploymentType
+): Promise<AppRole | null> {
   const cookieStore = await cookies();
   const rawRole = cookieStore.get(uiRoleCookieName)?.value ?? null;
   const tenantId = resolveAuthoritativeTenantForServer({
     cookieTenantId: cookieStore.get(uiTenantCookieName)?.value ?? null,
   });
-  return verifySignedRoleCookieValue({
+  const verifiedRole = verifySignedRoleCookieValue({
     rawCookieValue: rawRole,
     tenantId,
   });
+  return capRoleForDeployment(verifiedRole, deploymentType);
 }
 
 export async function GET(req: Request) {
@@ -124,7 +161,7 @@ export async function GET(req: Request) {
   const token = url.searchParams.get("token")?.trim() ?? "";
 
   if (!token) {
-    const existingRole = await getExistingVerifiedCookieRole();
+    const existingRole = await getExistingVerifiedCookieRole(deploymentType);
     if (existingRole) {
       return NextResponse.redirect(new URL(roleDefaultPortal(existingRole), req.url));
     }
@@ -154,9 +191,16 @@ export async function GET(req: Request) {
     });
   }
 
-  const comparisons = evaluateJoinToken(token);
+  const comparisons = evaluateJoinToken(token, deploymentType);
   const matched = comparisons.find((item) => item.matched) ?? null;
   if (!matched) {
+    return renderHtmlPage({
+      title: "Invalid Or Expired Link",
+      message: "This access link is invalid or expired. Contact your store manager.",
+    });
+  }
+  const effectiveRole = capRoleForDeployment(matched.role, deploymentType);
+  if (!effectiveRole) {
     return renderHtmlPage({
       title: "Invalid Or Expired Link",
       message: "This access link is invalid or expired. Contact your store manager.",
@@ -174,7 +218,7 @@ export async function GET(req: Request) {
     });
   }
 
-  const response = NextResponse.redirect(new URL(roleDefaultPortal(matched.role), req.url));
-  setRoleAndTenantCookies(response, matched.role, tenantId);
+  const response = NextResponse.redirect(new URL(roleDefaultPortal(effectiveRole), req.url));
+  setRoleAndTenantCookies(response, effectiveRole, tenantId);
   return response;
 }

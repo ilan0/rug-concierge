@@ -16,7 +16,6 @@ import {
   requireTenantId,
   resolveAuthoritativeTenantForServer,
 } from "@/lib/auth/tenant";
-import { requirePilotAccessApi } from "@/lib/auth/pilot-access";
 import { resolveApiRoleOrError } from "@/lib/http/guards";
 import {
   parseJsonObjectBody,
@@ -54,9 +53,6 @@ function hasMeaningfulConstraints(constraints: HardConstraints): boolean {
 // 7) Return structured JSON for UI.
 
 export async function POST(req: Request) {
-  const pilotBlocked = await requirePilotAccessApi();
-  if (pilotBlocked) return pilotBlocked;
-
   const startedAt = Date.now();
   try {
     const requestId = crypto.randomUUID();

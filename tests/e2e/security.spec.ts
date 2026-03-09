@@ -21,15 +21,6 @@ test.describe("Security Boundaries", () => {
       const context = await browser.newContext();
       await context.addCookies([
         {
-          name: "rug_pilot_access",
-          value: "1",
-          domain: host,
-          path: "/",
-          secure: true,
-          httpOnly: false,
-          sameSite: "Lax",
-        },
-        {
           name: "rug_ui_tenant_id",
           value: TENANT_ID,
           domain: host,
@@ -93,7 +84,7 @@ test.describe("Security Boundaries", () => {
           tenant_id: TENANT_ID,
         },
       });
-      expect([401, 403]).toContain(response.status());
+      expect(response.status()).toBe(403);
     }
   });
 

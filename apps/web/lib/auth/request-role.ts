@@ -1,5 +1,10 @@
 import { cookies } from "next/headers";
-import { isAppRole, normalizeAppRole, type AppRole } from "@/lib/auth/roles";
+import {
+  capRoleForDeployment,
+  isAppRole,
+  normalizeAppRole,
+  type AppRole,
+} from "@/lib/auth/roles";
 import { verifySignedRoleCookieValue } from "@/lib/auth/role-cookie";
 import { resolveAuthoritativeTenantForServer } from "@/lib/auth/tenant";
 import { getServerDeploymentType, type DeploymentType } from "@/lib/auth/deployment";
@@ -56,10 +61,11 @@ export async function getRequestCookieRole(): Promise<AppRole | null> {
   const tenantId = resolveAuthoritativeTenantForServer({
     cookieTenantId,
   });
-  return verifySignedRoleCookieValue({
+  const verifiedRole = verifySignedRoleCookieValue({
     rawCookieValue: rawRoleCookie,
     tenantId,
   });
+  return capRoleForDeployment(verifiedRole, getServerDeploymentType());
 }
 
 export async function resolveRequestRole(input?: {
@@ -85,15 +91,21 @@ export function resolveRoleFromInputs(input: {
   requestRole: AppRole | null;
   defaultRole?: AppRole;
 }): ResolvedRequestRole {
+  const cappedCookieRole = capRoleForDeployment(
+    input.cookieRole,
+    input.deploymentType
+  );
   const mismatch = Boolean(
-    input.cookieRole && input.requestRole && input.cookieRole !== input.requestRole
+    cappedCookieRole &&
+      input.requestRole &&
+      cappedCookieRole !== input.requestRole
   );
 
-  if (input.cookieRole) {
+  if (cappedCookieRole) {
     return {
-      role: input.cookieRole,
+      role: cappedCookieRole,
       source: "cookie",
-      cookie_role: input.cookieRole,
+      cookie_role: cappedCookieRole,
       request_role: input.requestRole,
       mismatch,
       blocked_non_retail_request: false,

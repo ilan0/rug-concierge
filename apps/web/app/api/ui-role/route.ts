@@ -1,15 +1,11 @@
 import { NextResponse } from "next/server";
 import { isUiRole } from "@/lib/ui/roles";
 import { uiRoleCookieName, uiTenantCookieName } from "@/lib/ui/role-session";
-import { requirePilotAccessApi } from "@/lib/auth/pilot-access";
 import { createSignedRoleCookieValue, ROLE_COOKIE_MAX_AGE_SECONDS } from "@/lib/auth/role-cookie";
 import { isDeveloperDeployment, isRoleSwitcherEnabledForServer } from "@/lib/auth/deployment";
 import { resolveAuthoritativeTenantForServer } from "@/lib/auth/tenant";
 
 export async function POST(req: Request) {
-  const blocked = await requirePilotAccessApi();
-  if (blocked) return blocked;
-
   if (!isRoleSwitcherEnabledForServer()) {
     return NextResponse.json(
       { error: "Role switching is disabled for this deployment." },

@@ -149,6 +149,40 @@ test("non-developer deployment allows explicit retail_customer request role", ()
   assert.equal(result.blocked_non_retail_request, false);
 });
 
+test("customer deployment ignores non-retail cookie role", () => {
+  const result = resolveRoleFromInputs({
+    deploymentType: "customer",
+    cookieRole: "store_staff",
+    requestRole: null,
+  });
+  assert.equal(result.role, "retail_customer");
+  assert.equal(result.source, "default");
+  assert.equal(result.cookie_role, null);
+});
+
+test("customer deployment allows trade cookie role", () => {
+  const result = resolveRoleFromInputs({
+    deploymentType: "customer",
+    cookieRole: "trade_client",
+    requestRole: null,
+  });
+  assert.equal(result.role, "trade_client");
+  assert.equal(result.source, "cookie");
+  assert.equal(result.cookie_role, "trade_client");
+});
+
+test("customer deployment keeps mismatch when trade cookie conflicts with request role", () => {
+  const result = resolveRoleFromInputs({
+    deploymentType: "customer",
+    cookieRole: "trade_client",
+    requestRole: "retail_customer",
+  });
+  assert.equal(result.role, "trade_client");
+  assert.equal(result.source, "cookie");
+  assert.equal(result.cookie_role, "trade_client");
+  assert.equal(result.mismatch, true);
+});
+
 test("developer deployment allows non-retail request role without cookie", () => {
   const result = resolveRoleFromInputs({
     deploymentType: "developer",

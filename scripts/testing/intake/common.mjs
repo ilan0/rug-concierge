@@ -1,6 +1,7 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import path from "node:path";
+import { createHmac } from "node:crypto";
 import { createClient } from "@supabase/supabase-js";
 import nextEnv from "@next/env";
 
@@ -48,6 +49,39 @@ export function requireTenantId() {
     throw new Error("Missing TENANT_ID.");
   }
   return tenantId;
+}
+
+function requireCookieSecret() {
+  loadWebEnvIfNeeded();
+  const secret = (process.env.COOKIE_SECRET ?? "").trim();
+  if (!secret || secret.length < 32) {
+    throw new Error("Missing COOKIE_SECRET for signed role cookie generation in intake QA.");
+  }
+  return secret;
+}
+
+function toBase64Url(buffer) {
+  return buffer
+    .toString("base64")
+    .replace(/\+/g, "-")
+    .replace(/\//g, "_")
+    .replace(/=+$/g, "");
+}
+
+export function makeSignedRoleCookie(role, tenantId) {
+  const payload = `${role}:${tenantId}`;
+  const signature = toBase64Url(
+    createHmac("sha256", requireCookieSecret()).update(payload).digest()
+  );
+  return `rug_ui_role=${role}.${signature}; rug_ui_tenant_id=${tenantId}`;
+}
+
+export function makeSignedRoleCookieValue(role, tenantId) {
+  const payload = `${role}:${tenantId}`;
+  const signature = toBase64Url(
+    createHmac("sha256", requireCookieSecret()).update(payload).digest()
+  );
+  return `${role}.${signature}`;
 }
 
 export function resolveArtifactRoot(runId) {

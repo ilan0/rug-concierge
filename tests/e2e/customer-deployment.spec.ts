@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { CUSTOMER_URL, TENANT_ID } from "./config";
+import { CUSTOMER_URL, TENANT_ID, TRADE_TOKEN } from "./config";
 import { cookieByName, expectPath, pathnameFromUrl } from "./helpers/common";
 
 test.describe("Customer Deployment", () => {
@@ -34,6 +34,68 @@ test.describe("Customer Deployment", () => {
 
     const tenantCookie = await cookieByName(context, CUSTOMER_URL, "rug_ui_tenant_id");
     expect(tenantCookie?.value).toBe(TENANT_ID);
+  });
+
+  test("trade client join token on customer deployment lands on /trade", async ({
+    page,
+    context,
+  }) => {
+    await page.goto(`/join?token=${TRADE_TOKEN}`);
+    await expectPath(page, "/trade");
+
+    const roleCookie = await cookieByName(context, CUSTOMER_URL, "rug_ui_role");
+    expect(roleCookie).not.toBeNull();
+    expect(roleCookie?.value.startsWith("trade_client.")).toBeTruthy();
+  });
+
+  test("trade client with cookie revisiting root lands on /trade", async ({ page }) => {
+    await page.goto(`/join?token=${TRADE_TOKEN}`);
+    await expectPath(page, "/trade");
+
+    await page.goto("/");
+    await expectPath(page, "/trade");
+  });
+
+  test("retail customer is blocked from /trade", async ({ page }) => {
+    await page.goto("/join");
+    await expectPath(page, "/concierge");
+
+    await page.goto("/trade");
+    await expectPath(page, "/concierge");
+  });
+
+  test("non-retail role cookie is ignored and overwritten to retail on customer deployment", async ({
+    page,
+    context,
+  }) => {
+    const host = new URL(CUSTOMER_URL).hostname;
+    await context.addCookies([
+      {
+        name: "rug_ui_role",
+        value: "store_staff.invalidsignature",
+        domain: host,
+        path: "/",
+        secure: true,
+        httpOnly: false,
+        sameSite: "Lax",
+      },
+      {
+        name: "rug_ui_tenant_id",
+        value: TENANT_ID,
+        domain: host,
+        path: "/",
+        secure: true,
+        httpOnly: false,
+        sameSite: "Lax",
+      },
+    ]);
+
+    await page.goto("/concierge");
+    await expectPath(page, "/concierge");
+
+    const roleCookie = await cookieByName(context, CUSTOMER_URL, "rug_ui_role");
+    expect(roleCookie).not.toBeNull();
+    expect(roleCookie?.value.startsWith("retail_customer.")).toBeTruthy();
   });
 
   test("chat pipeline sends messages and persists on refresh", async ({ page }) => {

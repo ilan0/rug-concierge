@@ -1,9 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { canRoleAccessRoute, type AppRoutePath } from "@/lib/auth/policy";
 import { isAppRole, type AppRole } from "@/lib/auth/roles";
 
 const ROLE_COOKIE_NAME = "rug_ui_role";
-const PILOT_ACCESS_COOKIE_NAME = "rug_pilot_access";
 
 function getDeploymentType(): "customer" | "staff" | "developer" {
   const value = process.env.DEPLOYMENT_TYPE?.trim();
@@ -13,13 +11,6 @@ function getDeploymentType(): "customer" | "staff" | "developer" {
   return "developer";
 }
 
-function roleDefaultPortal(role: AppRole): string {
-  if (role === "trade_client") return "/trade";
-  if (role === "store_staff") return "/inventory";
-  if (role === "developer") return "/";
-  return "/concierge";
-}
-
 function extractRoleFromCookie(rawValue: string | null | undefined): AppRole | null {
   if (typeof rawValue !== "string") return null;
   const rolePart = rawValue.split(".")[0]?.trim();
@@ -27,7 +18,13 @@ function extractRoleFromCookie(rawValue: string | null | undefined): AppRole | n
   return rolePart;
 }
 
-function resolveWorkspacePath(pathname: string): AppRoutePath | null {
+function resolveWorkspacePath(pathname: string):
+  | "/concierge"
+  | "/trade"
+  | "/inventory"
+  | "/intake"
+  | "/appraisal"
+  | null {
   if (pathname === "/concierge" || pathname.startsWith("/concierge/")) {
     return "/concierge";
   }
@@ -75,17 +72,21 @@ function withCanonicalTenantCookie(
 export function proxy(request: NextRequest) {
   const deploymentType = getDeploymentType();
   const pathname = request.nextUrl.pathname;
+  const role = extractRoleFromCookie(request.cookies.get(ROLE_COOKIE_NAME)?.value);
 
   if (deploymentType === "developer") {
     return NextResponse.next();
   }
 
   if (pathname === "/join") {
-    return NextResponse.next();
+    return withCanonicalTenantCookie(request, NextResponse.next());
   }
 
   if (deploymentType === "customer") {
     if (pathname === "/") {
+      if (role === "trade_client") {
+        return withCanonicalTenantCookie(request, redirectTo(request, "/trade"));
+      }
       return withCanonicalTenantCookie(
         request,
         redirectTo(request, "/concierge")
@@ -93,11 +94,16 @@ export function proxy(request: NextRequest) {
     }
 
     const route = resolveWorkspacePath(pathname);
+    if (route === "/trade") {
+      if (role === "trade_client") {
+        return withCanonicalTenantCookie(request, NextResponse.next());
+      }
+      return withCanonicalTenantCookie(request, redirectTo(request, "/concierge"));
+    }
     if (
       route === "/inventory" ||
       route === "/intake" ||
-      route === "/appraisal" ||
-      route === "/trade"
+      route === "/appraisal"
     ) {
       return withCanonicalTenantCookie(
         request,
@@ -109,24 +115,14 @@ export function proxy(request: NextRequest) {
 
   // Staff deployment
 
-  const hasPilotAccess =
-    request.cookies.get(PILOT_ACCESS_COOKIE_NAME)?.value === "1";
-
   if (pathname === "/") {
-    if (hasPilotAccess) {
-      const role = extractRoleFromCookie(request.cookies.get(ROLE_COOKIE_NAME)?.value);
-      if (role === "store_staff") {
-        return withCanonicalTenantCookie(request, redirectTo(request, "/inventory"));
-      }
-      if (role === "trade_client") {
-        return withCanonicalTenantCookie(request, redirectTo(request, "/trade"));
-      }
-      if (role === "developer") {
-        return withCanonicalTenantCookie(request, NextResponse.next());
-      }
-      return withCanonicalTenantCookie(request, redirectTo(request, "/join"));
+    if (role === "store_staff") {
+      return withCanonicalTenantCookie(request, redirectTo(request, "/inventory"));
     }
-    return withCanonicalTenantCookie(request, NextResponse.next());
+    if (role === "developer") {
+      return withCanonicalTenantCookie(request, NextResponse.next());
+    }
+    return withCanonicalTenantCookie(request, redirectTo(request, "/join"));
   }
 
   const route = resolveWorkspacePath(pathname);
@@ -134,20 +130,15 @@ export function proxy(request: NextRequest) {
     return withCanonicalTenantCookie(request, NextResponse.next());
   }
 
-  if (!hasPilotAccess) {
-    return withCanonicalTenantCookie(request, redirectTo(request, "/"));
+  if (route === "/trade" || route === "/concierge") {
+    return withCanonicalTenantCookie(request, redirectTo(request, "/inventory"));
   }
 
-  const role = extractRoleFromCookie(request.cookies.get(ROLE_COOKIE_NAME)?.value);
-  if (!role) {
+  if (route === "/inventory" || route === "/intake" || route === "/appraisal") {
+    if (role === "store_staff" || role === "developer") {
+      return withCanonicalTenantCookie(request, NextResponse.next());
+    }
     return withCanonicalTenantCookie(request, redirectTo(request, "/join"));
-  }
-
-  if (!canRoleAccessRoute(role, route)) {
-    return withCanonicalTenantCookie(
-      request,
-      redirectTo(request, roleDefaultPortal(role))
-    );
   }
 
   return withCanonicalTenantCookie(request, NextResponse.next());

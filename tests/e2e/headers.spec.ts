@@ -74,7 +74,7 @@ test.describe("Response Headers", () => {
         },
       });
 
-      expect([400, 401, 403]).toContain(failure.status());
+      expect([400, 403]).toContain(failure.status());
       expect(header(failure, "x-intake-storage-path")).toBeUndefined();
     } finally {
       if (rugId) {

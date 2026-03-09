@@ -3,22 +3,11 @@ import { WorkspaceNav } from "@/components/shell/workspace-nav";
 import { AccessGuard } from "@/components/ui/access-guard";
 import { getServerUiRole, getServerUiTenantId } from "@/lib/ui/server-role";
 import { canRoleAccessRoute } from "@/lib/auth/policy";
-import { getPilotAccessState } from "@/lib/auth/pilot-access";
 import { getServerDeploymentType } from "@/lib/auth/deployment";
 import { redirect } from "next/navigation";
 
 export default async function AppraisalPage() {
   const deploymentType = getServerDeploymentType();
-  const access = await getPilotAccessState();
-  if (access.required && !access.verified) {
-    return (
-      <AccessGuard
-        title="Pilot Access Required"
-        description="Please unlock pilot access on Home before using appraisal."
-      />
-    );
-  }
-
   const role = await getServerUiRole();
   if (deploymentType === "staff" && !role) {
     redirect("/join");

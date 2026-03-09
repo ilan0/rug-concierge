@@ -4,7 +4,6 @@ import { readdir, readFile } from "node:fs/promises";
 import path from "node:path";
 import { resolveRequestRole } from "@/lib/auth/request-role";
 import { canRoleReadDebugTrace } from "@/lib/auth/policy";
-import { requirePilotAccessApi } from "@/lib/auth/pilot-access";
 
 function slug(value: string): string {
   return value
@@ -36,9 +35,6 @@ function resolveRepoRootFromCwd(): string {
 }
 
 export async function GET(req: Request) {
-  const pilotBlocked = await requirePilotAccessApi();
-  if (pilotBlocked) return pilotBlocked;
-
   const roleResolution = await resolveRequestRole({
     defaultRole: "retail_customer",
   });
