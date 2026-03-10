@@ -11,25 +11,13 @@ import {
 import { Button } from "@/components/ui/button";
 import { RugImage } from "@/components/ui/rug-image";
 import type { InventoryBrowserRow } from "@/lib/types/inventory";
+import { formatRugSize } from "@/lib/utils/format";
 
 type StaffRugDetailModalProps = {
   row: InventoryBrowserRow | null;
   open: boolean;
   onClose: () => void;
 };
-
-function formatNumber(value: number): string {
-  if (Number.isInteger(value)) return `${value}`;
-  return value.toFixed(1).replace(/\.0$/, "");
-}
-
-function formatSizeValue(
-  widthIn: number | null,
-  lengthIn: number | null
-): string | null {
-  if (typeof widthIn !== "number" || typeof lengthIn !== "number") return null;
-  return `${formatNumber(widthIn)} x ${formatNumber(lengthIn)} in`;
-}
 
 function toStatusLabel(status: string | null): string {
   if (status === "available") return "Available";
@@ -51,7 +39,10 @@ export function StaffRugDetailModal({
   open,
   onClose,
 }: StaffRugDetailModalProps) {
-  const sizeLabel = formatSizeValue(row?.width_total_in ?? null, row?.length_total_in ?? null);
+  const sizeLabel = formatRugSize(
+    row?.width_total_in ?? null,
+    row?.length_total_in ?? null
+  );
   const title = row?.intake_label ?? sizeLabel ?? "Untitled";
   const statusLabel = toStatusLabel(row?.status ?? null);
   const structuredEntries = row?.ai_structured_fields
@@ -91,48 +82,51 @@ export function StaffRugDetailModal({
                 </DialogDescription>
               </DialogHeader>
 
-              <div className="overflow-hidden rounded-xl border border-border/70 bg-muted">
-                <div className="aspect-[3/4] w-full">
-                  <RugImage
-                    src={row.primary_image_url}
-                    alt={title}
-                    placeholderLabel="No image available"
-                  />
+              <div className="flex flex-col gap-5 sm:flex-row">
+                <div className="shrink-0 sm:w-44">
+                  <div className="aspect-[3/4] max-h-52 overflow-hidden rounded-lg bg-muted sm:max-h-none">
+                    <RugImage
+                      src={row.primary_image_url}
+                      alt={title}
+                      placeholderLabel="No image available"
+                    />
+                  </div>
+                </div>
+                <div className="min-w-0 flex-1 space-y-4">
+                  {hasDescription ? (
+                    <section className="space-y-2">
+                      <h3 className="text-xs font-semibold uppercase tracking-[0.08em] text-primary">
+                        Description
+                      </h3>
+                      <p className="text-sm leading-6 text-foreground/90">
+                        {row.ai_description}
+                      </p>
+                    </section>
+                  ) : null}
+
+                  {showAiDetailsSection ? (
+                    <section className="space-y-2">
+                      <h3 className="text-xs font-semibold uppercase tracking-[0.08em] text-primary">
+                        AI Details
+                      </h3>
+                      {structuredEntries.length > 0 ? (
+                        <div className="grid gap-2 sm:grid-cols-[minmax(0,10rem)_minmax(0,1fr)]">
+                          {structuredEntries.map(([key, value]) => (
+                            <div key={key} className="contents">
+                              <p className="text-sm font-medium text-foreground/85">{toKeyLabel(key)}</p>
+                              <p className="text-sm text-foreground/90">{String(value)}</p>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="text-sm text-muted-foreground">
+                          AI processing pending - check back shortly.
+                        </p>
+                      )}
+                    </section>
+                  ) : null}
                 </div>
               </div>
-
-              {showAiDetailsSection ? (
-                <section className="space-y-2">
-                  <h3 className="text-xs font-semibold uppercase tracking-[0.08em] text-primary">
-                    AI Details
-                  </h3>
-                  {structuredEntries.length > 0 ? (
-                    <div className="grid gap-2 sm:grid-cols-[minmax(0,10rem)_minmax(0,1fr)]">
-                      {structuredEntries.map(([key, value]) => (
-                        <div key={key} className="contents">
-                          <p className="text-sm font-medium text-foreground/85">{toKeyLabel(key)}</p>
-                          <p className="text-sm text-foreground/90">{String(value)}</p>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <p className="text-sm text-muted-foreground">
-                      AI processing pending - check back shortly.
-                    </p>
-                  )}
-                </section>
-              ) : null}
-
-              {hasDescription ? (
-                <section className="space-y-2">
-                  <h3 className="text-xs font-semibold uppercase tracking-[0.08em] text-primary">
-                    Description
-                  </h3>
-                  <p className="text-sm leading-6 text-foreground/90">
-                    {row.ai_description}
-                  </p>
-                </section>
-              ) : null}
             </>
           ) : (
             <p className="text-sm text-muted-foreground">No rug selected.</p>

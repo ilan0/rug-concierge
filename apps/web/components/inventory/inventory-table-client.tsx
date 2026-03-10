@@ -4,23 +4,11 @@ import { useState } from "react";
 import { RugImage } from "@/components/ui/rug-image";
 import { StaffRugDetailModal } from "@/components/inventory/staff-rug-detail-modal";
 import type { InventoryBrowserRow } from "@/lib/types/inventory";
+import { formatRugSize } from "@/lib/utils/format";
 
 type InventoryTableClientProps = {
   rows: InventoryBrowserRow[];
 };
-
-function formatNumber(value: number): string {
-  if (Number.isInteger(value)) return `${value}`;
-  return value.toFixed(1).replace(/\.0$/, "");
-}
-
-function formatSize(
-  widthIn: number | null,
-  lengthIn: number | null
-): string | null {
-  if (typeof widthIn !== "number" || typeof lengthIn !== "number") return null;
-  return `${formatNumber(widthIn)} x ${formatNumber(lengthIn)} in`;
-}
 
 function formatDate(value: string | null): string {
   if (!value) return "-";
@@ -58,7 +46,7 @@ function readiness(row: InventoryBrowserRow): {
   displayLabel: string;
   ready: boolean;
 } {
-  const sizeLabel = formatSize(row.width_total_in, row.length_total_in);
+  const sizeLabel = formatRugSize(row.width_total_in, row.length_total_in);
   const label = row.intake_label?.trim() || sizeLabel || "Untitled";
   return {
     displayLabel: label,
@@ -100,16 +88,12 @@ export function InventoryTableClient({ rows }: InventoryTableClientProps) {
                       <p className={ready ? "text-base font-semibold" : "text-base text-muted-foreground"}>
                         {displayLabel}
                       </p>
-                      <p className="inline-flex items-center gap-1.5 text-xs">
-                        <span
-                          className={
-                            ready
-                              ? "size-2 rounded-full bg-emerald-500"
-                              : "size-2 rounded-full bg-amber-400"
-                          }
-                        />
-                        {ready ? "AI ready" : "AI pending"}
-                      </p>
+                      {!ready ? (
+                        <p className="inline-flex items-center gap-1.5 text-xs text-amber-600">
+                          <span className="size-2 rounded-full bg-amber-400" />
+                          Processing...
+                        </p>
+                      ) : null}
                     </div>
                   </div>
 
@@ -128,7 +112,7 @@ export function InventoryTableClient({ rows }: InventoryTableClientProps) {
                     </p>
                     <p>
                       <span className="font-semibold">Size:</span>{" "}
-                      {formatSize(row.width_total_in, row.length_total_in) ?? "-"}
+                      {formatRugSize(row.width_total_in, row.length_total_in) || "-"}
                     </p>
                     <p>
                       <span className="font-semibold">Added:</span> {formatDate(row.created_at)}
@@ -144,7 +128,7 @@ export function InventoryTableClient({ rows }: InventoryTableClientProps) {
               <thead className="bg-secondary/50 text-left">
                 <tr>
                   <th className="p-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Image</th>
-                  <th className="p-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Label + Readiness</th>
+                  <th className="p-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Label</th>
                   <th className="p-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Stock ID</th>
                   <th className="p-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Status</th>
                   <th className="p-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Size</th>
@@ -169,16 +153,12 @@ export function InventoryTableClient({ rows }: InventoryTableClientProps) {
                         <p className={ready ? "font-medium" : "text-muted-foreground"}>
                           {displayLabel}
                         </p>
-                        <p className="mt-1 inline-flex items-center gap-1.5 text-xs">
-                          <span
-                            className={
-                              ready
-                                ? "size-2 rounded-full bg-emerald-500"
-                                : "size-2 rounded-full bg-amber-400"
-                            }
-                          />
-                          {ready ? "AI ready" : "AI pending"}
-                        </p>
+                        {!ready ? (
+                          <p className="mt-1 inline-flex items-center gap-1.5 text-xs text-amber-600">
+                            <span className="size-2 rounded-full bg-amber-400" />
+                            Processing...
+                          </p>
+                        ) : null}
                       </td>
                       <td className="p-3 align-top">
                         {row.stock_id ? (
@@ -191,7 +171,7 @@ export function InventoryTableClient({ rows }: InventoryTableClientProps) {
                         <StatusBadge status={row.status} />
                       </td>
                       <td className="p-3 align-top">
-                        {formatSize(row.width_total_in, row.length_total_in) ?? "-"}
+                        {formatRugSize(row.width_total_in, row.length_total_in) || "-"}
                       </td>
                       <td className="p-3 align-top">{formatDate(row.created_at)}</td>
                     </tr>

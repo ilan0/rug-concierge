@@ -3,6 +3,7 @@ import { supabaseAdmin } from "@/lib/supabase/admin";
 import { badRequest, internalError } from "@/lib/errors/http-errors";
 import { resolveAuthoritativeTenantForServer } from "@/lib/auth/tenant";
 import { fetchPrimaryRugImagesForRugs } from "@/lib/storage/rug-images";
+import { formatRugSize } from "@/lib/utils/format";
 
 const OPENAI_RESPONSES_URL = "https://api.openai.com/v1/responses";
 
@@ -13,13 +14,6 @@ function toPlainText(value: string): string {
     .replace(/^\s*[-*•]+\s*/gm, "")
     .replace(/\s+/g, " ")
     .trim();
-}
-
-function formatSize(totalIn: number): string {
-  const feet = Math.floor(totalIn / 12);
-  const inches = totalIn % 12;
-  if (inches === 0) return `${feet}'`;
-  return `${feet}'${inches}"`;
 }
 
 function extractOutputText(payload: unknown): string | null {
@@ -156,7 +150,7 @@ export async function GET(
   if (widthTotalIn === null || lengthTotalIn === null) {
     return internalError("Rug dimensions are unavailable.");
   }
-  const sizeDisplay = `${formatSize(widthTotalIn)} × ${formatSize(lengthTotalIn)}`;
+  const sizeDisplay = formatRugSize(widthTotalIn, lengthTotalIn);
 
   let contextualBlurb =
     typeof rug.contextual_blurb === "string" && rug.contextual_blurb.trim().length > 0
