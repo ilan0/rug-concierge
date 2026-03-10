@@ -61,7 +61,7 @@ export async function listInventory(
   let query = supabase
     .from("rugs")
     .select(
-      "id, sku, intake_label, status, price, sale_price, width_total_in, length_total_in, style, palette, pattern, best_for, public_description",
+      "id, intake_label, status, width_total_in, length_total_in, ai_description, created_at",
       { count: "exact" }
     )
     .eq("tenant_id", tenantId)
@@ -76,30 +76,8 @@ export async function listInventory(
     const token = escapeForIlike(filters.q);
     query = query.or(
       [
-        `sku.ilike.%${token}%`,
         `intake_label.ilike.%${token}%`,
-        `style.ilike.%${token}%`,
-        `palette.ilike.%${token}%`,
-        `pattern.ilike.%${token}%`,
-        `public_description.ilike.%${token}%`,
-      ].join(",")
-    );
-  }
-
-  if (filters.priceMin !== null) {
-    query = query.or(
-      [
-        `sale_price.gte.${filters.priceMin}`,
-        `price.gte.${filters.priceMin}`,
-      ].join(",")
-    );
-  }
-
-  if (filters.priceMax !== null) {
-    query = query.or(
-      [
-        `sale_price.lte.${filters.priceMax}`,
-        `price.lte.${filters.priceMax}`,
+        `ai_description.ilike.%${token}%`,
       ].join(",")
     );
   }
@@ -119,14 +97,6 @@ export async function listInventory(
 
   if (filters.sort === "oldest") {
     query = query.order("id", { ascending: true });
-  } else if (filters.sort === "price_low") {
-    query = query
-      .order("sale_price", { ascending: true, nullsFirst: false })
-      .order("price", { ascending: true, nullsFirst: false });
-  } else if (filters.sort === "price_high") {
-    query = query
-      .order("sale_price", { ascending: false, nullsFirst: false })
-      .order("price", { ascending: false, nullsFirst: false });
   } else {
     query = query.order("id", { ascending: false });
   }
