@@ -110,7 +110,6 @@ export function InventoryTableClient({ rows }: InventoryTableClientProps) {
                         />
                         {ready ? "AI ready" : "AI pending"}
                       </p>
-                      <p className="text-xs font-mono text-muted-foreground">{row.id}</p>
                     </div>
                   </div>
 
@@ -180,7 +179,6 @@ export function InventoryTableClient({ rows }: InventoryTableClientProps) {
                           />
                           {ready ? "AI ready" : "AI pending"}
                         </p>
-                        <p className="mt-1 text-xs font-mono text-muted-foreground">{row.id}</p>
                       </td>
                       <td className="p-3 align-top">
                         {row.stock_id ? (

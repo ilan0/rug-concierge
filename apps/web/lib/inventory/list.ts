@@ -65,8 +65,6 @@ export async function listInventory(
       { count: "exact" }
     )
     .eq("tenant_id", tenantId)
-    .order("created_at", { ascending: false, nullsFirst: false })
-    .order("id", { ascending: false })
     .range(from, to);
 
   if (filters.status !== "all") {

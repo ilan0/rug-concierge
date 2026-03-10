@@ -59,6 +59,8 @@ export function StaffRugDetailModal({
     : [];
   const hasDescription =
     typeof row?.ai_description === "string" && row.ai_description.trim().length > 0;
+  const showAiDetailsSection =
+    structuredEntries.length > 0 || (!row?.ai_structured_fields && !hasDescription);
 
   return (
     <Dialog
@@ -99,25 +101,27 @@ export function StaffRugDetailModal({
                 </div>
               </div>
 
-              <section className="space-y-2">
-                <h3 className="text-xs font-semibold uppercase tracking-[0.08em] text-primary">
-                  AI Details
-                </h3>
-                {structuredEntries.length > 0 ? (
-                  <div className="grid gap-2 sm:grid-cols-[minmax(0,10rem)_minmax(0,1fr)]">
-                    {structuredEntries.map(([key, value]) => (
-                      <div key={key} className="contents">
-                        <p className="text-sm font-medium text-foreground/85">{toKeyLabel(key)}</p>
-                        <p className="text-sm text-foreground/90">{String(value)}</p>
-                      </div>
-                    ))}
-                  </div>
-                ) : !row.ai_structured_fields && !hasDescription ? (
-                  <p className="text-sm text-muted-foreground">
-                    AI processing pending - check back shortly.
-                  </p>
-                ) : null}
-              </section>
+              {showAiDetailsSection ? (
+                <section className="space-y-2">
+                  <h3 className="text-xs font-semibold uppercase tracking-[0.08em] text-primary">
+                    AI Details
+                  </h3>
+                  {structuredEntries.length > 0 ? (
+                    <div className="grid gap-2 sm:grid-cols-[minmax(0,10rem)_minmax(0,1fr)]">
+                      {structuredEntries.map(([key, value]) => (
+                        <div key={key} className="contents">
+                          <p className="text-sm font-medium text-foreground/85">{toKeyLabel(key)}</p>
+                          <p className="text-sm text-foreground/90">{String(value)}</p>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-sm text-muted-foreground">
+                      AI processing pending - check back shortly.
+                    </p>
+                  )}
+                </section>
+              ) : null}
 
               {hasDescription ? (
                 <section className="space-y-2">
