@@ -12,7 +12,7 @@ export type IntakeCreateRequest = {
 
 export type IntakeCreatedRug = {
   id: string;
-  intake_label: string;
+  intake_label: string | null;
   ai_description: string | null;
   status: string | null;
   width_total_in: number;

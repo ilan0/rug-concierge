@@ -84,7 +84,8 @@ export function IntakeScreen({ tenantId }: IntakeScreenProps) {
         image: imageFile,
       });
       setLastSaved(payload.rug);
-      setNotice(`Saved ${payload.rug.intake_label} (${payload.ai_status}).`);
+      const displayLabel = payload.rug.intake_label ?? "Processing...";
+      setNotice(`Saved ${displayLabel} (${payload.ai_status}).`);
       clearForNext();
     } catch (nextError) {
       setError(
@@ -218,7 +219,8 @@ export function IntakeScreen({ tenantId }: IntakeScreenProps) {
           <SectionCard title="Last Saved Rug">
             <div className="space-y-1 text-sm">
               <p>
-                <span className="font-medium">Label:</span> {lastSaved.intake_label}
+                <span className="font-medium">Label:</span>{" "}
+                {lastSaved.intake_label ?? "Processing..."}
               </p>
               <p>
                 <span className="font-medium">ID:</span> {lastSaved.id}

@@ -61,7 +61,7 @@ export async function listInventory(
   let query = supabase
     .from("rugs")
     .select(
-      "id, tenant_id, intake_label, status, width_total_in, length_total_in, ai_description, created_at",
+      "id, tenant_id, intake_label, ai_structured_fields, stock_id, status, width_total_in, length_total_in, ai_description, created_at",
       { count: "exact" }
     )
     .eq("tenant_id", tenantId)
@@ -79,6 +79,7 @@ export async function listInventory(
       [
         `intake_label.ilike.%${token}%`,
         `ai_description.ilike.%${token}%`,
+        `stock_id.ilike.%${token}%`,
       ].join(",")
     );
   }
@@ -158,16 +159,19 @@ function toPositiveInt(value: unknown, fallback: number): number {
 }
 
 function toBrowserRow(row: Record<string, unknown>): InventoryBrowserRow | null {
-  if (typeof row.id !== "string" || typeof row.intake_label !== "string") {
+  if (typeof row.id !== "string") {
     return null;
   }
 
   return {
     id: row.id,
     tenant_id: typeof row.tenant_id === "string" ? row.tenant_id : null,
-    intake_label: row.intake_label,
+    intake_label:
+      typeof row.intake_label === "string" ? row.intake_label : null,
     primary_image_url: null,
     primary_image_caption: null,
+    ai_structured_fields: toRecordOrNull(row.ai_structured_fields),
+    stock_id: typeof row.stock_id === "string" ? row.stock_id : null,
     status: typeof row.status === "string" ? row.status : null,
     width_total_in: toNumberOrNull(row.width_total_in),
     length_total_in: toNumberOrNull(row.length_total_in),
@@ -182,6 +186,11 @@ function toNumberOrNull(value: unknown): number | null {
   return null;
 }
 
+function toRecordOrNull(value: unknown): Record<string, unknown> | null {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return null;
+  return value as Record<string, unknown>;
+}
+
 function escapeForIlike(value: string): string {
   return value.replace(/[%_]/g, "");
 }
@@ -193,4 +202,39 @@ async function getSupabaseAdminSafe(): Promise<SupabaseClient | null> {
   } catch {
     return null;
   }
+}
+
+export async function getInventoryStats(
+  tenantId: string
+): Promise<{ total: number; available: number }> {
+  const normalizedTenantId = tenantId.trim();
+  if (!normalizedTenantId) {
+    return { total: 0, available: 0 };
+  }
+
+  const supabase = await getSupabaseAdminSafe();
+  if (!supabase) {
+    return { total: 0, available: 0 };
+  }
+
+  const [totalResult, availableResult] = await Promise.all([
+    supabase
+      .from("rugs")
+      .select("id", { count: "exact", head: true })
+      .eq("tenant_id", normalizedTenantId),
+    supabase
+      .from("rugs")
+      .select("id", { count: "exact", head: true })
+      .eq("tenant_id", normalizedTenantId)
+      .eq("status", "available"),
+  ]);
+
+  if (totalResult.error || availableResult.error) {
+    return { total: 0, available: 0 };
+  }
+
+  return {
+    total: totalResult.count ?? 0,
+    available: availableResult.count ?? 0,
+  };
 }

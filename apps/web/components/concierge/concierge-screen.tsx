@@ -9,6 +9,7 @@ import { useVisualViewportInset } from "@/components/concierge/use-visual-viewpo
 import type { ConciergeVariant } from "@/components/concierge/types";
 import { AppShell } from "@/components/ui/app-shell";
 import { Button } from "@/components/ui/button";
+import { Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 type ConciergeScreenProps = {
@@ -18,6 +19,7 @@ type ConciergeScreenProps = {
 };
 
 const TITLE_SIZE = "text-[38px] leading-[1.08]";
+const HERO_TITLE_SIZE = "text-[52px] leading-[1.05] md:text-[60px]";
 const SUBTITLE_SIZE = "text-[20px] leading-[1.5]";
 const BODY_SIZE = "text-[18px] leading-[1.65]";
 const COMPOSER_REST_OFFSET_DESKTOP = 12;
@@ -88,6 +90,7 @@ export function ConciergeScreen({
     controller.turns.length <= SHORT_THREAD_MAX_TURNS &&
     !controller.isLoading &&
     !hasRecommendationTurn;
+  const isHeroState = controller.turns.length === 0 && !controller.isLoading;
 
   return (
     <AppShell
@@ -100,7 +103,10 @@ export function ConciergeScreen({
       />
 
       <header
-        className="mx-auto [text-size-adjust:100%] [-webkit-text-size-adjust:100%] pt-5 text-center"
+        className={cn(
+          "mx-auto [text-size-adjust:100%] [-webkit-text-size-adjust:100%] text-center",
+          isHeroState ? "pt-10 md:pt-16" : "pt-5"
+        )}
         style={railStyle}
       >
         <div className="mb-2 flex min-h-7 items-center justify-between">
@@ -108,10 +114,11 @@ export function ConciergeScreen({
             type="button"
             size="sm"
             variant="ghost"
-            className="h-7 rounded-full px-2 text-[11px] text-muted-foreground"
+            className="h-7 rounded-full border border-border/30 px-2 text-[11px] text-muted-foreground hover:border-primary/30 hover:bg-primary/10 hover:text-foreground"
             onClick={() => void controller.onNewChat()}
             disabled={controller.isLoading || controller.isResettingChat}
           >
+            <Plus className="mr-1 size-3" />
             New Chat
           </Button>
 
@@ -130,11 +137,18 @@ export function ConciergeScreen({
           )}
         </div>
 
-        <h1 className={cn("font-serif font-semibold tracking-tight text-foreground", TITLE_SIZE)}>
+        <h1
+          className={cn(
+            "font-serif font-semibold tracking-tight text-foreground",
+            isHeroState ? HERO_TITLE_SIZE : TITLE_SIZE
+          )}
+        >
           Rug Concierge
         </h1>
         <p className={cn("mx-auto mt-3 max-w-2xl text-foreground/85", SUBTITLE_SIZE)}>
-          Describe your room, size, and style in plain words.
+          {isHeroState
+            ? "Tell me what you're looking for - room, size, style - and I'll find options from the actual collection."
+            : "Describe your room, size, and style in plain words."}
         </p>
       </header>
 

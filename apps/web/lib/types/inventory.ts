@@ -15,9 +15,11 @@ export type InventoryFilters = {
 export type InventoryBrowserRow = {
   id: string;
   tenant_id: string | null;
-  intake_label: string;
+  intake_label: string | null;
   primary_image_url: string | null;
   primary_image_caption: string | null;
+  ai_structured_fields: Record<string, unknown> | null;
+  stock_id: string | null;
   status: string | null;
   width_total_in: number | null;
   length_total_in: number | null;

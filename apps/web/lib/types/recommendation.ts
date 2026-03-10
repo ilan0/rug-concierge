@@ -10,7 +10,7 @@ export type HardConstraints = {
 
 export type InventoryRug = {
   id: string;
-  intake_label: string;
+  intake_label: string | null;
   primary_image_url?: string | null;
   status?: string | null;
   width_total_in?: number | null;

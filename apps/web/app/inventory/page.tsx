@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { CheckCircle, Package, Search } from "lucide-react";
 import { WorkspaceNav } from "@/components/shell/workspace-nav";
 import { AccessGuard } from "@/components/ui/access-guard";
 import { AppShell } from "@/components/ui/app-shell";
@@ -7,17 +8,43 @@ import { SectionCard } from "@/components/ui/section-card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { RugImage } from "@/components/ui/rug-image";
-import { listInventory } from "@/lib/inventory/list";
+import { InventoryTableClient } from "@/components/inventory/inventory-table-client";
+import { getInventoryStats, listInventory } from "@/lib/inventory/list";
 import { isDefaultInventoryFilters } from "@/lib/inventory/filters";
 import { getServerUiRole, getServerUiTenantId } from "@/lib/ui/server-role";
 import { canRoleAccessRoute } from "@/lib/auth/policy";
+import type {
+  InventorySort,
+  InventoryStatusFilter,
+} from "@/lib/types/inventory";
 
 type InventoryPageProps = {
   searchParams?:
     | Promise<Record<string, string | string[] | undefined>>
     | Record<string, string | string[] | undefined>;
 };
+
+type StatusOption = {
+  value: InventoryStatusFilter;
+  label: string;
+};
+
+type SortOption = {
+  value: InventorySort;
+  label: string;
+};
+
+const STATUS_OPTIONS: StatusOption[] = [
+  { value: "available", label: "Available" },
+  { value: "all", label: "All" },
+  { value: "sold", label: "Sold" },
+  { value: "on_hold", label: "On Hold" },
+];
+
+const SORT_OPTIONS: SortOption[] = [
+  { value: "newest", label: "Newest" },
+  { value: "oldest", label: "Oldest" },
+];
 
 function readString(
   value: string | string[] | undefined,
@@ -40,43 +67,6 @@ function toNumberOrNull(value: string): number | null {
   return parsed;
 }
 
-function formatSize(widthIn: number | null, lengthIn: number | null): string {
-  if (typeof widthIn !== "number" || typeof lengthIn !== "number") return "-";
-  return `${widthIn}" x ${lengthIn}"`;
-}
-
-function formatDate(value: string | null): string {
-  if (!value) return "-";
-  const parsed = new Date(value);
-  if (Number.isNaN(parsed.getTime())) return "-";
-  return parsed.toLocaleDateString();
-}
-
-function StatusBadge({ status }: { status: string | null }) {
-  if (status === "available")
-    return (
-      <span className="inline-flex items-center gap-1.5 text-sm font-medium text-emerald-700">
-        <span className="size-2 shrink-0 rounded-full bg-emerald-500" />
-        available
-      </span>
-    );
-  if (status === "on_hold")
-    return (
-      <span className="inline-flex items-center gap-1.5 text-sm font-medium text-amber-700">
-        <span className="size-2 shrink-0 rounded-full bg-amber-500" />
-        on hold
-      </span>
-    );
-  if (status === "sold")
-    return (
-      <span className="inline-flex items-center gap-1.5 text-sm font-medium text-red-700">
-        <span className="size-2 shrink-0 rounded-full bg-red-500" />
-        sold
-      </span>
-    );
-  return <span className="text-sm text-muted-foreground">{status ?? "—"}</span>;
-}
-
 function buildQueryString(input: Record<string, string | number | null | undefined>) {
   const params = new URLSearchParams();
   for (const [key, value] of Object.entries(input)) {
@@ -86,6 +76,26 @@ function buildQueryString(input: Record<string, string | number | null | undefin
     params.set(key, next);
   }
   return params.toString();
+}
+
+function getVisiblePageNumbers(
+  currentPage: number,
+  totalPages: number,
+  maxVisible: number
+): number[] {
+  if (totalPages <= 0) return [];
+  if (totalPages <= maxVisible) {
+    return Array.from({ length: totalPages }, (_, index) => index + 1);
+  }
+
+  const half = Math.floor(maxVisible / 2);
+  let start = Math.max(1, currentPage - half);
+  let end = Math.min(totalPages, start + maxVisible - 1);
+
+  start = Math.max(1, end - maxVisible + 1);
+  end = Math.min(totalPages, start + maxVisible - 1);
+
+  return Array.from({ length: end - start + 1 }, (_, index) => start + index);
 }
 
 export default async function InventoryPage({ searchParams }: InventoryPageProps) {
@@ -124,12 +134,15 @@ export default async function InventoryPage({ searchParams }: InventoryPageProps
     sort: readString(params.sort),
   };
 
-  const result = await listInventory({
-    tenantId,
-    page,
-    pageSize,
-    filters: filtersInput,
-  });
+  const [result, inventoryStats] = await Promise.all([
+    listInventory({
+      tenantId,
+      page,
+      pageSize,
+      filters: filtersInput,
+    }),
+    getInventoryStats(tenantId),
+  ]);
 
   const prevPage = result.page > 1 ? result.page - 1 : null;
   const nextPage =
@@ -137,7 +150,7 @@ export default async function InventoryPage({ searchParams }: InventoryPageProps
       ? result.page + 1
       : null;
 
-  const baseQuery = buildQueryString({
+  const queryBase = {
     page_size: result.pageSize,
     q: result.filters.q || null,
     status: result.filters.status !== "available" ? result.filters.status : null,
@@ -146,9 +159,29 @@ export default async function InventoryPage({ searchParams }: InventoryPageProps
     length_min: result.filters.lengthMin,
     length_max: result.filters.lengthMax,
     sort: result.filters.sort !== "newest" ? result.filters.sort : null,
-  });
+  };
 
-  const pageBase = `/inventory?${baseQuery}`;
+  const pageLink = (next: number) =>
+    `/inventory?${buildQueryString({
+      ...queryBase,
+      page: next,
+    })}`;
+
+  const statusLink = (status: InventoryStatusFilter) =>
+    `/inventory?${buildQueryString({
+      ...queryBase,
+      page: 1,
+      status: status === "available" ? null : status,
+    })}`;
+
+  const sortLink = (sort: InventorySort) =>
+    `/inventory?${buildQueryString({
+      ...queryBase,
+      page: 1,
+      sort: sort === "newest" ? null : sort,
+    })}`;
+
+  const refreshLink = pageLink(1);
   const clearFiltersLink = `/inventory?${buildQueryString({
     page: 1,
     page_size: result.pageSize,
@@ -159,16 +192,18 @@ export default async function InventoryPage({ searchParams }: InventoryPageProps
     result.filters.status !== "available"
       ? `Status: ${result.filters.status}`
       : null,
-    result.filters.widthMin !== null ? `Min Width: ${result.filters.widthMin}"` : null,
-    result.filters.widthMax !== null ? `Max Width: ${result.filters.widthMax}"` : null,
+    result.filters.widthMin !== null ? `Min Width: ${result.filters.widthMin}\"` : null,
+    result.filters.widthMax !== null ? `Max Width: ${result.filters.widthMax}\"` : null,
     result.filters.lengthMin !== null
-      ? `Min Length: ${result.filters.lengthMin}"`
+      ? `Min Length: ${result.filters.lengthMin}\"`
       : null,
     result.filters.lengthMax !== null
-      ? `Max Length: ${result.filters.lengthMax}"`
+      ? `Max Length: ${result.filters.lengthMax}\"`
       : null,
     result.filters.sort !== "newest" ? `Sort: ${result.filters.sort}` : null,
   ].filter((item): item is string => Boolean(item));
+
+  const visiblePageNumbers = getVisiblePageNumbers(result.page, result.totalPages, 7);
 
   return (
     <>
@@ -186,119 +221,164 @@ export default async function InventoryPage({ searchParams }: InventoryPageProps
           variant="catalog"
           actions={
             <Button asChild variant="outline">
-              <Link href={`${pageBase}&page=1`}>Refresh</Link>
+              <Link href={refreshLink}>Refresh</Link>
             </Button>
           }
         />
 
         <div className="mt-5 space-y-5">
+          <div className="grid grid-cols-2 gap-4">
+            <div className="flex items-center gap-4 rounded-xl border border-primary/20 bg-primary/10 p-5">
+              <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground">
+                <Package className="size-5" />
+              </div>
+              <div>
+                <p className="text-xs font-bold uppercase tracking-widest text-primary">Total Stock</p>
+                <p className="text-2xl font-serif font-bold text-foreground">{inventoryStats.total}</p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-4 rounded-xl border border-emerald-500/20 bg-emerald-50 p-5">
+              <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-emerald-500 text-white">
+                <CheckCircle className="size-5" />
+              </div>
+              <div>
+                <p className="text-xs font-bold uppercase tracking-widest text-emerald-700">Available</p>
+                <p className="text-2xl font-serif font-bold text-foreground">{inventoryStats.available}</p>
+              </div>
+            </div>
+          </div>
+
           <SectionCard title="Search and Filters" tone="soft" className="border-border/55">
-            <form method="GET" action="/inventory" className="grid gap-3 md:grid-cols-3 xl:grid-cols-5">
-              <input type="hidden" name="page" value="1" />
-              <input type="hidden" name="page_size" value={result.pageSize} />
-
-              <div className="space-y-2 xl:col-span-2">
-                <label className="text-sm font-medium" htmlFor="q">Search</label>
-                <Input
-                  id="q"
-                  name="q"
-                  defaultValue={result.filters.q}
-                  placeholder="Search by label or description"
-                  className="h-11 text-base"
-                />
+            <div className="space-y-4 rounded-xl border border-border/60 bg-white p-4 shadow-sm">
+              <div className="space-y-2">
+                <p className="text-sm font-medium text-foreground">Status</p>
+                <div className="flex flex-wrap gap-2">
+                  {STATUS_OPTIONS.map((option) => {
+                    const active = result.filters.status === option.value;
+                    return (
+                      <Link
+                        key={option.value}
+                        href={statusLink(option.value)}
+                        className={
+                          active
+                            ? "inline-flex h-10 items-center rounded-full border border-primary/40 bg-primary/10 px-4 text-sm font-semibold text-foreground ring-1 ring-primary/25"
+                            : "inline-flex h-10 items-center rounded-full border border-border/50 bg-background px-4 text-sm font-medium text-foreground/80 hover:border-primary/30 hover:bg-primary/10 hover:text-foreground"
+                        }
+                      >
+                        {option.label}
+                      </Link>
+                    );
+                  })}
+                </div>
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-medium" htmlFor="status">Status</label>
-                <select
-                  id="status"
-                  name="status"
-                  defaultValue={result.filters.status}
-                  className="h-11 w-full rounded-md border border-input bg-background px-3 text-base"
-                >
-                  <option value="available">available</option>
-                  <option value="all">all</option>
-                  <option value="sold">sold</option>
-                  <option value="on_hold">on_hold</option>
-                </select>
+                <p className="text-sm font-medium text-foreground">Sort</p>
+                <div className="flex flex-wrap gap-2">
+                  {SORT_OPTIONS.map((option) => {
+                    const active = result.filters.sort === option.value;
+                    return (
+                      <Link
+                        key={option.value}
+                        href={sortLink(option.value)}
+                        className={
+                          active
+                            ? "inline-flex h-10 items-center rounded-full border border-primary/40 bg-primary/10 px-4 text-sm font-semibold text-foreground ring-1 ring-primary/25"
+                            : "inline-flex h-10 items-center rounded-full border border-border/50 bg-background px-4 text-sm font-medium text-foreground/80 hover:border-primary/30 hover:bg-primary/10 hover:text-foreground"
+                        }
+                      >
+                        {option.label}
+                      </Link>
+                    );
+                  })}
+                </div>
               </div>
 
-              <div className="space-y-2">
-                <label className="text-sm font-medium" htmlFor="sort">Sort</label>
-                <select
-                  id="sort"
-                  name="sort"
-                  defaultValue={result.filters.sort}
-                  className="h-11 w-full rounded-md border border-input bg-background px-3 text-base"
-                >
-                  <option value="newest">newest</option>
-                  <option value="oldest">oldest</option>
-                </select>
-              </div>
+              <form method="GET" action="/inventory" className="grid gap-3 md:grid-cols-3 xl:grid-cols-5">
+                <input type="hidden" name="page" value="1" />
+                <input type="hidden" name="page_size" value={result.pageSize} />
+                <input type="hidden" name="status" value={result.filters.status} />
+                <input type="hidden" name="sort" value={result.filters.sort} />
 
-              <details className="rounded-xl border border-border/60 bg-background/55 p-3 md:col-span-3 xl:col-span-5">
-                <summary className="cursor-pointer text-sm font-semibold text-foreground">
-                  Size filters (optional)
-                </summary>
-                <div className="mt-3 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium" htmlFor="width_min">Min Width (in)</label>
+                <div className="space-y-2 xl:col-span-2">
+                  <label className="text-sm font-medium" htmlFor="q">Search</label>
+                  <div className="relative">
+                    <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
                     <Input
-                      id="width_min"
-                      name="width_min"
-                      type="number"
-                      min="0"
-                      step="1"
-                      defaultValue={result.filters.widthMin ?? ""}
-                      className="h-11 text-base"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium" htmlFor="width_max">Max Width (in)</label>
-                    <Input
-                      id="width_max"
-                      name="width_max"
-                      type="number"
-                      min="0"
-                      step="1"
-                      defaultValue={result.filters.widthMax ?? ""}
-                      className="h-11 text-base"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium" htmlFor="length_min">Min Length (in)</label>
-                    <Input
-                      id="length_min"
-                      name="length_min"
-                      type="number"
-                      min="0"
-                      step="1"
-                      defaultValue={result.filters.lengthMin ?? ""}
-                      className="h-11 text-base"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium" htmlFor="length_max">Max Length (in)</label>
-                    <Input
-                      id="length_max"
-                      name="length_max"
-                      type="number"
-                      min="0"
-                      step="1"
-                      defaultValue={result.filters.lengthMax ?? ""}
-                      className="h-11 text-base"
+                      id="q"
+                      name="q"
+                      defaultValue={result.filters.q}
+                      placeholder="Search by label or description"
+                      className="h-11 pl-10 text-base"
                     />
                   </div>
                 </div>
-              </details>
 
-              <div className="flex flex-wrap items-end gap-2 md:col-span-3 xl:col-span-5">
-                <Button type="submit" className="h-11 px-5 text-base">Apply Filters</Button>
-                <Button asChild variant="ghost">
-                  <Link href={clearFiltersLink}>Clear</Link>
-                </Button>
-              </div>
-            </form>
+                <details className="rounded-xl border border-border/60 bg-background/55 p-3 md:col-span-3 xl:col-span-3">
+                  <summary className="cursor-pointer text-sm font-semibold text-foreground">
+                    Size filters (optional)
+                  </summary>
+                  <div className="mt-3 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium" htmlFor="width_min">Min Width (in)</label>
+                      <Input
+                        id="width_min"
+                        name="width_min"
+                        type="number"
+                        min="0"
+                        step="1"
+                        defaultValue={result.filters.widthMin ?? ""}
+                        className="h-11 text-base"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium" htmlFor="width_max">Max Width (in)</label>
+                      <Input
+                        id="width_max"
+                        name="width_max"
+                        type="number"
+                        min="0"
+                        step="1"
+                        defaultValue={result.filters.widthMax ?? ""}
+                        className="h-11 text-base"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium" htmlFor="length_min">Min Length (in)</label>
+                      <Input
+                        id="length_min"
+                        name="length_min"
+                        type="number"
+                        min="0"
+                        step="1"
+                        defaultValue={result.filters.lengthMin ?? ""}
+                        className="h-11 text-base"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium" htmlFor="length_max">Max Length (in)</label>
+                      <Input
+                        id="length_max"
+                        name="length_max"
+                        type="number"
+                        min="0"
+                        step="1"
+                        defaultValue={result.filters.lengthMax ?? ""}
+                        className="h-11 text-base"
+                      />
+                    </div>
+                  </div>
+                </details>
+
+                <div className="flex flex-wrap items-end gap-2 md:col-span-3 xl:col-span-5">
+                  <Button type="submit" className="h-11 px-5 text-base">Apply Filters</Button>
+                  <Button asChild variant="ghost">
+                    <Link href={clearFiltersLink}>Clear</Link>
+                  </Button>
+                </div>
+              </form>
+            </div>
           </SectionCard>
 
           {!isDefaultInventoryFilters(result.filters) ? (
@@ -322,96 +402,56 @@ export default async function InventoryPage({ searchParams }: InventoryPageProps
             />
           ) : (
             <SectionCard title="Inventory" tone="soft" className="border-border/55">
-              <div className="space-y-3 md:hidden">
-                {result.rows.map((rug) => (
-                  <article
-                    key={rug.id}
-                    className="rounded-xl border border-border/65 bg-background/80 p-3"
-                  >
-                    <div className="mb-2 flex items-start gap-3">
-                      <div className="h-16 w-16 shrink-0 overflow-hidden rounded-md border border-border/70 bg-muted">
-                        <RugImage src={rug.primary_image_url} alt={rug.intake_label} />
-                      </div>
-                      <div className="min-w-0">
-                        <p className="text-base font-semibold">{rug.intake_label}</p>
-                        <StatusBadge status={rug.status} />
-                        <p className="text-xs text-muted-foreground">Added {formatDate(rug.created_at)}</p>
-                      </div>
-                    </div>
-                    <div className="grid grid-cols-1 gap-2 text-sm">
-                      <p>
-                        <span className="font-semibold">Size:</span>{" "}
-                        {formatSize(rug.width_total_in, rug.length_total_in)}
-                      </p>
-                      <p className="line-clamp-3 text-muted-foreground">
-                        {rug.ai_description ?? "Description pending."}
-                      </p>
-                    </div>
-                  </article>
-                ))}
-              </div>
-
-              <div className="hidden overflow-x-auto rounded-xl border border-border/70 md:block">
-                <table className="w-full min-w-[980px] border-collapse text-[0.95rem]">
-                  <thead className="bg-secondary/50 text-left">
-                    <tr>
-                      <th className="p-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Image</th>
-                      <th className="p-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Label</th>
-                      <th className="p-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Status</th>
-                      <th className="p-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Size</th>
-                      <th className="p-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Description</th>
-                      <th className="p-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Added</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {result.rows.map((rug) => (
-                      <tr key={rug.id} className="border-t border-border transition-colors hover:bg-secondary/30">
-                        <td className="p-3 align-top">
-                          <div className="h-16 w-16 overflow-hidden rounded-md border border-border/70 bg-muted">
-                            <RugImage
-                              src={rug.primary_image_url}
-                              alt={rug.intake_label}
-                            />
-                          </div>
-                        </td>
-                        <td className="p-3 align-top">
-                          <p className="font-medium">{rug.intake_label}</p>
-                          <p className="mt-1 text-xs text-muted-foreground">{rug.id}</p>
-                        </td>
-                        <td className="p-3">
-                          <StatusBadge status={rug.status} />
-                        </td>
-                        <td className="p-3">{formatSize(rug.width_total_in, rug.length_total_in)}</td>
-                        <td className="p-3 max-w-[28rem]">
-                          <p className="line-clamp-3 text-sm text-muted-foreground">
-                            {rug.ai_description ?? "Description pending."}
-                          </p>
-                        </td>
-                        <td className="p-3">{formatDate(rug.created_at)}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+              <InventoryTableClient rows={result.rows} />
             </SectionCard>
           )}
 
-          <div className="flex items-center justify-between gap-3">
-            {prevPage ? (
-              <Button asChild variant="secondary">
-                <Link href={`${pageBase}&page=${prevPage}`}>Previous</Link>
-              </Button>
-            ) : (
-              <span className="text-sm text-muted-foreground">Previous</span>
-            )}
-            {nextPage ? (
-              <Button asChild variant="secondary">
-                <Link href={`${pageBase}&page=${nextPage}`}>Next</Link>
-              </Button>
-            ) : (
-              <span className="text-sm text-muted-foreground">Next</span>
-            )}
-          </div>
+          {result.totalPages > 1 ? (
+            <div className="flex flex-wrap items-center justify-center gap-2">
+              {prevPage ? (
+                <Link
+                  href={pageLink(prevPage)}
+                  className="inline-flex h-10 items-center rounded-full border border-border/50 px-4 text-sm font-medium text-foreground/80 hover:border-primary/30 hover:bg-primary/10 hover:text-foreground"
+                >
+                  {'<<'}
+                </Link>
+              ) : (
+                <span className="inline-flex h-10 items-center rounded-full border border-border/30 px-4 text-sm text-muted-foreground">
+                  {'<<'}
+                </span>
+              )}
+
+              {visiblePageNumbers.map((pageNumber) => {
+                const isCurrent = pageNumber === result.page;
+                return (
+                  <Link
+                    key={pageNumber}
+                    href={pageLink(pageNumber)}
+                    className={
+                      isCurrent
+                        ? "inline-flex h-10 min-w-10 items-center justify-center rounded-full bg-primary px-3 text-sm font-bold text-primary-foreground"
+                        : "inline-flex h-10 min-w-10 items-center justify-center rounded-full border border-border/50 px-3 text-sm font-medium text-foreground/80 hover:border-primary/30 hover:bg-primary/10 hover:text-foreground"
+                    }
+                  >
+                    {pageNumber}
+                  </Link>
+                );
+              })}
+
+              {nextPage ? (
+                <Link
+                  href={pageLink(nextPage)}
+                  className="inline-flex h-10 items-center rounded-full border border-border/50 px-4 text-sm font-medium text-foreground/80 hover:border-primary/30 hover:bg-primary/10 hover:text-foreground"
+                >
+                  {'>>'}
+                </Link>
+              ) : (
+                <span className="inline-flex h-10 items-center rounded-full border border-border/30 px-4 text-sm text-muted-foreground">
+                  {'>>'}
+                </span>
+              )}
+            </div>
+          ) : null}
         </div>
       </AppShell>
     </>

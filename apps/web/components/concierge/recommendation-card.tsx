@@ -19,10 +19,18 @@ type RecommendationCardProps = {
 function isRugDetailData(value: unknown): value is RugDetailData {
   if (!value || typeof value !== "object") return false;
   const data = value as Record<string, unknown>;
+  const aiFieldsValid =
+    data.ai_structured_fields === null ||
+    (typeof data.ai_structured_fields === "object" &&
+      data.ai_structured_fields !== null &&
+      !Array.isArray(data.ai_structured_fields));
   return (
     typeof data.id === "string" &&
-    typeof data.intake_label === "string" &&
+    (typeof data.intake_label === "string" || data.intake_label === null) &&
     typeof data.size_display === "string" &&
+    aiFieldsValid &&
+    (typeof data.stock_id === "string" || data.stock_id === null) &&
+    (typeof data.status === "string" || data.status === null) &&
     (typeof data.ai_description === "string" || data.ai_description === null) &&
     (typeof data.contextual_blurb === "string" || data.contextual_blurb === null) &&
     (typeof data.primary_image_url === "string" || data.primary_image_url === null)
@@ -90,7 +98,7 @@ export function RecommendationCard({
           }
         }}
       >
-        <div className="aspect-[4/3] w-full overflow-hidden bg-muted">
+        <div className="aspect-[3/4] w-full overflow-hidden bg-muted">
           <RugImage
             src={item.primary_image_url}
             alt={item.primary_image_caption ?? item.title}

@@ -335,7 +335,7 @@ export async function POST(req: Request) {
       id: rugId,
       tenant_id: tenantId,
       status: "available",
-      intake_label: "Processing...",
+      intake_label: null,
       ai_description: null,
       width_ft: parsed.value.widthFt,
       width_in: parsed.value.widthIn,
@@ -416,7 +416,7 @@ export async function POST(req: Request) {
   return NextResponse.json({
     rug: {
       id: rugId,
-      intake_label: "Processing...",
+      intake_label: null,
       ai_description: null,
       width_total_in: parsed.value.widthTotalIn,
       length_total_in: parsed.value.lengthTotalIn,

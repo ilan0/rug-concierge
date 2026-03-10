@@ -198,11 +198,17 @@ function sizeText(rug: InventoryRug): string | null {
   return `${formatFeetAndInches(w)} x ${formatFeetAndInches(l)}`;
 }
 
+function rugLabel(rug: InventoryRug): string {
+  const label = rug.intake_label?.trim();
+  if (label) return label;
+  return sizeText(rug) ?? "Untitled";
+}
+
 function toContextInventory(inventory: InventoryRug[]) {
   return inventory.map((rug) =>
     [
       `ID: ${rug.id}`,
-      `Label: ${rug.intake_label}`,
+      `Label: ${rugLabel(rug)}`,
       `Size: ${sizeText(rug) ?? "Unknown size"}`,
       `Description: ${
         rug.ai_description && rug.ai_description.trim().length > 0
@@ -372,7 +378,7 @@ function buildGroundedMatchReasons(
   const specificRugReasons = buildSpecificRugReasons(rug);
   const sizeDistanceIn = getSizeDistanceIn(rug, constraints);
   const signals = collectSoftSignals(userMessage);
-  const rugText = [toLower(rug.intake_label), toLower(rug.ai_description)].join(" ");
+  const rugText = [toLower(rugLabel(rug)), toLower(rug.ai_description)].join(" ");
 
   if (constraints.size && sizeDistanceIn !== null) {
     reasons.push(
@@ -406,7 +412,7 @@ function buildWhyNot(
   const sizeDistanceIn = getSizeDistanceIn(rug, constraints);
   const tolerance = constraints.size?.toleranceIn ?? 2;
   const signals = collectSoftSignals(userMessage);
-  const rugText = [toLower(rug.intake_label), toLower(rug.ai_description)].join(" ");
+  const rugText = [toLower(rugLabel(rug)), toLower(rug.ai_description)].join(" ");
 
   if (constraints.size && sizeDistanceIn !== null && sizeDistanceIn > tolerance * 2) {
     notes.push("Dimensions are not an exact match and may require compromise.");
@@ -437,7 +443,7 @@ function buildConfidence(
   let score = 0.5;
   const sizeDistanceIn = getSizeDistanceIn(rug, constraints);
   const signals = collectSoftSignals(userMessage);
-  const rugText = [toLower(rug.intake_label), toLower(rug.ai_description)].join(" ");
+  const rugText = [toLower(rugLabel(rug)), toLower(rug.ai_description)].join(" ");
 
   if (constraints.size && sizeDistanceIn !== null) {
     if (sizeDistanceIn <= 2) {
@@ -490,7 +496,7 @@ function fallbackRecommendations(
     return {
       rug_id: rug.id,
       sku: null,
-      title: rug.intake_label,
+      title: rugLabel(rug),
       primary_image_url: toImageUrl(rug),
       primary_image_caption: toImageCaption(rug),
       size_text: sizeText(rug),
@@ -722,7 +728,7 @@ function sanitizeResponse(
       return {
         ...rec,
         sku: null,
-        title: rug.intake_label,
+        title: rugLabel(rug),
         primary_image_url: toImageUrl(rug),
         primary_image_caption: toImageCaption(rug),
         size_text: sizeText(rug),

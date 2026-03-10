@@ -50,11 +50,16 @@ function extractOutputText(payload: unknown): string | null {
 }
 
 async function generateContextualBlurb(input: {
-  intakeLabel: string;
+  intakeLabel: string | null;
+  sizeDisplay: string;
   aiDescription: string | null;
 }): Promise<string> {
+  const labelForPrompt =
+    typeof input.intakeLabel === "string" && input.intakeLabel.trim().length > 0
+      ? input.intakeLabel
+      : `Rug ${input.sizeDisplay}`;
   const fallback = toPlainText(
-    `${input.intakeLabel} has a distinct character that can anchor a living room or bedroom. Ask staff for placement and care guidance based on your traffic level and lifestyle.`
+    `${labelForPrompt} has a distinct character that can anchor a living room or bedroom. Ask staff for placement and care guidance based on your traffic level and lifestyle.`
   );
 
   const apiKey = process.env.OPENAI_API_KEY;
@@ -78,7 +83,7 @@ async function generateContextualBlurb(input: {
         content: [
           {
             type: "input_text",
-            text: `Label: ${input.intakeLabel}\nDescription: ${
+            text: `Label: ${labelForPrompt}\nDescription: ${
               input.aiDescription ?? "No description available"
             }`,
           },
@@ -107,6 +112,11 @@ async function generateContextualBlurb(input: {
   return normalized || fallback;
 }
 
+function toRecordOrNull(value: unknown): Record<string, unknown> | null {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return null;
+  return value as Record<string, unknown>;
+}
+
 export async function GET(
   _req: Request,
   context: { params: Promise<{ id: string }> }
@@ -124,7 +134,7 @@ export async function GET(
   const rugResult = await supabaseAdmin
     .from("rugs")
     .select(
-      "id, intake_label, ai_description, width_total_in, length_total_in, status, contextual_blurb"
+      "id, intake_label, ai_structured_fields, stock_id, ai_description, width_total_in, length_total_in, status, contextual_blurb"
     )
     .eq("tenant_id", tenantId)
     .eq("id", id)
@@ -146,6 +156,7 @@ export async function GET(
   if (widthTotalIn === null || lengthTotalIn === null) {
     return internalError("Rug dimensions are unavailable.");
   }
+  const sizeDisplay = `${formatSize(widthTotalIn)} × ${formatSize(lengthTotalIn)}`;
 
   let contextualBlurb =
     typeof rug.contextual_blurb === "string" && rug.contextual_blurb.trim().length > 0
@@ -155,6 +166,7 @@ export async function GET(
   if (!contextualBlurb) {
     contextualBlurb = await generateContextualBlurb({
       intakeLabel: rug.intake_label,
+      sizeDisplay,
       aiDescription: rug.ai_description,
     });
 
@@ -174,12 +186,16 @@ export async function GET(
 
   return NextResponse.json({
     id,
-    intake_label: rug.intake_label,
+    intake_label:
+      typeof rug.intake_label === "string" ? rug.intake_label : null,
+    ai_structured_fields: toRecordOrNull(rug.ai_structured_fields),
+    stock_id: typeof rug.stock_id === "string" ? rug.stock_id : null,
     ai_description: rug.ai_description,
     contextual_blurb: contextualBlurb,
+    status: typeof rug.status === "string" ? rug.status : null,
     width_total_in: widthTotalIn,
     length_total_in: lengthTotalIn,
-    size_display: `${formatSize(widthTotalIn)} × ${formatSize(lengthTotalIn)}`,
+    size_display: sizeDisplay,
     primary_image_url: primaryImageUrl,
   });
 }

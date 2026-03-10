@@ -13,9 +13,12 @@ import { RugImage } from "@/components/ui/rug-image";
 
 export type RugDetailData = {
   id: string;
-  intake_label: string;
+  intake_label: string | null;
   ai_description: string | null;
   contextual_blurb: string | null;
+  ai_structured_fields: Record<string, unknown> | null;
+  stock_id: string | null;
+  status: string | null;
   size_display: string;
   primary_image_url: string | null;
 };
@@ -35,6 +38,8 @@ export function RugDetailModal({
   error,
   detail,
 }: RugDetailModalProps) {
+  const displayLabel = detail?.intake_label ?? detail?.size_display ?? "Untitled";
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-h-[90dvh] max-w-3xl overflow-y-auto p-0">
@@ -52,15 +57,15 @@ export function RugDetailModal({
           ) : detail ? (
             <>
               <DialogHeader>
-                <DialogTitle className="font-serif text-3xl leading-tight">{detail.intake_label}</DialogTitle>
+                <DialogTitle className="font-serif text-3xl leading-tight">{displayLabel}</DialogTitle>
                 <DialogDescription className="italic">Size: {detail.size_display}</DialogDescription>
               </DialogHeader>
 
               <div className="overflow-hidden rounded-xl border border-border/70 bg-muted">
-                <div className="aspect-[4/3] w-full">
+                <div className="aspect-[3/4] w-full">
                   <RugImage
                     src={detail.primary_image_url}
-                    alt={detail.intake_label}
+                    alt={displayLabel}
                     placeholderLabel="No image available"
                   />
                 </div>

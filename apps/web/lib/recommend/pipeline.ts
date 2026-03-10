@@ -420,13 +420,14 @@ async function runCandidateQuery(input: {
 }
 
 function toInventoryFromDbRow(row: Record<string, unknown>): InventoryRug | null {
-  if (typeof row.id !== "string" || typeof row.intake_label !== "string") {
+  if (typeof row.id !== "string") {
     return null;
   }
 
   return {
     id: row.id,
-    intake_label: row.intake_label,
+    intake_label:
+      typeof row.intake_label === "string" ? row.intake_label : null,
     status: typeof row.status === "string" ? row.status : null,
     width_total_in: toNumberOrNull(row.width_total_in),
     length_total_in: toNumberOrNull(row.length_total_in),
