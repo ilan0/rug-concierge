@@ -29,16 +29,16 @@ function navLinkClass(
     return cn(
       "inline-flex min-h-9 items-center rounded-full border px-3 py-1.5 text-sm font-medium leading-5 transition-colors",
       active
-        ? "border-border/70 bg-background/75 text-foreground"
-        : "border-border/20 bg-background/35 text-muted-foreground hover:border-border/40 hover:bg-background/60 hover:text-foreground"
+        ? "border-primary/50 bg-primary/10 text-foreground"
+        : "border-border/20 bg-background/35 text-muted-foreground hover:border-primary/30 hover:bg-primary/10 hover:text-foreground"
     );
   }
   if (variant === "workspace-soft") {
     return cn(
       "inline-flex min-h-10 items-center rounded-full border px-3.5 py-1.5 text-[0.95rem] font-medium leading-5 transition-colors",
       active
-        ? "border-border/70 bg-card/80 text-foreground shadow-sm"
-        : "border-border/35 bg-background/45 text-foreground/75 hover:border-border/60 hover:bg-card/65 hover:text-foreground"
+        ? "border-primary/55 bg-primary/10 text-foreground shadow-sm"
+        : "border-border/35 bg-background/45 text-foreground/75 hover:border-primary/40 hover:bg-primary/10 hover:text-foreground"
     );
   }
   return cn(

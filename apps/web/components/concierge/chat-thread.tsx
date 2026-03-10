@@ -126,7 +126,7 @@ export function ChatThread(input: ChatThreadProps) {
                   key={prompt}
                   type="button"
                   variant="outline"
-                  className="h-[52px] rounded-full border-border/55 bg-background/70 px-6 text-[18px] leading-[1.35] text-foreground"
+                  className="h-[52px] rounded-full border-border/55 bg-background/70 px-6 text-[18px] leading-[1.35] text-foreground hover:border-primary/50 hover:bg-primary/10 hover:text-foreground"
                   onClick={() => onChoosePrompt(prompt)}
                 >
                   {prompt}

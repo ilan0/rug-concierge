@@ -52,8 +52,8 @@ export function RugDetailModal({
           ) : detail ? (
             <>
               <DialogHeader>
-                <DialogTitle className="text-2xl leading-tight">{detail.intake_label}</DialogTitle>
-                <DialogDescription>Size: {detail.size_display}</DialogDescription>
+                <DialogTitle className="font-serif text-3xl leading-tight">{detail.intake_label}</DialogTitle>
+                <DialogDescription className="italic">Size: {detail.size_display}</DialogDescription>
               </DialogHeader>
 
               <div className="overflow-hidden rounded-xl border border-border/70 bg-muted">
@@ -67,7 +67,7 @@ export function RugDetailModal({
               </div>
 
               <section className="space-y-2">
-                <h3 className="text-xs font-semibold uppercase tracking-[0.08em] text-foreground/70">
+                <h3 className="text-xs font-semibold uppercase tracking-[0.08em] text-primary">
                   Description
                 </h3>
                 <p className="text-sm leading-6 text-foreground/90">
@@ -77,7 +77,7 @@ export function RugDetailModal({
               </section>
 
               <section className="space-y-2">
-                <h3 className="text-xs font-semibold uppercase tracking-[0.08em] text-foreground/70">
+                <h3 className="text-xs font-semibold uppercase tracking-[0.08em] text-primary">
                   Context
                 </h3>
                 <p className="text-sm leading-6 text-foreground/90">
@@ -88,7 +88,7 @@ export function RugDetailModal({
           ) : null}
 
           <DialogFooter>
-            <Button type="button" variant="secondary" onClick={() => onOpenChange(false)}>
+            <Button type="button" variant="default" onClick={() => onOpenChange(false)}>
               Close
             </Button>
           </DialogFooter>

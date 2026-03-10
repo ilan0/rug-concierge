@@ -52,6 +52,31 @@ function formatDate(value: string | null): string {
   return parsed.toLocaleDateString();
 }
 
+function StatusBadge({ status }: { status: string | null }) {
+  if (status === "available")
+    return (
+      <span className="inline-flex items-center gap-1.5 text-sm font-medium text-emerald-700">
+        <span className="size-2 shrink-0 rounded-full bg-emerald-500" />
+        available
+      </span>
+    );
+  if (status === "on_hold")
+    return (
+      <span className="inline-flex items-center gap-1.5 text-sm font-medium text-amber-700">
+        <span className="size-2 shrink-0 rounded-full bg-amber-500" />
+        on hold
+      </span>
+    );
+  if (status === "sold")
+    return (
+      <span className="inline-flex items-center gap-1.5 text-sm font-medium text-red-700">
+        <span className="size-2 shrink-0 rounded-full bg-red-500" />
+        sold
+      </span>
+    );
+  return <span className="text-sm text-muted-foreground">{status ?? "—"}</span>;
+}
+
 function buildQueryString(input: Record<string, string | number | null | undefined>) {
   const params = new URLSearchParams();
   for (const [key, value] of Object.entries(input)) {
@@ -309,7 +334,7 @@ export default async function InventoryPage({ searchParams }: InventoryPageProps
                       </div>
                       <div className="min-w-0">
                         <p className="text-base font-semibold">{rug.intake_label}</p>
-                        <p className="mt-1 text-sm text-muted-foreground">{rug.status ?? "-"}</p>
+                        <StatusBadge status={rug.status} />
                         <p className="text-xs text-muted-foreground">Added {formatDate(rug.created_at)}</p>
                       </div>
                     </div>
@@ -330,17 +355,17 @@ export default async function InventoryPage({ searchParams }: InventoryPageProps
                 <table className="w-full min-w-[980px] border-collapse text-[0.95rem]">
                   <thead className="bg-secondary/50 text-left">
                     <tr>
-                      <th className="p-3 font-semibold">Image</th>
-                      <th className="p-3 font-semibold">Label</th>
-                      <th className="p-3 font-semibold">Status</th>
-                      <th className="p-3 font-semibold">Size</th>
-                      <th className="p-3 font-semibold">Description</th>
-                      <th className="p-3 font-semibold">Added</th>
+                      <th className="p-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Image</th>
+                      <th className="p-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Label</th>
+                      <th className="p-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Status</th>
+                      <th className="p-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Size</th>
+                      <th className="p-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Description</th>
+                      <th className="p-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Added</th>
                     </tr>
                   </thead>
                   <tbody>
                     {result.rows.map((rug) => (
-                      <tr key={rug.id} className="border-t border-border">
+                      <tr key={rug.id} className="border-t border-border transition-colors hover:bg-secondary/30">
                         <td className="p-3 align-top">
                           <div className="h-16 w-16 overflow-hidden rounded-md border border-border/70 bg-muted">
                             <RugImage
@@ -353,7 +378,9 @@ export default async function InventoryPage({ searchParams }: InventoryPageProps
                           <p className="font-medium">{rug.intake_label}</p>
                           <p className="mt-1 text-xs text-muted-foreground">{rug.id}</p>
                         </td>
-                        <td className="p-3">{rug.status ?? "-"}</td>
+                        <td className="p-3">
+                          <StatusBadge status={rug.status} />
+                        </td>
                         <td className="p-3">{formatSize(rug.width_total_in, rug.length_total_in)}</td>
                         <td className="p-3 max-w-[28rem]">
                           <p className="line-clamp-3 text-sm text-muted-foreground">

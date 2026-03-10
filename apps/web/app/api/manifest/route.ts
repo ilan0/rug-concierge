@@ -16,7 +16,7 @@ export async function GET() {
     start_url: "/concierge",
     display: "standalone",
     background_color: "#ffffff",
-    theme_color: "#1a1a1a",
+    theme_color: "#f4ece2",
     icons: [
       {
         src: "/icons/icon-192.png",

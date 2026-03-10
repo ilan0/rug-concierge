@@ -79,7 +79,7 @@ export function RecommendationCard({
   return (
     <>
       <Card
-        className="cursor-pointer overflow-hidden rounded-3xl border-border/55 bg-background/80 shadow-[0_2px_10px_rgba(35,22,8,0.08)] transition hover:border-border/80"
+        className="cursor-pointer overflow-hidden rounded-3xl border-border/55 bg-background/80 shadow-[0_2px_10px_rgba(35,22,8,0.08)] transition hover:border-primary/35 hover:shadow-[0_4px_18px_rgba(238,189,43,0.12)]"
         onClick={onOpenDetails}
         role="button"
         tabIndex={0}
@@ -117,7 +117,7 @@ export function RecommendationCard({
         </CardHeader>
         <CardContent className="space-y-4 pb-5 pt-1 text-[17px] leading-[1.6] md:min-h-[300px] lg:min-h-[320px]">
           <p className="space-y-1">
-            <span className="block text-[12px] font-semibold uppercase tracking-[0.08em] text-foreground/70">
+            <span className="block text-[12px] font-semibold uppercase tracking-[0.08em] text-primary">
               Size
             </span>
             <span className="block whitespace-nowrap text-[28px] font-medium leading-[1.15] sm:text-[32px]">
@@ -126,7 +126,7 @@ export function RecommendationCard({
           </p>
 
           <div>
-            <p className="text-[12px] font-semibold uppercase tracking-[0.08em] text-foreground/70">
+            <p className="text-[12px] font-semibold uppercase tracking-[0.08em] text-primary">
               Why this fits
             </p>
             <div className="mt-2 space-y-2 text-[18px] leading-[1.6]">
