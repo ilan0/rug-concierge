@@ -40,14 +40,16 @@ function toNumberOrNull(value: string): number | null {
   return parsed;
 }
 
-function formatPrice(value: number | null): string {
-  if (typeof value !== "number") return "-";
-  return `$${value.toLocaleString()}`;
-}
-
 function formatSize(widthIn: number | null, lengthIn: number | null): string {
   if (typeof widthIn !== "number" || typeof lengthIn !== "number") return "-";
   return `${widthIn}" x ${lengthIn}"`;
+}
+
+function formatDate(value: string | null): string {
+  if (!value) return "-";
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) return "-";
+  return parsed.toLocaleDateString();
 }
 
 function buildQueryString(input: Record<string, string | number | null | undefined>) {
@@ -67,8 +69,8 @@ export default async function InventoryPage({ searchParams }: InventoryPageProps
     return (
       <AccessGuard
         title="Inventory Browser"
-        description="This page is available only to store staff and developers."
-        ctaLabel="Go Home to switch role"
+        description="This page is available only to store staff."
+        ctaLabel="Go to concierge"
       />
     );
   }
@@ -78,7 +80,7 @@ export default async function InventoryPage({ searchParams }: InventoryPageProps
     return (
       <AccessGuard
         title="Store Tenant Required"
-        description="Select your store tenant on Home before browsing inventory."
+        description="Select your store tenant before browsing inventory."
       />
     );
   }
@@ -90,8 +92,6 @@ export default async function InventoryPage({ searchParams }: InventoryPageProps
   const filtersInput = {
     q: readString(params.q),
     status: readString(params.status),
-    priceMin: toNumberOrNull(readString(params.price_min)),
-    priceMax: toNumberOrNull(readString(params.price_max)),
     widthMin: toNumberOrNull(readString(params.width_min)),
     widthMax: toNumberOrNull(readString(params.width_max)),
     lengthMin: toNumberOrNull(readString(params.length_min)),
@@ -116,8 +116,6 @@ export default async function InventoryPage({ searchParams }: InventoryPageProps
     page_size: result.pageSize,
     q: result.filters.q || null,
     status: result.filters.status !== "available" ? result.filters.status : null,
-    price_min: result.filters.priceMin,
-    price_max: result.filters.priceMax,
     width_min: result.filters.widthMin,
     width_max: result.filters.widthMax,
     length_min: result.filters.lengthMin,
@@ -136,8 +134,6 @@ export default async function InventoryPage({ searchParams }: InventoryPageProps
     result.filters.status !== "available"
       ? `Status: ${result.filters.status}`
       : null,
-    result.filters.priceMin !== null ? `Min Price: $${result.filters.priceMin}` : null,
-    result.filters.priceMax !== null ? `Max Price: $${result.filters.priceMax}` : null,
     result.filters.widthMin !== null ? `Min Width: ${result.filters.widthMin}"` : null,
     result.filters.widthMax !== null ? `Max Width: ${result.filters.widthMax}"` : null,
     result.filters.lengthMin !== null
@@ -161,7 +157,7 @@ export default async function InventoryPage({ searchParams }: InventoryPageProps
         <PageHeader
           kicker="Catalog"
           title="Inventory Browser"
-          subtitle="Browse store inventory with simple filters and recommendation context."
+          subtitle="Browse current available rugs and their AI-generated descriptions."
           variant="catalog"
           actions={
             <Button asChild variant="outline">
@@ -169,25 +165,6 @@ export default async function InventoryPage({ searchParams }: InventoryPageProps
             </Button>
           }
         />
-
-        <SectionCard tone="transparent" density="compact">
-          <div className="flex flex-wrap gap-2 text-[0.95rem]">
-            <Badge variant="secondary">Source: Supabase rugs</Badge>
-            <Badge
-              variant="outline"
-              className="max-w-[17rem] overflow-hidden text-ellipsis whitespace-nowrap"
-            >
-              Tenant: {tenantId}
-            </Badge>
-            <Badge variant="outline">Records: {result.total}</Badge>
-            <Badge variant="outline">
-              Page: {result.totalPages === 0 ? 0 : result.page} / {result.totalPages}
-            </Badge>
-            <Badge variant="outline" className="hidden md:inline-flex">
-              Loaded: {new Date(result.loadedAt).toLocaleString()}
-            </Badge>
-          </div>
-        </SectionCard>
 
         <div className="mt-5 space-y-5">
           <SectionCard title="Search and Filters" tone="soft" className="border-border/55">
@@ -201,7 +178,7 @@ export default async function InventoryPage({ searchParams }: InventoryPageProps
                   id="q"
                   name="q"
                   defaultValue={result.filters.q}
-                  placeholder="SKU, label, style, palette"
+                  placeholder="Search by label or description"
                   className="h-11 text-base"
                 />
               </div>
@@ -231,34 +208,7 @@ export default async function InventoryPage({ searchParams }: InventoryPageProps
                 >
                   <option value="newest">newest</option>
                   <option value="oldest">oldest</option>
-                  <option value="price_low">price low</option>
-                  <option value="price_high">price high</option>
                 </select>
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-sm font-medium" htmlFor="price_min">Min Price</label>
-                <Input
-                  id="price_min"
-                  name="price_min"
-                  type="number"
-                  min="0"
-                  step="1"
-                  defaultValue={result.filters.priceMin ?? ""}
-                  className="h-11 text-base"
-                />
-              </div>
-              <div className="space-y-2">
-                <label className="text-sm font-medium" htmlFor="price_max">Max Price</label>
-                <Input
-                  id="price_max"
-                  name="price_max"
-                  type="number"
-                  min="0"
-                  step="1"
-                  defaultValue={result.filters.priceMax ?? ""}
-                  className="h-11 text-base"
-                />
               </div>
 
               <details className="rounded-xl border border-border/60 bg-background/55 p-3 md:col-span-3 xl:col-span-5">
@@ -357,25 +307,19 @@ export default async function InventoryPage({ searchParams }: InventoryPageProps
                       <div className="h-16 w-16 shrink-0 overflow-hidden rounded-md border border-border/70 bg-muted">
                         <RugImage src={rug.primary_image_url} alt={rug.intake_label} />
                       </div>
-                      <div>
+                      <div className="min-w-0">
                         <p className="text-base font-semibold">{rug.intake_label}</p>
-                        <p className="text-xs text-muted-foreground">{rug.sku ?? rug.id}</p>
                         <p className="mt-1 text-sm text-muted-foreground">{rug.status ?? "-"}</p>
+                        <p className="text-xs text-muted-foreground">Added {formatDate(rug.created_at)}</p>
                       </div>
                     </div>
-                    <div className="grid grid-cols-2 gap-2 text-sm">
-                      <p>
-                        <span className="font-semibold">Price:</span> {formatPrice(rug.price)}
-                      </p>
-                      <p>
-                        <span className="font-semibold">Sale:</span> {formatPrice(rug.sale_price)}
-                      </p>
+                    <div className="grid grid-cols-1 gap-2 text-sm">
                       <p>
                         <span className="font-semibold">Size:</span>{" "}
                         {formatSize(rug.width_total_in, rug.length_total_in)}
                       </p>
-                      <p>
-                        <span className="font-semibold">Style:</span> {rug.style ?? "-"}
+                      <p className="line-clamp-3 text-muted-foreground">
+                        {rug.ai_description ?? "Description pending."}
                       </p>
                     </div>
                   </article>
@@ -383,20 +327,15 @@ export default async function InventoryPage({ searchParams }: InventoryPageProps
               </div>
 
               <div className="hidden overflow-x-auto rounded-xl border border-border/70 md:block">
-                <table className="w-full min-w-[1080px] border-collapse text-[0.95rem]">
+                <table className="w-full min-w-[980px] border-collapse text-[0.95rem]">
                   <thead className="bg-secondary/50 text-left">
                     <tr>
                       <th className="p-3 font-semibold">Image</th>
-                      <th className="p-3 font-semibold">SKU</th>
                       <th className="p-3 font-semibold">Label</th>
                       <th className="p-3 font-semibold">Status</th>
-                      <th className="p-3 font-semibold">Price</th>
-                      <th className="p-3 font-semibold">Sale Price</th>
                       <th className="p-3 font-semibold">Size</th>
-                      <th className="p-3 font-semibold">Style</th>
-                      <th className="p-3 font-semibold">Palette</th>
-                      <th className="p-3 font-semibold">Pattern</th>
-                      <th className="p-3 font-semibold">Best For</th>
+                      <th className="p-3 font-semibold">Description</th>
+                      <th className="p-3 font-semibold">Added</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -410,19 +349,18 @@ export default async function InventoryPage({ searchParams }: InventoryPageProps
                             />
                           </div>
                         </td>
-                        <td className="p-3">{rug.sku ?? "-"}</td>
                         <td className="p-3 align-top">
                           <p className="font-medium">{rug.intake_label}</p>
                           <p className="mt-1 text-xs text-muted-foreground">{rug.id}</p>
                         </td>
                         <td className="p-3">{rug.status ?? "-"}</td>
-                        <td className="p-3">{formatPrice(rug.price)}</td>
-                        <td className="p-3">{formatPrice(rug.sale_price)}</td>
                         <td className="p-3">{formatSize(rug.width_total_in, rug.length_total_in)}</td>
-                        <td className="p-3">{rug.style ?? "-"}</td>
-                        <td className="p-3">{rug.palette ?? "-"}</td>
-                        <td className="p-3">{rug.pattern ?? "-"}</td>
-                        <td className="p-3">{rug.best_for ?? "-"}</td>
+                        <td className="p-3 max-w-[28rem]">
+                          <p className="line-clamp-3 text-sm text-muted-foreground">
+                            {rug.ai_description ?? "Description pending."}
+                          </p>
+                        </td>
+                        <td className="p-3">{formatDate(rug.created_at)}</td>
                       </tr>
                     ))}
                   </tbody>

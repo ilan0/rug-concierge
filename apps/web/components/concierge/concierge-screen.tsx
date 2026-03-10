@@ -103,7 +103,18 @@ export function ConciergeScreen({
         className="mx-auto [text-size-adjust:100%] [-webkit-text-size-adjust:100%] pt-5 text-center"
         style={railStyle}
       >
-        <div className="mb-2 flex min-h-7 items-center justify-end">
+        <div className="mb-2 flex min-h-7 items-center justify-between">
+          <Button
+            type="button"
+            size="sm"
+            variant="ghost"
+            className="h-7 rounded-full px-2 text-[11px] text-muted-foreground"
+            onClick={() => void controller.onNewChat()}
+            disabled={controller.isLoading || controller.isResettingChat}
+          >
+            New Chat
+          </Button>
+
           {controller.isDeveloperRole ? (
             <Button
               type="button"
@@ -114,14 +125,16 @@ export function ConciergeScreen({
             >
               Debug
             </Button>
-          ) : null}
+          ) : (
+            <span />
+          )}
         </div>
 
         <h1 className={cn("font-serif font-semibold tracking-tight text-foreground", TITLE_SIZE)}>
           Rug Concierge
         </h1>
         <p className={cn("mx-auto mt-3 max-w-2xl text-foreground/85", SUBTITLE_SIZE)}>
-          Describe your room, size, budget, and style in plain words.
+          Describe your room, size, and style in plain words.
         </p>
       </header>
 

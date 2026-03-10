@@ -6,7 +6,11 @@ import {
   useState,
   type FormEvent,
 } from "react";
-import { fetchChatDebugTrace, sendChatTurn } from "@/lib/concierge/client";
+import {
+  fetchChatDebugTrace,
+  resetChatSession,
+  sendChatTurn,
+} from "@/lib/concierge/client";
 import type { UiChatRequest, UiChatResponseBody, UiRole } from "@/lib/types/chat-ui";
 import {
   getUiRole,
@@ -51,6 +55,7 @@ export function useConciergeController(input: UseConciergeControllerInput) {
   const [operatorOpen, setOperatorOpen] = useState(false);
   const [operatorView, setOperatorView] = useState<OperatorView>("debug");
   const [showSlowNotice, setShowSlowNotice] = useState(false);
+  const [isResettingChat, setIsResettingChat] = useState(false);
 
   const roleSwitcherVisible =
     process.env.NEXT_PUBLIC_ENABLE_ROLE_SWITCHER === "1" ||
@@ -229,21 +234,6 @@ export function useConciergeController(input: UseConciergeControllerInput) {
     await sendUserTurn(lastFailedMessage);
   };
 
-  const onConstraintAction = async (
-    action: "clear_budget" | "clear_size" | "start_over_constraints"
-  ) => {
-    if (isLoading) return;
-    if (action === "clear_budget") {
-      await sendUserTurn("clear budget");
-      return;
-    }
-    if (action === "clear_size") {
-      await sendUserTurn("clear size");
-      return;
-    }
-    await sendUserTurn("start over constraints");
-  };
-
   const onReset = () => {
     setSessionId(null);
     setTurns([]);
@@ -252,6 +242,33 @@ export function useConciergeController(input: UseConciergeControllerInput) {
     setLastFailedMessage(null);
     setSelectedTurnId(null);
     setRecommendationState(null);
+  };
+
+  const onNewChat = async () => {
+    if (isLoading || isResettingChat) return;
+
+    setError(null);
+    setIsResettingChat(true);
+    try {
+      const payload = await resetChatSession({
+        session_id: sessionId,
+        tenant_id: getUiTenantId() ?? tenantId,
+      });
+      setSessionId(payload.new_session_id);
+      setTurns([]);
+      setMessage("");
+      setLastFailedMessage(null);
+      setSelectedTurnId(null);
+      setRecommendationState(null);
+    } catch (nextError) {
+      setError(
+        nextError instanceof Error
+          ? nextError.message
+          : "Unable to reset chat right now."
+      );
+    } finally {
+      setIsResettingChat(false);
+    }
   };
 
   return {
@@ -273,6 +290,7 @@ export function useConciergeController(input: UseConciergeControllerInput) {
     operatorView,
     setOperatorView,
     showSlowNotice,
+    isResettingChat,
     debugRunId,
     canSubmit,
     lastFailedMessage,
@@ -284,8 +302,8 @@ export function useConciergeController(input: UseConciergeControllerInput) {
     onRoleChange,
     onSubmit,
     onRetryLastMessage,
-    onConstraintAction,
     onReset,
+    onNewChat,
     pushStarterPrompt: setMessage,
     effectiveTenantId: getUiTenantId() ?? tenantId,
   };

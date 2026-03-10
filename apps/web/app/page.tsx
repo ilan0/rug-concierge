@@ -1,5 +1,5 @@
-import { HomeScreen } from "@/components/home/home-screen";
+import { redirect } from "next/navigation";
 
-export default async function HomePage() {
-  return <HomeScreen />;
+export default function HomePage() {
+  redirect("/concierge");
 }

@@ -28,8 +28,8 @@ Each store uses one codebase with tenant-scoped data and two runtime modes:
 ## Cookie Security
 
 `rug_device_auth` cookie:
-- value: HMAC-SHA256 of `device:{tenantId}:unlocked`
-- signed with `COOKIE_SECRET`
+- value: SHA-256 signature of `device:{tenantId}:unlocked`
+- generated with `COOKIE_SECRET`
 - `HttpOnly`, `Secure`, `SameSite=Strict`, `Path=/`
 - max age: 400 days
 

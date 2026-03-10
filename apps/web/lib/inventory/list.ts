@@ -61,10 +61,11 @@ export async function listInventory(
   let query = supabase
     .from("rugs")
     .select(
-      "id, intake_label, status, width_total_in, length_total_in, ai_description, created_at",
+      "id, tenant_id, intake_label, status, width_total_in, length_total_in, ai_description, created_at",
       { count: "exact" }
     )
     .eq("tenant_id", tenantId)
+    .order("created_at", { ascending: false, nullsFirst: false })
     .order("id", { ascending: false })
     .range(from, to);
 
@@ -96,9 +97,13 @@ export async function listInventory(
   }
 
   if (filters.sort === "oldest") {
-    query = query.order("id", { ascending: true });
+    query = query
+      .order("created_at", { ascending: true, nullsFirst: true })
+      .order("id", { ascending: true });
   } else {
-    query = query.order("id", { ascending: false });
+    query = query
+      .order("created_at", { ascending: false, nullsFirst: false })
+      .order("id", { ascending: false });
   }
 
   const { data, error, count } = await query;
@@ -159,21 +164,16 @@ function toBrowserRow(row: Record<string, unknown>): InventoryBrowserRow | null 
 
   return {
     id: row.id,
-    sku: typeof row.sku === "string" ? row.sku : null,
+    tenant_id: typeof row.tenant_id === "string" ? row.tenant_id : null,
     intake_label: row.intake_label,
     primary_image_url: null,
     primary_image_caption: null,
     status: typeof row.status === "string" ? row.status : null,
-    price: toNumberOrNull(row.price),
-    sale_price: toNumberOrNull(row.sale_price),
     width_total_in: toNumberOrNull(row.width_total_in),
     length_total_in: toNumberOrNull(row.length_total_in),
-    style: typeof row.style === "string" ? row.style : null,
-    palette: typeof row.palette === "string" ? row.palette : null,
-    pattern: typeof row.pattern === "string" ? row.pattern : null,
-    best_for: typeof row.best_for === "string" ? row.best_for : null,
-    public_description:
-      typeof row.public_description === "string" ? row.public_description : null,
+    ai_description:
+      typeof row.ai_description === "string" ? row.ai_description : null,
+    created_at: typeof row.created_at === "string" ? row.created_at : null,
   };
 }
 

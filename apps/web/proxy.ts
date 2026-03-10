@@ -37,6 +37,17 @@ function hasValidDeviceCookie(request: NextRequest): boolean {
 
 export function proxy(request: NextRequest) {
   if (!isPasscodeGated()) {
+    const pathname = request.nextUrl.pathname;
+    const isStaffRoute =
+      pathname === "/inventory" ||
+      pathname.startsWith("/inventory/") ||
+      pathname === "/intake" ||
+      pathname.startsWith("/intake/");
+
+    if (isStaffRoute) {
+      const redirectUrl = new URL("/concierge", request.url);
+      return NextResponse.redirect(redirectUrl);
+    }
     return NextResponse.next();
   }
 

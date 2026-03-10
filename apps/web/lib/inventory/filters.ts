@@ -7,8 +7,6 @@ import type {
 export type InventoryFilterInput = {
   q?: string;
   status?: string;
-  priceMin?: number | null;
-  priceMax?: number | null;
   widthMin?: number | null;
   widthMax?: number | null;
   lengthMin?: number | null;
@@ -19,8 +17,6 @@ export type InventoryFilterInput = {
 const DEFAULT_FILTERS: InventoryFilters = {
   q: "",
   status: "available",
-  priceMin: null,
-  priceMax: null,
   widthMin: null,
   widthMax: null,
   lengthMin: null,
@@ -38,8 +34,6 @@ const ALLOWED_STATUS: InventoryStatusFilter[] = [
 const ALLOWED_SORT: InventorySort[] = [
   "newest",
   "oldest",
-  "price_low",
-  "price_high",
 ];
 
 export function normalizeInventoryFilters(
@@ -55,8 +49,6 @@ export function normalizeInventoryFilters(
     ? (input.sort as InventorySort)
     : DEFAULT_FILTERS.sort;
 
-  const priceMin = toPositiveNumberOrNull(input.priceMin);
-  const priceMax = toPositiveNumberOrNull(input.priceMax);
   const widthMin = toPositiveNumberOrNull(input.widthMin);
   const widthMax = toPositiveNumberOrNull(input.widthMax);
   const lengthMin = toPositiveNumberOrNull(input.lengthMin);
@@ -65,14 +57,6 @@ export function normalizeInventoryFilters(
   return {
     q,
     status,
-    priceMin:
-      priceMin !== null && priceMax !== null && priceMin > priceMax
-        ? priceMax
-        : priceMin,
-    priceMax:
-      priceMin !== null && priceMax !== null && priceMin > priceMax
-        ? priceMin
-        : priceMax,
     widthMin:
       widthMin !== null && widthMax !== null && widthMin > widthMax
         ? widthMax
@@ -97,8 +81,6 @@ export function isDefaultInventoryFilters(filters: InventoryFilters): boolean {
   return (
     filters.q === DEFAULT_FILTERS.q &&
     filters.status === DEFAULT_FILTERS.status &&
-    filters.priceMin === DEFAULT_FILTERS.priceMin &&
-    filters.priceMax === DEFAULT_FILTERS.priceMax &&
     filters.widthMin === DEFAULT_FILTERS.widthMin &&
     filters.widthMax === DEFAULT_FILTERS.widthMax &&
     filters.lengthMin === DEFAULT_FILTERS.lengthMin &&

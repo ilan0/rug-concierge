@@ -10,8 +10,8 @@ export default async function IntakePage() {
     return (
       <AccessGuard
         title="Inventory Intake"
-        description="This page is available only to store staff and developers."
-        ctaLabel="Go Home to switch role"
+        description="This page is available only to store staff."
+        ctaLabel="Go to concierge"
       />
     );
   }
@@ -21,7 +21,7 @@ export default async function IntakePage() {
     return (
       <AccessGuard
         title="Store Tenant Required"
-        description="Select your store tenant on Home before using intake."
+        description="Select your store tenant before using intake."
       />
     );
   }

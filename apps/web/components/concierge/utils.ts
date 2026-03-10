@@ -4,7 +4,7 @@ import type { DebugTraceSummary, ConciergeVariant } from "@/components/concierge
 export const STARTER_PROMPTS: Record<ConciergeVariant, string[]> = {
   concierge: [
     "Show me what you have",
-    "I need an 8x10 under $2500",
+    "I need something 8x10 for my living room",
     "Show dining room options",
   ],
 };
