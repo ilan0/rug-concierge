@@ -8,8 +8,6 @@ import {
   SessionTenantMismatchError,
 } from "@/lib/chat/session-store";
 import { updateRecommendationStateForTurn } from "@/lib/chat/state";
-import { updateTradeContextForTurn } from "@/lib/chat/trade-context";
-import { updateProjectContextForTurn } from "@/lib/chat/project-context";
 import { buildPromptLayers } from "@/lib/chat/prompt-builder";
 import {
   buildAiContextPacket,
@@ -42,31 +40,21 @@ import {
 } from "@/lib/http/validators";
 import type {
   ChatTurnRequest,
-  RecommendationReviewAction,
   RoleType,
   SessionData,
   SessionMessage,
 } from "@/lib/chat/types";
 
-/**
- * POST /api/chat
- *
- * This is the single backend entry point for user chat turns.
- * High-level flow:
- * 1) receive user message + session id + role
- * 2) load session (history + recommendation/trade/project context)
- * 3) update turn state from this turn
- * 4) route to mode handler (general chat or recommendation)
- * 5) persist updated session and return response
- */
+const MAX_SESSION_ID_CHARS = 64;
+const UUID_PATTERN =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
 export async function POST(req: Request) {
   const startedAt = Date.now();
   const flowPath: string[] = [
     "/api/chat POST",
     "getOrCreateSession",
     "updateRecommendationStateForTurn",
-    "updateTradeContextForTurn",
-    "updateProjectContextForTurn",
     "routeTurnMode",
     "handlerDispatch",
     "updateConversationMemory",
@@ -82,29 +70,22 @@ export async function POST(req: Request) {
     const body = parsedBody.body as ChatTurnRequest;
 
     const userMessage = readTrimmedString(body.message);
-    const reviewAction = normalizeReviewAction(body.review_action);
-    const hasMessage = userMessage.length > 0;
-    if (!hasMessage && !reviewAction) {
+    if (!userMessage) {
       return badRequest("Please send a message so I can help.");
     }
-    if (hasMessage && userMessage.length > 2000) {
+    if (userMessage.length > 2000) {
       return badRequest("Message is too long. Please keep it under 2000 characters.");
     }
-    const tradePreferencesError = validateOptionalObjectField(
-      body.trade_preferences,
-      "trade_preferences"
-    );
-    if (tradePreferencesError) return badRequest(tradePreferencesError);
+
     const constraintsError = validateOptionalObjectField(
       body.constraints,
       "constraints"
     );
     if (constraintsError) return badRequest(constraintsError);
 
-    const sessionId =
-      typeof body.session_id === "string" && body.session_id.trim()
-        ? body.session_id.trim()
-        : crypto.randomUUID();
+    const sessionIdResult = parseSessionId(body.session_id);
+    if (!sessionIdResult.ok) return badRequest(sessionIdResult.error);
+    const sessionId = sessionIdResult.value;
 
     const roleResult = await resolveApiRoleOrError({
       role: body.role,
@@ -117,35 +98,11 @@ export async function POST(req: Request) {
     const role: RoleType = roleResult.role;
     const traceMeta = requestedTraceMeta;
 
-    if (reviewAction) {
-      const reviewCapabilityError = requireRoleCapabilityOrError(
-        role,
-        "review.controls",
-        "review_action is available only for staff or developer roles."
-      );
-      if (reviewCapabilityError) return reviewCapabilityError;
-    }
-    if (
-      reviewAction === "override" &&
-      body.override !== undefined &&
-      (typeof body.override !== "object" || body.override === null)
-    ) {
-      return badRequest("override must be an object when provided.");
-    }
-    if (
-      body.override?.selected_rug_ids !== undefined &&
-      !Array.isArray(body.override.selected_rug_ids)
-    ) {
-      return badRequest("override.selected_rug_ids must be an array when provided.");
-    }
     const requestedTenantId = normalizeTenantId(body.tenant_id);
     const authoritativeTenantId = resolveAuthoritativeTenantForServer({
       requestTenantId: requestedTenantId,
     });
-    const tradeClientId =
-      typeof body.trade_client_id === "string" && body.trade_client_id.trim()
-        ? body.trade_client_id.trim()
-        : null;
+
     const session = await getOrCreateSession(sessionId, role, {
       tenantId: authoritativeTenantId,
     });
@@ -153,50 +110,28 @@ export async function POST(req: Request) {
 
     const userTurn: SessionMessage = {
       role: "user",
-      content: hasMessage ? userMessage : `[review_action:${reviewAction}]`,
+      content: userMessage,
       created_at: new Date().toISOString(),
     };
 
-    // Keep recommendation state fresh regardless of which mode this turn routes to.
     const withRecommendationState = updateRecommendationStateForTurn(session, {
       message: userMessage,
       constraints: body.constraints,
     });
-    const withTradeContext = updateTradeContextForTurn(withRecommendationState, {
-      role,
-      tenantId,
-      tradeClientId,
-      tradePreferences:
-        body.trade_preferences && typeof body.trade_preferences === "object"
-          ? body.trade_preferences
-          : undefined,
-    });
-    const nextSessionBase = updateProjectContextForTurn(withTradeContext, {
-      message: userMessage,
-      constraints: body.constraints,
-      projectContextOverride:
-        body.project_context && typeof body.project_context === "object"
-          ? body.project_context
-          : undefined,
-    });
     const nextSession: SessionData = {
-      ...nextSessionBase,
+      ...withRecommendationState,
       conversation_memory:
-        nextSessionBase.conversation_memory ?? buildInitialConversationMemory(),
+        withRecommendationState.conversation_memory ??
+        buildInitialConversationMemory(),
     };
 
     const routeDecision = routeTurnMode({
       message: userMessage,
       role,
-      review_action: reviewAction ?? undefined,
-      last_mode:
-        nextSession.review_state.last_mode === "recommendations"
-          ? "recommendation"
-          : "general_chat",
-      has_recent_recommendations: nextSession.review_state.last_recommendations.length > 0,
     });
     const effectiveMode = routeDecision.mode;
     const memoryEnabled = process.env.CHAT_MEMORY_V1 !== "0";
+
     if (effectiveMode === "recommendation") {
       const recommendationCapabilityError = requireRoleCapabilityOrError(
         role,
@@ -205,20 +140,16 @@ export async function POST(req: Request) {
       );
       if (recommendationCapabilityError) return recommendationCapabilityError;
     }
+
     if (effectiveMode === "recommendation") {
       const tenantError = requireTenantId(tenantId, "inventory-backed flow");
-      if (tenantError) {
-        return badRequest(tenantError);
-      }
+      if (tenantError) return badRequest(tenantError);
     }
     if (effectiveMode === "recommendation" && !hasTenantId(tenantId)) {
       return badRequest("tenant_id is required for this inventory-backed request.");
     }
 
-    const turnMessage =
-      userMessage ||
-      nextSession.review_state.last_user_message ||
-      "Show me another recommendation set.";
+    const turnMessage = userMessage;
     const contextSessionForAi = memoryEnabled
       ? nextSession
       : {
@@ -226,6 +157,7 @@ export async function POST(req: Request) {
           conversation_memory: buildInitialConversationMemory(),
           chat_history: [],
         };
+
     const aiContextPacket =
       effectiveMode === "recommendation" || effectiveMode === "general_chat"
         ? buildAiContextPacket({
@@ -233,6 +165,7 @@ export async function POST(req: Request) {
             latestUserMessage: turnMessage,
           })
         : null;
+
     const aiContextPacketStats = aiContextPacket
       ? getAiContextPacketStats(aiContextPacket)
       : null;
@@ -244,26 +177,7 @@ export async function POST(req: Request) {
       ai_context_packet: aiContextPacket ?? undefined,
       tenant_id: tenantId,
       mode: effectiveMode,
-      review_action: reviewAction ?? undefined,
       needs_clarification: routeDecision.needs_clarification,
-      override:
-        body.override && typeof body.override === "object"
-          ? {
-              assistant_message:
-                typeof body.override.assistant_message === "string"
-                  ? body.override.assistant_message
-                  : undefined,
-              selected_rug_ids: Array.isArray(body.override.selected_rug_ids)
-                ? body.override.selected_rug_ids.filter(
-                    (id): id is string => typeof id === "string" && id.trim().length > 0
-                  )
-                : undefined,
-              notes:
-                typeof body.override.notes === "string"
-                  ? body.override.notes
-                  : undefined,
-            }
-          : undefined,
       trace_meta: traceMeta ?? undefined,
     } as const;
 
@@ -283,16 +197,7 @@ export async function POST(req: Request) {
       content: handlerResult.assistant_message,
       created_at: new Date().toISOString(),
     };
-    const recommendationResponseMode =
-      fineMode === "recommendation" ||
-      fineMode === "clarifying_question" ||
-      fineMode === "no_match"
-        ? fineMode
-        : "recommendation";
-    const recommendationStateMode: NonNullable<SessionData["review_state"]["last_mode"]> =
-      recommendationResponseMode === "recommendation"
-        ? "recommendations"
-        : recommendationResponseMode;
+
     const nextConversationMemory = memoryEnabled
       ? mergeConversationMemory(nextSession.conversation_memory, {
           userMessage: userTurn.content,
@@ -307,37 +212,12 @@ export async function POST(req: Request) {
       updated_at: new Date().toISOString(),
       chat_history: trimChatHistory([...nextSession.chat_history, userTurn, assistantTurn]),
       conversation_memory: nextConversationMemory,
-      review_state:
-        responseMode === "recommendation"
-          ? updateReviewState(nextSession, {
-              role,
-              userMessage:
-                userMessage ||
-                nextSession.review_state.last_user_message ||
-                "Show me another recommendation set.",
-              reviewAction,
-              overrideNotes:
-                typeof body.override?.notes === "string"
-                  ? body.override.notes.trim()
-                  : null,
-              responseMode: recommendationStateMode,
-              assistantMessage: handlerResult.assistant_message,
-              recommendations:
-                "recommendations" in handlerResult
-                  ? handlerResult.recommendations
-                  : [],
-              questions:
-                "questions" in handlerResult ? handlerResult.questions : [],
-              notes: handlerResult.notes ?? null,
-            })
-          : nextSession.review_state,
     };
 
     await saveSession(updatedSession, {
       tenantId,
       mode: responseMode,
       turns: [userTurn, assistantTurn],
-      reviewAction: reviewAction ?? undefined,
     });
 
     const promptLayerPreview = buildPromptLayers({
@@ -360,13 +240,8 @@ export async function POST(req: Request) {
             role,
             requested_tenant_id: requestedTenantId,
             tenant_id: tenantId,
-            trade_client_id: tradeClientId,
             message: userMessage,
             constraints: body.constraints ?? null,
-            trade_preferences: body.trade_preferences ?? null,
-            project_context: body.project_context ?? null,
-            review_action: reviewAction,
-            override: body.override ?? null,
           },
           routing: {
             mode: effectiveMode,
@@ -381,10 +256,7 @@ export async function POST(req: Request) {
           },
           state_snapshot: {
             recommendation_state: nextSession.recommendation_state,
-            trade_context: nextSession.trade_context,
-            project_context: nextSession.project_context,
             conversation_memory: nextSession.conversation_memory,
-            review_state: nextSession.review_state,
           },
           memory_snapshot_before: nextSession.conversation_memory,
           memory_snapshot_after: updatedSession.conversation_memory,
@@ -395,7 +267,6 @@ export async function POST(req: Request) {
             mode: responseMode,
             fine_mode: fineMode,
             response_mode: handlerResult.mode,
-            review_action: reviewAction,
             notes: handlerResult.notes ?? null,
           },
           timing_ms: {
@@ -411,9 +282,6 @@ export async function POST(req: Request) {
       mode: responseMode,
       fine_mode: fineMode,
       recommendation_state: updatedSession.recommendation_state,
-      trade_context: updatedSession.trade_context,
-      project_context: updatedSession.project_context,
-      review_state: updatedSession.review_state,
       response: handlerResult,
     });
     if (traceMeta) {
@@ -431,59 +299,29 @@ export async function POST(req: Request) {
   }
 }
 
-function normalizeReviewAction(value: unknown): RecommendationReviewAction | null {
-  if (
-    value === "approve" ||
-    value === "reject" ||
-    value === "regenerate" ||
-    value === "override"
-  ) {
-    return value;
+function parseSessionId(
+  value: unknown
+): { ok: true; value: string } | { ok: false; error: string } {
+  if (value === undefined || value === null) {
+    return { ok: true, value: crypto.randomUUID() };
   }
-  return null;
-}
-
-function updateReviewState(
-  session: SessionData,
-  input: {
-    role: RoleType;
-    userMessage: string;
-    reviewAction: RecommendationReviewAction | null;
-    overrideNotes: string | null;
-    responseMode: NonNullable<SessionData["review_state"]["last_mode"]>;
-    assistantMessage: string;
-    recommendations: SessionData["review_state"]["last_recommendations"];
-    questions: string[];
-    notes: string | null;
+  if (typeof value !== "string") {
+    return { ok: false, error: "session_id must be a UUID string when provided." };
   }
-): SessionData["review_state"] {
-  const now = new Date().toISOString();
-  const prior = session.review_state;
-  const decision =
-    input.reviewAction === "approve"
-      ? "approved"
-      : input.reviewAction === "reject"
-        ? "rejected"
-        : input.reviewAction === "override"
-          ? "overridden"
-          : input.reviewAction === "regenerate"
-            ? "regenerated"
-            : "none";
 
-  return {
-    ...prior,
-    last_user_message: input.userMessage,
-    last_assistant_message: input.assistantMessage,
-    last_recommendations: input.recommendations,
-    last_questions: input.questions,
-    last_mode: input.responseMode,
-    last_notes: input.notes,
-    decision,
-    decision_notes: input.overrideNotes,
-    decision_at: input.reviewAction ? now : prior.decision_at,
-    reviewed_by_role: input.reviewAction ? input.role : prior.reviewed_by_role,
-    regenerate_count:
-      prior.regenerate_count + (input.reviewAction === "regenerate" ? 1 : 0),
-    override_count: prior.override_count + (input.reviewAction === "override" ? 1 : 0),
-  };
+  const trimmed = value.trim();
+  if (!trimmed) {
+    return { ok: true, value: crypto.randomUUID() };
+  }
+  if (trimmed.length > MAX_SESSION_ID_CHARS) {
+    return {
+      ok: false,
+      error: `session_id is too long. Keep it under ${MAX_SESSION_ID_CHARS} characters.`,
+    };
+  }
+  if (!UUID_PATTERN.test(trimmed)) {
+    return { ok: false, error: "session_id must be a valid UUID." };
+  }
+
+  return { ok: true, value: trimmed };
 }

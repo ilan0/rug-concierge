@@ -1,9 +1,6 @@
 import type { HardConstraints } from "@/lib/types/recommendation";
 
-// PSEUDOCODE
-// - Normalize constraints from request body into safe numeric values.
-// - Parse lightweight constraints from user message (size + budget).
-// - Merge both sources, with explicit request constraints taking precedence.
+// Constraint normalization and lightweight extraction from user text.
 
 function toNumber(value: unknown): number | null {
   if (typeof value === "number" && Number.isFinite(value)) {
@@ -39,28 +36,9 @@ export function normalizeHardConstraints(input: unknown): HardConstraints {
   }
 
   const data = input as Record<string, unknown>;
-  const budgetRaw = toNumber(data.budgetMax);
-  const budgetMax = budgetRaw !== null && budgetRaw >= 0 ? budgetRaw : undefined;
   const size = normalizeSize(data.size);
 
-  return { budgetMax, size };
-}
-
-function parseBudgetMax(userMessage: string): number | undefined {
-  const text = userMessage.toLowerCase();
-  const budgetPattern =
-    /\b(?:under|below|up to|max|maximum|at most|budget(?:\s*(?:is|:))?)\s*\$?\s*([\d,.]+)\s*(k)?\b/i;
-  const amountBeforeBudgetPattern =
-    /\$?\s*([\d,.]+)\s*(k)?\s*(?:budget|max|maximum)\b/i;
-  const match = text.match(budgetPattern) ?? text.match(amountBeforeBudgetPattern);
-  if (!match) return undefined;
-
-  const base = Number.parseFloat(match[1].replaceAll(",", ""));
-  if (!Number.isFinite(base)) return undefined;
-
-  const multiplier = match[2] ? 1000 : 1;
-  const value = base * multiplier;
-  return value >= 0 ? value : undefined;
+  return { size };
 }
 
 function parseSizeFromMessage(userMessage: string): HardConstraints["size"] | undefined {
@@ -90,7 +68,6 @@ function parseSizeFromMessage(userMessage: string): HardConstraints["size"] | un
 }
 
 export type ConstraintResetDirectives = {
-  clearBudget: boolean;
   clearSize: boolean;
   clearAll: boolean;
 };
@@ -109,12 +86,6 @@ export function parseConstraintResetDirectives(
     "clear constraints",
   ]);
 
-  const clearBudget =
-    clearAll ||
-    /(?:clear|remove|ignore|drop|reset)\s+(?:the\s+)?budget/i.test(text) ||
-    /\b(?:no|without)\s+budget(?:\s+limit)?\b/i.test(text) ||
-    /\bbudget\s+(?:doesn'?t matter|is flexible|is open)\b/i.test(text) ||
-    /\bany\s+budget\b/i.test(text);
   const clearSize =
     clearAll ||
     /(?:clear|remove|ignore|drop|reset)\s+(?:the\s+)?size/i.test(text) ||
@@ -122,7 +93,6 @@ export function parseConstraintResetDirectives(
     /\bany\s+size\b/i.test(text);
 
   return {
-    clearBudget,
     clearSize,
     clearAll,
   };
@@ -133,11 +103,9 @@ export function extractConstraintsFromUserMessage(
 ): Partial<HardConstraints> {
   if (!userMessage.trim()) return {};
 
-  const budgetMax = parseBudgetMax(userMessage);
   const size = parseSizeFromMessage(userMessage);
 
   return {
-    budgetMax,
     size,
   };
 }
@@ -147,10 +115,6 @@ export function mergeHardConstraints(
   inferred: Partial<HardConstraints>
 ): HardConstraints {
   return {
-    budgetMax:
-      typeof explicit.budgetMax === "number"
-        ? explicit.budgetMax
-        : inferred.budgetMax,
     size: explicit.size ?? inferred.size,
   };
 }

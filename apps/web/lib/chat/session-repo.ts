@@ -1,6 +1,5 @@
 import type {
   ChatMode,
-  RecommendationReviewAction,
   SessionData,
   SessionMessage,
 } from "@/lib/chat/types";
@@ -17,7 +16,6 @@ export type SaveSessionInput = {
   tenantId: string | null;
   mode: ChatMode;
   turns: PersistTurn[];
-  reviewAction?: RecommendationReviewAction;
 };
 
 export type LoadedSessionRecord = {
@@ -123,9 +121,7 @@ export async function appendTurnsToDb(
     mode: input.mode,
     content: turn.content,
     created_at: turn.created_at,
-    metadata: {
-      review_action: input.reviewAction ?? null,
-    },
+    metadata: {},
   }));
 
   const { error } = await supabaseAdmin.from(CHAT_MESSAGES_TABLE).insert(rows);

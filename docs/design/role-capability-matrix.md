@@ -1,17 +1,13 @@
-# Role Capability Matrix (v1)
+# Role Capability Matrix
 
-Backend policy source-of-truth reference.
-
-Implementation modules:
+Implementation references:
 - `apps/web/lib/auth/roles.ts`
 - `apps/web/lib/auth/capabilities.ts`
 - `apps/web/lib/auth/policy.ts`
-- `apps/web/lib/auth/request-role.ts`
 
 ## Roles
 
 - `retail_customer`
-- `trade_client`
 - `store_staff`
 - `developer`
 
@@ -19,45 +15,27 @@ Implementation modules:
 
 - `chat.general`
 - `chat.recommend`
-- `chat.trade_support`
 - `inventory.read`
 - `inventory.intake`
-- `appraisal.generate`
-- `review.controls`
 - `debug.trace.read`
 - `debug.trace.capture`
 
-## Capability Matrix
+## Matrix
 
-| Role | General Chat | Recommendations | Trade Support | Inventory Read | Inventory Intake | Appraisal | Review Controls | Debug Trace |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| `retail_customer` | yes | yes | no | no | no | no | no | no |
-| `trade_client` | yes | yes | yes | no | no | no | no | no |
-| `store_staff` | yes | yes | yes | yes | yes | yes | yes | no |
-| `developer` | yes | yes | yes | yes | yes | yes | yes | yes |
+| Role | chat.general | chat.recommend | inventory.read | inventory.intake | debug.trace.read | debug.trace.capture |
+| --- | --- | --- | --- | --- | --- | --- |
+| `retail_customer` | yes | yes | no | no | no | no |
+| `store_staff` | yes | yes | yes | yes | yes | yes |
+| `developer` | yes | yes | yes | yes | yes | yes |
 
-## UI Route Policy
+## Route Policy
 
 - `/concierge` -> `chat.general`
-- `/trade` -> `chat.trade_support`
 - `/inventory` -> `inventory.read`
 - `/intake` -> `inventory.intake`
-- `/appraisal` -> `appraisal.generate`
 
-Home screen and workspace navigation use this same policy map for visibility.
+## Runtime Semantics
 
-## API Policy Notes
-
-- Role resolution:
-  - cookie role first
-  - request role fallback
-  - default role fallback (`retail_customer`)
-- Cookie/request mismatch -> `403`.
-- Privileged roles (`store_staff`, `developer`) require cookie-resolved role.
-- `/api/chat` enforces mode-specific capabilities and review controls.
-- `/api/recommend` enforces `chat.recommend`.
-- `/api/inventory/intake` enforces `inventory.intake`.
-- `/api/appraisal/generate` enforces `appraisal.generate`.
-- `/api/debug/trace` enforces `debug.trace.read`  
-  - unauthorized returns `403` in development and `404` in production.
-- `/api/ui-role` syncs the role cookie used for API role resolution.
+- open mode: customer behavior by default
+- passcode mode with valid device cookie: staff behavior
+- developer mode is local/dev-only; no production grant path

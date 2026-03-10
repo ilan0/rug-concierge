@@ -1,6 +1,6 @@
 const DEFAULT_PREVIEW_MAX_CHARS = 120;
 
-export type OpenAiSurface = "general_chat" | "recommendation" | "appraisal";
+export type OpenAiSurface = "general_chat" | "recommendation";
 
 export type OpenAiAttempt = {
   response_status: number | null;
@@ -21,13 +21,11 @@ export function getMaxOutputTokens(surface: OpenAiSurface): number {
   const defaultBySurface: Record<OpenAiSurface, number> = {
     general_chat: 300,
     recommendation: 700,
-    appraisal: 900,
   };
 
   const envBySurface: Record<OpenAiSurface, string | undefined> = {
     general_chat: process.env.OPENAI_MAX_OUTPUT_TOKENS_GENERAL_CHAT,
     recommendation: process.env.OPENAI_MAX_OUTPUT_TOKENS_RECOMMENDATION,
-    appraisal: process.env.OPENAI_MAX_OUTPUT_TOKENS_APPRAISAL,
   };
 
   return parsePositiveInt(envBySurface[surface]) ?? defaultBySurface[surface];

@@ -12,8 +12,6 @@ import { listInventory } from "@/lib/inventory/list";
 import { isDefaultInventoryFilters } from "@/lib/inventory/filters";
 import { getServerUiRole, getServerUiTenantId } from "@/lib/ui/server-role";
 import { canRoleAccessRoute } from "@/lib/auth/policy";
-import { getServerDeploymentType } from "@/lib/auth/deployment";
-import { redirect } from "next/navigation";
 
 type InventoryPageProps = {
   searchParams?:
@@ -64,12 +62,7 @@ function buildQueryString(input: Record<string, string | number | null | undefin
 }
 
 export default async function InventoryPage({ searchParams }: InventoryPageProps) {
-  const deploymentType = getServerDeploymentType();
   const role = await getServerUiRole();
-  if (deploymentType === "staff" && !role) {
-    redirect("/join");
-  }
-
   if (!role || !canRoleAccessRoute(role, "/inventory")) {
     return (
       <AccessGuard
@@ -158,7 +151,12 @@ export default async function InventoryPage({ searchParams }: InventoryPageProps
 
   return (
     <>
-      <WorkspaceNav role={role} currentPath="/inventory" variant="workspace-soft" />
+      <WorkspaceNav
+        role={role}
+        currentPath="/inventory"
+        variant="workspace-soft"
+        showHomeLink={role === "developer"}
+      />
       <AppShell variant="catalog">
         <PageHeader
           kicker="Catalog"

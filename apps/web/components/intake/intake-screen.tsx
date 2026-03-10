@@ -22,7 +22,6 @@ type IntakeScreenProps = {
 };
 
 export function IntakeScreen({ tenantId }: IntakeScreenProps) {
-  const [intakeLabel, setIntakeLabel] = useState("");
   const [widthFt, setWidthFt] = useState("");
   const [widthIn, setWidthIn] = useState("");
   const [lengthFt, setLengthFt] = useState("");
@@ -33,15 +32,19 @@ export function IntakeScreen({ tenantId }: IntakeScreenProps) {
   const [notice, setNotice] = useState<string | null>(null);
   const [lastSaved, setLastSaved] = useState<IntakeCreatedRug | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
-  const labelInputRef = useRef<HTMLInputElement | null>(null);
+
+  const formatFeetAndInches = (totalIn: number): string => {
+    const feet = Math.floor(totalIn / 12);
+    const inches = totalIn % 12;
+    if (inches === 0) return `${feet}'`;
+    return `${feet}'${inches}"`;
+  };
 
   const clearForNext = () => {
-    setIntakeLabel("");
     setImageFile(null);
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
-    labelInputRef.current?.focus();
   };
 
   const parseDimensions = () => {
@@ -57,12 +60,7 @@ export function IntakeScreen({ tenantId }: IntakeScreenProps) {
     event.preventDefault();
     if (isSaving) return;
 
-    const trimmedLabel = intakeLabel.trim();
     const dimensions = parseDimensions();
-    if (!trimmedLabel) {
-      setError("Label is required.");
-      return;
-    }
     if (!dimensions.ok) {
       setError("Enter valid feet/inches dimensions.");
       return;
@@ -79,7 +77,6 @@ export function IntakeScreen({ tenantId }: IntakeScreenProps) {
       const payload = await createInventoryIntake({
         role: resolveIntakeRole(getUiRole()),
         tenant_id: tenantId,
-        intake_label: trimmedLabel,
         width_ft: dimensions.value.widthFt,
         width_in: dimensions.value.widthIn,
         length_ft: dimensions.value.lengthFt,
@@ -87,7 +84,7 @@ export function IntakeScreen({ tenantId }: IntakeScreenProps) {
         image: imageFile,
       });
       setLastSaved(payload.rug);
-      setNotice(`Saved ${payload.rug.intake_label}.`);
+      setNotice(`Saved ${payload.rug.intake_label} (${payload.ai_status}).`);
       clearForNext();
     } catch (nextError) {
       setError(
@@ -105,14 +102,14 @@ export function IntakeScreen({ tenantId }: IntakeScreenProps) {
       <PageHeader
         kicker="Staff Workflow"
         title="Inventory Intake"
-        subtitle="Capture a rug photo, one-line label, and dimensions to add inventory quickly."
+        subtitle="Capture a rug photo and dimensions. AI will generate label and description asynchronously."
       />
 
       <SectionCard>
         <div className="flex flex-wrap gap-2 text-sm">
           <Badge variant="secondary">Tenant: {tenantId}</Badge>
-          <Badge variant="outline">Required: photo, label, size</Badge>
-          <Badge variant="outline">Price defaults to pending</Badge>
+          <Badge variant="outline">Required: photo and size</Badge>
+          <Badge variant="outline">AI label + description</Badge>
         </div>
       </SectionCard>
 
@@ -131,19 +128,6 @@ export function IntakeScreen({ tenantId }: IntakeScreenProps) {
                 onChange={(event) =>
                   setImageFile(event.target.files?.[0] ?? null)
                 }
-                disabled={isSaving}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="intake-label">One-line Label</Label>
-              <Input
-                id="intake-label"
-                ref={labelInputRef}
-                value={intakeLabel}
-                onChange={(event) => setIntakeLabel(event.target.value)}
-                placeholder="Example: 9x12 Oushak - muted ivory blue"
-                className="h-12 text-base"
                 disabled={isSaving}
               />
             </div>
@@ -241,7 +225,11 @@ export function IntakeScreen({ tenantId }: IntakeScreenProps) {
               </p>
               <p>
                 <span className="font-medium">Size:</span>{" "}
-                {`${lastSaved.width_ft}'${lastSaved.width_in}" x ${lastSaved.length_ft}'${lastSaved.length_in}" (${lastSaved.width_total_in}" x ${lastSaved.length_total_in}")`}
+                {`${formatFeetAndInches(lastSaved.width_total_in)} x ${formatFeetAndInches(lastSaved.length_total_in)} (${lastSaved.width_total_in}" x ${lastSaved.length_total_in}")`}
+              </p>
+              <p>
+                <span className="font-medium">Description:</span>{" "}
+                {lastSaved.ai_description ?? "Pending"}
               </p>
             </div>
           </SectionCard>

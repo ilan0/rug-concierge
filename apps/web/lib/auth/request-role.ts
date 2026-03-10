@@ -1,22 +1,14 @@
-import { cookies } from "next/headers";
 import {
-  capRoleForDeployment,
   isAppRole,
   normalizeAppRole,
   type AppRole,
 } from "@/lib/auth/roles";
-import { verifySignedRoleCookieValue } from "@/lib/auth/role-cookie";
-import { resolveAuthoritativeTenantForServer } from "@/lib/auth/tenant";
-import { getServerDeploymentType, type DeploymentType } from "@/lib/auth/deployment";
-import { uiRoleCookieName, uiTenantCookieName } from "@/lib/ui/role-session";
+import { isPasscodeGated } from "@/lib/auth/deployment";
 
 export type ResolvedRequestRole = {
   role: AppRole;
-  source: "cookie" | "request" | "default";
-  cookie_role: AppRole | null;
+  source: "request" | "default";
   request_role: AppRole | null;
-  mismatch: boolean;
-  blocked_non_retail_request: boolean;
 };
 
 export type RequestRoleFields = {
@@ -45,105 +37,40 @@ export function getRequestedRoleFromBody(input: RequestRoleFields): {
     };
   }
 
-  if (hasRole) {
-    return { requestedRole: roleValue, error: null };
-  }
-  if (hasUserRole) {
-    return { requestedRole: userRoleValue, error: null };
-  }
+  if (hasRole) return { requestedRole: roleValue, error: null };
+  if (hasUserRole) return { requestedRole: userRoleValue, error: null };
   return { requestedRole: undefined, error: null };
-}
-
-export async function getRequestCookieRole(): Promise<AppRole | null> {
-  const cookieStore = await cookies();
-  const rawRoleCookie = cookieStore.get(uiRoleCookieName)?.value ?? null;
-  const cookieTenantId = cookieStore.get(uiTenantCookieName)?.value ?? null;
-  const tenantId = resolveAuthoritativeTenantForServer({
-    cookieTenantId,
-  });
-  const verifiedRole = verifySignedRoleCookieValue({
-    rawCookieValue: rawRoleCookie,
-    tenantId,
-  });
-  return capRoleForDeployment(verifiedRole, getServerDeploymentType());
 }
 
 export async function resolveRequestRole(input?: {
   requestedRole?: unknown;
   defaultRole?: AppRole;
 }): Promise<ResolvedRequestRole> {
-  const cookieRole = await getRequestCookieRole();
+  if (isPasscodeGated()) {
+    return {
+      role: "store_staff",
+      source: "default",
+      request_role: null,
+    };
+  }
+
   const requestRole =
     input?.requestedRole && isAppRole(input.requestedRole)
       ? input.requestedRole
       : null;
-  return resolveRoleFromInputs({
-    deploymentType: getServerDeploymentType(),
-    cookieRole,
-    requestRole,
-    defaultRole: input?.defaultRole,
-  });
-}
 
-export function resolveRoleFromInputs(input: {
-  deploymentType: DeploymentType;
-  cookieRole: AppRole | null;
-  requestRole: AppRole | null;
-  defaultRole?: AppRole;
-}): ResolvedRequestRole {
-  const cappedCookieRole = capRoleForDeployment(
-    input.cookieRole,
-    input.deploymentType
-  );
-  const mismatch = Boolean(
-    cappedCookieRole &&
-      input.requestRole &&
-      cappedCookieRole !== input.requestRole
-  );
-
-  if (cappedCookieRole) {
+  const allowDeveloperRole = process.env.NODE_ENV !== "production";
+  if (requestRole && (requestRole !== "developer" || allowDeveloperRole)) {
     return {
-      role: cappedCookieRole,
-      source: "cookie",
-      cookie_role: cappedCookieRole,
-      request_role: input.requestRole,
-      mismatch,
-      blocked_non_retail_request: false,
-    };
-  }
-
-  if (
-    input.deploymentType !== "developer" &&
-    input.requestRole &&
-    input.requestRole !== "retail_customer"
-  ) {
-    return {
-      role: "retail_customer",
-      source: "default",
-      cookie_role: null,
-      request_role: input.requestRole,
-      mismatch: false,
-      blocked_non_retail_request: true,
-    };
-  }
-
-  if (input.requestRole) {
-    return {
-      role: input.requestRole,
+      role: requestRole,
       source: "request",
-      cookie_role: null,
-      request_role: input.requestRole,
-      mismatch: false,
-      blocked_non_retail_request: false,
+      request_role: requestRole,
     };
   }
 
   return {
-    role: normalizeAppRole(input.defaultRole, "retail_customer"),
+    role: normalizeAppRole(input?.defaultRole, "retail_customer"),
     source: "default",
-    cookie_role: null,
     request_role: null,
-    mismatch: false,
-    blocked_non_retail_request: false,
   };
 }

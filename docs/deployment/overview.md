@@ -1,53 +1,49 @@
-# Multi-Tenant Deployment Overview
+# Deployment Overview
 
 ## Model
 
-- Each store uses two Vercel deployments backed by one shared Supabase instance:
-- Customer deployment: `retail_customer` (open) + `trade_client` (token entry).
-- Staff deployment: `store_staff` + `developer` (token entry).
+Each store uses one codebase with tenant-scoped data and two runtime modes:
 
-## Role Entry
+1. Open concierge mode (`STORE_PASSCODE` unset)
+2. Passcode-gated kiosk mode (`STORE_PASSCODE` set)
 
-- Customer URL (`/`) enters retail experience with no setup.
-- Trade role is issued from customer deployment `/join?token=<TRADE_ACCESS_TOKEN>`.
-- Staff/developer roles are issued from staff deployment `/join?token=...`.
-- `/join` maps token to role server-side, sets signed cookies, then redirects to role portal.
-- No passcode gate. Join token is the only hosted access gate.
+`TENANT_ID` binds inventory/chat scope per deployment.
 
-## Persona Links
+## Access Model
 
-- Retail customer: `https://<customer-domain>/`
-- Trade/design client: `https://<customer-domain>/join?token=<TRADE_ACCESS_TOKEN>`
-- Store staff/owner: `https://<staff-domain>/join?token=<STAFF_ACCESS_TOKEN>`
-- Developer: `https://<staff-domain>/join?token=<DEV_ACCESS_TOKEN>`
+- Open mode: requests are allowed without device cookie.
+- Passcode mode: middleware requires `rug_device_auth` cookie.
+- Passcode unlock endpoint: `POST /api/auth/passcode`.
+- Public exceptions in passcode mode:
+  - `/api/auth/passcode`
+  - `/api/config/public`
+  - `/api/manifest`
+
+## Role Semantics
+
+- `retail_customer`: default runtime behavior in open mode.
+- `store_staff`: behavior when passcode gate is active and device is unlocked.
+- `developer`: local/dev-only role path; no production grant path.
 
 ## Cookie Security
 
-- Role cookie format: `{role}.{hmac}`
-- Signature payload: `role:tenantId`
-- HMAC algorithm: SHA-256 with `COOKIE_SECRET`
-- Role cookie verification is required for API role resolution and server-page role checks.
-- Role cookie intentionally remains readable by client JS (`httpOnly: false`) in this phase to avoid breaking existing client-side role-aware UI. Integrity comes from signature verification, not obscurity.
+`rug_device_auth` cookie:
+- value: HMAC-SHA256 of `device:{tenantId}:unlocked`
+- signed with `COOKIE_SECRET`
+- `HttpOnly`, `Secure`, `SameSite=Strict`, `Path=/`
+- max age: 400 days
 
-## Tenant Security
+## Tenant Safety
 
-- On `customer` and `staff` deployments, `TENANT_ID` is authoritative.
-- Request/body tenant IDs are ignored on those deployments.
-- On `developer`, tenant can come from request/cookie for local iteration.
+`TENANT_ID` from env is authoritative when set.
+Request `tenant_id` is accepted only as fallback when env tenant is not set.
 
-## Deployment-Type Responsibilities
+## Branding
 
-- `DEPLOYMENT_TYPE` (server-only): all security decisions.
-- `NEXT_PUBLIC_DEPLOYMENT_TYPE` (client): UI behavior only.
-- Middleware performs lightweight presence/routing checks only.
-- Signature verification and authorization remain in server runtime utilities/routes.
+Branding config is runtime-driven:
+- `STORE_NAME`
+- `STORE_LOGO_URL`
 
-## Customer Role Cap
-
-- Customer deployment allows cookie roles: `retail_customer`, `trade_client`.
-- Customer deployment rejects cookie roles: `store_staff`, `developer` (fallback to retail flow).
-
-## Secret Rotation
-
-- Rotating `COOKIE_SECRET` invalidates all existing signed role cookies.
-- Expected behavior: users re-enter through their `/join` link (or customer root for retail).
+Consumed by:
+- `GET /api/config/public`
+- `GET /api/manifest`

@@ -7,11 +7,6 @@ export const STARTER_PROMPTS: Record<ConciergeVariant, string[]> = {
     "I need an 8x10 under $2500",
     "Show dining room options",
   ],
-  trade: [
-    "Need three options for a living room project under $4,000 each",
-    "Show me neutral styles for a designer client mood board",
-    "Find rugs that layer well with modern furniture",
-  ],
 };
 
 export function toRoomId(value: string): string {

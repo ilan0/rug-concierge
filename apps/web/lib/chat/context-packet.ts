@@ -14,8 +14,6 @@ export type ChatAiContextPacket = {
   conversation_memory: ReturnType<typeof toAiMemoryPacket>;
   structured_state: {
     recommendation_state: SessionData["recommendation_state"];
-    trade_context: SessionData["trade_context"];
-    project_context: SessionData["project_context"];
   };
   recent_turns: RecentTurn[];
   latest_user_message: string;
@@ -48,8 +46,6 @@ export function buildAiContextPacket(input: {
     conversation_memory: toAiMemoryPacket(input.session.conversation_memory),
     structured_state: {
       recommendation_state: input.session.recommendation_state,
-      trade_context: input.session.trade_context,
-      project_context: input.session.project_context,
     },
     recent_turns: toRecentTurns(input.session),
     latest_user_message: input.latestUserMessage,

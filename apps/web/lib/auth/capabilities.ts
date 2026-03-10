@@ -3,11 +3,8 @@ import type { AppRole } from "@/lib/auth/roles";
 export const APP_CAPABILITIES = [
   "chat.general",
   "chat.recommend",
-  "chat.trade_support",
   "inventory.read",
   "inventory.intake",
-  "appraisal.generate",
-  "review.controls",
   "debug.trace.read",
   "debug.trace.capture",
 ] as const;
@@ -18,15 +15,13 @@ const ALL_CAPABILITIES = [...APP_CAPABILITIES] as readonly AppCapability[];
 
 const ROLE_CAPABILITY_MAP: Record<AppRole, readonly AppCapability[]> = {
   retail_customer: ["chat.general", "chat.recommend"],
-  trade_client: ["chat.general", "chat.recommend", "chat.trade_support"],
   store_staff: [
     "chat.general",
     "chat.recommend",
-    "chat.trade_support",
     "inventory.read",
     "inventory.intake",
-    "appraisal.generate",
-    "review.controls",
+    "debug.trace.read",
+    "debug.trace.capture",
   ],
   developer: ALL_CAPABILITIES,
 };

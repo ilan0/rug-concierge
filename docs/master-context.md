@@ -1,165 +1,142 @@
 # Rug Concierge Master Context
 
-Canonical source of truth for current runtime behavior.
+Canonical runtime source of truth.
 
 ## Product Goal
 
-AI Rug Concierge for independent rug stores:
+AI concierge for rug showrooms:
 - inventory-grounded recommendations
-- retail and trade conversation workflows
-- staff appraisal drafting
-- fast staff inventory intake
+- customer-facing concierge chat
+- staff inventory intake
+- rug detail enrichment
 
-## Non-Negotiables
+## Runtime Rules
 
-- Inventory is source of truth.
-- Backend owns auth, tenant scoping, routing, and hard filtering.
-- AI ranks/explains only after backend candidate selection.
-- No fabricated inventory facts.
-- Tenant isolation is mandatory for inventory-backed routes.
+- Inventory is authoritative.
+- Backend owns tenant scoping and access control.
+- All inventory DB queries are tenant scoped.
+- AI can rank and explain candidates, but cannot invent inventory.
+- AI response text must be plain text only.
 
-## Runtime Surfaces
+## Deployments
 
-UI routes:
+### Open Concierge (no passcode)
+
+- `STORE_PASSCODE` unset
+- public pages and APIs are open
+- default behavior is customer flow
+
+### In-Store Kiosk (passcode gated)
+
+- `STORE_PASSCODE` set
+- middleware requires valid `rug_device_auth` cookie
+- unauthenticated page requests redirect to `/passcode`
+- unauthenticated API requests return `401` (`/api/auth/passcode` and `/api/config/public` stay open)
+
+## Routes
+
+Pages:
 - `/`
 - `/concierge`
-- `/trade`
 - `/inventory`
 - `/intake`
-- `/appraisal`
+- `/passcode`
 
-API routes:
+APIs:
 - `/api/chat`
 - `/api/recommend`
 - `/api/inventory/intake`
-- `/api/appraisal/generate`
-- `/api/appraisal/rugs`
-- `/api/appraisal/drafts`
+- `/api/rugs/[id]`
+- `/api/session/reset`
+- `/api/config/public`
+- `/api/manifest`
+- `/api/auth/passcode`
 - `/api/debug/trace`
-- `/api/ui-role`
-- `/api/ui-access`
 
 ## Roles and Capabilities
 
 Roles:
 - `retail_customer`
-- `trade_client`
 - `store_staff`
 - `developer`
 
-Policy source files:
-- `apps/web/lib/auth/roles.ts`
-- `apps/web/lib/auth/capabilities.ts`
-- `apps/web/lib/auth/policy.ts`
-- `apps/web/lib/auth/request-role.ts`
+Capabilities:
+- `chat.general`
+- `chat.recommend`
+- `inventory.read`
+- `inventory.intake`
+- `debug.trace.read`
+- `debug.trace.capture`
 
-Auth rules:
-- cookie role first, request role second
-- cookie/request mismatch -> `403`
-- privileged roles require cookie-resolved role
-- `role` is canonical request field (`user_role` compatibility alias only)
+Assignment:
+- `retail_customer`: `chat.general`, `chat.recommend`
+- `store_staff`: all six
+- `developer`: all six (local/dev workflow only)
 
-## Inventory Intake (V1)
+## Tenant Resolution
 
-- UI: `/intake` (`store_staff`, `developer`)
-- API: `POST /api/inventory/intake` (`multipart/form-data`)
-- Capability: `inventory.intake`
+Priority for server resolution:
+1. `TENANT_ID` env
+2. request body `tenant_id`
+3. reject request if neither exists for inventory-backed flow
 
-Required fields:
-- image
-- `intake_label`
-- width feet/inches
-- length feet/inches
-- tenant context
+If env `TENANT_ID` is set, it always wins.
 
-Defaults on create:
-- `status = "available"`
-- `price = null`
-- `sale_price = null`
-
-Budget policy:
-- if both sale/list prices are null, rug is treated as `0` for budget filtering
-
-Image writes:
-- storage upload to `rug-images`
-- primary `rug_images` row (`is_primary=true`, `sort_order=0`)
-- compensating rollback on downstream failure
-
-## Chat Orchestration
+## Chat Contract
 
 Entry: `POST /api/chat`
 
-Turn flow:
-1. validate request
-2. resolve/enforce role
-3. resolve tenant context
-4. load/create session
-5. update recommendation/trade/project context
-6. route mode (`general_chat` or `recommendation`)
-7. run handler
-8. persist session
-9. return envelope
+Behavior:
+- validates message and optional `session_id`
+- validates `session_id` as UUID and length-caps it
+- loads or creates session state
+- routes turn to general chat or recommendation flow
+- persists session and turn messages
 
-Mode semantics:
-- `mode`: coarse mode
-- `fine_mode`: specific outcome (`general_chat`, `recommendation`, `clarifying_question`, `no_match`)
-
-Session rules:
-- constraints remain sticky until changed/cleared
-- reset intents supported for budget and size
-- tenant mismatch on reused session id -> `403`
+Session state shape:
+- `session_id`
+- `tenant_id`
+- `role`
+- `chat_history`
+- `conversation_memory`
+- `recommendation_state`
+- `created_at`
+- `updated_at`
 
 ## Recommendation Pipeline
 
-Used by `/api/recommend` and recommendation turns in `/api/chat`.
+- hard filtering: availability + size
+- candidate rows require primary image URL
+- missing-image candidates are dropped and logged server-side with rug id and label
+- AI ranking uses `ai_description` as primary content signal
+- fallback reason text must be rug-specific; generic filler is disallowed
 
-Flow:
-1. merge explicit + inferred constraints
-2. validate tenant scope
-3. SQL-first query
-4. deterministic hard filter pass
-5. candidate shaping
-6. `no_match` if empty
-7. AI rank/explain if non-empty
-8. deterministic post-processing
+## Intake and Rug Detail
 
-Hard constraints:
-- availability
-- tenant scope
-- budget (if provided)
-- size (if provided; tolerance + rotation)
+`POST /api/inventory/intake`:
+- writes rug + primary image synchronously
+- returns quickly with `ai_status: "processing"`
+- launches async vision enrichment for `intake_label` and `ai_description`
 
-## Appraisal Flow
+`GET /api/rugs/[id]`:
+- returns rug, primary image URL, and `size_display`
+- generates `contextual_blurb` once if missing, then caches it
 
-Appraisal is dedicated API/page workflow, not chat mode.
+## Branding and PWA
 
-Endpoints:
-- `POST /api/appraisal/generate`
-- `GET /api/appraisal/rugs`
-- `GET /api/appraisal/drafts`
-- `POST /api/appraisal/drafts`
+`GET /api/config/public` returns:
+- `storeName`
+- `storeLogoUrl`
+- `isPasscodeGated`
 
-Rules:
-- roles: `store_staff`, `developer`
-- AI output is draft text for human review
-- finalized records are locked from edits/regeneration
+`GET /api/manifest` returns dynamic manifest JSON using store branding.
 
-## QA and Testing
+## QA
 
 Canonical suites:
 1. `TENANT_ID=<tenant> npm run qa:functional`
 2. `TENANT_ID=<tenant> npm run qa:quality`
 
-Notes:
-- Functional and quality are the only canonical QA suites.
-
-Latest output files:
+Output files:
 - `scripts/testing/functionality/latest-functional.md`
 - `scripts/testing/quality/latest-quality.md`
-
-## Minimal Doc Set
-
-Use only:
-1. `docs/master-context.md`
-2. `docs/testing/README.md`
-3. relevant design/data/prompt file from `docs/`

@@ -1,5 +1,5 @@
 -- Chat session persistence for backend-owned conversation state.
--- This keeps recommendation/trade/project/review context durable across restarts.
+-- This keeps recommendation context durable across restarts.
 
 create extension if not exists pgcrypto;
 
@@ -20,7 +20,7 @@ create table if not exists public.chat_messages (
   session_id text not null references public.chat_sessions(session_id) on delete cascade,
   tenant_id text null,
   role text not null check (role in ('user', 'assistant')),
-  mode text null check (mode in ('general_chat', 'recommendation', 'appraisal')),
+  mode text null check (mode in ('general_chat', 'recommendation')),
   content text not null,
   metadata jsonb not null default '{}'::jsonb,
   created_at timestamptz not null default now()

@@ -3,8 +3,6 @@ import { WorkspaceNav } from "@/components/shell/workspace-nav";
 import { AccessGuard } from "@/components/ui/access-guard";
 import { getServerUiRole, getServerUiTenantId } from "@/lib/ui/server-role";
 import { canRoleAccessRoute } from "@/lib/auth/policy";
-import { getServerDeploymentType } from "@/lib/auth/deployment";
-import { redirect } from "next/navigation";
 
 type ConciergePageProps = {
   searchParams?:
@@ -21,16 +19,7 @@ function readString(
 }
 
 export default async function ConciergePage({ searchParams }: ConciergePageProps) {
-  const deploymentType = getServerDeploymentType();
-  if (deploymentType === "staff") {
-    redirect("/inventory");
-  }
-
   const role = await getServerUiRole();
-  if (deploymentType === "customer" && !role) {
-    redirect("/join");
-  }
-
   if (!role || !canRoleAccessRoute(role, "/concierge")) {
     return (
       <AccessGuard
@@ -67,6 +56,7 @@ export default async function ConciergePage({ searchParams }: ConciergePageProps
         role={role}
         currentPath="/concierge"
         variant="concierge-minimal"
+        showHomeLink={role === "developer"}
         debugToggle={debugToggle}
       />
       <ConciergeScreen debug={debug} tenantId={tenantId} />

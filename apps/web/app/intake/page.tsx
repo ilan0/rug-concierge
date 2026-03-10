@@ -3,16 +3,9 @@ import { WorkspaceNav } from "@/components/shell/workspace-nav";
 import { AccessGuard } from "@/components/ui/access-guard";
 import { getServerUiRole, getServerUiTenantId } from "@/lib/ui/server-role";
 import { canRoleAccessRoute } from "@/lib/auth/policy";
-import { getServerDeploymentType } from "@/lib/auth/deployment";
-import { redirect } from "next/navigation";
 
 export default async function IntakePage() {
-  const deploymentType = getServerDeploymentType();
   const role = await getServerUiRole();
-  if (deploymentType === "staff" && !role) {
-    redirect("/join");
-  }
-
   if (!role || !canRoleAccessRoute(role, "/intake")) {
     return (
       <AccessGuard
@@ -35,7 +28,11 @@ export default async function IntakePage() {
 
   return (
     <>
-      <WorkspaceNav role={role} currentPath="/intake" />
+      <WorkspaceNav
+        role={role}
+        currentPath="/intake"
+        showHomeLink={role === "developer"}
+      />
       <IntakeScreen tenantId={tenantId} />
     </>
   );

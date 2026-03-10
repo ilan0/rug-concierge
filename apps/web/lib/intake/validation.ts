@@ -11,6 +11,15 @@ export type ValidatedDimensions = {
 
 export const INTAKE_LABEL_MAX_CHARS = 120;
 export const INTAKE_IMAGE_MAX_BYTES = 10 * 1024 * 1024;
+const ALLOWED_IMAGE_TYPES = new Set([
+  "image/jpeg",
+  "image/jpg",
+  "image/png",
+  "image/webp",
+  "image/heic",
+  "image/heif",
+  "image/avif",
+]);
 
 export function normalizeIntakeLabel(value: unknown): string {
   return typeof value === "string" ? value.trim() : "";
@@ -102,8 +111,12 @@ export function validateImageFile(
   if (!(value instanceof File)) {
     return { ok: false, error: "image is required." };
   }
-  if (!value.type.toLowerCase().startsWith("image/")) {
-    return { ok: false, error: "image must be an image/* file." };
+  if (!ALLOWED_IMAGE_TYPES.has(value.type.toLowerCase())) {
+    return {
+      ok: false,
+      error:
+        "image must be one of: jpeg, jpg, png, webp, heic, heif, or avif.",
+    };
   }
   if (!Number.isFinite(value.size) || value.size <= 0) {
     return { ok: false, error: "image must not be empty." };

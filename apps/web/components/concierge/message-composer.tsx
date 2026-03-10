@@ -21,7 +21,6 @@ type MessageComposerProps = {
 
 export function MessageComposer(input: MessageComposerProps) {
   const {
-    variant,
     message,
     isLoading,
     canSubmit,
@@ -88,11 +87,7 @@ export function MessageComposer(input: MessageComposerProps) {
               ref={textareaRef}
               value={message}
               onChange={(event) => onMessageChange(event.target.value)}
-              placeholder={
-                variant === "trade"
-                  ? "Describe the trade request..."
-                  : "Describe what you’re looking for…"
-              }
+              placeholder="Describe what you’re looking for…"
               rows={1}
               maxLength={2000}
               disabled={isLoading}

@@ -1,12 +1,7 @@
 import type { HardConstraints, InventoryRug } from "@/lib/types/recommendation";
 import { getSizeBounds, matchesSizeWithBounds } from "@/lib/filters/size-bounds";
 
-// PSEUDOCODE
-// For each rug:
-// - availability is always hard -> only `available` rugs stay
-// - if budget exists, compare against sale price (or list price fallback)
-// - if size doesn't match (with tolerance + rotation) -> drop
-// Return remaining rugs
+// Hard filters: availability and size bounds.
 
 function matchesSize(rug: InventoryRug, constraints: HardConstraints): boolean {
   const bounds = getSizeBounds(constraints.size);
@@ -28,20 +23,6 @@ export function filterByHardConstraints(
 ): InventoryRug[] {
   return inventory.filter((rug) => {
     if (rug.status !== "available") return false;
-
-    const effectivePrice =
-      typeof rug.sale_price_usd === "number"
-        ? rug.sale_price_usd
-        : typeof rug.price_usd === "number"
-          ? rug.price_usd
-          : 0;
-
-    if (
-      typeof constraints.budgetMax === "number" &&
-      effectivePrice > constraints.budgetMax
-    ) {
-      return false;
-    }
 
     if (!matchesSize(rug, constraints)) return false;
 

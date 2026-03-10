@@ -12,7 +12,6 @@ export async function createInventoryIntake(
   const formData = new FormData();
   formData.set("role", input.role);
   formData.set("tenant_id", input.tenant_id);
-  formData.set("intake_label", input.intake_label);
   formData.set("width_ft", toWholeNumber(input.width_ft));
   formData.set("width_in", toWholeNumber(input.width_in));
   formData.set("length_ft", toWholeNumber(input.length_ft));

@@ -1,12 +1,11 @@
-# Data Schema (Runtime Contract View)
+# Data Schema (Runtime Contract)
 
-This doc describes the data shape expected by current runtime code.
-It is a practical contract, not a full migration history.
+This doc describes the schema required by the current runtime.
 
 ## Multi-Tenant Rule
 
-Business tables are tenant scoped via `tenant_id`.
-Inventory-backed APIs must never cross tenant boundaries.
+Inventory-backed tables are scoped by `tenant_id`.
+All inventory queries must include tenant scope.
 
 ## Core Tables
 
@@ -16,83 +15,53 @@ Inventory-backed APIs must never cross tenant boundaries.
 - `name`
 - `settings` (JSON)
 
-### `trade_clients`
-
-- `id`
-- `tenant_id`
-- `name`
-- `company`
-- `contact_info`
-- `preferences` (JSON; soft signals only)
-
 ### `rugs`
 
-Runtime-required fields:
+Runtime fields:
 - `id`
 - `tenant_id`
 - `intake_label`
 - `status` (`available`, `sold`, `on_hold`)
-- `width_ft`, `width_in`, `length_ft`, `length_in`
-- `width_total_in`, `length_total_in`
-- `price` (nullable)
-- `sale_price` (nullable)
+- `width_total_in`
+- `length_total_in`
+- `ai_description` (nullable)
+- `contextual_blurb` (nullable)
 
-Optional enrichment fields:
-- `sku`
-- `style`
-- `origin_country`
-- `palette`
-- `pattern`
-- `condition`
-- `best_for`
-- `hashtags`
-- `public_description`
-- `internal_notes`
-- `custom_fields`
-
-Intake V1 write defaults:
-- `status = "available"`
-- `price = null`
-- `sale_price = null`
+Compatibility fields may still exist in DB but are not used by current runtime.
 
 ### `rug_images`
 
 Runtime-used fields:
 - `tenant_id`
 - `rug_id`
-- `path` (storage object key, not full URL)
+- `path` (storage object key)
 - `is_primary`
 - `sort_order`
-
-### `appraisals`
-
-- `id`
-- `tenant_id`
-- `rug_id` (nullable for customer-owned rugs)
-- `status` (`draft`, `finalized`, plus workflow statuses)
-- appraisal context/payload fields used by appraisal APIs
 
 ### `chat_sessions`
 
 - `session_id`
-- `tenant_id` (nullable in limited non-tenant flows)
+- `tenant_id` (nullable for non-inventory chat)
 - `role`
 - `session_data` (JSONB)
-- `created_at`, `updated_at`
+- `created_at`
+- `updated_at`
 
 ### `chat_messages`
 
 - `id`
 - `session_id`
 - `tenant_id`
-- `role` (`user` or `assistant`)
-- `mode`
+- `role` (`user`, `assistant`)
+- `mode` (`general_chat`, `recommendation`)
 - `content`
 - `metadata` (JSONB)
 - `created_at`
 
 ## Storage
 
-- Supabase bucket: `rug-images`
-- Object key convention: `TENANT_UUID/RUG_UUID/<filename>`
-- Public URL generated at runtime from bucket + key
+Supabase bucket:
+- `rug-images`
+
+Object key format:
+- `{TENANT_UUID}/{RUG_UUID}/primary-{timestamp}.{ext}`

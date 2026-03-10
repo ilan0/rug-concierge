@@ -5,8 +5,9 @@ import { cn } from "@/lib/utils";
 
 type WorkspaceNavProps = {
   role: AppRole | null;
-  currentPath: "/concierge" | "/trade" | "/inventory" | "/intake" | "/appraisal";
+  currentPath: "/concierge" | "/inventory" | "/intake";
   variant?: "default" | "workspace-soft" | "concierge-minimal";
+  showHomeLink?: boolean;
   debugToggle?: {
     enabled: boolean;
     hrefOn: string;
@@ -16,10 +17,8 @@ type WorkspaceNavProps = {
 
 const WORKSPACE_LINKS = [
   { href: "/concierge", label: "Concierge" },
-  { href: "/trade", label: "Trade" },
   { href: "/inventory", label: "Inventory" },
   { href: "/intake", label: "Intake" },
-  { href: "/appraisal", label: "Appraisal" },
 ] as const;
 
 function navLinkClass(
@@ -53,6 +52,7 @@ function navLinkClass(
 export function WorkspaceNav(props: WorkspaceNavProps) {
   const role = props.role;
   const variant = props.variant ?? "default";
+  const showHomeLink = props.showHomeLink ?? false;
   const debugAllowed = role ? canRoleReadDebugTrace(role) : false;
 
   return (
@@ -66,9 +66,11 @@ export function WorkspaceNav(props: WorkspaceNavProps) {
             : "mt-4"
       )}
     >
-      <Link href="/" className={navLinkClass(false, variant)}>
-        Home
-      </Link>
+      {showHomeLink ? (
+        <Link href="/" className={navLinkClass(false, variant)}>
+          Home
+        </Link>
+      ) : null}
       {WORKSPACE_LINKS.filter((link) => {
         if (link.href === "/concierge") return true;
         if (!role) return false;

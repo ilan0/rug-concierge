@@ -13,8 +13,6 @@ export type GeneralChatPromptSection = {
 
 type GeneralChatLayerContext = {
   role: RoleType;
-  hasTradePreferences: boolean;
-  hasProjectContext: boolean;
   hasStructuredStateContext: boolean;
   hasMemoryContext: boolean;
   hasRecentTurns: boolean;
@@ -37,10 +35,6 @@ type GeneralChatLayerDefinition = {
 };
 
 export function getRolePrompt(role: RoleType): string {
-  if (role === "trade_client") {
-    return "Role: trade client. Prioritize practical, concise support for repeat buyer workflows.";
-  }
-
   if (role === "store_staff" || role === "developer") {
     return "Role: store staff. Be operational, accurate, and efficient for store workflows.";
   }
@@ -68,12 +62,6 @@ const GENERAL_CHAT_LAYER_DEFINITIONS: GeneralChatLayerDefinition[] = [
     text: (input) => input.rolePrompt,
   },
   {
-    id: PROMPT_LAYER.roleTrade,
-    role: "system",
-    include: (input) => input.role === "trade_client",
-    text: (input) => input.rolePrompt,
-  },
-  {
     id: PROMPT_LAYER.roleStaff,
     role: "system",
     include: (input) => input.role === "store_staff" || input.role === "developer",
@@ -86,28 +74,6 @@ const GENERAL_CHAT_LAYER_DEFINITIONS: GeneralChatLayerDefinition[] = [
     text: (input) =>
       `STRUCTURED STATE CONTEXT:\n${JSON.stringify(
         input.contextPacket.structured_state,
-        null,
-        2
-      )}`,
-  },
-  {
-    id: PROMPT_LAYER.contextTradePreferences,
-    role: "system",
-    include: (input) => input.hasTradePreferences,
-    text: (input) =>
-      `TRADE PREFERENCES CONTEXT:\n${JSON.stringify(
-        input.contextPacket.structured_state.trade_context.preferences,
-        null,
-        2
-      )}`,
-  },
-  {
-    id: PROMPT_LAYER.contextProject,
-    role: "system",
-    include: (input) => input.hasProjectContext,
-    text: (input) =>
-      `PROJECT CONTEXT:\n${JSON.stringify(
-        input.contextPacket.structured_state.project_context,
         null,
         2
       )}`,

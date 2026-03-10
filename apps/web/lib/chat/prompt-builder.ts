@@ -19,11 +19,6 @@ export function buildPromptLayers(input: BuildPromptLayersInput): string[] {
   if (input.mode === "recommendation") {
     return getRecommendationLayerPreview({
       role: input.role,
-      hasTradePreferences: Object.keys(input.session.trade_context.preferences).length > 0,
-      hasProjectContext:
-        Boolean(input.session.project_context.name) ||
-        Boolean(input.session.project_context.active_room_id) ||
-        input.session.project_context.rooms.length > 0,
       hasChatMemoryContext: true,
       hasRecentTurnsContext: input.session.chat_history.length > 0,
     });
@@ -32,15 +27,9 @@ export function buildPromptLayers(input: BuildPromptLayersInput): string[] {
   return getChatLayerPreview({
     mode: input.mode,
     role: input.role,
-    hasTradePreferences: Object.keys(input.session.trade_context.preferences).length > 0,
-    hasProjectContext:
-      Boolean(input.session.project_context.name) ||
-      Boolean(input.session.project_context.active_room_id) ||
-      input.session.project_context.rooms.length > 0,
-    hasRecommendationHardConstraints:
-      Boolean(input.session.recommendation_state.hard_constraints.size) ||
-      typeof input.session.recommendation_state.hard_constraints.budgetMax ===
-        "number",
+    hasRecommendationHardConstraints: Boolean(
+      input.session.recommendation_state.hard_constraints.size
+    ),
     hasChatMemoryContext: hasMemoryContext,
     hasRecentTurnsContext: input.session.chat_history.length > 0,
   });

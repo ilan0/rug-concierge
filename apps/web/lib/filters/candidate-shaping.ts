@@ -1,22 +1,14 @@
 import type { InventoryRug } from "@/lib/types/recommendation";
 
-// PSEUDOCODE
-// - Keep candidate list small enough for AI context.
-// - Keep ordering deterministic.
-// - Avoid complex diversification logic in V1.
+// Keep candidate list bounded and deterministic.
 
 const DEFAULT_MAX_CANDIDATES = 30;
 
-function priceForSort(rug: InventoryRug): number {
-  const price = rug.sale_price_usd ?? rug.price_usd;
-  return typeof price === "number" ? price : Number.POSITIVE_INFINITY;
-}
-
 function stableCandidateOrder(candidates: InventoryRug[]): InventoryRug[] {
   return [...candidates].sort((a, b) => {
-    const priceDiff = priceForSort(a) - priceForSort(b);
-    if (priceDiff !== 0) return priceDiff;
-    return a.label.localeCompare(b.label);
+    const labelDiff = a.intake_label.localeCompare(b.intake_label);
+    if (labelDiff !== 0) return labelDiff;
+    return a.id.localeCompare(b.id);
   });
 }
 

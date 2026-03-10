@@ -21,9 +21,6 @@ export function clearUiRole(): void {
   window.localStorage.removeItem(ROLE_STORAGE_KEY);
 }
 
-export const uiRoleCookieName = "rug_ui_role";
-export const uiTenantCookieName = "rug_ui_tenant_id";
-
 function normalizeTenantId(value: unknown): string | null {
   if (typeof value !== "string") return null;
   const trimmed = value.trim();
@@ -47,28 +44,13 @@ export function clearUiTenantId(): void {
   window.localStorage.removeItem(TENANT_STORAGE_KEY);
 }
 
-export async function syncUiSession(input: {
+export async function syncUiSession(_input: {
   role: UiRole | null;
   tenant_id?: string | null;
 }): Promise<void> {
-  const response = await fetch("/api/ui-role", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      role: input.role,
-      tenant_id: normalizeTenantId(input.tenant_id ?? getUiTenantId()),
-    }),
-  });
-  if (!response.ok) {
-    throw new Error("Role cookie sync failed.");
-  }
+  return;
 }
 
-export async function syncRoleCookie(role: UiRole | null): Promise<void> {
-  await syncUiSession({
-    role,
-    tenant_id: getUiTenantId(),
-  });
+export async function syncRoleCookie(_role: UiRole | null): Promise<void> {
+  return;
 }

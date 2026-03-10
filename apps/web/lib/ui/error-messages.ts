@@ -1,6 +1,5 @@
 type ErrorMappingContext =
   | "chat"
-  | "appraisal"
   | "intake"
   | "debug_trace"
   | "generic";
@@ -51,9 +50,6 @@ export function mapApiErrorToFriendlyMessage(
     if (includesAny(raw, ["role mismatch", "role and user_role"])) {
       return "Your role information is out of sync. Re-select your role from Home and try again.";
     }
-    if (input.context === "appraisal") {
-      return "Please review appraisal input fields and try again.";
-    }
     if (input.context === "intake") {
       if (
         includesAny(raw, [
@@ -73,9 +69,6 @@ export function mapApiErrorToFriendlyMessage(
   if (status >= 500) {
     if (input.context === "chat") {
       return "The concierge service is temporarily unavailable. Please try again in a moment.";
-    }
-    if (input.context === "appraisal") {
-      return "Appraisal generation is temporarily unavailable. Please try again shortly.";
     }
     if (input.context === "intake") {
       return "Intake save failed right now. Please retry in a moment.";

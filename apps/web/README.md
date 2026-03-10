@@ -1,51 +1,36 @@
 # Web App (Next.js)
 
-Primary UI shell for Rug Concierge MVP.
+Primary UI shell for Rug Concierge.
 
 ## Routes
 
-- `/`: role/tenant setup + workspace entry
-- `/concierge`: retail/staff chat workflow via `/api/chat`
-- `/trade`: trade workflow via `/api/chat`
-- `/inventory`: tenant-scoped inventory browser
-- `/intake`: staff/developer mobile-first intake workflow
-- `/appraisal`: staff/developer appraisal workflow
+- `/`: app entry
+- `/concierge`: chat and recommendations
+- `/inventory`: tenant inventory view
+- `/intake`: inventory intake flow
+- `/passcode`: kiosk unlock page
 
 ## API Routes
 
 - `/api/chat`
 - `/api/recommend`
 - `/api/inventory/intake`
-- `/api/appraisal/generate`
-- `/api/appraisal/rugs`
-- `/api/appraisal/drafts`
+- `/api/rugs/[id]`
+- `/api/session/reset`
+- `/api/config/public`
+- `/api/manifest`
+- `/api/auth/passcode`
 - `/api/debug/trace`
-- `/api/ui-role`
-- `/api/ui-access`
 
-## Role Policy
+## Auth Model
 
-Policy source:
-- `/apps/web/lib/auth/roles.ts`
-- `/apps/web/lib/auth/capabilities.ts`
-- `/apps/web/lib/auth/policy.ts`
-- `/apps/web/lib/auth/request-role.ts`
-
-Rules:
-- cookie role first
-- cookie/body mismatch rejected
-- privileged roles require cookie role
+- if `STORE_PASSCODE` is unset, app runs open
+- if `STORE_PASSCODE` is set, middleware enforces `rug_device_auth` cookie
 
 ## Styling
 
 - Tailwind CSS
 - shadcn/ui components
-- shared primitives in `/apps/web/components/ui/*`
-
-## Workspace Nav
-
-Shared role-aware nav:
-- `/apps/web/components/shell/workspace-nav.tsx`
 
 ## Core Docs
 
@@ -71,5 +56,3 @@ npm --workspace apps/web run build
 TENANT_ID=<tenant-uuid> npm run qa:functional
 TENANT_ID=<tenant-uuid> npm run qa:quality
 ```
-
-`qa:functional` includes intake matrix validation.

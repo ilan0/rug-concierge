@@ -8,36 +8,20 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { SectionCard } from "@/components/ui/section-card";
-import { Textarea } from "@/components/ui/textarea";
-import { Input } from "@/components/ui/input";
-import type { Turn, OperatorView, UiReviewState } from "@/components/concierge/types";
+import type { Turn, OperatorView } from "@/components/concierge/types";
 import { formatTime, modeLabel } from "@/components/concierge/utils";
 
 type OperatorDrawerProps = {
   open: boolean;
   selectedTurn: Turn | null;
   debug: boolean;
-  showReviewControls?: boolean;
   canUseDebugTrace: boolean;
-  canUseReviewRoleControls: boolean;
-  canUseReviewControls: boolean;
-  isRecommendationContext: boolean;
   operatorView: OperatorView;
   setOperatorView: (view: OperatorView) => void;
   onClose: () => void;
-  isLoading: boolean;
-  onReviewAction: (action: "approve" | "reject" | "regenerate" | "override") => void;
-  overrideMessage: string;
-  setOverrideMessage: (value: string) => void;
-  overrideRugIds: string;
-  setOverrideRugIds: (value: string) => void;
-  overrideNotes: string;
-  setOverrideNotes: (value: string) => void;
-  reviewState: UiReviewState | null;
 };
 
 export function OperatorDrawer(input: OperatorDrawerProps) {
-  const showReviewControls = input.showReviewControls ?? true;
   const routeTrace =
     (input.selectedTurn?.debug?.trace?.routeTrace as {
       routing?: unknown;
@@ -58,6 +42,7 @@ export function OperatorDrawer(input: OperatorDrawerProps) {
       context_packet_stats?: unknown;
       timing_ms?: unknown;
     } | null) ?? null;
+
   const unifiedAiTrace = pipelineTrace?.ai_trace ?? generalChatTrace?.ai_trace ?? null;
   const unifiedMetrics = pipelineTrace
     ? {
@@ -102,16 +87,7 @@ export function OperatorDrawer(input: OperatorDrawerProps) {
           </SheetDescription>
         </SheetHeader>
 
-        <div className={showReviewControls ? "grid grid-cols-2 gap-2" : "grid grid-cols-1 gap-2"}>
-          {showReviewControls && input.canUseReviewRoleControls ? (
-            <Button
-              type="button"
-              variant={input.operatorView === "review" ? "default" : "outline"}
-              onClick={() => input.setOperatorView("review")}
-            >
-              Review
-            </Button>
-          ) : null}
+        <div className="grid grid-cols-1 gap-2">
           {input.canUseDebugTrace ? (
             <Button
               type="button"
@@ -124,81 +100,6 @@ export function OperatorDrawer(input: OperatorDrawerProps) {
         </div>
 
         <div className="flex-1 space-y-3 overflow-y-auto pr-1">
-          {showReviewControls &&
-          input.operatorView === "review" &&
-          input.canUseReviewRoleControls ? (
-            <>
-              <SectionCard title="Review Controls">
-                {!input.isRecommendationContext ? (
-                  <p className="text-sm text-muted-foreground">
-                    Review controls are available after a recommendation-mode assistant turn.
-                  </p>
-                ) : !input.canUseReviewControls ? (
-                  <p className="text-sm text-muted-foreground">
-                    Review controls are available only for store staff or developer.
-                  </p>
-                ) : (
-                  <div className="space-y-3">
-                    <div className="flex flex-wrap gap-2">
-                      <Button type="button" onClick={() => input.onReviewAction("approve")} disabled={input.isLoading}>
-                        Approve
-                      </Button>
-                      <Button type="button" variant="secondary" onClick={() => input.onReviewAction("reject")} disabled={input.isLoading}>
-                        Reject
-                      </Button>
-                      <Button type="button" variant="secondary" onClick={() => input.onReviewAction("regenerate")} disabled={input.isLoading}>
-                        Regenerate
-                      </Button>
-                    </div>
-
-                    <div className="space-y-2">
-                      <p className="text-sm font-medium">Override Message</p>
-                      <Textarea
-                        rows={3}
-                        value={input.overrideMessage}
-                        onChange={(event) => input.setOverrideMessage(event.target.value)}
-                        placeholder="Final wording for the assistant response"
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <p className="text-sm font-medium">Override Rug IDs</p>
-                      <Input
-                        value={input.overrideRugIds}
-                        onChange={(event) => input.setOverrideRugIds(event.target.value)}
-                        placeholder="id1,id2,id3"
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <p className="text-sm font-medium">Override Notes</p>
-                      <Input
-                        value={input.overrideNotes}
-                        onChange={(event) => input.setOverrideNotes(event.target.value)}
-                        placeholder="Reason for override"
-                      />
-                    </div>
-
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => input.onReviewAction("override")}
-                      disabled={input.isLoading}
-                    >
-                      Apply Override
-                    </Button>
-                  </div>
-                )}
-              </SectionCard>
-
-              <SectionCard title="Review State">
-                <pre className="overflow-auto rounded-lg border border-border bg-muted/30 p-3 text-xs">
-                  {JSON.stringify(input.reviewState, null, 2)}
-                </pre>
-              </SectionCard>
-            </>
-          ) : null}
-
           {input.operatorView === "debug" && input.canUseDebugTrace ? (
             <>
               {!input.debug ? (

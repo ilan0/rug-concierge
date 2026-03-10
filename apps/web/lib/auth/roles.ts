@@ -1,8 +1,5 @@
-import type { DeploymentType } from "@/lib/auth/deployment";
-
 export const APP_ROLES = [
   "retail_customer",
-  "trade_client",
   "store_staff",
   "developer",
 ] as const;
@@ -23,15 +20,6 @@ export function normalizeAppRole(
 
 export function appRoleLabel(role: AppRole): string {
   if (role === "retail_customer") return "Retail Customer";
-  if (role === "trade_client") return "Trade Client";
   if (role === "store_staff") return "Store Staff";
   return "Developer";
-}
-
-export function capRoleForDeployment(
-  role: AppRole | null,
-  deploymentType: DeploymentType
-): AppRole | null {
-  if (deploymentType !== "customer") return role;
-  return role === "retail_customer" || role === "trade_client" ? role : null;
 }

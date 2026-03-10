@@ -26,7 +26,6 @@ import type { HardConstraints } from "@/lib/types/recommendation";
 
 function hasMeaningfulConstraints(constraints: HardConstraints): boolean {
   return (
-    typeof constraints.budgetMax === "number" ||
     Boolean(
       constraints.size &&
         typeof constraints.size.widthIn === "number" &&
@@ -160,7 +159,7 @@ export async function POST(req: Request) {
 
     // Explicit request constraints come from UI payload.
     const explicitConstraints = normalizeHardConstraints(body.constraints);
-    // Inferred constraints come from lightweight text parsing (e.g. "8x10-ish", "under $2k").
+    // Inferred constraints come from lightweight text parsing (e.g. "8x10-ish").
     const inferredConstraints = extractConstraintsFromUserMessage(userMessage);
     // Explicit values win when both sources are present.
     const constraints: HardConstraints = mergeHardConstraints(
@@ -186,7 +185,7 @@ export async function POST(req: Request) {
               status: 400,
               body: {
                 error:
-                  "Provide a message or at least one valid constraint (size and/or budget).",
+                  "Provide a message or at least one valid size constraint.",
                 code: "BAD_REQUEST",
               },
             },
@@ -197,41 +196,8 @@ export async function POST(req: Request) {
         });
       }
       return badRequest(
-        "Provide a message or at least one valid constraint (size and/or budget)."
+        "Provide a message or at least one valid size constraint."
       );
-    }
-
-    if (
-      typeof constraints.budgetMax === "number" &&
-      (!Number.isFinite(constraints.budgetMax) || constraints.budgetMax <= 0)
-    ) {
-      if (traceMeta) {
-        await writeE2eTraceArtifact({
-          meta: traceMeta,
-          channel: "recommend-route",
-          trace_id: routeTraceId,
-          payload: {
-            flow_path: ["/api/recommend POST", "request_validation_failed"],
-            request_id: requestId,
-            request: {
-              tenant_id: body.tenant_id ?? null,
-              user_message: userMessage,
-              constraints,
-            },
-            response: {
-              status: 400,
-              body: {
-                error: "budgetMax must be a positive number.",
-                code: "BAD_REQUEST",
-              },
-            },
-            timing_ms: {
-              total_ms: Date.now() - startedAt,
-            },
-          },
-        });
-      }
-      return badRequest("budgetMax must be a positive number.");
     }
 
     if (constraints.size) {

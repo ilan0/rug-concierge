@@ -1,13 +1,11 @@
 import type {
   ChatMode,
-  RecommendationReviewAction,
   RoleType,
 } from "@/lib/chat/types";
 
 type RouteTurnModeInput = {
   message: string;
   role: RoleType;
-  review_action?: RecommendationReviewAction | null;
   last_mode?: ChatMode | null;
   has_recent_recommendations?: boolean;
 };
@@ -15,7 +13,6 @@ type RouteTurnModeInput = {
 export type RouteDecision = {
   mode: ChatMode;
   rule_id:
-    | "REVIEW_ACTION_CONTROL"
     | "EXPLICIT_RECOMMENDATION_REQUEST"
     | "RECOMMENDATION_FOLLOWUP"
     | "GENERAL_ADVICE_OR_EDUCATION"
@@ -32,7 +29,6 @@ type RouteRule = {
 };
 
 export const ROUTE_RULE_PRECEDENCE: RouteDecision["rule_id"][] = [
-  "REVIEW_ACTION_CONTROL",
   "EXPLICIT_RECOMMENDATION_REQUEST",
   "RECOMMENDATION_FOLLOWUP",
   "GENERAL_ADVICE_OR_EDUCATION",
@@ -41,15 +37,6 @@ export const ROUTE_RULE_PRECEDENCE: RouteDecision["rule_id"][] = [
 ];
 
 const ROUTE_RULES: RouteRule[] = [
-  {
-    id: "REVIEW_ACTION_CONTROL",
-    when: (input) => Boolean(input.review_action),
-    decide: () => ({
-      mode: "recommendation",
-      confidence: "high",
-      needs_clarification: false,
-    }),
-  },
   {
     id: "EXPLICIT_RECOMMENDATION_REQUEST",
     when: (_input, text) => isExplicitRecommendationRequest(text),

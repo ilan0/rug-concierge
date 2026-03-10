@@ -38,12 +38,6 @@ export async function GET(req: Request) {
   const roleResolution = await resolveRequestRole({
     defaultRole: "retail_customer",
   });
-  if (roleResolution.mismatch) {
-    return NextResponse.json(
-      { error: "Role mismatch between cookie and request payload." },
-      { status: 403 }
-    );
-  }
 
   if (!canRoleReadDebugTrace(roleResolution.role)) {
     if (process.env.NODE_ENV === "production") {

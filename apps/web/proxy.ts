@@ -1,149 +1,64 @@
-import { NextRequest, NextResponse } from "next/server";
-import { isAppRole, type AppRole } from "@/lib/auth/roles";
+import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
+import {
+  buildDeviceAuthCookieValue,
+  getCookieSecret,
+  timingSafeCookieValueMatch,
+} from "@/lib/auth/device-auth";
+import { getConfiguredTenantId, isPasscodeGated } from "@/lib/auth/deployment";
 
-const ROLE_COOKIE_NAME = "rug_ui_role";
-
-function getDeploymentType(): "customer" | "staff" | "developer" {
-  const value = process.env.DEPLOYMENT_TYPE?.trim();
-  if (value === "customer" || value === "staff" || value === "developer") {
-    return value;
-  }
-  return "developer";
+function isPublicApiPath(pathname: string): boolean {
+  return (
+    pathname === "/api/auth/passcode" ||
+    pathname === "/api/config/public" ||
+    pathname === "/api/manifest"
+  );
 }
 
-function extractRoleFromCookie(rawValue: string | null | undefined): AppRole | null {
-  if (typeof rawValue !== "string") return null;
-  const rolePart = rawValue.split(".")[0]?.trim();
-  if (!rolePart || !isAppRole(rolePart)) return null;
-  return rolePart;
-}
+function hasValidDeviceCookie(request: NextRequest): boolean {
+  const tenantId = getConfiguredTenantId();
+  const cookieSecret = getCookieSecret();
+  if (!tenantId || !cookieSecret) return false;
 
-function resolveWorkspacePath(pathname: string):
-  | "/concierge"
-  | "/trade"
-  | "/inventory"
-  | "/intake"
-  | "/appraisal"
-  | null {
-  if (pathname === "/concierge" || pathname.startsWith("/concierge/")) {
-    return "/concierge";
-  }
-  if (pathname === "/trade" || pathname.startsWith("/trade/")) {
-    return "/trade";
-  }
-  if (pathname === "/inventory" || pathname.startsWith("/inventory/")) {
-    return "/inventory";
-  }
-  if (pathname === "/intake" || pathname.startsWith("/intake/")) {
-    return "/intake";
-  }
-  if (pathname === "/appraisal" || pathname.startsWith("/appraisal/")) {
-    return "/appraisal";
-  }
-  return null;
-}
+  const submittedCookieValue =
+    request.cookies.get("rug_device_auth")?.value ?? "";
+  if (!submittedCookieValue) return false;
 
-function redirectTo(request: NextRequest, path: string): NextResponse {
-  const nextUrl = new URL(path, request.url);
-  return NextResponse.redirect(nextUrl);
-}
-
-function withCanonicalTenantCookie(
-  request: NextRequest,
-  response: NextResponse
-): NextResponse {
-  const deploymentType = getDeploymentType();
-  if (deploymentType === "developer") return response;
-
-  const tenantId = process.env.TENANT_ID?.trim();
-  if (!tenantId) return response;
-  if (request.cookies.get("rug_ui_tenant_id")?.value === tenantId) return response;
-
-  response.cookies.set("rug_ui_tenant_id", tenantId, {
-    path: "/",
-    sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
-    maxAge: 60 * 60 * 24 * 30,
-    httpOnly: false,
+  const expectedCookieValue = buildDeviceAuthCookieValue({
+    tenantId,
+    cookieSecret,
   });
-  return response;
+
+  return timingSafeCookieValueMatch({
+    submittedCookieValue,
+    expectedCookieValue,
+  });
 }
 
 export function proxy(request: NextRequest) {
-  const deploymentType = getDeploymentType();
-  const pathname = request.nextUrl.pathname;
-  const role = extractRoleFromCookie(request.cookies.get(ROLE_COOKIE_NAME)?.value);
-
-  if (deploymentType === "developer") {
+  if (!isPasscodeGated()) {
     return NextResponse.next();
   }
 
-  if (pathname === "/join") {
-    return withCanonicalTenantCookie(request, NextResponse.next());
+  const { pathname } = request.nextUrl;
+  const isApiPath = pathname.startsWith("/api/");
+
+  if (pathname === "/passcode" || isPublicApiPath(pathname)) {
+    return NextResponse.next();
   }
 
-  if (deploymentType === "customer") {
-    if (pathname === "/") {
-      if (role === "trade_client") {
-        return withCanonicalTenantCookie(request, redirectTo(request, "/trade"));
-      }
-      return withCanonicalTenantCookie(
-        request,
-        redirectTo(request, "/concierge")
-      );
-    }
-
-    const route = resolveWorkspacePath(pathname);
-    if (route === "/trade") {
-      if (role === "trade_client") {
-        return withCanonicalTenantCookie(request, NextResponse.next());
-      }
-      return withCanonicalTenantCookie(request, redirectTo(request, "/concierge"));
-    }
-    if (
-      route === "/inventory" ||
-      route === "/intake" ||
-      route === "/appraisal"
-    ) {
-      return withCanonicalTenantCookie(
-        request,
-        redirectTo(request, "/concierge")
-      );
-    }
-    return withCanonicalTenantCookie(request, NextResponse.next());
+  if (hasValidDeviceCookie(request)) {
+    return NextResponse.next();
   }
 
-  // Staff deployment
-
-  if (pathname === "/") {
-    if (role === "store_staff") {
-      return withCanonicalTenantCookie(request, redirectTo(request, "/inventory"));
-    }
-    if (role === "developer") {
-      return withCanonicalTenantCookie(request, NextResponse.next());
-    }
-    return withCanonicalTenantCookie(request, redirectTo(request, "/join"));
+  if (isApiPath) {
+    return NextResponse.json({ error: "device_not_authenticated" }, { status: 401 });
   }
 
-  const route = resolveWorkspacePath(pathname);
-  if (!route) {
-    return withCanonicalTenantCookie(request, NextResponse.next());
-  }
-
-  if (route === "/trade" || route === "/concierge") {
-    return withCanonicalTenantCookie(request, redirectTo(request, "/inventory"));
-  }
-
-  if (route === "/inventory" || route === "/intake" || route === "/appraisal") {
-    if (role === "store_staff" || role === "developer") {
-      return withCanonicalTenantCookie(request, NextResponse.next());
-    }
-    return withCanonicalTenantCookie(request, redirectTo(request, "/join"));
-  }
-
-  return withCanonicalTenantCookie(request, NextResponse.next());
+  const redirectUrl = new URL("/passcode", request.url);
+  return NextResponse.redirect(redirectUrl);
 }
 
 export const config = {
-  matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],
+  matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],
 };

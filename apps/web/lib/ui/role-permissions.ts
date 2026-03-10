@@ -18,12 +18,6 @@ const ALL_ROUTE_CARDS: UiRouteCard[] = [
       "Main customer-facing flow. Sends chat turns through backend routing and returns answers/recommendations.",
   },
   {
-    href: "/trade",
-    title: "Trade Support",
-    description:
-      "Repeat-buyer workflow for trade/design clients with project context and personalized support.",
-  },
-  {
     href: "/inventory",
     title: "Inventory Browser",
     description:
@@ -34,12 +28,6 @@ const ALL_ROUTE_CARDS: UiRouteCard[] = [
     title: "Inventory Intake",
     description:
       "Fast mobile-first workflow to intake a rug with photo, label, and dimensions.",
-  },
-  {
-    href: "/appraisal",
-    title: "Appraisal Draft Studio",
-    description:
-      "Store staff workflow to generate, copy, and export structured appraisal drafts.",
   },
 ];
 

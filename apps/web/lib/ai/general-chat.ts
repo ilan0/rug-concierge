@@ -257,12 +257,21 @@ function parseGeneralChatResponse(payload: unknown): GeneralChatModelResponse | 
   }
 }
 
+function toPlainText(value: string): string {
+  return normalizeText(
+    value
+      .replace(/\*\*/g, "")
+      .replace(/[_`#]/g, "")
+      .replace(/^\s*[-*•]+\s*/gm, "")
+  );
+}
+
 function sanitizeHints(hints: string[]): string[] {
   const seen = new Set<string>();
   const output: string[] = [];
 
   for (const hint of hints) {
-    const normalized = normalizeText(hint);
+    const normalized = toPlainText(hint);
     if (!normalized || normalized.length > MAX_HINT_CHARS) continue;
     const key = normalized.toLowerCase();
     if (seen.has(key)) continue;
@@ -279,7 +288,7 @@ function normalizeFollowUpQuestion(
   followUpQuestion: string | null
 ): string | null {
   if (!followUpQuestion) return null;
-  const normalizedFollowUp = normalizeText(followUpQuestion);
+  const normalizedFollowUp = toPlainText(followUpQuestion);
   if (!normalizedFollowUp) return null;
 
   const assistant = normalizeText(assistantMessage).toLowerCase();
@@ -297,10 +306,10 @@ function normalizeFollowUpQuestion(
 }
 
 function sanitizeResponse(response: GeneralChatModelResponse): GeneralChatModelResponse {
-  const assistantMessage = normalizeText(response.assistant_message);
+  const assistantMessage = toPlainText(response.assistant_message);
   return {
     assistant_message: assistantMessage,
-    notes: response.notes ? normalizeText(response.notes) : null,
+    notes: response.notes ? toPlainText(response.notes) : null,
     follow_up_question: normalizeFollowUpQuestion(
       assistantMessage,
       response.follow_up_question
@@ -366,19 +375,10 @@ export async function generateGeneralChatResponse(input: {
   }
 
   const prompts = getRecommendationPromptBundle();
-  const hasTradePreferences =
-    Object.keys(input.contextPacket.structured_state.trade_context.preferences).length > 0;
-  const projectContext = input.contextPacket.structured_state.project_context;
-  const hasProjectContext =
-    Boolean(projectContext.name) ||
-    projectContext.rooms.length > 0 ||
-    Boolean(projectContext.active_room_id);
-  const hasRecommendationHardConstraints =
-    Boolean(input.contextPacket.structured_state.recommendation_state.hard_constraints.size) ||
-    typeof input.contextPacket.structured_state.recommendation_state.hard_constraints
-      .budgetMax === "number";
-  const hasStructuredStateContext =
-    hasRecommendationHardConstraints || hasTradePreferences || hasProjectContext;
+  const hasRecommendationHardConstraints = Boolean(
+    input.contextPacket.structured_state.recommendation_state.hard_constraints.size
+  );
+  const hasStructuredStateContext = hasRecommendationHardConstraints;
   const hasMemoryContext =
     input.contextPacket.conversation_memory.summary_text.length > 0 ||
     input.contextPacket.conversation_memory.stable_facts.length > 0 ||
@@ -386,8 +386,6 @@ export async function generateGeneralChatResponse(input: {
 
   const promptSections = buildGeneralChatPromptSections({
     role: input.role,
-    hasTradePreferences,
-    hasProjectContext,
     hasStructuredStateContext,
     hasMemoryContext,
     hasRecentTurns: input.contextPacket.recent_turns.length > 0,

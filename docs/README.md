@@ -1,7 +1,6 @@
 # Docs Index
 
-Use this small set only.
-If docs conflict, `docs/master-context.md` wins.
+If docs conflict, `docs/master-context.md` is canonical.
 
 ## Read First
 
@@ -12,7 +11,6 @@ If docs conflict, `docs/master-context.md` wins.
 
 - `docs/design/chat-orchestration.md`
 - `docs/design/concierge-flow.md`
-- `docs/design/appraisal-flow.md`
 - `docs/design/role-capability-matrix.md`
 
 ## Data
@@ -32,6 +30,3 @@ If docs conflict, `docs/master-context.md` wins.
 - `docs/prompts/general-chat.md`
 - `docs/prompts/recommendation.md`
 - `docs/prompts/recommendation-structured-output.md`
-- `docs/prompts/trade-support.md`
-- `docs/prompts/appraisal.md`
-- `docs/prompts/appraisal-structured-output.md`

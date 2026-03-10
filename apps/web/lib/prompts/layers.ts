@@ -9,8 +9,6 @@ export type { PromptLayerId };
 export function getChatLayerPreview(input: {
   mode: ChatMode;
   role: RoleType;
-  hasTradePreferences: boolean;
-  hasProjectContext: boolean;
   hasRecommendationHardConstraints: boolean;
   hasChatMemoryContext: boolean;
   hasRecentTurnsContext: boolean;
@@ -18,8 +16,6 @@ export function getChatLayerPreview(input: {
   if (input.mode === "recommendation") {
     return getRecommendationLayerPreview({
       role: input.role,
-      hasTradePreferences: input.hasTradePreferences,
-      hasProjectContext: input.hasProjectContext,
       hasChatMemoryContext: input.hasChatMemoryContext,
       hasRecentTurnsContext: input.hasRecentTurnsContext,
     });
@@ -28,21 +24,14 @@ export function getChatLayerPreview(input: {
   if (input.mode === "general_chat") {
     return getGeneralChatLayerPreview({
       role: input.role,
-      hasTradePreferences: input.hasTradePreferences,
-      hasProjectContext: input.hasProjectContext,
-      hasStructuredStateContext:
-        input.hasRecommendationHardConstraints ||
-        input.hasTradePreferences ||
-        input.hasProjectContext,
+      hasStructuredStateContext: input.hasRecommendationHardConstraints,
       hasMemoryContext: input.hasChatMemoryContext,
       hasRecentTurns: input.hasRecentTurnsContext,
     });
   }
 
   const layers: PromptLayerId[] = [PROMPT_LAYER.systemBase];
-  if (input.role === "trade_client") {
-    layers.push(PROMPT_LAYER.roleTrade);
-  } else if (input.role === "store_staff" || input.role === "developer") {
+  if (input.role === "store_staff" || input.role === "developer") {
     layers.push(PROMPT_LAYER.roleStaff);
   } else {
     layers.push(PROMPT_LAYER.roleRetail);

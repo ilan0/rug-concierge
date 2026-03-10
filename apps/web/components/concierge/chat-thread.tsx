@@ -1,4 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import { RecommendationCard } from "@/components/concierge/recommendation-card";
 import type { Turn } from "@/components/concierge/types";
 import {
@@ -41,9 +43,6 @@ function formatConstraintSummary(input: Turn["constraintSnapshot"]) {
           : ""
       }`
     );
-  }
-  if (typeof input.hard_constraints.budgetMax === "number") {
-    items.push(`Up to $${input.hard_constraints.budgetMax.toLocaleString()}`);
   }
   if (input.soft_preferences?.style) {
     items.push(`Style ${input.soft_preferences.style}`);
@@ -175,7 +174,22 @@ export function ChatThread(input: ChatThreadProps) {
                 </Badge>
               ) : null}
 
-              <p className={cn("whitespace-pre-wrap text-foreground", bodyTextClassName)}>{turn.text}</p>
+              {turn.role === "assistant" ? (
+                <div
+                  className={cn(
+                    "text-foreground [&_li]:my-1 [&_ol]:list-decimal [&_ol]:pl-5 [&_p]:whitespace-pre-wrap [&_ul]:list-disc [&_ul]:pl-5",
+                    bodyTextClassName
+                  )}
+                >
+                  <ReactMarkdown remarkPlugins={[remarkGfm]} skipHtml>
+                    {turn.text}
+                  </ReactMarkdown>
+                </div>
+              ) : (
+                <p className={cn("whitespace-pre-wrap text-foreground", bodyTextClassName)}>
+                  {turn.text}
+                </p>
+              )}
 
               {turn.role === "assistant" &&
               shouldRenderFollowUpQuestion(turn.text, turn.followUpQuestion) ? (

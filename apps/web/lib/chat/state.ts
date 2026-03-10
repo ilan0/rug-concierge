@@ -21,17 +21,10 @@ export function updateRecommendationStateForTurn(
   const resets = parseConstraintResetDirectives(input.message);
   const existing = session.recommendation_state.hard_constraints;
   const resetAdjustedExisting: HardConstraints = {
-    budgetMax: resets.clearBudget ? undefined : existing.budgetMax,
     size: resets.clearSize ? undefined : existing.size,
   };
 
   const merged: HardConstraints = {
-    budgetMax:
-      typeof explicit.budgetMax === "number"
-        ? explicit.budgetMax
-        : typeof inferred.budgetMax === "number"
-          ? inferred.budgetMax
-          : resetAdjustedExisting.budgetMax,
     size: explicit.size ?? inferred.size ?? resetAdjustedExisting.size,
   };
 

@@ -20,17 +20,7 @@ type RunRecommendationPipelineInput = {
   userMessage: string;
   constraints: HardConstraints;
   promptContext?: {
-    role?: "retail_customer" | "trade_client" | "store_staff";
-    trade_preferences?: Record<string, unknown>;
-    project_context?: {
-      project_name?: string | null;
-      active_room?: string | null;
-      room_count?: number;
-      rooms?: Array<{
-        room_name: string;
-        constraints: HardConstraints;
-      }>;
-    };
+    role?: "retail_customer" | "store_staff";
     chat_context?: {
       structured_state?: unknown;
       conversation_memory?: unknown;
@@ -40,7 +30,7 @@ type RunRecommendationPipelineInput = {
   traceMeta?: E2eTraceMeta & {
     source_route: "/api/recommend" | "/api/chat";
     session_id?: string | null;
-    role?: "retail_customer" | "trade_client" | "store_staff" | null;
+    role?: "retail_customer" | "store_staff" | null;
   };
 };
 
@@ -109,6 +99,7 @@ export async function runRecommendationPipeline(
   try {
     const sqlStart = Date.now();
     const inventory = await fetchInventoryCandidates({
+      requestId,
       tenantId: input.tenantId,
       constraints: input.constraints,
       limit: SQL_QUERY_LIMIT,
@@ -255,6 +246,7 @@ export async function runRecommendationPipeline(
 }
 
 async function fetchInventoryCandidates(input: {
+  requestId: string;
   tenantId: string;
   constraints: HardConstraints;
   limit: number;
@@ -264,12 +256,7 @@ async function fetchInventoryCandidates(input: {
   if (!supabase) return null;
 
   const sizeBounds = getSizeBounds(input.constraints.size);
-  const budgetMax = input.constraints.budgetMax;
-
-  const variants = buildQueryVariants({
-    hasSize: Boolean(sizeBounds),
-    hasBudget: typeof budgetMax === "number",
-  });
+  const variants = buildQueryVariants({ hasSize: Boolean(sizeBounds) });
 
   const results = await Promise.all(
     variants.map((variant) =>
@@ -277,7 +264,6 @@ async function fetchInventoryCandidates(input: {
         supabase,
         tenantId: input.tenantId,
         limit: input.limit,
-        budgetMax,
         sizeBounds,
         variant,
         queryTrace: input.queryTrace,
@@ -306,15 +292,29 @@ async function fetchInventoryCandidates(input: {
     return {
       ...rug,
       primary_image_url: image?.primary_image_url ?? null,
-      primary_image_caption: image?.primary_image_caption ?? null,
     };
   });
 
-  return enriched.filter(
+  const withImages = enriched.filter(
     (rug) =>
       typeof rug.primary_image_url === "string" &&
       rug.primary_image_url.trim().length > 0
   );
+  const droppedForMissingImage = enriched.filter(
+    (rug) =>
+      !(typeof rug.primary_image_url === "string" && rug.primary_image_url.trim().length > 0)
+  );
+
+  for (const rug of droppedForMissingImage) {
+    console.warn("[recommendation] Candidate dropped: missing primary image", {
+      request_id: input.requestId,
+      tenant_id: input.tenantId,
+      rug_id: rug.id,
+      rug_label: rug.intake_label,
+    });
+  }
+
+  return withImages;
 }
 
 async function getSupabaseAdminSafe(): Promise<SupabaseClient | null> {
@@ -326,62 +326,27 @@ async function getSupabaseAdminSafe(): Promise<SupabaseClient | null> {
   }
 }
 
-function buildQueryVariants(input: {
-  hasSize: boolean;
-  hasBudget: boolean;
-}): Array<
-  | "none"
-  | "size_direct"
-  | "size_rotated"
-  | "budget_sale"
-  | "budget_list"
-  | "size_direct_budget_sale"
-  | "size_direct_budget_list"
-  | "size_rotated_budget_sale"
-  | "size_rotated_budget_list"
+function buildQueryVariants(input: { hasSize: boolean }): Array<
+  "base" | "size_direct" | "size_rotated"
 > {
-  if (!input.hasSize && !input.hasBudget) {
-    return ["none"];
-  }
-
-  if (input.hasSize && !input.hasBudget) {
+  if (input.hasSize) {
     return ["size_direct", "size_rotated"];
   }
-
-  if (!input.hasSize && input.hasBudget) {
-    return ["budget_sale", "budget_list"];
-  }
-
-  return [
-    "size_direct_budget_sale",
-    "size_direct_budget_list",
-    "size_rotated_budget_sale",
-    "size_rotated_budget_list",
-  ];
+  return ["base"];
 }
 
 async function runCandidateQuery(input: {
   supabase: SupabaseClient;
   tenantId: string;
   limit: number;
-  budgetMax: number | undefined;
   sizeBounds: ReturnType<typeof getSizeBounds>;
-  variant:
-    | "none"
-    | "size_direct"
-    | "size_rotated"
-    | "budget_sale"
-    | "budget_list"
-    | "size_direct_budget_sale"
-    | "size_direct_budget_list"
-    | "size_rotated_budget_sale"
-    | "size_rotated_budget_list";
+  variant: "base" | "size_direct" | "size_rotated";
   queryTrace: PipelineQueryTrace[];
 }): Promise<InventoryRug[] | null> {
   let query = input.supabase
     .from("rugs")
     .select(
-      "id, sku, intake_label, status, price, sale_price, width_total_in, length_total_in, style, palette, pattern, best_for, public_description"
+      "id, intake_label, status, width_total_in, length_total_in, ai_description"
     )
     .eq("status", "available")
     .limit(input.limit);
@@ -389,11 +354,8 @@ async function runCandidateQuery(input: {
   query = query.eq("tenant_id", input.tenantId);
 
   const bounds = input.sizeBounds;
-  const budgetMax = input.budgetMax;
-  const wantsSize = input.variant.includes("size_");
-  const rotated = input.variant.includes("rotated");
-  const wantsBudgetSale = input.variant.includes("budget_sale");
-  const wantsBudgetList = input.variant.includes("budget_list");
+  const wantsSize = input.variant !== "base";
+  const rotated = input.variant === "size_rotated";
 
   if (wantsSize && bounds) {
     const widthMin = rotated ? bounds.minLengthIn : bounds.minWidthIn;
@@ -406,19 +368,6 @@ async function runCandidateQuery(input: {
       .lte("width_total_in", widthMax)
       .gte("length_total_in", lengthMin)
       .lte("length_total_in", lengthMax);
-  }
-
-  if ((wantsBudgetSale || wantsBudgetList) && typeof budgetMax === "number") {
-    if (wantsBudgetSale) {
-      query = query.not("sale_price", "is", null).lte("sale_price", budgetMax);
-    }
-
-    if (wantsBudgetList) {
-      query = query
-        .is("sale_price", null)
-        // Intake policy: null list price is treated as zero for budget eligibility.
-        .or(`price.lte.${budgetMax},price.is.null`);
-    }
   }
 
   const { data, error } = await query;
@@ -438,15 +387,6 @@ async function runCandidateQuery(input: {
               rotated,
             }
           : null,
-        budget_max: typeof budgetMax === "number" ? budgetMax : null,
-        budget_field:
-          wantsBudgetSale && wantsBudgetList
-            ? "sale_price_or_price"
-            : wantsBudgetSale
-              ? "sale_price"
-              : wantsBudgetList
-                ? "price_or_null_zero"
-                : null,
       },
       row_count: 0,
       error: error?.message ?? "Unknown query failure",
@@ -469,15 +409,6 @@ async function runCandidateQuery(input: {
             rotated,
           }
         : null,
-      budget_max: typeof budgetMax === "number" ? budgetMax : null,
-      budget_field:
-        wantsBudgetSale && wantsBudgetList
-          ? "sale_price_or_price"
-          : wantsBudgetSale
-            ? "sale_price"
-            : wantsBudgetList
-              ? "price_or_null_zero"
-              : null,
     },
     row_count: data.length,
     error: null,
@@ -495,19 +426,12 @@ function toInventoryFromDbRow(row: Record<string, unknown>): InventoryRug | null
 
   return {
     id: row.id,
-    sku: typeof row.sku === "string" ? row.sku : null,
-    label: row.intake_label,
+    intake_label: row.intake_label,
     status: typeof row.status === "string" ? row.status : null,
-    price_usd: toNumberOrNull(row.price),
-    sale_price_usd: toNumberOrNull(row.sale_price),
     width_total_in: toNumberOrNull(row.width_total_in),
     length_total_in: toNumberOrNull(row.length_total_in),
-    style: typeof row.style === "string" ? row.style : null,
-    palette: typeof row.palette === "string" ? row.palette : null,
-    pattern: typeof row.pattern === "string" ? row.pattern : null,
-    best_for: typeof row.best_for === "string" ? row.best_for : null,
-    public_description:
-      typeof row.public_description === "string" ? row.public_description : null,
+    ai_description:
+      typeof row.ai_description === "string" ? row.ai_description : null,
   };
 }
 

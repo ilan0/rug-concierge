@@ -44,33 +44,6 @@ function buildEmptySession(sessionId: string, role: RoleType): SessionData {
       hard_constraints: {},
       soft_preferences: {},
     },
-    trade_context: {
-      tenant_id: null,
-      trade_client_id: null,
-      preferences: {},
-      preferences_source: "none",
-    },
-    project_context: {
-      project_id: null,
-      name: null,
-      active_room_id: null,
-      rooms: [],
-      notes: [],
-    },
-    review_state: {
-      last_user_message: null,
-      last_assistant_message: null,
-      last_recommendations: [],
-      last_questions: [],
-      last_mode: null,
-      last_notes: null,
-      decision: "none",
-      decision_notes: null,
-      decision_at: null,
-      reviewed_by_role: null,
-      regenerate_count: 0,
-      override_count: 0,
-    },
   };
 }
 
@@ -139,4 +112,8 @@ export async function saveSession(
     ...input,
     tenantId,
   });
+}
+
+export function deleteSessionFromMemory(sessionId: string): void {
+  sessions.delete(sessionId);
 }

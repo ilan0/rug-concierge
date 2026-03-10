@@ -28,7 +28,6 @@ export type Turn = {
   debug?: DebugMeta | null;
 };
 
-export type UiReviewState = NonNullable<UiChatResponseBody["review_state"]>;
-export type OperatorView = "debug" | "review";
+export type OperatorView = "debug";
 
-export type ConciergeVariant = "concierge" | "trade";
+export type ConciergeVariant = "concierge";

@@ -14,20 +14,16 @@ type RecommendationPromptBundleInput = {
   system: string;
   recommendation: string;
   structuredOutput: string;
-  tradeSupport: string;
 };
 
 type RecommendationLayerContext = {
   role: RoleType;
-  hasTradePreferences: boolean;
-  hasProjectContext: boolean;
   hasChatMemoryContext: boolean;
   hasRecentTurnsContext: boolean;
 };
 
 type BuildRecommendationPromptSectionsInput = RecommendationLayerContext & {
   prompts: RecommendationPromptBundleInput;
-  tradePreferences?: Record<string, unknown>;
   chatContext?: {
     structured_state?: unknown;
     conversation_memory?: unknown;
@@ -36,7 +32,6 @@ type BuildRecommendationPromptSectionsInput = RecommendationLayerContext & {
   inventoryContext: unknown[];
   userMessage: string;
   constraints: HardConstraints;
-  projectContext: unknown | null;
 };
 
 type RecommendationLayerDefinition = {
@@ -64,30 +59,6 @@ const RECOMMENDATION_LAYER_DEFINITIONS: RecommendationLayerDefinition[] = [
     role: "system",
     include: () => true,
     text: (input) => input.prompts.structuredOutput,
-  },
-  {
-    id: PROMPT_LAYER.taskTradeSupport,
-    role: "system",
-    include: (input) => input.role === "trade_client",
-    text: (input) => input.prompts.tradeSupport,
-  },
-  {
-    id: PROMPT_LAYER.contextTradePreferences,
-    role: "system",
-    include: (input) => input.hasTradePreferences,
-    text: (input) =>
-      `TRADE PREFERENCES (soft signals only):\n${JSON.stringify(
-        input.tradePreferences ?? {},
-        null,
-        2
-      )}`,
-  },
-  {
-    id: PROMPT_LAYER.contextProject,
-    role: "system",
-    include: (input) => input.hasProjectContext,
-    text: (input) =>
-      `PROJECT CONTEXT:\n${JSON.stringify(input.projectContext, null, 2)}`,
   },
   {
     id: PROMPT_LAYER.contextChatMemory,
@@ -119,7 +90,7 @@ const RECOMMENDATION_LAYER_DEFINITIONS: RecommendationLayerDefinition[] = [
     role: "system",
     include: () => true,
     text: (input) =>
-      `AVAILABLE INVENTORY (authoritative):\n${JSON.stringify(
+      `AVAILABLE INVENTORY (authoritative). Each entry includes ID, Label, Size, and Description:\n${JSON.stringify(
         input.inventoryContext,
         null,
         2
@@ -132,7 +103,7 @@ const RECOMMENDATION_LAYER_DEFINITIONS: RecommendationLayerDefinition[] = [
     text: (input) =>
       `User request:\n${input.userMessage}\n\nHard constraints:\n${JSON.stringify(
         input.constraints
-      )}\n\nProject context:\n${JSON.stringify(input.projectContext)}`,
+      )}`,
   },
 ];
 
