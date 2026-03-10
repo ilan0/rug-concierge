@@ -11,15 +11,7 @@ import {
   resetChatSession,
   sendChatTurn,
 } from "@/lib/concierge/client";
-import type { UiChatRequest, UiChatResponseBody, UiRole } from "@/lib/types/chat-ui";
-import {
-  getUiRole,
-  getUiTenantId,
-  setUiRole,
-  syncUiSession,
-} from "@/lib/ui/role-session";
-import { UI_ROLES } from "@/lib/ui/roles";
-import { canRoleReadDebugTrace } from "@/lib/auth/policy";
+import type { UiChatRequest, UiChatResponseBody } from "@/lib/types/chat-ui";
 import {
   STARTER_PROMPTS,
   summarizeTracePayload,
@@ -42,7 +34,6 @@ type UiRecommendationState = NonNullable<UiChatResponseBody["recommendation_stat
 export function useConciergeController(input: UseConciergeControllerInput) {
   const { debug, tenantId } = input;
 
-  const [role, setRole] = useState<UiRole>("retail_customer");
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [message, setMessage] = useState("");
   const [turns, setTurns] = useState<Turn[]>([]);
@@ -56,16 +47,6 @@ export function useConciergeController(input: UseConciergeControllerInput) {
   const [operatorView, setOperatorView] = useState<OperatorView>("debug");
   const [showSlowNotice, setShowSlowNotice] = useState(false);
   const [isResettingChat, setIsResettingChat] = useState(false);
-
-  const roleSwitcherVisible =
-    process.env.NEXT_PUBLIC_ENABLE_ROLE_SWITCHER === "1" ||
-    process.env.NODE_ENV !== "production";
-
-  useEffect(() => {
-    const storedRole = getUiRole();
-    if (!storedRole) return;
-    setRole(storedRole);
-  }, []);
 
   useEffect(() => {
     if (!isLoading) {
@@ -87,7 +68,6 @@ export function useConciergeController(input: UseConciergeControllerInput) {
   );
 
   const starterPrompts = STARTER_PROMPTS.concierge;
-  const roleOptions = UI_ROLES;
 
   const selectedTurn = turns.find((turn) => turn.id === selectedTurnId) ?? null;
   const latestAssistantTurn = [...turns]
@@ -95,8 +75,8 @@ export function useConciergeController(input: UseConciergeControllerInput) {
     .find((turn) => turn.role === "assistant");
   const latestAssistantMode = latestAssistantTurn?.fineMode;
 
-  const isDeveloperRole = role === "developer";
-  const canUseDebugTrace = canRoleReadDebugTrace(role);
+  const isDeveloperRole = process.env.NODE_ENV !== "production";
+  const canUseDebugTrace = isDeveloperRole;
   const canOpenOperator = isDeveloperRole;
 
   useEffect(() => {
@@ -109,27 +89,11 @@ export function useConciergeController(input: UseConciergeControllerInput) {
     nextState: UiRecommendationState | null | undefined
   ): Turn["constraintSnapshot"] => nextState ?? null;
 
-  const onRoleChange = async (nextRole: UiRole) => {
-    setRole(nextRole);
-    setUiRole(nextRole);
-    try {
-      await syncUiSession({
-        role: nextRole,
-        tenant_id: getUiTenantId() ?? tenantId,
-      });
-    } catch {
-      // Keep chat usable even if cookie sync fails.
-    }
-  };
-
-  const buildChatRequestPayload = (
-    userMessage: string,
-    activeRole: UiRole
-  ): UiChatRequest => ({
+  const buildChatRequestPayload = (userMessage: string): UiChatRequest => ({
     session_id: sessionId ?? undefined,
-    role: activeRole,
+    role: "retail_customer",
     message: userMessage,
-    tenant_id: getUiTenantId() ?? tenantId,
+    tenant_id: tenantId,
   });
 
   const sendUserTurn = async (userMessage: string) => {
@@ -153,7 +117,7 @@ export function useConciergeController(input: UseConciergeControllerInput) {
 
     try {
       const { payload, headers } = await sendChatTurn(
-        buildChatRequestPayload(userMessage, role),
+        buildChatRequestPayload(userMessage),
         debug && canUseDebugTrace && debugCaseId
           ? {
               debugTrace: {
@@ -252,7 +216,7 @@ export function useConciergeController(input: UseConciergeControllerInput) {
     try {
       const payload = await resetChatSession({
         session_id: sessionId,
-        tenant_id: getUiTenantId() ?? tenantId,
+        tenant_id: tenantId,
       });
       setSessionId(payload.new_session_id);
       setTurns([]);
@@ -272,9 +236,6 @@ export function useConciergeController(input: UseConciergeControllerInput) {
   };
 
   return {
-    role,
-    roleOptions,
-    roleSwitcherVisible,
     sessionId,
     message,
     setMessage,
@@ -299,12 +260,11 @@ export function useConciergeController(input: UseConciergeControllerInput) {
     isDeveloperRole,
     canUseDebugTrace,
     canOpenOperator,
-    onRoleChange,
     onSubmit,
     onRetryLastMessage,
     onReset,
     onNewChat,
     pushStarterPrompt: setMessage,
-    effectiveTenantId: getUiTenantId() ?? tenantId,
+    effectiveTenantId: tenantId,
   };
 }

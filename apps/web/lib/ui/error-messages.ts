@@ -23,6 +23,10 @@ export function mapApiErrorToFriendlyMessage(
   const code = (input.code ?? "").toUpperCase();
   const raw = (input.rawMessage ?? "").toLowerCase();
 
+  if (status === 429 || code === "TOO_MANY_REQUESTS") {
+    return "You've sent a lot of messages. Please wait a moment before continuing.";
+  }
+
   if (status === 401 || code === "UNAUTHORIZED") {
     return "Pilot access is locked. Go to Home, enter access code, and try again.";
   }

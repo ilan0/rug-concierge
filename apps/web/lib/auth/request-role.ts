@@ -3,7 +3,6 @@ import {
   normalizeAppRole,
   type AppRole,
 } from "@/lib/auth/roles";
-import { isPasscodeGated } from "@/lib/auth/deployment";
 
 export type ResolvedRequestRole = {
   role: AppRole;
@@ -46,14 +45,6 @@ export async function resolveRequestRole(input?: {
   requestedRole?: unknown;
   defaultRole?: AppRole;
 }): Promise<ResolvedRequestRole> {
-  if (isPasscodeGated()) {
-    return {
-      role: "store_staff",
-      source: "default",
-      request_role: null,
-    };
-  }
-
   const requestRole =
     input?.requestedRole && isAppRole(input.requestedRole)
       ? input.requestedRole

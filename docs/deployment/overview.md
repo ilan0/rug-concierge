@@ -2,36 +2,26 @@
 
 ## Model
 
-Each store uses one codebase with tenant-scoped data and two runtime modes:
-
-1. Open concierge mode (`STORE_PASSCODE` unset)
-2. Passcode-gated kiosk mode (`STORE_PASSCODE` set)
+Each store uses one kiosk deployment with tenant-scoped data.
+`STORE_PASSCODE` unlocks staff routes and actions.
 
 `TENANT_ID` binds inventory/chat scope per deployment.
 
 ## Access Model
 
-- Open mode: requests are allowed without device cookie.
-- Passcode mode: middleware requires `rug_device_auth` cookie.
-- Passcode unlock endpoint: `POST /api/auth/passcode`.
-- Public exceptions in passcode mode:
-  - `/api/auth/passcode`
-  - `/api/config/public`
-  - `/api/manifest`
-
-## Role Semantics
-
-- `retail_customer`: default runtime behavior in open mode.
-- `store_staff`: behavior when passcode gate is active and device is unlocked.
-- `developer`: local/dev-only role path; no production grant path.
+- Concierge is always accessible.
+- Staff routes (`/inventory`, `/intake`) require `staff_unlocked=1`.
+- Locked requests to staff routes are redirected to `/concierge`.
+- Staff unlock endpoint: `POST /api/auth/passcode`.
+- Staff lock endpoint: `POST /api/auth/lock`.
+- Intake write endpoint (`POST /api/inventory/intake`) requires staff unlock.
 
 ## Cookie Security
 
-`rug_device_auth` cookie:
-- value: SHA-256 signature of `device:{tenantId}:unlocked`
-- generated with `COOKIE_SECRET`
-- `HttpOnly`, `Secure`, `SameSite=Strict`, `Path=/`
-- max age: 400 days
+`staff_unlocked` cookie:
+- value: `1` when unlocked
+- `HttpOnly`, `Secure` (prod), `SameSite=Lax`, `Path=/`
+- session cookie (cleared on browser close unless explicitly locked first)
 
 ## Tenant Safety
 

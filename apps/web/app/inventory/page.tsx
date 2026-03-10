@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { CheckCircle, Package, Search } from "lucide-react";
-import { WorkspaceNav } from "@/components/shell/workspace-nav";
 import { AccessGuard } from "@/components/ui/access-guard";
 import { AppShell } from "@/components/ui/app-shell";
 import { PageHeader } from "@/components/ui/page-header";
@@ -11,8 +10,7 @@ import { Input } from "@/components/ui/input";
 import { InventoryTableClient } from "@/components/inventory/inventory-table-client";
 import { getInventoryStats, listInventory } from "@/lib/inventory/list";
 import { isDefaultInventoryFilters } from "@/lib/inventory/filters";
-import { getServerUiRole, getServerUiTenantId } from "@/lib/ui/server-role";
-import { canRoleAccessRoute } from "@/lib/auth/policy";
+import { getServerUiTenantId } from "@/lib/ui/server-role";
 import type {
   InventorySort,
   InventoryStatusFilter,
@@ -99,17 +97,6 @@ function getVisiblePageNumbers(
 }
 
 export default async function InventoryPage({ searchParams }: InventoryPageProps) {
-  const role = await getServerUiRole();
-  if (!role || !canRoleAccessRoute(role, "/inventory")) {
-    return (
-      <AccessGuard
-        title="Inventory Browser"
-        description="This page is available only to store staff."
-        ctaLabel="Go to concierge"
-      />
-    );
-  }
-
   const tenantId = await getServerUiTenantId();
   if (!tenantId) {
     return (
@@ -207,12 +194,6 @@ export default async function InventoryPage({ searchParams }: InventoryPageProps
 
   return (
     <>
-      <WorkspaceNav
-        role={role}
-        currentPath="/inventory"
-        variant="workspace-soft"
-        showHomeLink={role === "developer"}
-      />
       <AppShell variant="catalog">
         <PageHeader
           kicker="Catalog"

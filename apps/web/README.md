@@ -8,7 +8,6 @@ Primary UI shell for Rug Concierge.
 - `/concierge`: chat and recommendations
 - `/inventory`: tenant inventory view
 - `/intake`: inventory intake flow
-- `/passcode`: kiosk unlock page
 
 ## API Routes
 
@@ -20,12 +19,14 @@ Primary UI shell for Rug Concierge.
 - `/api/config/public`
 - `/api/manifest`
 - `/api/auth/passcode`
+- `/api/auth/lock`
 - `/api/debug/trace`
 
 ## Auth Model
 
-- if `STORE_PASSCODE` is unset, app runs open
-- if `STORE_PASSCODE` is set, middleware enforces `rug_device_auth` cookie
+- kiosk navigation is always available; concierge is always visible
+- staff routes (`/inventory`, `/intake`) require `staff_unlocked=1`
+- unlock with `POST /api/auth/passcode`, lock with `POST /api/auth/lock`
 
 ## Styling
 

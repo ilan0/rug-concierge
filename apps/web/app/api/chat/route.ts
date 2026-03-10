@@ -38,6 +38,7 @@ import {
   readTrimmedString,
   validateOptionalObjectField,
 } from "@/lib/http/validators";
+import { checkRateLimit, chatRateLimit } from "@/lib/rate-limit";
 import type {
   ChatTurnRequest,
   RoleType,
@@ -62,6 +63,23 @@ export async function POST(req: Request) {
   ];
 
   try {
+    if (chatRateLimit) {
+      const ip =
+        req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
+        req.headers.get("x-real-ip") ??
+        "unknown";
+      const { allowed } = await checkRateLimit(chatRateLimit, `chat:${ip}`);
+      if (!allowed) {
+        return NextResponse.json(
+          {
+            error:
+              "You've sent a lot of messages. Please wait a moment before continuing.",
+          },
+          { status: 429 }
+        );
+      }
+    }
+
     const requestedTraceMeta = parseE2eTraceMeta(req);
     const parsedBody = await parseJsonObjectBody<
       ChatTurnRequest & Record<string, unknown>

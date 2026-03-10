@@ -1,7 +1,4 @@
-import type { UiRole } from "@/lib/types/chat-ui";
-
 export type IntakeCreateRequest = {
-  role: UiRole;
   tenant_id: string;
   width_ft: number;
   width_in: number;

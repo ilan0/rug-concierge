@@ -18,20 +18,15 @@ AI concierge for rug showrooms:
 - AI can rank and explain candidates, but cannot invent inventory.
 - AI response text must be plain text only.
 
-## Deployments
+## Deployment Mode
 
-### Open Concierge (no passcode)
-
-- `STORE_PASSCODE` unset
-- public pages and APIs are open
-- default behavior is customer flow
-
-### In-Store Kiosk (passcode gated)
-
-- `STORE_PASSCODE` set
-- middleware requires valid `rug_device_auth` cookie
-- unauthenticated page requests redirect to `/passcode`
-- unauthenticated API requests return `401` (`/api/auth/passcode` and `/api/config/public` stay open)
+Single kiosk deployment:
+- `STORE_PASSCODE` configures staff unlock
+- `staff_unlocked=1` cookie grants staff access
+- proxy redirects locked `/inventory` and `/intake` requests to `/concierge`
+- intake write API (`POST /api/inventory/intake`) requires unlocked staff cookie
+- unlock endpoint: `POST /api/auth/passcode`
+- lock endpoint: `POST /api/auth/lock`
 
 ## Routes
 
@@ -40,7 +35,6 @@ Pages:
 - `/concierge`
 - `/inventory`
 - `/intake`
-- `/passcode`
 
 APIs:
 - `/api/chat`
@@ -51,27 +45,14 @@ APIs:
 - `/api/config/public`
 - `/api/manifest`
 - `/api/auth/passcode`
+- `/api/auth/lock`
 - `/api/debug/trace`
 
-## Roles and Capabilities
+## Role Defaults
 
-Roles:
-- `retail_customer`
-- `store_staff`
-- `developer`
-
-Capabilities:
-- `chat.general`
-- `chat.recommend`
-- `inventory.read`
-- `inventory.intake`
-- `debug.trace.read`
-- `debug.trace.capture`
-
-Assignment:
-- `retail_customer`: `chat.general`, `chat.recommend`
-- `store_staff`: all six
-- `developer`: all six (local/dev workflow only)
+- No customer-facing role switcher in UI.
+- Concierge requests default to customer tone/behavior.
+- Debug trace endpoints remain non-production only.
 
 ## Tenant Resolution
 

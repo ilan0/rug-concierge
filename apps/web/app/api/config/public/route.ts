@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import { isPasscodeGated } from "@/lib/auth/deployment";
 
 function readTrimmedEnv(name: string): string | null {
   const raw = process.env[name];
@@ -11,10 +10,11 @@ function readTrimmedEnv(name: string): string | null {
 export async function GET() {
   const storeName = readTrimmedEnv("STORE_NAME") ?? "Rug Concierge";
   const storeLogoUrl = readTrimmedEnv("STORE_LOGO_URL");
+  const isPasscodeGated = Boolean(readTrimmedEnv("STORE_PASSCODE"));
 
   return NextResponse.json({
     storeName,
     storeLogoUrl,
-    isPasscodeGated: isPasscodeGated(),
+    isPasscodeGated,
   });
 }

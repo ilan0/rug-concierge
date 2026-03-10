@@ -1,4 +1,13 @@
-import { getConfiguredTenantId } from "@/lib/auth/deployment";
+function readTrimmedEnv(name: string): string | null {
+  const raw = process.env[name];
+  if (typeof raw !== "string") return null;
+  const trimmed = raw.trim();
+  return trimmed.length > 0 ? trimmed : null;
+}
+
+export function getConfiguredTenantId(): string | null {
+  return readTrimmedEnv("TENANT_ID");
+}
 
 export function normalizeTenantId(value: unknown): string | null {
   if (typeof value !== "string") return null;

@@ -1,4 +1,4 @@
-import { NextResponse, after } from "next/server";
+import { NextRequest, NextResponse, after } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { rugImagePathToPublicUrl } from "@/lib/storage/rug-images";
 import { badRequest, internalError } from "@/lib/errors/http-errors";
@@ -11,6 +11,7 @@ import {
   validateDimensionTuple,
   validateImageFile,
 } from "@/lib/intake/validation";
+import { isStaffUnlockedFromRequest } from "@/lib/auth/staff";
 
 const RUG_IMAGES_BUCKET = "rug-images";
 const OPENAI_RESPONSES_URL = "https://api.openai.com/v1/responses";
@@ -309,7 +310,11 @@ function scheduleBackgroundTask(task: () => Promise<void>) {
   }
 }
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
+  if (!isStaffUnlockedFromRequest(req)) {
+    return NextResponse.json({ error: "staff_locked" }, { status: 401 });
+  }
+
   const formData = await req.formData().catch(() => null);
   if (!(formData instanceof FormData)) {
     return badRequest("Invalid multipart form payload.");

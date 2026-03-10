@@ -1,21 +1,8 @@
 import { IntakeScreen } from "@/components/intake/intake-screen";
-import { WorkspaceNav } from "@/components/shell/workspace-nav";
 import { AccessGuard } from "@/components/ui/access-guard";
-import { getServerUiRole, getServerUiTenantId } from "@/lib/ui/server-role";
-import { canRoleAccessRoute } from "@/lib/auth/policy";
+import { getServerUiTenantId } from "@/lib/ui/server-role";
 
 export default async function IntakePage() {
-  const role = await getServerUiRole();
-  if (!role || !canRoleAccessRoute(role, "/intake")) {
-    return (
-      <AccessGuard
-        title="Inventory Intake"
-        description="This page is available only to store staff."
-        ctaLabel="Go to concierge"
-      />
-    );
-  }
-
   const tenantId = await getServerUiTenantId();
   if (!tenantId) {
     return (
@@ -28,11 +15,6 @@ export default async function IntakePage() {
 
   return (
     <>
-      <WorkspaceNav
-        role={role}
-        currentPath="/intake"
-        showHomeLink={role === "developer"}
-      />
       <IntakeScreen tenantId={tenantId} />
     </>
   );

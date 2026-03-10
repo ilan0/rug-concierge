@@ -9,12 +9,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
-import { createInventoryIntake, resolveIntakeRole } from "@/lib/intake/client";
+import { createInventoryIntake } from "@/lib/intake/client";
 import {
   parseDimensionField,
   validateDimensionTuple,
 } from "@/lib/intake/validation";
-import { getUiRole } from "@/lib/ui/role-session";
 import type { IntakeCreatedRug } from "@/lib/types/intake";
 
 type IntakeScreenProps = {
@@ -75,7 +74,6 @@ export function IntakeScreen({ tenantId }: IntakeScreenProps) {
     setNotice(null);
     try {
       const payload = await createInventoryIntake({
-        role: resolveIntakeRole(getUiRole()),
         tenant_id: tenantId,
         width_ft: dimensions.value.widthFt,
         width_in: dimensions.value.widthIn,

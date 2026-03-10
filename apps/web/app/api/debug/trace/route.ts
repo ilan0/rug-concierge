@@ -2,8 +2,6 @@ import { NextResponse } from "next/server";
 import { existsSync } from "node:fs";
 import { readdir, readFile } from "node:fs/promises";
 import path from "node:path";
-import { resolveRequestRole } from "@/lib/auth/request-role";
-import { canRoleReadDebugTrace } from "@/lib/auth/policy";
 
 function slug(value: string): string {
   return value
@@ -35,15 +33,8 @@ function resolveRepoRootFromCwd(): string {
 }
 
 export async function GET(req: Request) {
-  const roleResolution = await resolveRequestRole({
-    defaultRole: "retail_customer",
-  });
-
-  if (!canRoleReadDebugTrace(roleResolution.role)) {
-    if (process.env.NODE_ENV === "production") {
-      return NextResponse.json({ error: "Not found" }, { status: 404 });
-    }
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  if (process.env.NODE_ENV === "production") {
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 
   const url = new URL(req.url);

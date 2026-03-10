@@ -1,4 +1,3 @@
-import type { UiRole } from "@/lib/types/chat-ui";
 import type { IntakeCreateRequest, IntakeCreateResponse } from "@/lib/types/intake";
 import { mapApiErrorToFriendlyMessage } from "@/lib/ui/error-messages";
 
@@ -10,7 +9,6 @@ export async function createInventoryIntake(
   input: IntakeCreateRequest
 ): Promise<IntakeCreateResponse> {
   const formData = new FormData();
-  formData.set("role", input.role);
   formData.set("tenant_id", input.tenant_id);
   formData.set("width_ft", toWholeNumber(input.width_ft));
   formData.set("width_in", toWholeNumber(input.width_in));
@@ -54,9 +52,4 @@ export async function createInventoryIntake(
   }
 
   return payload as IntakeCreateResponse;
-}
-
-export function resolveIntakeRole(role: UiRole | null): UiRole {
-  if (role === "store_staff" || role === "developer") return role;
-  return "store_staff";
 }

@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import { Manrope, Fraunces } from "next/font/google";
 import "./globals.css";
+import KioskNav from "@/components/kiosk/kiosk-nav";
 import { AppToaster } from "@/components/ui/sonner";
+import { isStaffUnlocked } from "@/lib/auth/staff";
 
 const manrope = Manrope({
   subsets: ["latin"],
@@ -18,11 +20,13 @@ export const metadata: Metadata = {
   description: "Rug Concierge pilot workspace",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const unlocked = await isStaffUnlocked();
+
   return (
     <html lang="en">
       <head>
@@ -33,6 +37,7 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
       </head>
       <body className={`${manrope.variable} ${fraunces.variable} min-h-screen bg-background font-sans text-foreground antialiased`}>
+        <KioskNav initialUnlocked={unlocked} />
         {children}
         <AppToaster />
       </body>
