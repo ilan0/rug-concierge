@@ -8,9 +8,26 @@ export async function POST(req: NextRequest) {
       req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
       req.headers.get("x-real-ip") ??
       "unknown";
-    const { allowed } = await checkRateLimit(passcodeRateLimit, `passcode:${ip}`);
+    const { allowed, resetAtMs } = await checkRateLimit(
+      passcodeRateLimit,
+      `passcode:${ip}`
+    );
     if (!allowed) {
-      return NextResponse.json({ error: "Too many attempts" }, { status: 429 });
+      const retryAfterSeconds = resetAtMs
+        ? Math.max(1, Math.ceil((resetAtMs - Date.now()) / 1000))
+        : 5 * 60;
+      return NextResponse.json(
+        {
+          error: "Too many attempts",
+          retry_after_seconds: retryAfterSeconds,
+        },
+        {
+          status: 429,
+          headers: {
+            "Retry-After": String(retryAfterSeconds),
+          },
+        }
+      );
     }
   }
 

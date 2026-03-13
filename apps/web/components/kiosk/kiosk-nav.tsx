@@ -5,6 +5,10 @@ import { useCallback, useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { Lock, LockOpen } from "lucide-react";
 import StaffPinModal from "@/components/kiosk/staff-pin-modal";
+import {
+  readStaffPinLockedUntilMs,
+  secondsUntilStaffPinUnlock,
+} from "@/lib/auth/staff-lockout";
 import { cn } from "@/lib/utils";
 
 interface KioskNavProps {
@@ -34,10 +38,30 @@ export default function KioskNav({ initialUnlocked }: KioskNavProps) {
   const [unlocked, setUnlocked] = useState(initialUnlocked);
   const [showPinModal, setShowPinModal] = useState(false);
   const [inactivityTimer, setInactivityTimer] = useState<number | null>(null);
+  const [pinCooldownSeconds, setPinCooldownSeconds] = useState(0);
 
   useEffect(() => {
     setUnlocked(initialUnlocked);
   }, [initialUnlocked]);
+
+  const syncPinCooldown = useCallback(() => {
+    const lockedUntil = readStaffPinLockedUntilMs();
+    if (!lockedUntil) {
+      setPinCooldownSeconds(0);
+      return;
+    }
+    setPinCooldownSeconds(secondsUntilStaffPinUnlock(lockedUntil));
+  }, []);
+
+  useEffect(() => {
+    syncPinCooldown();
+    const timer = window.setInterval(syncPinCooldown, 1000);
+    window.addEventListener("focus", syncPinCooldown);
+    return () => {
+      window.clearInterval(timer);
+      window.removeEventListener("focus", syncPinCooldown);
+    };
+  }, [syncPinCooldown]);
 
   const clearTimer = useCallback(() => {
     if (inactivityTimer) {
@@ -142,13 +166,16 @@ export default function KioskNav({ initialUnlocked }: KioskNavProps) {
           type="button"
           onClick={unlocked ? () => void handleLock() : () => setShowPinModal(true)}
           aria-label={unlocked ? "Lock staff mode" : "Unlock staff mode"}
-          className="ml-auto rounded-full p-1.5 transition-colors hover:bg-accent"
+          className="relative ml-auto rounded-full p-1.5 transition-colors hover:bg-accent"
         >
           {unlocked ? (
             <LockOpen className="h-4 w-4 text-primary" />
           ) : (
             <Lock className="h-4 w-4 text-muted-foreground" />
           )}
+          {!unlocked && pinCooldownSeconds > 0 ? (
+            <span className="absolute -right-0.5 -top-0.5 size-2 rounded-full bg-amber-500 ring-2 ring-background" />
+          ) : null}
         </button>
       </div>
 

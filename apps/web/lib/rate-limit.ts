@@ -14,15 +14,19 @@ const redis = createRedis();
 export async function checkRateLimit(
   limiter: Ratelimit,
   identifier: string
-): Promise<{ allowed: boolean; remaining: number }> {
+): Promise<{ allowed: boolean; remaining: number; resetAtMs: number | null }> {
   try {
     const result = await limiter.limit(identifier);
-    return { allowed: result.success, remaining: result.remaining };
+    return {
+      allowed: result.success,
+      remaining: result.remaining,
+      resetAtMs: result.reset,
+    };
   } catch {
     if (process.env.NODE_ENV === "production") {
       console.warn("[rate-limit] Redis unavailable - failing open");
     }
-    return { allowed: true, remaining: 0 };
+    return { allowed: true, remaining: 0, resetAtMs: null };
   }
 }
 
