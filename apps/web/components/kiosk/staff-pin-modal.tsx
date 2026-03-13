@@ -31,6 +31,8 @@ export default function StaffPinModal({ onSuccess, onDismiss }: StaffPinModalPro
   }, [shake]);
 
   useEffect(() => {
+    // Intentionally exclude `isSubmitting` from effect deps so in-flight requests
+    // are not canceled by cleanup when `setIsSubmitting(true)` runs.
     if (pin.length !== MAX_DIGITS || isSubmitting) return;
 
     let active = true;
@@ -85,7 +87,8 @@ export default function StaffPinModal({ onSuccess, onDismiss }: StaffPinModalPro
     return () => {
       active = false;
     };
-  }, [pin, isSubmitting, onSuccess]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pin, onSuccess]);
 
   const appendDigit = (digit: string) => {
     if (isSubmitting || pin.length >= MAX_DIGITS) return;
