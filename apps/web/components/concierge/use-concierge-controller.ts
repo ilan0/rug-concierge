@@ -193,6 +193,13 @@ export function useConciergeController(input: UseConciergeControllerInput) {
     await sendUserTurn(userMessage);
   };
 
+  const submitWithPrompt = (prompt: string) => {
+    const userMessage = prompt.trim();
+    if (!userMessage || isLoading) return;
+    setMessage("");
+    void sendUserTurn(userMessage);
+  };
+
   const onRetryLastMessage = async () => {
     if (!lastFailedMessage || isLoading) return;
     await sendUserTurn(lastFailedMessage);
@@ -261,10 +268,10 @@ export function useConciergeController(input: UseConciergeControllerInput) {
     canUseDebugTrace,
     canOpenOperator,
     onSubmit,
+    submitWithPrompt,
     onRetryLastMessage,
     onReset,
     onNewChat,
-    pushStarterPrompt: setMessage,
     effectiveTenantId: tenantId,
   };
 }

@@ -18,7 +18,8 @@ type ConciergeScreenProps = {
   tenantId: string;
 };
 
-const TITLE_SIZE = "text-[38px] leading-[1.08]";
+const TITLE_SIZE = "text-[30px] leading-[1.08] md:text-[34px]";
+const TITLE_SIZE_WITH_RECOMMENDATIONS = "text-[27px] leading-[1.07] md:text-[31px]";
 const HERO_TITLE_SIZE = "text-[52px] leading-[1.05] md:text-[60px]";
 const SUBTITLE_SIZE = "text-[20px] leading-[1.5]";
 const BODY_SIZE = "text-[18px] leading-[1.65]";
@@ -26,7 +27,6 @@ const COMPOSER_REST_OFFSET_DESKTOP = 12;
 const COMPOSER_REST_OFFSET_MOBILE = 8;
 const CONTENT_SAFETY_GAP = 10;
 const INITIAL_COMPOSER_HEIGHT = 92;
-const SHORT_THREAD_MAX_TURNS = 2;
 
 export function ConciergeScreen({
   debug,
@@ -37,6 +37,8 @@ export function ConciergeScreen({
   const keyboardInsetPx = useVisualViewportInset();
   const [composerHeightPx, setComposerHeightPx] = useState(INITIAL_COMPOSER_HEIGHT);
   const [isSmallViewport, setIsSmallViewport] = useState(false);
+  const [showJumpToLatest, setShowJumpToLatest] = useState(false);
+  const [jumpToLatest, setJumpToLatest] = useState<(() => void) | null>(null);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -54,6 +56,12 @@ export function ConciergeScreen({
   const onComposerHeightChange = useCallback((nextHeight: number) => {
     setComposerHeightPx((prev) => (prev === nextHeight ? prev : nextHeight));
   }, []);
+  const onJumpToLatestHandlerChange = useCallback(
+    (handler: (() => void) | null) => {
+      setJumpToLatest(() => handler);
+    },
+    []
+  );
 
   const composerRestOffsetPx = isSmallViewport
     ? COMPOSER_REST_OFFSET_MOBILE
@@ -86,11 +94,13 @@ export function ConciergeScreen({
       ),
     [controller.turns]
   );
-  const isShortThreadStage =
-    controller.turns.length <= SHORT_THREAD_MAX_TURNS &&
-    !controller.isLoading &&
-    !hasRecommendationTurn;
+  const hasMessages = controller.turns.length > 0;
   const isHeroState = controller.turns.length === 0 && !controller.isLoading;
+  const isActivePreRecommendation = hasMessages && !hasRecommendationTurn;
+  const isActiveWithRecommendation = hasRecommendationTurn;
+  const showActiveDesktopSubtitle = isActivePreRecommendation;
+  const showDesktopHeaderActions = controller.isDeveloperRole || hasMessages;
+  const useIntroSpacer = isHeroState;
 
   return (
     <AppShell
@@ -104,58 +114,93 @@ export function ConciergeScreen({
 
       <header
         className={cn(
-          "mx-auto [text-size-adjust:100%] [-webkit-text-size-adjust:100%] text-center",
-          isHeroState ? "pt-10 md:pt-16" : "pt-5"
+          "mx-auto [text-size-adjust:100%] [-webkit-text-size-adjust:100%] text-center transition-[padding] duration-300",
+          isHeroState
+            ? "pb-6 pt-10 md:pb-8 md:pt-16"
+            : isActiveWithRecommendation
+              ? "pb-0 pt-0 md:pb-0.5 md:pt-0.5"
+              : "pb-0.5 pt-0.5 md:pb-1 md:pt-1"
         )}
         style={railStyle}
       >
-        <div className="mb-2 flex min-h-7 items-center justify-between">
-          <Button
-            type="button"
-            size="sm"
-            variant="ghost"
-            className="h-7 rounded-full border border-border/30 px-2 text-[11px] text-muted-foreground hover:border-primary/30 hover:bg-primary/10 hover:text-foreground"
-            onClick={() => void controller.onNewChat()}
-            disabled={controller.isLoading || controller.isResettingChat}
-          >
-            <Plus className="mr-1 size-3" />
-            New Chat
-          </Button>
-
-          {controller.isDeveloperRole ? (
-            <Button
-              type="button"
-              size="sm"
-              variant="ghost"
-              className="h-7 rounded-full px-2 text-[11px] text-muted-foreground"
-              onClick={() => controller.setOperatorOpen(true)}
-            >
-              Debug
-            </Button>
-          ) : (
-            <span />
-          )}
-        </div>
+        {showDesktopHeaderActions ? (
+          <div className="mb-1 hidden min-h-8 items-center justify-end gap-2 pr-4 md:flex">
+            {controller.isDeveloperRole ? (
+              <Button
+                type="button"
+                size="sm"
+                variant="ghost"
+                className="h-8 rounded-full px-3 text-xs text-muted-foreground"
+                onClick={() => controller.setOperatorOpen(true)}
+              >
+                Debug
+              </Button>
+            ) : null}
+            {hasMessages ? (
+              <Button
+                type="button"
+                size="sm"
+                variant="ghost"
+                aria-label="New Chat"
+                className="h-8 rounded-full border border-border/45 bg-background/65 px-2 text-xs font-medium text-foreground/80 hover:border-primary/40 hover:bg-primary/10 hover:text-foreground lg:px-3"
+                onClick={() => void controller.onNewChat()}
+                disabled={controller.isLoading || controller.isResettingChat}
+              >
+                <Plus className="size-3.5 lg:mr-1" />
+                <span className="hidden lg:inline">New Chat</span>
+              </Button>
+            ) : null}
+          </div>
+        ) : null}
 
         <h1
           className={cn(
             "font-serif font-semibold tracking-tight text-foreground",
-            isHeroState ? HERO_TITLE_SIZE : TITLE_SIZE
+            isHeroState
+              ? HERO_TITLE_SIZE
+              : isActiveWithRecommendation
+                ? TITLE_SIZE_WITH_RECOMMENDATIONS
+                : TITLE_SIZE
           )}
         >
           Rug Concierge
         </h1>
-        <p className={cn("mx-auto mt-3 max-w-2xl text-foreground/85", SUBTITLE_SIZE)}>
+        {hasMessages ? (
+          <div className="mt-1 flex justify-center md:hidden">
+            <Button
+              type="button"
+              size="sm"
+              variant="ghost"
+              className="h-8 rounded-full border border-border/50 bg-background/70 px-3.5 text-xs font-medium text-foreground/85 hover:border-primary/40 hover:bg-primary/10 hover:text-foreground"
+              onClick={() => void controller.onNewChat()}
+              disabled={controller.isLoading || controller.isResettingChat}
+            >
+              <Plus className="mr-1 size-3.5" />
+              New Chat
+            </Button>
+          </div>
+        ) : null}
+        <p
+          className={cn(
+            "mx-auto max-w-2xl transition-opacity duration-200",
+            isHeroState
+              ? cn("mt-3 text-foreground/85", SUBTITLE_SIZE)
+              : showActiveDesktopSubtitle
+                ? "mt-1 hidden text-sm leading-6 text-foreground/65 lg:block"
+                : "hidden"
+          )}
+        >
           {isHeroState
-            ? "Tell me what you're looking for - room, size, style - and I'll find options from the actual collection."
+            ? "Tell me the room, size, and style — I'll show you what's in the collection."
             : "Describe your room, size, and style in plain words."}
         </p>
       </header>
 
       <div
         className={cn(
-          "mx-auto mt-4 [text-size-adjust:100%] [-webkit-text-size-adjust:100%]",
-          isShortThreadStage && "min-h-[clamp(60px,12vh,120px)]"
+          "mx-auto [text-size-adjust:100%] [-webkit-text-size-adjust:100%]",
+          isHeroState ? "mt-4" : "mt-0",
+          useIntroSpacer && "min-h-[clamp(44px,8vh,84px)]"
         )}
         style={railStyle}
       >
@@ -163,12 +208,13 @@ export function ConciergeScreen({
           turns={controller.turns}
           isLoading={controller.isLoading}
           showSlowNotice={controller.showSlowNotice}
-          jumpBottomOffsetPx={composerClearancePx}
           isDeveloperView={controller.isDeveloperRole}
           emptyStatePrompts={controller.starterPrompts.slice(0, 3)}
           bodyTextClassName={BODY_SIZE}
-          onChoosePrompt={controller.pushStarterPrompt}
+          onChoosePrompt={controller.submitWithPrompt}
           onSelectTurn={controller.setSelectedTurnId}
+          onJumpToLatestVisibilityChange={setShowJumpToLatest}
+          onJumpToLatestHandlerChange={onJumpToLatestHandlerChange}
         />
 
         <div aria-hidden="true" style={{ height: `${composerClearancePx}px` }} />
@@ -187,6 +233,8 @@ export function ConciergeScreen({
         onMessageChange={controller.setMessage}
         onSubmit={controller.onSubmit}
         onRetry={() => void controller.onRetryLastMessage()}
+        showJumpToLatest={showJumpToLatest}
+        onJumpToLatest={jumpToLatest ?? undefined}
       />
 
       {controller.canOpenOperator ? (

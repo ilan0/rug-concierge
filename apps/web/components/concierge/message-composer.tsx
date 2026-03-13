@@ -1,4 +1,5 @@
 import { useEffect, useRef, type FormEvent } from "react";
+import { ArrowDown } from "lucide-react";
 import type { ConciergeVariant } from "@/components/concierge/types";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -17,6 +18,8 @@ type MessageComposerProps = {
   onMessageChange: (value: string) => void;
   onSubmit: (event: FormEvent<HTMLFormElement>) => void;
   onRetry: () => void;
+  showJumpToLatest?: boolean;
+  onJumpToLatest?: () => void;
 };
 
 export function MessageComposer(input: MessageComposerProps) {
@@ -32,6 +35,8 @@ export function MessageComposer(input: MessageComposerProps) {
     onMessageChange,
     onSubmit,
     onRetry,
+    showJumpToLatest = false,
+    onJumpToLatest,
   } = input;
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -81,6 +86,22 @@ export function MessageComposer(input: MessageComposerProps) {
         className="w-full rounded-[20px] border border-border/70 bg-card/96 p-2 shadow-[0_14px_34px_rgba(42,27,11,0.2)] supports-[backdrop-filter:blur(0px)]:bg-card/90 supports-[backdrop-filter:blur(0px)]:backdrop-blur sm:p-2.5"
         style={{ paddingBottom: "calc(0.45rem + env(safe-area-inset-bottom, 0px))" }}
       >
+        {showJumpToLatest && onJumpToLatest ? (
+          <div className="mb-2 flex justify-end">
+            <Button
+              type="button"
+              variant="secondary"
+              size="sm"
+              className="h-9 w-9 rounded-full border border-border/55 bg-background/95 p-0 shadow-md backdrop-blur-sm transition-colors hover:bg-background sm:w-auto sm:px-3"
+              aria-label="Jump to latest"
+              onClick={onJumpToLatest}
+            >
+              <ArrowDown className="size-4 sm:hidden" />
+              <span className="hidden sm:inline">Jump to latest</span>
+            </Button>
+          </div>
+        ) : null}
+
         <form onSubmit={onSubmit}>
           <div className="flex items-end">
             <Textarea

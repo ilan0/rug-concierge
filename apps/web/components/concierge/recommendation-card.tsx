@@ -137,7 +137,7 @@ export function RecommendationCard({
             <p className="text-[12px] font-semibold uppercase tracking-[0.08em] text-primary">
               Why this fits
             </p>
-            <div className="mt-2 space-y-2 text-[18px] leading-[1.6]">
+            <div className="mt-2 space-y-2 text-[18px] leading-[1.6] md:min-h-[80px]">
               {visibleReasons.map((reason) => (
                 <p key={reason}>{reason}</p>
               ))}

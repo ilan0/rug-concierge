@@ -219,7 +219,7 @@ function toContextInventory(inventory: InventoryRug[]) {
   );
 }
 
-function toPriceUsd(rug: InventoryRug): number | null {
+function toPriceUsd(): number | null {
   return null;
 }
 
@@ -230,7 +230,7 @@ function toImageUrl(rug: InventoryRug): string | null {
     : null;
 }
 
-function toImageCaption(rug: InventoryRug): string | null {
+function toImageCaption(): string | null {
   return null;
 }
 
@@ -354,16 +354,12 @@ function getSizeDistanceIn(rug: InventoryRug, constraints: HardConstraints): num
 
 function buildSpecificRugReasons(rug: InventoryRug): string[] {
   const reasons: string[] = [];
-  const dimensions = sizeText(rug);
   const description = normalizeText(rug.ai_description ?? "");
 
   if (description) {
     reasons.push(description);
   } else {
     reasons.push("New arrival — ask staff for details about this rug.");
-  }
-  if (dimensions) {
-    reasons.push(`Size is ${dimensions}.`);
   }
 
   return uniqueCompactList(reasons, 3);
@@ -498,9 +494,9 @@ function fallbackRecommendations(
       sku: null,
       title: rugLabel(rug),
       primary_image_url: toImageUrl(rug),
-      primary_image_caption: toImageCaption(rug),
+      primary_image_caption: toImageCaption(),
       size_text: sizeText(rug),
-      price_usd: toPriceUsd(rug),
+      price_usd: toPriceUsd(),
       match_reasons: buildGroundedMatchReasons(
         rug,
         constraints,
@@ -730,9 +726,9 @@ function sanitizeResponse(
         sku: null,
         title: rugLabel(rug),
         primary_image_url: toImageUrl(rug),
-        primary_image_caption: toImageCaption(rug),
+        primary_image_caption: toImageCaption(),
         size_text: sizeText(rug),
-        price_usd: toPriceUsd(rug),
+        price_usd: toPriceUsd(),
         match_reasons: buildGroundedMatchReasons(
           rug,
           constraints,

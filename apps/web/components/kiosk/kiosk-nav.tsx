@@ -166,7 +166,7 @@ export default function KioskNav({ initialUnlocked }: KioskNavProps) {
           type="button"
           onClick={unlocked ? () => void handleLock() : () => setShowPinModal(true)}
           aria-label={unlocked ? "Lock staff mode" : "Unlock staff mode"}
-          className="relative ml-auto rounded-full p-1.5 transition-colors hover:bg-accent"
+          className="relative ml-auto flex size-11 items-center justify-center rounded-full transition-colors hover:bg-accent"
         >
           {unlocked ? (
             <LockOpen className="h-4 w-4 text-primary" />
