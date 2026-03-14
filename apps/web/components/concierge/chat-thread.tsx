@@ -238,7 +238,7 @@ export function ChatThread(input: ChatThreadProps) {
                 ) : null}
 
                 {hasRecommendations ? (
-                  <div className="mt-6 grid grid-cols-1 gap-5 md:grid-cols-2 [&>*:last-child:nth-child(odd)]:md:col-span-2 [&>*:last-child:nth-child(odd)]:md:mx-auto [&>*:last-child:nth-child(odd)]:md:w-full [&>*:last-child:nth-child(odd)]:md:max-w-[34rem]">
+                  <div className="mt-6 grid grid-cols-1 gap-5 md:grid-cols-2 [&>*:last-child:nth-child(odd)]:md:col-span-2 [&>*:last-child:nth-child(odd)]:md:mx-auto [&>*:last-child:nth-child(odd)]:md:max-w-[calc(50%-10px)]">
                     {turn.recommendations?.map((item) => (
                       <RecommendationCard
                         item={item}

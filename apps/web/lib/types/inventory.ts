@@ -2,6 +2,48 @@ export type InventoryStatusFilter = "all" | "available" | "sold" | "on_hold";
 
 export type InventorySort = "newest" | "oldest";
 
+export type RugOrigin =
+  | "Persian"
+  | "Afghan"
+  | "Turkish"
+  | "Indian"
+  | "Caucasian"
+  | "Pakistani"
+  | "Other";
+
+export type RugAgeCategory = "antique" | "semi-antique" | "vintage" | "new";
+
+export type RugMood = "traditional" | "transitional" | "eclectic" | "modern";
+
+export type RugAiStructuredFields = {
+  origin?: RugOrigin | null;
+  style?: string | null;
+  pattern?: string[] | null;
+  primary_colors?: string[] | null;
+  age_category?: RugAgeCategory | null;
+  mood?: RugMood | null;
+};
+
+export type StaffOverrides = {
+  label?: string | null;
+  origin?: string | null;
+  style?: string | null;
+  pattern?: string[] | null;
+  primary_colors?: string[] | null;
+  age_category?: string | null;
+  mood?: string | null;
+};
+
+export type EffectiveRugFields = {
+  label: string;
+  origin?: string | null;
+  style?: string | null;
+  pattern?: string[] | null;
+  primary_colors?: string[] | null;
+  age_category?: string | null;
+  mood?: string | null;
+};
+
 export type InventoryFilters = {
   q: string;
   status: InventoryStatusFilter;
@@ -18,7 +60,8 @@ export type InventoryBrowserRow = {
   intake_label: string | null;
   primary_image_url: string | null;
   primary_image_caption: string | null;
-  ai_structured_fields: Record<string, unknown> | null;
+  ai_structured_fields: RugAiStructuredFields | null;
+  staff_overrides: StaffOverrides | null;
   stock_id: string | null;
   status: string | null;
   width_total_in: number | null;
@@ -36,4 +79,21 @@ export type InventoryListResult = {
   filters: InventoryFilters;
   loadedAt: string;
   error: string | null;
+};
+
+export type StaffInventoryRugDetail = {
+  id: string;
+  tenant_id: string;
+  intake_label: string | null;
+  ai_description: string | null;
+  ai_structured_fields: RugAiStructuredFields | null;
+  staff_overrides: StaffOverrides | null;
+  effective_fields: EffectiveRugFields;
+  stock_id: string | null;
+  status: string | null;
+  width_total_in: number | null;
+  length_total_in: number | null;
+  created_at: string | null;
+  primary_image_url: string | null;
+  primary_image_caption: string | null;
 };

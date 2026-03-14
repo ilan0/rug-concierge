@@ -1,3 +1,9 @@
+import type {
+  EffectiveRugFields,
+  RugAiStructuredFields,
+  StaffOverrides,
+} from "@/lib/types/inventory";
+
 // Shared recommendation types.
 
 export type HardConstraints = {
@@ -16,4 +22,10 @@ export type InventoryRug = {
   width_total_in?: number | null;
   length_total_in?: number | null;
   ai_description?: string | null;
+  ai_structured_fields?: RugAiStructuredFields | null;
+  staff_overrides?: StaffOverrides | null;
+  effective_fields?: EffectiveRugFields | null;
+  origin?: string | null;
+  style?: string | null;
+  mood?: string | null;
 };

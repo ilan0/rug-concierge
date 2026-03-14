@@ -1,5 +1,6 @@
 export type IntakeCreateRequest = {
   tenant_id: string;
+  stock_id?: string | null;
   width_ft: number;
   width_in: number;
   length_ft: number;
@@ -9,6 +10,7 @@ export type IntakeCreateRequest = {
 
 export type IntakeCreatedRug = {
   id: string;
+  stock_id: string | null;
   intake_label: string | null;
   ai_description: string | null;
   status: string | null;

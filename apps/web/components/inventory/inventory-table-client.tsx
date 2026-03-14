@@ -45,21 +45,31 @@ export function StatusBadge({ status }: { status: string | null }) {
 function readiness(row: InventoryBrowserRow): {
   displayLabel: string;
   ready: boolean;
+  autoNamed: boolean;
 } {
   const sizeLabel = formatRugSize(row.width_total_in, row.length_total_in);
   const label = row.intake_label?.trim() || sizeLabel || "Untitled";
+  const ready = Boolean(row.intake_label && row.intake_label.trim().length > 0);
+  const hasStaffLabelOverride = Boolean(
+    row.staff_overrides?.label && row.staff_overrides.label.trim().length > 0
+  );
+  const autoNamed = ready && /^rug\s+[a-f0-9-]{6,}$/i.test(label) && !hasStaffLabelOverride;
+
   return {
     displayLabel: label,
-    ready: Boolean(row.intake_label && row.intake_label.trim().length > 0),
+    ready,
+    autoNamed,
   };
 }
 
 export function InventoryTableClient({ rows }: InventoryTableClientProps) {
   const [selectedRow, setSelectedRow] = useState<InventoryBrowserRow | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
+  const [initialEditField, setInitialEditField] = useState<"label" | null>(null);
 
-  const onOpenRow = (row: InventoryBrowserRow) => {
+  const onOpenRow = (row: InventoryBrowserRow, focusField: "label" | null = null) => {
     setSelectedRow(row);
+    setInitialEditField(focusField);
     setModalOpen(true);
   };
 
@@ -73,7 +83,7 @@ export function InventoryTableClient({ rows }: InventoryTableClientProps) {
         <>
           <div className="space-y-3 md:hidden">
             {rows.map((row) => {
-              const { displayLabel, ready } = readiness(row);
+              const { displayLabel, ready, autoNamed } = readiness(row);
               return (
                 <article
                   key={row.id}
@@ -93,6 +103,17 @@ export function InventoryTableClient({ rows }: InventoryTableClientProps) {
                           <span className="size-2 rounded-full bg-amber-400" />
                           Processing...
                         </p>
+                      ) : autoNamed ? (
+                        <button
+                          type="button"
+                          className="inline-flex items-center rounded-full border border-border/60 bg-background px-2.5 py-0.5 text-xs text-muted-foreground hover:border-primary/30 hover:bg-primary/10 hover:text-foreground"
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            onOpenRow(row, "label");
+                          }}
+                        >
+                          Auto-named
+                        </button>
                       ) : null}
                     </div>
                   </div>
@@ -137,7 +158,7 @@ export function InventoryTableClient({ rows }: InventoryTableClientProps) {
               </thead>
               <tbody>
                 {rows.map((row) => {
-                  const { displayLabel, ready } = readiness(row);
+                  const { displayLabel, ready, autoNamed } = readiness(row);
                   return (
                     <tr
                       key={row.id}
@@ -158,6 +179,17 @@ export function InventoryTableClient({ rows }: InventoryTableClientProps) {
                             <span className="size-2 rounded-full bg-amber-400" />
                             Processing...
                           </p>
+                        ) : autoNamed ? (
+                          <button
+                            type="button"
+                            className="mt-1 inline-flex items-center rounded-full border border-border/60 bg-background px-2.5 py-0.5 text-xs text-muted-foreground hover:border-primary/30 hover:bg-primary/10 hover:text-foreground"
+                            onClick={(event) => {
+                              event.stopPropagation();
+                              onOpenRow(row, "label");
+                            }}
+                          >
+                            Auto-named
+                          </button>
                         ) : null}
                       </td>
                       <td className="p-3 align-top">
@@ -186,7 +218,11 @@ export function InventoryTableClient({ rows }: InventoryTableClientProps) {
       <StaffRugDetailModal
         row={selectedRow}
         open={modalOpen}
-        onClose={() => setModalOpen(false)}
+        initialEditField={initialEditField}
+        onClose={() => {
+          setModalOpen(false);
+          setInitialEditField(null);
+        }}
       />
     </>
   );

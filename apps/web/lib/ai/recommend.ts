@@ -1,4 +1,5 @@
 import type { HardConstraints, InventoryRug } from "@/lib/types/recommendation";
+import { resolveEffectiveFields } from "@/lib/inventory/resolve-fields";
 import { getRecommendationPromptBundle } from "@/lib/ai/prompt-library";
 import {
   getMaxOutputTokens,
@@ -76,6 +77,9 @@ export type RecommendationResponse = {
     rug_id: string;
     sku: string | null;
     title: string;
+    origin: string | null;
+    style: string | null;
+    mood: string | null;
     primary_image_url: string | null;
     primary_image_caption: string | null;
     size_text: string | null;
@@ -128,6 +132,9 @@ const RECOMMENDATION_SCHEMA = {
           "rug_id",
           "sku",
           "title",
+          "origin",
+          "style",
+          "mood",
           "size_text",
           "price_usd",
           "match_reasons",
@@ -140,6 +147,9 @@ const RECOMMENDATION_SCHEMA = {
           rug_id: { type: "string", minLength: 1, maxLength: 80 },
           sku: { type: ["string", "null"], maxLength: 80 },
           title: { type: "string", minLength: 1, maxLength: MAX_TITLE_CHARS },
+          origin: { type: ["string", "null"], maxLength: 60 },
+          style: { type: ["string", "null"], maxLength: 80 },
+          mood: { type: ["string", "null"], maxLength: 32 },
           size_text: { type: ["string", "null"], maxLength: MAX_SIZE_TEXT_CHARS },
           price_usd: { type: ["number", "null"] },
           match_reasons: {
@@ -198,25 +208,51 @@ function sizeText(rug: InventoryRug): string | null {
   return `${formatFeetAndInches(w)} x ${formatFeetAndInches(l)}`;
 }
 
+function effectiveFields(rug: InventoryRug) {
+  return (
+    rug.effective_fields ??
+    resolveEffectiveFields(
+      rug.intake_label ?? null,
+      rug.ai_structured_fields ?? null,
+      rug.staff_overrides ?? null
+    )
+  );
+}
+
 function rugLabel(rug: InventoryRug): string {
-  const label = rug.intake_label?.trim();
+  const label = effectiveFields(rug).label?.trim();
   if (label) return label;
   return sizeText(rug) ?? "Untitled";
 }
 
 function toContextInventory(inventory: InventoryRug[]) {
-  return inventory.map((rug) =>
-    [
+  return inventory.map((rug) => {
+    const fields = effectiveFields(rug);
+    const patternText =
+      Array.isArray(fields.pattern) && fields.pattern.length > 0
+        ? fields.pattern.join(", ")
+        : "Unknown";
+    const colorText =
+      Array.isArray(fields.primary_colors) && fields.primary_colors.length > 0
+        ? fields.primary_colors.join(", ")
+        : "Unknown";
+
+    return [
       `ID: ${rug.id}`,
       `Label: ${rugLabel(rug)}`,
       `Size: ${sizeText(rug) ?? "Unknown size"}`,
+      `Origin: ${fields.origin ?? "Unknown"}`,
+      `Style: ${fields.style ?? "Unknown"}`,
+      `Pattern: ${patternText}`,
+      `Colors: ${colorText}`,
+      `Mood: ${fields.mood ?? "Unknown"}`,
       `Description: ${
         rug.ai_description && rug.ai_description.trim().length > 0
           ? rug.ai_description
           : "New arrival — description pending"
       }`,
-    ].join("\n")
-  );
+    ].join("\n");
+  });
 }
 
 function toPriceUsd(): number | null {
@@ -238,13 +274,37 @@ function toLower(value: string | null | undefined): string {
   return (value ?? "").toLowerCase();
 }
 
+function structuredSignalText(rug: InventoryRug): string {
+  const fields = effectiveFields(rug);
+  const tokens = [
+    fields.origin,
+    fields.style,
+    fields.mood,
+    ...(fields.pattern ?? []),
+    ...(fields.primary_colors ?? []),
+  ]
+    .filter((value): value is string => typeof value === "string")
+    .map((value) => value.toLowerCase());
+
+  return tokens.join(" ");
+}
+
 function collectSoftSignals(
   userMessage: string
 ): string[] {
   const signals: string[] = [];
   const text = userMessage.toLowerCase();
   const knownTokens = [
+    "persian",
+    "afghan",
+    "turkish",
+    "indian",
+    "caucasian",
+    "pakistani",
     "neutral",
+    "traditional",
+    "transitional",
+    "eclectic",
     "modern",
     "vintage",
     "kitchen",
@@ -252,10 +312,15 @@ function collectSoftSignals(
     "bedroom",
     "dining",
     "runner",
-    "kidz",
+    "geometric",
+    "medallion",
+    "tribal",
+    "floral",
     "pets",
-    "kidz",
+    "kids",
     "purple",
+    "navy",
+    "ivory",
     "blue",
     "green",
     "red",
@@ -375,6 +440,7 @@ function buildGroundedMatchReasons(
   const sizeDistanceIn = getSizeDistanceIn(rug, constraints);
   const signals = collectSoftSignals(userMessage);
   const rugText = [toLower(rugLabel(rug)), toLower(rug.ai_description)].join(" ");
+  const structuredText = structuredSignalText(rug);
 
   if (constraints.size && sizeDistanceIn !== null) {
     reasons.push(
@@ -384,9 +450,18 @@ function buildGroundedMatchReasons(
     );
   }
 
-  const matchedSignal = signals.find((token) => token && rugText.includes(token));
-  if (matchedSignal) {
-    reasons.push(`Matches your stated preference around "${matchedSignal}".`);
+  const matchedStructuredSignal = signals.find(
+    (token) => token && structuredText.includes(token)
+  );
+  if (matchedStructuredSignal) {
+    reasons.push(
+      `Strong match on your stated preference around "${matchedStructuredSignal}".`
+    );
+  } else {
+    const matchedTextSignal = signals.find((token) => token && rugText.includes(token));
+    if (matchedTextSignal) {
+      reasons.push(`Matches your stated preference around "${matchedTextSignal}".`);
+    }
   }
 
   return uniqueCompactList(
@@ -409,12 +484,15 @@ function buildWhyNot(
   const tolerance = constraints.size?.toleranceIn ?? 2;
   const signals = collectSoftSignals(userMessage);
   const rugText = [toLower(rugLabel(rug)), toLower(rug.ai_description)].join(" ");
+  const structuredText = structuredSignalText(rug);
 
   if (constraints.size && sizeDistanceIn !== null && sizeDistanceIn > tolerance * 2) {
     notes.push("Dimensions are not an exact match and may require compromise.");
   }
 
-  const hasSignalMatch = signals.some((token) => token && rugText.includes(token));
+  const hasSignalMatch = signals.some(
+    (token) => token && (structuredText.includes(token) || rugText.includes(token))
+  );
   if (signals.length > 0 && !hasSignalMatch) {
     notes.push("May not fully align with your stated style direction.");
   }
@@ -440,6 +518,7 @@ function buildConfidence(
   const sizeDistanceIn = getSizeDistanceIn(rug, constraints);
   const signals = collectSoftSignals(userMessage);
   const rugText = [toLower(rugLabel(rug)), toLower(rug.ai_description)].join(" ");
+  const structuredText = structuredSignalText(rug);
 
   if (constraints.size && sizeDistanceIn !== null) {
     if (sizeDistanceIn <= 2) {
@@ -454,10 +533,18 @@ function buildConfidence(
     }
   }
 
-  const signalMatches = signals.filter((token) => token && rugText.includes(token)).length;
-  if (signalMatches > 0) {
-    score += Math.min(0.15, signalMatches * 0.05);
-    factors.push("Matches stated preferences");
+  const structuredMatches = signals.filter(
+    (token) => token && structuredText.includes(token)
+  ).length;
+  if (structuredMatches > 0) {
+    score += Math.min(0.18, structuredMatches * 0.06);
+    factors.push("Strong structured preference match");
+  } else {
+    const textMatches = signals.filter((token) => token && rugText.includes(token)).length;
+    if (textMatches > 0) {
+      score += Math.min(0.12, textMatches * 0.04);
+      factors.push("Matches stated preferences");
+    }
   }
 
   if (rug.ai_description) {
@@ -489,10 +576,14 @@ function fallbackRecommendations(
   // breaks the frontend flow.
   const recommendations = inventory.slice(0, MAX_RECOMMENDATIONS).map((rug) => {
     const confidence = buildConfidence(rug, constraints, userMessage);
+    const fields = effectiveFields(rug);
     return {
       rug_id: rug.id,
       sku: null,
       title: rugLabel(rug),
+      origin: fields.origin ?? null,
+      style: fields.style ?? null,
+      mood: fields.mood ?? null,
       primary_image_url: toImageUrl(rug),
       primary_image_caption: toImageCaption(),
       size_text: sizeText(rug),
@@ -576,6 +667,18 @@ function isRecommendationResponse(value: unknown): value is RecommendationRespon
         typeof rec.title === "string" &&
         normalizeText(rec.title).length > 0 &&
         normalizeText(rec.title).length <= MAX_TITLE_CHARS &&
+        ((typeof rec.origin === "string" &&
+          normalizeText(rec.origin).length > 0 &&
+          normalizeText(rec.origin).length <= 60) ||
+          rec.origin === null) &&
+        ((typeof rec.style === "string" &&
+          normalizeText(rec.style).length > 0 &&
+          normalizeText(rec.style).length <= 80) ||
+          rec.style === null) &&
+        ((typeof rec.mood === "string" &&
+          normalizeText(rec.mood).length > 0 &&
+          normalizeText(rec.mood).length <= 32) ||
+          rec.mood === null) &&
         ((typeof rec.size_text === "string" &&
           normalizeText(rec.size_text).length <= MAX_SIZE_TEXT_CHARS) ||
           rec.size_text === null) &&
@@ -721,10 +824,14 @@ function sanitizeResponse(
       if (!rug) return rec;
 
       const confidence = buildConfidence(rug, constraints, userMessage);
+      const fields = effectiveFields(rug);
       return {
         ...rec,
         sku: null,
         title: rugLabel(rug),
+        origin: fields.origin ?? null,
+        style: fields.style ?? null,
+        mood: fields.mood ?? null,
         primary_image_url: toImageUrl(rug),
         primary_image_caption: toImageCaption(),
         size_text: sizeText(rug),

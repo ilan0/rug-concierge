@@ -10,6 +10,9 @@ export async function createInventoryIntake(
 ): Promise<IntakeCreateResponse> {
   const formData = new FormData();
   formData.set("tenant_id", input.tenant_id);
+  if (typeof input.stock_id === "string" && input.stock_id.trim().length > 0) {
+    formData.set("stock_id", input.stock_id.trim());
+  }
   formData.set("width_ft", toWholeNumber(input.width_ft));
   formData.set("width_in", toWholeNumber(input.width_in));
   formData.set("length_ft", toWholeNumber(input.length_ft));

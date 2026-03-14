@@ -3,6 +3,11 @@ import { supabaseAdmin } from "@/lib/supabase/admin";
 import { badRequest, internalError } from "@/lib/errors/http-errors";
 import { resolveAuthoritativeTenantForServer } from "@/lib/auth/tenant";
 import { fetchPrimaryRugImagesForRugs } from "@/lib/storage/rug-images";
+import {
+  aiStructuredFieldsSchema,
+  staffOverridesSchema,
+} from "@/lib/inventory/schemas";
+import { resolveEffectiveFields } from "@/lib/inventory/resolve-fields";
 import { formatRugSize } from "@/lib/utils/format";
 
 const OPENAI_RESPONSES_URL = "https://api.openai.com/v1/responses";
@@ -106,9 +111,16 @@ async function generateContextualBlurb(input: {
   return normalized || fallback;
 }
 
-function toRecordOrNull(value: unknown): Record<string, unknown> | null {
+function toAiStructuredFields(value: unknown) {
   if (!value || typeof value !== "object" || Array.isArray(value)) return null;
-  return value as Record<string, unknown>;
+  const parsed = aiStructuredFieldsSchema.safeParse(value);
+  return parsed.success ? parsed.data : null;
+}
+
+function toStaffOverrides(value: unknown) {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return null;
+  const parsed = staffOverridesSchema.safeParse(value);
+  return parsed.success ? parsed.data : null;
 }
 
 export async function GET(
@@ -125,20 +137,32 @@ export async function GET(
     return internalError("Tenant is not configured.");
   }
 
-  const rugResult = await supabaseAdmin
-    .from("rugs")
-    .select(
-      "id, intake_label, ai_structured_fields, stock_id, ai_description, width_total_in, length_total_in, status, contextual_blurb"
-    )
-    .eq("tenant_id", tenantId)
-    .eq("id", id)
-    .maybeSingle();
+  const runRugQuery = (columns: string) =>
+    supabaseAdmin
+      .from("rugs")
+      .select(columns)
+      .eq("tenant_id", tenantId)
+      .eq("id", id)
+      .maybeSingle();
+
+  const selectCandidates = [
+    "id, intake_label, ai_structured_fields, staff_overrides, ai_description, width_total_in, length_total_in, status, contextual_blurb",
+    "id, intake_label, ai_structured_fields, ai_description, width_total_in, length_total_in, status, contextual_blurb",
+    "id, intake_label, ai_description, width_total_in, length_total_in, status, contextual_blurb",
+  ];
+
+  let rugResult = await runRugQuery(selectCandidates[0]);
+  for (const selectColumns of selectCandidates.slice(1)) {
+    if (!rugResult.error) break;
+    if (!isLikelyMissingColumnError(rugResult.error.message ?? "")) break;
+    rugResult = await runRugQuery(selectColumns);
+  }
 
   if (rugResult.error || !rugResult.data) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 
-  const rug = rugResult.data;
+  const rug = rugResult.data as unknown as Record<string, unknown>;
   if (rug.status !== "available") {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
@@ -159,9 +183,11 @@ export async function GET(
 
   if (!contextualBlurb) {
     contextualBlurb = await generateContextualBlurb({
-      intakeLabel: rug.intake_label,
+      intakeLabel:
+        typeof rug.intake_label === "string" ? rug.intake_label : null,
       sizeDisplay,
-      aiDescription: rug.ai_description,
+      aiDescription:
+        typeof rug.ai_description === "string" ? rug.ai_description : null,
     });
 
     await supabaseAdmin
@@ -178,18 +204,33 @@ export async function GET(
   });
   const primaryImageUrl = imageMap.get(id)?.primary_image_url ?? null;
 
+  const aiFields = toAiStructuredFields(rug.ai_structured_fields);
+  const staffOverrides = toStaffOverrides(rug.staff_overrides ?? null);
+
   return NextResponse.json({
     id,
     intake_label:
       typeof rug.intake_label === "string" ? rug.intake_label : null,
-    ai_structured_fields: toRecordOrNull(rug.ai_structured_fields),
-    stock_id: typeof rug.stock_id === "string" ? rug.stock_id : null,
-    ai_description: rug.ai_description,
+    effective_fields: resolveEffectiveFields(
+      typeof rug.intake_label === "string" ? rug.intake_label : null,
+      aiFields,
+      staffOverrides
+    ),
+    ai_description:
+      typeof rug.ai_description === "string" ? rug.ai_description : null,
     contextual_blurb: contextualBlurb,
-    status: typeof rug.status === "string" ? rug.status : null,
     width_total_in: widthTotalIn,
     length_total_in: lengthTotalIn,
     size_display: sizeDisplay,
     primary_image_url: primaryImageUrl,
   });
+}
+
+function isLikelyMissingColumnError(message: string): boolean {
+  const normalized = message.toLowerCase();
+  return (
+    normalized.includes("does not exist") ||
+    normalized.includes("schema cache") ||
+    normalized.includes("could not find the")
+  );
 }

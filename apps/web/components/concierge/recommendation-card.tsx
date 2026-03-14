@@ -19,18 +19,17 @@ type RecommendationCardProps = {
 function isRugDetailData(value: unknown): value is RugDetailData {
   if (!value || typeof value !== "object") return false;
   const data = value as Record<string, unknown>;
-  const aiFieldsValid =
-    data.ai_structured_fields === null ||
-    (typeof data.ai_structured_fields === "object" &&
-      data.ai_structured_fields !== null &&
-      !Array.isArray(data.ai_structured_fields));
+  const effectiveFieldsValid =
+    typeof data.effective_fields === "object" &&
+    data.effective_fields !== null &&
+    !Array.isArray(data.effective_fields) &&
+    typeof (data.effective_fields as { label?: unknown }).label === "string";
+
   return (
     typeof data.id === "string" &&
     (typeof data.intake_label === "string" || data.intake_label === null) &&
     typeof data.size_display === "string" &&
-    aiFieldsValid &&
-    (typeof data.stock_id === "string" || data.stock_id === null) &&
-    (typeof data.status === "string" || data.status === null) &&
+    effectiveFieldsValid &&
     (typeof data.ai_description === "string" || data.ai_description === null) &&
     (typeof data.contextual_blurb === "string" || data.contextual_blurb === null) &&
     (typeof data.primary_image_url === "string" || data.primary_image_url === null)
@@ -42,6 +41,9 @@ export function RecommendationCard({
   showTechnicalMeta = false,
   maxVisibleReasons,
 }: RecommendationCardProps) {
+  const tags = [item.origin, item.style, item.mood].filter(
+    (value): value is string => typeof value === "string" && value.trim().length > 0
+  );
   const visibleReasonCount =
     typeof maxVisibleReasons === "number"
       ? Math.max(0, maxVisibleReasons)
@@ -98,10 +100,11 @@ export function RecommendationCard({
           }
         }}
       >
-        <div className="aspect-[3/4] w-full overflow-hidden bg-muted">
+        <div className="h-52 w-full overflow-hidden bg-muted">
           <RugImage
             src={item.primary_image_url}
             alt={item.primary_image_caption ?? item.title}
+            className="h-full w-full object-cover"
             placeholderLabel="No rug image"
           />
         </div>
@@ -124,11 +127,17 @@ export function RecommendationCard({
           </div>
         </CardHeader>
         <CardContent className="space-y-4 pb-5 pt-1 text-[17px] leading-[1.6] md:min-h-[300px] lg:min-h-[320px]">
+          {tags.length > 0 ? (
+            <p className="text-xs font-medium text-muted-foreground">
+              {tags.slice(0, 3).join(" · ")}
+            </p>
+          ) : null}
+
           <p className="space-y-1">
             <span className="block text-[12px] font-semibold uppercase tracking-[0.08em] text-primary">
               Size
             </span>
-            <span className="block whitespace-nowrap text-[28px] font-medium leading-[1.15] sm:text-[32px]">
+            <span className="block whitespace-nowrap text-xl font-medium leading-[1.15] sm:text-2xl">
               {item.size_text ?? "-"}
             </span>
           </p>
@@ -137,7 +146,7 @@ export function RecommendationCard({
             <p className="text-[12px] font-semibold uppercase tracking-[0.08em] text-primary">
               Why this fits
             </p>
-            <div className="mt-2 space-y-2 text-[18px] leading-[1.6] md:min-h-[80px]">
+            <div className="mt-2 space-y-2 text-sm leading-relaxed md:min-h-[4.5rem]">
               {visibleReasons.map((reason) => (
                 <p key={reason}>{reason}</p>
               ))}

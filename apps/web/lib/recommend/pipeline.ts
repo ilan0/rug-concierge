@@ -1,6 +1,11 @@
 import { filterByHardConstraints } from "@/lib/filters/hard-constraints";
 import { shapeCandidatesForAI } from "@/lib/filters/candidate-shaping";
 import { getSizeBounds } from "@/lib/filters/size-bounds";
+import { resolveEffectiveFields } from "@/lib/inventory/resolve-fields";
+import {
+  aiStructuredFieldsSchema,
+  staffOverridesSchema,
+} from "@/lib/inventory/schemas";
 import { fetchPrimaryRugImagesForRugs } from "@/lib/storage/rug-images";
 import { rankAndExplain } from "@/lib/ai/recommend";
 import type { RecommendationAiTrace } from "@/lib/ai/recommend";
@@ -314,7 +319,21 @@ async function fetchInventoryCandidates(input: {
     });
   }
 
-  return withImages;
+  return withImages.map((rug) => {
+    const effectiveFields = resolveEffectiveFields(
+      rug.intake_label ?? null,
+      rug.ai_structured_fields ?? null,
+      rug.staff_overrides ?? null
+    );
+
+    return {
+      ...rug,
+      effective_fields: effectiveFields,
+      origin: effectiveFields.origin ?? null,
+      style: effectiveFields.style ?? null,
+      mood: effectiveFields.mood ?? null,
+    };
+  });
 }
 
 async function getSupabaseAdminSafe(): Promise<SupabaseClient | null> {
@@ -343,34 +362,49 @@ async function runCandidateQuery(input: {
   variant: "base" | "size_direct" | "size_rotated";
   queryTrace: PipelineQueryTrace[];
 }): Promise<InventoryRug[] | null> {
-  let query = input.supabase
-    .from("rugs")
-    .select(
-      "id, intake_label, status, width_total_in, length_total_in, ai_description"
-    )
-    .eq("status", "available")
-    .limit(input.limit);
-
-  query = query.eq("tenant_id", input.tenantId);
-
   const bounds = input.sizeBounds;
   const wantsSize = input.variant !== "base";
   const rotated = input.variant === "size_rotated";
 
-  if (wantsSize && bounds) {
-    const widthMin = rotated ? bounds.minLengthIn : bounds.minWidthIn;
-    const widthMax = rotated ? bounds.maxLengthIn : bounds.maxWidthIn;
-    const lengthMin = rotated ? bounds.minWidthIn : bounds.minLengthIn;
-    const lengthMax = rotated ? bounds.maxWidthIn : bounds.maxLengthIn;
+  const buildQuery = (selectColumns: string) => {
+    let query = input.supabase
+      .from("rugs")
+      .select(selectColumns)
+      .eq("status", "available")
+      .limit(input.limit);
 
-    query = query
-      .gte("width_total_in", widthMin)
-      .lte("width_total_in", widthMax)
-      .gte("length_total_in", lengthMin)
-      .lte("length_total_in", lengthMax);
+    query = query.eq("tenant_id", input.tenantId);
+
+    if (wantsSize && bounds) {
+      const widthMin = rotated ? bounds.minLengthIn : bounds.minWidthIn;
+      const widthMax = rotated ? bounds.maxLengthIn : bounds.maxWidthIn;
+      const lengthMin = rotated ? bounds.minWidthIn : bounds.minLengthIn;
+      const lengthMax = rotated ? bounds.maxWidthIn : bounds.maxLengthIn;
+
+      query = query
+        .gte("width_total_in", widthMin)
+        .lte("width_total_in", widthMax)
+        .gte("length_total_in", lengthMin)
+        .lte("length_total_in", lengthMax);
+    }
+
+    return query;
+  };
+
+  const selectCandidates = [
+    "id, intake_label, status, width_total_in, length_total_in, ai_description, ai_structured_fields, staff_overrides",
+    "id, intake_label, status, width_total_in, length_total_in, ai_description, ai_structured_fields",
+    "id, intake_label, status, width_total_in, length_total_in, ai_description",
+  ];
+
+  let queryResult = await buildQuery(selectCandidates[0]);
+  for (const selectColumns of selectCandidates.slice(1)) {
+    if (!queryResult.error) break;
+    if (!isLikelyMissingColumnError(queryResult.error.message ?? "")) break;
+    queryResult = await buildQuery(selectColumns);
   }
 
-  const { data, error } = await query;
+  const { data, error } = queryResult;
   if (error || !Array.isArray(data)) {
     input.queryTrace.push({
       variant: input.variant,
@@ -414,7 +448,7 @@ async function runCandidateQuery(input: {
     error: null,
   });
 
-  return data
+  return (data as unknown as Record<string, unknown>[])
     .map((row) => toInventoryFromDbRow(row))
     .filter((row): row is InventoryRug => row !== null);
 }
@@ -433,10 +467,33 @@ function toInventoryFromDbRow(row: Record<string, unknown>): InventoryRug | null
     length_total_in: toNumberOrNull(row.length_total_in),
     ai_description:
       typeof row.ai_description === "string" ? row.ai_description : null,
+    ai_structured_fields: toAiStructuredFieldsOrNull(row.ai_structured_fields),
+    staff_overrides: toStaffOverridesOrNull(row.staff_overrides),
   };
 }
 
 function toNumberOrNull(value: unknown): number | null {
   if (typeof value === "number" && Number.isFinite(value)) return value;
   return null;
+}
+
+function toAiStructuredFieldsOrNull(value: unknown): InventoryRug["ai_structured_fields"] {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return null;
+  const parsed = aiStructuredFieldsSchema.safeParse(value);
+  return parsed.success ? parsed.data : null;
+}
+
+function toStaffOverridesOrNull(value: unknown): InventoryRug["staff_overrides"] {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return null;
+  const parsed = staffOverridesSchema.safeParse(value);
+  return parsed.success ? parsed.data : null;
+}
+
+function isLikelyMissingColumnError(message: string): boolean {
+  const normalized = message.toLowerCase();
+  return (
+    normalized.includes("does not exist") ||
+    normalized.includes("schema cache") ||
+    normalized.includes("could not find the")
+  );
 }

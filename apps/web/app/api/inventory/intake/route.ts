@@ -12,18 +12,9 @@ import {
   validateImageFile,
 } from "@/lib/intake/validation";
 import { isStaffUnlockedFromRequest } from "@/lib/auth/staff";
+import { requestVisionEnrichment } from "@/lib/inventory/vision-enrichment";
 
 const RUG_IMAGES_BUCKET = "rug-images";
-const OPENAI_RESPONSES_URL = "https://api.openai.com/v1/responses";
-const VISION_OUTPUT_SCHEMA = {
-  type: "object",
-  additionalProperties: false,
-  required: ["intake_label", "ai_description"],
-  properties: {
-    intake_label: { type: "string", minLength: 1, maxLength: 120 },
-    ai_description: { type: "string", minLength: 1, maxLength: 1200 },
-  },
-} as const;
 
 function extensionForImage(image: File): string {
   const type = image.type.toLowerCase();
@@ -48,11 +39,37 @@ function buildStoragePath(tenantId: string, rugId: string, image: File): string 
   return `${tenantId}/${rugId}/primary-${Date.now()}.${ext}`;
 }
 
+function parseStockIdField(value: FormDataEntryValue | null): {
+  ok: true;
+  value: string | null;
+} | {
+  ok: false;
+  error: string;
+} {
+  if (value === null || value === undefined) {
+    return { ok: true, value: null };
+  }
+  if (typeof value !== "string") {
+    return { ok: false, error: "stock_id must be a string when provided." };
+  }
+
+  const trimmed = value.trim();
+  if (!trimmed) {
+    return { ok: true, value: null };
+  }
+  if (trimmed.length > 80) {
+    return { ok: false, error: "stock_id must be 80 characters or fewer." };
+  }
+
+  return { ok: true, value: trimmed };
+}
+
 function parseMultipartForm(formData: FormData):
   | {
       ok: true;
       value: {
         tenantId: string | null;
+        stockId: string | null;
         widthFt: number;
         widthIn: number;
         lengthFt: number;
@@ -79,10 +96,16 @@ function parseMultipartForm(formData: FormData):
     return { ok: false, response: badRequest(imageResult.error) };
   }
 
+  const stockIdResult = parseStockIdField(formData.get("stock_id"));
+  if (!stockIdResult.ok) {
+    return { ok: false, response: badRequest(stockIdResult.error) };
+  }
+
   return {
     ok: true,
     value: {
       tenantId: normalizeTenantId(formData.get("tenant_id")),
+      stockId: stockIdResult.value,
       widthFt: dimensions.value.widthFt,
       widthIn: dimensions.value.widthIn,
       lengthFt: dimensions.value.lengthFt,
@@ -118,184 +141,49 @@ async function cleanupFailedWrite(input: {
   }
 }
 
-function extractOutputText(payload: unknown): string | null {
-  if (!payload || typeof payload !== "object") return null;
-  const data = payload as Record<string, unknown>;
-
-  if (typeof data.output_text === "string" && data.output_text.trim()) {
-    return data.output_text;
-  }
-
-  if (!Array.isArray(data.output)) return null;
-
-  for (const outputItem of data.output) {
-    if (!outputItem || typeof outputItem !== "object") continue;
-    const item = outputItem as Record<string, unknown>;
-    if (!Array.isArray(item.content)) continue;
-
-    for (const part of item.content) {
-      if (!part || typeof part !== "object") continue;
-      const block = part as Record<string, unknown>;
-      if (typeof block.text === "string" && block.text.trim()) {
-        return block.text;
-      }
-    }
-  }
-
-  return null;
-}
-
-function toPlainText(value: string): string {
-  return value
-    .replace(/\*\*/g, "")
-    .replace(/[_`#]/g, "")
-    .replace(/^\s*[-*•]+\s*/gm, "")
-    .replace(/\s+/g, " ")
-    .trim();
-}
-
-function parseVisionJson(payload: unknown): {
-  intakeLabel: string;
-  aiDescription: string;
-} | null {
-  const normalizeParsed = (parsed: Record<string, unknown>) => {
-    if (
-      typeof parsed.intake_label !== "string" ||
-      typeof parsed.ai_description !== "string"
-    ) {
-      return null;
-    }
-    const intakeLabel = toPlainText(parsed.intake_label).slice(0, 120);
-    const aiDescription = toPlainText(parsed.ai_description);
-    if (!intakeLabel || !aiDescription) return null;
-    return { intakeLabel, aiDescription };
-  };
-
-  const outputText = extractOutputText(payload);
-  if (outputText) {
-    const cleaned = outputText
-      .replace(/^```json\s*/i, "")
-      .replace(/^```\s*/i, "")
-      .replace(/\s*```$/, "")
-      .trim();
-    try {
-      const parsed = JSON.parse(cleaned) as Record<string, unknown>;
-      const normalized = normalizeParsed(parsed);
-      if (normalized) return normalized;
-    } catch {
-      // Try direct JSON block parsing below.
-    }
-  }
-
-  if (!payload || typeof payload !== "object") return null;
-  const data = payload as Record<string, unknown>;
-  if (!Array.isArray(data.output)) return null;
-
-  for (const item of data.output) {
-    if (!item || typeof item !== "object") continue;
-    const outputItem = item as Record<string, unknown>;
-    if (!Array.isArray(outputItem.content)) continue;
-    for (const part of outputItem.content) {
-      if (!part || typeof part !== "object") continue;
-      const block = part as Record<string, unknown>;
-      if (!block.json || typeof block.json !== "object") continue;
-      const normalized = normalizeParsed(block.json as Record<string, unknown>);
-      if (normalized) return normalized;
-    }
-  }
-
-  return null;
+async function applyFallbackLabel(input: { tenantId: string; rugId: string }) {
+  await supabaseAdmin
+    .from("rugs")
+    .update({
+      intake_label: `Rug ${input.rugId.slice(0, 6)}`,
+      ai_description: null,
+      ai_structured_fields: null,
+    })
+    .eq("tenant_id", input.tenantId)
+    .eq("id", input.rugId);
 }
 
 async function runVisionEnrichment(input: {
   tenantId: string;
   rugId: string;
   imageUrl: string;
+  widthTotalIn: number;
+  lengthTotalIn: number;
 }) {
-  const fallbackLabel = `Rug ${input.rugId.slice(0, 6)}`;
-  const apiKey = process.env.OPENAI_API_KEY;
+  const enrichment = await requestVisionEnrichment({
+    imageUrl: input.imageUrl,
+    widthTotalIn: input.widthTotalIn,
+    lengthTotalIn: input.lengthTotalIn,
+  });
 
-  const applyFallback = async () => {
-    await supabaseAdmin
-      .from("rugs")
-      .update({ intake_label: fallbackLabel })
-      .eq("tenant_id", input.tenantId)
-      .eq("id", input.rugId);
-  };
-
-  if (!apiKey) {
-    await applyFallback();
+  if (!enrichment) {
+    await applyFallbackLabel({ tenantId: input.tenantId, rugId: input.rugId });
     return;
   }
 
-  const requestPayload = {
-    model: "gpt-4o",
-    input: [
-      {
-        role: "system",
-        content: [
-          {
-            type: "input_text",
-            text:
-              "You are an expert rug appraiser. Analyze the rug in this image and return a JSON object with exactly two fields: 'intake_label' (a concise 3-7 word staff label, e.g. 'Blue Persian Medallion 8x10') and 'ai_description' (a rich 2-4 sentence description covering: visible style tradition, color palette, pattern or motif, texture/material if discernible, and best room/aesthetic fit). Return only valid JSON, plain text descriptions, no markdown.",
-          },
-        ],
-      },
-      {
-        role: "user",
-        content: [
-          {
-            type: "input_text",
-            text: "Analyze this rug photo.",
-          },
-          {
-            type: "input_image",
-            image_url: input.imageUrl,
-          },
-        ],
-      },
-    ],
-    max_output_tokens: 500,
-    text: {
-      format: {
-        type: "json_schema",
-        name: "intake_vision_response",
-        schema: VISION_OUTPUT_SCHEMA,
-        strict: true,
-      },
-    },
-  };
-
-  const response = await fetch(OPENAI_RESPONSES_URL, {
-    method: "POST",
-    headers: {
-      "content-type": "application/json",
-      authorization: `Bearer ${apiKey}`,
-    },
-    body: JSON.stringify(requestPayload),
-  }).catch(() => null);
-
-  if (!response || !response.ok) {
-    await applyFallback();
-    return;
-  }
-
-  const payload = (await response.json().catch(() => null)) as unknown;
-  const parsed = parseVisionJson(payload);
-
-  if (!parsed) {
-    await applyFallback();
-    return;
-  }
-
-  await supabaseAdmin
+  const result = await supabaseAdmin
     .from("rugs")
     .update({
-      intake_label: parsed.intakeLabel,
-      ai_description: parsed.aiDescription,
+      intake_label: enrichment.intakeLabel,
+      ai_description: enrichment.aiDescription,
+      ai_structured_fields: enrichment.aiStructuredFields,
     })
     .eq("tenant_id", input.tenantId)
     .eq("id", input.rugId);
+
+  if (result.error) {
+    await applyFallbackLabel({ tenantId: input.tenantId, rugId: input.rugId });
+  }
 }
 
 function scheduleBackgroundTask(task: () => Promise<void>) {
@@ -340,8 +228,10 @@ export async function POST(req: NextRequest) {
       id: rugId,
       tenant_id: tenantId,
       status: "available",
+      stock_id: parsed.value.stockId,
       intake_label: null,
       ai_description: null,
+      ai_structured_fields: null,
       width_ft: parsed.value.widthFt,
       width_in: parsed.value.widthIn,
       length_ft: parsed.value.lengthFt,
@@ -399,6 +289,8 @@ export async function POST(req: NextRequest) {
           tenantId,
           rugId,
           imageUrl: primaryImageUrl,
+          widthTotalIn: parsed.value.widthTotalIn,
+          lengthTotalIn: parsed.value.lengthTotalIn,
         });
       } catch (error) {
         console.error("[intake] vision enrichment failed", {
@@ -410,11 +302,7 @@ export async function POST(req: NextRequest) {
     });
   } else {
     scheduleBackgroundTask(async () => {
-      await supabaseAdmin
-        .from("rugs")
-        .update({ intake_label: `Rug ${rugId.slice(0, 6)}` })
-        .eq("tenant_id", tenantId)
-        .eq("id", rugId);
+      await applyFallbackLabel({ tenantId, rugId });
     });
   }
 
@@ -423,6 +311,7 @@ export async function POST(req: NextRequest) {
       id: rugId,
       intake_label: null,
       ai_description: null,
+      stock_id: parsed.value.stockId,
       width_total_in: parsed.value.widthTotalIn,
       length_total_in: parsed.value.lengthTotalIn,
       status: "available",

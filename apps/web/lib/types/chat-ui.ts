@@ -14,6 +14,9 @@ export type UiChatRequest = {
 export type UiRecommendationItem = {
   rug_id: string;
   title: string;
+  origin: string | null;
+  style: string | null;
+  mood: string | null;
   primary_image_url: string | null;
   primary_image_caption: string | null;
   size_text: string | null;
