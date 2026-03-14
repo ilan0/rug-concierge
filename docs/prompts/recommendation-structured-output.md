@@ -1,17 +1,15 @@
-# Structured Output Add-on (Recommendation Mode Only)
+# Recommendation Structured Output Add-on
 
-Use this layer only for recommendation-mode calls.
+Use this prompt layer only for recommendation mode.
 
-Runtime JSON schema enforcement is the source of truth.
-Follow that schema exactly and return JSON only.
+Runtime JSON schema validation in code is authoritative.
+The model output must match that schema exactly.
 
 Rules:
-- No markdown
-- No extra keys
-- No explanatory text outside JSON
-- Keep all string fields concise and complete.
-- Do not output unfinished trailing fragments.
-- `assistant_message` should stand on its own (no appended duplicate question text).
+- JSON only (no prose outside JSON)
+- no extra keys
+- no markdown
+- concise, complete string values
+- use null only where schema allows null
 
-If a value is unknown, use allowed null fields from the runtime schema.
-Do not invent fields or shape variants.
+Any mismatch should be treated as invalid output and handled by backend sanitization/fallback logic.

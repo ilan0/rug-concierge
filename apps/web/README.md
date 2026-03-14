@@ -14,6 +14,8 @@ Primary UI shell for Rug Concierge.
 - `/api/chat`
 - `/api/recommend`
 - `/api/inventory/intake`
+- `/api/inventory/rugs/[id]`
+- `/api/inventory/rugs/[id]/re-enrich`
 - `/api/rugs/[id]`
 - `/api/session/reset`
 - `/api/config/public`
@@ -35,7 +37,9 @@ Primary UI shell for Rug Concierge.
 
 ## Core Docs
 
+- `../../docs/README.md`
 - `../../docs/master-context.md`
+- `../../docs/deployment/runbook.md`
 - `../../docs/testing/README.md`
 
 ## Local Run

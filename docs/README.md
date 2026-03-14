@@ -1,11 +1,12 @@
 # Docs Index
 
-If docs conflict, `docs/master-context.md` is canonical.
+If docs conflict, use `docs/master-context.md` as the source of truth.
 
 ## Read First
 
 1. `docs/master-context.md`
-2. `docs/testing/README.md`
+2. `docs/deployment/runbook.md`
+3. `docs/testing/README.md`
 
 ## Design
 
@@ -20,8 +21,8 @@ If docs conflict, `docs/master-context.md` is canonical.
 
 ## Deployment
 
-- `docs/deployment/overview.md`
 - `docs/deployment/env-vars.md`
+- `docs/deployment/overview.md`
 - `docs/deployment/runbook.md`
 
 ## Prompt Contracts

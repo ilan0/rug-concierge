@@ -1,63 +1,54 @@
 # Chat Orchestration
 
-## Entry Point
+## Entrypoints
 
+- `POST /api/chat` (session-aware router)
+- `POST /api/recommend` (recommendation-only route, no chat memory envelope)
+
+Primary implementation references:
 - `apps/web/app/api/chat/route.ts`
+- `apps/web/app/api/recommend/route.ts`
 
-Turn flow:
-1. validate request body
-2. resolve tenant
-3. validate or create `session_id`
-4. load/create session
-5. route mode (`general_chat` or `recommendation`)
-6. run selected handler
-7. persist session and messages
-8. return response envelope
+## `/api/chat` Turn Flow
 
-## Request Contract
+1. Validate request body (`message`, optional `session_id`, optional role fields).
+2. Resolve role (`role`/`user_role`) and tenant binding.
+3. Validate or generate UUID `session_id`.
+4. Load/create session state.
+5. Route to `general_chat` or `recommendation`.
+6. Execute handler.
+7. Persist updated session + turn messages.
+8. Return mode/fine_mode response envelope.
+
+## Request Contract Notes
 
 Accepted fields:
-- `message`
+- `message` (required)
 - `session_id` (optional UUID)
-- `tenant_id` (optional fallback)
-- `constraints` (optional)
+- `tenant_id` (optional fallback if env `TENANT_ID` unset)
+- `constraints` (optional object)
+- `role` / `user_role` (optional; must match when both present)
 
-Validation rules:
-- malformed `session_id` returns `400`
-- oversized `session_id` returns `400`
-- inventory-backed turns without tenant context return `400`
+Validation highlights:
+- malformed or oversized `session_id` -> 400
+- recommendation turns without tenant context -> 400
+- session tenant mismatch on existing session -> 403
 
-## Session State
+## Session Persistence Model
 
-Session data fields:
-- `session_id`
-- `tenant_id`
-- `role`
+Session state stores:
+- `session_id`, `tenant_id`, `role`
 - `chat_history`
 - `conversation_memory`
 - `recommendation_state`
-- `created_at`
-- `updated_at`
+- `created_at`, `updated_at`
 
-## Mode Routing
+Persistence tables:
+- `chat_sessions` (session_data snapshot)
+- `chat_messages` (append-only turns)
 
-- explicit shopping intent -> recommendation
-- educational/general questions -> general chat
-- follow-up shopping turns can remain in recommendation
+## `/api/recommend` Notes
 
-## Recommendation Handler
-
-- calls shared recommendation pipeline
-- never invents inventory items
-- emits plain text responses only
-
-## General Chat Handler
-
-- answers non-inventory questions
-- can prompt user to request recommendations
-- emits plain text responses only
-
-## Observability
-
-- optional trace headers for chat and recommendation
-- recommendation QA logs include candidate counts and selected rug IDs
+- Accepts natural language (`user_message`/`message`) and structured `constraints`.
+- Structured constraints currently support `constraints.size`.
+- For deterministic tests, pass explicit `constraints.size` and keep message text for style/room intent.

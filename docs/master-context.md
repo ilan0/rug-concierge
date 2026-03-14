@@ -1,123 +1,100 @@
 # Rug Concierge Master Context
 
-Canonical runtime source of truth.
+Canonical runtime summary for the current production code.
 
-## Product Goal
+## Product
 
-AI concierge for rug showrooms:
+AI rug concierge for single-store kiosk deployments:
+- customer chat (`/concierge`)
+- staff inventory browser (`/inventory`)
+- staff intake (`/intake`)
 - inventory-grounded recommendations
-- customer-facing concierge chat
-- staff inventory intake
-- rug detail enrichment
 
-## Runtime Rules
+## Runtime Invariants
 
-- Inventory is authoritative.
-- Backend owns tenant scoping and access control.
-- All inventory DB queries are tenant scoped.
-- AI can rank and explain candidates, but cannot invent inventory.
-- AI response text must be plain text only.
+- Inventory is authoritative. AI never invents inventory rows.
+- Tenant scope is enforced on all inventory-backed DB reads/writes.
+- Recommendation hard filters are backend-enforced (availability + size).
+- Response strings are plain text only.
+- `contextual_blurb` is removed from runtime and API contracts.
 
-## Deployment Mode
+## Access Model
 
-Single kiosk deployment:
-- `STORE_PASSCODE` configures staff unlock
-- `staff_unlocked=1` cookie grants staff access
-- proxy redirects locked `/inventory` and `/intake` requests to `/concierge`
-- intake write API (`POST /api/inventory/intake`) requires unlocked staff cookie
-- unlock endpoint: `POST /api/auth/passcode`
-- lock endpoint: `POST /api/auth/lock`
-
-## Routes
-
-Pages:
-- `/`
-- `/concierge`
-- `/inventory`
-- `/intake`
-
-APIs:
-- `/api/chat`
-- `/api/recommend`
-- `/api/inventory/intake`
-- `/api/rugs/[id]`
-- `/api/session/reset`
-- `/api/config/public`
-- `/api/manifest`
-- `/api/auth/passcode`
-- `/api/auth/lock`
-- `/api/debug/trace`
-
-## Role Defaults
-
-- No customer-facing role switcher in UI.
-- Concierge requests default to customer tone/behavior.
-- Debug trace endpoints remain non-production only.
+- `STORE_PASSCODE` enables staff unlock mode.
+- Staff unlock cookie: `staff_unlocked=1` (`HttpOnly`, `SameSite=Lax`, `Secure` in prod).
+- Locked `/inventory` and `/intake` requests are redirected to `/concierge`.
+- Staff-protected endpoints require unlocked cookie:
+  - `POST /api/inventory/intake`
+  - `GET|PATCH /api/inventory/rugs/[id]`
+  - `POST /api/inventory/rugs/[id]/re-enrich`
 
 ## Tenant Resolution
 
-Priority for server resolution:
-1. `TENANT_ID` env
-2. request body `tenant_id`
-3. reject request if neither exists for inventory-backed flow
+Server-side priority:
+1. deployment env `TENANT_ID`
+2. request `tenant_id` (fallback)
+3. reject inventory-backed flow if still missing
 
-If env `TENANT_ID` is set, it always wins.
+When env `TENANT_ID` is set, it is authoritative.
 
-## Chat Contract
+## Core APIs
 
-Entry: `POST /api/chat`
+- `POST /api/chat` (chat router + session persistence)
+- `POST /api/recommend` (recommendation-only deterministic route)
+- `POST /api/inventory/intake` (async enrichment kickoff)
+- `GET /api/rugs/[id]` (retail-safe detail response)
+- `GET|PATCH /api/inventory/rugs/[id]` (staff detail + overrides)
+- `POST /api/inventory/rugs/[id]/re-enrich` (staff manual re-analysis)
+- `POST /api/session/reset`
+- `POST /api/auth/passcode`, `POST /api/auth/lock`
+- `GET /api/config/public`, `GET /api/manifest`
 
-Behavior:
-- validates message and optional `session_id`
-- validates `session_id` as UUID and length-caps it
-- loads or creates session state
-- routes turn to general chat or recommendation flow
-- persists session and turn messages
+## Intake + Enrichment
 
-Session state shape:
-- `session_id`
-- `tenant_id`
-- `role`
-- `chat_history`
-- `conversation_memory`
-- `recommendation_state`
-- `created_at`
-- `updated_at`
+`POST /api/inventory/intake`:
+- writes rug row + image row synchronously
+- returns quickly with `ai_status: "processing"`
+- runs vision enrichment in background
+
+Enrichment writes:
+- `intake_label` (3-6 words, no dimensions)
+- `ai_description` (1-2 sentences)
+- `ai_structured_fields` (`origin`, `style`, `pattern[]`, `primary_colors[]`, `age_category`, `mood`)
+
+On enrichment failure:
+- `intake_label` falls back to `Rug {id6}`
+- `ai_description = null`
+- `ai_structured_fields = null`
 
 ## Recommendation Pipeline
 
-- hard filtering: availability + size
-- candidate rows require primary image URL
-- missing-image candidates are dropped and logged server-side with rug id and label
-- AI ranking uses `ai_description` as primary content signal
-- fallback reason text must be rug-specific; generic filler is disallowed
+- SQL candidate query (tenant + availability + optional size bounds)
+- deterministic hard filtering in backend
+- candidate shaping for bounded AI input
+- AI ranking/explanations with strict JSON schema output
+- sanitizer and deterministic fallback behavior
 
-## Intake and Rug Detail
+Signals used:
+- `ai_description` (primary textual relevance)
+- merged effective structured fields (`origin/style/mood/pattern/colors`)
+- user message soft-signal matching
 
-`POST /api/inventory/intake`:
-- writes rug + primary image synchronously
-- returns quickly with `ai_status: "processing"`
-- launches async vision enrichment for `intake_label` and `ai_description`
+## Field Resolution
 
-`GET /api/rugs/[id]`:
-- returns rug, primary image URL, and `size_display`
-- generates `contextual_blurb` once if missing, then caches it
+Effective display fields are resolved at read time:
+- base: `intake_label` + `ai_structured_fields`
+- overlay: `staff_overrides`
+- merge helper: `resolveEffectiveFields()`
 
-## Branding and PWA
+## Scripts
 
-`GET /api/config/public` returns:
-- `storeName`
-- `storeLogoUrl`
-- `isPasscodeGated`
+- `scripts/re-enrich-rugs.ts`: batch vision enrichment for existing rugs
+- `scripts/seed-demo-rugs.ts`: seed 8 demo rugs + storage objects (idempotent by `stock_id`)
+- `scripts/verify-api-contracts.ts`: production contract + behavior checks, writes
+  `tmp/release-validation/overnight-phase2-report.json`
 
-`GET /api/manifest` returns dynamic manifest JSON using store branding.
+## QA Entrypoints
 
-## QA
-
-Canonical suites:
-1. `TENANT_ID=<tenant> npm run qa:functional`
-2. `TENANT_ID=<tenant> npm run qa:quality`
-
-Output files:
-- `scripts/testing/functionality/latest-functional.md`
-- `scripts/testing/quality/latest-quality.md`
+- `npm run qa:functional`
+- `npm run qa:quality`
+- `npm run qa:all`

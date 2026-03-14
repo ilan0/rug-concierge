@@ -1,36 +1,34 @@
-# Rug Images
+# Inventory Images
 
-Runtime image model for inventory and intake.
+Current image model used by intake, recommendation, and inventory detail APIs.
 
-## Storage
+## Storage Contract
 
-- Bucket: `rug-images`
-- `rug_images.path` stores object keys only (no full URL)
-- Path convention:
-  - `TENANT_UUID/RUG_UUID/front.jpg`
-  - `TENANT_UUID/RUG_UUID/detail-1.jpg`
+- bucket: `rug-images`
+- DB stores object keys in `rug_images.path` (not full URLs)
+- runtime builds public URLs with shared helper logic (`rugImagePathToPublicUrl`)
 
-Public URLs are generated at runtime with Supabase storage API.
+## DB Contract (`rug_images`)
 
-## `rug_images` Runtime Fields
+- required fields: `tenant_id`, `rug_id`, `path`
+- expected cardinality: one image row per rug (`rug_id` unique)
 
-- `tenant_id`
-- `rug_id`
-- `path`
-- `is_primary`
-- `sort_order`
+## Write Paths
 
-## Selection Behavior (Current MVP)
+`POST /api/inventory/intake`:
+- uploads image to storage
+- inserts one `rug_images` row
+- on downstream failure, performs best-effort cleanup
 
-- Runtime queries `rug_images` by `tenant_id` + rug IDs.
-- Expected data shape is one primary image row per rug.
-- If multiple valid rows exist for a rug, first valid row returned is used.
-- If no valid image row exists, UI falls back to placeholder.
+`scripts/seed-demo-rugs.ts`:
+- uploads demo images to storage
+- inserts one `rug_images` row per seeded demo rug
+- idempotent by `rugs.stock_id`
 
-## Intake Interaction
+## Read Paths
 
-`POST /api/inventory/intake` writes:
-- storage object to `rug-images`
-- one `rug_images` row with `is_primary=true`, `sort_order=0`
+- recommendation pipeline fetches primary image URLs by tenant + rug IDs
+- retail detail (`/api/rugs/[id]`) fetches image URL for one rug
+- staff detail routes fetch image URL similarly
 
-On downstream failure, intake performs compensating cleanup to avoid orphan rows/files.
+Candidates with missing image URLs are dropped from recommendation responses.

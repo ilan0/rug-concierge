@@ -24,7 +24,6 @@ export type RugDetailData = {
     mood?: string | null;
   };
   ai_description: string | null;
-  contextual_blurb: string | null;
   size_display: string;
   primary_image_url: string | null;
 };
@@ -114,14 +113,6 @@ export function RugDetailModal({
                 </section>
               ) : null}
 
-              <section className="space-y-2">
-                <h3 className="text-xs font-semibold uppercase tracking-[0.08em] text-primary">
-                  Context
-                </h3>
-                <p className="text-sm leading-6 text-foreground/90">
-                  {detail.contextual_blurb ?? "No contextual guidance yet."}
-                </p>
-              </section>
             </>
           ) : null}
 

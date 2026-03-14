@@ -4,6 +4,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { createClient } from "@supabase/supabase-js";
 import { z } from "zod";
+import { rugImagePathToPublicUrl } from "../apps/web/lib/storage/rug-images";
 
 const OPENAI_RESPONSES_URL = "https://api.openai.com/v1/responses";
 const MAX_CONCURRENCY = 2;
@@ -211,6 +212,14 @@ function assertEnv(name: string): string {
   return value;
 }
 
+function assertAnyEnv(names: string[]): string {
+  for (const name of names) {
+    const value = (process.env[name] ?? "").trim();
+    if (value) return value;
+  }
+  throw new Error(`Missing one of: ${names.join(", ")} environment variables.`);
+}
+
 function toPlainText(value: string): string {
   return value
     .replace(/\*\*/g, "")
@@ -359,7 +368,7 @@ async function requestVisionEnrichment(input: {
           {
             type: "input_text",
             text:
-              "You are an expert rug appraiser. Analyze the rug in this photo and return valid JSON only. Use measured size as context for scale only. Never include dimensions in the intake_label. Leave uncertain fields as null and unknown list fields as empty arrays.\\n\\nReturn shape:\\n{\\n  \\\"intake_label\\\": \\\"3-6 words, descriptive, no dimensions\\\",\\n  \\\"ai_description\\\": \\\"2-4 sentences: style tradition, palette, motifs, room fit\\\",\\n  \\\"ai_structured_fields\\\": {\\n    \\\"origin\\\": \\\"Persian|Afghan|Turkish|Indian|Caucasian|Pakistani|Other|null\\\",\\n    \\\"style\\\": \\\"named style like Heriz/Serapi/Gabbeh/Kilim or null\\\",\\n    \\\"pattern\\\": [\\\"medallion center\\\", \\\"all-over pattern\\\", \\\"geometric design\\\", \\\"floral motif\\\", \\\"tribal design\\\", \\\"floral border\\\", \\\"pictorial\\\", \\\"plain field\\\"],\\n    \\\"primary_colors\\\": [\\\"red\\\",\\\"navy\\\",\\\"ivory\\\",\\\"gold\\\",\\\"rust\\\",\\\"teal\\\",\\\"brown\\\",\\\"green\\\",\\\"blue\\\",\\\"black\\\",\\\"cream\\\",\\\"coral\\\"],\\n    \\\"age_category\\\": \\\"antique|semi-antique|vintage|new|null\\\",\\n    \\\"mood\\\": \\\"traditional|transitional|eclectic|modern|null\\\"\\n  }\\n}",
+              "You are an expert rug appraiser. Analyze the rug in this photo and return valid JSON only. Use measured size as context for scale only. Never include dimensions in the intake_label. Leave uncertain fields as null and unknown list fields as empty arrays.\\n\\nReturn shape:\\n{\\n  \\\"intake_label\\\": \\\"3-6 words, descriptive, no dimensions\\\",\\n  \\\"ai_description\\\": \\\"1-2 sentences: style tradition, palette, motifs, room fit\\\",\\n  \\\"ai_structured_fields\\\": {\\n    \\\"origin\\\": \\\"Persian|Afghan|Turkish|Indian|Caucasian|Pakistani|Other|null\\\",\\n    \\\"style\\\": \\\"named style like Heriz/Serapi/Gabbeh/Kilim or null\\\",\\n    \\\"pattern\\\": [\\\"medallion center\\\", \\\"all-over pattern\\\", \\\"geometric design\\\", \\\"floral motif\\\", \\\"tribal design\\\", \\\"floral border\\\", \\\"pictorial\\\", \\\"plain field\\\"],\\n    \\\"primary_colors\\\": [\\\"red\\\",\\\"navy\\\",\\\"ivory\\\",\\\"gold\\\",\\\"rust\\\",\\\"teal\\\",\\\"brown\\\",\\\"green\\\",\\\"blue\\\",\\\"black\\\",\\\"cream\\\",\\\"coral\\\"],\\n    \\\"age_category\\\": \\\"antique|semi-antique|vintage|new|null\\\",\\n    \\\"mood\\\": \\\"traditional|transitional|eclectic|modern|null\\\"\\n  }\\n}",
           },
         ],
       },
@@ -476,12 +485,9 @@ async function fetchPrimaryImageUrls(input: {
     if (!rugId || !pathValue) continue;
     if (map.has(rugId)) continue;
 
-    const { data: publicData } = input.supabase.storage
-      .from("rug-images")
-      .getPublicUrl(pathValue.replace(/^\/+/, ""));
-
-    if (publicData.publicUrl) {
-      map.set(rugId, publicData.publicUrl);
+    const publicUrl = rugImagePathToPublicUrl(input.supabase, pathValue);
+    if (publicUrl) {
+      map.set(rugId, publicUrl);
     }
   }
 
@@ -539,7 +545,10 @@ async function main() {
   const options = parseArgs(process.argv.slice(2));
 
   const supabaseUrl = assertEnv("SUPABASE_URL");
-  const supabaseSecretKey = assertEnv("SUPABASE_SECRET_KEY");
+  const supabaseSecretKey = assertAnyEnv([
+    "SUPABASE_SECRET_KEY",
+    "SUPABASE_SERVICE_ROLE_KEY",
+  ]);
   const supabase = createClient(supabaseUrl, supabaseSecretKey, {
     auth: { persistSession: false },
   });

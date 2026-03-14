@@ -31,7 +31,6 @@ function isRugDetailData(value: unknown): value is RugDetailData {
     typeof data.size_display === "string" &&
     effectiveFieldsValid &&
     (typeof data.ai_description === "string" || data.ai_description === null) &&
-    (typeof data.contextual_blurb === "string" || data.contextual_blurb === null) &&
     (typeof data.primary_image_url === "string" || data.primary_image_url === null)
   );
 }

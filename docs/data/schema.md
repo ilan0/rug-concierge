@@ -1,67 +1,80 @@
-# Data Schema (Runtime Contract)
+# Runtime Data Schema
 
-This doc describes the schema required by the current runtime.
+This doc lists the fields currently used by runtime code paths.
 
-## Multi-Tenant Rule
+## Tenant Rule
 
-Inventory-backed tables are scoped by `tenant_id`.
-All inventory queries must include tenant scope.
+All inventory-backed tables are tenant scoped. Runtime queries must include `tenant_id`.
 
-## Core Tables
+## `tenants`
 
-### `tenants`
-
+Runtime-required:
 - `id`
-- `name`
-- `settings` (JSON)
 
-### `rugs`
+Commonly present/used:
+- `settings` (jsonb)
+- `created_at`
 
-Runtime fields:
+## `rugs`
+
+Runtime-required fields:
 - `id`
 - `tenant_id`
-- `intake_label`
-- `status` (`available`, `sold`, `on_hold`)
-- `width_total_in`
-- `length_total_in`
+- `stock_id` (nullable)
+- `status` (`available`, `on_hold`, `sold`)
+- `width_ft`, `width_in`, `length_ft`, `length_in`
+- `width_total_in`, `length_total_in` (computed/generated in DB)
+- `intake_label` (nullable during processing)
 - `ai_description` (nullable)
-- `contextual_blurb` (nullable)
+- `ai_structured_fields` (jsonb nullable)
+- `staff_overrides` (jsonb nullable)
+- `created_at`, `updated_at`
 
-Compatibility fields may still exist in DB but are not used by current runtime.
+Removed from runtime:
+- `contextual_blurb`
 
-### `rug_images`
+## `rug_images`
 
 Runtime-used fields:
+- `id`
 - `tenant_id`
 - `rug_id`
-- `path` (storage object key)
-- `is_primary`
-- `sort_order`
+- `path` (storage object key only)
 
-### `chat_sessions`
+Current shape expectation:
+- one row per rug (`rug_id` unique index)
 
-- `session_id`
-- `tenant_id` (nullable for non-inventory chat)
+## `chat_sessions`
+
+Used by runtime chat persistence (`/api/chat`).
+
+- `session_id` (pk)
+- `tenant_id` (nullable)
 - `role`
-- `session_data` (JSONB)
+- `session_data` (jsonb)
 - `created_at`
 - `updated_at`
 
-### `chat_messages`
+## `chat_messages`
 
-- `id`
-- `session_id`
-- `tenant_id`
+Used by runtime turn history persistence (`/api/chat`).
+
+- `id` (uuid pk)
+- `session_id` (fk -> `chat_sessions.session_id`, cascade delete)
+- `tenant_id` (nullable)
 - `role` (`user`, `assistant`)
 - `mode` (`general_chat`, `recommendation`)
 - `content`
-- `metadata` (JSONB)
+- `metadata` (jsonb)
 - `created_at`
 
 ## Storage
 
-Supabase bucket:
+Bucket:
 - `rug-images`
 
-Object key format:
-- `{TENANT_UUID}/{RUG_UUID}/primary-{timestamp}.{ext}`
+Object keys used by runtime scripts/routes:
+- intake path: `{TENANT_UUID}/{RUG_UUID}/primary-{timestamp}.{ext}`
+- demo seed path: `{TENANT_UUID}/{RUG_UUID}/photo.{jpg|png}`
+
+Runtime builds public URLs from `rug_images.path` at read time.

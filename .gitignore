@@ -37,3 +37,4 @@ tests/e2e/config.ts
 # IDE
 .vscode
 .idea
+.vercel
