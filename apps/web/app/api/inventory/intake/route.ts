@@ -265,8 +265,6 @@ export async function POST(req: NextRequest) {
       tenant_id: tenantId,
       rug_id: rugId,
       path: storagePath,
-      is_primary: true,
-      sort_order: 0,
     })
     .select("rug_id")
     .single();

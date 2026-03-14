@@ -461,11 +461,9 @@ async function fetchPrimaryImageUrls(input: {
 
   const { data, error } = await input.supabase
     .from("rug_images")
-    .select("rug_id, path, is_primary, sort_order")
+    .select("rug_id, path")
     .eq("tenant_id", input.tenantId)
-    .in("rug_id", input.rugIds)
-    .order("is_primary", { ascending: false })
-    .order("sort_order", { ascending: true, nullsFirst: true });
+    .in("rug_id", input.rugIds);
 
   if (error || !Array.isArray(data)) {
     throw new Error(error?.message ?? "Failed to query rug_images.");
