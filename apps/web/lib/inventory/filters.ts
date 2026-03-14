@@ -1,12 +1,15 @@
 import type {
   InventoryFilters,
   InventorySort,
+  InventorySizePreset,
   InventoryStatusFilter,
 } from "@/lib/types/inventory";
+import { normalizeInventorySizePreset } from "@/lib/inventory/size-presets";
 
 export type InventoryFilterInput = {
   q?: string;
   status?: string;
+  sizePreset?: string;
   widthMin?: number | null;
   widthMax?: number | null;
   lengthMin?: number | null;
@@ -17,6 +20,7 @@ export type InventoryFilterInput = {
 const DEFAULT_FILTERS: InventoryFilters = {
   q: "",
   status: "available",
+  sizePreset: null,
   widthMin: null,
   widthMax: null,
   lengthMin: null,
@@ -48,15 +52,25 @@ export function normalizeInventoryFilters(
   const sort = ALLOWED_SORT.includes(input.sort as InventorySort)
     ? (input.sort as InventorySort)
     : DEFAULT_FILTERS.sort;
+  const sizePreset = normalizeInventorySizePreset(input.sizePreset);
 
   const widthMin = toPositiveNumberOrNull(input.widthMin);
   const widthMax = toPositiveNumberOrNull(input.widthMax);
   const lengthMin = toPositiveNumberOrNull(input.lengthMin);
   const lengthMax = toPositiveNumberOrNull(input.lengthMax);
 
+  const hasManualSizeBounds =
+    widthMin !== null ||
+    widthMax !== null ||
+    lengthMin !== null ||
+    lengthMax !== null;
+  const effectiveSizePreset =
+    hasManualSizeBounds ? null : (sizePreset as InventorySizePreset | null);
+
   return {
     q,
     status,
+    sizePreset: effectiveSizePreset,
     widthMin:
       widthMin !== null && widthMax !== null && widthMin > widthMax
         ? widthMax
@@ -81,6 +95,7 @@ export function isDefaultInventoryFilters(filters: InventoryFilters): boolean {
   return (
     filters.q === DEFAULT_FILTERS.q &&
     filters.status === DEFAULT_FILTERS.status &&
+    filters.sizePreset === DEFAULT_FILTERS.sizePreset &&
     filters.widthMin === DEFAULT_FILTERS.widthMin &&
     filters.widthMax === DEFAULT_FILTERS.widthMax &&
     filters.lengthMin === DEFAULT_FILTERS.lengthMin &&

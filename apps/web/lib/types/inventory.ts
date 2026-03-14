@@ -1,6 +1,16 @@
 export type InventoryStatusFilter = "all" | "available" | "sold" | "on_hold";
 
 export type InventorySort = "newest" | "oldest";
+export type InventorySizePreset =
+  | "3x5"
+  | "4x6"
+  | "5x8"
+  | "6x9"
+  | "8x10"
+  | "9x12"
+  | "10x14"
+  | "runner"
+  | "round-oval";
 
 export type RugOrigin =
   | "Persian"
@@ -47,6 +57,7 @@ export type EffectiveRugFields = {
 export type InventoryFilters = {
   q: string;
   status: InventoryStatusFilter;
+  sizePreset: InventorySizePreset | null;
   widthMin: number | null;
   widthMax: number | null;
   lengthMin: number | null;
@@ -57,6 +68,7 @@ export type InventoryFilters = {
 export type InventoryBrowserRow = {
   id: string;
   tenant_id: string | null;
+  effective_label: string | null;
   intake_label: string | null;
   primary_image_url: string | null;
   primary_image_caption: string | null;

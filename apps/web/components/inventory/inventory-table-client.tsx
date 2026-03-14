@@ -48,8 +48,9 @@ function readiness(row: InventoryBrowserRow): {
   autoNamed: boolean;
 } {
   const sizeLabel = formatRugSize(row.width_total_in, row.length_total_in);
-  const label = row.intake_label?.trim() || sizeLabel || "Untitled";
-  const ready = Boolean(row.intake_label && row.intake_label.trim().length > 0);
+  const mergedLabel = row.effective_label?.trim() || row.intake_label?.trim() || null;
+  const label = mergedLabel || sizeLabel || "Untitled";
+  const ready = Boolean(mergedLabel);
   const hasStaffLabelOverride = Boolean(
     row.staff_overrides?.label && row.staff_overrides.label.trim().length > 0
   );

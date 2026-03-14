@@ -143,19 +143,36 @@ export default function KioskNav({ initialUnlocked }: KioskNavProps) {
 
   return (
     <>
-      <div className="mx-auto mt-2 flex w-full max-w-6xl flex-wrap items-center gap-2 px-4 opacity-95 transition-all duration-200 sm:px-6 lg:px-8">
+      <nav
+        aria-label="Primary kiosk navigation"
+        className="mx-auto mt-2 flex w-full max-w-6xl flex-wrap items-center gap-2 px-4 opacity-95 transition-all duration-200 sm:px-6 lg:px-8"
+      >
         {LINKS.filter((link) => (link.requiresStaff ? unlocked : true)).map((link) => {
           const active = isLinkActive(pathname, link.href);
+          const className = cn(
+            "inline-flex min-h-9 items-center rounded-full border px-3 py-1.5 text-sm font-medium leading-5 transition-colors",
+            active
+              ? "border-primary/50 bg-primary/10 text-foreground"
+              : "border-border/20 bg-background/35 text-muted-foreground hover:border-primary/30 hover:bg-primary/10 hover:text-foreground"
+          );
+
+          if (link.requiresStaff) {
+            return (
+              <a
+                key={link.href}
+                href={link.href}
+                className={className}
+              >
+                {link.label}
+              </a>
+            );
+          }
+
           return (
             <Link
               key={link.href}
               href={link.href}
-              className={cn(
-                "inline-flex min-h-9 items-center rounded-full border px-3 py-1.5 text-sm font-medium leading-5 transition-colors",
-                active
-                  ? "border-primary/50 bg-primary/10 text-foreground"
-                  : "border-border/20 bg-background/35 text-muted-foreground hover:border-primary/30 hover:bg-primary/10 hover:text-foreground"
-              )}
+              className={className}
             >
               {link.label}
             </Link>
@@ -177,7 +194,7 @@ export default function KioskNav({ initialUnlocked }: KioskNavProps) {
             <span className="absolute -right-0.5 -top-0.5 size-2 rounded-full bg-amber-500 ring-2 ring-background" />
           ) : null}
         </button>
-      </div>
+      </nav>
 
       {showPinModal ? (
         <StaffPinModal

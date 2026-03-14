@@ -7,7 +7,9 @@ import {
   aiStructuredFieldsSchema,
   staffOverridesSchema,
 } from "@/lib/inventory/schemas";
+import { resolveEffectiveFields } from "@/lib/inventory/resolve-fields";
 import { fetchPrimaryRugImagesForRugs } from "@/lib/storage/rug-images";
+import { toExactSizePresetSpec } from "@/lib/inventory/size-presets";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 const DEFAULT_PAGE_SIZE = 50;
@@ -39,7 +41,7 @@ export async function listInventory(
   const pageSize = Math.min(requestedPageSize, MAX_PAGE_SIZE);
   const filters = normalizeInventoryFilters(input.filters);
   const from = (page - 1) * pageSize;
-  const to = from + pageSize - 1;
+  const to = from + pageSize;
 
   if (!tenantId) {
     return {
@@ -71,36 +73,11 @@ export async function listInventory(
   const runQuery = (selectColumns: string) => {
     let query = supabase
       .from("rugs")
-      .select(selectColumns, { count: "exact" })
-      .eq("tenant_id", tenantId)
-      .range(from, to);
+      .select(selectColumns)
+      .eq("tenant_id", tenantId);
 
     if (filters.status !== "all") {
       query = query.eq("status", filters.status);
-    }
-
-    if (filters.q) {
-      const token = escapeForIlike(filters.q);
-      query = query.or(
-        [
-          `intake_label.ilike.%${token}%`,
-          `ai_description.ilike.%${token}%`,
-          `stock_id.ilike.%${token}%`,
-        ].join(",")
-      );
-    }
-
-    if (filters.widthMin !== null) {
-      query = query.gte("width_total_in", filters.widthMin);
-    }
-    if (filters.widthMax !== null) {
-      query = query.lte("width_total_in", filters.widthMax);
-    }
-    if (filters.lengthMin !== null) {
-      query = query.gte("length_total_in", filters.lengthMin);
-    }
-    if (filters.lengthMax !== null) {
-      query = query.lte("length_total_in", filters.lengthMax);
     }
 
     if (filters.sort === "oldest") {
@@ -125,7 +102,7 @@ export async function listInventory(
     queryResult = await runQuery(selectColumns);
   }
 
-  const { data, error, count } = queryResult;
+  const { data, error } = queryResult;
   if (error || !Array.isArray(data)) {
     return {
       rows: [],
@@ -139,15 +116,22 @@ export async function listInventory(
     };
   }
 
-  const baseRows = (data as unknown as Record<string, unknown>[])
+  const allRows = (data as unknown as Record<string, unknown>[])
     .map((row) => toBrowserRow(row))
     .filter((row): row is InventoryBrowserRow => row !== null);
+  const filteredRows = allRows.filter((row) =>
+    matchesRowWithFilters(row, filters)
+  );
+  const total = filteredRows.length;
+  const totalPages = total === 0 ? 0 : Math.ceil(total / pageSize);
+  const pagedRows = filteredRows.slice(from, to);
+
   const imageMap = await fetchPrimaryRugImagesForRugs({
     supabase,
     tenantId,
-    rugIds: baseRows.map((row) => row.id),
+    rugIds: pagedRows.map((row) => row.id),
   });
-  const rows = baseRows.map((row) => {
+  const rows = pagedRows.map((row) => {
     const image = imageMap.get(row.id);
     return {
       ...row,
@@ -155,8 +139,6 @@ export async function listInventory(
       primary_image_caption: image?.primary_image_caption ?? null,
     };
   });
-  const total = typeof count === "number" ? count : rows.length;
-  const totalPages = total === 0 ? 0 : Math.ceil(total / pageSize);
 
   return {
     rows,
@@ -181,15 +163,27 @@ function toBrowserRow(row: Record<string, unknown>): InventoryBrowserRow | null 
     return null;
   }
 
+  const intakeLabel =
+    typeof row.intake_label === "string" ? row.intake_label : null;
+  const aiStructuredFields = toAiStructuredFieldsOrNull(row.ai_structured_fields);
+  const staffOverrides = toStaffOverridesOrNull(row.staff_overrides);
+  const sourceLabel =
+    normalizeLabel(staffOverrides?.label) ?? normalizeLabel(intakeLabel);
+  const mergedFields = resolveEffectiveFields(
+    intakeLabel,
+    aiStructuredFields,
+    staffOverrides
+  );
+
   return {
     id: row.id,
     tenant_id: typeof row.tenant_id === "string" ? row.tenant_id : null,
-    intake_label:
-      typeof row.intake_label === "string" ? row.intake_label : null,
+    effective_label: sourceLabel ?? normalizeLabel(mergedFields.label),
+    intake_label: intakeLabel,
     primary_image_url: null,
     primary_image_caption: null,
-    ai_structured_fields: toAiStructuredFieldsOrNull(row.ai_structured_fields),
-    staff_overrides: toStaffOverridesOrNull(row.staff_overrides),
+    ai_structured_fields: aiStructuredFields,
+    staff_overrides: staffOverrides,
     stock_id: typeof row.stock_id === "string" ? row.stock_id : null,
     status: typeof row.status === "string" ? row.status : null,
     width_total_in: toNumberOrNull(row.width_total_in),
@@ -221,8 +215,105 @@ function toStaffOverridesOrNull(
   return parsed.success ? parsed.data : null;
 }
 
-function escapeForIlike(value: string): string {
-  return value.replace(/[%_]/g, "");
+function matchesRowWithFilters(
+  row: InventoryBrowserRow,
+  filters: ReturnType<typeof normalizeInventoryFilters>
+): boolean {
+  if (!matchesSearchQuery(row, filters.q)) return false;
+  if (!matchesManualSizeBounds(row, filters)) return false;
+  if (!matchesSizePreset(row, filters.sizePreset)) return false;
+  return true;
+}
+
+function matchesSearchQuery(row: InventoryBrowserRow, query: string): boolean {
+  const normalized = query.trim().toLowerCase();
+  if (!normalized) return true;
+
+  const tokens = normalized.split(/\s+/).filter((token) => token.length > 0);
+  if (tokens.length === 0) return true;
+
+  const haystack = [
+    row.effective_label,
+    row.intake_label,
+    row.stock_id,
+    row.ai_description,
+  ]
+    .filter((value): value is string => typeof value === "string")
+    .join(" ")
+    .toLowerCase();
+
+  return tokens.every((token) => haystack.includes(token));
+}
+
+function matchesManualSizeBounds(
+  row: InventoryBrowserRow,
+  filters: ReturnType<typeof normalizeInventoryFilters>
+): boolean {
+  const width = row.width_total_in;
+  const length = row.length_total_in;
+
+  if (
+    filters.widthMin === null &&
+    filters.widthMax === null &&
+    filters.lengthMin === null &&
+    filters.lengthMax === null
+  ) {
+    return true;
+  }
+  if (width === null || length === null) return false;
+  if (filters.widthMin !== null && width < filters.widthMin) return false;
+  if (filters.widthMax !== null && width > filters.widthMax) return false;
+  if (filters.lengthMin !== null && length < filters.lengthMin) return false;
+  if (filters.lengthMax !== null && length > filters.lengthMax) return false;
+  return true;
+}
+
+function matchesSizePreset(
+  row: InventoryBrowserRow,
+  sizePreset: ReturnType<typeof normalizeInventoryFilters>["sizePreset"]
+): boolean {
+  if (!sizePreset) return true;
+  if (sizePreset === "runner") return matchesRunnerPreset(row);
+  if (sizePreset === "round-oval") return matchesRoundOvalPreset(row);
+
+  const spec = toExactSizePresetSpec(sizePreset);
+  if (!spec) return true;
+  const width = row.width_total_in;
+  const length = row.length_total_in;
+  if (width === null || length === null) return false;
+
+  const directMatch =
+    Math.abs(width - spec.widthIn) <= spec.toleranceIn &&
+    Math.abs(length - spec.lengthIn) <= spec.toleranceIn;
+  if (directMatch) return true;
+
+  return (
+    Math.abs(width - spec.lengthIn) <= spec.toleranceIn &&
+    Math.abs(length - spec.widthIn) <= spec.toleranceIn
+  );
+}
+
+function matchesRunnerPreset(row: InventoryBrowserRow): boolean {
+  const width = row.width_total_in;
+  const length = row.length_total_in;
+  if (width === null || length === null) return false;
+
+  const shortSide = Math.min(width, length);
+  const longSide = Math.max(width, length);
+  if (shortSide <= 0) return false;
+
+  return shortSide <= 42 && longSide >= 84 && longSide / shortSide >= 2.2;
+}
+
+function matchesRoundOvalPreset(row: InventoryBrowserRow): boolean {
+  const haystack = `${row.intake_label ?? ""} ${row.ai_description ?? ""}`.toLowerCase();
+  return /\b(round|circular|circle|oval)\b/.test(haystack);
+}
+
+function normalizeLabel(value: string | null | undefined): string | null {
+  if (typeof value !== "string") return null;
+  const trimmed = value.trim();
+  return trimmed.length > 0 ? trimmed : null;
 }
 
 function isLikelyMissingColumnError(message: string): boolean {

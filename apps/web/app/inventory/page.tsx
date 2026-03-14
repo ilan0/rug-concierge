@@ -1,48 +1,20 @@
 import Link from "next/link";
-import { CheckCircle, Package, Search } from "lucide-react";
+import { CheckCircle2, Package2 } from "lucide-react";
 import { AccessGuard } from "@/components/ui/access-guard";
 import { AppShell } from "@/components/ui/app-shell";
 import { PageHeader } from "@/components/ui/page-header";
 import { SectionCard } from "@/components/ui/section-card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
+import { InventoryControlsClient } from "@/components/inventory/inventory-controls-client";
 import { InventoryTableClient } from "@/components/inventory/inventory-table-client";
 import { getInventoryStats, listInventory } from "@/lib/inventory/list";
-import { isDefaultInventoryFilters } from "@/lib/inventory/filters";
 import { getServerUiTenantId } from "@/lib/ui/server-role";
-import type {
-  InventorySort,
-  InventoryStatusFilter,
-} from "@/lib/types/inventory";
 
 type InventoryPageProps = {
   searchParams?:
     | Promise<Record<string, string | string[] | undefined>>
     | Record<string, string | string[] | undefined>;
 };
-
-type StatusOption = {
-  value: InventoryStatusFilter;
-  label: string;
-};
-
-type SortOption = {
-  value: InventorySort;
-  label: string;
-};
-
-const STATUS_OPTIONS: StatusOption[] = [
-  { value: "available", label: "Available" },
-  { value: "all", label: "All" },
-  { value: "sold", label: "Sold" },
-  { value: "on_hold", label: "On Hold" },
-];
-
-const SORT_OPTIONS: SortOption[] = [
-  { value: "newest", label: "Newest" },
-  { value: "oldest", label: "Oldest" },
-];
 
 function readString(
   value: string | string[] | undefined,
@@ -114,6 +86,7 @@ export default async function InventoryPage({ searchParams }: InventoryPageProps
   const filtersInput = {
     q: readString(params.q),
     status: readString(params.status),
+    sizePreset: readString(params.size_preset),
     widthMin: toNumberOrNull(readString(params.width_min)),
     widthMax: toNumberOrNull(readString(params.width_max)),
     lengthMin: toNumberOrNull(readString(params.length_min)),
@@ -141,6 +114,7 @@ export default async function InventoryPage({ searchParams }: InventoryPageProps
     page_size: result.pageSize,
     q: result.filters.q || null,
     status: result.filters.status !== "available" ? result.filters.status : null,
+    size_preset: result.filters.sizePreset,
     width_min: result.filters.widthMin,
     width_max: result.filters.widthMax,
     length_min: result.filters.lengthMin,
@@ -154,287 +128,124 @@ export default async function InventoryPage({ searchParams }: InventoryPageProps
       page: next,
     })}`;
 
-  const statusLink = (status: InventoryStatusFilter) =>
-    `/inventory?${buildQueryString({
-      ...queryBase,
-      page: 1,
-      status: status === "available" ? null : status,
-    })}`;
-
-  const sortLink = (sort: InventorySort) =>
-    `/inventory?${buildQueryString({
-      ...queryBase,
-      page: 1,
-      sort: sort === "newest" ? null : sort,
-    })}`;
-
-  const refreshLink = pageLink(1);
-  const clearFiltersLink = `/inventory?${buildQueryString({
-    page: 1,
-    page_size: result.pageSize,
-  })}`;
-
-  const activeFilterItems = [
-    result.filters.q ? `Query: ${result.filters.q}` : null,
-    result.filters.status !== "available"
-      ? `Status: ${result.filters.status}`
-      : null,
-    result.filters.widthMin !== null ? `Min Width: ${result.filters.widthMin}\"` : null,
-    result.filters.widthMax !== null ? `Max Width: ${result.filters.widthMax}\"` : null,
-    result.filters.lengthMin !== null
-      ? `Min Length: ${result.filters.lengthMin}\"`
-      : null,
-    result.filters.lengthMax !== null
-      ? `Max Length: ${result.filters.lengthMax}\"`
-      : null,
-    result.filters.sort !== "newest" ? `Sort: ${result.filters.sort}` : null,
-  ].filter((item): item is string => Boolean(item));
-
+  const refreshLink = pageLink(result.page);
   const visiblePageNumbers = getVisiblePageNumbers(result.page, result.totalPages, 7);
+  const controlsKey = buildQueryString({
+    q: result.filters.q || null,
+    status: result.filters.status,
+    size_preset: result.filters.sizePreset,
+    width_min: result.filters.widthMin,
+    width_max: result.filters.widthMax,
+    length_min: result.filters.lengthMin,
+    length_max: result.filters.lengthMax,
+    sort: result.filters.sort,
+  });
 
   return (
-    <>
-      <AppShell variant="catalog">
-        <PageHeader
-          kicker="Catalog"
-          title="Inventory Browser"
-          subtitle="Browse current available rugs and their AI-generated descriptions."
-          variant="catalog"
-          actions={
-            <Button asChild variant="outline">
-              <Link href={refreshLink}>Refresh</Link>
-            </Button>
-          }
-        />
+    <AppShell variant="catalog" className="pt-4">
+      <PageHeader
+        title="Inventory Browser"
+        subtitle="Browse and manage AI-enriched inventory records."
+        variant="minimal"
+        className="mb-3"
+        actions={
+          <Button asChild variant="outline" size="sm">
+            <Link href={refreshLink}>Refresh</Link>
+          </Button>
+        }
+      />
 
-        <div className="mt-5 space-y-5">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="flex items-center gap-4 rounded-xl border border-primary/20 bg-primary/10 p-5">
-              <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground">
-                <Package className="size-5" />
-              </div>
-              <div>
-                <p className="text-xs font-bold uppercase tracking-widest text-primary">Total Stock</p>
-                <p className="text-2xl font-serif font-bold text-foreground">{inventoryStats.total}</p>
-              </div>
-            </div>
+      <div className="mb-3 flex flex-wrap items-center gap-2 text-xs">
+        <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/30 bg-primary/10 px-2.5 py-1 font-medium text-foreground">
+          <Package2 className="size-3.5 text-primary" />
+          Total {inventoryStats.total}
+        </span>
+        <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-400/30 bg-emerald-50 px-2.5 py-1 font-medium text-foreground">
+          <CheckCircle2 className="size-3.5 text-emerald-600" />
+          Available {inventoryStats.available}
+        </span>
+      </div>
 
-            <div className="flex items-center gap-4 rounded-xl border border-emerald-500/20 bg-emerald-50 p-5">
-              <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-emerald-500 text-white">
-                <CheckCircle className="size-5" />
-              </div>
-              <div>
-                <p className="text-xs font-bold uppercase tracking-widest text-emerald-700">Available</p>
-                <p className="text-2xl font-serif font-bold text-foreground">{inventoryStats.available}</p>
-              </div>
-            </div>
-          </div>
+      <InventoryControlsClient
+        key={controlsKey}
+        filters={result.filters}
+        pageSize={result.pageSize}
+      />
 
-          <SectionCard title="Search and Filters" tone="soft" className="border-border/55">
-            <div className="space-y-4 rounded-xl border border-border/60 bg-white p-4 shadow-sm">
-              <div className="space-y-2">
-                <p className="text-sm font-medium text-foreground">Status</p>
-                <div className="flex flex-wrap gap-2">
-                  {STATUS_OPTIONS.map((option) => {
-                    const active = result.filters.status === option.value;
-                    return (
-                      <Link
-                        key={option.value}
-                        href={statusLink(option.value)}
-                        className={
-                          active
-                            ? "inline-flex h-10 items-center rounded-full border border-primary/40 bg-primary/10 px-4 text-sm font-semibold text-foreground ring-1 ring-primary/25"
-                            : "inline-flex h-10 items-center rounded-full border border-border/50 bg-background px-4 text-sm font-medium text-foreground/80 hover:border-primary/30 hover:bg-primary/10 hover:text-foreground"
-                        }
-                      >
-                        {option.label}
-                      </Link>
-                    );
-                  })}
-                </div>
-              </div>
+      <section
+        aria-labelledby="inventory-results-heading"
+        className="mt-3"
+        data-inventory-results="true"
+      >
+        <h2 id="inventory-results-heading" className="mb-1.5 text-sm font-semibold text-foreground">
+          Inventory
+        </h2>
 
-              <div className="space-y-2">
-                <p className="text-sm font-medium text-foreground">Sort</p>
-                <div className="flex flex-wrap gap-2">
-                  {SORT_OPTIONS.map((option) => {
-                    const active = result.filters.sort === option.value;
-                    return (
-                      <Link
-                        key={option.value}
-                        href={sortLink(option.value)}
-                        className={
-                          active
-                            ? "inline-flex h-10 items-center rounded-full border border-primary/40 bg-primary/10 px-4 text-sm font-semibold text-foreground ring-1 ring-primary/25"
-                            : "inline-flex h-10 items-center rounded-full border border-border/50 bg-background px-4 text-sm font-medium text-foreground/80 hover:border-primary/30 hover:bg-primary/10 hover:text-foreground"
-                        }
-                      >
-                        {option.label}
-                      </Link>
-                    );
-                  })}
-                </div>
-              </div>
-
-              <form method="GET" action="/inventory" className="grid gap-3 md:grid-cols-3 xl:grid-cols-5">
-                <input type="hidden" name="page" value="1" />
-                <input type="hidden" name="page_size" value={result.pageSize} />
-                <input type="hidden" name="status" value={result.filters.status} />
-                <input type="hidden" name="sort" value={result.filters.sort} />
-
-                <div className="space-y-2 xl:col-span-2">
-                  <label className="text-sm font-medium" htmlFor="q">Search</label>
-                  <div className="relative">
-                    <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-                    <Input
-                      id="q"
-                      name="q"
-                      defaultValue={result.filters.q}
-                      placeholder="Search by label or description"
-                      className="h-11 pl-10 text-base"
-                    />
-                  </div>
-                </div>
-
-                <details className="rounded-xl border border-border/60 bg-background/55 p-3 md:col-span-3 xl:col-span-3">
-                  <summary className="cursor-pointer text-sm font-semibold text-foreground">
-                    Size filters (optional)
-                  </summary>
-                  <div className="mt-3 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium" htmlFor="width_min">Min Width (in)</label>
-                      <Input
-                        id="width_min"
-                        name="width_min"
-                        type="number"
-                        min="0"
-                        step="1"
-                        defaultValue={result.filters.widthMin ?? ""}
-                        className="h-11 text-base"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium" htmlFor="width_max">Max Width (in)</label>
-                      <Input
-                        id="width_max"
-                        name="width_max"
-                        type="number"
-                        min="0"
-                        step="1"
-                        defaultValue={result.filters.widthMax ?? ""}
-                        className="h-11 text-base"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium" htmlFor="length_min">Min Length (in)</label>
-                      <Input
-                        id="length_min"
-                        name="length_min"
-                        type="number"
-                        min="0"
-                        step="1"
-                        defaultValue={result.filters.lengthMin ?? ""}
-                        className="h-11 text-base"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium" htmlFor="length_max">Max Length (in)</label>
-                      <Input
-                        id="length_max"
-                        name="length_max"
-                        type="number"
-                        min="0"
-                        step="1"
-                        defaultValue={result.filters.lengthMax ?? ""}
-                        className="h-11 text-base"
-                      />
-                    </div>
-                  </div>
-                </details>
-
-                <div className="flex flex-wrap items-end gap-2 md:col-span-3 xl:col-span-5">
-                  <Button type="submit" className="h-11 px-5 text-base">Apply Filters</Button>
-                  <Button asChild variant="ghost">
-                    <Link href={clearFiltersLink}>Clear</Link>
-                  </Button>
-                </div>
-              </form>
-            </div>
+        {result.error ? (
+          <SectionCard tone="soft" density="compact" className="border-border/55">
+            <p className="text-sm font-medium text-foreground">Could not load inventory</p>
+            <p className="mt-1 text-sm text-muted-foreground">{result.error}</p>
           </SectionCard>
+        ) : result.rows.length === 0 ? (
+          <SectionCard tone="soft" density="compact" className="border-border/55">
+            <p className="text-sm font-medium text-foreground">No inventory rows found</p>
+            <p className="mt-1 text-sm text-muted-foreground">
+              No rugs matched current filters. Try broadening size or search terms.
+            </p>
+          </SectionCard>
+        ) : (
+          <SectionCard tone="soft" density="compact" className="border-border/55">
+            <InventoryTableClient rows={result.rows} />
+          </SectionCard>
+        )}
+      </section>
 
-          {!isDefaultInventoryFilters(result.filters) ? (
-            <SectionCard title="Active Filters" tone="transparent" density="compact">
-              <div className="flex flex-wrap gap-2">
-                {activeFilterItems.map((item) => (
-                  <Badge key={item} variant="outline">
-                    {item}
-                  </Badge>
-                ))}
-              </div>
-            </SectionCard>
-          ) : null}
-
-          {result.error ? (
-            <SectionCard title="Could not load inventory" description={result.error} />
-          ) : result.rows.length === 0 ? (
-            <SectionCard
-              title="No inventory rows found"
-              description="No rugs matched current filters. Adjust search or broaden constraints."
-            />
+      {result.totalPages > 1 ? (
+        <nav aria-label="Inventory pagination" className="mt-4 flex flex-wrap items-center justify-center gap-2">
+          {prevPage ? (
+            <Link
+              href={pageLink(prevPage)}
+              className="inline-flex h-9 items-center rounded-full border border-border/50 px-3 text-sm font-medium text-foreground/80 hover:border-primary/30 hover:bg-primary/10 hover:text-foreground"
+            >
+              {'<<'}
+            </Link>
           ) : (
-            <SectionCard title="Inventory" tone="soft" className="border-border/55">
-              <InventoryTableClient rows={result.rows} />
-            </SectionCard>
+            <span className="inline-flex h-9 items-center rounded-full border border-border/30 px-3 text-sm text-muted-foreground">
+              {'<<'}
+            </span>
           )}
 
-          {result.totalPages > 1 ? (
-            <div className="flex flex-wrap items-center justify-center gap-2">
-              {prevPage ? (
-                <Link
-                  href={pageLink(prevPage)}
-                  className="inline-flex h-10 items-center rounded-full border border-border/50 px-4 text-sm font-medium text-foreground/80 hover:border-primary/30 hover:bg-primary/10 hover:text-foreground"
-                >
-                  {'<<'}
-                </Link>
-              ) : (
-                <span className="inline-flex h-10 items-center rounded-full border border-border/30 px-4 text-sm text-muted-foreground">
-                  {'<<'}
-                </span>
-              )}
+          {visiblePageNumbers.map((pageNumber) => {
+            const isCurrent = pageNumber === result.page;
+            return (
+              <Link
+                key={pageNumber}
+                href={pageLink(pageNumber)}
+                className={
+                  isCurrent
+                    ? "inline-flex h-9 min-w-9 items-center justify-center rounded-full bg-primary px-3 text-sm font-bold text-primary-foreground"
+                    : "inline-flex h-9 min-w-9 items-center justify-center rounded-full border border-border/50 px-3 text-sm font-medium text-foreground/80 hover:border-primary/30 hover:bg-primary/10 hover:text-foreground"
+                }
+              >
+                {pageNumber}
+              </Link>
+            );
+          })}
 
-              {visiblePageNumbers.map((pageNumber) => {
-                const isCurrent = pageNumber === result.page;
-                return (
-                  <Link
-                    key={pageNumber}
-                    href={pageLink(pageNumber)}
-                    className={
-                      isCurrent
-                        ? "inline-flex h-10 min-w-10 items-center justify-center rounded-full bg-primary px-3 text-sm font-bold text-primary-foreground"
-                        : "inline-flex h-10 min-w-10 items-center justify-center rounded-full border border-border/50 px-3 text-sm font-medium text-foreground/80 hover:border-primary/30 hover:bg-primary/10 hover:text-foreground"
-                    }
-                  >
-                    {pageNumber}
-                  </Link>
-                );
-              })}
-
-              {nextPage ? (
-                <Link
-                  href={pageLink(nextPage)}
-                  className="inline-flex h-10 items-center rounded-full border border-border/50 px-4 text-sm font-medium text-foreground/80 hover:border-primary/30 hover:bg-primary/10 hover:text-foreground"
-                >
-                  {'>>'}
-                </Link>
-              ) : (
-                <span className="inline-flex h-10 items-center rounded-full border border-border/30 px-4 text-sm text-muted-foreground">
-                  {'>>'}
-                </span>
-              )}
-            </div>
-          ) : null}
-        </div>
-      </AppShell>
-    </>
+          {nextPage ? (
+            <Link
+              href={pageLink(nextPage)}
+              className="inline-flex h-9 items-center rounded-full border border-border/50 px-3 text-sm font-medium text-foreground/80 hover:border-primary/30 hover:bg-primary/10 hover:text-foreground"
+            >
+              {'>>'}
+            </Link>
+          ) : (
+            <span className="inline-flex h-9 items-center rounded-full border border-border/30 px-3 text-sm text-muted-foreground">
+              {'>>'}
+            </span>
+          )}
+        </nav>
+      ) : null}
+    </AppShell>
   );
 }
