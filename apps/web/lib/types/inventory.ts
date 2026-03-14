@@ -2,6 +2,7 @@ export type InventoryStatusFilter = "all" | "available" | "sold" | "on_hold";
 
 export type InventorySort = "newest" | "oldest";
 export type InventorySizePreset =
+  | "accent"
   | "3x5"
   | "4x6"
   | "5x8"
@@ -9,6 +10,7 @@ export type InventorySizePreset =
   | "8x10"
   | "9x12"
   | "10x14"
+  | "oversized"
   | "runner"
   | "round-oval";
 
@@ -57,7 +59,7 @@ export type EffectiveRugFields = {
 export type InventoryFilters = {
   q: string;
   status: InventoryStatusFilter;
-  sizePreset: InventorySizePreset | null;
+  sizePresets: InventorySizePreset[];
   widthMin: number | null;
   widthMax: number | null;
   lengthMin: number | null;

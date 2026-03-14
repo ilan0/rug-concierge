@@ -145,7 +145,12 @@ export function InventoryTableClient({ rows }: InventoryTableClientProps) {
             })}
           </div>
 
-          <div className="hidden overflow-x-auto rounded-xl border border-border/70 md:block">
+          <div
+            className="hidden overflow-x-auto rounded-xl border border-border/70 md:block"
+            tabIndex={0}
+            role="region"
+            aria-label="Inventory table"
+          >
             <table className="w-full min-w-[1080px] border-collapse text-[0.95rem]">
               <thead className="bg-secondary/50 text-left">
                 <tr>

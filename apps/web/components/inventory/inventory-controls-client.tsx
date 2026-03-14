@@ -1,12 +1,26 @@
 "use client";
 
+import type { Dispatch, ReactNode, SetStateAction } from "react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { Search, SlidersHorizontal, X } from "lucide-react";
+import {
+  ChevronDown,
+  ChevronUp,
+  Filter,
+  Search,
+  X,
+} from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
-  SIZE_PRESET_OPTIONS,
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
+import {
+  splitSizePresetGroups,
   toSizePresetLabel,
 } from "@/lib/inventory/size-presets";
 import type {
@@ -19,27 +33,18 @@ import type {
 type InventoryControlsClientProps = {
   filters: InventoryFilters;
   pageSize: number;
+  children: ReactNode;
 };
 
 type FilterPatch = {
   q?: string | null;
   status?: InventoryStatusFilter;
   sort?: InventorySort;
-  sizePreset?: InventorySizePreset | null;
+  sizePresets?: InventorySizePreset[];
   widthMin?: number | null;
   widthMax?: number | null;
   lengthMin?: number | null;
   lengthMax?: number | null;
-};
-
-type StatusOption = {
-  value: InventoryStatusFilter;
-  label: string;
-};
-
-type SortOption = {
-  value: InventorySort;
-  label: string;
 };
 
 type ActiveFilterItem = {
@@ -48,49 +53,108 @@ type ActiveFilterItem = {
   onRemove: () => void;
 };
 
-const STATUS_OPTIONS: StatusOption[] = [
+type SizeInputParts = {
+  ft: string;
+  inches: string;
+};
+
+const STATUS_OPTIONS: Array<{ value: InventoryStatusFilter; label: string }> = [
   { value: "available", label: "Available" },
   { value: "all", label: "All" },
   { value: "sold", label: "Sold" },
   { value: "on_hold", label: "On Hold" },
 ];
 
-const SORT_OPTIONS: SortOption[] = [
+const SORT_OPTIONS: Array<{ value: InventorySort; label: string }> = [
   { value: "newest", label: "Newest" },
   { value: "oldest", label: "Oldest" },
 ];
 
-function numberInputToValue(value: string): number | null {
-  const normalized = value.trim();
-  if (!normalized) return null;
-  const parsed = Number.parseInt(normalized, 10);
+function chipClass(active: boolean): string {
+  return active
+    ? "inline-flex min-h-8 items-center rounded-full border border-primary/45 bg-primary/10 px-3 text-xs font-semibold text-foreground ring-1 ring-primary/25"
+    : "inline-flex min-h-8 items-center rounded-full border border-border/55 bg-background px-3 text-xs font-medium text-foreground/80 hover:border-primary/30 hover:bg-primary/10 hover:text-foreground";
+}
+
+function toSizeParts(value: number | null): SizeInputParts {
+  if (value === null || !Number.isFinite(value) || value < 0) {
+    return { ft: "", inches: "" };
+  }
+  const total = Math.floor(value);
+  return {
+    ft: String(Math.floor(total / 12)),
+    inches: String(total % 12),
+  };
+}
+
+function hasInput(parts: SizeInputParts): boolean {
+  return parts.ft.trim().length > 0 || parts.inches.trim().length > 0;
+}
+
+function parseNonNegativeInt(value: string): number | null {
+  const trimmed = value.trim();
+  if (!trimmed) return null;
+  const parsed = Number.parseInt(trimmed, 10);
   if (!Number.isFinite(parsed) || parsed < 0) return null;
   return parsed;
 }
 
-function toInputValue(value: number | null): string {
-  return value === null ? "" : String(value);
+function toInches(parts: SizeInputParts): number | null {
+  if (!hasInput(parts)) return null;
+  const ft = parseNonNegativeInt(parts.ft);
+  const inches = parseNonNegativeInt(parts.inches);
+  if (ft === null && inches === null) return null;
+  const baseFt = ft ?? 0;
+  const baseInches = inches ?? 0;
+  return baseFt * 12 + baseInches;
 }
 
-function chipClass(active: boolean): string {
-  return active
-    ? "inline-flex h-8 items-center rounded-full border border-primary/45 bg-primary/10 px-3 text-xs font-semibold text-foreground ring-1 ring-primary/25"
-    : "inline-flex h-8 items-center rounded-full border border-border/55 bg-background px-3 text-xs font-medium text-foreground/80 hover:border-primary/30 hover:bg-primary/10 hover:text-foreground";
+function formatInches(value: number): string {
+  const total = Math.max(0, Math.floor(value));
+  const ft = Math.floor(total / 12);
+  const inches = total % 12;
+  if (ft > 0 && inches > 0) return `${ft}' ${inches}"`;
+  if (ft > 0) return `${ft}'`;
+  return `${inches}"`;
+}
+
+function formatRangeLabel(
+  axis: "Width" | "Length",
+  min: number | null,
+  max: number | null
+): string | null {
+  if (min === null && max === null) return null;
+  if (min !== null && max !== null) {
+    return `${axis} ${formatInches(min)} - ${formatInches(max)}`;
+  }
+  if (min !== null) return `${axis} >= ${formatInches(min)}`;
+  return `${axis} <= ${formatInches(max ?? 0)}`;
 }
 
 export function InventoryControlsClient({
   filters,
   pageSize,
+  children,
 }: InventoryControlsClientProps) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
   const [queryInput, setQueryInput] = useState(filters.q);
-  const [widthMinInput, setWidthMinInput] = useState(toInputValue(filters.widthMin));
-  const [widthMaxInput, setWidthMaxInput] = useState(toInputValue(filters.widthMax));
-  const [lengthMinInput, setLengthMinInput] = useState(toInputValue(filters.lengthMin));
-  const [lengthMaxInput, setLengthMaxInput] = useState(toInputValue(filters.lengthMax));
+  const [sheetOpen, setSheetOpen] = useState(false);
+  const [showAllSizes, setShowAllSizes] = useState(false);
+  const [widthMinInput, setWidthMinInput] = useState<SizeInputParts>(
+    toSizeParts(filters.widthMin)
+  );
+  const [widthMaxInput, setWidthMaxInput] = useState<SizeInputParts>(
+    toSizeParts(filters.widthMax)
+  );
+  const [lengthMinInput, setLengthMinInput] = useState<SizeInputParts>(
+    toSizeParts(filters.lengthMin)
+  );
+  const [lengthMaxInput, setLengthMaxInput] = useState<SizeInputParts>(
+    toSizeParts(filters.lengthMax)
+  );
 
   const applyPatch = useCallback(
     (patch: FilterPatch) => {
@@ -120,9 +184,11 @@ export function InventoryControlsClient({
           patch.sort && patch.sort !== "newest" ? patch.sort : null
         );
       }
-      if (Object.prototype.hasOwnProperty.call(patch, "sizePreset")) {
-        setMaybe("size_preset", patch.sizePreset ?? null);
+      if (Object.prototype.hasOwnProperty.call(patch, "sizePresets")) {
+        const joined = (patch.sizePresets ?? []).join(",");
+        setMaybe("size_presets", joined.length > 0 ? joined : null);
       }
+      nextParams.delete("size_preset");
       if (Object.prototype.hasOwnProperty.call(patch, "widthMin")) {
         setMaybe(
           "width_min",
@@ -168,22 +234,22 @@ export function InventoryControlsClient({
   }, [applyPatch, filters.q, queryInput]);
 
   useEffect(() => {
-    const widthMin = numberInputToValue(widthMinInput);
-    const widthMax = numberInputToValue(widthMaxInput);
-    const lengthMin = numberInputToValue(lengthMinInput);
-    const lengthMax = numberInputToValue(lengthMaxInput);
+    const widthMin = toInches(widthMinInput);
+    const widthMax = toInches(widthMaxInput);
+    const lengthMin = toInches(lengthMinInput);
+    const lengthMax = toInches(lengthMaxInput);
 
-    const noManualInput =
-      widthMinInput.trim().length === 0 &&
-      widthMaxInput.trim().length === 0 &&
-      lengthMinInput.trim().length === 0 &&
-      lengthMaxInput.trim().length === 0;
+    const hasCustomInput =
+      hasInput(widthMinInput) ||
+      hasInput(widthMaxInput) ||
+      hasInput(lengthMinInput) ||
+      hasInput(lengthMaxInput);
     const unchanged =
       widthMin === filters.widthMin &&
       widthMax === filters.widthMax &&
       lengthMin === filters.lengthMin &&
       lengthMax === filters.lengthMax &&
-      (noManualInput || filters.sizePreset === null);
+      (!hasCustomInput || filters.sizePresets.length === 0);
 
     if (unchanged) return;
 
@@ -193,7 +259,7 @@ export function InventoryControlsClient({
         widthMax,
         lengthMin,
         lengthMax,
-        sizePreset: noManualInput ? filters.sizePreset : null,
+        sizePresets: hasCustomInput ? [] : filters.sizePresets,
       });
     }, 300);
 
@@ -202,7 +268,7 @@ export function InventoryControlsClient({
     applyPatch,
     filters.lengthMax,
     filters.lengthMin,
-    filters.sizePreset,
+    filters.sizePresets,
     filters.widthMax,
     filters.widthMin,
     lengthMaxInput,
@@ -213,15 +279,15 @@ export function InventoryControlsClient({
 
   const clearAll = useCallback(() => {
     setQueryInput("");
-    setWidthMinInput("");
-    setWidthMaxInput("");
-    setLengthMinInput("");
-    setLengthMaxInput("");
+    setWidthMinInput({ ft: "", inches: "" });
+    setWidthMaxInput({ ft: "", inches: "" });
+    setLengthMinInput({ ft: "", inches: "" });
+    setLengthMaxInput({ ft: "", inches: "" });
     applyPatch({
       q: null,
       status: "available",
       sort: "newest",
-      sizePreset: null,
+      sizePresets: [],
       widthMin: null,
       widthMax: null,
       lengthMin: null,
@@ -229,20 +295,27 @@ export function InventoryControlsClient({
     });
   }, [applyPatch]);
 
-  const onSizePresetToggle = (preset: InventorySizePreset) => {
-    const nextPreset = filters.sizePreset === preset ? null : preset;
-    setWidthMinInput("");
-    setWidthMaxInput("");
-    setLengthMinInput("");
-    setLengthMaxInput("");
-    applyPatch({
-      sizePreset: nextPreset,
-      widthMin: null,
-      widthMax: null,
-      lengthMin: null,
-      lengthMax: null,
-    });
-  };
+  const onSizePresetToggle = useCallback(
+    (preset: InventorySizePreset) => {
+      const exists = filters.sizePresets.includes(preset);
+      const next = exists
+        ? filters.sizePresets.filter((value) => value !== preset)
+        : [...filters.sizePresets, preset];
+
+      setWidthMinInput({ ft: "", inches: "" });
+      setWidthMaxInput({ ft: "", inches: "" });
+      setLengthMinInput({ ft: "", inches: "" });
+      setLengthMaxInput({ ft: "", inches: "" });
+      applyPatch({
+        sizePresets: next,
+        widthMin: null,
+        widthMax: null,
+        lengthMin: null,
+        lengthMax: null,
+      });
+    },
+    [applyPatch, filters.sizePresets]
+  );
 
   const activeFilters = useMemo(() => {
     const items: ActiveFilterItem[] = [];
@@ -277,195 +350,271 @@ export function InventoryControlsClient({
       });
     }
 
-    if (filters.sizePreset) {
+    for (const preset of filters.sizePresets) {
       items.push({
-        key: "size_preset",
-        label: toSizePresetLabel(filters.sizePreset),
-        onRemove: () => applyPatch({ sizePreset: null }),
+        key: `size_preset_${preset}`,
+        label: toSizePresetLabel(preset),
+        onRemove: () =>
+          applyPatch({
+            sizePresets: filters.sizePresets.filter((value) => value !== preset),
+          }),
       });
     }
 
-    if (filters.widthMin !== null || filters.widthMax !== null) {
-      const label =
-        filters.widthMin !== null && filters.widthMax !== null
-          ? `Width ${filters.widthMin}-${filters.widthMax}in`
-          : filters.widthMin !== null
-            ? `Width >= ${filters.widthMin}in`
-            : `Width <= ${filters.widthMax}in`;
+    const widthLabel = formatRangeLabel("Width", filters.widthMin, filters.widthMax);
+    if (widthLabel) {
       items.push({
         key: "width",
-        label,
+        label: widthLabel,
         onRemove: () => {
-          setWidthMinInput("");
-          setWidthMaxInput("");
+          setWidthMinInput({ ft: "", inches: "" });
+          setWidthMaxInput({ ft: "", inches: "" });
           applyPatch({ widthMin: null, widthMax: null });
         },
       });
     }
 
-    if (filters.lengthMin !== null || filters.lengthMax !== null) {
-      const label =
-        filters.lengthMin !== null && filters.lengthMax !== null
-          ? `Length ${filters.lengthMin}-${filters.lengthMax}in`
-          : filters.lengthMin !== null
-            ? `Length >= ${filters.lengthMin}in`
-            : `Length <= ${filters.lengthMax}in`;
+    const lengthLabel = formatRangeLabel(
+      "Length",
+      filters.lengthMin,
+      filters.lengthMax
+    );
+    if (lengthLabel) {
       items.push({
         key: "length",
-        label,
+        label: lengthLabel,
         onRemove: () => {
-          setLengthMinInput("");
-          setLengthMaxInput("");
+          setLengthMinInput({ ft: "", inches: "" });
+          setLengthMaxInput({ ft: "", inches: "" });
           applyPatch({ lengthMin: null, lengthMax: null });
         },
       });
     }
 
     return items;
-  }, [filters, applyPatch]);
+  }, [applyPatch, filters]);
 
-  return (
-    <section
-      aria-labelledby="inventory-controls-heading"
-      data-inventory-controls="true"
-      className="space-y-2 rounded-xl border border-border/60 bg-white/90 p-2.5 shadow-sm"
-    >
-      <h2 id="inventory-controls-heading" className="sr-only">
-        Inventory Controls
-      </h2>
+  const sizePresetGroups = useMemo(() => splitSizePresetGroups(), []);
+  const visiblePresets = showAllSizes
+    ? [...sizePresetGroups.featured, ...sizePresetGroups.more]
+    : sizePresetGroups.featured;
 
-      <div className="flex items-center gap-2">
-        <div className="relative min-w-0 flex-1">
-          <Search className="pointer-events-none absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            value={queryInput}
-            onChange={(event) => setQueryInput(event.target.value)}
-            placeholder="Search labels, stock id, or description"
-            className="h-9 pl-8 text-sm"
-          />
-        </div>
-        <Button type="button" variant="ghost" size="sm" onClick={clearAll}>
-          Clear all
-        </Button>
+  const hasCustomInput =
+    hasInput(widthMinInput) ||
+    hasInput(widthMaxInput) ||
+    hasInput(lengthMinInput) ||
+    hasInput(lengthMaxInput);
+
+  const renderCustomBound = (
+    label: string,
+    value: SizeInputParts,
+    setValue: Dispatch<SetStateAction<SizeInputParts>>
+  ) => (
+    <label className="space-y-1.5">
+      <span className="text-xs font-medium text-foreground/80">{label}</span>
+      <div className="grid grid-cols-2 gap-1.5">
+        <Input
+          value={value.ft}
+          onChange={(event) =>
+            setValue((prev) => ({ ...prev, ft: event.target.value }))
+          }
+          inputMode="numeric"
+          placeholder="ft"
+          className="h-8 text-sm"
+        />
+        <Input
+          value={value.inches}
+          onChange={(event) =>
+            setValue((prev) => ({ ...prev, inches: event.target.value }))
+          }
+          inputMode="numeric"
+          placeholder="in"
+          className="h-8 text-sm"
+        />
       </div>
+    </label>
+  );
 
-      <div className="space-y-1" data-filter-lane="status">
+  const renderFilterSections = (mobile: boolean) => (
+    <div
+      className={
+        mobile
+          ? "space-y-3"
+          : "space-y-3 rounded-xl border border-border/60 bg-white/90 p-3 shadow-sm"
+      }
+      data-inventory-filters="true"
+    >
+      <div className="space-y-1.5" data-filter-lane="status">
         <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
           Status
         </p>
-        <div className="-mx-1 overflow-x-auto px-1 pb-1">
-          <div className="inline-flex min-w-full gap-1.5 whitespace-nowrap sm:min-w-0 sm:flex-wrap">
-            {STATUS_OPTIONS.map((option) => (
-              <button
-                key={option.value}
-                type="button"
-                className={chipClass(filters.status === option.value)}
-                onClick={() => applyPatch({ status: option.value })}
-              >
-                {option.label}
-              </button>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      <div className="space-y-1" data-filter-lane="sort">
-        <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
-          Sort
-        </p>
-        <div className="-mx-1 overflow-x-auto px-1 pb-1">
-          <div className="inline-flex min-w-full gap-1.5 whitespace-nowrap sm:min-w-0 sm:flex-wrap">
-            {SORT_OPTIONS.map((option) => (
-              <button
-                key={option.value}
-                type="button"
-                className={chipClass(filters.sort === option.value)}
-                onClick={() => applyPatch({ sort: option.value })}
-              >
-                {option.label}
-              </button>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      <div className="space-y-1" data-filter-lane="size">
-        <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
-          Sizes
-        </p>
-        <div className="-mx-1 overflow-x-auto px-1 pb-1">
-          <div className="inline-flex min-w-full gap-1.5 whitespace-nowrap sm:min-w-0 sm:flex-wrap">
-            {SIZE_PRESET_OPTIONS.map((option) => (
-              <button
-                key={option.value}
-                type="button"
-                className={chipClass(filters.sizePreset === option.value)}
-                onClick={() => onSizePresetToggle(option.value)}
-              >
-                {option.label}
-              </button>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      <details className="rounded-lg border border-border/45 bg-background/55 p-2">
-        <summary className="flex cursor-pointer list-none items-center gap-1.5 text-xs font-medium text-foreground/80">
-          <SlidersHorizontal className="size-3.5 text-muted-foreground" />
-          Advanced size filters (inches)
-        </summary>
-        <div className="mt-2 grid gap-2 sm:grid-cols-2 xl:grid-cols-4">
-          <Input
-            value={widthMinInput}
-            onChange={(event) => setWidthMinInput(event.target.value)}
-            inputMode="numeric"
-            placeholder="Min width"
-            className="h-9 text-sm"
-          />
-          <Input
-            value={widthMaxInput}
-            onChange={(event) => setWidthMaxInput(event.target.value)}
-            inputMode="numeric"
-            placeholder="Max width"
-            className="h-9 text-sm"
-          />
-          <Input
-            value={lengthMinInput}
-            onChange={(event) => setLengthMinInput(event.target.value)}
-            inputMode="numeric"
-            placeholder="Min length"
-            className="h-9 text-sm"
-          />
-          <Input
-            value={lengthMaxInput}
-            onChange={(event) => setLengthMaxInput(event.target.value)}
-            inputMode="numeric"
-            placeholder="Max length"
-            className="h-9 text-sm"
-          />
-        </div>
-      </details>
-
-      {activeFilters.length > 0 ? (
-        <div
-          className="flex flex-wrap gap-1.5"
-          aria-label="Active filters"
-          data-active-filters="true"
-        >
-          {activeFilters.map((item) => (
+        <div className="flex flex-wrap gap-1.5">
+          {STATUS_OPTIONS.map((option) => (
             <button
-              key={item.key}
+              key={option.value}
               type="button"
-              onClick={item.onRemove}
-              className="inline-flex h-7 items-center gap-1 rounded-full border border-border/55 bg-background px-2.5 text-xs text-foreground/80 hover:border-primary/35 hover:bg-primary/10 hover:text-foreground"
-              aria-label={`Remove filter ${item.label}`}
+              className={chipClass(filters.status === option.value)}
+              onClick={() => applyPatch({ status: option.value })}
             >
-              <span>{item.label}</span>
-              <X className="size-3" />
+              {option.label}
             </button>
           ))}
         </div>
-      ) : null}
-    </section>
+      </div>
+
+      <div className="space-y-1.5" data-filter-lane="sort">
+        <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+          Sort
+        </p>
+        <div className="flex flex-wrap gap-1.5">
+          {SORT_OPTIONS.map((option) => (
+            <button
+              key={option.value}
+              type="button"
+              className={chipClass(filters.sort === option.value)}
+              onClick={() => applyPatch({ sort: option.value })}
+            >
+              {option.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="space-y-1.5" data-filter-lane="size">
+        <div className="flex items-center justify-between gap-2">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+            Sizes
+          </p>
+          {sizePresetGroups.more.length > 0 ? (
+            <button
+              type="button"
+              className="inline-flex items-center gap-1 text-xs font-medium text-muted-foreground hover:text-foreground"
+              onClick={() => setShowAllSizes((prev) => !prev)}
+            >
+              {showAllSizes ? "Less" : "More"}
+              {showAllSizes ? (
+                <ChevronUp className="size-3.5" />
+              ) : (
+                <ChevronDown className="size-3.5" />
+              )}
+            </button>
+          ) : null}
+        </div>
+        <div className="flex flex-wrap gap-1.5">
+          {visiblePresets.map((preset) => (
+            <button
+              key={preset}
+              type="button"
+              className={chipClass(filters.sizePresets.includes(preset))}
+              onClick={() => onSizePresetToggle(preset)}
+            >
+              {toSizePresetLabel(preset)}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="space-y-2 rounded-lg border border-border/50 bg-background/70 p-2.5">
+        <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+          Custom Size
+        </p>
+        <div className="grid gap-2 sm:grid-cols-2">
+          {renderCustomBound("Width Min", widthMinInput, setWidthMinInput)}
+          {renderCustomBound("Width Max", widthMaxInput, setWidthMaxInput)}
+          {renderCustomBound("Length Min", lengthMinInput, setLengthMinInput)}
+          {renderCustomBound("Length Max", lengthMaxInput, setLengthMaxInput)}
+        </div>
+        <p className="text-xs text-muted-foreground">
+          Feet + inches. Enter any bound to override size presets.
+        </p>
+      </div>
+
+      <Button
+        type="button"
+        variant="ghost"
+        size="sm"
+        className="w-full justify-center"
+        onClick={clearAll}
+        disabled={
+          activeFilters.length === 0 &&
+          !hasCustomInput &&
+          queryInput.trim().length === 0
+        }
+      >
+        Clear all filters
+      </Button>
+    </div>
+  );
+
+  return (
+    <div className="space-y-2">
+      <section
+        aria-label="Inventory search"
+        data-inventory-controls="true"
+        className="rounded-xl border border-border/60 bg-white/90 p-2.5 shadow-sm"
+      >
+        <div className="flex items-center gap-2">
+          <div className="relative min-w-0 flex-1">
+            <Search className="pointer-events-none absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              value={queryInput}
+              onChange={(event) => setQueryInput(event.target.value)}
+              placeholder="Search labels, stock id, or description"
+              className="h-9 pl-8 text-sm"
+            />
+          </div>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="lg:hidden"
+            onClick={() => setSheetOpen(true)}
+          >
+            <Filter className="mr-1.5 size-3.5" />
+            Filters
+          </Button>
+        </div>
+
+        {activeFilters.length > 0 ? (
+          <div
+            className="mt-2 flex flex-wrap gap-1.5"
+            aria-label="Active filters"
+            data-active-filters="true"
+          >
+            {activeFilters.map((item) => (
+              <button
+                key={item.key}
+                type="button"
+                onClick={item.onRemove}
+                className="inline-flex min-h-7 items-center gap-1 rounded-full border border-border/55 bg-background px-2.5 text-xs text-foreground/80 hover:border-primary/35 hover:bg-primary/10 hover:text-foreground"
+                aria-label={`Remove filter ${item.label}`}
+              >
+                <span>{item.label}</span>
+                <X className="size-3" />
+              </button>
+            ))}
+          </div>
+        ) : null}
+      </section>
+
+      <div className="grid gap-3 lg:grid-cols-[18rem_minmax(0,1fr)]">
+        <aside className="hidden lg:block">
+          <div className="sticky top-24">{renderFilterSections(false)}</div>
+        </aside>
+        <div>{children}</div>
+      </div>
+
+      <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
+        <SheetContent side="right" className="w-full p-4 sm:max-w-md">
+          <SheetHeader>
+            <SheetTitle>Inventory Filters</SheetTitle>
+            <SheetDescription>
+              Combine presets or use custom feet and inches ranges.
+            </SheetDescription>
+          </SheetHeader>
+          <div className="mt-4">{renderFilterSections(true)}</div>
+        </SheetContent>
+      </Sheet>
+    </div>
   );
 }

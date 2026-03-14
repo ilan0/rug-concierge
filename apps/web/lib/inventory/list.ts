@@ -221,7 +221,7 @@ function matchesRowWithFilters(
 ): boolean {
   if (!matchesSearchQuery(row, filters.q)) return false;
   if (!matchesManualSizeBounds(row, filters)) return false;
-  if (!matchesSizePreset(row, filters.sizePreset)) return false;
+  if (!matchesAnySizePreset(row, filters.sizePresets)) return false;
   return true;
 }
 
@@ -268,11 +268,20 @@ function matchesManualSizeBounds(
   return true;
 }
 
+function matchesAnySizePreset(
+  row: InventoryBrowserRow,
+  sizePresets: ReturnType<typeof normalizeInventoryFilters>["sizePresets"]
+): boolean {
+  if (sizePresets.length === 0) return true;
+  return sizePresets.some((preset) => matchesSizePreset(row, preset));
+}
+
 function matchesSizePreset(
   row: InventoryBrowserRow,
-  sizePreset: ReturnType<typeof normalizeInventoryFilters>["sizePreset"]
+  sizePreset: ReturnType<typeof normalizeInventoryFilters>["sizePresets"][number]
 ): boolean {
-  if (!sizePreset) return true;
+  if (sizePreset === "accent") return matchesAccentPreset(row);
+  if (sizePreset === "oversized") return matchesOversizedPreset(row);
   if (sizePreset === "runner") return matchesRunnerPreset(row);
   if (sizePreset === "round-oval") return matchesRoundOvalPreset(row);
 
@@ -293,6 +302,16 @@ function matchesSizePreset(
   );
 }
 
+function matchesAccentPreset(row: InventoryBrowserRow): boolean {
+  const width = row.width_total_in;
+  const length = row.length_total_in;
+  if (width === null || length === null) return false;
+
+  const shortSide = Math.min(width, length);
+  const longSide = Math.max(width, length);
+  return shortSide <= 36 && longSide <= 60;
+}
+
 function matchesRunnerPreset(row: InventoryBrowserRow): boolean {
   const width = row.width_total_in;
   const length = row.length_total_in;
@@ -303,6 +322,17 @@ function matchesRunnerPreset(row: InventoryBrowserRow): boolean {
   if (shortSide <= 0) return false;
 
   return shortSide <= 42 && longSide >= 84 && longSide / shortSide >= 2.2;
+}
+
+function matchesOversizedPreset(row: InventoryBrowserRow): boolean {
+  const width = row.width_total_in;
+  const length = row.length_total_in;
+  if (width === null || length === null) return false;
+
+  const shortSide = Math.min(width, length);
+  const longSide = Math.max(width, length);
+  if (shortSide < 84) return false;
+  return width > 132 || length > 180 || longSide > 180;
 }
 
 function matchesRoundOvalPreset(row: InventoryBrowserRow): boolean {

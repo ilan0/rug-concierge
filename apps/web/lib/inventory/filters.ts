@@ -1,15 +1,17 @@
 import type {
   InventoryFilters,
   InventorySort,
-  InventorySizePreset,
   InventoryStatusFilter,
 } from "@/lib/types/inventory";
-import { normalizeInventorySizePreset } from "@/lib/inventory/size-presets";
+import {
+  normalizeInventorySizePresetList,
+} from "@/lib/inventory/size-presets";
 
 export type InventoryFilterInput = {
   q?: string;
   status?: string;
   sizePreset?: string;
+  sizePresets?: string | string[];
   widthMin?: number | null;
   widthMax?: number | null;
   lengthMin?: number | null;
@@ -20,7 +22,7 @@ export type InventoryFilterInput = {
 const DEFAULT_FILTERS: InventoryFilters = {
   q: "",
   status: "available",
-  sizePreset: null,
+  sizePresets: [],
   widthMin: null,
   widthMax: null,
   lengthMin: null,
@@ -52,7 +54,10 @@ export function normalizeInventoryFilters(
   const sort = ALLOWED_SORT.includes(input.sort as InventorySort)
     ? (input.sort as InventorySort)
     : DEFAULT_FILTERS.sort;
-  const sizePreset = normalizeInventorySizePreset(input.sizePreset);
+
+  const fromModern = normalizeInventorySizePresetList(input.sizePresets);
+  const fromLegacy = normalizeInventorySizePresetList(input.sizePreset);
+  const sizePresets = Array.from(new Set([...fromModern, ...fromLegacy]));
 
   const widthMin = toPositiveNumberOrNull(input.widthMin);
   const widthMax = toPositiveNumberOrNull(input.widthMax);
@@ -64,13 +69,11 @@ export function normalizeInventoryFilters(
     widthMax !== null ||
     lengthMin !== null ||
     lengthMax !== null;
-  const effectiveSizePreset =
-    hasManualSizeBounds ? null : (sizePreset as InventorySizePreset | null);
 
   return {
     q,
     status,
-    sizePreset: effectiveSizePreset,
+    sizePresets: hasManualSizeBounds ? [] : sizePresets,
     widthMin:
       widthMin !== null && widthMax !== null && widthMin > widthMax
         ? widthMax
@@ -95,7 +98,7 @@ export function isDefaultInventoryFilters(filters: InventoryFilters): boolean {
   return (
     filters.q === DEFAULT_FILTERS.q &&
     filters.status === DEFAULT_FILTERS.status &&
-    filters.sizePreset === DEFAULT_FILTERS.sizePreset &&
+    filters.sizePresets.length === 0 &&
     filters.widthMin === DEFAULT_FILTERS.widthMin &&
     filters.widthMax === DEFAULT_FILTERS.widthMax &&
     filters.lengthMin === DEFAULT_FILTERS.lengthMin &&

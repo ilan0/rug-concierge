@@ -26,6 +26,7 @@ type InventoryMetrics = {
   sortChipCount: number;
   sizeChipCount: number;
   hasSearch: boolean;
+  hasFiltersButton: boolean;
   hasApplyButton: boolean;
   activeFilterRemoveButtons: number;
 };
@@ -168,6 +169,11 @@ async function measureInventoryMetrics(page: Page): Promise<InventoryMetrics> {
       sortChipCount,
       sizeChipCount,
       hasSearch: Boolean(document.querySelector("[data-inventory-controls='true'] input")),
+      hasFiltersButton: Array.from(
+        document.querySelectorAll("[data-inventory-controls='true'] button")
+      ).some((button) =>
+        (button.textContent ?? "").trim().toLowerCase().includes("filters")
+      ),
       hasApplyButton:
         Array.from(document.querySelectorAll("[data-inventory-controls='true'] button")).some((button) =>
           (button.textContent ?? "").trim().toLowerCase() === "apply filters"
@@ -213,12 +219,12 @@ function buildRubric(desktop: ProfileAuditResult, mobile: ProfileAuditResult): R
     desktopInv.hasSearch &&
     !desktopInv.hasApplyButton &&
     desktopInv.statusChipCount >= 4 &&
-    desktopInv.sizeChipCount >= 9;
+    desktopInv.sizeChipCount >= 6;
 
   const mobileErgo =
-    mobileInv.sizeLaneOverflowing &&
     mobileInv.firstResultWithinMinimalScroll &&
-    mobileControlsRatio <= 0.5;
+    mobileControlsRatio <= 0.35 &&
+    mobileInv.hasFiltersButton;
 
   const interactionConsistency =
     desktopInv.statusChipCount === mobileInv.statusChipCount &&

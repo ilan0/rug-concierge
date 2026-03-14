@@ -21,6 +21,7 @@ function readString(
   fallback = ""
 ): string {
   if (typeof value === "string") return value;
+  if (Array.isArray(value)) return value[0] ?? fallback;
   return fallback;
 }
 
@@ -86,6 +87,7 @@ export default async function InventoryPage({ searchParams }: InventoryPageProps
   const filtersInput = {
     q: readString(params.q),
     status: readString(params.status),
+    sizePresets: readString(params.size_presets),
     sizePreset: readString(params.size_preset),
     widthMin: toNumberOrNull(readString(params.width_min)),
     widthMax: toNumberOrNull(readString(params.width_max)),
@@ -114,7 +116,10 @@ export default async function InventoryPage({ searchParams }: InventoryPageProps
     page_size: result.pageSize,
     q: result.filters.q || null,
     status: result.filters.status !== "available" ? result.filters.status : null,
-    size_preset: result.filters.sizePreset,
+    size_presets:
+      result.filters.sizePresets.length > 0
+        ? result.filters.sizePresets.join(",")
+        : null,
     width_min: result.filters.widthMin,
     width_max: result.filters.widthMax,
     length_min: result.filters.lengthMin,
@@ -133,7 +138,10 @@ export default async function InventoryPage({ searchParams }: InventoryPageProps
   const controlsKey = buildQueryString({
     q: result.filters.q || null,
     status: result.filters.status,
-    size_preset: result.filters.sizePreset,
+    size_presets:
+      result.filters.sizePresets.length > 0
+        ? result.filters.sizePresets.join(",")
+        : null,
     width_min: result.filters.widthMin,
     width_max: result.filters.widthMax,
     length_min: result.filters.lengthMin,
@@ -170,82 +178,82 @@ export default async function InventoryPage({ searchParams }: InventoryPageProps
         key={controlsKey}
         filters={result.filters}
         pageSize={result.pageSize}
-      />
-
-      <section
-        aria-labelledby="inventory-results-heading"
-        className="mt-3"
-        data-inventory-results="true"
       >
-        <h2 id="inventory-results-heading" className="mb-1.5 text-sm font-semibold text-foreground">
-          Inventory
-        </h2>
+        <section
+          aria-labelledby="inventory-results-heading"
+          className="mt-1"
+          data-inventory-results="true"
+        >
+          <h2 id="inventory-results-heading" className="mb-1.5 text-sm font-semibold text-foreground">
+            Inventory
+          </h2>
 
-        {result.error ? (
-          <SectionCard tone="soft" density="compact" className="border-border/55">
-            <p className="text-sm font-medium text-foreground">Could not load inventory</p>
-            <p className="mt-1 text-sm text-muted-foreground">{result.error}</p>
-          </SectionCard>
-        ) : result.rows.length === 0 ? (
-          <SectionCard tone="soft" density="compact" className="border-border/55">
-            <p className="text-sm font-medium text-foreground">No inventory rows found</p>
-            <p className="mt-1 text-sm text-muted-foreground">
-              No rugs matched current filters. Try broadening size or search terms.
-            </p>
-          </SectionCard>
-        ) : (
-          <SectionCard tone="soft" density="compact" className="border-border/55">
-            <InventoryTableClient rows={result.rows} />
-          </SectionCard>
-        )}
-      </section>
-
-      {result.totalPages > 1 ? (
-        <nav aria-label="Inventory pagination" className="mt-4 flex flex-wrap items-center justify-center gap-2">
-          {prevPage ? (
-            <Link
-              href={pageLink(prevPage)}
-              className="inline-flex h-9 items-center rounded-full border border-border/50 px-3 text-sm font-medium text-foreground/80 hover:border-primary/30 hover:bg-primary/10 hover:text-foreground"
-            >
-              {'<<'}
-            </Link>
+          {result.error ? (
+            <SectionCard tone="soft" density="compact" className="border-border/55">
+              <p className="text-sm font-medium text-foreground">Could not load inventory</p>
+              <p className="mt-1 text-sm text-muted-foreground">{result.error}</p>
+            </SectionCard>
+          ) : result.rows.length === 0 ? (
+            <SectionCard tone="soft" density="compact" className="border-border/55">
+              <p className="text-sm font-medium text-foreground">No inventory rows found</p>
+              <p className="mt-1 text-sm text-muted-foreground">
+                No rugs matched current filters. Try broadening size or search terms.
+              </p>
+            </SectionCard>
           ) : (
-            <span className="inline-flex h-9 items-center rounded-full border border-border/30 px-3 text-sm text-muted-foreground">
-              {'<<'}
-            </span>
+            <SectionCard tone="soft" density="compact" className="border-border/55">
+              <InventoryTableClient rows={result.rows} />
+            </SectionCard>
           )}
+        </section>
 
-          {visiblePageNumbers.map((pageNumber) => {
-            const isCurrent = pageNumber === result.page;
-            return (
+        {result.totalPages > 1 ? (
+          <nav aria-label="Inventory pagination" className="mt-4 flex flex-wrap items-center justify-center gap-2">
+            {prevPage ? (
               <Link
-                key={pageNumber}
-                href={pageLink(pageNumber)}
-                className={
-                  isCurrent
-                    ? "inline-flex h-9 min-w-9 items-center justify-center rounded-full bg-primary px-3 text-sm font-bold text-primary-foreground"
-                    : "inline-flex h-9 min-w-9 items-center justify-center rounded-full border border-border/50 px-3 text-sm font-medium text-foreground/80 hover:border-primary/30 hover:bg-primary/10 hover:text-foreground"
-                }
+                href={pageLink(prevPage)}
+                className="inline-flex h-9 items-center rounded-full border border-border/50 px-3 text-sm font-medium text-foreground/80 hover:border-primary/30 hover:bg-primary/10 hover:text-foreground"
               >
-                {pageNumber}
+                {'<<'}
               </Link>
-            );
-          })}
+            ) : (
+              <span className="inline-flex h-9 items-center rounded-full border border-border/30 px-3 text-sm text-muted-foreground">
+                {'<<'}
+              </span>
+            )}
 
-          {nextPage ? (
-            <Link
-              href={pageLink(nextPage)}
-              className="inline-flex h-9 items-center rounded-full border border-border/50 px-3 text-sm font-medium text-foreground/80 hover:border-primary/30 hover:bg-primary/10 hover:text-foreground"
-            >
-              {'>>'}
-            </Link>
-          ) : (
-            <span className="inline-flex h-9 items-center rounded-full border border-border/30 px-3 text-sm text-muted-foreground">
-              {'>>'}
-            </span>
-          )}
-        </nav>
-      ) : null}
+            {visiblePageNumbers.map((pageNumber) => {
+              const isCurrent = pageNumber === result.page;
+              return (
+                <Link
+                  key={pageNumber}
+                  href={pageLink(pageNumber)}
+                  className={
+                    isCurrent
+                      ? "inline-flex h-9 min-w-9 items-center justify-center rounded-full bg-primary px-3 text-sm font-bold text-primary-foreground"
+                      : "inline-flex h-9 min-w-9 items-center justify-center rounded-full border border-border/50 px-3 text-sm font-medium text-foreground/80 hover:border-primary/30 hover:bg-primary/10 hover:text-foreground"
+                  }
+                >
+                  {pageNumber}
+                </Link>
+              );
+            })}
+
+            {nextPage ? (
+              <Link
+                href={pageLink(nextPage)}
+                className="inline-flex h-9 items-center rounded-full border border-border/50 px-3 text-sm font-medium text-foreground/80 hover:border-primary/30 hover:bg-primary/10 hover:text-foreground"
+              >
+                {'>>'}
+              </Link>
+            ) : (
+              <span className="inline-flex h-9 items-center rounded-full border border-border/30 px-3 text-sm text-muted-foreground">
+                {'>>'}
+              </span>
+            )}
+          </nav>
+        ) : null}
+      </InventoryControlsClient>
     </AppShell>
   );
 }
