@@ -146,9 +146,9 @@ export async function GET(
       .maybeSingle();
 
   const selectCandidates = [
-    "id, intake_label, ai_structured_fields, staff_overrides, ai_description, width_total_in, length_total_in, status, contextual_blurb",
-    "id, intake_label, ai_structured_fields, ai_description, width_total_in, length_total_in, status, contextual_blurb",
-    "id, intake_label, ai_description, width_total_in, length_total_in, status, contextual_blurb",
+    "id, intake_label, ai_structured_fields, staff_overrides, ai_description, width_total_in, length_total_in, status",
+    "id, intake_label, ai_structured_fields, ai_description, width_total_in, length_total_in, status",
+    "id, intake_label, ai_description, width_total_in, length_total_in, status",
   ];
 
   let rugResult = await runRugQuery(selectCandidates[0]);
@@ -176,26 +176,13 @@ export async function GET(
   }
   const sizeDisplay = formatRugSize(widthTotalIn, lengthTotalIn);
 
-  let contextualBlurb =
-    typeof rug.contextual_blurb === "string" && rug.contextual_blurb.trim().length > 0
-      ? rug.contextual_blurb
-      : null;
-
-  if (!contextualBlurb) {
-    contextualBlurb = await generateContextualBlurb({
-      intakeLabel:
-        typeof rug.intake_label === "string" ? rug.intake_label : null,
-      sizeDisplay,
-      aiDescription:
-        typeof rug.ai_description === "string" ? rug.ai_description : null,
-    });
-
-    await supabaseAdmin
-      .from("rugs")
-      .update({ contextual_blurb: contextualBlurb })
-      .eq("tenant_id", tenantId)
-      .eq("id", id);
-  }
+  const contextualBlurb = await generateContextualBlurb({
+    intakeLabel:
+      typeof rug.intake_label === "string" ? rug.intake_label : null,
+    sizeDisplay,
+    aiDescription:
+      typeof rug.ai_description === "string" ? rug.ai_description : null,
+  });
 
   const imageMap = await fetchPrimaryRugImagesForRugs({
     supabase: supabaseAdmin,
