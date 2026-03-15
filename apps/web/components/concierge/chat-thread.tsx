@@ -104,8 +104,9 @@ export function ChatThread(input: ChatThreadProps) {
 
   useEffect(() => {
     if (typeof window === "undefined" || !isPinnedToBottom) return;
+    if (!isLoading && turns.length === 0) return;
     window.scrollTo({ top: document.documentElement.scrollHeight, behavior: "auto" });
-  }, [latestTurnSignature, isLoading, isPinnedToBottom]);
+  }, [latestTurnSignature, isLoading, isPinnedToBottom, turns.length]);
 
   const jumpToLatest = useCallback(() => {
     if (typeof window === "undefined") return;
