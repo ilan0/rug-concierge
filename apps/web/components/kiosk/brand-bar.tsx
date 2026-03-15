@@ -16,7 +16,7 @@ export function BrandBar({ storeName, logoMarkUrl }: BrandBarProps) {
   }, [logoMarkUrl]);
 
   return (
-    <section className="mx-auto mt-2 w-full max-w-6xl px-4 sm:px-6 lg:px-8">
+    <div className="mx-auto mt-2 w-full max-w-6xl px-4 sm:px-6 lg:px-8">
       <div className="rounded-xl border border-border/55 bg-card/80 px-3 py-2 shadow-sm backdrop-blur supports-[backdrop-filter]:bg-card/70 sm:px-4">
         <div className="flex min-h-11 items-center gap-3">
           {showLogo && logoMarkUrl ? (
@@ -36,6 +36,6 @@ export function BrandBar({ storeName, logoMarkUrl }: BrandBarProps) {
           </p>
         </div>
       </div>
-    </section>
+    </div>
   );
 }
