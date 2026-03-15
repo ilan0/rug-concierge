@@ -10,11 +10,18 @@ type InventoryTableClientProps = {
   rows: InventoryBrowserRow[];
 };
 
+const INVENTORY_DATE_FORMATTER = new Intl.DateTimeFormat("en-US", {
+  year: "numeric",
+  month: "numeric",
+  day: "numeric",
+  timeZone: "UTC",
+});
+
 function formatDate(value: string | null): string {
   if (!value) return "-";
   const parsed = new Date(value);
   if (Number.isNaN(parsed.getTime())) return "-";
-  return parsed.toLocaleDateString();
+  return INVENTORY_DATE_FORMATTER.format(parsed);
 }
 
 export function StatusBadge({ status }: { status: string | null }) {
