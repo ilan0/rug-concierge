@@ -16,6 +16,8 @@ type ConciergeScreenProps = {
   debug: boolean;
   variant?: ConciergeVariant;
   tenantId: string;
+  storeName: string;
+  storeLogoUrl: string | null;
 };
 
 const TITLE_SIZE = "text-[30px] leading-[1.08] md:text-[34px]";
@@ -32,6 +34,8 @@ export function ConciergeScreen({
   debug,
   variant = "concierge",
   tenantId,
+  storeName,
+  storeLogoUrl,
 }: ConciergeScreenProps) {
   const controller = useConciergeController({ debug, variant, tenantId });
   const keyboardInsetPx = useVisualViewportInset();
@@ -39,6 +43,7 @@ export function ConciergeScreen({
   const [isSmallViewport, setIsSmallViewport] = useState(false);
   const [showJumpToLatest, setShowJumpToLatest] = useState(false);
   const [jumpToLatest, setJumpToLatest] = useState<(() => void) | null>(null);
+  const [showStoreLogo, setShowStoreLogo] = useState(Boolean(storeLogoUrl));
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -52,6 +57,10 @@ export function ConciergeScreen({
     mediaQuery.addListener(sync);
     return () => mediaQuery.removeListener(sync);
   }, []);
+
+  useEffect(() => {
+    setShowStoreLogo(Boolean(storeLogoUrl));
+  }, [storeLogoUrl]);
 
   const onComposerHeightChange = useCallback((nextHeight: number) => {
     setComposerHeightPx((prev) => (prev === nextHeight ? prev : nextHeight));
@@ -153,18 +162,29 @@ export function ConciergeScreen({
           </div>
         ) : null}
 
-        <h1
-          className={cn(
-            "font-serif font-semibold tracking-tight text-foreground",
-            isHeroState
-              ? HERO_TITLE_SIZE
-              : isActiveWithRecommendation
-                ? TITLE_SIZE_WITH_RECOMMENDATIONS
-                : TITLE_SIZE
-          )}
-        >
-          Rug Concierge
-        </h1>
+        <div className="mx-auto max-w-4xl px-2 sm:px-4">
+          {showStoreLogo && storeLogoUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={storeLogoUrl}
+              alt={`${storeName} logo`}
+              className="mx-auto mb-2.5 h-12 w-auto object-contain sm:h-14 md:h-16"
+              onError={() => setShowStoreLogo(false)}
+            />
+          ) : null}
+          <h1
+            className={cn(
+              "mx-auto max-w-4xl text-pretty font-serif font-semibold tracking-tight text-foreground",
+              isHeroState
+                ? HERO_TITLE_SIZE
+                : isActiveWithRecommendation
+                  ? TITLE_SIZE_WITH_RECOMMENDATIONS
+                  : TITLE_SIZE
+            )}
+          >
+            {storeName}
+          </h1>
+        </div>
         {hasMessages ? (
           <div className="mt-1 flex justify-center md:hidden">
             <Button

@@ -1,5 +1,6 @@
 import { ConciergeScreen } from "@/components/concierge/concierge-screen";
 import { AccessGuard } from "@/components/ui/access-guard";
+import { getResolvedBranding } from "@/lib/branding/tenant-branding";
 import { getServerUiTenantId } from "@/lib/ui/server-role";
 
 type ConciergePageProps = {
@@ -30,10 +31,16 @@ export default async function ConciergePage({ searchParams }: ConciergePageProps
   const params = (await searchParams) ?? {};
   const debugAllowed = process.env.NODE_ENV !== "production";
   const debug = debugAllowed && readString(params.debug) === "1";
+  const branding = await getResolvedBranding();
 
   return (
     <>
-      <ConciergeScreen debug={debug} tenantId={tenantId} />
+      <ConciergeScreen
+        debug={debug}
+        tenantId={tenantId}
+        storeName={branding.storeName}
+        storeLogoUrl={branding.storeLogoUrl}
+      />
     </>
   );
 }

@@ -141,13 +141,15 @@ export default function KioskNav({ initialUnlocked }: KioskNavProps) {
     router.refresh();
   }, [router]);
 
+  const visibleLinks = unlocked ? LINKS : [];
+
   return (
     <>
       <nav
         aria-label="Primary kiosk navigation"
         className="mx-auto mt-2 flex w-full max-w-6xl flex-wrap items-center gap-2 px-4 opacity-95 transition-all duration-200 sm:px-6 lg:px-8"
       >
-        {LINKS.filter((link) => (link.requiresStaff ? unlocked : true)).map((link) => {
+        {visibleLinks.map((link) => {
           const active = isLinkActive(pathname, link.href);
           const className = cn(
             "inline-flex min-h-9 items-center rounded-full border px-3 py-1.5 text-sm font-medium leading-5 transition-colors",
