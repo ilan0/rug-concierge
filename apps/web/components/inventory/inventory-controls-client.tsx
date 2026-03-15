@@ -2,7 +2,7 @@
 
 import type { Dispatch, ReactNode, SetStateAction } from "react";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { usePathname } from "next/navigation";
 import {
   ChevronDown,
   ChevronUp,
@@ -137,9 +137,7 @@ export function InventoryControlsClient({
   pageSize,
   children,
 }: InventoryControlsClientProps) {
-  const router = useRouter();
   const pathname = usePathname();
-  const searchParams = useSearchParams();
 
   const [queryInput, setQueryInput] = useState(filters.q);
   const [sheetOpen, setSheetOpen] = useState(false);
@@ -159,7 +157,9 @@ export function InventoryControlsClient({
 
   const applyPatch = useCallback(
     (patch: FilterPatch) => {
-      const nextParams = new URLSearchParams(searchParams.toString());
+      const currentSearch =
+        typeof window === "undefined" ? "" : window.location.search;
+      const nextParams = new URLSearchParams(currentSearch);
 
       const setMaybe = (key: string, value: string | null) => {
         if (!value) {
@@ -226,9 +226,15 @@ export function InventoryControlsClient({
 
       const nextQuery = nextParams.toString();
       const nextUrl = nextQuery ? `${pathname}?${nextQuery}` : pathname;
-      router.replace(nextUrl, { scroll: false });
+
+      if (typeof window !== "undefined") {
+        const currentUrl = `${window.location.pathname}${window.location.search}`;
+        if (currentUrl !== nextUrl) {
+          window.location.replace(nextUrl);
+        }
+      }
     },
-    [pathname, pageSize, router, searchParams]
+    [pathname, pageSize]
   );
 
   useEffect(() => {
