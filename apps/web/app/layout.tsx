@@ -42,11 +42,13 @@ export default async function RootLayout({
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
       </head>
       <body className={`${manrope.variable} ${fraunces.variable} min-h-screen bg-background font-sans text-foreground antialiased`}>
-        <BrandBar
-          storeName={branding.storeName}
-          logoMarkUrl={branding.storeLogoUrl}
-        />
-        <KioskNav initialUnlocked={unlocked} />
+        <header aria-label="Store header">
+          <BrandBar
+            storeName={branding.storeName}
+            logoMarkUrl={branding.storeLogoUrl}
+          />
+          <KioskNav initialUnlocked={unlocked} />
+        </header>
         {children}
         <AppToaster />
       </body>
