@@ -390,9 +390,9 @@ async function runCandidateQuery(input: {
   };
 
   const selectCandidates = [
-    "id, intake_label, status, width_total_in, length_total_in, ai_description, ai_structured_fields, staff_overrides",
-    "id, intake_label, status, width_total_in, length_total_in, ai_description, ai_structured_fields",
-    "id, intake_label, status, width_total_in, length_total_in, ai_description",
+    "id, tenant_id, intake_label, status, width_total_in, length_total_in, ai_description, ai_structured_fields, staff_overrides",
+    "id, tenant_id, intake_label, status, width_total_in, length_total_in, ai_description, ai_structured_fields",
+    "id, tenant_id, intake_label, status, width_total_in, length_total_in, ai_description",
   ];
 
   let queryResult = await buildQuery(selectCandidates[0]);
