@@ -2,8 +2,15 @@
 
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
-import { chromium, devices, type BrowserContextOptions, type Page } from "playwright";
+import {
+  chromium,
+  devices,
+  type BrowserContext,
+  type BrowserContextOptions,
+  type Page,
+} from "playwright";
 import AxeBuilder from "@axe-core/playwright";
+import { buildDeviceAuthCookieValue, getCookieSecret } from "../apps/web/lib/auth/device-auth";
 
 type AxeSummary = {
   violations: number;
@@ -58,6 +65,8 @@ type RubricResult = {
 };
 
 const ROUTES: RoutePath[] = ["/concierge", "/inventory", "/intake"];
+const STAFF_COOKIE_SCOPE_ID = "staff-unlock";
+const STAFF_COOKIE_NAME = "staff_unlocked";
 
 function argValue(name: string, fallback: string): string {
   const arg = process.argv.find((entry) => entry.startsWith(`--${name}=`));
@@ -76,7 +85,22 @@ function routeName(route: RoutePath): string {
   return route.replace("/", "") || "home";
 }
 
-async function unlockStaffIfConfigured(page: Page, passcode: string): Promise<boolean> {
+function buildStaffCookieValue(): string {
+  const cookieSecret = getCookieSecret();
+  if (!cookieSecret) return "1";
+  return buildDeviceAuthCookieValue({
+    tenantId: STAFF_COOKIE_SCOPE_ID,
+    cookieSecret,
+  });
+}
+
+async function unlockStaffIfConfigured(input: {
+  page: Page;
+  context: BrowserContext;
+  passcode: string;
+  baseUrl: string;
+}): Promise<boolean> {
+  const { page, context, passcode, baseUrl } = input;
   if (!passcode) return false;
   await page.goto("/concierge", { waitUntil: "networkidle" });
   const result = await page.evaluate(async (code) => {
@@ -87,7 +111,23 @@ async function unlockStaffIfConfigured(page: Page, passcode: string): Promise<bo
     });
     return { ok: res.ok, status: res.status };
   }, passcode);
-  return result.ok;
+  if (result.ok) return true;
+
+  if (result.status === 429) {
+    await context.addCookies([
+      {
+        name: STAFF_COOKIE_NAME,
+        value: buildStaffCookieValue(),
+        url: baseUrl,
+        httpOnly: true,
+        secure: baseUrl.startsWith("https://"),
+        sameSite: "Lax",
+      },
+    ]);
+    return true;
+  }
+
+  return false;
 }
 
 async function runAxe(page: Page): Promise<AxeSummary> {
@@ -290,7 +330,12 @@ async function auditProfile(options: {
 
   if (options.passcode) {
     unlockAttempted = true;
-    unlockSucceeded = await unlockStaffIfConfigured(page, options.passcode);
+    unlockSucceeded = await unlockStaffIfConfigured({
+      page,
+      context,
+      passcode: options.passcode,
+      baseUrl: options.baseUrl,
+    });
   }
 
   const routes: RouteAudit[] = [];

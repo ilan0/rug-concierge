@@ -31,6 +31,14 @@ type UseConciergeControllerInput = {
 
 type UiRecommendationState = NonNullable<UiChatResponseBody["recommendation_state"]>;
 
+function storageSessionKey(tenantId: string): string {
+  return `rug_concierge_session_id:${tenantId}`;
+}
+
+function storageTurnsKey(tenantId: string): string {
+  return `rug_concierge_turns:${tenantId}`;
+}
+
 export function useConciergeController(input: UseConciergeControllerInput) {
   const { debug, tenantId } = input;
 
@@ -56,6 +64,59 @@ export function useConciergeController(input: UseConciergeControllerInput) {
     const timer = window.setTimeout(() => setShowSlowNotice(true), 8000);
     return () => window.clearTimeout(timer);
   }, [isLoading]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const storedSessionId = window.localStorage.getItem(storageSessionKey(tenantId));
+    if (storedSessionId && storedSessionId.trim().length > 0) {
+      setSessionId(storedSessionId.trim());
+    }
+
+    const storedTurns = window.localStorage.getItem(storageTurnsKey(tenantId));
+    if (!storedTurns) return;
+
+    try {
+      const parsed = JSON.parse(storedTurns);
+      if (!Array.isArray(parsed)) return;
+
+      const safeTurns = parsed.filter((item) => {
+        return (
+          item &&
+          typeof item === "object" &&
+          typeof (item as { id?: unknown }).id === "string" &&
+          typeof (item as { role?: unknown }).role === "string" &&
+          typeof (item as { text?: unknown }).text === "string"
+        );
+      }) as Turn[];
+
+      if (safeTurns.length > 0) {
+        setTurns(safeTurns);
+      }
+    } catch {
+      // Ignore invalid persisted chat payloads.
+    }
+  }, [tenantId]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const key = storageSessionKey(tenantId);
+    if (sessionId && sessionId.trim().length > 0) {
+      window.localStorage.setItem(key, sessionId);
+      return;
+    }
+    window.localStorage.removeItem(key);
+  }, [sessionId, tenantId]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const key = storageTurnsKey(tenantId);
+    if (turns.length === 0) {
+      window.localStorage.removeItem(key);
+      return;
+    }
+    window.localStorage.setItem(key, JSON.stringify(turns.slice(-40)));
+  }, [tenantId, turns]);
 
   const debugRunId = useMemo(
     () => toSlug(`concierge-debug-${new Date().toISOString().replace(/[:.]/g, "-")}`),
