@@ -1,0 +1,52 @@
+{
+  "tables": {
+    "tenants": [
+      "id",
+      "settings",
+      "created_at"
+    ],
+    "rugs": [
+      "id",
+      "tenant_id",
+      "stock_id",
+      "status",
+      "width_ft",
+      "width_in",
+      "length_ft",
+      "length_in",
+      "width_total_in",
+      "length_total_in",
+      "intake_label",
+      "ai_description",
+      "ai_structured_fields",
+      "staff_overrides",
+      "created_at",
+      "updated_at"
+    ],
+    "rug_images": [
+      "id",
+      "tenant_id",
+      "rug_id",
+      "path",
+      "created_at"
+    ],
+    "chat_sessions": [
+      "session_id",
+      "tenant_id",
+      "role",
+      "session_data",
+      "created_at",
+      "updated_at"
+    ],
+    "chat_messages": [
+      "id",
+      "session_id",
+      "tenant_id",
+      "role",
+      "mode",
+      "content",
+      "metadata",
+      "created_at"
+    ]
+  }
+}

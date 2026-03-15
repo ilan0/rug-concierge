@@ -65,8 +65,16 @@ function getArtifactPath(meta: E2eTraceMeta, channel: string, traceId: string): 
   );
 }
 
+function isE2eTraceEnabled(): boolean {
+  const override = process.env.ENABLE_E2E_TRACE_ARTIFACTS;
+  if (override === "1") return true;
+  if (override === "0") return false;
+  if (process.env.QA_MODE === "1") return true;
+  return process.env.NODE_ENV !== "production";
+}
+
 export function parseE2eTraceMeta(req: Request): E2eTraceMeta | null {
-  if (process.env.QA_MODE === "1") return null;
+  if (!isE2eTraceEnabled()) return null;
   const runId = req.headers.get("x-e2e-trace-run")?.trim();
   const caseId = req.headers.get("x-e2e-trace-case")?.trim();
   if (!runId || !caseId) return null;
@@ -79,7 +87,7 @@ export function parseE2eTraceMeta(req: Request): E2eTraceMeta | null {
 export async function writeE2eTraceArtifact(
   input: E2eTraceWriteInput
 ): Promise<string | null> {
-  if (process.env.QA_MODE === "1") return null;
+  if (!isE2eTraceEnabled()) return null;
   try {
     const filePath = getArtifactPath(input.meta, input.channel, input.trace_id);
     await mkdir(path.dirname(filePath), { recursive: true });

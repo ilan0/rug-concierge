@@ -13,6 +13,11 @@ import {
 } from "@/lib/intake/validation";
 import { isStaffUnlockedFromRequest } from "@/lib/auth/staff";
 import { requestVisionEnrichment } from "@/lib/inventory/vision-enrichment";
+import {
+  checkLocalRateLimit,
+  checkRateLimit,
+  inventoryWriteRateLimit,
+} from "@/lib/rate-limit";
 
 const RUG_IMAGES_BUCKET = "rug-images";
 
@@ -201,6 +206,24 @@ function scheduleBackgroundTask(task: () => Promise<void>) {
 export async function POST(req: NextRequest) {
   if (!isStaffUnlockedFromRequest(req)) {
     return NextResponse.json({ error: "staff_locked" }, { status: 401 });
+  }
+
+  const ip =
+    req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
+    req.headers.get("x-real-ip") ??
+    "unknown";
+  const rateLimitResult = inventoryWriteRateLimit
+    ? await checkRateLimit(inventoryWriteRateLimit, `inventory:intake:${ip}`)
+    : checkLocalRateLimit({
+        key: `inventory:intake:${ip}`,
+        maxRequests: 30,
+        windowMs: 10 * 60 * 1000,
+      });
+  if (!rateLimitResult.allowed) {
+    return NextResponse.json(
+      { error: "Too many intake requests. Please wait and try again." },
+      { status: 429 }
+    );
   }
 
   const formData = await req.formData().catch(() => null);

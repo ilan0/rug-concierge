@@ -1,17 +1,11 @@
 import { NextResponse } from "next/server";
-
-function readTrimmedEnv(name: string): string | null {
-  const raw = process.env[name];
-  if (typeof raw !== "string") return null;
-  const trimmed = raw.trim();
-  return trimmed.length > 0 ? trimmed : null;
-}
+import { getResolvedBranding } from "@/lib/branding/tenant-branding";
 
 export async function GET() {
-  const storeName = readTrimmedEnv("STORE_NAME") ?? "Rug Concierge";
+  const branding = await getResolvedBranding();
 
   const manifest = {
-    name: `${storeName} Rug Concierge`,
+    name: `${branding.storeName} Rug Concierge`,
     short_name: "Rug Concierge",
     start_url: "/concierge",
     display: "standalone",

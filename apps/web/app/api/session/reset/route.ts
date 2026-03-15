@@ -1,10 +1,19 @@
 import { NextResponse } from "next/server";
+import { z } from "zod";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import {
   normalizeTenantId,
   resolveAuthoritativeTenantForServer,
 } from "@/lib/auth/tenant";
 import { deleteSessionFromMemory } from "@/lib/chat/session-store";
+import { parseJsonBodyWithSchema } from "@/lib/http/route-validation";
+
+const RESET_SESSION_BODY_SCHEMA = z
+  .object({
+    session_id: z.string().trim().min(1).max(128).optional(),
+    tenant_id: z.string().trim().min(1).max(128).optional(),
+  })
+  .strict();
 
 function readOptionalSessionId(value: unknown): string | null {
   if (typeof value !== "string") return null;
@@ -13,11 +22,17 @@ function readOptionalSessionId(value: unknown): string | null {
 }
 
 export async function POST(req: Request) {
-  const body = (await req.json().catch(() => ({}))) as Record<string, unknown>;
-  const oldSessionId = readOptionalSessionId(body.session_id);
+  const parsedBody = await parseJsonBodyWithSchema(
+    req,
+    RESET_SESSION_BODY_SCHEMA,
+    "Invalid request payload."
+  );
+  if (!parsedBody.ok) return parsedBody.response;
+
+  const oldSessionId = readOptionalSessionId(parsedBody.value.session_id);
 
   const tenantId = resolveAuthoritativeTenantForServer({
-    requestTenantId: normalizeTenantId(body.tenant_id),
+    requestTenantId: normalizeTenantId(parsedBody.value.tenant_id),
   });
 
   if (oldSessionId && tenantId) {

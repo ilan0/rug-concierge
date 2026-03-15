@@ -2,6 +2,15 @@ import { NextResponse } from "next/server";
 import { existsSync } from "node:fs";
 import { readdir, readFile } from "node:fs/promises";
 import path from "node:path";
+import { z } from "zod";
+import { parseSearchParamsWithSchema } from "@/lib/http/route-validation";
+
+const DEBUG_TRACE_QUERY_SCHEMA = z
+  .object({
+    run: z.string().trim().min(1),
+    case: z.string().trim().min(1),
+  })
+  .strict();
 
 function slug(value: string): string {
   return value
@@ -38,15 +47,14 @@ export async function GET(req: Request) {
   }
 
   const url = new URL(req.url);
-  const run = url.searchParams.get("run")?.trim() ?? "";
-  const testCase = url.searchParams.get("case")?.trim() ?? "";
-
-  if (!run || !testCase) {
-    return NextResponse.json(
-      { error: "run and case are required query params." },
-      { status: 400 }
-    );
-  }
+  const parsedQuery = parseSearchParamsWithSchema(
+    url.searchParams,
+    DEBUG_TRACE_QUERY_SCHEMA,
+    "run and case are required query params."
+  );
+  if (!parsedQuery.ok) return parsedQuery.response;
+  const run = parsedQuery.value.run;
+  const testCase = parsedQuery.value.case;
 
   // Tenant enforcement is intentionally skipped for this route.
   // This endpoint is developer-only and reads local debug artifact files,

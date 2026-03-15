@@ -23,6 +23,7 @@ import {
   splitSizePresetGroups,
   toSizePresetLabel,
 } from "@/lib/inventory/size-presets";
+import { INVENTORY_QUERY_PARAMS } from "@/lib/inventory/query-params";
 import type {
   InventoryFilters,
   InventorySizePreset,
@@ -72,8 +73,8 @@ const SORT_OPTIONS: Array<{ value: InventorySort; label: string }> = [
 
 function chipClass(active: boolean): string {
   return active
-    ? "inline-flex min-h-8 items-center rounded-full border border-primary/45 bg-primary/10 px-3 text-xs font-semibold text-foreground ring-1 ring-primary/25"
-    : "inline-flex min-h-8 items-center rounded-full border border-border/55 bg-background px-3 text-xs font-medium text-foreground/80 hover:border-primary/30 hover:bg-primary/10 hover:text-foreground";
+    ? "inline-flex min-h-7 items-center rounded-full border border-primary/55 bg-primary/12 px-2.5 text-[11px] font-semibold text-foreground ring-1 ring-primary/30"
+    : "inline-flex min-h-7 items-center rounded-full border border-border/55 bg-background px-2.5 text-[11px] font-medium text-foreground/80 hover:border-primary/30 hover:bg-primary/10 hover:text-foreground";
 }
 
 function toSizeParts(value: number | null): SizeInputParts {
@@ -170,52 +171,58 @@ export function InventoryControlsClient({
 
       if (Object.prototype.hasOwnProperty.call(patch, "q")) {
         const nextQ = (patch.q ?? "").trim();
-        setMaybe("q", nextQ.length > 0 ? nextQ.slice(0, 120) : null);
+        setMaybe(
+          INVENTORY_QUERY_PARAMS.query,
+          nextQ.length > 0 ? nextQ.slice(0, 120) : null
+        );
       }
       if (Object.prototype.hasOwnProperty.call(patch, "status")) {
         setMaybe(
-          "status",
+          INVENTORY_QUERY_PARAMS.status,
           patch.status && patch.status !== "available" ? patch.status : null
         );
       }
       if (Object.prototype.hasOwnProperty.call(patch, "sort")) {
         setMaybe(
-          "sort",
+          INVENTORY_QUERY_PARAMS.sort,
           patch.sort && patch.sort !== "newest" ? patch.sort : null
         );
       }
       if (Object.prototype.hasOwnProperty.call(patch, "sizePresets")) {
         const joined = (patch.sizePresets ?? []).join(",");
-        setMaybe("size_presets", joined.length > 0 ? joined : null);
+        setMaybe(
+          INVENTORY_QUERY_PARAMS.sizePresets,
+          joined.length > 0 ? joined : null
+        );
       }
-      nextParams.delete("size_preset");
+      nextParams.delete(INVENTORY_QUERY_PARAMS.legacySizePreset);
       if (Object.prototype.hasOwnProperty.call(patch, "widthMin")) {
         setMaybe(
-          "width_min",
+          INVENTORY_QUERY_PARAMS.widthMin,
           typeof patch.widthMin === "number" ? String(patch.widthMin) : null
         );
       }
       if (Object.prototype.hasOwnProperty.call(patch, "widthMax")) {
         setMaybe(
-          "width_max",
+          INVENTORY_QUERY_PARAMS.widthMax,
           typeof patch.widthMax === "number" ? String(patch.widthMax) : null
         );
       }
       if (Object.prototype.hasOwnProperty.call(patch, "lengthMin")) {
         setMaybe(
-          "length_min",
+          INVENTORY_QUERY_PARAMS.lengthMin,
           typeof patch.lengthMin === "number" ? String(patch.lengthMin) : null
         );
       }
       if (Object.prototype.hasOwnProperty.call(patch, "lengthMax")) {
         setMaybe(
-          "length_max",
+          INVENTORY_QUERY_PARAMS.lengthMax,
           typeof patch.lengthMax === "number" ? String(patch.lengthMax) : null
         );
       }
 
-      nextParams.set("page", "1");
-      nextParams.set("page_size", String(pageSize));
+      nextParams.set(INVENTORY_QUERY_PARAMS.page, "1");
+      nextParams.set(INVENTORY_QUERY_PARAMS.pageSize, String(pageSize));
 
       const nextQuery = nextParams.toString();
       const nextUrl = nextQuery ? `${pathname}?${nextQuery}` : pathname;
@@ -440,12 +447,12 @@ export function InventoryControlsClient({
       className={
         mobile
           ? "space-y-3"
-          : "space-y-3 rounded-xl border border-border/60 bg-white/90 p-3 shadow-sm"
+          : "space-y-2.5 rounded-xl border border-border/60 bg-white/90 p-2.5 shadow-sm"
       }
       data-inventory-filters="true"
     >
       <div className="space-y-1.5" data-filter-lane="status">
-        <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+        <p className="text-[9px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
           Status
         </p>
         <div className="flex flex-wrap gap-1.5">
@@ -463,7 +470,7 @@ export function InventoryControlsClient({
       </div>
 
       <div className="space-y-1.5" data-filter-lane="sort">
-        <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+        <p className="text-[9px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
           Sort
         </p>
         <div className="flex flex-wrap gap-1.5">
@@ -482,7 +489,7 @@ export function InventoryControlsClient({
 
       <div className="space-y-1.5" data-filter-lane="size">
         <div className="flex items-center justify-between gap-2">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+          <p className="text-[9px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
             Sizes
           </p>
           {sizePresetGroups.more.length > 0 ? (
@@ -514,20 +521,20 @@ export function InventoryControlsClient({
         </div>
       </div>
 
-      <div className="space-y-2 rounded-lg border border-border/50 bg-background/70 p-2.5">
-        <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
-          Custom Size
-        </p>
-        <div className="grid gap-2 sm:grid-cols-2">
+      <details
+        className="rounded-lg border border-border/40 bg-background/70 p-2.5"
+        open={hasCustomInput}
+      >
+        <summary className="cursor-pointer list-none text-[9px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+          Custom Size (ft/in)
+        </summary>
+        <div className="mt-2 grid gap-2 sm:grid-cols-2">
           {renderCustomBound("Width Min", widthMinInput, setWidthMinInput)}
           {renderCustomBound("Width Max", widthMaxInput, setWidthMaxInput)}
           {renderCustomBound("Length Min", lengthMinInput, setLengthMinInput)}
           {renderCustomBound("Length Max", lengthMaxInput, setLengthMaxInput)}
         </div>
-        <p className="text-xs text-muted-foreground">
-          Feet + inches. Enter any bound to override size presets.
-        </p>
-      </div>
+      </details>
 
       <Button
         type="button"

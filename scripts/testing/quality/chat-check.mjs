@@ -86,7 +86,8 @@ function evaluate(response, expect = {}) {
       ? response.json.response.recommendations
       : [];
     const recommendationReasonsOk = recommendations.every((row) =>
-      isPlainTextOnly(row?.why_this_fits)
+      Array.isArray(row?.match_reasons) &&
+      row.match_reasons.every((reason) => isPlainTextOnly(reason))
     );
 
     checks.push({

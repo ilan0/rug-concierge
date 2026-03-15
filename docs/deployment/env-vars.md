@@ -16,16 +16,24 @@
 
 ## Branding (Optional)
 
-- `STORE_NAME` (default: `Rug Concierge`)
-- `STORE_LOGO_URL`
+- `STORE_NAME` (fallback only; tenant settings are authoritative when present)
+- `STORE_LOGO_URL` (fallback only)
 
 ## Optional Runtime Tunables
 
 - `OPENAI_MODEL`
+- `OPENAI_TIMEOUT_MS`
+- `OPENAI_RETRY_ATTEMPTS`
+- `OPENAI_RETRY_BASE_MS`
 - `OPENAI_MAX_OUTPUT_TOKENS_GENERAL_CHAT`
 - `OPENAI_MAX_OUTPUT_TOKENS_RECOMMENDATION`
 - `ENABLE_GENERAL_CHAT_AI`
 - `CHAT_MEMORY_V1`
+- `CHAT_PERSISTENCE_FAIL_OPEN`
+- `RATE_LIMIT_FAIL_OPEN`
+- `ALLOW_DYNAMIC_TENANT_ID`
+- `ENABLE_RECOMMENDATION_QA_LOGGING`
+- `ENABLE_E2E_TRACE_ARTIFACTS`
 
 ## Script/Automation Support
 
@@ -39,4 +47,8 @@ Vercel automation helpers require:
 ## Notes
 
 - `SUPABASE_SECRET_KEY` is required by app runtime (`apps/web/lib/supabase/admin.ts`).
+- Runtime branding source order:
+  1. `tenants.settings.branding` for deployment `TENANT_ID`
+  2. env fallback (`STORE_NAME`, `STORE_LOGO_URL`)
+  3. default (`Rug Concierge`)
 - Rotating `COOKIE_SECRET` invalidates prior device auth signatures.

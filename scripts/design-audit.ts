@@ -219,7 +219,7 @@ function buildRubric(desktop: ProfileAuditResult, mobile: ProfileAuditResult): R
     desktopInv.hasSearch &&
     !desktopInv.hasApplyButton &&
     desktopInv.statusChipCount >= 4 &&
-    desktopInv.sizeChipCount >= 6;
+    desktopInv.sizeChipCount >= 5;
 
   const mobileErgo =
     mobileInv.firstResultWithinMinimalScroll &&

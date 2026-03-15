@@ -88,15 +88,15 @@ export function InventoryTableClient({ rows }: InventoryTableClientProps) {
               return (
                 <article
                   key={row.id}
-                  className="cursor-pointer rounded-xl border border-border/65 bg-background/80 p-3 transition-colors hover:bg-secondary/30"
+                  className="cursor-pointer rounded-xl border border-border/65 bg-background/80 p-2.5 transition-colors hover:bg-secondary/30"
                   onClick={() => onOpenRow(row)}
                 >
-                  <div className="mb-2 flex items-start gap-3">
-                    <div className="h-20 w-16 shrink-0 overflow-hidden rounded-md border border-border/70 bg-muted">
+                  <div className="mb-2 flex items-start gap-2.5">
+                    <div className="h-16 w-14 shrink-0 overflow-hidden rounded-md border border-border/70 bg-muted">
                       <RugImage src={row.primary_image_url} alt={displayLabel} />
                     </div>
                     <div className="min-w-0 space-y-1">
-                      <p className={ready ? "text-base font-semibold" : "text-base text-muted-foreground"}>
+                      <p className={ready ? "text-lg font-semibold leading-tight" : "text-lg leading-tight text-muted-foreground"}>
                         {displayLabel}
                       </p>
                       {!ready ? (
@@ -119,26 +119,24 @@ export function InventoryTableClient({ rows }: InventoryTableClientProps) {
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-1 gap-2 text-sm">
-                    <p>
-                      <span className="font-semibold">Stock ID:</span>{" "}
+                  <div className="grid grid-cols-[auto_1fr] items-center gap-x-2 gap-y-1 text-sm leading-tight">
+                    <span className="text-muted-foreground">Stock</span>
+                    <span>
                       {row.stock_id ? (
                         <span className="font-mono text-xs">{row.stock_id}</span>
                       ) : (
                         "-"
                       )}
-                    </p>
-                    <p>
-                      <span className="font-semibold">Status:</span>{" "}
-                      <StatusBadge status={row.status} />
-                    </p>
-                    <p>
-                      <span className="font-semibold">Size:</span>{" "}
-                      {formatRugSize(row.width_total_in, row.length_total_in) || "-"}
-                    </p>
-                    <p>
-                      <span className="font-semibold">Added:</span> {formatDate(row.created_at)}
-                    </p>
+                    </span>
+
+                    <span className="text-muted-foreground">Status</span>
+                    <StatusBadge status={row.status} />
+
+                    <span className="text-muted-foreground">Size</span>
+                    <span>{formatRugSize(row.width_total_in, row.length_total_in) || "-"}</span>
+
+                    <span className="text-muted-foreground">Added</span>
+                    <span>{formatDate(row.created_at)}</span>
                   </div>
                 </article>
               );

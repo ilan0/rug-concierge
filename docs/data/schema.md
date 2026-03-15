@@ -15,6 +15,10 @@ Commonly present/used:
 - `settings` (jsonb)
 - `created_at`
 
+`settings` shape used at runtime:
+- `branding.store_name` (string)
+- `branding.logo_mark_url` (string public URL)
+
 ## `rugs`
 
 Runtime-required fields:
@@ -30,9 +34,6 @@ Runtime-required fields:
 - `staff_overrides` (jsonb nullable)
 - `created_at`, `updated_at`
 
-Removed from runtime:
-- `contextual_blurb`
-
 ## `rug_images`
 
 Runtime-used fields:
@@ -40,6 +41,7 @@ Runtime-used fields:
 - `tenant_id`
 - `rug_id`
 - `path` (storage object key only)
+- `created_at`
 
 Current shape expectation:
 - one row per rug (`rug_id` unique index)

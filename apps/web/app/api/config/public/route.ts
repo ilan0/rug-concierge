@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { getResolvedBranding } from "@/lib/branding/tenant-branding";
 
 function readTrimmedEnv(name: string): string | null {
   const raw = process.env[name];
@@ -8,13 +9,12 @@ function readTrimmedEnv(name: string): string | null {
 }
 
 export async function GET() {
-  const storeName = readTrimmedEnv("STORE_NAME") ?? "Rug Concierge";
-  const storeLogoUrl = readTrimmedEnv("STORE_LOGO_URL");
+  const branding = await getResolvedBranding();
   const isPasscodeGated = Boolean(readTrimmedEnv("STORE_PASSCODE"));
 
   return NextResponse.json({
-    storeName,
-    storeLogoUrl,
+    storeName: branding.storeName,
+    storeLogoUrl: branding.storeLogoUrl,
     isPasscodeGated,
   });
 }

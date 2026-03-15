@@ -1,113 +1,68 @@
 import { NextResponse } from "next/server";
+import { z } from "zod";
 import { supabaseAdmin } from "@/lib/supabase/admin";
-import { badRequest, internalError } from "@/lib/errors/http-errors";
+import { internalError } from "@/lib/errors/http-errors";
 import { resolveAuthoritativeTenantForServer } from "@/lib/auth/tenant";
 import { fetchPrimaryRugImagesForRugs } from "@/lib/storage/rug-images";
 import {
-  aiStructuredFieldsSchema,
-  staffOverridesSchema,
-} from "@/lib/inventory/schemas";
-import { resolveEffectiveFields } from "@/lib/inventory/resolve-fields";
+  fetchRugRecordById,
+  toStaffInventoryRugDetail,
+} from "@/lib/inventory/rug-record";
 import { formatRugSize } from "@/lib/utils/format";
+import { parseRouteParamsWithSchema } from "@/lib/http/route-validation";
 
-function toAiStructuredFields(value: unknown) {
-  if (!value || typeof value !== "object" || Array.isArray(value)) return null;
-  const parsed = aiStructuredFieldsSchema.safeParse(value);
-  return parsed.success ? parsed.data : null;
-}
-
-function toStaffOverrides(value: unknown) {
-  if (!value || typeof value !== "object" || Array.isArray(value)) return null;
-  const parsed = staffOverridesSchema.safeParse(value);
-  return parsed.success ? parsed.data : null;
-}
+const RUG_ID_PARAMS_SCHEMA = z.object({ id: z.string().uuid() }).strict();
 
 export async function GET(
   _req: Request,
   context: { params: Promise<{ id: string }> }
 ) {
-  const { id } = await context.params;
-  if (!id || typeof id !== "string") {
-    return badRequest("rug id is required.");
-  }
+  const params = await parseRouteParamsWithSchema(
+    context.params,
+    RUG_ID_PARAMS_SCHEMA,
+    "rug id is required."
+  );
+  if (!params.ok) return params.response;
 
   const tenantId = resolveAuthoritativeTenantForServer({});
   if (!tenantId) {
     return internalError("Tenant is not configured.");
   }
 
-  const runRugQuery = (columns: string) =>
-    supabaseAdmin
-      .from("rugs")
-      .select(columns)
-      .eq("tenant_id", tenantId)
-      .eq("id", id)
-      .maybeSingle();
-
-  const selectCandidates = [
-    "id, intake_label, ai_structured_fields, staff_overrides, ai_description, width_total_in, length_total_in, status",
-    "id, intake_label, ai_structured_fields, ai_description, width_total_in, length_total_in, status",
-    "id, intake_label, ai_description, width_total_in, length_total_in, status",
-  ];
-
-  let rugResult = await runRugQuery(selectCandidates[0]);
-  for (const selectColumns of selectCandidates.slice(1)) {
-    if (!rugResult.error) break;
-    if (!isLikelyMissingColumnError(rugResult.error.message ?? "")) break;
-    rugResult = await runRugQuery(selectColumns);
-  }
-
-  if (rugResult.error || !rugResult.data) {
+  const row = await fetchRugRecordById({
+    supabase: supabaseAdmin,
+    tenantId,
+    id: params.value.id,
+  });
+  if (!row || row.status !== "available") {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 
-  const rug = rugResult.data as unknown as Record<string, unknown>;
-  if (rug.status !== "available") {
-    return NextResponse.json({ error: "Not found" }, { status: 404 });
-  }
-
-  const widthTotalIn =
-    typeof rug.width_total_in === "number" ? rug.width_total_in : null;
-  const lengthTotalIn =
-    typeof rug.length_total_in === "number" ? rug.length_total_in : null;
-  if (widthTotalIn === null || lengthTotalIn === null) {
+  if (row.width_total_in === null || row.length_total_in === null) {
     return internalError("Rug dimensions are unavailable.");
   }
-  const sizeDisplay = formatRugSize(widthTotalIn, lengthTotalIn);
 
   const imageMap = await fetchPrimaryRugImagesForRugs({
     supabase: supabaseAdmin,
     tenantId,
-    rugIds: [id],
+    rugIds: [params.value.id],
   });
-  const primaryImageUrl = imageMap.get(id)?.primary_image_url ?? null;
+  const primaryImageUrl = imageMap.get(params.value.id)?.primary_image_url ?? null;
 
-  const aiFields = toAiStructuredFields(rug.ai_structured_fields);
-  const staffOverrides = toStaffOverrides(rug.staff_overrides ?? null);
+  const detail = toStaffInventoryRugDetail({
+    row,
+    primaryImageUrl,
+    primaryImageCaption: null,
+  });
 
   return NextResponse.json({
-    id,
-    intake_label:
-      typeof rug.intake_label === "string" ? rug.intake_label : null,
-    effective_fields: resolveEffectiveFields(
-      typeof rug.intake_label === "string" ? rug.intake_label : null,
-      aiFields,
-      staffOverrides
-    ),
-    ai_description:
-      typeof rug.ai_description === "string" ? rug.ai_description : null,
-    width_total_in: widthTotalIn,
-    length_total_in: lengthTotalIn,
-    size_display: sizeDisplay,
+    id: row.id,
+    intake_label: row.intake_label,
+    effective_fields: detail.effective_fields,
+    ai_description: row.ai_description,
+    width_total_in: row.width_total_in,
+    length_total_in: row.length_total_in,
+    size_display: formatRugSize(row.width_total_in, row.length_total_in),
     primary_image_url: primaryImageUrl,
   });
-}
-
-function isLikelyMissingColumnError(message: string): boolean {
-  const normalized = message.toLowerCase();
-  return (
-    normalized.includes("does not exist") ||
-    normalized.includes("schema cache") ||
-    normalized.includes("could not find the")
-  );
 }

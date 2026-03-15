@@ -14,14 +14,15 @@ AI rug concierge for single-store kiosk deployments:
 
 - Inventory is authoritative. AI never invents inventory rows.
 - Tenant scope is enforced on all inventory-backed DB reads/writes.
+- Store branding is tenant-owned (`tenants.settings.branding`) with env fallback.
 - Recommendation hard filters are backend-enforced (availability + size).
 - Response strings are plain text only.
-- `contextual_blurb` is removed from runtime and API contracts.
 
 ## Access Model
 
 - `STORE_PASSCODE` enables staff unlock mode.
-- Staff unlock cookie: `staff_unlocked=1` (`HttpOnly`, `SameSite=Lax`, `Secure` in prod).
+- Staff unlock cookie: `staff_unlocked=<derived-token>` (`HttpOnly`, `SameSite=Lax`, `Secure` in prod).
+  - Legacy fallback remains `staff_unlocked=1` when `COOKIE_SECRET` is not configured.
 - Locked `/inventory` and `/intake` requests are redirected to `/concierge`.
 - Staff-protected endpoints require unlocked cookie:
   - `POST /api/inventory/intake`
@@ -32,10 +33,10 @@ AI rug concierge for single-store kiosk deployments:
 
 Server-side priority:
 1. deployment env `TENANT_ID`
-2. request `tenant_id` (fallback)
+2. request/cookie `tenant_id` fallback only when dynamic resolution is allowed
 3. reject inventory-backed flow if still missing
 
-When env `TENANT_ID` is set, it is authoritative.
+When env `TENANT_ID` is set, it is authoritative. In production, dynamic fallback is disabled by default unless `ALLOW_DYNAMIC_TENANT_ID=1`.
 
 ## Core APIs
 
@@ -48,6 +49,20 @@ When env `TENANT_ID` is set, it is authoritative.
 - `POST /api/session/reset`
 - `POST /api/auth/passcode`, `POST /api/auth/lock`
 - `GET /api/config/public`, `GET /api/manifest`
+
+## Source Of Truth Map
+
+| Contract Surface | Canonical Code Module |
+| --- | --- |
+| Role capability checks | `apps/web/lib/http/guards.ts` |
+| Request role normalization | `apps/web/lib/auth/request-role.ts` |
+| Tenant resolution | `apps/web/lib/auth/tenant.ts` |
+| Tenant branding resolution | `apps/web/lib/branding/tenant-branding.ts` |
+| Inventory row parsing/shape | `apps/web/lib/inventory/rug-record.ts` |
+| Inventory filter normalization | `apps/web/lib/inventory/filters.ts` |
+| Recommendation orchestration | `apps/web/lib/recommend/pipeline.ts` |
+| Recommendation output shaping | `apps/web/lib/ai/recommend.ts` |
+| Shared route validation | `apps/web/lib/http/route-validation.ts` |
 
 ## Intake + Enrichment
 
@@ -95,6 +110,7 @@ Effective display fields are resolved at read time:
 
 ## QA Entrypoints
 
+- `npm run quality:release`
 - `npm run qa:functional`
 - `npm run qa:quality`
 - `npm run qa:all`

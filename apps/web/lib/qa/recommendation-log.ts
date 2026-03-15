@@ -55,10 +55,17 @@ function getLogPath(): string {
   return path.resolve(repoRoot, "docs/testing/qa-log.ndjson");
 }
 
+function shouldWriteRecommendationQaLog(): boolean {
+  const override = process.env.ENABLE_RECOMMENDATION_QA_LOGGING;
+  if (override === "1") return true;
+  if (override === "0") return false;
+  return process.env.NODE_ENV !== "production";
+}
+
 export async function logRecommendationQaEvent(
   event: RecommendationQaEvent
 ): Promise<void> {
-  if (process.env.QA_MODE === "1") return;
+  if (!shouldWriteRecommendationQaLog()) return;
   try {
     const outputPath = getLogPath();
     await mkdir(path.dirname(outputPath), { recursive: true });

@@ -2,6 +2,7 @@ import {
   visionEnrichmentSchema,
   type ParsedAiStructuredFields,
 } from "@/lib/inventory/schemas";
+import { postOpenAiResponses } from "@/lib/ai/response-quality";
 import { formatRugSize } from "@/lib/utils/format";
 
 const OPENAI_RESPONSES_URL = "https://api.openai.com/v1/responses";
@@ -255,19 +256,14 @@ export async function requestVisionEnrichment(input: {
     },
   };
 
-  const response = await fetch(OPENAI_RESPONSES_URL, {
-    method: "POST",
-    headers: {
-      "content-type": "application/json",
-      authorization: `Bearer ${apiKey}`,
-    },
-    body: JSON.stringify(requestPayload),
-  }).catch(() => null);
-
-  if (!response || !response.ok) {
+  const response = await postOpenAiResponses({
+    url: OPENAI_RESPONSES_URL,
+    apiKey,
+    requestPayload,
+  });
+  if (!response.ok) {
     return null;
   }
 
-  const payload = (await response.json().catch(() => null)) as unknown;
-  return parseVisionPayload(payload);
+  return parseVisionPayload(response.response_payload);
 }

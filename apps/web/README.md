@@ -27,8 +27,16 @@ Primary UI shell for Rug Concierge.
 ## Auth Model
 
 - kiosk navigation is always available; concierge is always visible
-- staff routes (`/inventory`, `/intake`) require `staff_unlocked=1`
+- staff routes (`/inventory`, `/intake`) require `staff_unlocked` cookie
+  - legacy `staff_unlocked=1` works only when `COOKIE_SECRET` is unset
 - unlock with `POST /api/auth/passcode`, lock with `POST /api/auth/lock`
+
+## Branding Model
+
+- runtime source order:
+  1. tenant settings (`tenants.settings.branding`) for deployment `TENANT_ID`
+  2. env fallback (`STORE_NAME`, `STORE_LOGO_URL`)
+  3. default `Rug Concierge`
 
 ## Styling
 

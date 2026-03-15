@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { z } from "zod";
 import {
   extractConstraintsFromUserMessage,
   mergeHardConstraints,
@@ -17,12 +18,27 @@ import {
   resolveAuthoritativeTenantForServer,
 } from "@/lib/auth/tenant";
 import { resolveApiRoleOrError } from "@/lib/http/guards";
+import { parseJsonBodyWithSchema } from "@/lib/http/route-validation";
 import {
-  parseJsonObjectBody,
   readUserMessage,
-  validateOptionalObjectField,
 } from "@/lib/http/validators";
+import {
+  checkLocalRateLimit,
+  checkRateLimit,
+  recommendRateLimit,
+} from "@/lib/rate-limit";
 import type { HardConstraints } from "@/lib/types/recommendation";
+
+const RECOMMEND_BODY_SCHEMA = z
+  .object({
+    tenant_id: z.string().trim().min(1).max(128).optional(),
+    role: z.string().optional(),
+    user_role: z.string().optional(),
+    user_message: z.string().optional(),
+    message: z.string().optional(),
+    constraints: z.record(z.string(), z.unknown()).optional(),
+  })
+  .strict();
 
 function hasMeaningfulConstraints(constraints: HardConstraints): boolean {
   return (
@@ -42,7 +58,7 @@ function hasMeaningfulConstraints(constraints: HardConstraints): boolean {
  * Not for freeform chat; inventory truth stays in backend.
  */
 
-// PSEUDOCODE
+// Flow overview
 // 1) Parse request body and extract constraints + user message.
 // 2) Normalize explicit constraints and parse lightweight constraints from user text.
 // 3) Merge both sources into one backend constraint object.
@@ -54,12 +70,34 @@ function hasMeaningfulConstraints(constraints: HardConstraints): boolean {
 export async function POST(req: Request) {
   const startedAt = Date.now();
   try {
+    const ip =
+      req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
+      req.headers.get("x-real-ip") ??
+      "unknown";
+    const recommendRateLimitResult = recommendRateLimit
+      ? await checkRateLimit(recommendRateLimit, `recommend:${ip}`)
+      : checkLocalRateLimit({
+          key: `recommend:${ip}`,
+          maxRequests: 30,
+          windowMs: 10 * 60 * 1000,
+        });
+    if (!recommendRateLimitResult.allowed) {
+      return NextResponse.json(
+        {
+          error:
+            "You have sent many recommendation requests. Please wait a moment and try again.",
+        },
+        { status: 429 }
+      );
+    }
+
     const requestId = crypto.randomUUID();
     const traceMeta = parseE2eTraceMeta(req);
     const routeTraceId = crypto.randomUUID();
 
-    const parsedBody = await parseJsonObjectBody<Record<string, unknown>>(
+    const parsedBody = await parseJsonBodyWithSchema(
       req,
+      RECOMMEND_BODY_SCHEMA,
       "Invalid request"
     );
     if (!parsedBody.ok) {
@@ -84,7 +122,7 @@ export async function POST(req: Request) {
       }
       return parsedBody.response;
     }
-    const body = parsedBody.body;
+    const body = parsedBody.value;
 
     const roleResult = await resolveApiRoleOrError({
       role: body.role,
@@ -122,40 +160,6 @@ export async function POST(req: Request) {
 
     // `user_message` is preferred, but we also accept `message`.
     const userMessage = readUserMessage(body);
-
-    const constraintsError = validateOptionalObjectField(
-      body.constraints,
-      "constraints"
-    );
-    if (constraintsError) {
-      if (traceMeta) {
-        await writeE2eTraceArtifact({
-          meta: traceMeta,
-          channel: "recommend-route",
-          trace_id: routeTraceId,
-          payload: {
-            flow_path: ["/api/recommend POST", "request_validation_failed"],
-            request_id: requestId,
-            request: {
-              tenant_id: body.tenant_id ?? null,
-              user_message: userMessage,
-              constraints: body.constraints,
-            },
-            response: {
-              status: 400,
-              body: {
-                error: constraintsError,
-                code: "BAD_REQUEST",
-              },
-            },
-            timing_ms: {
-              total_ms: Date.now() - startedAt,
-            },
-          },
-        });
-      }
-      return badRequest(constraintsError);
-    }
 
     // Explicit request constraints come from UI payload.
     const explicitConstraints = normalizeHardConstraints(body.constraints);

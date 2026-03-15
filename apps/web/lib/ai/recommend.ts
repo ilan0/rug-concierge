@@ -15,7 +15,7 @@ import {
   groupPromptSectionsByRole,
 } from "@/lib/prompts/recommendation-stack";
 
-// PSEUDOCODE
+// Flow overview
 // 1) If candidate inventory is empty -> return no_match.
 // 2) Build an authoritative inventory context payload from backend candidates.
 // 3) Call OpenAI Responses API with strict JSON schema output.
@@ -565,7 +565,7 @@ function buildConfidence(
   };
 }
 
-// PSEUDOCODE
+// Flow overview
 // Deterministic local fallback used when AI is unavailable or invalid.
 function fallbackRecommendations(
   inventory: InventoryRug[],
@@ -610,7 +610,7 @@ function fallbackRecommendations(
   };
 }
 
-// PSEUDOCODE
+// Flow overview
 // Runtime guard for structured output contract.
 function isRecommendationResponse(value: unknown): value is RecommendationResponse {
   // Manual runtime checks to ensure model output is truly usable.
@@ -725,7 +725,7 @@ function isRecommendationResponse(value: unknown): value is RecommendationRespon
   return true;
 }
 
-// PSEUDOCODE
+// Flow overview
 // Extract plain text JSON from Responses API payload variants.
 function extractOutputText(payload: unknown): string | null {
   // Responses API payloads can vary by model/settings.
@@ -760,7 +760,7 @@ function extractOutputText(payload: unknown): string | null {
   return null;
 }
 
-// PSEUDOCODE
+// Flow overview
 // Parse model output from either text JSON or direct JSON part.
 function parseRecommendationResponse(payload: unknown): RecommendationResponse | null {
   const outputText = extractOutputText(payload);
@@ -801,7 +801,7 @@ function parseRecommendationResponse(payload: unknown): RecommendationResponse |
   return null;
 }
 
-// PSEUDOCODE
+// Flow overview
 // Enforce backend trust boundary:
 // - keep only recommendations that reference candidate IDs
 // - clamp output counts
@@ -900,7 +900,7 @@ export async function rankAndExplain(
   promptContext?: RecommendationPromptContext,
   trace?: RecommendationAiTrace
 ): Promise<RecommendationResponse> {
-  // PSEUDOCODE
+  // Flow overview
   // A) Early return for true no-match candidate set.
   // B) Verify OpenAI key.
   // C) Build prompt inputs from user request + hard constraints + candidate inventory.

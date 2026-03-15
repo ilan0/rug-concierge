@@ -2,10 +2,7 @@ import { filterByHardConstraints } from "@/lib/filters/hard-constraints";
 import { shapeCandidatesForAI } from "@/lib/filters/candidate-shaping";
 import { getSizeBounds } from "@/lib/filters/size-bounds";
 import { resolveEffectiveFields } from "@/lib/inventory/resolve-fields";
-import {
-  aiStructuredFieldsSchema,
-  staffOverridesSchema,
-} from "@/lib/inventory/schemas";
+import { parseRugRecord } from "@/lib/inventory/rug-record";
 import { fetchPrimaryRugImagesForRugs } from "@/lib/storage/rug-images";
 import { rankAndExplain } from "@/lib/ai/recommend";
 import type { RecommendationAiTrace } from "@/lib/ai/recommend";
@@ -50,7 +47,7 @@ type PipelineQueryTrace = {
   error: string | null;
 };
 
-// PSEUDOCODE
+// Flow overview
 // Shared server recommendation pipeline:
 // - query candidates from Supabase (SQL-first hard filtering)
 // - enforce backend hard constraints again in code
@@ -310,12 +307,11 @@ async function fetchInventoryCandidates(input: {
       !(typeof rug.primary_image_url === "string" && rug.primary_image_url.trim().length > 0)
   );
 
-  for (const rug of droppedForMissingImage) {
-    console.warn("[recommendation] Candidate dropped: missing primary image", {
+  if (droppedForMissingImage.length > 0) {
+    console.warn("[recommendation] Candidates dropped: missing primary image", {
       request_id: input.requestId,
       tenant_id: input.tenantId,
-      rug_id: rug.id,
-      rug_label: rug.intake_label,
+      dropped_count: droppedForMissingImage.length,
     });
   }
 
@@ -371,6 +367,8 @@ async function runCandidateQuery(input: {
       .from("rugs")
       .select(selectColumns)
       .eq("status", "available")
+      .order("created_at", { ascending: false, nullsFirst: false })
+      .order("id", { ascending: false })
       .limit(input.limit);
 
     query = query.eq("tenant_id", input.tenantId);
@@ -448,45 +446,24 @@ async function runCandidateQuery(input: {
     error: null,
   });
 
-  return (data as unknown as Record<string, unknown>[])
+  return (data as unknown[])
     .map((row) => toInventoryFromDbRow(row))
     .filter((row): row is InventoryRug => row !== null);
 }
 
-function toInventoryFromDbRow(row: Record<string, unknown>): InventoryRug | null {
-  if (typeof row.id !== "string") {
-    return null;
-  }
-
+function toInventoryFromDbRow(row: unknown): InventoryRug | null {
+  const parsed = parseRugRecord(row);
+  if (!parsed) return null;
   return {
-    id: row.id,
-    intake_label:
-      typeof row.intake_label === "string" ? row.intake_label : null,
-    status: typeof row.status === "string" ? row.status : null,
-    width_total_in: toNumberOrNull(row.width_total_in),
-    length_total_in: toNumberOrNull(row.length_total_in),
-    ai_description:
-      typeof row.ai_description === "string" ? row.ai_description : null,
-    ai_structured_fields: toAiStructuredFieldsOrNull(row.ai_structured_fields),
-    staff_overrides: toStaffOverridesOrNull(row.staff_overrides),
+    id: parsed.id,
+    intake_label: parsed.intake_label,
+    status: parsed.status,
+    width_total_in: parsed.width_total_in,
+    length_total_in: parsed.length_total_in,
+    ai_description: parsed.ai_description,
+    ai_structured_fields: parsed.ai_structured_fields,
+    staff_overrides: parsed.staff_overrides,
   };
-}
-
-function toNumberOrNull(value: unknown): number | null {
-  if (typeof value === "number" && Number.isFinite(value)) return value;
-  return null;
-}
-
-function toAiStructuredFieldsOrNull(value: unknown): InventoryRug["ai_structured_fields"] {
-  if (!value || typeof value !== "object" || Array.isArray(value)) return null;
-  const parsed = aiStructuredFieldsSchema.safeParse(value);
-  return parsed.success ? parsed.data : null;
-}
-
-function toStaffOverridesOrNull(value: unknown): InventoryRug["staff_overrides"] {
-  if (!value || typeof value !== "object" || Array.isArray(value)) return null;
-  const parsed = staffOverridesSchema.safeParse(value);
-  return parsed.success ? parsed.data : null;
 }
 
 function isLikelyMissingColumnError(message: string): boolean {

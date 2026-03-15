@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { badRequest, internalError } from "@/lib/errors/http-errors";
 import { isStaffUnlockedFromRequest } from "@/lib/auth/staff";
@@ -6,132 +7,20 @@ import { resolveAuthoritativeTenantForServer } from "@/lib/auth/tenant";
 import { fetchPrimaryRugImagesForRugs } from "@/lib/storage/rug-images";
 import { requestVisionEnrichment } from "@/lib/inventory/vision-enrichment";
 import {
-  aiStructuredFieldsSchema,
-  staffOverridesSchema,
-} from "@/lib/inventory/schemas";
-import { resolveEffectiveFields } from "@/lib/inventory/resolve-fields";
+  checkLocalRateLimit,
+  checkRateLimit,
+  inventoryWriteRateLimit,
+} from "@/lib/rate-limit";
+import {
+  fetchRugRecordById,
+  toStaffInventoryRugDetail,
+} from "@/lib/inventory/rug-record";
+import { parseRouteParamsWithSchema } from "@/lib/http/route-validation";
 
-type RugRecord = {
-  id: string;
-  tenant_id: string;
-  intake_label: string | null;
-  ai_description: string | null;
-  ai_structured_fields: unknown;
-  staff_overrides: unknown;
-  stock_id: string | null;
-  status: string | null;
-  width_total_in: number | null;
-  length_total_in: number | null;
-  created_at: string | null;
-};
+const RUG_ID_PARAMS_SCHEMA = z.object({ id: z.string().uuid() }).strict();
 
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return Boolean(value) && typeof value === "object" && !Array.isArray(value);
-}
-
-function toAiStructuredFields(value: unknown) {
-  if (!isRecord(value)) return null;
-  const parsed = aiStructuredFieldsSchema.safeParse(value);
-  return parsed.success ? parsed.data : null;
-}
-
-function toStaffOverrides(value: unknown) {
-  if (!isRecord(value)) return null;
-  const parsed = staffOverridesSchema.safeParse(value);
-  return parsed.success ? parsed.data : null;
-}
-
-function shapeRugResponse(input: {
-  row: RugRecord;
-  primaryImageUrl: string | null;
-  primaryImageCaption: string | null;
-}) {
-  const aiFields = toAiStructuredFields(input.row.ai_structured_fields);
-  const staffOverrides = toStaffOverrides(input.row.staff_overrides);
-  return {
-    id: input.row.id,
-    tenant_id: input.row.tenant_id,
-    intake_label: input.row.intake_label,
-    ai_description: input.row.ai_description,
-    ai_structured_fields: aiFields,
-    staff_overrides: staffOverrides,
-    effective_fields: resolveEffectiveFields(input.row.intake_label, aiFields, staffOverrides),
-    stock_id: input.row.stock_id,
-    status: input.row.status,
-    width_total_in: input.row.width_total_in,
-    length_total_in: input.row.length_total_in,
-    created_at: input.row.created_at,
-    primary_image_url: input.primaryImageUrl,
-    primary_image_caption: input.primaryImageCaption,
-  };
-}
-
-async function fetchRugById(input: {
-  tenantId: string;
-  id: string;
-}): Promise<RugRecord | null> {
-  const runQuery = (columns: string) =>
-    supabaseAdmin
-      .from("rugs")
-      .select(columns)
-      .eq("tenant_id", input.tenantId)
-      .eq("id", input.id)
-      .maybeSingle();
-
-  const selectCandidates = [
-    "id, tenant_id, intake_label, ai_description, ai_structured_fields, staff_overrides, stock_id, status, width_total_in, length_total_in, created_at",
-    "id, tenant_id, intake_label, ai_description, ai_structured_fields, stock_id, status, width_total_in, length_total_in, created_at",
-    "id, tenant_id, intake_label, ai_description, status, width_total_in, length_total_in, created_at",
-  ];
-
-  let result = await runQuery(selectCandidates[0]);
-  for (const selectColumns of selectCandidates.slice(1)) {
-    if (!result.error) break;
-    if (!isLikelyMissingColumnError(result.error.message ?? "")) break;
-    result = await runQuery(selectColumns);
-  }
-
-  if (result.error || !result.data) return null;
-
-  const row = result.data as unknown as Record<string, unknown>;
-  if (
-    typeof row.id !== "string" ||
-    typeof row.tenant_id !== "string" ||
-    row.id.trim().length === 0 ||
-    row.tenant_id.trim().length === 0
-  ) {
-    return null;
-  }
-
-  return {
-    id: row.id,
-    tenant_id: row.tenant_id,
-    intake_label: typeof row.intake_label === "string" ? row.intake_label : null,
-    ai_description:
-      typeof row.ai_description === "string" ? row.ai_description : null,
-    ai_structured_fields: row.ai_structured_fields,
-    staff_overrides: row.staff_overrides ?? null,
-    stock_id: typeof row.stock_id === "string" ? row.stock_id : null,
-    status: typeof row.status === "string" ? row.status : null,
-    width_total_in:
-      typeof row.width_total_in === "number" && Number.isFinite(row.width_total_in)
-        ? row.width_total_in
-        : null,
-    length_total_in:
-      typeof row.length_total_in === "number" && Number.isFinite(row.length_total_in)
-        ? row.length_total_in
-        : null,
-    created_at: typeof row.created_at === "string" ? row.created_at : null,
-  };
-}
-
-function isLikelyMissingColumnError(message: string): boolean {
-  const normalized = message.toLowerCase();
-  return (
-    normalized.includes("does not exist") ||
-    normalized.includes("schema cache") ||
-    normalized.includes("could not find the")
-  );
+function staffLockedResponse() {
+  return NextResponse.json({ error: "staff_locked" }, { status: 401 });
 }
 
 async function withPrimaryImage(input: { tenantId: string; rugId: string }) {
@@ -147,10 +36,6 @@ async function withPrimaryImage(input: { tenantId: string; rugId: string }) {
   };
 }
 
-function staffLockedResponse() {
-  return NextResponse.json({ error: "staff_locked" }, { status: 401 });
-}
-
 export async function POST(
   req: NextRequest,
   context: { params: Promise<{ id: string }> }
@@ -159,22 +44,46 @@ export async function POST(
     return staffLockedResponse();
   }
 
-  const { id } = await context.params;
-  if (!id || typeof id !== "string") {
-    return badRequest("rug id is required.");
+  const ip =
+    req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
+    req.headers.get("x-real-ip") ??
+    "unknown";
+  const rateLimitResult = inventoryWriteRateLimit
+    ? await checkRateLimit(inventoryWriteRateLimit, `inventory:re-enrich:${ip}`)
+    : checkLocalRateLimit({
+        key: `inventory:re-enrich:${ip}`,
+        maxRequests: 30,
+        windowMs: 10 * 60 * 1000,
+      });
+  if (!rateLimitResult.allowed) {
+    return NextResponse.json(
+      { error: "Too many inventory requests. Please wait and try again." },
+      { status: 429 }
+    );
   }
+
+  const params = await parseRouteParamsWithSchema(
+    context.params,
+    RUG_ID_PARAMS_SCHEMA,
+    "rug id is required."
+  );
+  if (!params.ok) return params.response;
 
   const tenantId = resolveAuthoritativeTenantForServer({});
   if (!tenantId) {
     return internalError("Tenant is not configured.");
   }
 
-  const existing = await fetchRugById({ tenantId, id });
+  const existing = await fetchRugRecordById({
+    supabase: supabaseAdmin,
+    tenantId,
+    id: params.value.id,
+  });
   if (!existing) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 
-  const image = await withPrimaryImage({ tenantId, rugId: id });
+  const image = await withPrimaryImage({ tenantId, rugId: params.value.id });
   if (!image.primaryImageUrl) {
     return badRequest("Rug does not have a primary image to analyze.");
   }
@@ -196,17 +105,27 @@ export async function POST(
       ai_structured_fields: enrichment.aiStructuredFields,
     })
     .eq("tenant_id", tenantId)
-    .eq("id", id);
+    .eq("id", params.value.id);
 
   if (updateResult.error) {
     return internalError("Unable to save enrichment result.");
   }
 
-  const updatedRow = await fetchRugById({ tenantId, id });
+  const updatedRow = await fetchRugRecordById({
+    supabase: supabaseAdmin,
+    tenantId,
+    id: params.value.id,
+  });
   if (!updatedRow) {
     return internalError("Unable to load updated rug.");
   }
 
-  const updatedImage = await withPrimaryImage({ tenantId, rugId: updatedRow.id });
-  return NextResponse.json(shapeRugResponse({ row: updatedRow, ...updatedImage }));
+  const updatedImage = await withPrimaryImage({
+    tenantId,
+    rugId: updatedRow.id,
+  });
+  return NextResponse.json(
+    toStaffInventoryRugDetail({ row: updatedRow, ...updatedImage })
+  );
 }
+

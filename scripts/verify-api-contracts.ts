@@ -24,8 +24,10 @@ type RecommendResponse = {
   recommendations?: unknown;
 };
 
-const REPORT_PATH =
-  "/Users/ilannabatkhorian/Documents/rug-concierge/tmp/release-validation/overnight-phase2-report.json";
+const REPORT_PATH = path.resolve(
+  process.cwd(),
+  "tmp/release-validation/overnight-phase2-report.json"
+);
 
 const REQUIRED_STOCK_IDS = [
   "DEMO-001",
@@ -37,6 +39,11 @@ const REQUIRED_STOCK_IDS = [
   "DEMO-007",
   "DEMO-008",
 ] as const;
+
+function envFlag(name: string): boolean {
+  const value = (process.env[name] ?? "").trim().toLowerCase();
+  return value === "1" || value === "true" || value === "yes";
+}
 
 function loadEnvFileIfExists(filePath: string) {
   if (!fs.existsSync(filePath)) return;
@@ -196,6 +203,7 @@ function asMode(payload: unknown): string | null {
 async function main() {
   loadEnv();
 
+  const nonDestructive = envFlag("NON_DESTRUCTIVE");
   const baseUrl = assertEnv("BASE_URL").replace(/\/$/, "");
   const tenantId = assertEnv("TENANT_ID");
   const storePasscode = assertEnv("STORE_PASSCODE");
@@ -358,53 +366,57 @@ async function main() {
     Boolean(staffPayload && Object.prototype.hasOwnProperty.call(staffPayload, "effective_fields"))
   );
 
-  const overrideSet = await patchJson({
-    url: `${baseUrl}/api/inventory/rugs/${encodeURIComponent(sampleRug.id)}`,
-    body: {
-      staff_overrides: {
-        mood: "modern",
-        label: "Override Test Label",
+  if (!nonDestructive) {
+    const overrideSet = await patchJson({
+      url: `${baseUrl}/api/inventory/rugs/${encodeURIComponent(sampleRug.id)}`,
+      body: {
+        staff_overrides: {
+          mood: "modern",
+          label: "Override Test Label",
+        },
       },
-    },
-    headers: staffCookieHeader ? { Cookie: staffCookieHeader } : undefined,
-  });
+      headers: staffCookieHeader ? { Cookie: staffCookieHeader } : undefined,
+    });
 
-  const overrideSetPayload = overrideSet.payload as Record<string, unknown> | null;
-  const overrideSetEffective = (overrideSetPayload?.effective_fields ?? null) as
-    | Record<string, unknown>
-    | null;
+    const overrideSetPayload = overrideSet.payload as Record<string, unknown> | null;
+    const overrideSetEffective = (overrideSetPayload?.effective_fields ?? null) as
+      | Record<string, unknown>
+      | null;
 
-  addCheck("override set returns 200", overrideSet.status === 200, `status=${overrideSet.status}`);
-  addCheck(
-    "override set updates effective mood",
-    overrideSetEffective?.mood === "modern",
-    `effective mood=${String(overrideSetEffective?.mood ?? "<missing>")}`
-  );
-  addCheck(
-    "override set updates effective label",
-    overrideSetEffective?.label === "Override Test Label",
-    `effective label=${String(overrideSetEffective?.label ?? "<missing>")}`
-  );
+    addCheck("override set returns 200", overrideSet.status === 200, `status=${overrideSet.status}`);
+    addCheck(
+      "override set updates effective mood",
+      overrideSetEffective?.mood === "modern",
+      `effective mood=${String(overrideSetEffective?.mood ?? "<missing>")}`
+    );
+    addCheck(
+      "override set updates effective label",
+      overrideSetEffective?.label === "Override Test Label",
+      `effective label=${String(overrideSetEffective?.label ?? "<missing>")}`
+    );
 
-  const overrideUnset = await patchJson({
-    url: `${baseUrl}/api/inventory/rugs/${encodeURIComponent(sampleRug.id)}`,
-    body: {
-      staff_overrides: {
-        mood: null,
+    const overrideUnset = await patchJson({
+      url: `${baseUrl}/api/inventory/rugs/${encodeURIComponent(sampleRug.id)}`,
+      body: {
+        staff_overrides: {
+          mood: null,
+        },
       },
-    },
-    headers: staffCookieHeader ? { Cookie: staffCookieHeader } : undefined,
-  });
+      headers: staffCookieHeader ? { Cookie: staffCookieHeader } : undefined,
+    });
 
-  const overrideUnsetPayload = overrideUnset.payload as Record<string, unknown> | null;
-  const overrideUnsetRaw = (overrideUnsetPayload?.staff_overrides ?? null) as
-    | Record<string, unknown>
-    | null;
-  addCheck("override unset returns 200", overrideUnset.status === 200, `status=${overrideUnset.status}`);
-  addCheck(
-    "override unset removes mood key",
-    Boolean(overrideUnsetRaw && !Object.prototype.hasOwnProperty.call(overrideUnsetRaw, "mood"))
-  );
+    const overrideUnsetPayload = overrideUnset.payload as Record<string, unknown> | null;
+    const overrideUnsetRaw = (overrideUnsetPayload?.staff_overrides ?? null) as
+      | Record<string, unknown>
+      | null;
+    addCheck("override unset returns 200", overrideUnset.status === 200, `status=${overrideUnset.status}`);
+    addCheck(
+      "override unset removes mood key",
+      Boolean(overrideUnsetRaw && !Object.prototype.hasOwnProperty.call(overrideUnsetRaw, "mood"))
+    );
+  } else {
+    addCheck("override set/unset checks skipped in NON_DESTRUCTIVE mode", true);
+  }
 
   const overrideInvalid = await patchJson({
     url: `${baseUrl}/api/inventory/rugs/${encodeURIComponent(sampleRug.id)}`,
@@ -556,7 +568,15 @@ async function main() {
 
   addCheck("total rugs is 8", totalRugs === 8, `total=${totalRugs}`);
   addCheck("all rugs enriched", enrichedCount === 8, `enriched=${enrichedCount}`);
-  addCheck("at least one rug has overrides", hasOverrides >= 1, `has_overrides=${hasOverrides}`);
+  if (!nonDestructive) {
+    addCheck("at least one rug has overrides", hasOverrides >= 1, `has_overrides=${hasOverrides}`);
+  } else {
+    addCheck(
+      "non-destructive mode does not require override mutation",
+      true,
+      `has_overrides=${hasOverrides}`
+    );
+  }
   addCheck("fallback label count is 0", fallbackLabelCount === 0, `fallback=${fallbackLabelCount}`);
 
   const passed = checks.filter((check) => check.passed).length;
@@ -564,6 +584,7 @@ async function main() {
   const report = {
     base_url: baseUrl,
     tenant_id: tenantId,
+    non_destructive: nonDestructive,
     generated_at: new Date().toISOString(),
     summary: {
       total: checks.length,

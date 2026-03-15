@@ -42,18 +42,26 @@ const ALLOWED_SORT: InventorySort[] = [
   "oldest",
 ];
 
+function isInventoryStatusFilter(value: string): value is InventoryStatusFilter {
+  return ALLOWED_STATUS.some((item) => item === value);
+}
+
+function isInventorySort(value: string): value is InventorySort {
+  return ALLOWED_SORT.some((item) => item === value);
+}
+
 export function normalizeInventoryFilters(
   input: InventoryFilterInput = {}
 ): InventoryFilters {
   const q = typeof input.q === "string" ? input.q.trim().slice(0, 120) : "";
-  const status = ALLOWED_STATUS.includes(
-    input.status as InventoryStatusFilter
-  )
-    ? (input.status as InventoryStatusFilter)
-    : DEFAULT_FILTERS.status;
-  const sort = ALLOWED_SORT.includes(input.sort as InventorySort)
-    ? (input.sort as InventorySort)
-    : DEFAULT_FILTERS.sort;
+  const status =
+    typeof input.status === "string" && isInventoryStatusFilter(input.status)
+      ? input.status
+      : DEFAULT_FILTERS.status;
+  const sort =
+    typeof input.sort === "string" && isInventorySort(input.sort)
+      ? input.sort
+      : DEFAULT_FILTERS.sort;
 
   const fromModern = normalizeInventorySizePresetList(input.sizePresets);
   const fromLegacy = normalizeInventorySizePresetList(input.sizePreset);

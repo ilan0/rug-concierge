@@ -78,7 +78,8 @@ async function main() {
     ? recommend.json.response.recommendations
     : [];
   const recommendationReasonsArePlain = recommendationRows.every((row) =>
-    isPlainTextOnly(row?.why_this_fits)
+    Array.isArray(row?.match_reasons) &&
+    row.match_reasons.every((reason) => isPlainTextOnly(reason))
   );
   record(
     "recommendation turn returns 200 with plain text reasons",

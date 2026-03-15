@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
 import { Manrope, Fraunces } from "next/font/google";
 import "./globals.css";
+import { BrandBar } from "@/components/kiosk/brand-bar";
 import KioskNav from "@/components/kiosk/kiosk-nav";
 import { AppToaster } from "@/components/ui/sonner";
 import { isStaffUnlocked } from "@/lib/auth/staff";
+import { getResolvedBranding } from "@/lib/branding/tenant-branding";
 
 const manrope = Manrope({
   subsets: ["latin"],
@@ -25,7 +27,10 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const unlocked = await isStaffUnlocked();
+  const [unlocked, branding] = await Promise.all([
+    isStaffUnlocked(),
+    getResolvedBranding(),
+  ]);
 
   return (
     <html lang="en">
@@ -37,6 +42,10 @@ export default async function RootLayout({
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
       </head>
       <body className={`${manrope.variable} ${fraunces.variable} min-h-screen bg-background font-sans text-foreground antialiased`}>
+        <BrandBar
+          storeName={branding.storeName}
+          logoMarkUrl={branding.storeLogoUrl}
+        />
         <KioskNav initialUnlocked={unlocked} />
         {children}
         <AppToaster />

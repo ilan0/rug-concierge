@@ -1,6 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
 
-// PSEUDOCODE
+// Flow overview
 // Read server env vars
 // Create Supabase admin client (secret key)
 // Use for server-side queries

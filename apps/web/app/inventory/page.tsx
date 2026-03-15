@@ -4,10 +4,13 @@ import { AccessGuard } from "@/components/ui/access-guard";
 import { AppShell } from "@/components/ui/app-shell";
 import { PageHeader } from "@/components/ui/page-header";
 import { SectionCard } from "@/components/ui/section-card";
-import { Button } from "@/components/ui/button";
 import { InventoryControlsClient } from "@/components/inventory/inventory-controls-client";
 import { InventoryTableClient } from "@/components/inventory/inventory-table-client";
 import { getInventoryStats, listInventory } from "@/lib/inventory/list";
+import {
+  INVENTORY_QUERY_PARAMS,
+  readQueryStringParam,
+} from "@/lib/inventory/query-params";
 import { getServerUiTenantId } from "@/lib/ui/server-role";
 
 type InventoryPageProps = {
@@ -15,15 +18,6 @@ type InventoryPageProps = {
     | Promise<Record<string, string | string[] | undefined>>
     | Record<string, string | string[] | undefined>;
 };
-
-function readString(
-  value: string | string[] | undefined,
-  fallback = ""
-): string {
-  if (typeof value === "string") return value;
-  if (Array.isArray(value)) return value[0] ?? fallback;
-  return fallback;
-}
 
 function toPositiveInt(value: string, fallback: number): number {
   const parsed = Number.parseInt(value, 10);
@@ -81,19 +75,35 @@ export default async function InventoryPage({ searchParams }: InventoryPageProps
   }
 
   const params = (await searchParams) ?? {};
-  const page = toPositiveInt(readString(params.page), 1);
-  const pageSize = toPositiveInt(readString(params.page_size), 50);
+  const page = toPositiveInt(
+    readQueryStringParam(params[INVENTORY_QUERY_PARAMS.page]),
+    1
+  );
+  const pageSize = toPositiveInt(
+    readQueryStringParam(params[INVENTORY_QUERY_PARAMS.pageSize]),
+    50
+  );
 
   const filtersInput = {
-    q: readString(params.q),
-    status: readString(params.status),
-    sizePresets: readString(params.size_presets),
-    sizePreset: readString(params.size_preset),
-    widthMin: toNumberOrNull(readString(params.width_min)),
-    widthMax: toNumberOrNull(readString(params.width_max)),
-    lengthMin: toNumberOrNull(readString(params.length_min)),
-    lengthMax: toNumberOrNull(readString(params.length_max)),
-    sort: readString(params.sort),
+    q: readQueryStringParam(params[INVENTORY_QUERY_PARAMS.query]),
+    status: readQueryStringParam(params[INVENTORY_QUERY_PARAMS.status]),
+    sizePresets: readQueryStringParam(params[INVENTORY_QUERY_PARAMS.sizePresets]),
+    sizePreset: readQueryStringParam(
+      params[INVENTORY_QUERY_PARAMS.legacySizePreset]
+    ),
+    widthMin: toNumberOrNull(
+      readQueryStringParam(params[INVENTORY_QUERY_PARAMS.widthMin])
+    ),
+    widthMax: toNumberOrNull(
+      readQueryStringParam(params[INVENTORY_QUERY_PARAMS.widthMax])
+    ),
+    lengthMin: toNumberOrNull(
+      readQueryStringParam(params[INVENTORY_QUERY_PARAMS.lengthMin])
+    ),
+    lengthMax: toNumberOrNull(
+      readQueryStringParam(params[INVENTORY_QUERY_PARAMS.lengthMax])
+    ),
+    sort: readQueryStringParam(params[INVENTORY_QUERY_PARAMS.sort]),
   };
 
   const [result, inventoryStats] = await Promise.all([
@@ -113,40 +123,41 @@ export default async function InventoryPage({ searchParams }: InventoryPageProps
       : null;
 
   const queryBase = {
-    page_size: result.pageSize,
-    q: result.filters.q || null,
-    status: result.filters.status !== "available" ? result.filters.status : null,
-    size_presets:
+    [INVENTORY_QUERY_PARAMS.pageSize]: result.pageSize,
+    [INVENTORY_QUERY_PARAMS.query]: result.filters.q || null,
+    [INVENTORY_QUERY_PARAMS.status]:
+      result.filters.status !== "available" ? result.filters.status : null,
+    [INVENTORY_QUERY_PARAMS.sizePresets]:
       result.filters.sizePresets.length > 0
         ? result.filters.sizePresets.join(",")
         : null,
-    width_min: result.filters.widthMin,
-    width_max: result.filters.widthMax,
-    length_min: result.filters.lengthMin,
-    length_max: result.filters.lengthMax,
-    sort: result.filters.sort !== "newest" ? result.filters.sort : null,
+    [INVENTORY_QUERY_PARAMS.widthMin]: result.filters.widthMin,
+    [INVENTORY_QUERY_PARAMS.widthMax]: result.filters.widthMax,
+    [INVENTORY_QUERY_PARAMS.lengthMin]: result.filters.lengthMin,
+    [INVENTORY_QUERY_PARAMS.lengthMax]: result.filters.lengthMax,
+    [INVENTORY_QUERY_PARAMS.sort]:
+      result.filters.sort !== "newest" ? result.filters.sort : null,
   };
 
   const pageLink = (next: number) =>
     `/inventory?${buildQueryString({
       ...queryBase,
-      page: next,
+      [INVENTORY_QUERY_PARAMS.page]: next,
     })}`;
 
-  const refreshLink = pageLink(result.page);
   const visiblePageNumbers = getVisiblePageNumbers(result.page, result.totalPages, 7);
   const controlsKey = buildQueryString({
-    q: result.filters.q || null,
-    status: result.filters.status,
-    size_presets:
+    [INVENTORY_QUERY_PARAMS.query]: result.filters.q || null,
+    [INVENTORY_QUERY_PARAMS.status]: result.filters.status,
+    [INVENTORY_QUERY_PARAMS.sizePresets]:
       result.filters.sizePresets.length > 0
         ? result.filters.sizePresets.join(",")
         : null,
-    width_min: result.filters.widthMin,
-    width_max: result.filters.widthMax,
-    length_min: result.filters.lengthMin,
-    length_max: result.filters.lengthMax,
-    sort: result.filters.sort,
+    [INVENTORY_QUERY_PARAMS.widthMin]: result.filters.widthMin,
+    [INVENTORY_QUERY_PARAMS.widthMax]: result.filters.widthMax,
+    [INVENTORY_QUERY_PARAMS.lengthMin]: result.filters.lengthMin,
+    [INVENTORY_QUERY_PARAMS.lengthMax]: result.filters.lengthMax,
+    [INVENTORY_QUERY_PARAMS.sort]: result.filters.sort,
   });
 
   return (
@@ -156,11 +167,6 @@ export default async function InventoryPage({ searchParams }: InventoryPageProps
         subtitle="Browse and manage AI-enriched inventory records."
         variant="minimal"
         className="mb-3"
-        actions={
-          <Button asChild variant="outline" size="sm">
-            <Link href={refreshLink}>Refresh</Link>
-          </Button>
-        }
       />
 
       <div className="mb-3 flex flex-wrap items-center gap-2 text-xs">

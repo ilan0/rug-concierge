@@ -10,6 +10,15 @@ const CHAT_MESSAGES_TABLE = "chat_messages";
 
 const warningCache = new Set<string>();
 
+function shouldFailClosedOnPersistenceError(): boolean {
+  if (process.env.NODE_ENV !== "production") return false;
+  return process.env.CHAT_PERSISTENCE_FAIL_OPEN === "1" ? false : true;
+}
+
+function persistenceError(message: string): never {
+  throw new Error(`[chat-session-persistence] ${message}`);
+}
+
 type PersistTurn = Pick<SessionMessage, "role" | "content" | "created_at">;
 
 export type SaveSessionInput = {
@@ -59,6 +68,9 @@ export async function loadSessionFromDb(
       "load-session-failed",
       `Unable to load session from DB (${error.message}). Falling back to in-memory session store.`
     );
+    if (shouldFailClosedOnPersistenceError()) {
+      persistenceError(`Unable to load session from DB (${error.message}).`);
+    }
     return null;
   }
 
@@ -102,6 +114,9 @@ export async function upsertSessionToDb(
       "upsert-session-failed",
       `Unable to persist session to DB (${error.message}). Falling back to in-memory session store.`
     );
+    if (shouldFailClosedOnPersistenceError()) {
+      persistenceError(`Unable to persist session to DB (${error.message}).`);
+    }
     return false;
   }
 
@@ -130,6 +145,9 @@ export async function appendTurnsToDb(
       "append-turns-failed",
       `Unable to persist chat turns to DB (${error.message}). Continuing without turn history persistence.`
     );
+    if (shouldFailClosedOnPersistenceError()) {
+      persistenceError(`Unable to persist chat turns to DB (${error.message}).`);
+    }
     return false;
   }
 

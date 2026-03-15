@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { z } from "zod";
 import { handleGeneralChatTurn } from "@/lib/chat/handlers/general-chat";
 import { handleRecommendationTurn } from "@/lib/chat/handlers/recommendation";
 import { routeTurnMode } from "@/lib/chat/router";
@@ -33,18 +34,31 @@ import {
   requireRoleCapabilityOrError,
   resolveApiRoleOrError,
 } from "@/lib/http/guards";
+import { parseJsonBodyWithSchema } from "@/lib/http/route-validation";
 import {
-  parseJsonObjectBody,
   readTrimmedString,
-  validateOptionalObjectField,
 } from "@/lib/http/validators";
-import { checkRateLimit, chatRateLimit } from "@/lib/rate-limit";
+import {
+  checkLocalRateLimit,
+  checkRateLimit,
+  chatRateLimit,
+} from "@/lib/rate-limit";
 import type {
-  ChatTurnRequest,
   RoleType,
   SessionData,
   SessionMessage,
 } from "@/lib/chat/types";
+
+const CHAT_BODY_SCHEMA = z
+  .object({
+    session_id: z.string().trim().min(1).max(128).optional(),
+    role: z.string().optional(),
+    user_role: z.string().optional(),
+    message: z.string(),
+    tenant_id: z.string().trim().min(1).max(128).optional(),
+    constraints: z.record(z.string(), z.unknown()).optional(),
+  })
+  .strict();
 
 const MAX_SESSION_ID_CHARS = 64;
 const UUID_PATTERN =
@@ -63,29 +77,35 @@ export async function POST(req: Request) {
   ];
 
   try {
-    if (chatRateLimit) {
-      const ip =
-        req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
-        req.headers.get("x-real-ip") ??
-        "unknown";
-      const { allowed } = await checkRateLimit(chatRateLimit, `chat:${ip}`);
-      if (!allowed) {
-        return NextResponse.json(
-          {
-            error:
-              "You've sent a lot of messages. Please wait a moment before continuing.",
-          },
-          { status: 429 }
-        );
-      }
+    const ip =
+      req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
+      req.headers.get("x-real-ip") ??
+      "unknown";
+    const chatRateLimitResult = chatRateLimit
+      ? await checkRateLimit(chatRateLimit, `chat:${ip}`)
+      : checkLocalRateLimit({
+          key: `chat:${ip}`,
+          maxRequests: 20,
+          windowMs: 10 * 60 * 1000,
+        });
+    if (!chatRateLimitResult.allowed) {
+      return NextResponse.json(
+        {
+          error:
+            "You've sent a lot of messages. Please wait a moment before continuing.",
+        },
+        { status: 429 }
+      );
     }
 
     const requestedTraceMeta = parseE2eTraceMeta(req);
-    const parsedBody = await parseJsonObjectBody<
-      ChatTurnRequest & Record<string, unknown>
-    >(req);
+    const parsedBody = await parseJsonBodyWithSchema(
+      req,
+      CHAT_BODY_SCHEMA,
+      "Invalid request payload."
+    );
     if (!parsedBody.ok) return parsedBody.response;
-    const body = parsedBody.body as ChatTurnRequest;
+    const body = parsedBody.value;
 
     const userMessage = readTrimmedString(body.message);
     if (!userMessage) {
@@ -94,12 +114,6 @@ export async function POST(req: Request) {
     if (userMessage.length > 2000) {
       return badRequest("Message is too long. Please keep it under 2000 characters.");
     }
-
-    const constraintsError = validateOptionalObjectField(
-      body.constraints,
-      "constraints"
-    );
-    if (constraintsError) return badRequest(constraintsError);
 
     const sessionIdResult = parseSessionId(body.session_id);
     if (!sessionIdResult.ok) return badRequest(sessionIdResult.error);

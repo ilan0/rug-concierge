@@ -1,5 +1,9 @@
-ALTER TABLE public.rugs
-  ADD COLUMN IF NOT EXISTS staff_overrides JSONB DEFAULT NULL;
+begin;
 
-COMMENT ON COLUMN public.rugs.staff_overrides IS
+alter table public.rugs
+  add column if not exists staff_overrides jsonb default null;
+
+comment on column public.rugs.staff_overrides is
   'Staff corrections over AI fields. Shape: StaffOverrides. Never written by enrichment pipeline.';
+
+commit;

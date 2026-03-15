@@ -1,25 +1,20 @@
-import type { InventoryListResult, InventoryBrowserRow } from "@/lib/types/inventory";
+import type { InventoryListResult } from "@/lib/types/inventory";
 import {
   normalizeInventoryFilters,
   type InventoryFilterInput,
 } from "@/lib/inventory/filters";
 import {
-  aiStructuredFieldsSchema,
-  staffOverridesSchema,
-} from "@/lib/inventory/schemas";
-import { resolveEffectiveFields } from "@/lib/inventory/resolve-fields";
+  isLikelyMissingColumnError,
+  parseRugRecord,
+  RUG_SELECT_CANDIDATES,
+  toInventoryBrowserRow,
+} from "@/lib/inventory/rug-record";
 import { fetchPrimaryRugImagesForRugs } from "@/lib/storage/rug-images";
 import { toExactSizePresetSpec } from "@/lib/inventory/size-presets";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 const DEFAULT_PAGE_SIZE = 50;
 const MAX_PAGE_SIZE = 100;
-const SELECT_WITH_OVERRIDES =
-  "id, tenant_id, intake_label, ai_structured_fields, staff_overrides, stock_id, status, width_total_in, length_total_in, ai_description, created_at";
-const SELECT_LEGACY =
-  "id, tenant_id, intake_label, ai_structured_fields, stock_id, status, width_total_in, length_total_in, ai_description, created_at";
-const SELECT_MINIMAL =
-  "id, tenant_id, intake_label, status, width_total_in, length_total_in, ai_description, created_at";
 
 type ListInventoryInput = {
   tenantId?: string | null;
@@ -41,7 +36,7 @@ export async function listInventory(
   const pageSize = Math.min(requestedPageSize, MAX_PAGE_SIZE);
   const filters = normalizeInventoryFilters(input.filters);
   const from = (page - 1) * pageSize;
-  const to = from + pageSize;
+  const to = from + pageSize - 1;
 
   if (!tenantId) {
     return {
@@ -70,15 +65,49 @@ export async function listInventory(
     };
   }
 
+  let countQuery = supabase
+    .from("rugs")
+    .select("id", { count: "exact", head: true })
+    .eq("tenant_id", tenantId);
+
+  countQuery = applySqlFilters(countQuery, filters);
+
+  const countResult = await countQuery;
+  if (countResult.error) {
+    return {
+      rows: [],
+      total: 0,
+      page,
+      pageSize,
+      totalPages: 0,
+      filters,
+      loadedAt: new Date().toISOString(),
+      error: "Failed to load inventory records.",
+    };
+  }
+
+  const total = countResult.count ?? 0;
+  const totalPages = total === 0 ? 0 : Math.ceil(total / pageSize);
+  if (total === 0) {
+    return {
+      rows: [],
+      total,
+      page,
+      pageSize,
+      totalPages,
+      filters,
+      loadedAt: new Date().toISOString(),
+      error: null,
+    };
+  }
+
   const runQuery = (selectColumns: string) => {
     let query = supabase
       .from("rugs")
       .select(selectColumns)
       .eq("tenant_id", tenantId);
 
-    if (filters.status !== "all") {
-      query = query.eq("status", filters.status);
-    }
+    query = applySqlFilters(query, filters);
 
     if (filters.sort === "oldest") {
       query = query
@@ -90,13 +119,12 @@ export async function listInventory(
         .order("id", { ascending: false });
     }
 
-    return query;
+    return query.range(from, to);
   };
 
-  const selectCandidates = [SELECT_WITH_OVERRIDES, SELECT_LEGACY, SELECT_MINIMAL];
-  let queryResult = await runQuery(selectCandidates[0]);
+  let queryResult = await runQuery(RUG_SELECT_CANDIDATES[0]);
 
-  for (const selectColumns of selectCandidates.slice(1)) {
+  for (const selectColumns of RUG_SELECT_CANDIDATES.slice(1)) {
     if (!queryResult.error) break;
     if (!isLikelyMissingColumnError(queryResult.error.message ?? "")) break;
     queryResult = await runQuery(selectColumns);
@@ -116,22 +144,17 @@ export async function listInventory(
     };
   }
 
-  const allRows = (data as unknown as Record<string, unknown>[])
-    .map((row) => toBrowserRow(row))
-    .filter((row): row is InventoryBrowserRow => row !== null);
-  const filteredRows = allRows.filter((row) =>
-    matchesRowWithFilters(row, filters)
-  );
-  const total = filteredRows.length;
-  const totalPages = total === 0 ? 0 : Math.ceil(total / pageSize);
-  const pagedRows = filteredRows.slice(from, to);
+  const rowsFromDb = (data as unknown[])
+    .map((row) => parseRugRecord(row))
+    .filter((row): row is NonNullable<typeof row> => row !== null)
+    .map((row) => toInventoryBrowserRow(row));
 
   const imageMap = await fetchPrimaryRugImagesForRugs({
     supabase,
     tenantId,
-    rugIds: pagedRows.map((row) => row.id),
+    rugIds: rowsFromDb.map((row) => row.id),
   });
-  const rows = pagedRows.map((row) => {
+  const rows = rowsFromDb.map((row) => {
     const image = imageMap.get(row.id);
     return {
       ...row,
@@ -158,201 +181,146 @@ function toPositiveInt(value: unknown, fallback: number): number {
   return Math.floor(value);
 }
 
-function toBrowserRow(row: Record<string, unknown>): InventoryBrowserRow | null {
-  if (typeof row.id !== "string") {
-    return null;
+type InventorySqlQuery<T> = {
+  eq: (column: string, value: unknown) => T;
+  gte: (column: string, value: number) => T;
+  lte: (column: string, value: number) => T;
+  or: (filters: string) => T;
+};
+
+function applySqlFilters<T extends InventorySqlQuery<T>>(
+  query: T,
+  filters: ReturnType<typeof normalizeInventoryFilters>
+): T {
+  let next = query;
+
+  if (filters.status !== "all") {
+    next = next.eq("status", filters.status);
   }
 
-  const intakeLabel =
-    typeof row.intake_label === "string" ? row.intake_label : null;
-  const aiStructuredFields = toAiStructuredFieldsOrNull(row.ai_structured_fields);
-  const staffOverrides = toStaffOverridesOrNull(row.staff_overrides);
-  const sourceLabel =
-    normalizeLabel(staffOverrides?.label) ?? normalizeLabel(intakeLabel);
-  const mergedFields = resolveEffectiveFields(
-    intakeLabel,
-    aiStructuredFields,
-    staffOverrides
-  );
+  const searchTokens = filters.q
+    .trim()
+    .toLowerCase()
+    .split(/\s+/)
+    .map((token) => sanitizeSearchToken(token))
+    .filter((token) => token.length > 0);
 
-  return {
-    id: row.id,
-    tenant_id: typeof row.tenant_id === "string" ? row.tenant_id : null,
-    effective_label: sourceLabel ?? normalizeLabel(mergedFields.label),
-    intake_label: intakeLabel,
-    primary_image_url: null,
-    primary_image_caption: null,
-    ai_structured_fields: aiStructuredFields,
-    staff_overrides: staffOverrides,
-    stock_id: typeof row.stock_id === "string" ? row.stock_id : null,
-    status: typeof row.status === "string" ? row.status : null,
-    width_total_in: toNumberOrNull(row.width_total_in),
-    length_total_in: toNumberOrNull(row.length_total_in),
-    ai_description:
-      typeof row.ai_description === "string" ? row.ai_description : null,
-    created_at: typeof row.created_at === "string" ? row.created_at : null,
-  };
-}
-
-function toNumberOrNull(value: unknown): number | null {
-  if (typeof value === "number" && Number.isFinite(value)) return value;
-  return null;
-}
-
-function toAiStructuredFieldsOrNull(
-  value: unknown
-): InventoryBrowserRow["ai_structured_fields"] {
-  if (!value || typeof value !== "object" || Array.isArray(value)) return null;
-  const parsed = aiStructuredFieldsSchema.safeParse(value);
-  return parsed.success ? parsed.data : null;
-}
-
-function toStaffOverridesOrNull(
-  value: unknown
-): InventoryBrowserRow["staff_overrides"] {
-  if (!value || typeof value !== "object" || Array.isArray(value)) return null;
-  const parsed = staffOverridesSchema.safeParse(value);
-  return parsed.success ? parsed.data : null;
-}
-
-function matchesRowWithFilters(
-  row: InventoryBrowserRow,
-  filters: ReturnType<typeof normalizeInventoryFilters>
-): boolean {
-  if (!matchesSearchQuery(row, filters.q)) return false;
-  if (!matchesManualSizeBounds(row, filters)) return false;
-  if (!matchesAnySizePreset(row, filters.sizePresets)) return false;
-  return true;
-}
-
-function matchesSearchQuery(row: InventoryBrowserRow, query: string): boolean {
-  const normalized = query.trim().toLowerCase();
-  if (!normalized) return true;
-
-  const tokens = normalized.split(/\s+/).filter((token) => token.length > 0);
-  if (tokens.length === 0) return true;
-
-  const haystack = [
-    row.effective_label,
-    row.intake_label,
-    row.stock_id,
-    row.ai_description,
-  ]
-    .filter((value): value is string => typeof value === "string")
-    .join(" ")
-    .toLowerCase();
-
-  return tokens.every((token) => haystack.includes(token));
-}
-
-function matchesManualSizeBounds(
-  row: InventoryBrowserRow,
-  filters: ReturnType<typeof normalizeInventoryFilters>
-): boolean {
-  const width = row.width_total_in;
-  const length = row.length_total_in;
-
-  if (
-    filters.widthMin === null &&
-    filters.widthMax === null &&
-    filters.lengthMin === null &&
-    filters.lengthMax === null
-  ) {
-    return true;
+  if (filters.widthMin !== null) {
+    next = next.gte("width_total_in", filters.widthMin);
   }
-  if (width === null || length === null) return false;
-  if (filters.widthMin !== null && width < filters.widthMin) return false;
-  if (filters.widthMax !== null && width > filters.widthMax) return false;
-  if (filters.lengthMin !== null && length < filters.lengthMin) return false;
-  if (filters.lengthMax !== null && length > filters.lengthMax) return false;
-  return true;
+  if (filters.widthMax !== null) {
+    next = next.lte("width_total_in", filters.widthMax);
+  }
+  if (filters.lengthMin !== null) {
+    next = next.gte("length_total_in", filters.lengthMin);
+  }
+  if (filters.lengthMax !== null) {
+    next = next.lte("length_total_in", filters.lengthMax);
+  }
+
+  const booleanExpressions: string[] = [];
+  if (searchTokens.length > 0) {
+    const tokenExpressions = searchTokens.map((token) => {
+      const pattern = `*${token}*`;
+      return `or(intake_label.ilike.${pattern},stock_id.ilike.${pattern},ai_description.ilike.${pattern})`;
+    });
+    booleanExpressions.push(
+      tokenExpressions.length === 1
+        ? tokenExpressions[0]
+        : `and(${tokenExpressions.join(",")})`
+    );
+  }
+
+  if (filters.sizePresets.length > 0) {
+    const clauses = buildSizePresetClauses(filters.sizePresets);
+    if (clauses.length > 0) {
+      booleanExpressions.push(
+        clauses.length === 1 ? clauses[0] : `or(${clauses.join(",")})`
+      );
+    }
+  }
+
+  if (booleanExpressions.length > 0) {
+    const expression =
+      booleanExpressions.length === 1
+        ? booleanExpressions[0]
+        : `and(${booleanExpressions.join(",")})`;
+    next = next.or(expression);
+  }
+
+  return next;
 }
 
-function matchesAnySizePreset(
-  row: InventoryBrowserRow,
+function sanitizeSearchToken(token: string): string {
+  return token
+    .replace(/[^a-z0-9-]/gi, "")
+    .slice(0, 40);
+}
+
+function buildExactSizeClauses(
+  widthIn: number,
+  lengthIn: number,
+  toleranceIn: number
+): string[] {
+  const widthMin = Math.max(0, Math.floor(widthIn - toleranceIn));
+  const widthMax = Math.ceil(widthIn + toleranceIn);
+  const lengthMin = Math.max(0, Math.floor(lengthIn - toleranceIn));
+  const lengthMax = Math.ceil(lengthIn + toleranceIn);
+
+  return [
+    `and(width_total_in.gte.${widthMin},width_total_in.lte.${widthMax},length_total_in.gte.${lengthMin},length_total_in.lte.${lengthMax})`,
+    `and(width_total_in.gte.${lengthMin},width_total_in.lte.${lengthMax},length_total_in.gte.${widthMin},length_total_in.lte.${widthMax})`,
+  ];
+}
+
+function buildSizePresetClauses(
   sizePresets: ReturnType<typeof normalizeInventoryFilters>["sizePresets"]
-): boolean {
-  if (sizePresets.length === 0) return true;
-  return sizePresets.some((preset) => matchesSizePreset(row, preset));
-}
+): string[] {
+  const clauses: string[] = [];
 
-function matchesSizePreset(
-  row: InventoryBrowserRow,
-  sizePreset: ReturnType<typeof normalizeInventoryFilters>["sizePresets"][number]
-): boolean {
-  if (sizePreset === "accent") return matchesAccentPreset(row);
-  if (sizePreset === "oversized") return matchesOversizedPreset(row);
-  if (sizePreset === "runner") return matchesRunnerPreset(row);
-  if (sizePreset === "round-oval") return matchesRoundOvalPreset(row);
+  for (const preset of sizePresets) {
+    if (preset === "accent") {
+      clauses.push(
+        "and(width_total_in.lte.36,length_total_in.lte.60)",
+        "and(width_total_in.lte.60,length_total_in.lte.36)"
+      );
+      continue;
+    }
 
-  const spec = toExactSizePresetSpec(sizePreset);
-  if (!spec) return true;
-  const width = row.width_total_in;
-  const length = row.length_total_in;
-  if (width === null || length === null) return false;
+    if (preset === "runner") {
+      clauses.push(
+        "and(width_total_in.lte.42,length_total_in.gte.93)",
+        "and(width_total_in.gte.93,length_total_in.lte.42)"
+      );
+      continue;
+    }
 
-  const directMatch =
-    Math.abs(width - spec.widthIn) <= spec.toleranceIn &&
-    Math.abs(length - spec.lengthIn) <= spec.toleranceIn;
-  if (directMatch) return true;
+    if (preset === "oversized") {
+      clauses.push(
+        "and(width_total_in.gte.84,length_total_in.gte.133)",
+        "and(width_total_in.gte.133,length_total_in.gte.84)"
+      );
+      continue;
+    }
 
-  return (
-    Math.abs(width - spec.lengthIn) <= spec.toleranceIn &&
-    Math.abs(length - spec.widthIn) <= spec.toleranceIn
-  );
-}
+    if (preset === "round-oval") {
+      for (const keyword of ["round", "circular", "circle", "oval"]) {
+        clauses.push(
+          `intake_label.ilike.*${keyword}*`,
+          `ai_description.ilike.*${keyword}*`
+        );
+      }
+      continue;
+    }
 
-function matchesAccentPreset(row: InventoryBrowserRow): boolean {
-  const width = row.width_total_in;
-  const length = row.length_total_in;
-  if (width === null || length === null) return false;
+    const spec = toExactSizePresetSpec(preset);
+    if (!spec) continue;
+    clauses.push(
+      ...buildExactSizeClauses(spec.widthIn, spec.lengthIn, spec.toleranceIn)
+    );
+  }
 
-  const shortSide = Math.min(width, length);
-  const longSide = Math.max(width, length);
-  return shortSide <= 36 && longSide <= 60;
-}
-
-function matchesRunnerPreset(row: InventoryBrowserRow): boolean {
-  const width = row.width_total_in;
-  const length = row.length_total_in;
-  if (width === null || length === null) return false;
-
-  const shortSide = Math.min(width, length);
-  const longSide = Math.max(width, length);
-  if (shortSide <= 0) return false;
-
-  return shortSide <= 42 && longSide >= 84 && longSide / shortSide >= 2.2;
-}
-
-function matchesOversizedPreset(row: InventoryBrowserRow): boolean {
-  const width = row.width_total_in;
-  const length = row.length_total_in;
-  if (width === null || length === null) return false;
-
-  const shortSide = Math.min(width, length);
-  const longSide = Math.max(width, length);
-  if (shortSide < 84) return false;
-  return width > 132 || length > 180 || longSide > 180;
-}
-
-function matchesRoundOvalPreset(row: InventoryBrowserRow): boolean {
-  const haystack = `${row.intake_label ?? ""} ${row.ai_description ?? ""}`.toLowerCase();
-  return /\b(round|circular|circle|oval)\b/.test(haystack);
-}
-
-function normalizeLabel(value: string | null | undefined): string | null {
-  if (typeof value !== "string") return null;
-  const trimmed = value.trim();
-  return trimmed.length > 0 ? trimmed : null;
-}
-
-function isLikelyMissingColumnError(message: string): boolean {
-  const normalized = message.toLowerCase();
-  return (
-    normalized.includes("does not exist") ||
-    normalized.includes("schema cache") ||
-    normalized.includes("could not find the")
-  );
+  return clauses;
 }
 
 async function getSupabaseAdminSafe(): Promise<SupabaseClient | null> {

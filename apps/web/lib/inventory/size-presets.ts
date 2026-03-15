@@ -13,9 +13,9 @@ export type SizePresetMeta = {
 };
 
 export const SIZE_PRESET_OPTIONS: readonly SizePresetMeta[] = [
-  { value: "accent", label: "Accent", featured: true },
+  { value: "accent", label: "Accent", featured: false },
   { value: "3x5", label: "3x5", featured: false },
-  { value: "4x6", label: "4x6", featured: true },
+  { value: "4x6", label: "4x6", featured: false },
   { value: "5x8", label: "5x8", featured: true },
   { value: "6x9", label: "6x9", featured: true },
   { value: "8x10", label: "8x10", featured: true },

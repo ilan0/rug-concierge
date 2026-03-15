@@ -8,7 +8,7 @@ import type { HardConstraints } from "@/lib/types/recommendation";
 
 type UpdateRecommendationStateInput = {
   message: string;
-  constraints?: HardConstraints;
+  constraints?: unknown;
 };
 
 // Update recommendation state on every turn, even if turn routes to general chat.
