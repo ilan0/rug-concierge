@@ -21,12 +21,33 @@ import {
   validateDimensionTuple,
 } from "@/lib/intake/validation";
 import type { IntakeCreatedRug } from "@/lib/types/intake";
+import { cn } from "@/lib/utils";
 
 type IntakeScreenProps = {
   tenantId: string;
 };
 
 type SubmitIntent = "save" | "save_and_add_another";
+
+type IntakeFieldErrors = {
+  photo: string | null;
+  widthFt: string | null;
+  widthIn: string | null;
+  lengthFt: string | null;
+  lengthIn: string | null;
+  width: string | null;
+  length: string | null;
+};
+
+const EMPTY_FIELD_ERRORS: IntakeFieldErrors = {
+  photo: null,
+  widthFt: null,
+  widthIn: null,
+  lengthFt: null,
+  lengthIn: null,
+  width: null,
+  length: null,
+};
 
 export function IntakeScreen({ tenantId }: IntakeScreenProps) {
   const [widthFt, setWidthFt] = useState("");
@@ -38,6 +59,8 @@ export function IntakeScreen({ tenantId }: IntakeScreenProps) {
   const [submitIntent, setSubmitIntent] = useState<SubmitIntent>("save");
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] =
+    useState<IntakeFieldErrors>(EMPTY_FIELD_ERRORS);
   const [notice, setNotice] = useState<string | null>(null);
   const [lastSaved, setLastSaved] = useState<IntakeCreatedRug | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -64,6 +87,7 @@ export function IntakeScreen({ tenantId }: IntakeScreenProps) {
 
   const clearImage = () => {
     setImageFile(null);
+    setFieldErrors((prev) => ({ ...prev, photo: null }));
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
@@ -76,42 +100,90 @@ export function IntakeScreen({ tenantId }: IntakeScreenProps) {
     setLengthFt("");
     setLengthIn("");
     setStockId("");
+    setFieldErrors(EMPTY_FIELD_ERRORS);
   };
 
-  const parseDimensions = () => {
-    return validateDimensionTuple({
-      widthFt: parseDimensionField(widthFt, "width_ft"),
-      widthIn: parseDimensionField(widthIn, "width_in"),
-      lengthFt: parseDimensionField(lengthFt, "length_ft"),
-      lengthIn: parseDimensionField(lengthIn, "length_in"),
+  const validateInputs = () => {
+    const nextFieldErrors: IntakeFieldErrors = { ...EMPTY_FIELD_ERRORS };
+
+    const parsedWidthFt = parseDimensionField(widthFt, "width_ft");
+    const parsedWidthIn = parseDimensionField(widthIn, "width_in");
+    const parsedLengthFt = parseDimensionField(lengthFt, "length_ft");
+    const parsedLengthIn = parseDimensionField(lengthIn, "length_in");
+
+    if (!imageFile) {
+      nextFieldErrors.photo = "Photo is required.";
+    }
+    if (parsedWidthFt === null) {
+      nextFieldErrors.widthFt = "Enter width feet (0-99).";
+    }
+    if (parsedWidthIn === null) {
+      nextFieldErrors.widthIn = "Enter width inches (0-11).";
+    }
+    if (parsedLengthFt === null) {
+      nextFieldErrors.lengthFt = "Enter length feet (0-99).";
+    }
+    if (parsedLengthIn === null) {
+      nextFieldErrors.lengthIn = "Enter length inches (0-11).";
+    }
+    if (parsedWidthFt !== null && parsedWidthIn !== null) {
+      const widthTotal = parsedWidthFt * 12 + parsedWidthIn;
+      if (widthTotal <= 0) {
+        nextFieldErrors.width = "Width must be greater than zero.";
+      }
+    }
+    if (parsedLengthFt !== null && parsedLengthIn !== null) {
+      const lengthTotal = parsedLengthFt * 12 + parsedLengthIn;
+      if (lengthTotal <= 0) {
+        nextFieldErrors.length = "Length must be greater than zero.";
+      }
+    }
+
+    setFieldErrors(nextFieldErrors);
+    if (Object.values(nextFieldErrors).some((value) => value !== null)) {
+      return { ok: false } as const;
+    }
+
+    const dimensions = validateDimensionTuple({
+      widthFt: parsedWidthFt,
+      widthIn: parsedWidthIn,
+      lengthFt: parsedLengthFt,
+      lengthIn: parsedLengthIn,
     });
+    if (!dimensions.ok) {
+      return { ok: false } as const;
+    }
+
+    return { ok: true, value: dimensions.value } as const;
   };
 
   const onSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (isSaving) return;
 
-    const dimensions = parseDimensions();
-    if (!dimensions.ok) {
-      setError("Enter valid feet/inches dimensions.");
+    const validation = validateInputs();
+    if (!validation.ok) {
+      setError("Please correct the highlighted fields.");
       return;
     }
     if (!imageFile) {
-      setError("Photo is required.");
+      setError("Please attach a photo.");
+      setFieldErrors((prev) => ({ ...prev, photo: "Photo is required." }));
       return;
     }
 
     setIsSaving(true);
     setError(null);
+    setFieldErrors(EMPTY_FIELD_ERRORS);
     setNotice(null);
     try {
       const payload = await createInventoryIntake({
         tenant_id: tenantId,
         stock_id: stockId.trim() || null,
-        width_ft: dimensions.value.widthFt,
-        width_in: dimensions.value.widthIn,
-        length_ft: dimensions.value.lengthFt,
-        length_in: dimensions.value.lengthIn,
+        width_ft: validation.value.widthFt,
+        width_in: validation.value.widthIn,
+        length_ft: validation.value.lengthFt,
+        length_in: validation.value.lengthIn,
         image: imageFile,
       });
       setLastSaved(payload.rug);
@@ -149,7 +221,11 @@ export function IntakeScreen({ tenantId }: IntakeScreenProps) {
               accept="image/*"
               capture="environment"
               className="hidden"
-              onChange={(event) => setImageFile(event.target.files?.[0] ?? null)}
+              onChange={(event) => {
+                setImageFile(event.target.files?.[0] ?? null);
+                setError(null);
+                setFieldErrors((prev) => ({ ...prev, photo: null }));
+              }}
               disabled={isSaving}
             />
 
@@ -161,7 +237,12 @@ export function IntakeScreen({ tenantId }: IntakeScreenProps) {
               {!imagePreviewUrl ? (
                 <button
                   type="button"
-                  className="w-full rounded-2xl border-2 border-dashed border-border/65 bg-background/60 px-4 py-10 text-center transition-colors hover:border-primary/45 hover:bg-primary/10"
+                  className={cn(
+                    "w-full rounded-2xl border-2 border-dashed px-4 py-10 text-center transition-colors",
+                    fieldErrors.photo
+                      ? "border-destructive/70 bg-destructive/5"
+                      : "border-border/65 bg-background/60 hover:border-primary/45 hover:bg-primary/10"
+                  )}
                   onClick={() => fileInputRef.current?.click()}
                   disabled={isSaving}
                 >
@@ -196,6 +277,9 @@ export function IntakeScreen({ tenantId }: IntakeScreenProps) {
                   </Button>
                 </div>
               )}
+              {fieldErrors.photo ? (
+                <p className="text-xs text-destructive">{fieldErrors.photo}</p>
+              ) : null}
             </div>
 
             <div className="grid gap-4 sm:grid-cols-2">
@@ -208,21 +292,66 @@ export function IntakeScreen({ tenantId }: IntakeScreenProps) {
                     inputMode="numeric"
                     pattern="[0-9]*"
                     value={widthFt}
-                    onChange={(event) => setWidthFt(event.target.value)}
+                    onChange={(event) => {
+                      setWidthFt(event.target.value);
+                      setError(null);
+                      setFieldErrors((prev) => ({
+                        ...prev,
+                        widthFt: null,
+                        width: null,
+                      }));
+                    }}
                     placeholder="ft"
-                    className="h-12 text-base"
+                    className={cn(
+                      "h-12 text-base",
+                      fieldErrors.widthFt || fieldErrors.width
+                        ? "border-destructive focus-visible:ring-destructive/60"
+                        : null
+                    )}
                     disabled={isSaving}
+                    aria-invalid={
+                      fieldErrors.widthFt || fieldErrors.width ? true : undefined
+                    }
                   />
                   <Input
                     inputMode="numeric"
                     pattern="[0-9]*"
                     value={widthIn}
-                    onChange={(event) => setWidthIn(event.target.value)}
+                    onChange={(event) => {
+                      setWidthIn(event.target.value);
+                      setError(null);
+                      setFieldErrors((prev) => ({
+                        ...prev,
+                        widthIn: null,
+                        width: null,
+                      }));
+                    }}
                     placeholder="in"
-                    className="h-12 text-base"
+                    className={cn(
+                      "h-12 text-base",
+                      fieldErrors.widthIn || fieldErrors.width
+                        ? "border-destructive focus-visible:ring-destructive/60"
+                        : null
+                    )}
                     disabled={isSaving}
+                    aria-invalid={
+                      fieldErrors.widthIn || fieldErrors.width ? true : undefined
+                    }
                   />
                 </div>
+                {fieldErrors.widthFt || fieldErrors.widthIn || fieldErrors.width ? (
+                  <div className="space-y-0.5">
+                    {fieldErrors.widthFt ? (
+                      <p className="text-xs text-destructive">{fieldErrors.widthFt}</p>
+                    ) : null}
+                    {fieldErrors.widthIn ? (
+                      <p className="text-xs text-destructive">{fieldErrors.widthIn}</p>
+                    ) : null}
+                    {fieldErrors.width ? (
+                      <p className="text-xs text-destructive">{fieldErrors.width}</p>
+                    ) : null}
+                  </div>
+                ) : null}
               </div>
 
               <div className="space-y-2">
@@ -234,21 +363,66 @@ export function IntakeScreen({ tenantId }: IntakeScreenProps) {
                     inputMode="numeric"
                     pattern="[0-9]*"
                     value={lengthFt}
-                    onChange={(event) => setLengthFt(event.target.value)}
+                    onChange={(event) => {
+                      setLengthFt(event.target.value);
+                      setError(null);
+                      setFieldErrors((prev) => ({
+                        ...prev,
+                        lengthFt: null,
+                        length: null,
+                      }));
+                    }}
                     placeholder="ft"
-                    className="h-12 text-base"
+                    className={cn(
+                      "h-12 text-base",
+                      fieldErrors.lengthFt || fieldErrors.length
+                        ? "border-destructive focus-visible:ring-destructive/60"
+                        : null
+                    )}
                     disabled={isSaving}
+                    aria-invalid={
+                      fieldErrors.lengthFt || fieldErrors.length ? true : undefined
+                    }
                   />
                   <Input
                     inputMode="numeric"
                     pattern="[0-9]*"
                     value={lengthIn}
-                    onChange={(event) => setLengthIn(event.target.value)}
+                    onChange={(event) => {
+                      setLengthIn(event.target.value);
+                      setError(null);
+                      setFieldErrors((prev) => ({
+                        ...prev,
+                        lengthIn: null,
+                        length: null,
+                      }));
+                    }}
                     placeholder="in"
-                    className="h-12 text-base"
+                    className={cn(
+                      "h-12 text-base",
+                      fieldErrors.lengthIn || fieldErrors.length
+                        ? "border-destructive focus-visible:ring-destructive/60"
+                        : null
+                    )}
                     disabled={isSaving}
+                    aria-invalid={
+                      fieldErrors.lengthIn || fieldErrors.length ? true : undefined
+                    }
                   />
                 </div>
+                {fieldErrors.lengthFt || fieldErrors.lengthIn || fieldErrors.length ? (
+                  <div className="space-y-0.5">
+                    {fieldErrors.lengthFt ? (
+                      <p className="text-xs text-destructive">{fieldErrors.lengthFt}</p>
+                    ) : null}
+                    {fieldErrors.lengthIn ? (
+                      <p className="text-xs text-destructive">{fieldErrors.lengthIn}</p>
+                    ) : null}
+                    {fieldErrors.length ? (
+                      <p className="text-xs text-destructive">{fieldErrors.length}</p>
+                    ) : null}
+                  </div>
+                ) : null}
               </div>
             </div>
 

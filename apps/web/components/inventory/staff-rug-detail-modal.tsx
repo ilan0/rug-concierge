@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RugImage } from "@/components/ui/rug-image";
+import { toast } from "sonner";
 import {
   fetchStaffRugDetail,
   patchStaffRugDetail,
@@ -380,18 +381,26 @@ export function StaffRugDetailModal({
 
   const onReAnalyze = async () => {
     if (!detail || reAnalyzing) return;
+    if (typeof window !== "undefined") {
+      const confirmed = window.confirm(
+        "Re-analyze this rug with AI? This will refresh AI fields and keep your staff overrides."
+      );
+      if (!confirmed) return;
+    }
     setReAnalyzing(true);
     setError(null);
     try {
       const updated = await reEnrichStaffRug(detail.id);
       setDetail(updated);
       setDraft(detailToDraft(updated));
+      toast.success("Rug re-analyzed successfully.");
     } catch (nextError) {
       setError(
         nextError instanceof Error
           ? nextError.message
           : "Unable to re-analyze this rug right now."
       );
+      toast.error("Unable to re-analyze this rug right now.");
     } finally {
       setReAnalyzing(false);
     }
@@ -797,7 +806,7 @@ export function StaffRugDetailModal({
           )}
 
           <DialogFooter>
-            <Button type="button" variant="default" onClick={onClose}>
+            <Button type="button" variant="outline" onClick={onClose}>
               Close
             </Button>
           </DialogFooter>

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Delete } from "lucide-react";
+import { Delete, X } from "lucide-react";
 import {
   clearStaffPinLockedUntilMs,
   formatStaffPinCooldown,
@@ -169,12 +169,21 @@ export default function StaffPinModal({ onSuccess, onDismiss }: StaffPinModalPro
       role="presentation"
     >
       <div
-        className="mx-4 w-full max-w-xs rounded-2xl bg-card p-8 shadow-2xl"
+        className="relative mx-4 w-full max-w-xs rounded-2xl bg-card p-8 shadow-2xl"
         role="dialog"
         aria-modal="true"
         aria-label="Staff Access"
         onClick={(event) => event.stopPropagation()}
       >
+        <button
+          type="button"
+          aria-label="Close staff access"
+          className="absolute right-3 top-3 rounded-full p-1 text-muted-foreground/70 transition-colors hover:bg-accent hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50"
+          onClick={onDismiss}
+          disabled={isSubmitting}
+        >
+          <X className="size-4" />
+        </button>
         <h2 className="font-serif text-xl font-semibold text-foreground">Staff Access</h2>
         <p className="mt-1 text-sm text-muted-foreground">Enter store passcode</p>
 

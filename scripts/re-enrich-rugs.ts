@@ -5,6 +5,7 @@ import path from "node:path";
 import { createClient } from "@supabase/supabase-js";
 import { z } from "zod";
 import { rugImagePathToPublicUrl } from "../apps/web/lib/storage/rug-images";
+import { resolveStyleValue } from "../apps/web/lib/inventory/style-normalization";
 
 const OPENAI_RESPONSES_URL = "https://api.openai.com/v1/responses";
 const MAX_CONCURRENCY = 2;
@@ -268,14 +269,23 @@ function extractOutputText(payload: unknown): string | null {
   return null;
 }
 
-function normalizeStructuredFields(
-  value: z.infer<typeof aiStructuredFieldsSchema> | null | undefined
+function normalizeStructuredFields(input: {
+  value: z.infer<typeof aiStructuredFieldsSchema> | null | undefined;
+  aiDescription: string;
+}
 ): z.infer<typeof aiStructuredFieldsSchema> | null {
+  const { value, aiDescription } = input;
   if (!value) return null;
 
   const normalized: z.infer<typeof aiStructuredFieldsSchema> = {};
   if (value.origin) normalized.origin = value.origin;
-  if (value.style) normalized.style = toPlainText(value.style).slice(0, 80);
+  const style = resolveStyleValue({
+    styleRaw: value.style ?? null,
+    pattern: value.pattern ?? [],
+    mood: value.mood ?? null,
+    aiDescription,
+  });
+  if (style) normalized.style = style.slice(0, 80);
   if (Array.isArray(value.pattern) && value.pattern.length > 0) {
     const next = value.pattern
       .map((item) => toPlainText(item).slice(0, 48))
@@ -306,7 +316,10 @@ function parseVisionPayload(payload: unknown): VisionEnrichmentResult | null {
     return {
       intakeLabel,
       aiDescription,
-      aiStructuredFields: normalizeStructuredFields(validated.data.ai_structured_fields),
+      aiStructuredFields: normalizeStructuredFields({
+        value: validated.data.ai_structured_fields,
+        aiDescription,
+      }),
     };
   };
 
@@ -368,7 +381,7 @@ async function requestVisionEnrichment(input: {
           {
             type: "input_text",
             text:
-              "You are an expert rug appraiser. Analyze the rug in this photo and return valid JSON only. Use measured size as context for scale only. Never include dimensions in the intake_label. Leave uncertain fields as null and unknown list fields as empty arrays.\\n\\nReturn shape:\\n{\\n  \\\"intake_label\\\": \\\"3-6 words, descriptive, no dimensions\\\",\\n  \\\"ai_description\\\": \\\"1-2 sentences: style tradition, palette, motifs, room fit\\\",\\n  \\\"ai_structured_fields\\\": {\\n    \\\"origin\\\": \\\"Persian|Afghan|Turkish|Indian|Caucasian|Pakistani|Other|null\\\",\\n    \\\"style\\\": \\\"named style like Heriz/Serapi/Gabbeh/Kilim or null\\\",\\n    \\\"pattern\\\": [\\\"medallion center\\\", \\\"all-over pattern\\\", \\\"geometric design\\\", \\\"floral motif\\\", \\\"tribal design\\\", \\\"floral border\\\", \\\"pictorial\\\", \\\"plain field\\\"],\\n    \\\"primary_colors\\\": [\\\"red\\\",\\\"navy\\\",\\\"ivory\\\",\\\"gold\\\",\\\"rust\\\",\\\"teal\\\",\\\"brown\\\",\\\"green\\\",\\\"blue\\\",\\\"black\\\",\\\"cream\\\",\\\"coral\\\"],\\n    \\\"age_category\\\": \\\"antique|semi-antique|vintage|new|null\\\",\\n    \\\"mood\\\": \\\"traditional|transitional|eclectic|modern|null\\\"\\n  }\\n}",
+              "You are an expert rug appraiser. Analyze the rug in this photo and return valid JSON only. Use measured size as context for scale only. Never include dimensions in the intake_label. Leave uncertain fields as null and unknown list fields as empty arrays.\\n\\nStyle is important: provide a concise style value whenever possible (named style preferred, otherwise broad style like Traditional, Tribal, Geometric, Floral, Modern, Transitional). Use null only when truly impossible.\\n\\nReturn shape:\\n{\\n  \\\"intake_label\\\": \\\"3-6 words, descriptive, no dimensions\\\",\\n  \\\"ai_description\\\": \\\"1-2 sentences: style tradition, palette, motifs, room fit\\\",\\n  \\\"ai_structured_fields\\\": {\\n    \\\"origin\\\": \\\"Persian|Afghan|Turkish|Indian|Caucasian|Pakistani|Other|null\\\",\\n    \\\"style\\\": \\\"named style like Heriz/Serapi/Gabbeh/Kilim or concise broad style, or null only when impossible\\\",\\n    \\\"pattern\\\": [\\\"medallion center\\\", \\\"all-over pattern\\\", \\\"geometric design\\\", \\\"floral motif\\\", \\\"tribal design\\\", \\\"floral border\\\", \\\"pictorial\\\", \\\"plain field\\\"],\\n    \\\"primary_colors\\\": [\\\"red\\\",\\\"navy\\\",\\\"ivory\\\",\\\"gold\\\",\\\"rust\\\",\\\"teal\\\",\\\"brown\\\",\\\"green\\\",\\\"blue\\\",\\\"black\\\",\\\"cream\\\",\\\"coral\\\"],\\n    \\\"age_category\\\": \\\"antique|semi-antique|vintage|new|null\\\",\\n    \\\"mood\\\": \\\"traditional|transitional|eclectic|modern|null\\\"\\n  }\\n}",
           },
         ],
       },

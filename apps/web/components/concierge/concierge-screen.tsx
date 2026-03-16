@@ -29,6 +29,8 @@ const COMPOSER_REST_OFFSET_DESKTOP = 12;
 const COMPOSER_REST_OFFSET_MOBILE = 8;
 const CONTENT_SAFETY_GAP = 10;
 const INITIAL_COMPOSER_HEIGHT = 92;
+const CONCIERGE_SUBTITLE =
+  "Tell me the room, size, and style — I'll show you what's in the collection.";
 
 export function ConciergeScreen({
   debug,
@@ -208,9 +210,7 @@ export function ConciergeScreen({
                 : "hidden"
           )}
         >
-          {isHeroState
-            ? "Tell me the room, size, and style — I'll show you what's in the collection."
-            : "Describe your room, size, and style in plain words."}
+          {CONCIERGE_SUBTITLE}
         </p>
       </header>
 

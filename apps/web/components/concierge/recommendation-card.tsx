@@ -9,6 +9,7 @@ import {
   RugDetailModal,
   type RugDetailData,
 } from "@/components/concierge/rug-detail-modal";
+import { toast } from "sonner";
 
 type RecommendationCardProps = {
   item: UiRecommendationItem;
@@ -83,6 +84,64 @@ export function RecommendationCard({
   const onOpenDetails = () => {
     setDetailOpen(true);
     void loadDetail();
+  };
+
+  const onShare = async () => {
+    const title =
+      detail?.effective_fields.label ??
+      detail?.intake_label ??
+      item.title ??
+      "Rug recommendation";
+    const sizeText = detail?.size_display ?? item.size_text ?? null;
+    const descriptorText = [item.origin, item.style, item.mood]
+      .filter((value): value is string => typeof value === "string" && value.trim().length > 0)
+      .join(" · ");
+    const lines = [title];
+    if (sizeText) lines.push(`Size: ${sizeText}`);
+    if (descriptorText) lines.push(descriptorText);
+    lines.push(`Rug ID: ${item.rug_id}`);
+    if (typeof window !== "undefined") {
+      lines.push(`${window.location.origin}/concierge`);
+    }
+    const shareText = lines.join("\n");
+
+    if (
+      typeof navigator !== "undefined" &&
+      typeof navigator.share === "function"
+    ) {
+      try {
+        await navigator.share({
+          title,
+          text: shareText,
+          url:
+            typeof window !== "undefined"
+              ? `${window.location.origin}/concierge`
+              : undefined,
+        });
+        toast.success("Rug details shared.");
+        return;
+      } catch (error) {
+        if (error instanceof Error && error.name === "AbortError") {
+          return;
+        }
+      }
+    }
+
+    if (
+      typeof navigator !== "undefined" &&
+      navigator.clipboard &&
+      typeof navigator.clipboard.writeText === "function"
+    ) {
+      try {
+        await navigator.clipboard.writeText(shareText);
+        toast.success("Rug details copied to clipboard.");
+        return;
+      } catch {
+        // fall through to error toast
+      }
+    }
+
+    toast.error("Sharing is unavailable on this device.");
   };
 
   return (
@@ -160,6 +219,7 @@ export function RecommendationCard({
         isLoading={detailLoading}
         error={detailError}
         detail={detail}
+        onShare={() => void onShare()}
       />
     </>
   );

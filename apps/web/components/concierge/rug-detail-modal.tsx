@@ -34,6 +34,7 @@ type RugDetailModalProps = {
   isLoading: boolean;
   error: string | null;
   detail: RugDetailData | null;
+  onShare?: () => void;
 };
 
 export function RugDetailModal({
@@ -42,6 +43,7 @@ export function RugDetailModal({
   isLoading,
   error,
   detail,
+  onShare,
 }: RugDetailModalProps) {
   const displayLabel =
     detail?.effective_fields.label ??
@@ -117,7 +119,17 @@ export function RugDetailModal({
           ) : null}
 
           <DialogFooter>
-            <Button type="button" variant="default" onClick={() => onOpenChange(false)}>
+            {onShare ? (
+              <Button
+                type="button"
+                variant="outline"
+                onClick={onShare}
+                disabled={isLoading || !detail}
+              >
+                Share
+              </Button>
+            ) : null}
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               Close
             </Button>
           </DialogFooter>
