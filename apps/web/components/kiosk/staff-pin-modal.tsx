@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
 import { Delete, X } from "lucide-react";
 import {
   clearStaffPinLockedUntilMs,
@@ -20,6 +21,7 @@ const MAX_DIGITS = 4;
 const PASSCODE_LOCKOUT_FALLBACK_SECONDS = 5 * 60;
 
 export default function StaffPinModal({ onSuccess, onDismiss }: StaffPinModalProps) {
+  const [mounted, setMounted] = useState(false);
   const [pin, setPin] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [lockedUntilMs, setLockedUntilMs] = useState<number | null>(null);
@@ -32,6 +34,10 @@ export default function StaffPinModal({ onSuccess, onDismiss }: StaffPinModalPro
   const isCooldownActive = cooldownSeconds > 0;
 
   const keypadDigits = useMemo(() => ["1", "2", "3", "4", "5", "6", "7", "8", "9"], []);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     if (!shake) return;
@@ -162,7 +168,9 @@ export default function StaffPinModal({ onSuccess, onDismiss }: StaffPinModalPro
     onDismiss();
   };
 
-  return (
+  if (!mounted || typeof document === "undefined") return null;
+
+  return createPortal(
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm"
       onClick={onBackdropClick}
@@ -243,6 +251,7 @@ export default function StaffPinModal({ onSuccess, onDismiss }: StaffPinModalPro
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
