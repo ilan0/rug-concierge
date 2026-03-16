@@ -35,6 +35,7 @@ type RugDetailModalProps = {
   error: string | null;
   detail: RugDetailData | null;
   onShare?: () => void;
+  onAskAboutThisRug?: () => void;
 };
 
 export function RugDetailModal({
@@ -44,6 +45,7 @@ export function RugDetailModal({
   error,
   detail,
   onShare,
+  onAskAboutThisRug,
 }: RugDetailModalProps) {
   const displayLabel =
     detail?.effective_fields.label ??
@@ -119,6 +121,15 @@ export function RugDetailModal({
           ) : null}
 
           <DialogFooter>
+            {onAskAboutThisRug ? (
+              <Button
+                type="button"
+                onClick={onAskAboutThisRug}
+                disabled={isLoading || !detail}
+              >
+                Ask About This Rug
+              </Button>
+            ) : null}
             {onShare ? (
               <Button
                 type="button"

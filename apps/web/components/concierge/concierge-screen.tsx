@@ -230,6 +230,11 @@ export function ConciergeScreen({
           emptyStatePrompts={controller.starterPrompts.slice(0, emptyStatePromptLimit)}
           bodyTextClassName={BODY_SIZE}
           onChoosePrompt={controller.submitWithPrompt}
+          onAskAboutRug={(rugTitle) =>
+            controller.submitWithPrompt(
+              `Tell me more about "${rugTitle}" and why it fits my request.`
+            )
+          }
           onSelectTurn={controller.setSelectedTurnId}
           onJumpToLatestVisibilityChange={setShowJumpToLatest}
           onJumpToLatestHandlerChange={onJumpToLatestHandlerChange}

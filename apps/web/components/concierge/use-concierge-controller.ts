@@ -39,6 +39,28 @@ function storageTurnsKey(tenantId: string): string {
   return `rug_concierge_turns:${tenantId}`;
 }
 
+function readSessionStorage(key: string): string | null {
+  if (typeof window === "undefined") return null;
+  try {
+    return window.sessionStorage.getItem(key);
+  } catch {
+    return null;
+  }
+}
+
+function writeSessionStorage(key: string, value: string | null): void {
+  if (typeof window === "undefined") return;
+  try {
+    if (value === null) {
+      window.sessionStorage.removeItem(key);
+      return;
+    }
+    window.sessionStorage.setItem(key, value);
+  } catch {
+    // Ignore storage write failures in restrictive browser contexts.
+  }
+}
+
 export function useConciergeController(input: UseConciergeControllerInput) {
   const { debug, tenantId } = input;
 
@@ -67,13 +89,24 @@ export function useConciergeController(input: UseConciergeControllerInput) {
 
   useEffect(() => {
     if (typeof window === "undefined") return;
+    const sessionKey = storageSessionKey(tenantId);
+    const turnsKey = storageTurnsKey(tenantId);
 
-    const storedSessionId = window.localStorage.getItem(storageSessionKey(tenantId));
+    // Legacy cleanup: historical localStorage persistence leaked prior sessions
+    // across fresh tabs. Keep new persistence scoped to the current tab only.
+    try {
+      window.localStorage.removeItem(sessionKey);
+      window.localStorage.removeItem(turnsKey);
+    } catch {
+      // Ignore storage cleanup failures in restrictive browser contexts.
+    }
+
+    const storedSessionId = readSessionStorage(sessionKey);
     if (storedSessionId && storedSessionId.trim().length > 0) {
       setSessionId(storedSessionId.trim());
     }
 
-    const storedTurns = window.localStorage.getItem(storageTurnsKey(tenantId));
+    const storedTurns = readSessionStorage(turnsKey);
     if (!storedTurns) return;
 
     try {
@@ -99,23 +132,21 @@ export function useConciergeController(input: UseConciergeControllerInput) {
   }, [tenantId]);
 
   useEffect(() => {
-    if (typeof window === "undefined") return;
     const key = storageSessionKey(tenantId);
     if (sessionId && sessionId.trim().length > 0) {
-      window.localStorage.setItem(key, sessionId);
+      writeSessionStorage(key, sessionId);
       return;
     }
-    window.localStorage.removeItem(key);
+    writeSessionStorage(key, null);
   }, [sessionId, tenantId]);
 
   useEffect(() => {
-    if (typeof window === "undefined") return;
     const key = storageTurnsKey(tenantId);
     if (turns.length === 0) {
-      window.localStorage.removeItem(key);
+      writeSessionStorage(key, null);
       return;
     }
-    window.localStorage.setItem(key, JSON.stringify(turns.slice(-40)));
+    writeSessionStorage(key, JSON.stringify(turns.slice(-40)));
   }, [tenantId, turns]);
 
   const debugRunId = useMemo(

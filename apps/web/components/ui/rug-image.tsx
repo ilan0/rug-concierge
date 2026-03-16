@@ -1,3 +1,6 @@
+"use client";
+
+import { useMemo, useState } from "react";
 import { cn } from "@/lib/utils";
 
 type RugImageProps = {
@@ -15,17 +18,39 @@ export function RugImage({
   placeholderClassName,
   placeholderLabel = "No image",
 }: RugImageProps) {
-  if (typeof src === "string" && src.trim().length > 0) {
+  const normalizedSrc = useMemo(() => {
+    if (typeof src !== "string") return null;
+    const trimmed = src.trim();
+    return trimmed.length > 0 ? trimmed : null;
+  }, [src]);
+  const [loadedSrc, setLoadedSrc] = useState<string | null>(null);
+  const [failedSrc, setFailedSrc] = useState<string | null>(null);
+  const loaded = normalizedSrc !== null && loadedSrc === normalizedSrc;
+  const failed = normalizedSrc !== null && failedSrc === normalizedSrc;
+
+  if (normalizedSrc && !failed) {
     return (
-      // External Supabase storage image URLs are rendered directly for MVP.
-      // eslint-disable-next-line @next/next/no-img-element
-      <img
-        src={src}
-        alt={alt}
-        className={cn("h-full w-full object-cover", className)}
-        loading="lazy"
-        decoding="async"
-      />
+      <div className={cn("relative h-full w-full overflow-hidden", className)}>
+        {!loaded ? (
+          <div className="absolute inset-0 animate-pulse bg-gradient-to-br from-muted via-muted/80 to-muted/60" />
+        ) : null}
+        {/* External Supabase storage image URLs are rendered directly for MVP. */}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={normalizedSrc}
+          alt={alt}
+          className={cn(
+            "h-full w-full object-cover transition-opacity duration-200",
+            loaded ? "opacity-100" : "opacity-0"
+          )}
+          loading="lazy"
+          decoding="async"
+          onLoad={() => setLoadedSrc(normalizedSrc)}
+          onError={() => {
+            setFailedSrc(normalizedSrc);
+          }}
+        />
+      </div>
     );
   }
 

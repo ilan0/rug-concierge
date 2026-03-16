@@ -244,6 +244,8 @@ export async function POST(req: NextRequest) {
   }
 
   const rugId = crypto.randomUUID();
+  const normalizedStockId =
+    parsed.value.stockId ?? `AUTO-${rugId.slice(0, 8).toUpperCase()}`;
 
   const insertedRug = await supabaseAdmin
     .from("rugs")
@@ -251,7 +253,7 @@ export async function POST(req: NextRequest) {
       id: rugId,
       tenant_id: tenantId,
       status: "available",
-      stock_id: parsed.value.stockId,
+      stock_id: normalizedStockId,
       intake_label: null,
       ai_description: null,
       ai_structured_fields: null,
@@ -332,7 +334,7 @@ export async function POST(req: NextRequest) {
       id: rugId,
       intake_label: null,
       ai_description: null,
-      stock_id: parsed.value.stockId,
+      stock_id: normalizedStockId,
       width_total_in: parsed.value.widthTotalIn,
       length_total_in: parsed.value.lengthTotalIn,
       status: "available",

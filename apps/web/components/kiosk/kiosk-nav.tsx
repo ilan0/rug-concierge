@@ -1,7 +1,6 @@
 "use client";
 
-import Link from "next/link";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { Lock, LockOpen } from "lucide-react";
 import StaffPinModal from "@/components/kiosk/staff-pin-modal";
@@ -17,10 +16,9 @@ interface KioskNavProps {
 
 const INACTIVITY_MS = 10 * 60 * 1000;
 
-const LINKS = [
-  { href: "/concierge", label: "Concierge", requiresStaff: false },
-  { href: "/inventory", label: "Inventory", requiresStaff: true },
-  { href: "/intake", label: "Intake", requiresStaff: true },
+const STAFF_LINKS = [
+  { href: "/inventory", label: "Inventory" },
+  { href: "/intake", label: "Intake" },
 ] as const;
 
 function isStaffPath(pathname: string): boolean {
@@ -37,12 +35,20 @@ export default function KioskNav({ initialUnlocked }: KioskNavProps) {
 
   const [unlocked, setUnlocked] = useState(initialUnlocked);
   const [showPinModal, setShowPinModal] = useState(false);
-  const [inactivityTimer, setInactivityTimer] = useState<number | null>(null);
-  const [pinCooldownSeconds, setPinCooldownSeconds] = useState(0);
+  const [pinCooldownSeconds, setPinCooldownSeconds] = useState(() => {
+    const lockedUntil = readStaffPinLockedUntilMs();
+    if (!lockedUntil) return 0;
+    return secondsUntilStaffPinUnlock(lockedUntil);
+  });
+  const inactivityTimerRef = useRef<number | null>(null);
 
   useEffect(() => {
-    setUnlocked(initialUnlocked);
-  }, [initialUnlocked]);
+    if (typeof window === "undefined") return;
+    // Ensure every route transition lands at the top of the new page.
+    window.requestAnimationFrame(() => {
+      window.scrollTo(0, 0);
+    });
+  }, [pathname]);
 
   const syncPinCooldown = useCallback(() => {
     const lockedUntil = readStaffPinLockedUntilMs();
@@ -54,7 +60,6 @@ export default function KioskNav({ initialUnlocked }: KioskNavProps) {
   }, []);
 
   useEffect(() => {
-    syncPinCooldown();
     const timer = window.setInterval(syncPinCooldown, 1000);
     window.addEventListener("focus", syncPinCooldown);
     return () => {
@@ -64,11 +69,11 @@ export default function KioskNav({ initialUnlocked }: KioskNavProps) {
   }, [syncPinCooldown]);
 
   const clearTimer = useCallback(() => {
-    if (inactivityTimer) {
-      window.clearTimeout(inactivityTimer);
-      setInactivityTimer(null);
+    if (inactivityTimerRef.current !== null) {
+      window.clearTimeout(inactivityTimerRef.current);
+      inactivityTimerRef.current = null;
     }
-  }, [inactivityTimer]);
+  }, []);
 
   const handleLock = useCallback(async () => {
     clearTimer();
@@ -92,16 +97,16 @@ export default function KioskNav({ initialUnlocked }: KioskNavProps) {
   const resetTimer = useCallback(() => {
     if (!unlocked) return;
 
-    if (inactivityTimer) {
-      window.clearTimeout(inactivityTimer);
+    if (inactivityTimerRef.current !== null) {
+      window.clearTimeout(inactivityTimerRef.current);
     }
 
     const timer = window.setTimeout(() => {
       void handleLock();
     }, INACTIVITY_MS);
 
-    setInactivityTimer(timer);
-  }, [handleLock, inactivityTimer, unlocked]);
+    inactivityTimerRef.current = timer;
+  }, [handleLock, unlocked]);
 
   useEffect(() => {
     if (!unlocked) {
@@ -141,43 +146,31 @@ export default function KioskNav({ initialUnlocked }: KioskNavProps) {
     router.refresh();
   }, [router]);
 
-  const visibleLinks = unlocked ? LINKS : [];
+  const visibleLinks = unlocked ? STAFF_LINKS : [];
 
   return (
     <>
       <nav
         aria-label="Primary kiosk navigation"
-        className="mx-auto mt-2 flex w-full max-w-6xl flex-wrap items-center gap-2 px-4 opacity-95 transition-all duration-200 sm:px-6 lg:px-8"
+        className="mx-auto flex w-full max-w-6xl flex-wrap items-center gap-2 px-4 py-2 opacity-95 transition-all duration-200 sm:px-6 lg:px-8"
       >
         {visibleLinks.map((link) => {
           const active = isLinkActive(pathname, link.href);
           const className = cn(
             "inline-flex min-h-9 items-center rounded-full border px-3 py-1.5 text-sm font-medium leading-5 transition-colors",
             active
-              ? "border-primary/50 bg-primary/10 text-foreground"
-              : "border-border/20 bg-background/35 text-muted-foreground hover:border-primary/30 hover:bg-primary/10 hover:text-foreground"
+              ? "border-primary bg-primary text-primary-foreground shadow-sm"
+              : "border-border/55 bg-background/75 text-foreground/75 hover:border-primary/45 hover:bg-primary/10 hover:text-foreground"
           );
 
-          if (link.requiresStaff) {
-            return (
-              <a
-                key={link.href}
-                href={link.href}
-                className={className}
-              >
-                {link.label}
-              </a>
-            );
-          }
-
           return (
-            <Link
+            <a
               key={link.href}
               href={link.href}
               className={className}
             >
               {link.label}
-            </Link>
+            </a>
           );
         })}
 

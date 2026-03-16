@@ -63,6 +63,7 @@ export function IntakeScreen({ tenantId }: IntakeScreenProps) {
     useState<IntakeFieldErrors>(EMPTY_FIELD_ERRORS);
   const [notice, setNotice] = useState<string | null>(null);
   const [lastSaved, setLastSaved] = useState<IntakeCreatedRug | null>(null);
+  const [prefersTouchCapture, setPrefersTouchCapture] = useState(false);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const imagePreviewUrl = useMemo(
@@ -77,6 +78,19 @@ export function IntakeScreen({ tenantId }: IntakeScreenProps) {
       }
     };
   }, [imagePreviewUrl]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const mediaQuery = window.matchMedia("(pointer: coarse)");
+    const sync = () => setPrefersTouchCapture(mediaQuery.matches);
+    sync();
+    if (typeof mediaQuery.addEventListener === "function") {
+      mediaQuery.addEventListener("change", sync);
+      return () => mediaQuery.removeEventListener("change", sync);
+    }
+    mediaQuery.addListener(sync);
+    return () => mediaQuery.removeListener(sync);
+  }, []);
 
   const formatFeetAndInches = (totalIn: number): string => {
     const feet = Math.floor(totalIn / 12);
@@ -250,9 +264,13 @@ export function IntakeScreen({ tenantId }: IntakeScreenProps) {
                     <span className="flex size-12 items-center justify-center rounded-full bg-primary/10 text-primary">
                       <Camera className="size-6" />
                     </span>
-                    <p className="text-lg font-semibold text-foreground">Tap to take a photo</p>
+                    <p className="text-lg font-semibold text-foreground">
+                      {prefersTouchCapture ? "Tap to take a photo" : "Click to upload a photo"}
+                    </p>
                     <p className="text-sm text-muted-foreground">
-                      Or choose one from the photo library
+                      {prefersTouchCapture
+                        ? "Or choose one from the photo library"
+                        : "Supported formats: JPEG, PNG, WebP, HEIC"}
                     </p>
                   </div>
                 </button>
@@ -288,56 +306,66 @@ export function IntakeScreen({ tenantId }: IntakeScreenProps) {
                   Width <span className="text-destructive">*</span>
                 </Label>
                 <div className="grid grid-cols-2 gap-2">
-                  <Input
-                    inputMode="numeric"
-                    pattern="[0-9]*"
-                    value={widthFt}
-                    onChange={(event) => {
-                      setWidthFt(event.target.value);
-                      setError(null);
-                      setFieldErrors((prev) => ({
-                        ...prev,
-                        widthFt: null,
-                        width: null,
-                      }));
-                    }}
-                    placeholder="ft"
-                    className={cn(
-                      "h-12 text-base",
-                      fieldErrors.widthFt || fieldErrors.width
-                        ? "border-destructive focus-visible:ring-destructive/60"
-                        : null
-                    )}
-                    disabled={isSaving}
-                    aria-invalid={
-                      fieldErrors.widthFt || fieldErrors.width ? true : undefined
-                    }
-                  />
-                  <Input
-                    inputMode="numeric"
-                    pattern="[0-9]*"
-                    value={widthIn}
-                    onChange={(event) => {
-                      setWidthIn(event.target.value);
-                      setError(null);
-                      setFieldErrors((prev) => ({
-                        ...prev,
-                        widthIn: null,
-                        width: null,
-                      }));
-                    }}
-                    placeholder="in"
-                    className={cn(
-                      "h-12 text-base",
-                      fieldErrors.widthIn || fieldErrors.width
-                        ? "border-destructive focus-visible:ring-destructive/60"
-                        : null
-                    )}
-                    disabled={isSaving}
-                    aria-invalid={
-                      fieldErrors.widthIn || fieldErrors.width ? true : undefined
-                    }
-                  />
+                  <div className="relative">
+                    <Input
+                      inputMode="numeric"
+                      pattern="[0-9]*"
+                      value={widthFt}
+                      onChange={(event) => {
+                        setWidthFt(event.target.value);
+                        setError(null);
+                        setFieldErrors((prev) => ({
+                          ...prev,
+                          widthFt: null,
+                          width: null,
+                        }));
+                      }}
+                      placeholder="0"
+                      className={cn(
+                        "h-12 pr-9 text-base",
+                        fieldErrors.widthFt || fieldErrors.width
+                          ? "border-destructive focus-visible:ring-destructive/60"
+                          : null
+                      )}
+                      disabled={isSaving}
+                      aria-invalid={
+                        fieldErrors.widthFt || fieldErrors.width ? true : undefined
+                      }
+                    />
+                    <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs font-medium text-muted-foreground">
+                      ft
+                    </span>
+                  </div>
+                  <div className="relative">
+                    <Input
+                      inputMode="numeric"
+                      pattern="[0-9]*"
+                      value={widthIn}
+                      onChange={(event) => {
+                        setWidthIn(event.target.value);
+                        setError(null);
+                        setFieldErrors((prev) => ({
+                          ...prev,
+                          widthIn: null,
+                          width: null,
+                        }));
+                      }}
+                      placeholder="0"
+                      className={cn(
+                        "h-12 pr-9 text-base",
+                        fieldErrors.widthIn || fieldErrors.width
+                          ? "border-destructive focus-visible:ring-destructive/60"
+                          : null
+                      )}
+                      disabled={isSaving}
+                      aria-invalid={
+                        fieldErrors.widthIn || fieldErrors.width ? true : undefined
+                      }
+                    />
+                    <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs font-medium text-muted-foreground">
+                      in
+                    </span>
+                  </div>
                 </div>
                 {fieldErrors.widthFt || fieldErrors.widthIn || fieldErrors.width ? (
                   <div className="space-y-0.5">
@@ -359,56 +387,66 @@ export function IntakeScreen({ tenantId }: IntakeScreenProps) {
                   Length <span className="text-destructive">*</span>
                 </Label>
                 <div className="grid grid-cols-2 gap-2">
-                  <Input
-                    inputMode="numeric"
-                    pattern="[0-9]*"
-                    value={lengthFt}
-                    onChange={(event) => {
-                      setLengthFt(event.target.value);
-                      setError(null);
-                      setFieldErrors((prev) => ({
-                        ...prev,
-                        lengthFt: null,
-                        length: null,
-                      }));
-                    }}
-                    placeholder="ft"
-                    className={cn(
-                      "h-12 text-base",
-                      fieldErrors.lengthFt || fieldErrors.length
-                        ? "border-destructive focus-visible:ring-destructive/60"
-                        : null
-                    )}
-                    disabled={isSaving}
-                    aria-invalid={
-                      fieldErrors.lengthFt || fieldErrors.length ? true : undefined
-                    }
-                  />
-                  <Input
-                    inputMode="numeric"
-                    pattern="[0-9]*"
-                    value={lengthIn}
-                    onChange={(event) => {
-                      setLengthIn(event.target.value);
-                      setError(null);
-                      setFieldErrors((prev) => ({
-                        ...prev,
-                        lengthIn: null,
-                        length: null,
-                      }));
-                    }}
-                    placeholder="in"
-                    className={cn(
-                      "h-12 text-base",
-                      fieldErrors.lengthIn || fieldErrors.length
-                        ? "border-destructive focus-visible:ring-destructive/60"
-                        : null
-                    )}
-                    disabled={isSaving}
-                    aria-invalid={
-                      fieldErrors.lengthIn || fieldErrors.length ? true : undefined
-                    }
-                  />
+                  <div className="relative">
+                    <Input
+                      inputMode="numeric"
+                      pattern="[0-9]*"
+                      value={lengthFt}
+                      onChange={(event) => {
+                        setLengthFt(event.target.value);
+                        setError(null);
+                        setFieldErrors((prev) => ({
+                          ...prev,
+                          lengthFt: null,
+                          length: null,
+                        }));
+                      }}
+                      placeholder="0"
+                      className={cn(
+                        "h-12 pr-9 text-base",
+                        fieldErrors.lengthFt || fieldErrors.length
+                          ? "border-destructive focus-visible:ring-destructive/60"
+                          : null
+                      )}
+                      disabled={isSaving}
+                      aria-invalid={
+                        fieldErrors.lengthFt || fieldErrors.length ? true : undefined
+                      }
+                    />
+                    <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs font-medium text-muted-foreground">
+                      ft
+                    </span>
+                  </div>
+                  <div className="relative">
+                    <Input
+                      inputMode="numeric"
+                      pattern="[0-9]*"
+                      value={lengthIn}
+                      onChange={(event) => {
+                        setLengthIn(event.target.value);
+                        setError(null);
+                        setFieldErrors((prev) => ({
+                          ...prev,
+                          lengthIn: null,
+                          length: null,
+                        }));
+                      }}
+                      placeholder="0"
+                      className={cn(
+                        "h-12 pr-9 text-base",
+                        fieldErrors.lengthIn || fieldErrors.length
+                          ? "border-destructive focus-visible:ring-destructive/60"
+                          : null
+                      )}
+                      disabled={isSaving}
+                      aria-invalid={
+                        fieldErrors.lengthIn || fieldErrors.length ? true : undefined
+                      }
+                    />
+                    <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs font-medium text-muted-foreground">
+                      in
+                    </span>
+                  </div>
                 </div>
                 {fieldErrors.lengthFt || fieldErrors.lengthIn || fieldErrors.length ? (
                   <div className="space-y-0.5">

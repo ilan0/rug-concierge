@@ -3,6 +3,7 @@ import type {
   RugAiStructuredFields,
   StaffOverrides,
 } from "@/lib/types/inventory";
+import { resolveStyleValue } from "@/lib/inventory/style-normalization";
 
 function hasOwn(obj: object, key: string): boolean {
   return Object.prototype.hasOwnProperty.call(obj, key);
@@ -28,6 +29,12 @@ export function resolveEffectiveFields(
 ): EffectiveRugFields {
   const normalizedOverrides = normalizeOverrides(staffOverrides);
   const base = aiFields ?? {};
+  const normalizedAiStyle = resolveStyleValue({
+    styleRaw: base.style ?? null,
+    pattern: base.pattern ?? [],
+    mood: base.mood ?? null,
+    aiDescription: "",
+  });
 
   return {
     label:
@@ -41,7 +48,7 @@ export function resolveEffectiveFields(
     style:
       (hasOwn(normalizedOverrides, "style")
         ? normalizedOverrides.style
-        : base.style) ?? null,
+        : normalizedAiStyle) ?? null,
     pattern:
       (hasOwn(normalizedOverrides, "pattern")
         ? normalizedOverrides.pattern

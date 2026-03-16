@@ -488,6 +488,24 @@ export function StaffRugDetailModal({
                     </section>
                   ) : null}
 
+                  <section className="space-y-2">
+                    <h3 className="text-xs font-semibold uppercase tracking-[0.08em] text-primary">
+                      Inventory
+                    </h3>
+                    <div className="rounded-lg border border-border/60 bg-background/55 p-3">
+                      <div className="grid grid-cols-[7rem_1fr] gap-2">
+                        <p className="text-sm font-medium text-foreground/85">Stock ID</p>
+                        <p className="text-sm text-foreground/90">
+                          {detail.stock_id ? (
+                            <span className="font-mono text-xs">{detail.stock_id}</span>
+                          ) : (
+                            "—"
+                          )}
+                        </p>
+                      </div>
+                    </div>
+                  </section>
+
                   <section className="space-y-3">
                     <h3 className="text-xs font-semibold uppercase tracking-[0.08em] text-primary">
                       AI Details
@@ -602,7 +620,7 @@ export function StaffRugDetailModal({
                                   type="button"
                                   className={
                                     active
-                                      ? "rounded-full border border-primary/35 bg-primary/10 px-2.5 py-1 text-xs text-foreground"
+                                      ? "rounded-full border border-primary/70 bg-primary/20 px-2.5 py-1 text-xs font-medium text-foreground ring-1 ring-primary/35"
                                       : "rounded-full border border-border/60 bg-background px-2.5 py-1 text-xs text-muted-foreground"
                                   }
                                   onClick={() => onToggleListValue("pattern", option)}
@@ -650,7 +668,7 @@ export function StaffRugDetailModal({
                                   type="button"
                                   className={
                                     active
-                                      ? "rounded-full border border-primary/35 bg-primary/10 px-2.5 py-1 text-xs text-foreground"
+                                      ? "rounded-full border border-primary/70 bg-primary/20 px-2.5 py-1 text-xs font-medium text-foreground ring-1 ring-primary/35"
                                       : "rounded-full border border-border/60 bg-background px-2.5 py-1 text-xs text-muted-foreground"
                                   }
                                   onClick={() => onToggleListValue("primary_colors", option)}

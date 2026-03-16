@@ -15,6 +15,7 @@ type RecommendationCardProps = {
   item: UiRecommendationItem;
   showTechnicalMeta?: boolean;
   maxVisibleReasons?: number;
+  onAskAboutRug?: (rugTitle: string) => void;
 };
 
 function isRugDetailData(value: unknown): value is RugDetailData {
@@ -40,6 +41,7 @@ export function RecommendationCard({
   item,
   showTechnicalMeta = false,
   maxVisibleReasons,
+  onAskAboutRug,
 }: RecommendationCardProps) {
   const tags = [item.origin, item.style, item.mood].filter(
     (value): value is string => typeof value === "string" && value.trim().length > 0
@@ -144,6 +146,17 @@ export function RecommendationCard({
     toast.error("Sharing is unavailable on this device.");
   };
 
+  const onAskAboutThisRug = () => {
+    if (!onAskAboutRug) return;
+    const rugTitle =
+      detail?.effective_fields.label ??
+      detail?.intake_label ??
+      item.title ??
+      "this rug";
+    setDetailOpen(false);
+    onAskAboutRug(rugTitle);
+  };
+
   return (
     <>
       <Card
@@ -220,6 +233,7 @@ export function RecommendationCard({
         error={detailError}
         detail={detail}
         onShare={() => void onShare()}
+        onAskAboutThisRug={onAskAboutRug ? onAskAboutThisRug : undefined}
       />
     </>
   );

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { RecommendationCard } from "@/components/concierge/recommendation-card";
@@ -20,6 +20,7 @@ type ChatThreadProps = {
   emptyStatePrompts: string[];
   bodyTextClassName: string;
   onChoosePrompt: (prompt: string) => void;
+  onAskAboutRug?: (rugTitle: string) => void;
   onSelectTurn: (turnId: string) => void;
   onJumpToLatestVisibilityChange?: (visible: boolean) => void;
   onJumpToLatestHandlerChange?: (handler: (() => void) | null) => void;
@@ -87,12 +88,14 @@ export function ChatThread(input: ChatThreadProps) {
     emptyStatePrompts,
     bodyTextClassName,
     onChoosePrompt,
+    onAskAboutRug,
     onSelectTurn,
     onJumpToLatestVisibilityChange,
     onJumpToLatestHandlerChange,
   } = input;
   const [isPinnedToBottom, setIsPinnedToBottom] = useState(true);
   const [showJumpToLatest, setShowJumpToLatest] = useState(false);
+  const hasCompletedInitialAutoScrollPass = useRef(false);
 
   const latestTurnSignature = useMemo(
     () => turns.map((turn) => turn.id).join("|"),
@@ -123,6 +126,10 @@ export function ChatThread(input: ChatThreadProps) {
 
   useEffect(() => {
     if (typeof window === "undefined" || !isPinnedToBottom) return;
+    if (!hasCompletedInitialAutoScrollPass.current) {
+      hasCompletedInitialAutoScrollPass.current = true;
+      return;
+    }
     if (!isLoading && turns.length === 0) return;
     window.scrollTo({ top: document.documentElement.scrollHeight, behavior: "auto" });
   }, [latestTurnSignature, isLoading, isPinnedToBottom, turns.length]);
@@ -162,7 +169,7 @@ export function ChatThread(input: ChatThreadProps) {
                   key={prompt}
                   type="button"
                   variant="outline"
-                  className="h-auto min-h-[52px] w-full justify-start whitespace-normal break-words rounded-full border-border/55 bg-background/70 px-6 py-3 text-left text-[18px] leading-[1.35] text-foreground hover:border-primary/50 hover:bg-primary/10 hover:text-foreground sm:w-auto sm:max-w-full sm:justify-center sm:text-center"
+                  className="h-auto min-h-[52px] w-full justify-start whitespace-normal break-words rounded-full border-primary/35 bg-primary/5 px-6 py-3 text-left text-[18px] leading-[1.35] text-foreground hover:border-primary/55 hover:bg-primary/12 hover:text-foreground sm:w-auto sm:max-w-full sm:justify-center sm:text-center"
                   onClick={() => onChoosePrompt(prompt)}
                 >
                   {prompt}
@@ -265,6 +272,7 @@ export function ChatThread(input: ChatThreadProps) {
                         key={item.rug_id}
                         showTechnicalMeta={isDeveloperView}
                         maxVisibleReasons={2}
+                        onAskAboutRug={onAskAboutRug}
                       />
                     ))}
                   </div>

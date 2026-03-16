@@ -37,7 +37,10 @@ export default async function RootLayout({
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
       </head>
       <body className={`${manrope.variable} ${fraunces.variable} min-h-screen bg-background font-sans text-foreground antialiased`}>
-        <header aria-label="Store header">
+        <header
+          aria-label="Store header"
+          className="sticky top-0 z-40 border-b border-border/30 bg-background/90 backdrop-blur supports-[backdrop-filter]:bg-background/75"
+        >
           <KioskNav initialUnlocked={unlocked} />
         </header>
         {children}

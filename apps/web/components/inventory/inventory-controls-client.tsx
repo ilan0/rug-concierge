@@ -463,24 +463,34 @@ export function InventoryControlsClient({
     <label className="space-y-1.5">
       <span className="text-xs font-medium text-foreground/80">{label}</span>
       <div className="grid grid-cols-2 gap-1.5">
-        <Input
-          value={value.ft}
-          onChange={(event) =>
-            setValue((prev) => ({ ...prev, ft: event.target.value }))
-          }
-          inputMode="numeric"
-          placeholder="ft"
-          className="h-8 text-sm"
-        />
-        <Input
-          value={value.inches}
-          onChange={(event) =>
-            setValue((prev) => ({ ...prev, inches: event.target.value }))
-          }
-          inputMode="numeric"
-          placeholder="in"
-          className="h-8 text-sm"
-        />
+        <div className="relative">
+          <Input
+            value={value.ft}
+            onChange={(event) =>
+              setValue((prev) => ({ ...prev, ft: event.target.value }))
+            }
+            inputMode="numeric"
+            placeholder="0"
+            className="h-8 pr-8 text-sm"
+          />
+          <span className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-[11px] font-medium text-muted-foreground">
+            ft
+          </span>
+        </div>
+        <div className="relative">
+          <Input
+            value={value.inches}
+            onChange={(event) =>
+              setValue((prev) => ({ ...prev, inches: event.target.value }))
+            }
+            inputMode="numeric"
+            placeholder="0"
+            className="h-8 pr-8 text-sm"
+          />
+          <span className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-[11px] font-medium text-muted-foreground">
+            in
+          </span>
+        </div>
       </div>
     </label>
   );
