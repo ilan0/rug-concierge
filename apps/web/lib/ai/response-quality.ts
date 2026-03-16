@@ -1,9 +1,11 @@
 const DEFAULT_PREVIEW_MAX_CHARS = 120;
-const DEFAULT_OPENAI_TIMEOUT_MS = 20_000;
 const DEFAULT_OPENAI_RETRY_ATTEMPTS = 3;
 const DEFAULT_OPENAI_RETRY_BASE_MS = 350;
 
-export type OpenAiSurface = "general_chat" | "recommendation";
+export type OpenAiSurface =
+  | "general_chat"
+  | "recommendation"
+  | "vision_enrichment";
 
 export type OpenAiAttempt = {
   response_status: number | null;
@@ -20,16 +22,36 @@ function parsePositiveInt(value: string | undefined): number | null {
   return parsed;
 }
 
-function getOpenAiTimeoutMs(): number {
-  return (
-    parsePositiveInt(process.env.OPENAI_TIMEOUT_MS) ??
-    DEFAULT_OPENAI_TIMEOUT_MS
-  );
+function getOpenAiTimeoutMs(surface: OpenAiSurface): number {
+  const globalTimeout = parsePositiveInt(process.env.OPENAI_TIMEOUT_MS);
+  const bySurface: Record<OpenAiSurface, number> = {
+    general_chat: 20_000,
+    recommendation: 5_500,
+    vision_enrichment: 15_000,
+  };
+  const envBySurface: Partial<Record<OpenAiSurface, string | undefined>> = {
+    general_chat: process.env.OPENAI_TIMEOUT_MS_GENERAL_CHAT,
+    recommendation: process.env.OPENAI_TIMEOUT_MS_RECOMMENDATION,
+    vision_enrichment: process.env.OPENAI_TIMEOUT_MS_VISION_ENRICHMENT,
+  };
+
+  return parsePositiveInt(envBySurface[surface]) ?? globalTimeout ?? bySurface[surface];
 }
 
-function getOpenAiRetryAttempts(): number {
-  const parsed = parsePositiveInt(process.env.OPENAI_RETRY_ATTEMPTS);
-  if (!parsed) return DEFAULT_OPENAI_RETRY_ATTEMPTS;
+function getOpenAiRetryAttempts(surface: OpenAiSurface): number {
+  const globalRetryAttempts = parsePositiveInt(process.env.OPENAI_RETRY_ATTEMPTS);
+  const bySurface: Record<OpenAiSurface, number> = {
+    general_chat: DEFAULT_OPENAI_RETRY_ATTEMPTS,
+    recommendation: 1,
+    vision_enrichment: 2,
+  };
+  const envBySurface: Partial<Record<OpenAiSurface, string | undefined>> = {
+    general_chat: process.env.OPENAI_RETRY_ATTEMPTS_GENERAL_CHAT,
+    recommendation: process.env.OPENAI_RETRY_ATTEMPTS_RECOMMENDATION,
+    vision_enrichment: process.env.OPENAI_RETRY_ATTEMPTS_VISION_ENRICHMENT,
+  };
+  const parsed = parsePositiveInt(envBySurface[surface]) ?? globalRetryAttempts;
+  if (!parsed) return bySurface[surface];
   return Math.min(parsed, 5);
 }
 
@@ -60,11 +82,13 @@ export function getMaxOutputTokens(surface: OpenAiSurface): number {
   const defaultBySurface: Record<OpenAiSurface, number> = {
     general_chat: 300,
     recommendation: 500,
+    vision_enrichment: 450,
   };
 
   const envBySurface: Record<OpenAiSurface, string | undefined> = {
     general_chat: process.env.OPENAI_MAX_OUTPUT_TOKENS_GENERAL_CHAT,
     recommendation: process.env.OPENAI_MAX_OUTPUT_TOKENS_RECOMMENDATION,
+    vision_enrichment: process.env.OPENAI_MAX_OUTPUT_TOKENS_VISION_ENRICHMENT,
   };
 
   return parsePositiveInt(envBySurface[surface]) ?? defaultBySurface[surface];
@@ -124,12 +148,14 @@ export async function postOpenAiResponses(input: {
   url: string;
   apiKey: string;
   requestPayload: unknown;
+  surface?: OpenAiSurface;
 }): Promise<OpenAiAttempt> {
-  const maxAttempts = getOpenAiRetryAttempts();
+  const surface = input.surface ?? "general_chat";
+  const maxAttempts = getOpenAiRetryAttempts(surface);
 
   for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), getOpenAiTimeoutMs());
+    const timeout = setTimeout(() => controller.abort(), getOpenAiTimeoutMs(surface));
     const response = await fetch(input.url, {
       method: "POST",
       headers: {

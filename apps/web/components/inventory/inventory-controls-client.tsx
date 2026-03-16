@@ -1,7 +1,7 @@
 "use client";
 
 import type { Dispatch, ReactNode, SetStateAction } from "react";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import {
   ChevronDown,
@@ -138,6 +138,7 @@ export function InventoryControlsClient({
   children,
 }: InventoryControlsClientProps) {
   const pathname = usePathname();
+  const suppressAutoQueryPatchRef = useRef(false);
 
   const [queryInput, setQueryInput] = useState(filters.q);
   const [sheetOpen, setSheetOpen] = useState(false);
@@ -239,6 +240,7 @@ export function InventoryControlsClient({
 
   useEffect(() => {
     const normalized = queryInput.trim();
+    if (suppressAutoQueryPatchRef.current) return;
     if (normalized === filters.q) return;
     const timer = window.setTimeout(() => {
       applyPatch({ q: normalized || null });
@@ -291,6 +293,7 @@ export function InventoryControlsClient({
   ]);
 
   const clearAll = useCallback(() => {
+    suppressAutoQueryPatchRef.current = true;
     setQueryInput("");
     setWidthMinInput({ ft: "", inches: "" });
     setWidthMaxInput({ ft: "", inches: "" });
@@ -307,27 +310,11 @@ export function InventoryControlsClient({
       lengthMin: null,
       lengthMax: null,
     };
-    if (typeof window !== "undefined") {
-      const resetParams = new URLSearchParams();
-      resetParams.set(INVENTORY_QUERY_PARAMS.page, "1");
-      resetParams.set(INVENTORY_QUERY_PARAMS.pageSize, String(pageSize));
-      const resetUrl = `${pathname}?${resetParams.toString()}`;
-      const currentUrl = `${window.location.pathname}${window.location.search}`;
-      if (currentUrl !== resetUrl) {
-        window.location.assign(resetUrl);
-        window.setTimeout(() => {
-          const afterNavUrl = `${window.location.pathname}${window.location.search}`;
-          if (afterNavUrl !== resetUrl) {
-            applyPatch(resetPatch);
-          }
-        }, 450);
-        return;
-      }
-      applyPatch(resetPatch);
-      return;
-    }
     applyPatch(resetPatch);
-  }, [applyPatch, pageSize, pathname]);
+    window.setTimeout(() => {
+      suppressAutoQueryPatchRef.current = false;
+    }, 650);
+  }, [applyPatch]);
 
   const onSizePresetToggle = useCallback(
     (preset: InventorySizePreset) => {

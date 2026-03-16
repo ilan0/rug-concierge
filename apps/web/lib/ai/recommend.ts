@@ -1046,6 +1046,7 @@ export async function rankAndExplain(
     url: OPENAI_RESPONSES_URL,
     apiKey,
     requestPayload,
+    surface: "recommendation",
   });
 
   if (trace) {
@@ -1089,6 +1090,7 @@ export async function rankAndExplain(
       url: OPENAI_RESPONSES_URL,
       apiKey,
       requestPayload: retryPayload,
+      surface: "recommendation",
     });
 
     if (trace) {

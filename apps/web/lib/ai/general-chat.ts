@@ -458,6 +458,7 @@ export async function generateGeneralChatResponse(input: {
     url: OPENAI_RESPONSES_URL,
     apiKey,
     requestPayload,
+    surface: "general_chat",
   });
 
   if (input.trace) {
@@ -496,6 +497,7 @@ export async function generateGeneralChatResponse(input: {
       url: OPENAI_RESPONSES_URL,
       apiKey,
       requestPayload: retryPayload,
+      surface: "general_chat",
     });
 
     if (input.trace) {

@@ -260,6 +260,7 @@ export async function requestVisionEnrichment(input: {
     url: OPENAI_RESPONSES_URL,
     apiKey,
     requestPayload,
+    surface: "vision_enrichment",
   });
   if (!response.ok) {
     return null;
