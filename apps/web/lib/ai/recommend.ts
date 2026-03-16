@@ -38,6 +38,8 @@ const MAX_FACTOR_CHARS = 100;
 const MAX_NOTES_CHARS = 220;
 const RETRY_SYSTEM_INSTRUCTION =
   "Retry and return one complete JSON object that matches the schema exactly. Keep answers concise and finish all sentences.";
+const ENABLE_PARSE_RETRY =
+  (process.env.OPENAI_RECOMMENDATION_PARSE_RETRY ?? "").trim() === "1";
 
 type RecommendationPromptContext = {
   role?: "retail_customer" | "store_staff";
@@ -1066,11 +1068,13 @@ export async function rankAndExplain(
   }
 
   let parsed = parseRecommendationResponse(firstAttempt.response_payload);
-  const shouldRetry = shouldRetryAfterAttempt({
-    attempt: firstAttempt,
-    parseSucceeded: Boolean(parsed),
-    alreadyRetried: false,
-  });
+  const shouldRetry =
+    ENABLE_PARSE_RETRY &&
+    shouldRetryAfterAttempt({
+      attempt: firstAttempt,
+      parseSucceeded: Boolean(parsed),
+      alreadyRetried: false,
+    });
 
   if (shouldRetry) {
     if (trace) {

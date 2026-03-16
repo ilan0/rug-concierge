@@ -297,14 +297,7 @@ export function InventoryControlsClient({
     setLengthMinInput({ ft: "", inches: "" });
     setLengthMaxInput({ ft: "", inches: "" });
     setShowAllSizes(false);
-    if (typeof window !== "undefined") {
-      const resetParams = new URLSearchParams();
-      resetParams.set(INVENTORY_QUERY_PARAMS.page, "1");
-      resetParams.set(INVENTORY_QUERY_PARAMS.pageSize, String(pageSize));
-      window.location.replace(`${pathname}?${resetParams.toString()}`);
-      return;
-    }
-    applyPatch({
+    const resetPatch: FilterPatch = {
       q: null,
       status: "available",
       sort: "newest",
@@ -313,7 +306,27 @@ export function InventoryControlsClient({
       widthMax: null,
       lengthMin: null,
       lengthMax: null,
-    });
+    };
+    if (typeof window !== "undefined") {
+      const resetParams = new URLSearchParams();
+      resetParams.set(INVENTORY_QUERY_PARAMS.page, "1");
+      resetParams.set(INVENTORY_QUERY_PARAMS.pageSize, String(pageSize));
+      const resetUrl = `${pathname}?${resetParams.toString()}`;
+      const currentUrl = `${window.location.pathname}${window.location.search}`;
+      if (currentUrl !== resetUrl) {
+        window.location.assign(resetUrl);
+        window.setTimeout(() => {
+          const afterNavUrl = `${window.location.pathname}${window.location.search}`;
+          if (afterNavUrl !== resetUrl) {
+            applyPatch(resetPatch);
+          }
+        }, 450);
+        return;
+      }
+      applyPatch(resetPatch);
+      return;
+    }
+    applyPatch(resetPatch);
   }, [applyPatch, pageSize, pathname]);
 
   const onSizePresetToggle = useCallback(

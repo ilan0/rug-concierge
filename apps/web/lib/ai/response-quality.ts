@@ -59,7 +59,7 @@ async function sleep(ms: number): Promise<void> {
 export function getMaxOutputTokens(surface: OpenAiSurface): number {
   const defaultBySurface: Record<OpenAiSurface, number> = {
     general_chat: 300,
-    recommendation: 560,
+    recommendation: 500,
   };
 
   const envBySurface: Record<OpenAiSurface, string | undefined> = {
