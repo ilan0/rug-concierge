@@ -5,7 +5,6 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -85,9 +84,7 @@ const COLOR_OPTIONS = [
 
 function toStatusLabel(status: string | null): string {
   if (status === "available") return "Available";
-  if (status === "on_hold") return "On Hold";
-  if (status === "sold") return "Sold";
-  return "Unknown";
+  return "Not Available";
 }
 
 function normalizeList(values: string[]): string[] {
@@ -98,6 +95,28 @@ function normalizeList(values: string[]): string[] {
     unique.add(trimmed);
   }
   return [...unique];
+}
+
+function normalizeDraftForCompare(draft: EditDraft) {
+  return {
+    label: draft.label.trim(),
+    origin: draft.origin.trim(),
+    style: draft.style.trim(),
+    pattern: [...normalizeList(draft.pattern)].sort((a, b) => a.localeCompare(b)),
+    primary_colors: [...normalizeList(draft.primary_colors)].sort((a, b) =>
+      a.localeCompare(b)
+    ),
+    age_category: draft.age_category.trim(),
+    mood: draft.mood.trim(),
+    stock_id: draft.stock_id.trim(),
+    status: draft.status,
+  };
+}
+
+function draftsEqual(left: EditDraft, right: EditDraft): boolean {
+  const a = normalizeDraftForCompare(left);
+  const b = normalizeDraftForCompare(right);
+  return JSON.stringify(a) === JSON.stringify(b);
 }
 
 function hasOverride(detail: StaffInventoryRugDetail, key: keyof StaffOverrides) {
@@ -118,8 +137,8 @@ function detailToDraft(detail: StaffInventoryRugDetail): EditDraft {
     style: detail.effective_fields.style ?? "",
     pattern: normalizeList(detail.effective_fields.pattern ?? []),
     primary_colors: normalizeList(detail.effective_fields.primary_colors ?? []),
-    age_category: detail.effective_fields.age_category ?? "",
-    mood: detail.effective_fields.mood ?? "",
+    age_category: detail.effective_fields.age_category ?? "new",
+    mood: detail.effective_fields.mood ?? "traditional",
     stock_id: detail.stock_id ?? "",
     status:
       detail.status === "on_hold" || detail.status === "sold"
@@ -243,6 +262,9 @@ export function StaffRugDetailModal({
   );
   const title = detail?.effective_fields.label ?? sizeLabel ?? "Untitled";
   const statusLabel = toStatusLabel(detail?.status ?? null);
+  const baselineDraft = useMemo(() => (detail ? detailToDraft(detail) : null), [detail]);
+  const hasUnsavedChanges =
+    editMode && draft && baselineDraft ? !draftsEqual(draft, baselineDraft) : false;
 
   const fieldRows = useMemo(() => {
     if (!detail) return [];
@@ -339,8 +361,8 @@ export function StaffRugDetailModal({
     }
   };
 
-  const onSaveEdits = async () => {
-    if (!detail || !draft || saving) return;
+  const onSaveEdits = async (): Promise<boolean> => {
+    if (!detail || !draft || saving) return false;
 
     setSaving(true);
     setError(null);
@@ -364,12 +386,14 @@ export function StaffRugDetailModal({
       setDetail(updated);
       setDraft(detailToDraft(updated));
       setEditMode(false);
+      return true;
     } catch (nextError) {
       setError(
         nextError instanceof Error
           ? nextError.message
           : "Unable to save changes right now."
       );
+      return false;
     } finally {
       setSaving(false);
     }
@@ -422,11 +446,46 @@ export function StaffRugDetailModal({
     }
   };
 
+  const onAvailabilityToggle = async (nextAvailable: boolean) => {
+    if (!detail || saving || reAnalyzing) return;
+    const currentAvailable = detail.status === "available";
+    if (currentAvailable === nextAvailable) return;
+    await onQuickStatusChange(nextAvailable ? "available" : "on_hold");
+  };
+
+  const onRequestClose = async () => {
+    if (saving) return;
+    if (!hasUnsavedChanges) {
+      setEditMode(false);
+      onClose();
+      return;
+    }
+
+    const shouldSave = window.confirm(
+      "You have unsaved changes.\n\nPress OK to Save and close.\nPress Cancel for discard options."
+    );
+    if (shouldSave) {
+      const saved = await onSaveEdits();
+      if (saved) onClose();
+      return;
+    }
+
+    const shouldDiscard = window.confirm("Discard unsaved changes and close?");
+    if (!shouldDiscard) return;
+    if (detail) {
+      setDraft(detailToDraft(detail));
+    }
+    setEditMode(false);
+    onClose();
+  };
+
   return (
     <Dialog
       open={open}
       onOpenChange={(nextOpen) => {
-        if (!nextOpen) onClose();
+        if (!nextOpen) {
+          void onRequestClose();
+        }
       }}
     >
       <DialogContent className="max-h-[90dvh] max-w-2xl overflow-y-auto p-0">
@@ -435,23 +494,41 @@ export function StaffRugDetailModal({
             <>
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <div className="flex items-center gap-2">
-                  <span className="inline-flex items-center rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-primary">
+                  <span
+                    className={
+                      detail.status === "available"
+                        ? "inline-flex items-center rounded-full border border-emerald-400/35 bg-emerald-50 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-emerald-700"
+                        : "inline-flex items-center rounded-full border border-red-400/35 bg-red-50 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-red-700"
+                    }
+                  >
                     {statusLabel}
                   </span>
-                  <select
-                    className="h-8 rounded-full border border-border/60 bg-background px-3 text-xs"
-                    value={draft?.status ?? "available"}
-                    onChange={(event) =>
-                      void onQuickStatusChange(
-                        event.target.value as "available" | "on_hold" | "sold"
-                      )
-                    }
-                    disabled={saving || reAnalyzing}
-                  >
-                    <option value="available">Available</option>
-                    <option value="on_hold">On Hold</option>
-                    <option value="sold">Sold</option>
-                  </select>
+                  <div className="inline-flex rounded-full border border-border/60 bg-background p-0.5">
+                    <button
+                      type="button"
+                      className={
+                        detail.status === "available"
+                          ? "rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-800"
+                          : "rounded-full px-3 py-1 text-xs font-medium text-muted-foreground hover:bg-accent"
+                      }
+                      onClick={() => void onAvailabilityToggle(true)}
+                      disabled={saving || reAnalyzing}
+                    >
+                      Available
+                    </button>
+                    <button
+                      type="button"
+                      className={
+                        detail.status !== "available"
+                          ? "rounded-full bg-red-100 px-3 py-1 text-xs font-semibold text-red-800"
+                          : "rounded-full px-3 py-1 text-xs font-medium text-muted-foreground hover:bg-accent"
+                      }
+                      onClick={() => void onAvailabilityToggle(false)}
+                      disabled={saving || reAnalyzing}
+                    >
+                      Not Available
+                    </button>
+                  </div>
                 </div>
 
                 <div className="flex items-center gap-2">
@@ -464,15 +541,17 @@ export function StaffRugDetailModal({
                   >
                     {reAnalyzing ? "Re-analyzing..." : "Re-analyze"}
                   </Button>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setEditMode((prev) => !prev)}
-                    disabled={saving || reAnalyzing}
-                  >
-                    {editMode ? "Cancel" : "Edit"}
-                  </Button>
+                  {!editMode ? (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setEditMode(true)}
+                      disabled={saving || reAnalyzing}
+                    >
+                      Edit
+                    </Button>
+                  ) : null}
                 </div>
               </div>
 
@@ -768,7 +847,6 @@ export function StaffRugDetailModal({
                                 )
                               }
                             >
-                              <option value="">Let AI decide</option>
                               {AGE_OPTIONS.map((option) => (
                                 <option key={option} value={option}>
                                   {option}
@@ -800,7 +878,6 @@ export function StaffRugDetailModal({
                                 )
                               }
                             >
-                              <option value="">Let AI decide</option>
                               {MOOD_OPTIONS.map((option) => (
                                 <option key={option} value={option}>
                                   {option}
@@ -873,11 +950,6 @@ export function StaffRugDetailModal({
             <p className="text-sm text-muted-foreground">No rug selected.</p>
           )}
 
-          <DialogFooter>
-            <Button type="button" variant="outline" onClick={onClose}>
-              Close
-            </Button>
-          </DialogFooter>
         </div>
       </DialogContent>
     </Dialog>
