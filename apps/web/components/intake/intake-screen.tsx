@@ -63,7 +63,6 @@ export function IntakeScreen({ tenantId }: IntakeScreenProps) {
     useState<IntakeFieldErrors>(EMPTY_FIELD_ERRORS);
   const [notice, setNotice] = useState<string | null>(null);
   const [lastSaved, setLastSaved] = useState<IntakeCreatedRug | null>(null);
-  const [prefersTouchCapture, setPrefersTouchCapture] = useState(false);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const imagePreviewUrl = useMemo(
@@ -78,19 +77,6 @@ export function IntakeScreen({ tenantId }: IntakeScreenProps) {
       }
     };
   }, [imagePreviewUrl]);
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    const mediaQuery = window.matchMedia("(pointer: coarse)");
-    const sync = () => setPrefersTouchCapture(mediaQuery.matches);
-    sync();
-    if (typeof mediaQuery.addEventListener === "function") {
-      mediaQuery.addEventListener("change", sync);
-      return () => mediaQuery.removeEventListener("change", sync);
-    }
-    mediaQuery.addListener(sync);
-    return () => mediaQuery.removeListener(sync);
-  }, []);
 
   const formatFeetAndInches = (totalIn: number): string => {
     const feet = Math.floor(totalIn / 12);
@@ -265,12 +251,10 @@ export function IntakeScreen({ tenantId }: IntakeScreenProps) {
                       <Camera className="size-6" />
                     </span>
                     <p className="text-lg font-semibold text-foreground">
-                      {prefersTouchCapture ? "Tap to take a photo" : "Click to upload a photo"}
+                      Tap or click to upload a photo
                     </p>
                     <p className="text-sm text-muted-foreground">
-                      {prefersTouchCapture
-                        ? "Or choose one from the photo library"
-                        : "Supported formats: JPEG, PNG, WebP, HEIC"}
+                      Supported formats: JPEG, PNG, WebP, HEIC
                     </p>
                   </div>
                 </button>
