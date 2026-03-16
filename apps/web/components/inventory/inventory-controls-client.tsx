@@ -330,13 +330,20 @@ export function InventoryControlsClient({
     setLengthMinInput({ ft: "", inches: "" });
     setLengthMaxInput({ ft: "", inches: "" });
     setShowAllSizes(false);
-    if (typeof window !== "undefined") {
-      const resetParams = new URLSearchParams();
-      resetParams.set(INVENTORY_QUERY_PARAMS.page, "1");
-      resetParams.set(INVENTORY_QUERY_PARAMS.pageSize, String(pageSize));
-      window.location.replace(`${pathname}?${resetParams.toString()}`);
-    }
-  }, [pageSize, pathname]);
+    applyPatch({
+      q: null,
+      status: "available",
+      sort: "newest",
+      sizePresets: [],
+      widthMin: null,
+      widthMax: null,
+      lengthMin: null,
+      lengthMax: null,
+    });
+    window.setTimeout(() => {
+      suppressAutoQueryPatchRef.current = false;
+    }, 650);
+  }, [applyPatch]);
 
   const onSizePresetToggle = useCallback(
     (preset: InventorySizePreset) => {
