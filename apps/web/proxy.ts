@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { isStaffUnlockedFromRequest } from "@/lib/auth/staff";
 
 const STAFF_ROUTES = ["/inventory", "/intake"] as const;
+const CONCIERGE_ROUTE = "/concierge";
 
 function isStaffRoute(pathname: string): boolean {
   return STAFF_ROUTES.some(
@@ -9,12 +10,23 @@ function isStaffRoute(pathname: string): boolean {
   );
 }
 
+function isConciergeRoute(pathname: string): boolean {
+  return pathname === CONCIERGE_ROUTE || pathname.startsWith(`${CONCIERGE_ROUTE}/`);
+}
+
 export function proxy(req: NextRequest) {
   const { pathname } = req.nextUrl;
+  const staffUnlocked = isStaffUnlockedFromRequest(req);
 
-  if (isStaffRoute(pathname) && !isStaffUnlockedFromRequest(req)) {
+  if (isStaffRoute(pathname) && !staffUnlocked) {
     const url = req.nextUrl.clone();
-    url.pathname = "/concierge";
+    url.pathname = CONCIERGE_ROUTE;
+    return NextResponse.redirect(url);
+  }
+
+  if (isConciergeRoute(pathname) && staffUnlocked) {
+    const url = req.nextUrl.clone();
+    url.pathname = "/inventory";
     return NextResponse.redirect(url);
   }
 
@@ -22,5 +34,5 @@ export function proxy(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/inventory/:path*", "/intake/:path*"],
+  matcher: ["/concierge/:path*", "/inventory/:path*", "/intake/:path*"],
 };

@@ -164,21 +164,21 @@ export function InventoryTableClient({ rows }: InventoryTableClientProps) {
           </div>
 
           <div
-            className="hidden overflow-x-auto rounded-xl border border-border/70 md:block"
+            className="hidden overflow-hidden rounded-xl border border-border/70 md:block"
             tabIndex={0}
             role="region"
             aria-label="Inventory table"
           >
-            <table className="w-full min-w-[1080px] border-collapse text-[0.95rem]">
+            <table className="w-full table-fixed border-collapse text-sm">
               <thead className="bg-secondary/50 text-left">
                 <tr>
-                  <th className="p-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Image</th>
-                  <th className="p-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Label</th>
-                  <th className="p-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Stock ID</th>
-                  <th className="p-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Status</th>
-                  <th className="p-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Size</th>
-                  <th className="p-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Added</th>
-                  <th className="p-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Action</th>
+                  <th className="w-[92px] p-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Image</th>
+                  <th className="w-[34%] p-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Label</th>
+                  <th className="w-[15%] p-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Stock ID</th>
+                  <th className="w-[12%] p-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Status</th>
+                  <th className="w-[15%] p-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Size</th>
+                  <th className="hidden w-[12%] p-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground xl:table-cell">Added</th>
+                  <th className="w-[88px] p-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Action</th>
                 </tr>
               </thead>
               <tbody>
@@ -196,7 +196,13 @@ export function InventoryTableClient({ rows }: InventoryTableClientProps) {
                         </div>
                       </td>
                       <td className="p-3 align-top">
-                        <p className={ready ? "font-medium" : "text-muted-foreground"}>
+                        <p
+                          className={
+                            ready
+                              ? "break-words font-medium leading-snug"
+                              : "break-words leading-snug text-muted-foreground"
+                          }
+                        >
                           {displayLabel}
                         </p>
                         {!ready ? (
@@ -219,7 +225,7 @@ export function InventoryTableClient({ rows }: InventoryTableClientProps) {
                       </td>
                       <td className="p-3 align-top">
                         {row.stock_id ? (
-                          <span className="text-xs font-mono">{row.stock_id}</span>
+                          <span className="block truncate text-xs font-mono">{row.stock_id}</span>
                         ) : (
                           "-"
                         )}
@@ -230,7 +236,9 @@ export function InventoryTableClient({ rows }: InventoryTableClientProps) {
                       <td className="p-3 align-top">
                         {formatRugSize(row.width_total_in, row.length_total_in) || "-"}
                       </td>
-                      <td className="p-3 align-top">{formatDate(row.created_at)}</td>
+                      <td className="hidden p-3 align-top xl:table-cell">
+                        {formatDate(row.created_at)}
+                      </td>
                       <td className="p-3 align-top">
                         <button
                           type="button"
@@ -240,7 +248,7 @@ export function InventoryTableClient({ rows }: InventoryTableClientProps) {
                             onOpenRow(row);
                           }}
                         >
-                          View details
+                          View
                         </button>
                       </td>
                     </tr>

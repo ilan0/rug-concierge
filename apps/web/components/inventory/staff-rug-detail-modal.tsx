@@ -172,6 +172,8 @@ export function StaffRugDetailModal({
   const [editMode, setEditMode] = useState(false);
   const [patternInput, setPatternInput] = useState("");
   const [colorInput, setColorInput] = useState("");
+  const [showPatternAddInput, setShowPatternAddInput] = useState(false);
+  const [showColorAddInput, setShowColorAddInput] = useState(false);
   const labelInputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
@@ -181,6 +183,10 @@ export function StaffRugDetailModal({
     setDetail(seeded);
     setDraft(detailToDraft(seeded));
     setError(null);
+    setPatternInput("");
+    setColorInput("");
+    setShowPatternAddInput(false);
+    setShowColorAddInput(false);
 
     let cancelled = false;
     const load = async () => {
@@ -214,6 +220,14 @@ export function StaffRugDetailModal({
       setEditMode(true);
     }
   }, [open, initialEditField]);
+
+  useEffect(() => {
+    if (editMode) return;
+    setPatternInput("");
+    setColorInput("");
+    setShowPatternAddInput(false);
+    setShowColorAddInput(false);
+  }, [editMode]);
 
   useEffect(() => {
     if (!editMode) return;
@@ -295,8 +309,10 @@ export function StaffRugDetailModal({
 
     if (field === "pattern") {
       setPatternInput("");
+      setShowPatternAddInput(false);
     } else {
       setColorInput("");
+      setShowColorAddInput(false);
     }
   };
 
@@ -629,21 +645,39 @@ export function StaffRugDetailModal({
                                 </button>
                               );
                             })}
-                          </div>
-                          <div className="flex gap-2">
-                            <Input
-                              value={patternInput}
-                              onChange={(event) => setPatternInput(event.target.value)}
-                              placeholder="Add custom pattern"
-                            />
-                            <Button
+                            <button
                               type="button"
-                              variant="outline"
-                              onClick={() => onAddCustomListValue("pattern")}
+                              className="rounded-full border border-dashed border-border/70 bg-background px-2.5 py-1 text-xs font-medium text-muted-foreground hover:border-primary/45 hover:bg-primary/10 hover:text-foreground"
+                              onClick={() =>
+                                setShowPatternAddInput((prev) => !prev)
+                              }
                             >
-                              Add
-                            </Button>
+                              {showPatternAddInput ? "Cancel" : "+ Add"}
+                            </button>
                           </div>
+                          {showPatternAddInput ? (
+                            <div className="flex flex-wrap gap-2">
+                              <Input
+                                value={patternInput}
+                                onChange={(event) => setPatternInput(event.target.value)}
+                                onKeyDown={(event) => {
+                                  if (event.key !== "Enter") return;
+                                  event.preventDefault();
+                                  onAddCustomListValue("pattern");
+                                }}
+                                placeholder="Custom pattern"
+                                className="h-9 min-w-[14rem] flex-1"
+                              />
+                              <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                onClick={() => onAddCustomListValue("pattern")}
+                              >
+                                Add
+                              </Button>
+                            </div>
+                          ) : null}
                         </div>
 
                         <div className="space-y-1">
@@ -677,21 +711,37 @@ export function StaffRugDetailModal({
                                 </button>
                               );
                             })}
-                          </div>
-                          <div className="flex gap-2">
-                            <Input
-                              value={colorInput}
-                              onChange={(event) => setColorInput(event.target.value)}
-                              placeholder="Add custom color"
-                            />
-                            <Button
+                            <button
                               type="button"
-                              variant="outline"
-                              onClick={() => onAddCustomListValue("primary_colors")}
+                              className="rounded-full border border-dashed border-border/70 bg-background px-2.5 py-1 text-xs font-medium text-muted-foreground hover:border-primary/45 hover:bg-primary/10 hover:text-foreground"
+                              onClick={() => setShowColorAddInput((prev) => !prev)}
                             >
-                              Add
-                            </Button>
+                              {showColorAddInput ? "Cancel" : "+ Add"}
+                            </button>
                           </div>
+                          {showColorAddInput ? (
+                            <div className="flex flex-wrap gap-2">
+                              <Input
+                                value={colorInput}
+                                onChange={(event) => setColorInput(event.target.value)}
+                                onKeyDown={(event) => {
+                                  if (event.key !== "Enter") return;
+                                  event.preventDefault();
+                                  onAddCustomListValue("primary_colors");
+                                }}
+                                placeholder="Custom color"
+                                className="h-9 min-w-[14rem] flex-1"
+                              />
+                              <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                onClick={() => onAddCustomListValue("primary_colors")}
+                              >
+                                Add
+                              </Button>
+                            </div>
+                          ) : null}
                         </div>
 
                         <div className="grid gap-3 sm:grid-cols-2">

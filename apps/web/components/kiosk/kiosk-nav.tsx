@@ -143,7 +143,11 @@ export default function KioskNav({ initialUnlocked }: KioskNavProps) {
   const handleUnlockSuccess = useCallback(() => {
     setUnlocked(true);
     setShowPinModal(false);
-    router.refresh();
+    if (typeof window !== "undefined") {
+      window.location.assign("/inventory");
+      return;
+    }
+    router.replace("/inventory");
   }, [router]);
 
   const visibleLinks = unlocked ? STAFF_LINKS : [];

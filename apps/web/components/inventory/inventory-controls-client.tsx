@@ -657,7 +657,7 @@ export function InventoryControlsClient({
         ) : null}
       </section>
 
-      <div className="grid gap-3 lg:grid-cols-[18rem_minmax(0,1fr)]">
+      <div className="grid gap-3 lg:grid-cols-[15.5rem_minmax(0,1fr)] xl:grid-cols-[16rem_minmax(0,1fr)]">
         <aside className="hidden lg:block">
           <div className="sticky top-24">{renderFilterSections(false)}</div>
         </aside>
