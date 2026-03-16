@@ -628,6 +628,22 @@ function fallbackRecommendations(
   };
 }
 
+function shouldUseDeterministicPath(input: {
+  inventory: InventoryRug[];
+  constraints: HardConstraints;
+  userMessage: string;
+}): boolean {
+  if (!hasOptionalHardConstraints(input.constraints)) return false;
+  if (input.inventory.length > 24) return false;
+
+  const normalizedMessage = input.userMessage.toLowerCase();
+  if (/\b(explain|compare|why|tell me more)\b/.test(normalizedMessage)) {
+    return false;
+  }
+
+  return true;
+}
+
 // Flow overview
 // Runtime guard for structured output contract.
 function isRecommendationResponse(value: unknown): value is RecommendationResponse {
@@ -952,6 +968,29 @@ export async function rankAndExplain(
         : [],
       recommendations: [],
       notes: null,
+    });
+  }
+
+  if (shouldUseDeterministicPath({ inventory, constraints, userMessage })) {
+    if (trace) {
+      trace.called = false;
+      trace.model = OPENAI_MODEL;
+      trace.prompt_layers = [];
+      trace.request_payload = null;
+      trace.response_status = null;
+      trace.response_payload = null;
+      trace.parsed_response = null;
+      trace.fallback_reason = "Deterministic fast path";
+      trace.error = null;
+      trace.incomplete_detected = false;
+      trace.retry_attempted = false;
+      trace.retry_succeeded = false;
+      trace.text_postprocess_applied = false;
+    }
+
+    return applyTonePolish({
+      ...fallbackRecommendations(inventory, constraints, userMessage),
+      notes: "Deterministic fast-path response.",
     });
   }
 
