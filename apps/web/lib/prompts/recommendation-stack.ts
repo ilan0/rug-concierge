@@ -70,8 +70,7 @@ const RECOMMENDATION_LAYER_DEFINITIONS: RecommendationLayerDefinition[] = [
           structured_state: input.chatContext?.structured_state ?? null,
           conversation_memory: input.chatContext?.conversation_memory ?? null,
         },
-        null,
-        2
+        null
       )}`,
   },
   {
@@ -80,9 +79,7 @@ const RECOMMENDATION_LAYER_DEFINITIONS: RecommendationLayerDefinition[] = [
     include: (input) => input.hasRecentTurnsContext,
     text: (input) =>
       `RECENT TURNS CONTEXT:\n${JSON.stringify(
-        input.chatContext?.recent_turns ?? [],
-        null,
-        2
+        input.chatContext?.recent_turns ?? []
       )}`,
   },
   {
@@ -91,9 +88,7 @@ const RECOMMENDATION_LAYER_DEFINITIONS: RecommendationLayerDefinition[] = [
     include: () => true,
     text: (input) =>
       `AVAILABLE INVENTORY (authoritative). Each entry includes ID, Label, Size, and Description:\n${JSON.stringify(
-        input.inventoryContext,
-        null,
-        2
+        input.inventoryContext
       )}`,
   },
   {

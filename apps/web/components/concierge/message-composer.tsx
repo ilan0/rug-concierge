@@ -20,6 +20,7 @@ type MessageComposerProps = {
   onRetry: () => void;
   showJumpToLatest?: boolean;
   onJumpToLatest?: () => void;
+  floating?: boolean;
 };
 
 export function MessageComposer(input: MessageComposerProps) {
@@ -37,6 +38,7 @@ export function MessageComposer(input: MessageComposerProps) {
     onRetry,
     showJumpToLatest = false,
     onJumpToLatest,
+    floating = true,
   } = input;
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -73,13 +75,26 @@ export function MessageComposer(input: MessageComposerProps) {
 
   return (
     <section
-      className="fixed bottom-0 z-40 -translate-x-1/2 [text-size-adjust:100%] [-webkit-text-size-adjust:100%]"
-      style={{
-        bottom: `${Math.max(0, bottomOffsetPx + restingOffsetPx)}px`,
-        left: "calc(50% + (env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px)) / 2)",
-        width:
-          "min(820px, calc(100vw - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px) - 1.5rem))",
-      }}
+      data-concierge-composer="true"
+      data-floating-composer={floating ? "true" : "false"}
+      className={
+        floating
+          ? "fixed bottom-0 z-40 -translate-x-1/2 [text-size-adjust:100%] [-webkit-text-size-adjust:100%]"
+          : "relative z-30 mx-auto mt-4 [text-size-adjust:100%] [-webkit-text-size-adjust:100%]"
+      }
+      style={
+        floating
+          ? {
+              bottom: `${Math.max(0, bottomOffsetPx + restingOffsetPx)}px`,
+              left: "calc(50% + (env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px)) / 2)",
+              width:
+                "min(820px, calc(100vw - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px) - 1.5rem))",
+            }
+          : {
+              width:
+                "min(820px, calc(100vw - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px) - 1.5rem))",
+            }
+      }
     >
       <div
         ref={containerRef}

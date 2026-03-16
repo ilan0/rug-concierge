@@ -13,8 +13,8 @@ import type { HardConstraints, InventoryRug } from "@/lib/types/recommendation";
 import type { RecommendationResponse } from "@/lib/ai/recommend";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
-const SQL_QUERY_LIMIT = 300;
-const AI_CANDIDATE_LIMIT = 60;
+const SQL_QUERY_LIMIT = 220;
+const AI_CANDIDATE_LIMIT = 40;
 
 type RunRecommendationPipelineInput = {
   requestId?: string;

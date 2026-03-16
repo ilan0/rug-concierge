@@ -22,8 +22,8 @@ type ConciergeScreenProps = {
 
 const TITLE_SIZE = "text-[30px] leading-[1.08] md:text-[34px]";
 const TITLE_SIZE_WITH_RECOMMENDATIONS = "text-[27px] leading-[1.07] md:text-[31px]";
-const HERO_TITLE_SIZE = "text-[52px] leading-[1.05] md:text-[60px]";
-const SUBTITLE_SIZE = "text-[20px] leading-[1.5]";
+const HERO_TITLE_SIZE = "text-[44px] leading-[1.05] sm:text-[52px] md:text-[60px]";
+const SUBTITLE_SIZE = "text-[18px] leading-[1.45] sm:text-[20px] sm:leading-[1.5]";
 const BODY_SIZE = "text-[18px] leading-[1.65]";
 const COMPOSER_REST_OFFSET_DESKTOP = 12;
 const COMPOSER_REST_OFFSET_MOBILE = 8;
@@ -71,21 +71,20 @@ export function ConciergeScreen({
     },
     []
   );
+  const hasMessages = controller.turns.length > 0;
+  const isHeroState = controller.turns.length === 0 && !controller.isLoading;
 
   const composerRestOffsetPx = isSmallViewport
     ? COMPOSER_REST_OFFSET_MOBILE
     : COMPOSER_REST_OFFSET_DESKTOP;
-  const composerClearancePx = useMemo(
-    () =>
-      Math.max(
-        INITIAL_COMPOSER_HEIGHT + CONTENT_SAFETY_GAP,
-        composerHeightPx +
-          keyboardInsetPx +
-          composerRestOffsetPx +
-          CONTENT_SAFETY_GAP
-      ),
-    [composerHeightPx, keyboardInsetPx, composerRestOffsetPx]
-  );
+  const shouldFloatComposer = !(isHeroState && isSmallViewport);
+  const composerClearancePx = useMemo(() => {
+    if (!shouldFloatComposer) return CONTENT_SAFETY_GAP;
+    return Math.max(
+      INITIAL_COMPOSER_HEIGHT + CONTENT_SAFETY_GAP,
+      composerHeightPx + keyboardInsetPx + composerRestOffsetPx + CONTENT_SAFETY_GAP
+    );
+  }, [composerHeightPx, keyboardInsetPx, composerRestOffsetPx, shouldFloatComposer]);
   const railStyle = useMemo(
     () => ({
       width:
@@ -103,13 +102,12 @@ export function ConciergeScreen({
       ),
     [controller.turns]
   );
-  const hasMessages = controller.turns.length > 0;
-  const isHeroState = controller.turns.length === 0 && !controller.isLoading;
   const isActivePreRecommendation = hasMessages && !hasRecommendationTurn;
   const isActiveWithRecommendation = hasRecommendationTurn;
   const showActiveDesktopSubtitle = isActivePreRecommendation;
   const showDesktopHeaderActions = controller.isDeveloperRole || hasMessages;
-  const useIntroSpacer = isHeroState;
+  const useIntroSpacer = isHeroState && !isSmallViewport;
+  const emptyStatePromptLimit = isSmallViewport ? 2 : 3;
 
   return (
     <AppShell
@@ -229,7 +227,7 @@ export function ConciergeScreen({
           isLoading={controller.isLoading}
           showSlowNotice={controller.showSlowNotice}
           isDeveloperView={controller.isDeveloperRole}
-          emptyStatePrompts={controller.starterPrompts.slice(0, 3)}
+          emptyStatePrompts={controller.starterPrompts.slice(0, emptyStatePromptLimit)}
           bodyTextClassName={BODY_SIZE}
           onChoosePrompt={controller.submitWithPrompt}
           onSelectTurn={controller.setSelectedTurnId}
@@ -255,6 +253,7 @@ export function ConciergeScreen({
         onRetry={() => void controller.onRetryLastMessage()}
         showJumpToLatest={showJumpToLatest}
         onJumpToLatest={jumpToLatest ?? undefined}
+        floating={shouldFloatComposer}
       />
 
       {controller.canOpenOperator ? (

@@ -296,6 +296,14 @@ export function InventoryControlsClient({
     setWidthMaxInput({ ft: "", inches: "" });
     setLengthMinInput({ ft: "", inches: "" });
     setLengthMaxInput({ ft: "", inches: "" });
+    setShowAllSizes(false);
+    if (typeof window !== "undefined") {
+      const resetParams = new URLSearchParams();
+      resetParams.set(INVENTORY_QUERY_PARAMS.page, "1");
+      resetParams.set(INVENTORY_QUERY_PARAMS.pageSize, String(pageSize));
+      window.location.replace(`${pathname}?${resetParams.toString()}`);
+      return;
+    }
     applyPatch({
       q: null,
       status: "available",
@@ -306,7 +314,7 @@ export function InventoryControlsClient({
       lengthMin: null,
       lengthMax: null,
     });
-  }, [applyPatch]);
+  }, [applyPatch, pageSize, pathname]);
 
   const onSizePresetToggle = useCallback(
     (preset: InventorySizePreset) => {

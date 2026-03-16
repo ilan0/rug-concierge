@@ -145,6 +145,19 @@ export function InventoryTableClient({ rows }: InventoryTableClientProps) {
                     <span className="text-muted-foreground">Added</span>
                     <span>{formatDate(row.created_at)}</span>
                   </div>
+
+                  <div className="mt-2.5">
+                    <button
+                      type="button"
+                      className="inline-flex h-8 items-center rounded-full border border-border/60 bg-background px-3 text-xs font-medium text-foreground/85 hover:border-primary/35 hover:bg-primary/10 hover:text-foreground"
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        onOpenRow(row);
+                      }}
+                    >
+                      View details
+                    </button>
+                  </div>
                 </article>
               );
             })}
@@ -165,6 +178,7 @@ export function InventoryTableClient({ rows }: InventoryTableClientProps) {
                   <th className="p-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Status</th>
                   <th className="p-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Size</th>
                   <th className="p-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Added</th>
+                  <th className="p-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Action</th>
                 </tr>
               </thead>
               <tbody>
@@ -217,6 +231,18 @@ export function InventoryTableClient({ rows }: InventoryTableClientProps) {
                         {formatRugSize(row.width_total_in, row.length_total_in) || "-"}
                       </td>
                       <td className="p-3 align-top">{formatDate(row.created_at)}</td>
+                      <td className="p-3 align-top">
+                        <button
+                          type="button"
+                          className="inline-flex h-8 items-center rounded-full border border-border/60 bg-background px-3 text-xs font-medium text-foreground/85 hover:border-primary/35 hover:bg-primary/10 hover:text-foreground"
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            onOpenRow(row);
+                          }}
+                        >
+                          View details
+                        </button>
+                      </td>
                     </tr>
                   );
                 })}

@@ -251,30 +251,23 @@ function rugLabel(rug: InventoryRug): string {
 function toContextInventory(inventory: InventoryRug[]) {
   return inventory.map((rug) => {
     const fields = effectiveFields(rug);
-    const patternText =
-      Array.isArray(fields.pattern) && fields.pattern.length > 0
-        ? fields.pattern.join(", ")
-        : "Unknown";
-    const colorText =
-      Array.isArray(fields.primary_colors) && fields.primary_colors.length > 0
-        ? fields.primary_colors.join(", ")
-        : "Unknown";
 
-    return [
-      `ID: ${rug.id}`,
-      `Label: ${rugLabel(rug)}`,
-      `Size: ${sizeText(rug) ?? "Unknown size"}`,
-      `Origin: ${fields.origin ?? "Unknown"}`,
-      `Style: ${fields.style ?? "Unknown"}`,
-      `Pattern: ${patternText}`,
-      `Colors: ${colorText}`,
-      `Mood: ${fields.mood ?? "Unknown"}`,
-      `Description: ${
+    return {
+      id: rug.id,
+      label: rugLabel(rug),
+      size: sizeText(rug) ?? null,
+      origin: fields.origin ?? null,
+      style: fields.style ?? null,
+      mood: fields.mood ?? null,
+      pattern: Array.isArray(fields.pattern) ? fields.pattern.slice(0, 4) : [],
+      colors: Array.isArray(fields.primary_colors)
+        ? fields.primary_colors.slice(0, 5)
+        : [],
+      desc:
         rug.ai_description && rug.ai_description.trim().length > 0
           ? rug.ai_description
-          : "New arrival — description pending"
-      }`,
-    ].join("\n");
+          : "New arrival — description pending",
+    };
   });
 }
 
