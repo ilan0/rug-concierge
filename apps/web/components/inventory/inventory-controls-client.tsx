@@ -139,6 +139,8 @@ export function InventoryControlsClient({
 }: InventoryControlsClientProps) {
   const pathname = usePathname();
   const suppressAutoQueryPatchRef = useRef(false);
+  const queryDebounceRef = useRef<number | null>(null);
+  const sizeDebounceRef = useRef<number | null>(null);
 
   const [queryInput, setQueryInput] = useState(filters.q);
   const [sheetOpen, setSheetOpen] = useState(false);
@@ -242,10 +244,20 @@ export function InventoryControlsClient({
     const normalized = queryInput.trim();
     if (suppressAutoQueryPatchRef.current) return;
     if (normalized === filters.q) return;
-    const timer = window.setTimeout(() => {
+    if (queryDebounceRef.current !== null) {
+      window.clearTimeout(queryDebounceRef.current);
+      queryDebounceRef.current = null;
+    }
+    queryDebounceRef.current = window.setTimeout(() => {
       applyPatch({ q: normalized || null });
+      queryDebounceRef.current = null;
     }, 300);
-    return () => window.clearTimeout(timer);
+    return () => {
+      if (queryDebounceRef.current !== null) {
+        window.clearTimeout(queryDebounceRef.current);
+        queryDebounceRef.current = null;
+      }
+    };
   }, [applyPatch, filters.q, queryInput]);
 
   useEffect(() => {
@@ -268,7 +280,11 @@ export function InventoryControlsClient({
 
     if (unchanged) return;
 
-    const timer = window.setTimeout(() => {
+    if (sizeDebounceRef.current !== null) {
+      window.clearTimeout(sizeDebounceRef.current);
+      sizeDebounceRef.current = null;
+    }
+    sizeDebounceRef.current = window.setTimeout(() => {
       applyPatch({
         widthMin,
         widthMax,
@@ -276,9 +292,15 @@ export function InventoryControlsClient({
         lengthMax,
         sizePresets: hasCustomInput ? [] : filters.sizePresets,
       });
+      sizeDebounceRef.current = null;
     }, 300);
 
-    return () => window.clearTimeout(timer);
+    return () => {
+      if (sizeDebounceRef.current !== null) {
+        window.clearTimeout(sizeDebounceRef.current);
+        sizeDebounceRef.current = null;
+      }
+    };
   }, [
     applyPatch,
     filters.lengthMax,
@@ -294,27 +316,27 @@ export function InventoryControlsClient({
 
   const clearAll = useCallback(() => {
     suppressAutoQueryPatchRef.current = true;
+    if (queryDebounceRef.current !== null) {
+      window.clearTimeout(queryDebounceRef.current);
+      queryDebounceRef.current = null;
+    }
+    if (sizeDebounceRef.current !== null) {
+      window.clearTimeout(sizeDebounceRef.current);
+      sizeDebounceRef.current = null;
+    }
     setQueryInput("");
     setWidthMinInput({ ft: "", inches: "" });
     setWidthMaxInput({ ft: "", inches: "" });
     setLengthMinInput({ ft: "", inches: "" });
     setLengthMaxInput({ ft: "", inches: "" });
     setShowAllSizes(false);
-    const resetPatch: FilterPatch = {
-      q: null,
-      status: "available",
-      sort: "newest",
-      sizePresets: [],
-      widthMin: null,
-      widthMax: null,
-      lengthMin: null,
-      lengthMax: null,
-    };
-    applyPatch(resetPatch);
-    window.setTimeout(() => {
-      suppressAutoQueryPatchRef.current = false;
-    }, 650);
-  }, [applyPatch]);
+    if (typeof window !== "undefined") {
+      const resetParams = new URLSearchParams();
+      resetParams.set(INVENTORY_QUERY_PARAMS.page, "1");
+      resetParams.set(INVENTORY_QUERY_PARAMS.pageSize, String(pageSize));
+      window.location.replace(`${pathname}?${resetParams.toString()}`);
+    }
+  }, [pageSize, pathname]);
 
   const onSizePresetToggle = useCallback(
     (preset: InventorySizePreset) => {
