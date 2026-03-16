@@ -6,12 +6,30 @@ import type {
 
 // Shared recommendation types.
 
+export type RecommendationShapeConstraint =
+  | "runner"
+  | "round_oval"
+  | "area"
+  | "oversized";
+
+export type RecommendationRoomPreference =
+  | "living_room"
+  | "dining_room"
+  | "bedroom"
+  | "kitchen"
+  | "hallway"
+  | "entryway"
+  | "office";
+
 export type HardConstraints = {
   size?: {
     widthIn: number;
     lengthIn: number;
     toleranceIn?: number;
   };
+  colors?: string[];
+  styles?: string[];
+  shape?: RecommendationShapeConstraint;
 };
 
 export type InventoryRug = {

@@ -7,8 +7,17 @@ type RouteTurnModeInput = {
   message: string;
   role: RoleType;
   last_mode?: ChatMode | null;
+  last_result_mode?: "recommendation" | "no_match" | "clarifying_question" | null;
   has_recent_recommendations?: boolean;
 };
+
+export type RecommendationFollowupIntent =
+  | "none"
+  | "closest"
+  | "larger"
+  | "smaller"
+  | "more_like_this"
+  | "tighten";
 
 export type RouteDecision = {
   mode: ChatMode;
@@ -49,11 +58,14 @@ const ROUTE_RULES: RouteRule[] = [
   {
     id: "RECOMMENDATION_FOLLOWUP",
     when: (input, text) =>
-      isRecommendationFollowup(text) &&
-      (input.last_mode === "recommendation" || Boolean(input.has_recent_recommendations)),
+      parseRecommendationFollowupIntent(text) !== "none" &&
+      (input.last_mode === "recommendation" ||
+        input.last_result_mode === "recommendation" ||
+        input.last_result_mode === "no_match" ||
+        Boolean(input.has_recent_recommendations)),
     decide: () => ({
       mode: "recommendation",
-      confidence: "medium",
+      confidence: "high",
       needs_clarification: false,
     }),
   },
@@ -140,7 +152,27 @@ function isExplicitRecommendationRequest(text: string): boolean {
   return false;
 }
 
-function isRecommendationFollowup(text: string): boolean {
+export function parseRecommendationFollowupIntent(
+  text: string
+): RecommendationFollowupIntent {
+  if (!text.trim()) return "none";
+  if (isGeneralAdviceOrEducation(text)) return "none";
+
+  const normalized = text.toLowerCase().trim();
+  if (
+    /\b(closest|nearest|best match|closest you have|closest option|closest size)\b/.test(
+      normalized
+    )
+  ) {
+    return "closest";
+  }
+  if (/\b(larger|bigger|go larger|size up|go up)\b/.test(normalized)) {
+    return "larger";
+  }
+  if (/\b(smaller|go smaller|size down|go down)\b/.test(normalized)) {
+    return "smaller";
+  }
+
   const followupSignals = [
     "show more",
     "more like this",
@@ -153,7 +185,24 @@ function isRecommendationFollowup(text: string): boolean {
     "different options",
     "another set",
   ];
-  return followupSignals.some((signal) => text.includes(signal));
+  if (followupSignals.some((signal) => normalized.includes(signal))) {
+    if (
+      normalized.includes("narrow") ||
+      normalized.includes("filter") ||
+      normalized.includes("under ") ||
+      normalized.includes("over ") ||
+      normalized.includes("only ")
+    ) {
+      return "tighten";
+    }
+    return "more_like_this";
+  }
+
+  if (/^(yes|yeah|yep|sure|ok|okay|please|do it|that works|sounds good)\b/.test(normalized)) {
+    return "more_like_this";
+  }
+
+  return "none";
 }
 
 function isGeneralAdviceOrEducation(text: string): boolean {
@@ -184,7 +233,7 @@ function isConstraintOnlyWithoutIntent(text: string): boolean {
 }
 
 function hasConstraintSignalsInMessage(text: string): boolean {
-  return /(\d+\s*[x×]\s*\d+)|(\$\s*\d+)|\b(under|below|budget|max|maximum|size|palette|style|room|neutral|modern)\b/i.test(
+  return /(\d+\s*[x×]\s*\d+)|(\$\s*\d+)|\b(under|below|budget|max|maximum|size|palette|style|room|neutral|modern|traditional|runner|round|oval|blue|red|green|navy|ivory|gold|oversized)\b/i.test(
     text
   );
 }

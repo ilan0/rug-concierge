@@ -28,7 +28,12 @@ export function buildPromptLayers(input: BuildPromptLayersInput): string[] {
     mode: input.mode,
     role: input.role,
     hasRecommendationHardConstraints: Boolean(
-      input.session.recommendation_state.hard_constraints.size
+      input.session.recommendation_state.hard_constraints.size ||
+        (input.session.recommendation_state.hard_constraints.colors?.length ?? 0) >
+          0 ||
+        (input.session.recommendation_state.hard_constraints.styles?.length ?? 0) >
+          0 ||
+        input.session.recommendation_state.hard_constraints.shape
     ),
     hasChatMemoryContext: hasMemoryContext,
     hasRecentTurnsContext: input.session.chat_history.length > 0,

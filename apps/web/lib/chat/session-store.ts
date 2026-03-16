@@ -49,6 +49,7 @@ function buildEmptySession(sessionId: string, role: RoleType): SessionData {
     recommendation_state: {
       hard_constraints: {},
       soft_preferences: {},
+      runtime: {},
     },
   };
 }

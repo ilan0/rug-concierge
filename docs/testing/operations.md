@@ -1,8 +1,10 @@
 # QA Operations
 
-Canonical operational testing guide.
+Canonical operational validation guide. This repo does not keep saved test suites or QA harness scripts.
 
-## Core Local Gates
+## 1) Core Local Gates (Blocking)
+
+Run before each deployment:
 
 ```bash
 npm run quality:release
@@ -14,60 +16,51 @@ Equivalent expanded commands:
 npm --workspace apps/web exec tsc --noEmit
 npm --workspace apps/web run lint
 npm --workspace apps/web run build
-npm run test:unit
 npm run check:docs
 npm run check:migrations
-npm run check:api-contracts
 ```
 
-Notes:
-- `check:api-contracts` defaults to `NON_DESTRUCTIVE=1`.
-- It skips outside strict mode when `BASE_URL`, `TENANT_ID`, or `STORE_PASSCODE` are missing.
-- Set `REQUIRE_API_CONTRACT_CHECK=1` (or run in CI) to fail hard on missing env.
-- For production release validation, run strict + write-path checks:
-  - `REQUIRE_API_CONTRACT_CHECK=1 NON_DESTRUCTIVE=0`.
+## 2) Manual Local Runtime Checks (Ad Hoc)
 
-## Functional + Quality Suites
+Start local app with real env values, then run ad hoc checks using shell commands:
 
-```bash
-TENANT_ID=<tenant-uuid> npm run qa:functional
-TENANT_ID=<tenant-uuid> npm run qa:quality
-TENANT_ID=<tenant-uuid> npm run qa:all
-```
+1. `GET /api/config/public` returns branding + tenant-safe config.
+2. `GET /api/manifest` returns valid web manifest.
+3. `POST /api/chat` greeting returns 200 and assistant text.
+4. `POST /api/recommend` with strict size returns recommendations.
+5. stacked hard constraints (`size + color/style/shape`) can return no-match without hallucination.
+6. follow-up `show closest` after no-match widens size only (`0/4/8/12/18/24`) and keeps non-size hard constraints strict.
+7. staff unlock + inventory detail access works; invalid staff override payload returns 400.
+8. override set and clear behavior resolves `effective_fields` correctly.
 
-Outputs:
-- Functional: `scripts/testing/functionality/latest-functional.md`
-- Quality: `scripts/testing/quality/latest-quality.md`
+## 3) Production Validation (Blocking)
 
-## Contract Verification (Non-Destructive)
+Target: `https://rug-concierge.vercel.app`
 
-```bash
-BASE_URL=<deployment-or-local-url> \
-TENANT_ID=<tenant-uuid> \
-STORE_PASSCODE=<passcode> \
-NON_DESTRUCTIVE=1 \
-npx tsx scripts/verify-api-contracts.ts
-```
+1. Repeat the same API checks live with ad hoc commands (no saved harness).
+2. Full browser walkthrough on desktop + mobile:
+   - locked customer flow
+   - unlock/lock cycle
+   - concierge multi-turn recommendations + no-match + closest follow-up
+   - inventory filtering, modal, overrides, re-analyze
+   - intake async enrichment flow
+   - session persistence after refresh
+3. Run accessibility scan ad hoc (Playwright + axe) and ensure zero violations on `/concierge`, `/inventory`, `/intake`.
+4. Capture latency samples for:
+   - `/api/config/public`
+   - greeting `/api/chat`
+   - constrained `/api/recommend`
+   and report p50/p95.
 
-Artifact:
-- `tmp/release-validation/overnight-phase2-report.json`
+## 4) Data Hygiene Before Sign-Off
 
-## Contract Verification (Production Strict)
+1. Remove QA pollution rows from production inventory.
+2. Clear test override labels (for example: `Override Test Label`).
+3. Verify recommendation payloads do not expose deprecated/forbidden fields.
 
-```bash
-BASE_URL=https://rug-concierge.vercel.app \
-TENANT_ID=<tenant-uuid> \
-STORE_PASSCODE=<passcode> \
-REQUIRE_API_CONTRACT_CHECK=1 \
-NON_DESTRUCTIVE=0 \
-npm run check:api-contracts
-```
+## 5) AI Constraint Policy (Runtime Truth)
 
-## Demo Inventory Flow
-
-```bash
-TENANT_ID=<tenant-uuid> npx tsx scripts/seed-demo-rugs.ts
-TENANT_ID=<tenant-uuid> npx tsx scripts/re-enrich-rugs.ts --tenant-id=<tenant-uuid>
-```
-
-If enrichment failures remain, rerun without `--force` to retry only unenriched rows.
+- Hard constraints: `size`, `colors`, `styles`, `shape`.
+- Soft preferences only: `room`, `material`.
+- Closest behavior only applies after explicit closest-style follow-up and only relaxes size.
+- Non-size hard constraints are never silently dropped.

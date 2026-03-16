@@ -1,1 +1,0 @@
-{"name":"generated concise recommendation request","turns":[{"message":"I need a 5x8 rug for a bedroom","expect":{"status":200,"mode":"recommendation","plain_text_only":true}}]}

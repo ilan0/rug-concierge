@@ -15,7 +15,7 @@ AI rug concierge for single-store kiosk deployments:
 - Inventory is authoritative. AI never invents inventory rows.
 - Tenant scope is enforced on all inventory-backed DB reads/writes.
 - Store branding is tenant-owned (`tenants.settings.branding`) with env fallback.
-- Recommendation hard filters are backend-enforced (availability + size).
+- Recommendation hard filters are backend-enforced (availability + `size/colors/styles/shape`).
 - Response strings are plain text only.
 
 ## Access Model
@@ -94,6 +94,12 @@ Signals used:
 - merged effective structured fields (`origin/style/mood/pattern/colors`)
 - user message soft-signal matching
 
+Constraint policy:
+- hard: `size`, `colors`, `styles`, `shape`
+- soft only: `room`, `material`
+- explicit closest follow-up widens size with ladder `0/4/8/12/18/24` only
+- non-size hard constraints are never auto-relaxed
+
 ## Field Resolution
 
 Effective display fields are resolved at read time:
@@ -105,12 +111,8 @@ Effective display fields are resolved at read time:
 
 - `scripts/re-enrich-rugs.ts`: batch vision enrichment for existing rugs
 - `scripts/seed-demo-rugs.ts`: seed 8 demo rugs + storage objects (idempotent by `stock_id`)
-- `scripts/verify-api-contracts.ts`: production contract + behavior checks, writes
-  `tmp/release-validation/overnight-phase2-report.json`
+- validation checks run operationally via ad hoc shell/browser walkthroughs; no saved QA harness scripts in repo
 
-## QA Entrypoints
+## Quality Entrypoint
 
 - `npm run quality:release`
-- `npm run qa:functional`
-- `npm run qa:quality`
-- `npm run qa:all`

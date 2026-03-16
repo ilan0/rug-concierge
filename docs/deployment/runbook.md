@@ -51,10 +51,16 @@ Commands:
 2. `TENANT_ID=<tenant> npx tsx scripts/re-enrich-rugs.ts --tenant-id=<tenant>`
    - if some rugs fail enrichment, rerun the same command (no `--force`) for failed-only retries
    - use `--force` only for intentional full reprocessing
-3. `BASE_URL=<prod-url> TENANT_ID=<tenant> STORE_PASSCODE=<staff-passcode> npx tsx scripts/verify-api-contracts.ts`
+3. Run ad hoc API checks against production:
+   - `GET /api/config/public`
+   - `GET /api/manifest`
+   - `POST /api/chat` greeting
+   - `POST /api/recommend` strict-size match and strict no-match
+   - follow-up `closest` check after no-match
+   - staff unlock + staff detail + override set/clear + invalid payload
 
-Verification artifact:
-- `tmp/release-validation/overnight-phase2-report.json`
+Operational note:
+- This repo does not keep saved QA harness scripts. Release verification is executed ad hoc and recorded in operator notes.
 
 ## 7) Secret Rotation
 

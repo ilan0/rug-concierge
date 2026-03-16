@@ -57,7 +57,14 @@ export type UiChatResponseBody = {
       style?: string;
       palette?: string;
       room?: string;
+      material?: string;
       notes?: string[];
+    };
+    runtime?: {
+      last_result_mode?: "recommendation" | "no_match" | "clarifying_question";
+      last_relaxed_size_tolerance_in?: number | null;
+      last_blockers?: string[];
+      updated_at?: string;
     };
   };
   response: UiGeneralResponse | UiRecommendationResponse;

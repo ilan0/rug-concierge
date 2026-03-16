@@ -1,6 +1,78 @@
-import type { HardConstraints } from "@/lib/types/recommendation";
+import type {
+  HardConstraints,
+  RecommendationRoomPreference,
+  RecommendationShapeConstraint,
+} from "@/lib/types/recommendation";
 
-// Constraint normalization and lightweight extraction from user text.
+const MAX_CONSTRAINT_TOKENS = 6;
+
+const COLOR_SYNONYMS: Array<{ token: string; canonical: string }> = [
+  { token: "ivory", canonical: "ivory" },
+  { token: "cream", canonical: "cream" },
+  { token: "beige", canonical: "beige" },
+  { token: "tan", canonical: "beige" },
+  { token: "gold", canonical: "gold" },
+  { token: "yellow", canonical: "gold" },
+  { token: "rust", canonical: "rust" },
+  { token: "orange", canonical: "rust" },
+  { token: "coral", canonical: "coral" },
+  { token: "red", canonical: "red" },
+  { token: "blue", canonical: "blue" },
+  { token: "navy", canonical: "navy" },
+  { token: "teal", canonical: "teal" },
+  { token: "green", canonical: "green" },
+  { token: "brown", canonical: "brown" },
+  { token: "black", canonical: "black" },
+  { token: "gray", canonical: "gray" },
+  { token: "grey", canonical: "gray" },
+  { token: "white", canonical: "white" },
+];
+
+const STYLE_TERMS: Array<{ token: string; canonical: string }> = [
+  { token: "traditional", canonical: "traditional" },
+  { token: "transitional", canonical: "transitional" },
+  { token: "modern", canonical: "modern" },
+  { token: "eclectic", canonical: "eclectic" },
+  { token: "persian", canonical: "persian" },
+  { token: "oushak", canonical: "oushak" },
+  { token: "heriz", canonical: "heriz" },
+  { token: "serapi", canonical: "serapi" },
+  { token: "gabbeh", canonical: "gabbeh" },
+  { token: "kilim", canonical: "kilim" },
+  { token: "tribal", canonical: "tribal" },
+  { token: "floral", canonical: "floral" },
+  { token: "geometric", canonical: "geometric" },
+  { token: "medallion", canonical: "medallion" },
+  { token: "minimal", canonical: "minimal" },
+  { token: "vintage", canonical: "vintage" },
+];
+
+const ROOM_TERM_MAP: Array<{
+  token: string;
+  room: RecommendationRoomPreference;
+}> = [
+  { token: "living room", room: "living_room" },
+  { token: "family room", room: "living_room" },
+  { token: "dining room", room: "dining_room" },
+  { token: "bedroom", room: "bedroom" },
+  { token: "kitchen", room: "kitchen" },
+  { token: "hallway", room: "hallway" },
+  { token: "hall", room: "hallway" },
+  { token: "entryway", room: "entryway" },
+  { token: "entry", room: "entryway" },
+  { token: "office", room: "office" },
+];
+
+const MATERIAL_TERMS = [
+  "wool",
+  "silk",
+  "cotton",
+  "jute",
+  "synthetic",
+  "viscose",
+  "nylon",
+  "polyester",
+] as const;
 
 function toNumber(value: unknown): number | null {
   if (typeof value === "number" && Number.isFinite(value)) {
@@ -30,15 +102,62 @@ function normalizeSize(input: unknown): HardConstraints["size"] | undefined {
   return { widthIn, lengthIn, toleranceIn };
 }
 
+function normalizeStringToken(value: unknown, maxChars = 32): string | null {
+  if (typeof value !== "string") return null;
+  const normalized = value.trim().toLowerCase();
+  if (!normalized) return null;
+  return normalized.replace(/\s+/g, " ").slice(0, maxChars);
+}
+
+function parseTokenList(input: unknown): string[] {
+  const source: string[] = Array.isArray(input)
+    ? input
+        .map((item) => (typeof item === "string" ? item : ""))
+        .flatMap((item) => item.split(","))
+    : typeof input === "string"
+      ? input.split(",")
+      : [];
+
+  const cleaned = source
+    .map((token) => normalizeStringToken(token))
+    .filter((token): token is string => token !== null);
+
+  return Array.from(new Set(cleaned)).slice(0, MAX_CONSTRAINT_TOKENS);
+}
+
+function normalizeShape(value: unknown): RecommendationShapeConstraint | undefined {
+  const token = normalizeStringToken(value);
+  if (!token) return undefined;
+
+  if (token === "runner") return "runner";
+  if (token === "round" || token === "oval" || token === "round_oval") {
+    return "round_oval";
+  }
+  if (token === "oversized") return "oversized";
+  if (token === "area") return "area";
+  return undefined;
+}
+
 export function normalizeHardConstraints(input: unknown): HardConstraints {
   if (!input || typeof input !== "object") {
     return {};
   }
 
   const data = input as Record<string, unknown>;
+  const hasColorsKey = Object.prototype.hasOwnProperty.call(data, "colors");
+  const hasStylesKey = Object.prototype.hasOwnProperty.call(data, "styles");
+  const hasShapeKey = Object.prototype.hasOwnProperty.call(data, "shape");
   const size = normalizeSize(data.size);
+  const colors = parseTokenList(data.colors);
+  const styles = parseTokenList(data.styles);
+  const shape = normalizeShape(data.shape);
 
-  return { size };
+  return {
+    size,
+    colors: hasColorsKey ? colors : undefined,
+    styles: hasStylesKey ? styles : undefined,
+    shape: hasShapeKey ? shape : undefined,
+  };
 }
 
 function parseSizeFromMessage(userMessage: string): HardConstraints["size"] | undefined {
@@ -67,8 +186,58 @@ function parseSizeFromMessage(userMessage: string): HardConstraints["size"] | un
   };
 }
 
+function includesToken(text: string, token: string): boolean {
+  return text.includes(token);
+}
+
+function parseColorsFromMessage(userMessage: string): string[] {
+  const text = userMessage.toLowerCase();
+  const matches = COLOR_SYNONYMS.filter((entry) =>
+    includesToken(text, entry.token)
+  ).map((entry) => entry.canonical);
+  return Array.from(new Set(matches)).slice(0, MAX_CONSTRAINT_TOKENS);
+}
+
+function parseStylesFromMessage(userMessage: string): string[] {
+  const text = userMessage.toLowerCase();
+  const matches = STYLE_TERMS.filter((entry) =>
+    includesToken(text, entry.token)
+  ).map((entry) => entry.canonical);
+  return Array.from(new Set(matches)).slice(0, MAX_CONSTRAINT_TOKENS);
+}
+
+function parseShapeFromMessage(
+  userMessage: string
+): RecommendationShapeConstraint | undefined {
+  const text = userMessage.toLowerCase();
+  if (/\brunner\b/.test(text)) return "runner";
+  if (/\b(round|circular|circle|oval)\b/.test(text)) return "round_oval";
+  if (/\boversized\b/.test(text)) return "oversized";
+  if (/\barea rug\b/.test(text)) return "area";
+  return undefined;
+}
+
+function parseRoomFromMessage(
+  userMessage: string
+): RecommendationRoomPreference | undefined {
+  const text = userMessage.toLowerCase();
+  for (const entry of ROOM_TERM_MAP) {
+    if (includesToken(text, entry.token)) return entry.room;
+  }
+  return undefined;
+}
+
+function parseMaterialFromMessage(userMessage: string): string | undefined {
+  const text = userMessage.toLowerCase();
+  const match = MATERIAL_TERMS.find((term) => includesToken(text, term));
+  return match ?? undefined;
+}
+
 export type ConstraintResetDirectives = {
   clearSize: boolean;
+  clearColors: boolean;
+  clearStyles: boolean;
+  clearShape: boolean;
   clearAll: boolean;
 };
 
@@ -84,6 +253,8 @@ export function parseConstraintResetDirectives(
     "start over constraints",
     "reset constraints",
     "clear constraints",
+    "start over filters",
+    "clear all filters",
   ]);
 
   const clearSize =
@@ -92,9 +263,73 @@ export function parseConstraintResetDirectives(
     /\b(?:no|without)\s+size(?:\s+limit)?\b/i.test(text) ||
     /\bany\s+size\b/i.test(text);
 
+  const clearColors =
+    clearAll ||
+    /(?:clear|remove|ignore|drop|reset)\s+(?:the\s+)?(?:color|colors)/i.test(
+      text
+    );
+  const clearStyles =
+    clearAll ||
+    /(?:clear|remove|ignore|drop|reset)\s+(?:the\s+)?(?:style|styles)/i.test(
+      text
+    );
+  const clearShape =
+    clearAll ||
+    /(?:clear|remove|ignore|drop|reset)\s+(?:the\s+)?(?:shape|runner|round|oval)/i.test(
+      text
+    );
+
   return {
     clearSize,
+    clearColors,
+    clearStyles,
+    clearShape,
     clearAll,
+  };
+}
+
+export type SoftPreferenceSignals = {
+  style?: string;
+  palette?: string;
+  room?: RecommendationRoomPreference;
+  material?: string;
+};
+
+export function normalizeSoftPreferences(input: unknown): SoftPreferenceSignals {
+  if (!input || typeof input !== "object") return {};
+  const data = input as Record<string, unknown>;
+
+  const style = normalizeStringToken(data.style, 48) ?? undefined;
+  const palette = normalizeStringToken(data.palette, 64) ?? undefined;
+  const roomToken = normalizeStringToken(data.room, 32);
+  const room = ROOM_TERM_MAP.find(
+    (entry) => entry.room === roomToken || entry.token === roomToken
+  )?.room;
+  const material = normalizeStringToken(data.material, 32) ?? undefined;
+
+  return {
+    style,
+    palette,
+    room,
+    material,
+  };
+}
+
+export function extractSoftPreferencesFromUserMessage(
+  userMessage: string
+): SoftPreferenceSignals {
+  if (!userMessage.trim()) return {};
+
+  const styles = parseStylesFromMessage(userMessage);
+  const colors = parseColorsFromMessage(userMessage);
+  const room = parseRoomFromMessage(userMessage);
+  const material = parseMaterialFromMessage(userMessage);
+
+  return {
+    style: styles[0],
+    palette: colors.length > 0 ? colors.join(", ") : undefined,
+    room,
+    material,
   };
 }
 
@@ -104,9 +339,15 @@ export function extractConstraintsFromUserMessage(
   if (!userMessage.trim()) return {};
 
   const size = parseSizeFromMessage(userMessage);
+  const colors = parseColorsFromMessage(userMessage);
+  const styles = parseStylesFromMessage(userMessage);
+  const shape = parseShapeFromMessage(userMessage);
 
   return {
     size,
+    colors: colors.length > 0 ? colors : undefined,
+    styles: styles.length > 0 ? styles : undefined,
+    shape,
   };
 }
 
@@ -116,5 +357,8 @@ export function mergeHardConstraints(
 ): HardConstraints {
   return {
     size: explicit.size ?? inferred.size,
+    colors: explicit.colors ?? inferred.colors,
+    styles: explicit.styles ?? inferred.styles,
+    shape: explicit.shape ?? inferred.shape,
   };
 }

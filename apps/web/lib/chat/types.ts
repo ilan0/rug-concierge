@@ -1,4 +1,7 @@
-import type { HardConstraints } from "@/lib/types/recommendation";
+import type {
+  HardConstraints,
+  RecommendationRoomPreference,
+} from "@/lib/types/recommendation";
 import type { RecommendationResponse } from "@/lib/ai/recommend";
 import type { E2eTraceMeta } from "@/lib/qa/e2e-trace";
 import type { AppRole } from "@/lib/auth/roles";
@@ -32,8 +35,15 @@ export type RecommendationState = {
   soft_preferences: {
     style?: string;
     palette?: string;
-    room?: string;
+    room?: RecommendationRoomPreference;
+    material?: string;
     notes?: string[];
+  };
+  runtime?: {
+    last_result_mode?: "recommendation" | "no_match" | "clarifying_question";
+    last_relaxed_size_tolerance_in?: number | null;
+    last_blockers?: string[];
+    updated_at?: string;
   };
 };
 
@@ -77,4 +87,8 @@ export type GeneralChatResponse = {
 
 export type RecommendationTurnResponse = Omit<RecommendationResponse, "mode"> & {
   mode: "recommendation" | "clarifying_question" | "no_match";
+  runtime_update?: {
+    relaxed_size_tolerance_in?: number | null;
+    blockers?: string[];
+  };
 };

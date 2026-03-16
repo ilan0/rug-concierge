@@ -50,11 +50,30 @@ function formatConstraintSummary(input: Turn["constraintSnapshot"]) {
       }`
     );
   }
+  if (input.hard_constraints.colors && input.hard_constraints.colors.length > 0) {
+    items.push(`Colors ${input.hard_constraints.colors.join(", ")}`);
+  }
+  if (input.hard_constraints.styles && input.hard_constraints.styles.length > 0) {
+    items.push(`Styles ${input.hard_constraints.styles.join(", ")}`);
+  }
+  if (input.hard_constraints.shape) {
+    items.push(
+      input.hard_constraints.shape === "round_oval"
+        ? "Shape round/oval"
+        : `Shape ${input.hard_constraints.shape}`
+    );
+  }
   if (input.soft_preferences?.style) {
     items.push(`Style ${input.soft_preferences.style}`);
   }
   if (input.soft_preferences?.palette) {
     items.push(`Palette ${input.soft_preferences.palette}`);
+  }
+  if (input.soft_preferences?.room) {
+    items.push(`Room ${input.soft_preferences.room.replaceAll("_", " ")}`);
+  }
+  if (input.soft_preferences?.material) {
+    items.push(`Material ${input.soft_preferences.material}`);
   }
   return items.slice(0, 4);
 }

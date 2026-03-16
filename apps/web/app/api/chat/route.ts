@@ -160,6 +160,18 @@ export async function POST(req: Request) {
     const routeDecision = routeTurnMode({
       message: userMessage,
       role,
+      last_mode:
+        nextSession.recommendation_state.runtime?.last_result_mode ===
+        "recommendation"
+          ? "recommendation"
+          : null,
+      last_result_mode:
+        nextSession.recommendation_state.runtime?.last_result_mode ?? null,
+      has_recent_recommendations: Boolean(
+        nextSession.recommendation_state.runtime?.last_result_mode ===
+          "recommendation" ||
+          nextSession.recommendation_state.runtime?.last_result_mode === "no_match"
+      ),
     });
     const effectiveMode = routeDecision.mode;
     const memoryEnabled = process.env.CHAT_MEMORY_V1 !== "0";
@@ -223,6 +235,16 @@ export async function POST(req: Request) {
       routeDecision.needs_clarification && effectiveMode === "general_chat"
         ? "clarifying_question"
         : handlerResult.mode;
+    const publicHandlerResult =
+      "runtime_update" in handlerResult
+        ? (() => {
+            const next = {
+              ...handlerResult,
+            } as Record<string, unknown>;
+            delete next.runtime_update;
+            return next;
+          })()
+        : handlerResult;
 
     const assistantTurn: SessionMessage = {
       role: "assistant",
@@ -244,6 +266,34 @@ export async function POST(req: Request) {
       updated_at: new Date().toISOString(),
       chat_history: trimChatHistory([...nextSession.chat_history, userTurn, assistantTurn]),
       conversation_memory: nextConversationMemory,
+      recommendation_state: {
+        ...nextSession.recommendation_state,
+        runtime: {
+          ...(nextSession.recommendation_state.runtime ?? {}),
+          last_result_mode:
+            handlerResult.mode === "recommendation" ||
+            handlerResult.mode === "no_match" ||
+            handlerResult.mode === "clarifying_question"
+              ? handlerResult.mode
+              : nextSession.recommendation_state.runtime?.last_result_mode,
+          last_relaxed_size_tolerance_in:
+            "runtime_update" in handlerResult &&
+            handlerResult.runtime_update &&
+            Object.prototype.hasOwnProperty.call(
+              handlerResult.runtime_update,
+              "relaxed_size_tolerance_in"
+            )
+              ? handlerResult.runtime_update.relaxed_size_tolerance_in ?? null
+              : nextSession.recommendation_state.runtime
+                    ?.last_relaxed_size_tolerance_in ?? null,
+          last_blockers:
+            "runtime_update" in handlerResult &&
+            handlerResult.runtime_update?.blockers
+              ? handlerResult.runtime_update.blockers
+              : nextSession.recommendation_state.runtime?.last_blockers ?? [],
+          updated_at: new Date().toISOString(),
+        },
+      },
     };
 
     await saveSession(updatedSession, {
@@ -314,7 +364,7 @@ export async function POST(req: Request) {
       mode: responseMode,
       fine_mode: fineMode,
       recommendation_state: updatedSession.recommendation_state,
-      response: handlerResult,
+      response: publicHandlerResult,
     });
     if (traceMeta) {
       response.headers.set("x-chat-route-trace-id", routeTraceId);

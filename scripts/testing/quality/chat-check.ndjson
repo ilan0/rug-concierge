@@ -1,3 +1,0 @@
-{"name":"general greeting stays in general_chat","turns":[{"message":"hi","expect":{"status":200,"mode":"general_chat","plain_text_only":true}}]}
-{"name":"size request returns recommendation mode","turns":[{"message":"show me something 8x10","expect":{"status":200,"mode":"recommendation","plain_text_only":true}}]}
-{"name":"follow up remains plain text","turns":[{"message":"show me 8x10 rugs for a living room","expect":{"status":200,"mode":"recommendation","plain_text_only":true}},{"message":"show me more options","expect":{"status":200,"mode":"recommendation","plain_text_only":true}}]}

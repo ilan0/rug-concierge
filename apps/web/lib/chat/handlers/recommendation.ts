@@ -1,5 +1,6 @@
 import { runRecommendationPipeline } from "@/lib/recommend/pipeline";
 import { hasTenantId } from "@/lib/auth/tenant";
+import { parseRecommendationFollowupIntent } from "@/lib/chat/router";
 import type {
   ChatTurnHandlerInput,
   RecommendationTurnResponse,
@@ -12,6 +13,10 @@ export async function handleRecommendationTurn(
   const promptRole = input.role === "developer" ? "store_staff" : input.role;
 
   const constraints = input.session.recommendation_state.hard_constraints;
+  const followupIntent = parseRecommendationFollowupIntent(
+    input.message.toLowerCase().trim()
+  );
+  const priorResultMode = input.session.recommendation_state.runtime?.last_result_mode ?? null;
 
   if (!hasTenantId(input.tenant_id)) {
     return {
@@ -28,6 +33,8 @@ export async function handleRecommendationTurn(
     tenantId: input.tenant_id,
     userMessage: input.message.trim(),
     constraints,
+    followupIntent,
+    priorResultMode,
     promptContext: {
       role: promptRole,
       chat_context: input.ai_context_packet
@@ -66,5 +73,10 @@ export async function handleRecommendationTurn(
       aiResponse.mode === "recommendations"
         ? "recommendation"
         : aiResponse.mode,
+    runtime_update: {
+      relaxed_size_tolerance_in:
+        result.meta?.relaxed_size_tolerance_in ?? null,
+      blockers: result.meta?.blockers ?? [],
+    },
   };
 }

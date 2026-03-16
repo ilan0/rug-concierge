@@ -26,7 +26,8 @@ Primary UI shell for Rug Concierge.
 
 ## Auth Model
 
-- kiosk navigation is always available; concierge is always visible
+- concierge is always available
+- staff route tabs are hidden in locked mode and shown only after unlock
 - staff routes (`/inventory`, `/intake`) require `staff_unlocked` cookie
   - legacy `staff_unlocked=1` works only when `COOKIE_SECRET` is unset
 - unlock with `POST /api/auth/passcode`, lock with `POST /api/auth/lock`
@@ -63,9 +64,6 @@ npm --workspace apps/web run lint
 npm --workspace apps/web run build
 ```
 
-## QA (Repo Root)
+## Runtime Validation
 
-```bash
-TENANT_ID=<tenant-uuid> npm run qa:functional
-TENANT_ID=<tenant-uuid> npm run qa:quality
-```
+Use the manual operational checklist in [docs/testing/operations.md](/Users/ilannabatkhorian/Documents/rug-concierge/docs/testing/operations.md).

@@ -13,14 +13,22 @@ import type { HardConstraints, InventoryRug } from "@/lib/types/recommendation";
 import type { RecommendationResponse } from "@/lib/ai/recommend";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
-const SQL_QUERY_LIMIT = 120;
-const AI_CANDIDATE_LIMIT = 30;
+const SQL_QUERY_LIMIT = 300;
+const AI_CANDIDATE_LIMIT = 60;
 
 type RunRecommendationPipelineInput = {
   requestId?: string;
   tenantId: string;
   userMessage: string;
   constraints: HardConstraints;
+  followupIntent?:
+    | "none"
+    | "closest"
+    | "larger"
+    | "smaller"
+    | "more_like_this"
+    | "tighten";
+  priorResultMode?: "recommendation" | "no_match" | "clarifying_question" | null;
   promptContext?: {
     role?: "retail_customer" | "store_staff";
     chat_context?: {
@@ -37,7 +45,15 @@ type RunRecommendationPipelineInput = {
 };
 
 type RunRecommendationPipelineResult =
-  | { ok: true; response: RecommendationResponse; trace_id?: string | null }
+  | {
+      ok: true;
+      response: RecommendationResponse;
+      trace_id?: string | null;
+      meta?: {
+        relaxed_size_tolerance_in?: number | null;
+        blockers?: string[];
+      };
+    }
   | { ok: false; error: string };
 
 type PipelineQueryTrace = {
@@ -46,6 +62,8 @@ type PipelineQueryTrace = {
   row_count: number;
   error: string | null;
 };
+
+const SIZE_RELAXATION_STEPS_IN = [0, 4, 8, 12, 18, 24] as const;
 
 // Flow overview
 // Shared server recommendation pipeline:
@@ -99,11 +117,20 @@ export async function runRecommendationPipeline(
   };
 
   try {
+    const shouldPrepareClosestRelaxation = shouldAttemptClosestRelaxation({
+      followupIntent: input.followupIntent ?? "none",
+      priorResultMode: input.priorResultMode ?? null,
+      constraints: input.constraints,
+    });
+    const sqlConstraintEnvelope = shouldPrepareClosestRelaxation
+      ? expandSizeToleranceForFetch(input.constraints)
+      : input.constraints;
+
     const sqlStart = Date.now();
     const inventory = await fetchInventoryCandidates({
       requestId,
       tenantId: input.tenantId,
-      constraints: input.constraints,
+      constraints: sqlConstraintEnvelope,
       limit: SQL_QUERY_LIMIT,
       queryTrace,
     });
@@ -149,19 +176,114 @@ export async function runRecommendationPipeline(
       return { ok: false, error: errorMessage };
     }
 
+    let effectiveConstraints = input.constraints;
+    let relaxedToleranceIn: number | null = null;
+
     const hardFilterStart = Date.now();
-    const candidates = filterByHardConstraints(inventory, input.constraints);
+    let candidates = filterByHardConstraints(inventory, effectiveConstraints);
     timings.filter_hard_constraints_ms = Date.now() - hardFilterStart;
+
+    if (
+      candidates.length === 0 &&
+      shouldAttemptClosestRelaxation({
+        followupIntent: input.followupIntent ?? "none",
+        priorResultMode: input.priorResultMode ?? null,
+        constraints: effectiveConstraints,
+      })
+    ) {
+      const relaxed = applyClosestRelaxationLadder(
+        inventory,
+        effectiveConstraints
+      );
+      candidates = relaxed.candidates;
+      effectiveConstraints = relaxed.constraints;
+      relaxedToleranceIn = relaxed.relaxedToleranceIn;
+    }
+
+    let blockers: string[] = [];
+    if (candidates.length === 0) {
+      blockers = detectHardConstraintBlockers(inventory, effectiveConstraints);
+      const response = buildGuidedNoMatchResponse({
+        userMessage: input.userMessage,
+        constraints: effectiveConstraints,
+        followupIntent: input.followupIntent ?? "none",
+        blockers,
+        relaxedToleranceIn,
+      });
+
+      const logStart = Date.now();
+      await logRecommendationQaEvent({
+        request_id: requestId,
+        tenant_id: input.tenantId,
+        user_message: input.userMessage,
+        constraints: effectiveConstraints,
+        sql_candidate_count: inventory.length,
+        filtered_candidate_count: 0,
+        ai_candidate_count: 0,
+        response_mode: response.mode,
+        recommendation_ids: [],
+        notes: response.notes,
+        error: null,
+        created_at: new Date().toISOString(),
+      });
+      timings.qa_log_ms = Date.now() - logStart;
+
+      const tracePath = await writeTrace({
+        request_id: requestId,
+        flow_path: flowPath,
+        source_route: input.traceMeta?.source_route ?? null,
+        session_id: input.traceMeta?.session_id ?? null,
+        role: input.traceMeta?.role ?? null,
+        tenant_id: input.tenantId,
+        user_message: input.userMessage,
+        constraints: effectiveConstraints,
+        prompt_context: input.promptContext ?? null,
+        query_trace: queryTrace,
+        candidate_counts: {
+          sql_candidates: inventory.length,
+          hard_filtered_candidates: 0,
+          ai_candidates: 0,
+        },
+        timing_ms: {
+          ...timings,
+          total_ms: Date.now() - startedAt,
+        },
+        ai_trace: aiTrace,
+        result: {
+          mode: response.mode,
+          notes: response.notes,
+          recommendation_ids: [],
+          recommendation_count: 0,
+          blockers,
+          relaxed_size_tolerance_in: relaxedToleranceIn,
+        },
+        error: null,
+      });
+
+      return {
+        ok: true,
+        response,
+        trace_id: tracePath ? requestId : null,
+        meta: {
+          relaxed_size_tolerance_in: relaxedToleranceIn,
+          blockers,
+        },
+      };
+    }
+
     const shapeStart = Date.now();
     const aiCandidates = shapeCandidatesForAI(candidates, {
       maxCandidates: AI_CANDIDATE_LIMIT,
+      userMessage: input.userMessage,
+      constraints: effectiveConstraints,
+      followupIntent: input.followupIntent ?? "none",
     });
     timings.shape_candidates_ms = Date.now() - shapeStart;
 
     const aiStart = Date.now();
     const response = await rankAndExplain(
       aiCandidates,
-      input.constraints,
+      effectiveConstraints,
       input.userMessage,
       input.promptContext,
       aiTrace
@@ -173,7 +295,7 @@ export async function runRecommendationPipeline(
       request_id: requestId,
       tenant_id: input.tenantId,
       user_message: input.userMessage,
-      constraints: input.constraints,
+      constraints: effectiveConstraints,
       sql_candidate_count: inventory.length,
       filtered_candidate_count: candidates.length,
       ai_candidate_count: aiCandidates.length,
@@ -193,7 +315,7 @@ export async function runRecommendationPipeline(
       role: input.traceMeta?.role ?? null,
       tenant_id: input.tenantId,
       user_message: input.userMessage,
-      constraints: input.constraints,
+      constraints: effectiveConstraints,
       prompt_context: input.promptContext ?? null,
       query_trace: queryTrace,
       candidate_counts: {
@@ -211,6 +333,7 @@ export async function runRecommendationPipeline(
         notes: response.notes,
         recommendation_ids: response.recommendations.map((rec) => rec.rug_id),
         recommendation_count: response.recommendations.length,
+        relaxed_size_tolerance_in: relaxedToleranceIn,
       },
       error: null,
     });
@@ -219,6 +342,10 @@ export async function runRecommendationPipeline(
       ok: true,
       response,
       trace_id: tracePath ? requestId : null,
+      meta: {
+        relaxed_size_tolerance_in: relaxedToleranceIn,
+        blockers,
+      },
     };
   } catch {
     await writeTrace({
@@ -245,6 +372,208 @@ export async function runRecommendationPipeline(
       error: "Unexpected pipeline failure",
     };
   }
+}
+
+function shouldAttemptClosestRelaxation(input: {
+  followupIntent:
+    | "none"
+    | "closest"
+    | "larger"
+    | "smaller"
+    | "more_like_this"
+    | "tighten";
+  priorResultMode: "recommendation" | "no_match" | "clarifying_question" | null;
+  constraints: HardConstraints;
+}): boolean {
+  if (!input.constraints.size) return false;
+  if (
+    input.followupIntent !== "closest" &&
+    input.followupIntent !== "larger" &&
+    input.followupIntent !== "smaller"
+  ) {
+    return false;
+  }
+
+  return input.priorResultMode === "no_match";
+}
+
+function expandSizeToleranceForFetch(constraints: HardConstraints): HardConstraints {
+  if (!constraints.size) return constraints;
+  return {
+    ...constraints,
+    size: {
+      ...constraints.size,
+      toleranceIn: Math.max(
+        constraints.size.toleranceIn ?? 0,
+        SIZE_RELAXATION_STEPS_IN[SIZE_RELAXATION_STEPS_IN.length - 1]
+      ),
+    },
+  };
+}
+
+function applyClosestRelaxationLadder(
+  inventory: InventoryRug[],
+  constraints: HardConstraints
+): {
+  constraints: HardConstraints;
+  candidates: InventoryRug[];
+  relaxedToleranceIn: number | null;
+} {
+  if (!constraints.size) {
+    return {
+      constraints,
+      candidates: filterByHardConstraints(inventory, constraints),
+      relaxedToleranceIn: null,
+    };
+  }
+
+  for (const tolerance of SIZE_RELAXATION_STEPS_IN) {
+    const nextConstraints: HardConstraints = {
+      ...constraints,
+      size: {
+        ...constraints.size,
+        toleranceIn: tolerance,
+      },
+    };
+    const candidates = filterByHardConstraints(inventory, nextConstraints);
+    if (candidates.length > 0) {
+      return {
+        constraints: nextConstraints,
+        candidates,
+        relaxedToleranceIn: tolerance,
+      };
+    }
+  }
+
+  return {
+    constraints,
+    candidates: [],
+    relaxedToleranceIn: SIZE_RELAXATION_STEPS_IN[SIZE_RELAXATION_STEPS_IN.length - 1],
+  };
+}
+
+function detectHardConstraintBlockers(
+  inventory: InventoryRug[],
+  constraints: HardConstraints
+): string[] {
+  const blockers: string[] = [];
+  const activeKeys: Array<keyof HardConstraints> = [];
+  if (constraints.size) activeKeys.push("size");
+  if (constraints.colors && constraints.colors.length > 0) activeKeys.push("colors");
+  if (constraints.styles && constraints.styles.length > 0) activeKeys.push("styles");
+  if (constraints.shape) activeKeys.push("shape");
+
+  if (activeKeys.length === 0) return blockers;
+
+  const baseline = filterByHardConstraints(inventory, constraints);
+  if (baseline.length > 0) return blockers;
+
+  for (const key of activeKeys) {
+    const relaxed: HardConstraints = {
+      ...constraints,
+      [key]: undefined,
+    };
+    const relaxedMatches = filterByHardConstraints(inventory, relaxed);
+    if (relaxedMatches.length > 0) {
+      blockers.push(key);
+    }
+  }
+
+  return blockers;
+}
+
+function describeHardConstraints(constraints: HardConstraints): string[] {
+  const items: string[] = [];
+  if (constraints.size) {
+    const toleranceText =
+      typeof constraints.size.toleranceIn === "number"
+        ? ` ±${constraints.size.toleranceIn}"`
+        : "";
+    items.push(
+      `size ${Math.round(constraints.size.widthIn)}" x ${Math.round(
+        constraints.size.lengthIn
+      )}"${toleranceText}`
+    );
+  }
+  if (constraints.colors && constraints.colors.length > 0) {
+    items.push(`colors ${constraints.colors.join(", ")}`);
+  }
+  if (constraints.styles && constraints.styles.length > 0) {
+    items.push(`styles ${constraints.styles.join(", ")}`);
+  }
+  if (constraints.shape) {
+    items.push(
+      constraints.shape === "round_oval"
+        ? "shape round/oval"
+        : `shape ${constraints.shape}`
+    );
+  }
+  return items;
+}
+
+function blockerLabel(blocker: string): string {
+  if (blocker === "colors") return "color";
+  if (blocker === "styles") return "style";
+  if (blocker === "shape") return "shape";
+  return blocker;
+}
+
+function buildGuidedNoMatchResponse(input: {
+  userMessage: string;
+  constraints: HardConstraints;
+  followupIntent:
+    | "none"
+    | "closest"
+    | "larger"
+    | "smaller"
+    | "more_like_this"
+    | "tighten";
+  blockers: string[];
+  relaxedToleranceIn: number | null;
+}): RecommendationResponse {
+  const constraintSummary = describeHardConstraints(input.constraints);
+  const summaryText =
+    constraintSummary.length > 0
+      ? `I couldn't find rugs matching ${constraintSummary.join(" + ")}.`
+      : "I couldn't find rugs matching your request.";
+
+  let assistantMessage = summaryText;
+  if (
+    (input.followupIntent === "closest" ||
+      input.followupIntent === "larger" ||
+      input.followupIntent === "smaller") &&
+    typeof input.relaxedToleranceIn === "number"
+  ) {
+    assistantMessage = `${summaryText} I widened size tolerance up to ±${input.relaxedToleranceIn}" and still found no valid matches.`;
+  }
+
+  if (input.blockers.length > 0) {
+    assistantMessage = `${assistantMessage} The tightest blockers appear to be ${input.blockers
+      .map((blocker) => blockerLabel(blocker))
+      .join(" + ")} constraints.`;
+  }
+
+  const questions: string[] = [];
+  if (input.blockers.includes("colors")) {
+    questions.push("Would you like to relax color and keep the other constraints strict?");
+  }
+  if (input.blockers.includes("styles")) {
+    questions.push("Would you like to relax style and keep size/color strict?");
+  }
+  if (input.blockers.includes("shape")) {
+    questions.push("Would you like to clear shape and keep the rest strict?");
+  }
+  if (questions.length === 0) {
+    questions.push("Would you like to relax one constraint so I can show the closest options?");
+  }
+
+  return {
+    mode: "no_match",
+    assistant_message: assistantMessage,
+    questions: questions.slice(0, 2),
+    recommendations: [],
+    notes: null,
+  };
 }
 
 async function fetchInventoryCandidates(input: {

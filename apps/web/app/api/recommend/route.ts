@@ -6,6 +6,7 @@ import {
   normalizeHardConstraints,
 } from "@/lib/filters/extract-constraints";
 import { runRecommendationPipeline } from "@/lib/recommend/pipeline";
+import { parseRecommendationFollowupIntent } from "@/lib/chat/router";
 import {
   parseE2eTraceMeta,
   writeE2eTraceArtifact,
@@ -46,7 +47,10 @@ function hasMeaningfulConstraints(constraints: HardConstraints): boolean {
       constraints.size &&
         typeof constraints.size.widthIn === "number" &&
         typeof constraints.size.lengthIn === "number"
-    )
+    ) ||
+    Boolean(constraints.colors && constraints.colors.length > 0) ||
+    Boolean(constraints.styles && constraints.styles.length > 0) ||
+    Boolean(constraints.shape)
   );
 }
 
@@ -188,8 +192,8 @@ export async function POST(req: Request) {
             response: {
               status: 400,
               body: {
-                error:
-                  "Provide a message or at least one valid size constraint.",
+                  error:
+                    "Provide a message or at least one valid hard constraint.",
                 code: "BAD_REQUEST",
               },
             },
@@ -200,7 +204,7 @@ export async function POST(req: Request) {
         });
       }
       return badRequest(
-        "Provide a message or at least one valid size constraint."
+        "Provide a message or at least one valid hard constraint."
       );
     }
 
@@ -317,6 +321,10 @@ export async function POST(req: Request) {
       tenantId,
       userMessage,
       constraints,
+      followupIntent: parseRecommendationFollowupIntent(
+        userMessage.toLowerCase().trim()
+      ),
+      priorResultMode: null,
       promptContext: undefined,
       traceMeta: traceMeta
         ? {

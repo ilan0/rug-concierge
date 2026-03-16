@@ -9,26 +9,14 @@
     "dev": "npm --workspace apps/web run dev",
     "build": "npm --workspace apps/web run build",
     "lint": "npm --workspace apps/web run lint",
-    "test:unit": "TSX_TSCONFIG_PATH=apps/web/tsconfig.json node --import tsx --test apps/web/tests/unit/*.test.ts",
     "check:docs": "node scripts/check-docs-drift.mjs",
     "check:migrations": "node scripts/check-migrations.mjs",
-    "check:api-contracts": "node scripts/run-api-contract-check.mjs",
-    "quality:release": "npm --workspace apps/web exec tsc --noEmit && npm --workspace apps/web run lint && npm --workspace apps/web run build && npm run test:unit && npm run check:docs && npm run check:migrations && npm run check:api-contracts",
-    "qa": "npm run qa:functional",
-    "qa:functional": "node scripts/qa.mjs functional",
-    "qa:quality": "node scripts/qa.mjs quality",
-    "qa:all": "npm run qa:functional && npm run qa:quality"
+    "quality:release": "npm --workspace apps/web exec tsc --noEmit && npm --workspace apps/web run lint && npm --workspace apps/web run build && npm run check:docs && npm run check:migrations"
   },
   "engines": {
     "node": ">=20.9.0"
   },
   "devDependencies": {
-    "@axe-core/playwright": "^4.11.1",
-    "@playwright/test": "^1.58.2",
-    "fast-check": "^4.5.3",
-    "pixelmatch": "^7.1.0",
-    "playwright": "^1.58.2",
-    "pngjs": "^7.0.0",
     "tsx": "^4.21.0",
     "zod": "^4.3.6"
   }

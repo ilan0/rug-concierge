@@ -180,12 +180,35 @@ const RECOMMENDATION_SCHEMA = {
 } as const;
 
 function hasOptionalHardConstraints(constraints: HardConstraints): boolean {
-  return Boolean(constraints.size);
+  return Boolean(
+    constraints.size ||
+      (constraints.colors && constraints.colors.length > 0) ||
+      (constraints.styles && constraints.styles.length > 0) ||
+      constraints.shape
+  );
 }
 
 function buildFallbackRequestText(constraints: HardConstraints): string {
+  const pieces: string[] = [];
   if (constraints.size) {
-    return `Find the best matches for size ${constraints.size.widthIn}" x ${constraints.size.lengthIn}".`;
+    pieces.push(
+      `size ${constraints.size.widthIn}" x ${constraints.size.lengthIn}"`
+    );
+  }
+  if (constraints.colors && constraints.colors.length > 0) {
+    pieces.push(`colors ${constraints.colors.join(", ")}`);
+  }
+  if (constraints.styles && constraints.styles.length > 0) {
+    pieces.push(`styles ${constraints.styles.join(", ")}`);
+  }
+  if (constraints.shape) {
+    pieces.push(
+      constraints.shape === "round_oval" ? "shape round/oval" : `shape ${constraints.shape}`
+    );
+  }
+
+  if (pieces.length > 0) {
+    return `Find the best matches for ${pieces.join(" + ")}.`;
   }
   return "Show a varied set of available rugs from inventory.";
 }
@@ -376,9 +399,9 @@ function applyTonePolish(response: RecommendationResponse): RecommendationRespon
 
   if (response.mode === "no_match") {
     const noMatchMessage = toPlainText(response.assistant_message);
-    const withGuidance = /\b(adjust|widen|broaden|change|try|refine)\b/i.test(noMatchMessage)
+    const withGuidance = /\b(adjust|widen|broaden|change|try|refine|relax)\b/i.test(noMatchMessage)
       ? noMatchMessage
-      : `${noMatchMessage} Try widening size constraints and I can suggest alternatives.`;
+      : `${noMatchMessage} Try relaxing one constraint and I can suggest alternatives.`;
     return {
       ...response,
       assistant_message: withGuidance,
@@ -927,7 +950,7 @@ export async function rankAndExplain(
     return applyTonePolish({
       mode: "no_match",
       assistant_message: constrainedSearch
-        ? "Based on current inventory, nothing fits those constraints. Try widening size constraints and I can suggest alternatives."
+        ? "Based on current inventory, nothing fits those constraints. Try relaxing one constraint and I can suggest alternatives."
         : "I do not see any available rugs in the current inventory list.",
       questions: constrainedSearch
         ? ["Would you like to adjust the size request?"]

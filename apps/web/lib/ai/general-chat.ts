@@ -376,7 +376,13 @@ export async function generateGeneralChatResponse(input: {
 
   const prompts = getRecommendationPromptBundle();
   const hasRecommendationHardConstraints = Boolean(
-    input.contextPacket.structured_state.recommendation_state.hard_constraints.size
+    input.contextPacket.structured_state.recommendation_state.hard_constraints.size ||
+      (input.contextPacket.structured_state.recommendation_state.hard_constraints
+        .colors?.length ?? 0) > 0 ||
+      (input.contextPacket.structured_state.recommendation_state.hard_constraints
+        .styles?.length ?? 0) > 0 ||
+      input.contextPacket.structured_state.recommendation_state.hard_constraints
+        .shape
   );
   const hasStructuredStateContext = hasRecommendationHardConstraints;
   const hasMemoryContext =
