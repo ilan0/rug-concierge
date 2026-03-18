@@ -160,7 +160,8 @@ export function RecommendationCard({
   return (
     <>
       <Card
-        className="cursor-pointer overflow-hidden rounded-3xl border-border/55 bg-background/80 shadow-[0_2px_10px_rgba(35,22,8,0.08)] transition hover:border-primary/35 hover:shadow-[0_4px_18px_rgba(238,189,43,0.12)]"
+        data-recommendation-card="true"
+        className="cursor-pointer overflow-hidden rounded-3xl border-border/55 bg-background/82 shadow-[0_2px_10px_rgba(35,22,8,0.08)] transition hover:-translate-y-[1px] hover:border-primary/35 hover:shadow-[0_8px_20px_rgba(238,189,43,0.14)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/45"
         onClick={onOpenDetails}
         role="button"
         tabIndex={0}
@@ -197,11 +198,18 @@ export function RecommendationCard({
             ) : null}
           </div>
         </CardHeader>
-        <CardContent className="space-y-4 pb-5 pt-1 text-[17px] leading-[1.6] md:min-h-[300px] lg:min-h-[320px]">
+        <CardContent className="space-y-4 pb-5 pt-1 text-[17px] leading-[1.6] md:min-h-[288px] lg:min-h-[302px]">
           {tags.length > 0 ? (
-            <p className="text-xs font-medium text-muted-foreground">
-              {tags.slice(0, 3).join(" · ")}
-            </p>
+            <div className="flex flex-wrap gap-1.5">
+              {tags.slice(0, 3).map((tag) => (
+                <span
+                  key={`${item.rug_id}-${tag}`}
+                  className="rounded-full border border-border/55 bg-background px-2.5 py-0.5 text-[11px] font-medium text-foreground/75"
+                >
+                  {tag}
+                </span>
+              ))}
+            </div>
           ) : null}
 
           <p className="space-y-1">

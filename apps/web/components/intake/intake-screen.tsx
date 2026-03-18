@@ -63,6 +63,7 @@ export function IntakeScreen({ tenantId }: IntakeScreenProps) {
     useState<IntakeFieldErrors>(EMPTY_FIELD_ERRORS);
   const [notice, setNotice] = useState<string | null>(null);
   const [lastSaved, setLastSaved] = useState<IntakeCreatedRug | null>(null);
+  const [touchPreferred, setTouchPreferred] = useState(false);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const imagePreviewUrl = useMemo(
@@ -77,6 +78,19 @@ export function IntakeScreen({ tenantId }: IntakeScreenProps) {
       }
     };
   }, [imagePreviewUrl]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const mq = window.matchMedia("(pointer: coarse)");
+    const sync = () => setTouchPreferred(mq.matches);
+    sync();
+    if (typeof mq.addEventListener === "function") {
+      mq.addEventListener("change", sync);
+      return () => mq.removeEventListener("change", sync);
+    }
+    mq.addListener(sync);
+    return () => mq.removeListener(sync);
+  }, []);
 
   const formatFeetAndInches = (totalIn: number): string => {
     const feet = Math.floor(totalIn / 12);
@@ -209,12 +223,12 @@ export function IntakeScreen({ tenantId }: IntakeScreenProps) {
     <AppShell>
       <PageHeader
         title="Inventory Intake"
-        subtitle="Capture a photo and dimensions. AI will auto-generate the name and description."
+        subtitle="Capture a rug photo and dimensions. AI enrichment runs automatically after save."
       />
 
       <div className="mt-5 space-y-5">
-        <SectionCard>
-          <form onSubmit={onSubmit} className="space-y-6">
+        <SectionCard tone="soft">
+          <form onSubmit={onSubmit} className="space-y-5">
             <input
               ref={fileInputRef}
               type="file"
@@ -238,7 +252,7 @@ export function IntakeScreen({ tenantId }: IntakeScreenProps) {
                 <button
                   type="button"
                   className={cn(
-                    "w-full rounded-2xl border-2 border-dashed px-4 py-10 text-center transition-colors",
+                    "w-full rounded-2xl border-2 border-dashed px-4 py-8 text-center transition-colors",
                     fieldErrors.photo
                       ? "border-destructive/70 bg-destructive/5"
                       : "border-border/65 bg-background/60 hover:border-primary/45 hover:bg-primary/10"
@@ -251,7 +265,7 @@ export function IntakeScreen({ tenantId }: IntakeScreenProps) {
                       <Camera className="size-6" />
                     </span>
                     <p className="text-lg font-semibold text-foreground">
-                      Tap or click to upload a photo
+                      {touchPreferred ? "Tap to upload a photo" : "Click to upload a photo"}
                     </p>
                     <p className="text-sm text-muted-foreground">
                       Supported formats: JPEG, PNG, WebP, HEIC
@@ -465,6 +479,7 @@ export function IntakeScreen({ tenantId }: IntakeScreenProps) {
               <Button
                 type="submit"
                 size="lg"
+                className="min-w-32"
                 onClick={() => setSubmitIntent("save")}
                 disabled={isSaving}
               >
@@ -474,6 +489,7 @@ export function IntakeScreen({ tenantId }: IntakeScreenProps) {
                 type="submit"
                 variant="outline"
                 size="lg"
+                className="min-w-40"
                 onClick={() => setSubmitIntent("save_and_add_another")}
                 disabled={isSaving}
               >
@@ -484,7 +500,7 @@ export function IntakeScreen({ tenantId }: IntakeScreenProps) {
             </div>
 
             <p className="text-sm text-muted-foreground">
-              AI will auto-generate name and description from the photo.
+              Labels and structured fields are generated after upload and can be refined in Inventory.
             </p>
           </form>
         </SectionCard>
@@ -504,7 +520,7 @@ export function IntakeScreen({ tenantId }: IntakeScreenProps) {
         ) : null}
 
         {lastSaved ? (
-          <SectionCard title="Last Saved Rug">
+          <SectionCard title="Last Saved Rug" tone="soft">
             <div className="space-y-1 text-sm">
               <p>
                 <span className="font-medium">Label:</span>{" "}

@@ -39,7 +39,7 @@ export default async function RootLayout({
       <body className={`${manrope.variable} ${fraunces.variable} min-h-screen bg-background font-sans text-foreground antialiased`}>
         <header
           aria-label="Store header"
-          className="sticky top-0 z-40 border-b border-border/30 bg-background/90 backdrop-blur supports-[backdrop-filter]:bg-background/75"
+          className="sticky top-0 z-40 border-b border-border/35 bg-background/92 shadow-[0_1px_0_rgba(60,39,15,0.05)] backdrop-blur supports-[backdrop-filter]:bg-background/80"
         >
           <KioskNav initialUnlocked={unlocked} />
         </header>

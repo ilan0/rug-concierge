@@ -27,7 +27,7 @@ function getOpenAiTimeoutMs(surface: OpenAiSurface): number {
   const bySurface: Record<OpenAiSurface, number> = {
     general_chat: 20_000,
     recommendation: 5_500,
-    vision_enrichment: 15_000,
+    vision_enrichment: 25_000,
   };
   const envBySurface: Partial<Record<OpenAiSurface, string | undefined>> = {
     general_chat: process.env.OPENAI_TIMEOUT_MS_GENERAL_CHAT,
@@ -43,7 +43,7 @@ function getOpenAiRetryAttempts(surface: OpenAiSurface): number {
   const bySurface: Record<OpenAiSurface, number> = {
     general_chat: DEFAULT_OPENAI_RETRY_ATTEMPTS,
     recommendation: 1,
-    vision_enrichment: 2,
+    vision_enrichment: 3,
   };
   const envBySurface: Partial<Record<OpenAiSurface, string | undefined>> = {
     general_chat: process.env.OPENAI_RETRY_ATTEMPTS_GENERAL_CHAT,

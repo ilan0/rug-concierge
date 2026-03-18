@@ -152,9 +152,9 @@ export function ChatThread(input: ChatThreadProps) {
 
   return (
     <section className="relative">
-      <section className="flex flex-col gap-8">
+      <section className="flex flex-col gap-7">
         {turns.length === 0 ? (
-          <article className="max-w-full rounded-3xl bg-background/55 px-5 py-5">
+          <article className="max-w-full rounded-3xl border border-border/45 bg-background/60 px-5 py-5 shadow-[0_4px_14px_rgba(36,20,5,0.06)]">
             <div className="mb-3 flex items-center justify-between gap-2">
               <p className="text-[11px] font-semibold tracking-[0.08em] text-muted-foreground">
                 Concierge
@@ -169,7 +169,7 @@ export function ChatThread(input: ChatThreadProps) {
                   key={prompt}
                   type="button"
                   variant="outline"
-                  className="h-auto min-h-[52px] w-full justify-start whitespace-normal break-words rounded-full border-primary/35 bg-primary/5 px-6 py-3 text-left text-[18px] leading-[1.35] text-foreground hover:border-primary/55 hover:bg-primary/12 hover:text-foreground sm:w-auto sm:max-w-full sm:justify-center sm:text-center"
+                  className="h-auto min-h-[52px] w-full justify-start whitespace-normal break-words rounded-2xl border-primary/35 bg-primary/6 px-5 py-3 text-left text-[17px] leading-[1.35] text-foreground shadow-sm hover:border-primary/55 hover:bg-primary/12 hover:text-foreground sm:w-auto sm:max-w-full sm:justify-center sm:text-center"
                   onClick={() => onChoosePrompt(prompt)}
                 >
                   {prompt}
@@ -189,13 +189,20 @@ export function ChatThread(input: ChatThreadProps) {
                 key={turn.id}
                 className={
                   turn.role === "user"
-                    ? "group ml-auto max-w-[92%] rounded-3xl bg-[#e7dccf]/82 px-6 py-5 shadow-[0_1px_2px_rgba(50,30,12,0.12)] sm:max-w-[86%]"
-                    : "group max-w-full rounded-3xl bg-background/55 px-4 py-4 sm:px-5 sm:py-5"
+                    ? "group ml-auto max-w-[92%] rounded-3xl border border-border/45 bg-[#e7dccf]/82 px-6 py-5 shadow-[0_1px_2px_rgba(50,30,12,0.12)] sm:max-w-[86%]"
+                    : "group max-w-full rounded-3xl border border-border/45 bg-background/58 px-4 py-4 sm:px-5 sm:py-5"
                 }
                 onClick={() =>
                   turn.role === "assistant" ? onSelectTurn(turn.id) : undefined
                 }
                 tabIndex={turn.role === "assistant" ? 0 : undefined}
+                onKeyDown={(event) => {
+                  if (turn.role !== "assistant") return;
+                  if (event.key === "Enter" || event.key === " ") {
+                    event.preventDefault();
+                    onSelectTurn(turn.id);
+                  }
+                }}
               >
                 <div className="mb-2 flex items-center justify-between gap-2">
                   <p className="text-[11px] font-semibold tracking-[0.08em] text-muted-foreground">
@@ -247,16 +254,20 @@ export function ChatThread(input: ChatThreadProps) {
 
                 {turn.role === "assistant" &&
                 shouldRenderFollowUpQuestion(turn.text, turn.followUpQuestion) ? (
-                  <div className="mt-5 rounded-lg border border-amber-200 bg-amber-50 p-3">
-                    <p className="text-xs font-semibold uppercase tracking-[0.08em] text-amber-800">Suggested Next Step</p>
-                    <p className="mt-1 text-sm text-amber-900">{turn.followUpQuestion}</p>
+                  <div className="mt-5 rounded-xl border border-primary/30 bg-primary/8 p-3">
+                    <p className="text-xs font-semibold uppercase tracking-[0.08em] text-foreground/80">
+                      Suggested Next Step
+                    </p>
+                    <p className="mt-1 text-sm text-foreground/90">{turn.followUpQuestion}</p>
                   </div>
                 ) : null}
 
                 {turn.role === "assistant" && turn.questions && turn.questions.length > 0 ? (
-                  <div className="mt-5">
-                    <p className="text-xs font-semibold uppercase tracking-[0.08em] text-muted-foreground">Clarifying Questions</p>
-                    <ul className="mt-1 list-disc space-y-1 pl-5 text-[18px] leading-[1.65]">
+                  <div className="mt-5 rounded-xl border border-primary/30 bg-primary/8 p-3">
+                    <p className="text-xs font-semibold uppercase tracking-[0.08em] text-foreground/80">
+                      Clarifying Questions
+                    </p>
+                    <ul className="mt-1.5 list-disc space-y-1 pl-5 text-[17px] leading-[1.55] text-foreground/90">
                       {turn.questions.map((question) => (
                         <li key={question}>{question}</li>
                       ))}

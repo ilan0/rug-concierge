@@ -151,12 +151,16 @@ export default function KioskNav({ initialUnlocked }: KioskNavProps) {
   }, [router]);
 
   const visibleLinks = unlocked ? STAFF_LINKS : [];
+  const hasVisibleLinks = visibleLinks.length > 0;
 
   return (
     <>
       <nav
         aria-label="Primary kiosk navigation"
-        className="mx-auto flex w-full max-w-6xl flex-wrap items-center gap-2 px-4 py-2 opacity-95 transition-all duration-200 sm:px-6 lg:px-8"
+        className={cn(
+          "mx-auto flex w-full max-w-6xl flex-wrap items-center gap-2 px-4 py-2 opacity-95 transition-all duration-200 sm:px-6 lg:px-8",
+          hasVisibleLinks ? "justify-start" : "justify-end"
+        )}
       >
         {visibleLinks.map((link) => {
           const active = isLinkActive(pathname, link.href);
@@ -164,7 +168,7 @@ export default function KioskNav({ initialUnlocked }: KioskNavProps) {
             "inline-flex min-h-9 items-center rounded-full border px-3 py-1.5 text-sm font-medium leading-5 transition-colors",
             active
               ? "border-primary bg-primary text-primary-foreground shadow-sm"
-              : "border-border/55 bg-background/75 text-foreground/75 hover:border-primary/45 hover:bg-primary/10 hover:text-foreground"
+              : "border-border/55 bg-background/70 text-foreground/75 hover:border-primary/45 hover:bg-primary/12 hover:text-foreground"
           );
 
           return (
@@ -172,6 +176,7 @@ export default function KioskNav({ initialUnlocked }: KioskNavProps) {
               key={link.href}
               href={link.href}
               className={className}
+              aria-current={active ? "page" : undefined}
             >
               {link.label}
             </a>

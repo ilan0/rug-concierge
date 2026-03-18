@@ -98,7 +98,7 @@ export function MessageComposer(input: MessageComposerProps) {
     >
       <div
         ref={containerRef}
-        className="w-full rounded-[20px] border border-border/70 bg-card/96 p-2 shadow-[0_14px_34px_rgba(42,27,11,0.2)] supports-[backdrop-filter:blur(0px)]:bg-card/90 supports-[backdrop-filter:blur(0px)]:backdrop-blur sm:p-2.5"
+        className="w-full rounded-[20px] border border-border/70 bg-card/95 p-2 shadow-[0_12px_28px_rgba(42,27,11,0.16)] supports-[backdrop-filter:blur(0px)]:bg-card/88 supports-[backdrop-filter:blur(0px)]:backdrop-blur sm:p-2.5"
         style={{ paddingBottom: "calc(0.45rem + env(safe-area-inset-bottom, 0px))" }}
       >
         {showJumpToLatest && onJumpToLatest ? (

@@ -7,6 +7,10 @@ import { resolveAuthoritativeTenantForServer } from "@/lib/auth/tenant";
 import { fetchPrimaryRugImagesForRugs } from "@/lib/storage/rug-images";
 import { requestVisionEnrichment } from "@/lib/inventory/vision-enrichment";
 import {
+  buildTradeTitle,
+  sanitizeFallbackTradeLabel,
+} from "@/lib/inventory/title-builder";
+import {
   checkLocalRateLimit,
   checkRateLimit,
   inventoryWriteRateLimit,
@@ -97,10 +101,18 @@ export async function POST(
     return internalError("Vision enrichment failed for this rug.");
   }
 
+  const computedTradeTitle = buildTradeTitle({
+    aiFields: enrichment.aiStructuredFields,
+    widthTotalIn: existing.width_total_in,
+    lengthTotalIn: existing.length_total_in,
+    fallbackLabel: enrichment.intakeLabel,
+  });
+  const safeFallbackTitle = sanitizeFallbackTradeLabel(enrichment.intakeLabel);
+
   const updateResult = await supabaseAdmin
     .from("rugs")
     .update({
-      intake_label: enrichment.intakeLabel,
+      intake_label: computedTradeTitle ?? safeFallbackTitle ?? "Gallery Rug",
       ai_description: enrichment.aiDescription,
       ai_structured_fields: enrichment.aiStructuredFields,
     })
@@ -128,4 +140,3 @@ export async function POST(
     toStaffInventoryRugDetail({ row: updatedRow, ...updatedImage })
   );
 }
-

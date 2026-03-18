@@ -7,6 +7,8 @@ export const RUG_ORIGIN_VALUES = [
   "Indian",
   "Caucasian",
   "Pakistani",
+  "Moroccan",
+  "Central Asian",
   "Other",
 ] as const;
 
@@ -14,6 +16,8 @@ export const RUG_AGE_CATEGORY_VALUES = [
   "antique",
   "semi-antique",
   "vintage",
+  "traditional",
+  "contemporary",
   "new",
 ] as const;
 

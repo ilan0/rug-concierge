@@ -14,6 +14,10 @@ import {
 import { isStaffUnlockedFromRequest } from "@/lib/auth/staff";
 import { requestVisionEnrichment } from "@/lib/inventory/vision-enrichment";
 import {
+  buildTradeTitle,
+  sanitizeFallbackTradeLabel,
+} from "@/lib/inventory/title-builder";
+import {
   checkLocalRateLimit,
   checkRateLimit,
   inventoryWriteRateLimit,
@@ -176,10 +180,18 @@ async function runVisionEnrichment(input: {
     return;
   }
 
+  const computedTradeTitle = buildTradeTitle({
+    aiFields: enrichment.aiStructuredFields,
+    widthTotalIn: input.widthTotalIn,
+    lengthTotalIn: input.lengthTotalIn,
+    fallbackLabel: enrichment.intakeLabel,
+  });
+  const safeFallbackTitle = sanitizeFallbackTradeLabel(enrichment.intakeLabel);
+
   const result = await supabaseAdmin
     .from("rugs")
     .update({
-      intake_label: enrichment.intakeLabel,
+      intake_label: computedTradeTitle ?? safeFallbackTitle ?? "Gallery Rug",
       ai_description: enrichment.aiDescription,
       ai_structured_fields: enrichment.aiStructuredFields,
     })

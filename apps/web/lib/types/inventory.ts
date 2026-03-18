@@ -21,9 +21,17 @@ export type RugOrigin =
   | "Indian"
   | "Caucasian"
   | "Pakistani"
+  | "Moroccan"
+  | "Central Asian"
   | "Other";
 
-export type RugAgeCategory = "antique" | "semi-antique" | "vintage" | "new";
+export type RugAgeCategory =
+  | "antique"
+  | "semi-antique"
+  | "vintage"
+  | "traditional"
+  | "contemporary"
+  | "new";
 
 export type RugMood = "traditional" | "transitional" | "eclectic" | "modern";
 

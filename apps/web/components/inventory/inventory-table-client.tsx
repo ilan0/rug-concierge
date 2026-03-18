@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Pencil } from "lucide-react";
 import { RugImage } from "@/components/ui/rug-image";
 import { StaffRugDetailModal } from "@/components/inventory/staff-rug-detail-modal";
 import type { InventoryBrowserRow } from "@/lib/types/inventory";
@@ -29,21 +30,21 @@ export function StatusBadge({ status }: { status: string | null }) {
     return (
       <span className="inline-flex items-center gap-1.5 text-sm font-medium text-emerald-700">
         <span className="size-2 shrink-0 rounded-full bg-emerald-500" />
-        available
+        Available
       </span>
     );
   if (status === "on_hold")
     return (
       <span className="inline-flex items-center gap-1.5 text-sm font-medium text-amber-700">
         <span className="size-2 shrink-0 rounded-full bg-amber-500" />
-        on hold
+        On Hold
       </span>
     );
   if (status === "sold")
     return (
       <span className="inline-flex items-center gap-1.5 text-sm font-medium text-red-700">
         <span className="size-2 shrink-0 rounded-full bg-red-500" />
-        sold
+        Sold
       </span>
     );
   return <span className="text-sm text-muted-foreground">{status ?? "-"}</span>;
@@ -95,7 +96,7 @@ export function InventoryTableClient({ rows }: InventoryTableClientProps) {
               return (
                 <article
                   key={row.id}
-                  className="cursor-pointer rounded-xl border border-border/65 bg-background/80 p-2.5 transition-colors hover:bg-secondary/30"
+                  className="cursor-pointer rounded-xl border border-border/65 bg-background/80 p-3 transition-colors hover:bg-secondary/30"
                   onClick={() => onOpenRow(row)}
                 >
                   <div className="mb-2 flex items-start gap-2.5">
@@ -155,7 +156,7 @@ export function InventoryTableClient({ rows }: InventoryTableClientProps) {
                         onOpenRow(row);
                       }}
                     >
-                      View details
+                      Open details
                     </button>
                   </div>
                 </article>
@@ -172,13 +173,13 @@ export function InventoryTableClient({ rows }: InventoryTableClientProps) {
             <table className="w-full table-fixed border-collapse text-sm">
               <thead className="bg-secondary/50 text-left">
                 <tr>
-                  <th className="w-[92px] p-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Image</th>
-                  <th className="w-[34%] p-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Label</th>
-                  <th className="w-[15%] p-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Stock ID</th>
-                  <th className="w-[12%] p-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Status</th>
-                  <th className="w-[15%] p-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Size</th>
-                  <th className="hidden w-[12%] p-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground xl:table-cell">Added</th>
-                  <th className="w-[88px] p-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Action</th>
+                  <th className="w-[84px] p-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Image</th>
+                  <th className="w-[36%] p-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Label</th>
+                  <th className="w-[14%] p-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Stock ID</th>
+                  <th className="w-[13%] p-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Size</th>
+                  <th className="w-[11%] p-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Status</th>
+                  <th className="hidden w-[10%] p-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground 2xl:table-cell">Added</th>
+                  <th className="w-[74px] p-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Edit</th>
                 </tr>
               </thead>
               <tbody>
@@ -191,7 +192,7 @@ export function InventoryTableClient({ rows }: InventoryTableClientProps) {
                       onClick={() => onOpenRow(row)}
                     >
                       <td className="p-3 align-top">
-                        <div className="h-20 w-16 overflow-hidden rounded-md border border-border/70 bg-muted">
+                        <div className="h-20 w-[3.4rem] overflow-hidden rounded-md border border-border/70 bg-muted">
                           <RugImage src={row.primary_image_url} alt={displayLabel} />
                         </div>
                       </td>
@@ -199,8 +200,8 @@ export function InventoryTableClient({ rows }: InventoryTableClientProps) {
                         <p
                           className={
                             ready
-                              ? "break-words font-medium leading-snug"
-                              : "break-words leading-snug text-muted-foreground"
+                              ? "line-clamp-3 break-words font-medium leading-snug"
+                              : "line-clamp-3 break-words leading-snug text-muted-foreground"
                           }
                         >
                           {displayLabel}
@@ -231,24 +232,25 @@ export function InventoryTableClient({ rows }: InventoryTableClientProps) {
                         )}
                       </td>
                       <td className="p-3 align-top">
-                        <StatusBadge status={row.status} />
-                      </td>
-                      <td className="p-3 align-top">
                         {formatRugSize(row.width_total_in, row.length_total_in) || "-"}
                       </td>
-                      <td className="hidden p-3 align-top xl:table-cell">
+                      <td className="p-3 align-top">
+                        <StatusBadge status={row.status} />
+                      </td>
+                      <td className="hidden p-3 align-top 2xl:table-cell">
                         {formatDate(row.created_at)}
                       </td>
                       <td className="p-3 align-top">
                         <button
                           type="button"
-                          className="inline-flex h-8 items-center rounded-full border border-border/60 bg-background px-3 text-xs font-medium text-foreground/85 hover:border-primary/35 hover:bg-primary/10 hover:text-foreground"
+                          className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-border/60 bg-background text-xs font-medium text-foreground/85 hover:border-primary/35 hover:bg-primary/10 hover:text-foreground"
                           onClick={(event) => {
                             event.stopPropagation();
                             onOpenRow(row);
                           }}
+                          aria-label={`Edit ${displayLabel}`}
                         >
-                          View
+                          <Pencil className="size-3.5" />
                         </button>
                       </td>
                     </tr>

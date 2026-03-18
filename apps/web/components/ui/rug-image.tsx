@@ -57,11 +57,12 @@ export function RugImage({
   return (
     <div
       className={cn(
-        "flex h-full w-full items-center justify-center bg-muted text-[11px] font-medium uppercase tracking-[0.08em] text-muted-foreground",
+        "flex h-full w-full flex-col items-center justify-center gap-1 bg-muted/90 px-2 text-center text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground",
         placeholderClassName
       )}
       aria-label={placeholderLabel}
     >
+      <span className="size-1.5 rounded-full bg-border/70" />
       {placeholderLabel}
     </div>
   );

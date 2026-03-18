@@ -1,7 +1,9 @@
 import { ConciergeScreen } from "@/components/concierge/concierge-screen";
 import { AccessGuard } from "@/components/ui/access-guard";
+import { isStaffUnlocked } from "@/lib/auth/staff";
 import { getResolvedBranding } from "@/lib/branding/tenant-branding";
 import { getServerUiTenantId } from "@/lib/ui/server-role";
+import { redirect } from "next/navigation";
 
 type ConciergePageProps = {
   searchParams?:
@@ -19,6 +21,7 @@ function readString(
 
 export default async function ConciergePage({ searchParams }: ConciergePageProps) {
   const tenantId = await getServerUiTenantId();
+  const unlocked = await isStaffUnlocked();
   if (!tenantId) {
     return (
       <AccessGuard
@@ -26,6 +29,10 @@ export default async function ConciergePage({ searchParams }: ConciergePageProps
         description="Select your store tenant on Home before using concierge."
       />
     );
+  }
+
+  if (unlocked) {
+    redirect("/inventory");
   }
 
   const params = (await searchParams) ?? {};

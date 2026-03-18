@@ -1,17 +1,19 @@
 import Link from "next/link";
-import { CheckCircle2, Package2 } from "lucide-react";
+import { CheckCircle2, Package2, SlidersHorizontal } from "lucide-react";
 import { AccessGuard } from "@/components/ui/access-guard";
 import { AppShell } from "@/components/ui/app-shell";
 import { PageHeader } from "@/components/ui/page-header";
 import { SectionCard } from "@/components/ui/section-card";
 import { InventoryControlsClient } from "@/components/inventory/inventory-controls-client";
 import { InventoryTableClient } from "@/components/inventory/inventory-table-client";
+import { isStaffUnlocked } from "@/lib/auth/staff";
 import { getInventoryStats, listInventory } from "@/lib/inventory/list";
 import {
   INVENTORY_QUERY_PARAMS,
   readQueryStringParam,
 } from "@/lib/inventory/query-params";
 import { getServerUiTenantId } from "@/lib/ui/server-role";
+import { redirect } from "next/navigation";
 
 type InventoryPageProps = {
   searchParams?:
@@ -65,6 +67,7 @@ function getVisiblePageNumbers(
 
 export default async function InventoryPage({ searchParams }: InventoryPageProps) {
   const tenantId = await getServerUiTenantId();
+  const unlocked = await isStaffUnlocked();
   if (!tenantId) {
     return (
       <AccessGuard
@@ -72,6 +75,10 @@ export default async function InventoryPage({ searchParams }: InventoryPageProps
         description="Select your store tenant before browsing inventory."
       />
     );
+  }
+
+  if (!unlocked) {
+    redirect("/concierge");
   }
 
   const params = (await searchParams) ?? {};
@@ -161,15 +168,15 @@ export default async function InventoryPage({ searchParams }: InventoryPageProps
   });
 
   return (
-    <AppShell variant="catalog" className="pt-4">
+    <AppShell variant="catalog" className="pt-3">
       <PageHeader
         title="Inventory Browser"
-        subtitle="Browse and manage AI-enriched inventory records."
+        subtitle="Browse, filter, and update your current collection."
         variant="minimal"
-        className="mb-3"
+        className="mb-2"
       />
 
-      <div className="mb-3 flex flex-wrap items-center gap-2 text-xs">
+      <div className="mb-2.5 flex flex-wrap items-center gap-2 text-xs">
         <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/30 bg-primary/10 px-2.5 py-1 font-medium text-foreground">
           <Package2 className="size-3.5 text-primary" />
           Total {inventoryStats.total}
@@ -177,6 +184,10 @@ export default async function InventoryPage({ searchParams }: InventoryPageProps
         <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-400/30 bg-emerald-50 px-2.5 py-1 font-medium text-foreground">
           <CheckCircle2 className="size-3.5 text-emerald-600" />
           Available {inventoryStats.available}
+        </span>
+        <span className="inline-flex items-center gap-1.5 rounded-full border border-border/50 bg-card px-2.5 py-1 font-medium text-foreground/85">
+          <SlidersHorizontal className="size-3.5 text-muted-foreground" />
+          Showing {result.rows.length} of {result.total}
         </span>
       </div>
 
@@ -207,9 +218,9 @@ export default async function InventoryPage({ searchParams }: InventoryPageProps
               </p>
             </SectionCard>
           ) : (
-            <SectionCard tone="soft" density="compact" className="border-border/55">
+            <div className="rounded-2xl border border-border/60 bg-card/86 p-2 shadow-sm backdrop-blur supports-[backdrop-filter]:bg-card/76">
               <InventoryTableClient rows={result.rows} />
-            </SectionCard>
+            </div>
           )}
         </section>
 

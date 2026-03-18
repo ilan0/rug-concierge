@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RugImage } from "@/components/ui/rug-image";
 import { toast } from "sonner";
+import { Pencil, RefreshCw } from "lucide-react";
 import {
   fetchStaffRugDetail,
   patchStaffRugDetail,
@@ -22,7 +23,6 @@ import { resolveEffectiveFields } from "@/lib/inventory/resolve-fields";
 import type {
   InventoryBrowserRow,
   StaffInventoryRugDetail,
-  StaffOverrides,
 } from "@/lib/types/inventory";
 import { formatRugSize } from "@/lib/utils/format";
 
@@ -52,10 +52,19 @@ const ORIGIN_OPTIONS = [
   "Indian",
   "Caucasian",
   "Pakistani",
+  "Moroccan",
+  "Central Asian",
   "Other",
 ] as const;
 
-const AGE_OPTIONS = ["antique", "semi-antique", "vintage", "new"] as const;
+const AGE_OPTIONS = [
+  "antique",
+  "semi-antique",
+  "vintage",
+  "traditional",
+  "contemporary",
+  "new",
+] as const;
 const MOOD_OPTIONS = ["traditional", "transitional", "eclectic", "modern"] as const;
 const PATTERN_OPTIONS = [
   "medallion center",
@@ -81,11 +90,6 @@ const COLOR_OPTIONS = [
   "cream",
   "coral",
 ] as const;
-
-function toStatusLabel(status: string | null): string {
-  if (status === "available") return "Available";
-  return "Not Available";
-}
 
 function normalizeList(values: string[]): string[] {
   const unique = new Set<string>();
@@ -117,12 +121,6 @@ function draftsEqual(left: EditDraft, right: EditDraft): boolean {
   const a = normalizeDraftForCompare(left);
   const b = normalizeDraftForCompare(right);
   return JSON.stringify(a) === JSON.stringify(b);
-}
-
-function hasOverride(detail: StaffInventoryRugDetail, key: keyof StaffOverrides) {
-  if (!detail.staff_overrides) return false;
-  if (!Object.prototype.hasOwnProperty.call(detail.staff_overrides, key)) return false;
-  return detail.staff_overrides[key] !== null && detail.staff_overrides[key] !== undefined;
 }
 
 function formatList(value: string[] | null | undefined): string {
@@ -206,6 +204,7 @@ export function StaffRugDetailModal({
     setColorInput("");
     setShowPatternAddInput(false);
     setShowColorAddInput(false);
+    setEditMode(false);
 
     let cancelled = false;
     const load = async () => {
@@ -261,46 +260,9 @@ export function StaffRugDetailModal({
     detail?.length_total_in ?? null
   );
   const title = detail?.effective_fields.label ?? sizeLabel ?? "Untitled";
-  const statusLabel = toStatusLabel(detail?.status ?? null);
   const baselineDraft = useMemo(() => (detail ? detailToDraft(detail) : null), [detail]);
   const hasUnsavedChanges =
     editMode && draft && baselineDraft ? !draftsEqual(draft, baselineDraft) : false;
-
-  const fieldRows = useMemo(() => {
-    if (!detail) return [];
-    return [
-      {
-        key: "origin" as const,
-        label: "Origin",
-        value: detail.effective_fields.origin ?? "—",
-      },
-      {
-        key: "style" as const,
-        label: "Style",
-        value: detail.effective_fields.style ?? "—",
-      },
-      {
-        key: "pattern" as const,
-        label: "Pattern",
-        value: formatList(detail.effective_fields.pattern),
-      },
-      {
-        key: "primary_colors" as const,
-        label: "Colors",
-        value: formatList(detail.effective_fields.primary_colors),
-      },
-      {
-        key: "age_category" as const,
-        label: "Age",
-        value: detail.effective_fields.age_category ?? "—",
-      },
-      {
-        key: "mood" as const,
-        label: "Mood",
-        value: detail.effective_fields.mood ?? "—",
-      },
-    ];
-  }, [detail]);
 
   const onToggleListValue = (field: "pattern" | "primary_colors", value: string) => {
     setDraft((prev) => {
@@ -335,29 +297,6 @@ export function StaffRugDetailModal({
     } else {
       setColorInput("");
       setShowColorAddInput(false);
-    }
-  };
-
-  const onRevertField = async (field: keyof StaffOverrides) => {
-    if (!detail || saving) return;
-    setSaving(true);
-    setError(null);
-
-    try {
-      const payload: StaffOverrides = { [field]: null } as StaffOverrides;
-      const updated = await patchStaffRugDetail(detail.id, {
-        staff_overrides: payload,
-      });
-      setDetail(updated);
-      setDraft(detailToDraft(updated));
-    } catch (nextError) {
-      setError(
-        nextError instanceof Error
-          ? nextError.message
-          : "Unable to revert field right now."
-      );
-    } finally {
-      setSaving(false);
     }
   };
 
@@ -479,6 +418,30 @@ export function StaffRugDetailModal({
     onClose();
   };
 
+  const onToggleEditMode = async () => {
+    if (!editMode) {
+      setEditMode(true);
+      return;
+    }
+    if (!hasUnsavedChanges) {
+      setEditMode(false);
+      return;
+    }
+    const shouldSave = window.confirm(
+      "You have unsaved changes.\n\nPress OK to Save.\nPress Cancel for discard options."
+    );
+    if (shouldSave) {
+      await onSaveEdits();
+      return;
+    }
+    const shouldDiscard = window.confirm("Discard unsaved changes?");
+    if (!shouldDiscard) return;
+    if (detail) {
+      setDraft(detailToDraft(detail));
+    }
+    setEditMode(false);
+  };
+
   return (
     <Dialog
       open={open}
@@ -488,27 +451,25 @@ export function StaffRugDetailModal({
         }
       }}
     >
-      <DialogContent className="max-h-[90dvh] max-w-2xl overflow-y-auto p-0">
-        <div className="space-y-4 p-4 sm:p-6">
+      <DialogContent className="max-h-[92dvh] max-w-5xl overflow-hidden border-border/70 bg-card/96 p-0 shadow-[0_18px_46px_rgba(31,18,6,0.2)] backdrop-blur supports-[backdrop-filter]:bg-card/90">
+        <div className="flex max-h-[92dvh] flex-col">
+          <div
+            className={
+              editMode
+                ? "flex-1 space-y-4 overflow-y-auto p-4 pb-24 sm:p-6 sm:pb-28"
+                : "flex-1 space-y-4 overflow-y-auto p-4 sm:p-6"
+            }
+          >
           {detail ? (
             <>
-              <div className="flex flex-wrap items-center justify-between gap-2">
-                <div className="flex items-center gap-2">
-                  <span
-                    className={
-                      detail.status === "available"
-                        ? "inline-flex items-center rounded-full border border-emerald-400/35 bg-emerald-50 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-emerald-700"
-                        : "inline-flex items-center rounded-full border border-red-400/35 bg-red-50 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-red-700"
-                    }
-                  >
-                    {statusLabel}
-                  </span>
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex flex-wrap items-center gap-2">
                   <div className="inline-flex rounded-full border border-border/60 bg-background p-0.5">
                     <button
                       type="button"
                       className={
                         detail.status === "available"
-                          ? "rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-800"
+                          ? "rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-800 ring-1 ring-emerald-200"
                           : "rounded-full px-3 py-1 text-xs font-medium text-muted-foreground hover:bg-accent"
                       }
                       onClick={() => void onAvailabilityToggle(true)}
@@ -520,7 +481,7 @@ export function StaffRugDetailModal({
                       type="button"
                       className={
                         detail.status !== "available"
-                          ? "rounded-full bg-red-100 px-3 py-1 text-xs font-semibold text-red-800"
+                          ? "rounded-full bg-rose-100 px-3 py-1 text-xs font-semibold text-rose-800 ring-1 ring-rose-200"
                           : "rounded-full px-3 py-1 text-xs font-medium text-muted-foreground hover:bg-accent"
                       }
                       onClick={() => void onAvailabilityToggle(false)}
@@ -531,40 +492,50 @@ export function StaffRugDetailModal({
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 self-end">
                   <Button
                     type="button"
-                    variant="outline"
+                    variant="ghost"
                     size="sm"
+                    className="h-8 px-2.5 text-xs"
                     onClick={() => void onReAnalyze()}
                     disabled={saving || reAnalyzing}
+                    aria-label="Re-analyze"
                   >
-                    {reAnalyzing ? "Re-analyzing..." : "Re-analyze"}
+                    <RefreshCw className={reAnalyzing ? "h-3.5 w-3.5 animate-spin" : "h-3.5 w-3.5"} />
+                    <span className="hidden sm:inline">
+                      {reAnalyzing ? "Re-analyzing..." : "Re-analyze"}
+                    </span>
                   </Button>
-                  {!editMode ? (
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setEditMode(true)}
-                      disabled={saving || reAnalyzing}
-                    >
-                      Edit
-                    </Button>
+                  {editMode ? (
+                    <span className="inline-flex rounded-full border border-primary/30 bg-primary/10 px-2.5 py-1 text-xs font-semibold text-foreground">
+                      Editing
+                    </span>
                   ) : null}
+                  <Button
+                    type="button"
+                    variant={editMode ? "secondary" : "outline"}
+                    size="icon"
+                    onClick={() => void onToggleEditMode()}
+                    disabled={saving || reAnalyzing}
+                    aria-label={editMode ? "Exit edit mode" : "Edit fields"}
+                    title={editMode ? "Exit edit mode" : "Edit fields"}
+                  >
+                    <Pencil className="h-4 w-4" />
+                  </Button>
                 </div>
               </div>
 
               <DialogHeader>
-                <DialogTitle className="font-serif text-3xl leading-tight">{title}</DialogTitle>
-                <DialogDescription className="italic">
+                <DialogTitle className="font-serif text-[2rem] leading-tight sm:text-[2.15rem]">{title}</DialogTitle>
+                <DialogDescription className="italic text-foreground/75">
                   Size: {sizeLabel ?? "Unknown size"}
                 </DialogDescription>
               </DialogHeader>
 
-              <div className="flex flex-col gap-5 sm:flex-row">
-                <div className="shrink-0 sm:w-44">
-                  <div className="aspect-[3/4] max-h-52 overflow-hidden rounded-lg bg-muted sm:max-h-none">
+              <div className="flex flex-col gap-5 sm:flex-row sm:items-start">
+                <div className="shrink-0 sm:w-52">
+                  <div className="aspect-[3/4] max-h-56 overflow-hidden rounded-xl border border-border/65 bg-muted sm:max-h-none">
                     <RugImage
                       src={detail.primary_image_url}
                       alt={title}
@@ -575,7 +546,7 @@ export function StaffRugDetailModal({
 
                 <div className="min-w-0 flex-1 space-y-4">
                   {detail.ai_description ? (
-                    <section className="space-y-2">
+                    <section className="space-y-2 rounded-xl border border-border/55 bg-background/45 p-3">
                       <h3 className="text-xs font-semibold uppercase tracking-[0.08em] text-primary">
                         Description
                       </h3>
@@ -583,71 +554,73 @@ export function StaffRugDetailModal({
                     </section>
                   ) : null}
 
-                  <section className="space-y-2">
+                  <section className="space-y-2 rounded-xl border border-border/55 bg-background/45 p-3">
                     <h3 className="text-xs font-semibold uppercase tracking-[0.08em] text-primary">
                       Inventory
                     </h3>
-                    <div className="rounded-lg border border-border/60 bg-background/55 p-3">
-                      <div className="grid grid-cols-[7rem_1fr] gap-2">
+                    <div className="rounded-lg border border-border/55 bg-background/70 p-3">
+                      <div className="grid gap-2 sm:grid-cols-[7rem_1fr] sm:items-center">
                         <p className="text-sm font-medium text-foreground/85">Stock ID</p>
-                        <p className="text-sm text-foreground/90">
-                          {detail.stock_id ? (
-                            <span className="font-mono text-xs">{detail.stock_id}</span>
-                          ) : (
-                            "—"
-                          )}
-                        </p>
+                        {editMode && draft ? (
+                          <Input
+                            id="edit-stock"
+                            value={draft.stock_id}
+                            onChange={(event) =>
+                              setDraft((prev) =>
+                                prev ? { ...prev, stock_id: event.target.value } : prev
+                              )
+                            }
+                            placeholder="SKU-1234"
+                            className="h-9 max-w-xs"
+                          />
+                        ) : (
+                          <p className="text-sm text-foreground/90">
+                            {detail.stock_id ? (
+                              <span className="font-mono text-xs">{detail.stock_id}</span>
+                            ) : (
+                              "—"
+                            )}
+                          </p>
+                        )}
                       </div>
                     </div>
                   </section>
 
-                  <section className="space-y-3">
+                  <section className="space-y-3 rounded-xl border border-border/55 bg-background/45 p-3">
                     <h3 className="text-xs font-semibold uppercase tracking-[0.08em] text-primary">
-                      AI Details
+                      Details
                     </h3>
 
-                    {editMode && draft ? (
-                      <div className="space-y-4 rounded-lg border border-border/60 bg-background/55 p-3">
-                        <div className="space-y-1">
-                          <div className="flex items-center justify-between gap-2">
-                            <Label htmlFor="edit-label">Label</Label>
-                            {hasOverride(detail, "label") ? (
-                              <button
-                                type="button"
-                                className="text-xs text-muted-foreground underline"
-                                onClick={() => void onRevertField("label")}
-                              >
-                                Revert to AI
-                              </button>
-                            ) : null}
-                          </div>
-                          <Input
-                            id="edit-label"
-                            ref={labelInputRef}
-                            value={draft.label}
-                            onChange={(event) =>
-                              setDraft((prev) =>
-                                prev ? { ...prev, label: event.target.value } : prev
-                              )
-                            }
-                            placeholder="Rug label"
-                          />
+                    {draft ? (
+                      <div className="space-y-3 rounded-lg border border-border/55 bg-background/75 p-3">
+                        <div className="grid gap-2 sm:grid-cols-[7rem_1fr] sm:items-start">
+                          <Label htmlFor="edit-label" className="text-sm font-medium text-foreground/85">
+                            Label
+                          </Label>
+                          {editMode ? (
+                            <Input
+                              id="edit-label"
+                              ref={labelInputRef}
+                              value={draft.label}
+                              onChange={(event) =>
+                                setDraft((prev) =>
+                                  prev ? { ...prev, label: event.target.value } : prev
+                                )
+                              }
+                              placeholder="Rug label"
+                            />
+                          ) : (
+                            <p className="text-sm text-foreground/90">
+                              {detail.effective_fields.label ?? "—"}
+                            </p>
+                          )}
                         </div>
 
-                        <div className="grid gap-3 sm:grid-cols-2">
-                          <div className="space-y-1">
-                            <div className="flex items-center justify-between gap-2">
-                              <Label htmlFor="edit-origin">Origin</Label>
-                              {hasOverride(detail, "origin") ? (
-                                <button
-                                  type="button"
-                                  className="text-xs text-muted-foreground underline"
-                                  onClick={() => void onRevertField("origin")}
-                                >
-                                  Revert
-                                </button>
-                              ) : null}
-                            </div>
+                        <div className="grid gap-2 sm:grid-cols-[7rem_1fr] sm:items-start">
+                          <Label htmlFor="edit-origin" className="text-sm font-medium text-foreground/85">
+                            Origin
+                          </Label>
+                          {editMode ? (
                             <select
                               id="edit-origin"
                               className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
@@ -658,28 +631,27 @@ export function StaffRugDetailModal({
                                 )
                               }
                             >
-                              <option value="">Let AI decide</option>
+                              {draft.origin && !ORIGIN_OPTIONS.includes(draft.origin as (typeof ORIGIN_OPTIONS)[number]) ? (
+                                <option value={draft.origin}>{draft.origin}</option>
+                              ) : null}
                               {ORIGIN_OPTIONS.map((option) => (
                                 <option key={option} value={option}>
                                   {option}
                                 </option>
                               ))}
                             </select>
-                          </div>
+                          ) : (
+                            <p className="text-sm text-foreground/90">
+                              {detail.effective_fields.origin ?? "—"}
+                            </p>
+                          )}
+                        </div>
 
-                          <div className="space-y-1">
-                            <div className="flex items-center justify-between gap-2">
-                              <Label htmlFor="edit-style">Style</Label>
-                              {hasOverride(detail, "style") ? (
-                                <button
-                                  type="button"
-                                  className="text-xs text-muted-foreground underline"
-                                  onClick={() => void onRevertField("style")}
-                                >
-                                  Revert
-                                </button>
-                              ) : null}
-                            </div>
+                        <div className="grid gap-2 sm:grid-cols-[7rem_1fr] sm:items-start">
+                          <Label htmlFor="edit-style" className="text-sm font-medium text-foreground/85">
+                            Style
+                          </Label>
+                          {editMode ? (
                             <Input
                               id="edit-style"
                               value={draft.style}
@@ -690,153 +662,140 @@ export function StaffRugDetailModal({
                               }
                               placeholder="e.g. Heriz"
                             />
-                          </div>
+                          ) : (
+                            <p className="text-sm text-foreground/90">
+                              {detail.effective_fields.style ?? "—"}
+                            </p>
+                          )}
                         </div>
 
-                        <div className="space-y-1">
-                          <div className="flex items-center justify-between gap-2">
-                            <Label>Pattern</Label>
-                            {hasOverride(detail, "pattern") ? (
-                              <button
-                                type="button"
-                                className="text-xs text-muted-foreground underline"
-                                onClick={() => void onRevertField("pattern")}
-                              >
-                                Revert
-                              </button>
-                            ) : null}
-                          </div>
-                          <div className="flex flex-wrap gap-2">
-                            {PATTERN_OPTIONS.map((option) => {
-                              const active = draft.pattern.includes(option);
-                              return (
-                                <button
-                                  key={option}
-                                  type="button"
-                                  className={
-                                    active
-                                      ? "rounded-full border border-primary/70 bg-primary/20 px-2.5 py-1 text-xs font-medium text-foreground ring-1 ring-primary/35"
-                                      : "rounded-full border border-border/60 bg-background px-2.5 py-1 text-xs text-muted-foreground"
-                                  }
-                                  onClick={() => onToggleListValue("pattern", option)}
-                                >
-                                  {option}
-                                </button>
-                              );
-                            })}
-                            <button
-                              type="button"
-                              className="rounded-full border border-dashed border-border/70 bg-background px-2.5 py-1 text-xs font-medium text-muted-foreground hover:border-primary/45 hover:bg-primary/10 hover:text-foreground"
-                              onClick={() =>
-                                setShowPatternAddInput((prev) => !prev)
-                              }
-                            >
-                              {showPatternAddInput ? "Cancel" : "+ Add"}
-                            </button>
-                          </div>
-                          {showPatternAddInput ? (
-                            <div className="flex flex-wrap gap-2">
-                              <Input
-                                value={patternInput}
-                                onChange={(event) => setPatternInput(event.target.value)}
-                                onKeyDown={(event) => {
-                                  if (event.key !== "Enter") return;
-                                  event.preventDefault();
-                                  onAddCustomListValue("pattern");
-                                }}
-                                placeholder="Custom pattern"
-                                className="h-9 min-w-[14rem] flex-1"
-                              />
-                              <Button
-                                type="button"
-                                variant="outline"
-                                size="sm"
-                                onClick={() => onAddCustomListValue("pattern")}
-                              >
-                                Add
-                              </Button>
-                            </div>
-                          ) : null}
-                        </div>
-
-                        <div className="space-y-1">
-                          <div className="flex items-center justify-between gap-2">
-                            <Label>Colors</Label>
-                            {hasOverride(detail, "primary_colors") ? (
-                              <button
-                                type="button"
-                                className="text-xs text-muted-foreground underline"
-                                onClick={() => void onRevertField("primary_colors")}
-                              >
-                                Revert
-                              </button>
-                            ) : null}
-                          </div>
-                          <div className="flex flex-wrap gap-2">
-                            {COLOR_OPTIONS.map((option) => {
-                              const active = draft.primary_colors.includes(option);
-                              return (
-                                <button
-                                  key={option}
-                                  type="button"
-                                  className={
-                                    active
-                                      ? "rounded-full border border-primary/70 bg-primary/20 px-2.5 py-1 text-xs font-medium text-foreground ring-1 ring-primary/35"
-                                      : "rounded-full border border-border/60 bg-background px-2.5 py-1 text-xs text-muted-foreground"
-                                  }
-                                  onClick={() => onToggleListValue("primary_colors", option)}
-                                >
-                                  {option}
-                                </button>
-                              );
-                            })}
-                            <button
-                              type="button"
-                              className="rounded-full border border-dashed border-border/70 bg-background px-2.5 py-1 text-xs font-medium text-muted-foreground hover:border-primary/45 hover:bg-primary/10 hover:text-foreground"
-                              onClick={() => setShowColorAddInput((prev) => !prev)}
-                            >
-                              {showColorAddInput ? "Cancel" : "+ Add"}
-                            </button>
-                          </div>
-                          {showColorAddInput ? (
-                            <div className="flex flex-wrap gap-2">
-                              <Input
-                                value={colorInput}
-                                onChange={(event) => setColorInput(event.target.value)}
-                                onKeyDown={(event) => {
-                                  if (event.key !== "Enter") return;
-                                  event.preventDefault();
-                                  onAddCustomListValue("primary_colors");
-                                }}
-                                placeholder="Custom color"
-                                className="h-9 min-w-[14rem] flex-1"
-                              />
-                              <Button
-                                type="button"
-                                variant="outline"
-                                size="sm"
-                                onClick={() => onAddCustomListValue("primary_colors")}
-                              >
-                                Add
-                              </Button>
-                            </div>
-                          ) : null}
-                        </div>
-
-                        <div className="grid gap-3 sm:grid-cols-2">
-                          <div className="space-y-1">
-                            <div className="flex items-center justify-between gap-2">
-                              <Label htmlFor="edit-age">Age Category</Label>
-                              {hasOverride(detail, "age_category") ? (
+                        <div className="grid gap-2 sm:grid-cols-[7rem_1fr] sm:items-start">
+                          <p className="text-sm font-medium text-foreground/85">Pattern</p>
+                          {editMode ? (
+                            <div className="space-y-2">
+                              <div className="flex flex-wrap gap-1.5">
+                                {PATTERN_OPTIONS.map((option) => {
+                                  const active = draft.pattern.includes(option);
+                                  return (
+                                    <button
+                                      key={option}
+                                      type="button"
+                                      className={
+                                        active
+                                          ? "rounded-full border border-primary/70 bg-primary px-2.5 py-1 text-xs font-semibold text-primary-foreground shadow-sm"
+                                          : "rounded-full border border-border/60 bg-background px-2.5 py-1 text-xs text-muted-foreground"
+                                      }
+                                      onClick={() => onToggleListValue("pattern", option)}
+                                    >
+                                      {option}
+                                    </button>
+                                  );
+                                })}
                                 <button
                                   type="button"
-                                  className="text-xs text-muted-foreground underline"
-                                  onClick={() => void onRevertField("age_category")}
+                                  className="rounded-full border border-dashed border-border/70 bg-background px-2.5 py-1 text-xs font-medium text-muted-foreground hover:border-primary/45 hover:bg-primary/10 hover:text-foreground"
+                                  onClick={() => setShowPatternAddInput((prev) => !prev)}
                                 >
-                                  Revert
+                                  {showPatternAddInput ? "Done" : "+ Add"}
                                 </button>
+                              </div>
+                              {showPatternAddInput ? (
+                                <div className="flex flex-wrap gap-2">
+                                  <Input
+                                    value={patternInput}
+                                    onChange={(event) => setPatternInput(event.target.value)}
+                                    onKeyDown={(event) => {
+                                      if (event.key !== "Enter") return;
+                                      event.preventDefault();
+                                      onAddCustomListValue("pattern");
+                                    }}
+                                    placeholder="Custom pattern"
+                                    className="h-9 min-w-[14rem] flex-1"
+                                  />
+                                  <Button
+                                    type="button"
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => onAddCustomListValue("pattern")}
+                                  >
+                                    Add
+                                  </Button>
+                                </div>
                               ) : null}
                             </div>
+                          ) : (
+                            <p className="text-sm text-foreground/90">
+                              {formatList(detail.effective_fields.pattern)}
+                            </p>
+                          )}
+                        </div>
+
+                        <div className="grid gap-2 sm:grid-cols-[7rem_1fr] sm:items-start">
+                          <p className="text-sm font-medium text-foreground/85">Colors</p>
+                          {editMode ? (
+                            <div className="space-y-2">
+                              <div className="flex flex-wrap gap-1.5">
+                                {COLOR_OPTIONS.map((option) => {
+                                  const active = draft.primary_colors.includes(option);
+                                  return (
+                                    <button
+                                      key={option}
+                                      type="button"
+                                      className={
+                                        active
+                                          ? "rounded-full border border-primary/70 bg-primary px-2.5 py-1 text-xs font-semibold text-primary-foreground shadow-sm"
+                                          : "rounded-full border border-border/60 bg-background px-2.5 py-1 text-xs text-muted-foreground"
+                                      }
+                                      onClick={() => onToggleListValue("primary_colors", option)}
+                                    >
+                                      {option}
+                                    </button>
+                                  );
+                                })}
+                                <button
+                                  type="button"
+                                  className="rounded-full border border-dashed border-border/70 bg-background px-2.5 py-1 text-xs font-medium text-muted-foreground hover:border-primary/45 hover:bg-primary/10 hover:text-foreground"
+                                  onClick={() => setShowColorAddInput((prev) => !prev)}
+                                >
+                                  {showColorAddInput ? "Done" : "+ Add"}
+                                </button>
+                              </div>
+                              {showColorAddInput ? (
+                                <div className="flex flex-wrap gap-2">
+                                  <Input
+                                    value={colorInput}
+                                    onChange={(event) => setColorInput(event.target.value)}
+                                    onKeyDown={(event) => {
+                                      if (event.key !== "Enter") return;
+                                      event.preventDefault();
+                                      onAddCustomListValue("primary_colors");
+                                    }}
+                                    placeholder="Custom color"
+                                    className="h-9 min-w-[14rem] flex-1"
+                                  />
+                                  <Button
+                                    type="button"
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => onAddCustomListValue("primary_colors")}
+                                  >
+                                    Add
+                                  </Button>
+                                </div>
+                              ) : null}
+                            </div>
+                          ) : (
+                            <p className="text-sm text-foreground/90">
+                              {formatList(detail.effective_fields.primary_colors)}
+                            </p>
+                          )}
+                        </div>
+
+                        <div className="grid gap-2 sm:grid-cols-[7rem_1fr] sm:items-start">
+                          <Label htmlFor="edit-age" className="text-sm font-medium text-foreground/85">
+                            Age
+                          </Label>
+                          {editMode ? (
                             <select
                               id="edit-age"
                               className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
@@ -853,21 +812,18 @@ export function StaffRugDetailModal({
                                 </option>
                               ))}
                             </select>
-                          </div>
+                          ) : (
+                            <p className="text-sm text-foreground/90">
+                              {detail.effective_fields.age_category ?? "—"}
+                            </p>
+                          )}
+                        </div>
 
-                          <div className="space-y-1">
-                            <div className="flex items-center justify-between gap-2">
-                              <Label htmlFor="edit-mood">Mood</Label>
-                              {hasOverride(detail, "mood") ? (
-                                <button
-                                  type="button"
-                                  className="text-xs text-muted-foreground underline"
-                                  onClick={() => void onRevertField("mood")}
-                                >
-                                  Revert
-                                </button>
-                              ) : null}
-                            </div>
+                        <div className="grid gap-2 sm:grid-cols-[7rem_1fr] sm:items-start">
+                          <Label htmlFor="edit-mood" className="text-sm font-medium text-foreground/85">
+                            Mood
+                          </Label>
+                          {editMode ? (
                             <select
                               id="edit-mood"
                               className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
@@ -884,56 +840,19 @@ export function StaffRugDetailModal({
                                 </option>
                               ))}
                             </select>
-                          </div>
+                          ) : (
+                            <p className="text-sm text-foreground/90">
+                              {detail.effective_fields.mood ?? "—"}
+                            </p>
+                          )}
                         </div>
-
-                        <div className="space-y-1">
-                          <Label htmlFor="edit-stock">Stock ID</Label>
-                          <Input
-                            id="edit-stock"
-                            value={draft.stock_id}
-                            onChange={(event) =>
-                              setDraft((prev) =>
-                                prev ? { ...prev, stock_id: event.target.value } : prev
-                              )
-                            }
-                            placeholder="SKU-1234"
-                          />
-                        </div>
-
-                        <div className="flex justify-end">
-                          <Button
-                            type="button"
-                            onClick={() => void onSaveEdits()}
-                            disabled={saving || reAnalyzing}
-                          >
-                            {saving ? "Saving..." : "Save Changes"}
-                          </Button>
-                        </div>
-                      </div>
-                    ) : fieldRows.length > 0 ? (
-                      <div className="space-y-2 rounded-lg border border-border/60 bg-background/55 p-3">
-                        {fieldRows.map((field) => (
-                          <div key={field.key} className="grid grid-cols-[7rem_1fr_auto] items-start gap-2">
-                            <p className="text-sm font-medium text-foreground/85">{field.label}</p>
-                            <p className="text-sm text-foreground/90">{field.value}</p>
-                            <span
-                              className={
-                                hasOverride(detail, field.key)
-                                  ? "inline-flex rounded-full border border-primary/30 bg-primary/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.08em] text-primary"
-                                  : "inline-flex rounded-full border border-border/60 bg-background px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground"
-                              }
-                            >
-                              {hasOverride(detail, field.key) ? "Edited" : "AI"}
-                            </span>
-                          </div>
-                        ))}
                       </div>
                     ) : (
                       <p className="text-sm text-muted-foreground">
                         AI processing pending - check back shortly.
                       </p>
                     )}
+
                   </section>
                 </div>
               </div>
@@ -949,7 +868,23 @@ export function StaffRugDetailModal({
           ) : (
             <p className="text-sm text-muted-foreground">No rug selected.</p>
           )}
-
+          </div>
+          {editMode ? (
+            <div className="border-t border-border/60 bg-background/95 px-4 py-3 backdrop-blur supports-[backdrop-filter]:bg-background/85 sm:px-6">
+              <div className="flex items-center justify-between gap-3">
+                <p className="text-xs text-muted-foreground">
+                  {hasUnsavedChanges ? "Unsaved changes" : "No changes yet"}
+                </p>
+                <Button
+                  type="button"
+                  onClick={() => void onSaveEdits()}
+                  disabled={saving || reAnalyzing || !hasUnsavedChanges}
+                >
+                  {saving ? "Saving..." : "Save Changes"}
+                </Button>
+              </div>
+            </div>
+          ) : null}
         </div>
       </DialogContent>
     </Dialog>

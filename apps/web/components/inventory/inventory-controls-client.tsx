@@ -73,8 +73,8 @@ const SORT_OPTIONS: Array<{ value: InventorySort; label: string }> = [
 
 function chipClass(active: boolean): string {
   return active
-    ? "inline-flex min-h-7 items-center rounded-full border border-primary/55 bg-primary/12 px-2.5 text-[11px] font-semibold text-foreground ring-1 ring-primary/30"
-    : "inline-flex min-h-7 items-center rounded-full border border-border/55 bg-background px-2.5 text-[11px] font-medium text-foreground/80 hover:border-primary/30 hover:bg-primary/10 hover:text-foreground";
+    ? "inline-flex min-h-8 items-center rounded-full border border-primary/70 bg-primary px-3 text-xs font-semibold text-primary-foreground shadow-sm"
+    : "inline-flex min-h-8 items-center rounded-full border border-border/60 bg-card/80 px-3 text-xs font-medium text-foreground/85 hover:border-primary/35 hover:bg-primary/10 hover:text-foreground";
 }
 
 function toSizeParts(value: number | null): SizeInputParts {
@@ -145,6 +145,7 @@ export function InventoryControlsClient({
   const [queryInput, setQueryInput] = useState(filters.q);
   const [sheetOpen, setSheetOpen] = useState(false);
   const [showAllSizes, setShowAllSizes] = useState(false);
+  const [compactSearchPlaceholder, setCompactSearchPlaceholder] = useState(false);
   const [widthMinInput, setWidthMinInput] = useState<SizeInputParts>(
     toSizeParts(filters.widthMin)
   );
@@ -157,6 +158,19 @@ export function InventoryControlsClient({
   const [lengthMaxInput, setLengthMaxInput] = useState<SizeInputParts>(
     toSizeParts(filters.lengthMax)
   );
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const mq = window.matchMedia("(max-width: 640px)");
+    const sync = () => setCompactSearchPlaceholder(mq.matches);
+    sync();
+    if (typeof mq.addEventListener === "function") {
+      mq.addEventListener("change", sync);
+      return () => mq.removeEventListener("change", sync);
+    }
+    mq.addListener(sync);
+    return () => mq.removeListener(sync);
+  }, []);
 
   const applyPatch = useCallback(
     (patch: FilterPatch) => {
@@ -500,12 +514,12 @@ export function InventoryControlsClient({
       className={
         mobile
           ? "space-y-3"
-          : "space-y-2.5 rounded-xl border border-border/60 bg-white/90 p-2.5 shadow-sm"
+          : "space-y-3 rounded-2xl border border-border/60 bg-card/88 p-3 shadow-sm backdrop-blur supports-[backdrop-filter]:bg-card/78"
       }
       data-inventory-filters="true"
     >
-      <div className="space-y-1.5" data-filter-lane="status">
-        <p className="text-[9px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+      <div className="space-y-1.5 rounded-xl border border-border/45 bg-background/45 p-2.5" data-filter-lane="status">
+        <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
           Status
         </p>
         <div className="flex flex-wrap gap-1.5">
@@ -522,8 +536,8 @@ export function InventoryControlsClient({
         </div>
       </div>
 
-      <div className="space-y-1.5" data-filter-lane="sort">
-        <p className="text-[9px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+      <div className="space-y-1.5 rounded-xl border border-border/45 bg-background/45 p-2.5" data-filter-lane="sort">
+        <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
           Sort
         </p>
         <div className="flex flex-wrap gap-1.5">
@@ -540,9 +554,9 @@ export function InventoryControlsClient({
         </div>
       </div>
 
-      <div className="space-y-1.5" data-filter-lane="size">
+      <div className="space-y-1.5 rounded-xl border border-border/45 bg-background/45 p-2.5" data-filter-lane="size">
         <div className="flex items-center justify-between gap-2">
-          <p className="text-[9px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
             Sizes
           </p>
           {sizePresetGroups.more.length > 0 ? (
@@ -575,10 +589,10 @@ export function InventoryControlsClient({
       </div>
 
       <details
-        className="rounded-lg border border-border/40 bg-background/70 p-2.5"
+        className="rounded-xl border border-border/45 bg-background/45 p-2.5"
         open={hasCustomInput}
       >
-        <summary className="cursor-pointer list-none text-[9px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+        <summary className="cursor-pointer list-none text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
           Custom Size (ft/in)
         </summary>
         <div className="mt-2 grid gap-2 sm:grid-cols-2">
@@ -593,7 +607,7 @@ export function InventoryControlsClient({
         type="button"
         variant="ghost"
         size="sm"
-        className="w-full justify-center"
+        className="w-full justify-center rounded-xl border border-border/50 bg-background/60 text-foreground/85 hover:bg-primary/10"
         onClick={clearAll}
         disabled={
           activeFilters.length === 0 &&
@@ -601,7 +615,7 @@ export function InventoryControlsClient({
           queryInput.trim().length === 0
         }
       >
-        Clear all filters
+        Clear all
       </Button>
     </div>
   );
@@ -611,7 +625,7 @@ export function InventoryControlsClient({
       <section
         aria-label="Inventory search"
         data-inventory-controls="true"
-        className="rounded-xl border border-border/60 bg-white/90 p-2.5 shadow-sm"
+        className="rounded-2xl border border-border/60 bg-card/88 p-2.5 shadow-sm backdrop-blur supports-[backdrop-filter]:bg-card/78"
       >
         <div className="flex items-center gap-2">
           <div className="relative min-w-0 flex-1">
@@ -619,7 +633,11 @@ export function InventoryControlsClient({
             <Input
               value={queryInput}
               onChange={(event) => setQueryInput(event.target.value)}
-              placeholder="Search labels, stock id, or description"
+              placeholder={
+                compactSearchPlaceholder
+                  ? "Search rugs"
+                  : "Search labels, stock id, or description"
+              }
               className="h-9 pl-8 text-sm"
             />
           </div>
@@ -646,7 +664,7 @@ export function InventoryControlsClient({
                 key={item.key}
                 type="button"
                 onClick={item.onRemove}
-                className="inline-flex min-h-7 items-center gap-1 rounded-full border border-border/55 bg-background px-2.5 text-xs text-foreground/80 hover:border-primary/35 hover:bg-primary/10 hover:text-foreground"
+                className="inline-flex min-h-8 items-center gap-1 rounded-full border border-border/55 bg-background px-2.5 text-xs text-foreground/85 hover:border-primary/35 hover:bg-primary/10 hover:text-foreground"
                 aria-label={`Remove filter ${item.label}`}
               >
                 <span>{item.label}</span>

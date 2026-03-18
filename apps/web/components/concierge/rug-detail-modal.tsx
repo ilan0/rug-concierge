@@ -63,7 +63,7 @@ export function RugDetailModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[90dvh] max-w-3xl overflow-y-auto p-0">
+      <DialogContent className="max-h-[90dvh] max-w-3xl overflow-y-auto border-border/70 bg-card/96 p-0 shadow-[0_18px_46px_rgba(31,18,6,0.2)] backdrop-blur supports-[backdrop-filter]:bg-card/90">
         <div className="space-y-4 p-4 sm:p-6">
           {isLoading ? (
             <div className="space-y-3">
@@ -78,8 +78,8 @@ export function RugDetailModal({
           ) : detail ? (
             <>
               <DialogHeader>
-                <DialogTitle className="font-serif text-3xl leading-tight">{displayLabel}</DialogTitle>
-                <DialogDescription className="italic">Size: {detail.size_display}</DialogDescription>
+                <DialogTitle className="font-serif text-[2rem] leading-tight">{displayLabel}</DialogTitle>
+                <DialogDescription className="italic text-foreground/75">Size: {detail.size_display}</DialogDescription>
               </DialogHeader>
 
               <div className="overflow-hidden rounded-xl border border-border/70 bg-muted">
@@ -120,7 +120,7 @@ export function RugDetailModal({
             </>
           ) : null}
 
-          <DialogFooter>
+          <DialogFooter className="gap-2 border-t border-border/55 pt-3">
             {onAskAboutThisRug ? (
               <Button
                 type="button"
@@ -140,7 +140,7 @@ export function RugDetailModal({
                 Share
               </Button>
             ) : null}
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+            <Button type="button" variant="ghost" onClick={() => onOpenChange(false)}>
               Close
             </Button>
           </DialogFooter>

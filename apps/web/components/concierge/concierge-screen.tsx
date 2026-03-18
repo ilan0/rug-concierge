@@ -23,7 +23,7 @@ type ConciergeScreenProps = {
 const TITLE_SIZE = "text-[30px] leading-[1.08] md:text-[34px]";
 const TITLE_SIZE_WITH_RECOMMENDATIONS = "text-[27px] leading-[1.07] md:text-[31px]";
 const HERO_TITLE_SIZE = "text-[44px] leading-[1.05] sm:text-[52px] md:text-[60px]";
-const SUBTITLE_SIZE = "text-[18px] leading-[1.45] sm:text-[20px] sm:leading-[1.5]";
+const SUBTITLE_SIZE = "text-[17px] leading-[1.5] sm:text-[20px] sm:leading-[1.5]";
 const BODY_SIZE = "text-[18px] leading-[1.65]";
 const COMPOSER_REST_OFFSET_DESKTOP = 12;
 const COMPOSER_REST_OFFSET_MOBILE = 8;
@@ -79,7 +79,7 @@ export function ConciergeScreen({
   const composerRestOffsetPx = isSmallViewport
     ? COMPOSER_REST_OFFSET_MOBILE
     : COMPOSER_REST_OFFSET_DESKTOP;
-  const shouldFloatComposer = !(isHeroState && isSmallViewport);
+  const shouldFloatComposer = !isHeroState;
   const composerClearancePx = useMemo(() => {
     if (!shouldFloatComposer) return CONTENT_SAFETY_GAP;
     return Math.max(
@@ -108,7 +108,7 @@ export function ConciergeScreen({
   const isActiveWithRecommendation = hasRecommendationTurn;
   const showActiveDesktopSubtitle = isActivePreRecommendation;
   const showDesktopHeaderActions = controller.isDeveloperRole || hasMessages;
-  const useIntroSpacer = isHeroState && !isSmallViewport;
+  const useIntroSpacer = false;
   const emptyStatePromptLimit = isSmallViewport ? 2 : 3;
 
   return (
@@ -125,7 +125,7 @@ export function ConciergeScreen({
         className={cn(
           "mx-auto [text-size-adjust:100%] [-webkit-text-size-adjust:100%] text-center transition-[padding] duration-300",
           isHeroState
-            ? "pb-6 pt-10 md:pb-8 md:pt-16"
+            ? "pb-4 pt-8 md:pb-5 md:pt-10"
             : isActiveWithRecommendation
               ? "pb-0 pt-0 md:pb-0.5 md:pt-0.5"
               : "pb-0.5 pt-0.5 md:pb-1 md:pt-1"
@@ -202,7 +202,7 @@ export function ConciergeScreen({
         ) : null}
         <p
           className={cn(
-            "mx-auto max-w-2xl transition-opacity duration-200",
+            "mx-auto max-w-2xl px-2 text-balance transition-opacity duration-200 sm:px-0",
             isHeroState
               ? cn("mt-3 text-foreground/85", SUBTITLE_SIZE)
               : showActiveDesktopSubtitle
@@ -217,7 +217,7 @@ export function ConciergeScreen({
       <div
         className={cn(
           "mx-auto [text-size-adjust:100%] [-webkit-text-size-adjust:100%]",
-          isHeroState ? "mt-4" : "mt-0",
+          isHeroState ? "mt-2" : "mt-0",
           useIntroSpacer && "min-h-[clamp(44px,8vh,84px)]"
         )}
         style={railStyle}

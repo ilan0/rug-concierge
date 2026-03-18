@@ -73,6 +73,16 @@ export default function StaffPinModal({ onSuccess, onDismiss }: StaffPinModalPro
   }, [lockedUntilMs]);
 
   useEffect(() => {
+    if (isSubmitting) return;
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== "Escape") return;
+      onDismiss();
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [isSubmitting, onDismiss]);
+
+  useEffect(() => {
     // Intentionally exclude `isSubmitting` from effect deps so in-flight requests
     // are not canceled by cleanup when `setIsSubmitting(true)` runs.
     if (pin.length !== MAX_DIGITS || isSubmitting || isCooldownActive) return;
@@ -177,7 +187,7 @@ export default function StaffPinModal({ onSuccess, onDismiss }: StaffPinModalPro
       role="presentation"
     >
       <div
-        className="relative mx-4 w-full max-w-xs rounded-2xl bg-card p-8 shadow-2xl"
+        className="relative mx-4 w-full max-w-[21rem] rounded-2xl border border-border/60 bg-card p-8 shadow-2xl"
         role="dialog"
         aria-modal="true"
         aria-label="Staff Access"
