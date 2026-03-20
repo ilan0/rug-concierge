@@ -58,7 +58,7 @@ function getArtifactPath(meta: E2eTraceMeta, channel: string, traceId: string): 
   const channelSlug = slug(channel || "trace");
   return path.resolve(
     repoRoot,
-    "docs/testing/artifacts",
+    "tmp/qa/artifacts",
     runId,
     caseId,
     `${channelSlug}-${slug(traceId)}.json`

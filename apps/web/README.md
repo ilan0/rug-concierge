@@ -14,6 +14,7 @@ Primary UI shell for Rug Concierge.
 - `/api/chat`
 - `/api/recommend`
 - `/api/inventory/intake`
+- `/api/inventory/enrichment/worker`
 - `/api/inventory/rugs/[id]`
 - `/api/inventory/rugs/[id]/re-enrich`
 - `/api/rugs/[id]`
@@ -29,27 +30,12 @@ Primary UI shell for Rug Concierge.
 - concierge is always available
 - staff route tabs are hidden in locked mode and shown only after unlock
 - staff routes (`/inventory`, `/intake`) require `staff_unlocked` cookie
-  - legacy `staff_unlocked=1` works only when `COOKIE_SECRET` is unset
+- legacy `staff_unlocked=1` works only when `COOKIE_SECRET` is unset
 - unlock with `POST /api/auth/passcode`, lock with `POST /api/auth/lock`
-
-## Branding Model
-
-- runtime source order:
-  1. tenant settings (`tenants.settings.branding`) for deployment `TENANT_ID`
-  2. env fallback (`STORE_NAME`, `STORE_LOGO_URL`)
-  3. default `Rug Concierge`
-
-## Styling
-
-- Tailwind CSS
-- shadcn/ui components
 
 ## Core Docs
 
-- `../../docs/README.md`
-- `../../docs/master-context.md`
-- `../../docs/deployment/runbook.md`
-- `../../docs/testing/README.md`
+- `../../docs/master.md`
 
 ## Local Run
 
@@ -60,10 +46,7 @@ npm run dev
 ## Build Validation
 
 ```bash
+npm --workspace apps/web exec tsc --noEmit
 npm --workspace apps/web run lint
 npm --workspace apps/web run build
 ```
-
-## Runtime Validation
-
-Use the manual operational checklist in [docs/testing/operations.md](/Users/ilannabatkhorian/Documents/rug-concierge/docs/testing/operations.md).

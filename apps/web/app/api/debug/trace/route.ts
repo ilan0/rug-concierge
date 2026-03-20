@@ -62,7 +62,7 @@ export async function GET(req: Request) {
   const repoRoot = resolveRepoRootFromCwd();
   const traceDir = path.resolve(
     repoRoot,
-    "docs/testing/artifacts",
+    "tmp/qa/artifacts",
     slug(run),
     slug(testCase)
   );

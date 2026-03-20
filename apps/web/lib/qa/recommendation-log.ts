@@ -52,7 +52,7 @@ function getLogPath(): string {
   }
 
   const repoRoot = resolveRepoRootFromCwd();
-  return path.resolve(repoRoot, "docs/testing/qa-log.ndjson");
+  return path.resolve(repoRoot, "tmp/qa/recommendation-log.ndjson");
 }
 
 function shouldWriteRecommendationQaLog(): boolean {

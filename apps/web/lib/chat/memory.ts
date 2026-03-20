@@ -27,6 +27,7 @@ const PRACTICAL_TERMS = [
   "easy to clean",
   "durable",
   "allergies",
+  "maintenance",
 ];
 
 const STYLE_TERMS = [
@@ -144,6 +145,17 @@ export function extractStableFactsFromUserMessage(userMessage: string): string[]
   }
 
   for (const term of PRACTICAL_TERMS) {
+    if (term === "maintenance") {
+      if (
+        /\bmaintenance\b/.test(text) ||
+        /\brug care\b/.test(text) ||
+        /\bcare instructions?\b/.test(text) ||
+        /\bhow (do i|to) care for\b/.test(text)
+      ) {
+        facts.push(`practical ${term}`);
+      }
+      continue;
+    }
     if (text.includes(term)) facts.push(`practical ${term}`);
   }
 

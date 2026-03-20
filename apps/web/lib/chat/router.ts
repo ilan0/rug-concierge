@@ -136,14 +136,14 @@ function isExplicitRecommendationRequest(text: string): boolean {
   if (explicitPhrases.some((phrase) => text.includes(phrase))) return true;
 
   const needBasedRecommendationIntent =
-    /\b(i need|need|i want|want|i would like|would like|looking for|look for|i am searching for|searching for|find me|show me|find|recommend|search for)\b/.test(
+    /\b(i need|need|i want|want|i would like|would like|i'?d love|love|interested in|looking for|look for|i am searching for|searching for|find me|show me|find|recommend|search for)\b/.test(
       text
     );
   if (needBasedRecommendationIntent && hasConstraintSignalsInMessage(text)) {
     return true;
   }
 
-  const shoppingVerb = /\b(show|show me|find|recommend|browse|search for|look for)\b/.test(
+  const shoppingVerb = /\b(show|show me|find|recommend|browse|search for|look for|love|interested in)\b/.test(
     text
   );
   const rugObject = /\b(rug|rugs|runner|inventory|options)\b/.test(text);
@@ -198,11 +198,43 @@ export function parseRecommendationFollowupIntent(
     return "more_like_this";
   }
 
-  if (/^(yes|yeah|yep|sure|ok|okay|please|do it|that works|sounds good)\b/.test(normalized)) {
+  if (
+    /^(yes|yeah|yep|sure|please|do it|that works|sounds good|show me more|more please)\b/.test(
+      normalized
+    )
+  ) {
     return "more_like_this";
   }
 
   return "none";
+}
+
+function hasMaintenanceIntent(text: string): boolean {
+  const normalized = text.toLowerCase().trim();
+  if (!normalized) return false;
+
+  if (/\b(don'?t care|do not care|clean lines?|clean look|clean aesthetic)\b/.test(normalized)) {
+    return false;
+  }
+
+  const maintenancePatterns = [
+    /\bhow do i clean\b/,
+    /\bhow to clean\b/,
+    /\bhow should i clean\b/,
+    /\bhow do i care for\b/,
+    /\bhow to care for\b/,
+    /\brug care\b/,
+    /\bcarpet care\b/,
+    /\bcleaning\b/,
+    /\bmaintenance\b/,
+    /\bcare instructions?\b/,
+    /\bclean this rug\b/,
+    /\bclean a rug\b/,
+    /\bclean my rug\b/,
+    /\bmaintain\b/,
+  ];
+
+  return maintenancePatterns.some((pattern) => pattern.test(normalized));
 }
 
 function isGeneralAdviceOrEducation(text: string): boolean {
@@ -213,12 +245,10 @@ function isGeneralAdviceOrEducation(text: string): boolean {
     "would this look good",
     "what do you think",
     "tell me about",
-    "care",
-    "clean",
-    "maintenance",
     "difference between",
   ];
-  return adviceSignals.some((signal) => text.includes(signal));
+  if (adviceSignals.some((signal) => text.includes(signal))) return true;
+  return hasMaintenanceIntent(text);
 }
 
 function isConstraintOnlyWithoutIntent(text: string): boolean {
@@ -226,14 +256,14 @@ function isConstraintOnlyWithoutIntent(text: string): boolean {
   if (!hasConstraintSignals) return false;
 
   const hasIntentVerb =
-    /\b(show|find|recommend|browse|search|look|need|want|help|tell|explain|compare|is|are|would|should|can|do)\b/i.test(
+    /\b(show|find|recommend|browse|search|look|need|want|love|prefer|interested|help|tell|explain|compare)\b/i.test(
       text
     );
   return !hasIntentVerb;
 }
 
 function hasConstraintSignalsInMessage(text: string): boolean {
-  return /(\d+\s*[x×]\s*\d+)|(\$\s*\d+)|\b(under|below|budget|max|maximum|size|palette|style|room|neutral|modern|traditional|runner|round|oval|blue|red|green|navy|ivory|gold|oversized)\b/i.test(
+  return /(\d+\s*[x×]\s*\d+)|(\$\s*\d+)|\b(under|below|budget|max|maximum|size|palette|style|room|neutral|modern|traditional|runner|round|oval|blue|red|green|navy|ivory|gold|oversized|beige|cream|gray|grey|brown|white|black|tan|sand|rust|terracotta|burgundy|charcoal|taupe|sage)\b/i.test(
     text
   );
 }

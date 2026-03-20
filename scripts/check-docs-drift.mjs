@@ -7,25 +7,27 @@ const repoRoot = process.cwd();
 const docsDir = path.resolve(repoRoot, "docs");
 const reportPath = path.resolve(repoRoot, "tmp/docs/drift-report.json");
 
-const canonicalDocs = [
-  "docs/master-context.md",
-  "docs/data/schema.md",
-  "docs/deployment/runbook.md",
-  "docs/deployment/env-vars.md",
-  "docs/testing/operations.md",
-  "docs/design/architecture-flow.md",
-];
-
-const pointerDocs = [
-  "docs/design/chat-orchestration.md",
-  "docs/design/concierge-flow.md",
-  "docs/design/role-capability-matrix.md",
-  "docs/testing/README.md",
-];
+const allowedDocs = new Set([
+  "docs/master.md",
+  "docs/prompts/system.md",
+  "docs/prompts/general-chat.md",
+  "docs/prompts/recommendation.md",
+  "docs/prompts/recommendation-structured-output.md",
+]);
 
 const forbiddenTokens = [
   "contextual_blurb",
   "/api/ui-access",
+  "trade_client",
+  "needs_retake",
+];
+
+const requiredSections = [
+  "# Rug Concierge Master Reference",
+  "## Intake And Durable Enrichment",
+  "## Deterministic Title Construction",
+  "## Core APIs",
+  "## Runtime Prompt Files",
 ];
 
 const checks = [];
@@ -46,51 +48,48 @@ function readFileSafe(filePath) {
   }
 }
 
-for (const relPath of canonicalDocs) {
-  const absolute = path.resolve(repoRoot, relPath);
-  addCheck(
-    `canonical doc exists: ${relPath}`,
-    fs.existsSync(absolute),
-    fs.existsSync(absolute) ? "ok" : "missing"
-  );
-}
-
-for (const relPath of pointerDocs) {
-  const absolute = path.resolve(repoRoot, relPath);
-  const contents = readFileSafe(absolute);
-  const hasPointerLanguage =
-    typeof contents === "string" &&
-    (contents.toLowerCase().includes("pointer") ||
-      contents.toLowerCase().includes("consolidated into"));
-  addCheck(
-    `pointer doc is reduced: ${relPath}`,
-    hasPointerLanguage,
-    hasPointerLanguage ? "ok" : "missing pointer marker"
-  );
-}
-
-const docFiles = [];
-for (const firstLevel of fs.readdirSync(docsDir)) {
-  const firstLevelPath = path.resolve(docsDir, firstLevel);
-  const stats = fs.statSync(firstLevelPath);
-  if (stats.isFile() && firstLevelPath.endsWith(".md")) {
-    docFiles.push(firstLevelPath);
-    continue;
-  }
-  if (!stats.isDirectory()) continue;
-  for (const nested of fs.readdirSync(firstLevelPath)) {
-    const nestedPath = path.resolve(firstLevelPath, nested);
-    if (fs.statSync(nestedPath).isFile() && nestedPath.endsWith(".md")) {
-      docFiles.push(nestedPath);
+function walkMarkdownFiles(dirPath) {
+  const out = [];
+  for (const entry of fs.readdirSync(dirPath, { withFileTypes: true })) {
+    const absolute = path.resolve(dirPath, entry.name);
+    if (entry.isDirectory()) {
+      out.push(...walkMarkdownFiles(absolute));
+      continue;
+    }
+    if (entry.isFile() && absolute.endsWith(".md")) {
+      out.push(absolute);
     }
   }
+  return out;
 }
 
-const allDocsText = docFiles
-  .map((file) => readFileSafe(file) ?? "")
-  .join("\n")
-  .toLowerCase();
+const docFiles = fs.existsSync(docsDir) ? walkMarkdownFiles(docsDir) : [];
+const docRelPaths = docFiles.map((file) => path.relative(repoRoot, file).replaceAll(path.sep, "/"));
 
+addCheck("docs directory exists", fs.existsSync(docsDir), fs.existsSync(docsDir) ? "ok" : "missing docs/");
+
+for (const relPath of allowedDocs) {
+  const absolute = path.resolve(repoRoot, relPath);
+  addCheck(`allowed doc exists: ${relPath}`, fs.existsSync(absolute), fs.existsSync(absolute) ? "ok" : "missing");
+}
+
+const unexpectedDocs = docRelPaths.filter((relPath) => !allowedDocs.has(relPath));
+addCheck(
+  "no unexpected markdown docs remain",
+  unexpectedDocs.length === 0,
+  unexpectedDocs.length === 0 ? "ok" : unexpectedDocs.join(", ")
+);
+
+const masterDoc = readFileSafe(path.resolve(repoRoot, "docs/master.md")) ?? "";
+for (const section of requiredSections) {
+  addCheck(
+    `master doc contains section: ${section}`,
+    masterDoc.includes(section),
+    masterDoc.includes(section) ? "ok" : "missing"
+  );
+}
+
+const allDocsText = docFiles.map((file) => readFileSafe(file) ?? "").join("\n").toLowerCase();
 for (const token of forbiddenTokens) {
   addCheck(
     `forbidden token absent: ${token}`,
@@ -98,15 +97,6 @@ for (const token of forbiddenTokens) {
     allDocsText.includes(token) ? "token present in docs" : "ok"
   );
 }
-
-const masterContext = readFileSafe(path.resolve(repoRoot, "docs/master-context.md")) ?? "";
-addCheck(
-  "master context has source-of-truth table",
-  masterContext.includes("## Source Of Truth Map"),
-  masterContext.includes("## Source Of Truth Map")
-    ? "ok"
-    : "missing source-of-truth map section"
-);
 
 const pathRegex = /`((docs|apps|packages|scripts)\/[^`]+)`/g;
 const referencedPaths = new Set();
@@ -117,7 +107,7 @@ for (const docFile of docFiles) {
   }
 }
 
-for (const relPath of [...referencedPaths]) {
+for (const relPath of referencedPaths) {
   const absolute = path.resolve(repoRoot, relPath);
   addCheck(
     `referenced path exists: ${relPath}`,
@@ -159,4 +149,3 @@ console.log(
     2
   )
 );
-

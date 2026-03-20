@@ -1,8 +1,0 @@
-{
-  "generated_at": "2026-03-19T05:33:16.319Z",
-  "ok": false,
-  "reason": "playwright_json_parse_failed",
-  "stdout": "\nRunning 8 tests using 1 worker\n\n  ✓  1 [chromium] › tests/e2e/intake-batch.spec.ts:108:5 › batch intake uses shared dimensions with per-photo override and shows completion summary (1.5s)\n  ✓  2 [chromium] › tests/e2e/intake-batch.spec.ts:178:5 › batch intake marks local duplicates and handles server duplicate responses (472ms)\n  ✓  3 [chromium] › tests/e2e/intake-batch.spec.ts:240:5 › batch intake enforces max 3 concurrent upload requests (1.3s)\n  ✓  4 [chromium] › tests/e2e/intake-batch.spec.ts:279:5 › batch intake enforces 20-photo cap (329ms)\n  ✓  5 [chromium] › tests/e2e/intake-batch.spec.ts:293:5 › batch intake reports mixed outcomes with 3 duplicates out of 5 (469ms)\n  ✓  6 [chromium] › tests/e2e/inventory-review-flow.spec.ts:117:5 › inventory row shows needs review warning with reason text (2.3s)\n  ✓  7 [chromium] › tests/e2e/inventory-review-flow.spec.ts:138:5 › re-analyze action transitions rug back to processing (4.3s)\n  ✓  8 [chromium] › tests/e2e/inventory-review-flow.spec.ts:183:5 › delete action confirms and removes row from inventory (3.7s)\n\n  8 passed (15.6s)\n",
-  "stderr": "",
-  "code": 0
-}
