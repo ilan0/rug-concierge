@@ -3,6 +3,10 @@ import {
   aiStructuredFieldsSchema,
   staffOverridesSchema,
 } from "@/lib/inventory/schemas";
+import {
+  isEnrichmentStatus,
+  isReviewReasonCode,
+} from "@/lib/inventory/enrichment-state";
 import type {
   StaffInventoryRugDetail,
   StaffOverrides,
@@ -82,6 +86,12 @@ function parseStaffRugDetail(payload: unknown): StaffInventoryRugDetail {
     effective_fields: effectiveFields,
     stock_id: typeof payload.stock_id === "string" ? payload.stock_id : null,
     status: typeof payload.status === "string" ? payload.status : null,
+    enrichment_status: isEnrichmentStatus(payload.enrichment_status)
+      ? payload.enrichment_status
+      : null,
+    review_reason_code: isReviewReasonCode(payload.review_reason_code)
+      ? payload.review_reason_code
+      : null,
     width_total_in:
       typeof payload.width_total_in === "number" && Number.isFinite(payload.width_total_in)
         ? payload.width_total_in
@@ -158,4 +168,13 @@ export async function reEnrichStaffRug(
   }
   const payload = (await response.json().catch(() => null)) as unknown;
   return parseStaffRugDetail(payload);
+}
+
+export async function deleteStaffRug(id: string): Promise<void> {
+  const response = await fetch(`/api/inventory/rugs/${encodeURIComponent(id)}`, {
+    method: "DELETE",
+  });
+  if (!response.ok) {
+    await parseErrorOrThrow(response);
+  }
 }

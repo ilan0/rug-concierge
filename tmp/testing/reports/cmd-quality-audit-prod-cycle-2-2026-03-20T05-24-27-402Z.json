@@ -1,0 +1,18 @@
+{
+  "generated_at": "2026-03-20T05:59:25.486Z",
+  "cycle": 2,
+  "label": "quality-audit-prod",
+  "command": "node",
+  "args": [
+    "tmp/testing/quality-auditor.mjs",
+    "--mode=prod",
+    "--manifest=/Users/ilannabatkhorian/Documents/rug-concierge/tmp/testing/manifests/manifest-real-60.json",
+    "--run_report=/Users/ilannabatkhorian/Documents/rug-concierge/tmp/testing/reports/golden-run-report-prod-cycle-2-2026-03-20T05-24-27-402Z.json",
+    "--report=/Users/ilannabatkhorian/Documents/rug-concierge/tmp/testing/reports/quality-audit-prod-cycle-2-2026-03-20T05-24-27-402Z.json"
+  ],
+  "code": 0,
+  "ok": true,
+  "report_path": "/Users/ilannabatkhorian/Documents/rug-concierge/tmp/testing/reports/quality-audit-prod-cycle-2-2026-03-20T05-24-27-402Z.json",
+  "stdout": "{\n  \"ok\": true,\n  \"report\": \"/Users/ilannabatkhorian/Documents/rug-concierge/tmp/testing/reports/quality-audit-prod-cycle-2-2026-03-20T05-24-27-402Z.json\",\n  \"gates\": {\n    \"title_compliance_100\": true,\n    \"invalid_to_needs_review_100\": true,\n    \"origin_accuracy_ge_95\": true,\n    \"style_accuracy_ge_92\": true,\n    \"age_format_plausibility_ge_90\": true,\n    \"integrity_100\": true,\n    \"no_critical_failures\": true\n  },\n  \"failure_count\": 2\n}\n",
+  "stderr": ""
+}

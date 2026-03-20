@@ -26,6 +26,8 @@ Runtime-required fields:
 - `tenant_id`
 - `stock_id` (nullable)
 - `status` (`available`, `on_hold`, `sold`)
+- `enrichment_status` (`processing`, `ready`, `needs_review`)
+- `review_reason_code` (`ANALYSIS_INCOMPLETE`, `ANALYSIS_FAILED`, nullable)
 - `width_ft`, `width_in`, `length_ft`, `length_in`
 - `width_total_in`, `length_total_in` (computed/generated in DB)
 - `intake_label` (nullable during processing)
@@ -41,10 +43,25 @@ Runtime-used fields:
 - `tenant_id`
 - `rug_id`
 - `path` (storage object key only)
+- `image_sha256` (exact duplicate detection hash)
 - `created_at`
 
 Current shape expectation:
 - one row per rug (`rug_id` unique index)
+- one exact image hash per tenant (`tenant_id`, `image_sha256` unique index)
+
+## `inventory_enrichment_jobs`
+
+Runtime-used fields:
+- `id`
+- `tenant_id`
+- `rug_id` (fk -> `rugs.id`, cascade delete)
+- `state` (`queued`, `retry_scheduled`, `processing`, `completed`, `needs_review`)
+- `attempt_count`, `max_attempts`
+- `next_attempt_at`
+- `last_error`
+- `locked_at`, `lock_owner`
+- `created_at`, `updated_at`
 
 ## `chat_sessions`
 

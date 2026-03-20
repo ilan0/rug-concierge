@@ -1,0 +1,16 @@
+{
+  "generated_at": "2026-03-19T03:42:31.461Z",
+  "cycle": 2,
+  "label": "contract-prod",
+  "command": "node",
+  "args": [
+    "tmp/testing/contract-suite.mjs",
+    "--base_url=https://rug-concierge.vercel.app",
+    "--report=/Users/ilannabatkhorian/Documents/rug-concierge/tmp/testing/reports/contract-report-cycle-2-2026-03-19T03-42-05-964Z-prod.json"
+  ],
+  "code": 1,
+  "ok": false,
+  "report_path": "/Users/ilannabatkhorian/Documents/rug-concierge/tmp/testing/reports/contract-report-cycle-2-2026-03-19T03-42-05-964Z-prod.json",
+  "stdout": "",
+  "stderr": "{\n  \"ok\": false,\n  \"error\": \"Passcode unlock failed (429) at https://rug-concierge.vercel.app\"\n}\n"
+}

@@ -1,0 +1,18 @@
+{
+  "generated_at": "2026-03-19T03:42:31.662Z",
+  "cycle": 2,
+  "label": "real-images-prod",
+  "command": "node",
+  "args": [
+    "tmp/testing/run-real-image-intake.mjs",
+    "--base_url=https://rug-concierge.vercel.app",
+    "--label=prod",
+    "--manifest=/Users/ilannabatkhorian/Documents/rug-concierge/tmp/testing/manifests/manifest-real-60.json",
+    "--report=/Users/ilannabatkhorian/Documents/rug-concierge/tmp/testing/reports/golden-run-report-prod-cycle-2-2026-03-19T03-42-05-964Z.json"
+  ],
+  "code": 1,
+  "ok": false,
+  "report_path": "/Users/ilannabatkhorian/Documents/rug-concierge/tmp/testing/reports/golden-run-report-prod-cycle-2-2026-03-19T03-42-05-964Z.json",
+  "stdout": "",
+  "stderr": "{\n  \"ok\": false,\n  \"error\": \"Passcode unlock failed (429) at https://rug-concierge.vercel.app\"\n}\n"
+}

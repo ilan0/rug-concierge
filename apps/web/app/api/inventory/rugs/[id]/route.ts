@@ -5,6 +5,7 @@ import { internalError } from "@/lib/errors/http-errors";
 import { resolveAuthoritativeTenantForServer } from "@/lib/auth/tenant";
 import { isStaffUnlockedFromRequest } from "@/lib/auth/staff";
 import { fetchPrimaryRugImagesForRugs } from "@/lib/storage/rug-images";
+import { buildTradeTitle } from "@/lib/inventory/title-builder";
 import {
   checkLocalRateLimit,
   checkRateLimit,
@@ -22,6 +23,7 @@ import {
   parseRouteParamsWithSchema,
 } from "@/lib/http/route-validation";
 
+const RUG_IMAGES_BUCKET = "rug-images";
 const RUG_ID_PARAMS_SCHEMA = z.object({ id: z.string().uuid() }).strict();
 
 const PATCH_BODY_SCHEMA = z
@@ -166,10 +168,56 @@ export async function PATCH(
     updatePayload.status = parsedBody.value.status;
   }
   if (Object.prototype.hasOwnProperty.call(parsedBody.value, "staff_overrides")) {
-    updatePayload.staff_overrides = mergeStaffOverrides(
+    const mergedOverrides = mergeStaffOverrides(
       existing.staff_overrides,
       parsedBody.value.staff_overrides ?? {}
     );
+    updatePayload.staff_overrides = mergedOverrides;
+
+    const explicitStaffLabel =
+      typeof mergedOverrides?.label === "string" &&
+      mergedOverrides.label.trim().length > 0
+        ? mergedOverrides.label.trim()
+        : null;
+
+    const computedTitle = buildTradeTitle({
+      aiFields: {
+        origin:
+          mergedOverrides?.origin ??
+          existing.ai_structured_fields?.origin ??
+          null,
+        style:
+          mergedOverrides?.style ??
+          existing.ai_structured_fields?.style ??
+          null,
+        age_category:
+          mergedOverrides?.age_category ??
+          existing.ai_structured_fields?.age_category ??
+          null,
+        pattern:
+          mergedOverrides?.pattern ??
+          existing.ai_structured_fields?.pattern ??
+          null,
+        primary_colors:
+          mergedOverrides?.primary_colors ??
+          existing.ai_structured_fields?.primary_colors ??
+          null,
+        mood:
+          mergedOverrides?.mood ??
+          existing.ai_structured_fields?.mood ??
+          null,
+      },
+      widthTotalIn: existing.width_total_in,
+      lengthTotalIn: existing.length_total_in,
+      fallbackLabel: explicitStaffLabel ?? existing.intake_label,
+    });
+
+    const isReady = Boolean(computedTitle);
+    updatePayload.enrichment_status = isReady ? "ready" : "needs_review";
+    updatePayload.review_reason_code = isReady ? null : "ANALYSIS_INCOMPLETE";
+    if (computedTitle) {
+      updatePayload.intake_label = computedTitle;
+    }
   }
 
   let updated = existing;
@@ -197,4 +245,69 @@ export async function PATCH(
 
   const image = await withPrimaryImage({ tenantId, rugId: updated.id });
   return NextResponse.json(toStaffInventoryRugDetail({ row: updated, ...image }));
+}
+
+export async function DELETE(
+  req: NextRequest,
+  context: { params: Promise<{ id: string }> }
+) {
+  if (!isStaffUnlockedFromRequest(req)) {
+    return staffLockedResponse();
+  }
+  const rateLimited = await enforceInventoryRateLimit(req, "write");
+  if (rateLimited) return rateLimited;
+
+  const params = await parseRouteParamsWithSchema(
+    context.params,
+    RUG_ID_PARAMS_SCHEMA,
+    "rug id is required."
+  );
+  if (!params.ok) return params.response;
+
+  const tenantId = resolveAuthoritativeTenantForServer({});
+  if (!tenantId) {
+    return internalError("Tenant is not configured.");
+  }
+
+  const existing = await fetchRugRecordById({
+    supabase: supabaseAdmin,
+    tenantId,
+    id: params.value.id,
+  });
+  if (!existing) {
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
+  }
+
+  const imageRows = await supabaseAdmin
+    .from("rug_images")
+    .select("path")
+    .eq("tenant_id", tenantId)
+    .eq("rug_id", params.value.id);
+  if (imageRows.error) {
+    return internalError("Unable to read rug images before delete.");
+  }
+
+  const storagePaths = (Array.isArray(imageRows.data) ? imageRows.data : [])
+    .map((row) => (typeof row?.path === "string" ? row.path.trim() : ""))
+    .filter((path) => path.length > 0);
+
+  if (storagePaths.length > 0) {
+    const storageRemove = await supabaseAdmin.storage
+      .from(RUG_IMAGES_BUCKET)
+      .remove(storagePaths);
+    if (storageRemove.error) {
+      return internalError("Unable to delete rug image from storage.");
+    }
+  }
+
+  const deleteResult = await supabaseAdmin
+    .from("rugs")
+    .delete()
+    .eq("tenant_id", tenantId)
+    .eq("id", params.value.id);
+  if (deleteResult.error) {
+    return internalError("Unable to delete rug.");
+  }
+
+  return NextResponse.json({ ok: true, id: params.value.id });
 }

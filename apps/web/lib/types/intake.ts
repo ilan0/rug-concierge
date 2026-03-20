@@ -1,3 +1,8 @@
+import type {
+  EnrichmentStatus,
+  ReviewReasonCode,
+} from "@/lib/inventory/enrichment-state";
+
 export type IntakeCreateRequest = {
   tenant_id: string;
   stock_id?: string | null;
@@ -14,6 +19,8 @@ export type IntakeCreatedRug = {
   intake_label: string | null;
   ai_description: string | null;
   status: string | null;
+  enrichment_status: EnrichmentStatus | null;
+  review_reason_code: ReviewReasonCode | null;
   width_total_in: number;
   length_total_in: number;
   primary_image_url: string | null;
@@ -22,4 +29,13 @@ export type IntakeCreatedRug = {
 export type IntakeCreateResponse = {
   rug: IntakeCreatedRug;
   ai_status: "processing";
+};
+
+export type IntakeDuplicateImageResponse = {
+  error: string;
+  code: "DUPLICATE_IMAGE";
+  existing_rug: {
+    id: string;
+    label: string | null;
+  };
 };

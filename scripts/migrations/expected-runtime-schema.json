@@ -10,6 +10,8 @@
       "tenant_id",
       "stock_id",
       "status",
+      "enrichment_status",
+      "review_reason_code",
       "width_ft",
       "width_in",
       "length_ft",
@@ -28,7 +30,22 @@
       "tenant_id",
       "rug_id",
       "path",
+      "image_sha256",
       "created_at"
+    ],
+    "inventory_enrichment_jobs": [
+      "id",
+      "tenant_id",
+      "rug_id",
+      "state",
+      "attempt_count",
+      "max_attempts",
+      "next_attempt_at",
+      "last_error",
+      "locked_at",
+      "lock_owner",
+      "created_at",
+      "updated_at"
     ],
     "chat_sessions": [
       "session_id",

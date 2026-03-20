@@ -13,12 +13,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RugImage } from "@/components/ui/rug-image";
 import { toast } from "sonner";
-import { Pencil, RefreshCw } from "lucide-react";
+import { Pencil, RefreshCw, Trash2 } from "lucide-react";
 import {
+  deleteStaffRug,
   fetchStaffRugDetail,
   patchStaffRugDetail,
   reEnrichStaffRug,
 } from "@/lib/inventory/staff-client";
+import { reviewReasonMessage } from "@/lib/inventory/enrichment-state";
 import { resolveEffectiveFields } from "@/lib/inventory/resolve-fields";
 import type {
   InventoryBrowserRow,
@@ -162,6 +164,8 @@ function rowToDetail(row: InventoryBrowserRow): StaffInventoryRugDetail {
     effective_fields: effectiveFields,
     stock_id: row.stock_id,
     status: row.status,
+    enrichment_status: row.enrichment_status,
+    review_reason_code: row.review_reason_code,
     width_total_in: row.width_total_in,
     length_total_in: row.length_total_in,
     created_at: row.created_at,
@@ -185,6 +189,7 @@ export function StaffRugDetailModal({
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [reAnalyzing, setReAnalyzing] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [editMode, setEditMode] = useState(false);
   const [patternInput, setPatternInput] = useState("");
@@ -359,10 +364,10 @@ export function StaffRugDetailModal({
   };
 
   const onReAnalyze = async () => {
-    if (!detail || reAnalyzing) return;
+    if (!detail || reAnalyzing || deleting) return;
     if (typeof window !== "undefined") {
       const confirmed = window.confirm(
-        "Re-analyze this rug with AI? This will refresh AI fields and keep your staff overrides."
+        "Queue AI re-analysis for this rug? Staff overrides will be preserved."
       );
       if (!confirmed) return;
     }
@@ -372,7 +377,7 @@ export function StaffRugDetailModal({
       const updated = await reEnrichStaffRug(detail.id);
       setDetail(updated);
       setDraft(detailToDraft(updated));
-      toast.success("Rug re-analyzed successfully.");
+      toast.success("Re-analysis queued. This rug is processing.");
     } catch (nextError) {
       setError(
         nextError instanceof Error
@@ -385,15 +390,45 @@ export function StaffRugDetailModal({
     }
   };
 
+  const onDeleteRug = async () => {
+    if (!detail || deleting || saving || reAnalyzing) return;
+    if (typeof window !== "undefined") {
+      const confirmed = window.confirm(
+        "Delete this rug from inventory? This cannot be undone."
+      );
+      if (!confirmed) return;
+    }
+
+    setDeleting(true);
+    setError(null);
+    try {
+      await deleteStaffRug(detail.id);
+      toast.success("Rug deleted.");
+      onClose();
+      if (typeof window !== "undefined") {
+        window.location.reload();
+      }
+    } catch (nextError) {
+      const message =
+        nextError instanceof Error
+          ? nextError.message
+          : "Unable to delete this rug right now.";
+      setError(message);
+      toast.error(message);
+    } finally {
+      setDeleting(false);
+    }
+  };
+
   const onAvailabilityToggle = async (nextAvailable: boolean) => {
-    if (!detail || saving || reAnalyzing) return;
+    if (!detail || saving || reAnalyzing || deleting) return;
     const currentAvailable = detail.status === "available";
     if (currentAvailable === nextAvailable) return;
     await onQuickStatusChange(nextAvailable ? "available" : "on_hold");
   };
 
   const onRequestClose = async () => {
-    if (saving) return;
+    if (saving || deleting) return;
     if (!hasUnsavedChanges) {
       setEditMode(false);
       onClose();
@@ -473,7 +508,7 @@ export function StaffRugDetailModal({
                           : "rounded-full px-3 py-1 text-xs font-medium text-muted-foreground hover:bg-accent"
                       }
                       onClick={() => void onAvailabilityToggle(true)}
-                      disabled={saving || reAnalyzing}
+                      disabled={saving || reAnalyzing || deleting}
                     >
                       Available
                     </button>
@@ -485,7 +520,7 @@ export function StaffRugDetailModal({
                           : "rounded-full px-3 py-1 text-xs font-medium text-muted-foreground hover:bg-accent"
                       }
                       onClick={() => void onAvailabilityToggle(false)}
-                      disabled={saving || reAnalyzing}
+                      disabled={saving || reAnalyzing || deleting}
                     >
                       Not Available
                     </button>
@@ -499,12 +534,26 @@ export function StaffRugDetailModal({
                     size="sm"
                     className="h-8 px-2.5 text-xs"
                     onClick={() => void onReAnalyze()}
-                    disabled={saving || reAnalyzing}
+                    disabled={saving || reAnalyzing || deleting}
                     aria-label="Re-analyze"
                   >
                     <RefreshCw className={reAnalyzing ? "h-3.5 w-3.5 animate-spin" : "h-3.5 w-3.5"} />
                     <span className="hidden sm:inline">
                       {reAnalyzing ? "Re-analyzing..." : "Re-analyze"}
+                    </span>
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="h-8 px-2.5 text-xs text-red-700 hover:bg-red-50 hover:text-red-700"
+                    onClick={() => void onDeleteRug()}
+                    disabled={saving || reAnalyzing || deleting}
+                    aria-label="Delete rug"
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                    <span className="hidden sm:inline">
+                      {deleting ? "Deleting..." : "Delete"}
                     </span>
                   </Button>
                   {editMode ? (
@@ -517,7 +566,7 @@ export function StaffRugDetailModal({
                     variant={editMode ? "secondary" : "outline"}
                     size="icon"
                     onClick={() => void onToggleEditMode()}
-                    disabled={saving || reAnalyzing}
+                    disabled={saving || reAnalyzing || deleting}
                     aria-label={editMode ? "Exit edit mode" : "Edit fields"}
                     title={editMode ? "Exit edit mode" : "Edit fields"}
                   >
@@ -545,6 +594,28 @@ export function StaffRugDetailModal({
                 </div>
 
                 <div className="min-w-0 flex-1 space-y-4">
+                  {detail.enrichment_status === "needs_review" ? (
+                    <section className="rounded-xl border border-red-200 bg-red-50 p-3">
+                      <p className="text-xs font-semibold uppercase tracking-[0.08em] text-red-700">
+                        Needs Review
+                      </p>
+                      <p className="mt-1 text-sm text-red-700">
+                        {reviewReasonMessage(detail.review_reason_code)}
+                      </p>
+                    </section>
+                  ) : null}
+
+                  {detail.enrichment_status === "processing" ? (
+                    <section className="rounded-xl border border-amber-200 bg-amber-50 p-3">
+                      <p className="text-xs font-semibold uppercase tracking-[0.08em] text-amber-700">
+                        Processing
+                      </p>
+                      <p className="mt-1 text-sm text-amber-700">
+                        AI analysis is running in the background.
+                      </p>
+                    </section>
+                  ) : null}
+
                   {detail.ai_description ? (
                     <section className="space-y-2 rounded-xl border border-border/55 bg-background/45 p-3">
                       <h3 className="text-xs font-semibold uppercase tracking-[0.08em] text-primary">
@@ -878,7 +949,7 @@ export function StaffRugDetailModal({
                 <Button
                   type="button"
                   onClick={() => void onSaveEdits()}
-                  disabled={saving || reAnalyzing || !hasUnsavedChanges}
+                  disabled={saving || reAnalyzing || deleting || !hasUnsavedChanges}
                 >
                   {saving ? "Saving..." : "Save Changes"}
                 </Button>

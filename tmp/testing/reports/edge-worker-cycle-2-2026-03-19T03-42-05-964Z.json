@@ -1,0 +1,10 @@
+{
+  "generated_at": "2026-03-19T03:42:28.372Z",
+  "cycle": 2,
+  "label": "edge-worker-local",
+  "base_url": "http://127.0.0.1:4201",
+  "code": 1,
+  "ok": false,
+  "stdout": "",
+  "stderr": "FAIL: Passcode unlock failed: 429\n"
+}

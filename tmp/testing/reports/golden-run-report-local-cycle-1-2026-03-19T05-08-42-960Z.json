@@ -1,0 +1,4183 @@
+{
+  "generated_at": "2026-03-19T05:16:55.573Z",
+  "base_url": "http://127.0.0.1:4201",
+  "label": "local",
+  "tenant_id": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5",
+  "manifest_path": "/Users/ilannabatkhorian/Documents/rug-concierge/tmp/testing/manifests/manifest-real-60.json",
+  "manifest_count": 60,
+  "submission_summary": {
+    "created": 60,
+    "duplicate_rejected": 0,
+    "error": 0,
+    "download_error": 0
+  },
+  "unresolved_after_timeout": [],
+  "submissions": [
+    {
+      "row_id": "real-001",
+      "stock_id": "CERT-LOCAL-20260319T050926-001",
+      "category": "valid",
+      "image_url": "https://upload.wikimedia.org/wikipedia/commons/0/01/Persia_Sultanabad_carpet_%28detail%29.jpg",
+      "status": "created",
+      "http_status": 200,
+      "request_attempts": 1,
+      "rate_limited_retries": 0,
+      "rug_id": "8e80938f-fa4b-465f-a669-39176543ac9a",
+      "response": {
+        "rug": {
+          "id": "8e80938f-fa4b-465f-a669-39176543ac9a",
+          "intake_label": null,
+          "ai_description": null,
+          "stock_id": "CERT-LOCAL-20260319T050926-001",
+          "width_total_in": 96,
+          "length_total_in": 120,
+          "status": "available",
+          "enrichment_status": "processing",
+          "review_reason_code": null,
+          "primary_image_url": "https://nlypymygmysfgxekhudr.supabase.co/storage/v1/object/public/rug-images/1f3d032b-8411-48a9-8a44-1f3cb9df67a5/8e80938f-fa4b-465f-a669-39176543ac9a/primary-1773896967020.jpg"
+        },
+        "ai_status": "processing"
+      },
+      "duration_ms": 2263
+    },
+    {
+      "row_id": "real-002",
+      "stock_id": "CERT-LOCAL-20260319T050926-002",
+      "category": "valid",
+      "image_url": "https://upload.wikimedia.org/wikipedia/commons/0/0e/Rug_esfahan_detail.jpg",
+      "status": "created",
+      "http_status": 200,
+      "request_attempts": 1,
+      "rate_limited_retries": 0,
+      "rug_id": "78ed416f-8067-45d6-b541-7bce5ab0f6f6",
+      "response": {
+        "rug": {
+          "id": "78ed416f-8067-45d6-b541-7bce5ab0f6f6",
+          "intake_label": null,
+          "ai_description": null,
+          "stock_id": "CERT-LOCAL-20260319T050926-002",
+          "width_total_in": 96,
+          "length_total_in": 120,
+          "status": "available",
+          "enrichment_status": "processing",
+          "review_reason_code": null,
+          "primary_image_url": "https://nlypymygmysfgxekhudr.supabase.co/storage/v1/object/public/rug-images/1f3d032b-8411-48a9-8a44-1f3cb9df67a5/78ed416f-8067-45d6-b541-7bce5ab0f6f6/primary-1773896969279.jpg"
+        },
+        "ai_status": "processing"
+      },
+      "duration_ms": 2150
+    },
+    {
+      "row_id": "real-003",
+      "stock_id": "CERT-LOCAL-20260319T050926-003",
+      "category": "valid",
+      "image_url": "https://upload.wikimedia.org/wikipedia/commons/1/15/A_close_up_view_of_the_pictorial_masterpiece_rug_by_Mohammad_Seirafian%2C_Isfahan%2C_Iran.jpg",
+      "status": "created",
+      "http_status": 200,
+      "request_attempts": 1,
+      "rate_limited_retries": 0,
+      "rug_id": "38e220e3-cbfb-41ba-9368-67d0d216d345",
+      "response": {
+        "rug": {
+          "id": "38e220e3-cbfb-41ba-9368-67d0d216d345",
+          "intake_label": null,
+          "ai_description": null,
+          "stock_id": "CERT-LOCAL-20260319T050926-003",
+          "width_total_in": 96,
+          "length_total_in": 120,
+          "status": "available",
+          "enrichment_status": "processing",
+          "review_reason_code": null,
+          "primary_image_url": "https://nlypymygmysfgxekhudr.supabase.co/storage/v1/object/public/rug-images/1f3d032b-8411-48a9-8a44-1f3cb9df67a5/38e220e3-cbfb-41ba-9368-67d0d216d345/primary-1773896971385.jpg"
+        },
+        "ai_status": "processing"
+      },
+      "duration_ms": 1851
+    },
+    {
+      "row_id": "real-004",
+      "stock_id": "CERT-LOCAL-20260319T050926-004",
+      "category": "valid",
+      "image_url": "https://upload.wikimedia.org/wikipedia/commons/1/15/Silk_Kashan_Carpet_MET_wb-14.40.715c.jpeg",
+      "status": "created",
+      "http_status": 200,
+      "request_attempts": 1,
+      "rate_limited_retries": 0,
+      "rug_id": "8d3fceb3-2cad-4822-82c2-3d0382a9fde9",
+      "response": {
+        "rug": {
+          "id": "8d3fceb3-2cad-4822-82c2-3d0382a9fde9",
+          "intake_label": null,
+          "ai_description": null,
+          "stock_id": "CERT-LOCAL-20260319T050926-004",
+          "width_total_in": 96,
+          "length_total_in": 120,
+          "status": "available",
+          "enrichment_status": "processing",
+          "review_reason_code": null,
+          "primary_image_url": "https://nlypymygmysfgxekhudr.supabase.co/storage/v1/object/public/rug-images/1f3d032b-8411-48a9-8a44-1f3cb9df67a5/8d3fceb3-2cad-4822-82c2-3d0382a9fde9/primary-1773896973251.jpg"
+        },
+        "ai_status": "processing"
+      },
+      "duration_ms": 1802
+    },
+    {
+      "row_id": "real-005",
+      "stock_id": "CERT-LOCAL-20260319T050926-005",
+      "category": "valid",
+      "image_url": "https://upload.wikimedia.org/wikipedia/commons/1/1c/42556-Antique-Persian-Tabriz-Carpets-hires.jpg",
+      "status": "created",
+      "http_status": 200,
+      "request_attempts": 1,
+      "rate_limited_retries": 0,
+      "rug_id": "20950889-56f4-4a4c-9ae0-8d3388ee7a48",
+      "response": {
+        "rug": {
+          "id": "20950889-56f4-4a4c-9ae0-8d3388ee7a48",
+          "intake_label": null,
+          "ai_description": null,
+          "stock_id": "CERT-LOCAL-20260319T050926-005",
+          "width_total_in": 96,
+          "length_total_in": 120,
+          "status": "available",
+          "enrichment_status": "processing",
+          "review_reason_code": null,
+          "primary_image_url": "https://nlypymygmysfgxekhudr.supabase.co/storage/v1/object/public/rug-images/1f3d032b-8411-48a9-8a44-1f3cb9df67a5/20950889-56f4-4a4c-9ae0-8d3388ee7a48/primary-1773896975019.jpg"
+        },
+        "ai_status": "processing"
+      },
+      "duration_ms": 1592
+    },
+    {
+      "row_id": "real-006",
+      "stock_id": "CERT-LOCAL-20260319T050926-006",
+      "category": "valid",
+      "image_url": "https://upload.wikimedia.org/wikipedia/commons/1/1f/Silk_Kashan_Carpet_MET_wb-14.40.724e.jpeg",
+      "status": "created",
+      "http_status": 200,
+      "request_attempts": 1,
+      "rate_limited_retries": 0,
+      "rug_id": "c79e2a90-bde3-4ce9-b5ef-d5293da3368a",
+      "response": {
+        "rug": {
+          "id": "c79e2a90-bde3-4ce9-b5ef-d5293da3368a",
+          "intake_label": null,
+          "ai_description": null,
+          "stock_id": "CERT-LOCAL-20260319T050926-006",
+          "width_total_in": 96,
+          "length_total_in": 120,
+          "status": "available",
+          "enrichment_status": "processing",
+          "review_reason_code": null,
+          "primary_image_url": "https://nlypymygmysfgxekhudr.supabase.co/storage/v1/object/public/rug-images/1f3d032b-8411-48a9-8a44-1f3cb9df67a5/c79e2a90-bde3-4ce9-b5ef-d5293da3368a/primary-1773896976634.jpg"
+        },
+        "ai_status": "processing"
+      },
+      "duration_ms": 1453
+    },
+    {
+      "row_id": "real-007",
+      "stock_id": "CERT-LOCAL-20260319T050926-007",
+      "category": "valid",
+      "image_url": "https://upload.wikimedia.org/wikipedia/commons/2/25/Arts_de_l%27Islam_%28Rillieux-la-Pape%29_-_tapis_d%27apparat_%28Iran_-_Kerman%29_16e_-_17e_si%C3%A8cle_%283%29.jpg",
+      "status": "created",
+      "http_status": 200,
+      "request_attempts": 1,
+      "rate_limited_retries": 0,
+      "rug_id": "87f5dfa1-7485-4d27-86b8-d7e9b71c0a34",
+      "response": {
+        "rug": {
+          "id": "87f5dfa1-7485-4d27-86b8-d7e9b71c0a34",
+          "intake_label": null,
+          "ai_description": null,
+          "stock_id": "CERT-LOCAL-20260319T050926-007",
+          "width_total_in": 96,
+          "length_total_in": 120,
+          "status": "available",
+          "enrichment_status": "processing",
+          "review_reason_code": null,
+          "primary_image_url": "https://nlypymygmysfgxekhudr.supabase.co/storage/v1/object/public/rug-images/1f3d032b-8411-48a9-8a44-1f3cb9df67a5/87f5dfa1-7485-4d27-86b8-d7e9b71c0a34/primary-1773896979455.jpg"
+        },
+        "ai_status": "processing"
+      },
+      "duration_ms": 4328
+    },
+    {
+      "row_id": "real-008",
+      "stock_id": "CERT-LOCAL-20260319T050926-008",
+      "category": "valid",
+      "image_url": "https://upload.wikimedia.org/wikipedia/commons/2/26/Silk_Kashan_Carpet_MET_SC40543.jpg",
+      "status": "created",
+      "http_status": 200,
+      "request_attempts": 1,
+      "rate_limited_retries": 0,
+      "rug_id": "e4210a49-5203-4bad-98c2-48ea7ba1626e",
+      "response": {
+        "rug": {
+          "id": "e4210a49-5203-4bad-98c2-48ea7ba1626e",
+          "intake_label": null,
+          "ai_description": null,
+          "stock_id": "CERT-LOCAL-20260319T050926-008",
+          "width_total_in": 96,
+          "length_total_in": 120,
+          "status": "available",
+          "enrichment_status": "processing",
+          "review_reason_code": null,
+          "primary_image_url": "https://nlypymygmysfgxekhudr.supabase.co/storage/v1/object/public/rug-images/1f3d032b-8411-48a9-8a44-1f3cb9df67a5/e4210a49-5203-4bad-98c2-48ea7ba1626e/primary-1773896982717.jpg"
+        },
+        "ai_status": "processing"
+      },
+      "duration_ms": 1595
+    },
+    {
+      "row_id": "real-009",
+      "stock_id": "CERT-LOCAL-20260319T050926-009",
+      "category": "valid",
+      "image_url": "https://upload.wikimedia.org/wikipedia/commons/2/2d/Silk_Kashan_Carpet_MET_wb-14.40.715b.jpeg",
+      "status": "created",
+      "http_status": 200,
+      "request_attempts": 1,
+      "rate_limited_retries": 0,
+      "rug_id": "fcf67904-21af-40e5-849a-8d6b6ccd5f64",
+      "response": {
+        "rug": {
+          "id": "fcf67904-21af-40e5-849a-8d6b6ccd5f64",
+          "intake_label": null,
+          "ai_description": null,
+          "stock_id": "CERT-LOCAL-20260319T050926-009",
+          "width_total_in": 96,
+          "length_total_in": 120,
+          "status": "available",
+          "enrichment_status": "processing",
+          "review_reason_code": null,
+          "primary_image_url": "https://nlypymygmysfgxekhudr.supabase.co/storage/v1/object/public/rug-images/1f3d032b-8411-48a9-8a44-1f3cb9df67a5/fcf67904-21af-40e5-849a-8d6b6ccd5f64/primary-1773896985124.jpg"
+        },
+        "ai_status": "processing"
+      },
+      "duration_ms": 3172
+    },
+    {
+      "row_id": "real-010",
+      "stock_id": "CERT-LOCAL-20260319T050926-010",
+      "category": "valid",
+      "image_url": "https://upload.wikimedia.org/wikipedia/commons/2/2e/Fragment_of_Tabriz_carpet_%22Ovchulug%22.jpg",
+      "status": "created",
+      "http_status": 200,
+      "request_attempts": 1,
+      "rate_limited_retries": 0,
+      "rug_id": "5455b60d-ad2c-4341-9f10-cd43e4a26b7d",
+      "response": {
+        "rug": {
+          "id": "5455b60d-ad2c-4341-9f10-cd43e4a26b7d",
+          "intake_label": null,
+          "ai_description": null,
+          "stock_id": "CERT-LOCAL-20260319T050926-010",
+          "width_total_in": 96,
+          "length_total_in": 120,
+          "status": "available",
+          "enrichment_status": "processing",
+          "review_reason_code": null,
+          "primary_image_url": "https://nlypymygmysfgxekhudr.supabase.co/storage/v1/object/public/rug-images/1f3d032b-8411-48a9-8a44-1f3cb9df67a5/5455b60d-ad2c-4341-9f10-cd43e4a26b7d/primary-1773896987146.jpg"
+        },
+        "ai_status": "processing"
+      },
+      "duration_ms": 1021
+    },
+    {
+      "row_id": "real-011",
+      "stock_id": "CERT-LOCAL-20260319T050926-011",
+      "category": "valid",
+      "image_url": "https://upload.wikimedia.org/wikipedia/commons/3/30/Heriz_Azeri_carpet_vaq-vaq.jpg",
+      "status": "created",
+      "http_status": 200,
+      "request_attempts": 1,
+      "rate_limited_retries": 0,
+      "rug_id": "569c3c3f-17a8-4dea-909e-bb484b9a3087",
+      "response": {
+        "rug": {
+          "id": "569c3c3f-17a8-4dea-909e-bb484b9a3087",
+          "intake_label": null,
+          "ai_description": null,
+          "stock_id": "CERT-LOCAL-20260319T050926-011",
+          "width_total_in": 96,
+          "length_total_in": 120,
+          "status": "available",
+          "enrichment_status": "processing",
+          "review_reason_code": null,
+          "primary_image_url": "https://nlypymygmysfgxekhudr.supabase.co/storage/v1/object/public/rug-images/1f3d032b-8411-48a9-8a44-1f3cb9df67a5/569c3c3f-17a8-4dea-909e-bb484b9a3087/primary-1773896988191.jpg"
+        },
+        "ai_status": "processing"
+      },
+      "duration_ms": 1092
+    },
+    {
+      "row_id": "real-012",
+      "stock_id": "CERT-LOCAL-20260319T050926-012",
+      "category": "valid",
+      "image_url": "https://upload.wikimedia.org/wikipedia/commons/3/30/Isfahan_Rug.jpg",
+      "status": "created",
+      "http_status": 200,
+      "request_attempts": 1,
+      "rate_limited_retries": 0,
+      "rug_id": "79accdfd-bfde-4c0d-8f1a-a63c5d40ed7f",
+      "response": {
+        "rug": {
+          "id": "79accdfd-bfde-4c0d-8f1a-a63c5d40ed7f",
+          "intake_label": null,
+          "ai_description": null,
+          "stock_id": "CERT-LOCAL-20260319T050926-012",
+          "width_total_in": 96,
+          "length_total_in": 120,
+          "status": "available",
+          "enrichment_status": "processing",
+          "review_reason_code": null,
+          "primary_image_url": "https://nlypymygmysfgxekhudr.supabase.co/storage/v1/object/public/rug-images/1f3d032b-8411-48a9-8a44-1f3cb9df67a5/79accdfd-bfde-4c0d-8f1a-a63c5d40ed7f/primary-1773896989287.jpg"
+        },
+        "ai_status": "processing"
+      },
+      "duration_ms": 1240
+    },
+    {
+      "row_id": "real-013",
+      "stock_id": "CERT-LOCAL-20260319T050926-013",
+      "category": "valid",
+      "image_url": "https://upload.wikimedia.org/wikipedia/commons/3/33/Silk_Kashan_Carpet_MET_wb-58.46.jpeg",
+      "status": "created",
+      "http_status": 200,
+      "request_attempts": 1,
+      "rate_limited_retries": 0,
+      "rug_id": "c898a77f-2575-41b2-95dd-dc62f4ae32cf",
+      "response": {
+        "rug": {
+          "id": "c898a77f-2575-41b2-95dd-dc62f4ae32cf",
+          "intake_label": null,
+          "ai_description": null,
+          "stock_id": "CERT-LOCAL-20260319T050926-013",
+          "width_total_in": 96,
+          "length_total_in": 120,
+          "status": "available",
+          "enrichment_status": "processing",
+          "review_reason_code": null,
+          "primary_image_url": "https://nlypymygmysfgxekhudr.supabase.co/storage/v1/object/public/rug-images/1f3d032b-8411-48a9-8a44-1f3cb9df67a5/c898a77f-2575-41b2-95dd-dc62f4ae32cf/primary-1773896990541.jpg"
+        },
+        "ai_status": "processing"
+      },
+      "duration_ms": 2117
+    },
+    {
+      "row_id": "real-014",
+      "stock_id": "CERT-LOCAL-20260319T050926-014",
+      "category": "valid",
+      "image_url": "https://upload.wikimedia.org/wikipedia/commons/3/38/Silk_Kashan_Carpet_MET_wb-14.40.724b.jpeg",
+      "status": "created",
+      "http_status": 200,
+      "request_attempts": 1,
+      "rate_limited_retries": 0,
+      "rug_id": "152ced71-346e-4330-8692-9ab048c4c205",
+      "response": {
+        "rug": {
+          "id": "152ced71-346e-4330-8692-9ab048c4c205",
+          "intake_label": null,
+          "ai_description": null,
+          "stock_id": "CERT-LOCAL-20260319T050926-014",
+          "width_total_in": 96,
+          "length_total_in": 120,
+          "status": "available",
+          "enrichment_status": "processing",
+          "review_reason_code": null,
+          "primary_image_url": "https://nlypymygmysfgxekhudr.supabase.co/storage/v1/object/public/rug-images/1f3d032b-8411-48a9-8a44-1f3cb9df67a5/152ced71-346e-4330-8692-9ab048c4c205/primary-1773896992766.jpg"
+        },
+        "ai_status": "processing"
+      },
+      "duration_ms": 1477
+    },
+    {
+      "row_id": "real-015",
+      "stock_id": "CERT-LOCAL-20260319T050926-015",
+      "category": "valid",
+      "image_url": "https://upload.wikimedia.org/wikipedia/commons/3/3e/Four_Season_Persian_Tabriz_Rug.jpg",
+      "status": "created",
+      "http_status": 200,
+      "request_attempts": 1,
+      "rate_limited_retries": 0,
+      "rug_id": "4ee131b5-f56d-4ffc-97e1-a8e725d2ff41",
+      "response": {
+        "rug": {
+          "id": "4ee131b5-f56d-4ffc-97e1-a8e725d2ff41",
+          "intake_label": null,
+          "ai_description": null,
+          "stock_id": "CERT-LOCAL-20260319T050926-015",
+          "width_total_in": 96,
+          "length_total_in": 120,
+          "status": "available",
+          "enrichment_status": "processing",
+          "review_reason_code": null,
+          "primary_image_url": "https://nlypymygmysfgxekhudr.supabase.co/storage/v1/object/public/rug-images/1f3d032b-8411-48a9-8a44-1f3cb9df67a5/4ee131b5-f56d-4ffc-97e1-a8e725d2ff41/primary-1773896994517.jpg"
+        },
+        "ai_status": "processing"
+      },
+      "duration_ms": 1661
+    },
+    {
+      "row_id": "real-016",
+      "stock_id": "CERT-LOCAL-20260319T050926-016",
+      "category": "valid",
+      "image_url": "https://upload.wikimedia.org/wikipedia/commons/4/41/A_pictorial_Isfahan_rug%2C_signed_Ahmad_Esfahani%2C_central_Persia%2C_circa_1900.jpg",
+      "status": "created",
+      "http_status": 200,
+      "request_attempts": 1,
+      "rate_limited_retries": 0,
+      "rug_id": "3c6f0d33-057f-470b-819d-32c880f1adf2",
+      "response": {
+        "rug": {
+          "id": "3c6f0d33-057f-470b-819d-32c880f1adf2",
+          "intake_label": null,
+          "ai_description": null,
+          "stock_id": "CERT-LOCAL-20260319T050926-016",
+          "width_total_in": 96,
+          "length_total_in": 120,
+          "status": "available",
+          "enrichment_status": "processing",
+          "review_reason_code": null,
+          "primary_image_url": "https://nlypymygmysfgxekhudr.supabase.co/storage/v1/object/public/rug-images/1f3d032b-8411-48a9-8a44-1f3cb9df67a5/3c6f0d33-057f-470b-819d-32c880f1adf2/primary-1773896995928.jpg"
+        },
+        "ai_status": "processing"
+      },
+      "duration_ms": 1888
+    },
+    {
+      "row_id": "real-017",
+      "stock_id": "CERT-LOCAL-20260319T050926-017",
+      "category": "valid",
+      "image_url": "https://upload.wikimedia.org/wikipedia/commons/4/4a/Silk_Kashan_Carpet_MET_TP327.jpg",
+      "status": "created",
+      "http_status": 200,
+      "request_attempts": 1,
+      "rate_limited_retries": 0,
+      "rug_id": "774a204d-75b2-4712-9324-4fd6d6238dc4",
+      "response": {
+        "rug": {
+          "id": "774a204d-75b2-4712-9324-4fd6d6238dc4",
+          "intake_label": null,
+          "ai_description": null,
+          "stock_id": "CERT-LOCAL-20260319T050926-017",
+          "width_total_in": 96,
+          "length_total_in": 120,
+          "status": "available",
+          "enrichment_status": "processing",
+          "review_reason_code": null,
+          "primary_image_url": "https://nlypymygmysfgxekhudr.supabase.co/storage/v1/object/public/rug-images/1f3d032b-8411-48a9-8a44-1f3cb9df67a5/774a204d-75b2-4712-9324-4fd6d6238dc4/primary-1773896997825.jpg"
+        },
+        "ai_status": "processing"
+      },
+      "duration_ms": 1790
+    },
+    {
+      "row_id": "real-018",
+      "stock_id": "CERT-LOCAL-20260319T050926-018",
+      "category": "valid",
+      "image_url": "https://upload.wikimedia.org/wikipedia/commons/4/4f/Tabriz_Khoi_rug_circa_1900.jpg",
+      "status": "created",
+      "http_status": 200,
+      "request_attempts": 1,
+      "rate_limited_retries": 0,
+      "rug_id": "31fff2b4-1d9e-4755-b98e-66f3b48db89f",
+      "response": {
+        "rug": {
+          "id": "31fff2b4-1d9e-4755-b98e-66f3b48db89f",
+          "intake_label": null,
+          "ai_description": null,
+          "stock_id": "CERT-LOCAL-20260319T050926-018",
+          "width_total_in": 96,
+          "length_total_in": 120,
+          "status": "available",
+          "enrichment_status": "processing",
+          "review_reason_code": null,
+          "primary_image_url": "https://nlypymygmysfgxekhudr.supabase.co/storage/v1/object/public/rug-images/1f3d032b-8411-48a9-8a44-1f3cb9df67a5/31fff2b4-1d9e-4755-b98e-66f3b48db89f/primary-1773896999606.jpg"
+        },
+        "ai_status": "processing"
+      },
+      "duration_ms": 1838
+    },
+    {
+      "row_id": "real-019",
+      "stock_id": "CERT-LOCAL-20260319T050926-019",
+      "category": "valid",
+      "image_url": "https://upload.wikimedia.org/wikipedia/commons/5/50/Bijar_Kilim_19th_century.jpg",
+      "status": "created",
+      "http_status": 200,
+      "request_attempts": 1,
+      "rate_limited_retries": 0,
+      "rug_id": "eb51b364-4c72-4577-9164-e94d903dd5ab",
+      "response": {
+        "rug": {
+          "id": "eb51b364-4c72-4577-9164-e94d903dd5ab",
+          "intake_label": null,
+          "ai_description": null,
+          "stock_id": "CERT-LOCAL-20260319T050926-019",
+          "width_total_in": 96,
+          "length_total_in": 120,
+          "status": "available",
+          "enrichment_status": "processing",
+          "review_reason_code": null,
+          "primary_image_url": "https://nlypymygmysfgxekhudr.supabase.co/storage/v1/object/public/rug-images/1f3d032b-8411-48a9-8a44-1f3cb9df67a5/eb51b364-4c72-4577-9164-e94d903dd5ab/primary-1773897001565.jpg"
+        },
+        "ai_status": "processing"
+      },
+      "duration_ms": 2360
+    },
+    {
+      "row_id": "real-020",
+      "stock_id": "CERT-LOCAL-20260319T050926-020",
+      "category": "valid",
+      "image_url": "https://upload.wikimedia.org/wikipedia/commons/5/52/Silk_Kashan_Carpet_MET_SC150780.jpg",
+      "status": "created",
+      "http_status": 200,
+      "request_attempts": 1,
+      "rate_limited_retries": 0,
+      "rug_id": "9a16dda2-e138-4deb-896f-53e6052efbcb",
+      "response": {
+        "rug": {
+          "id": "9a16dda2-e138-4deb-896f-53e6052efbcb",
+          "intake_label": null,
+          "ai_description": null,
+          "stock_id": "CERT-LOCAL-20260319T050926-020",
+          "width_total_in": 96,
+          "length_total_in": 120,
+          "status": "available",
+          "enrichment_status": "processing",
+          "review_reason_code": null,
+          "primary_image_url": "https://nlypymygmysfgxekhudr.supabase.co/storage/v1/object/public/rug-images/1f3d032b-8411-48a9-8a44-1f3cb9df67a5/9a16dda2-e138-4deb-896f-53e6052efbcb/primary-1773897003708.jpg"
+        },
+        "ai_status": "processing"
+      },
+      "duration_ms": 1187
+    },
+    {
+      "row_id": "real-021",
+      "stock_id": "CERT-LOCAL-20260319T050926-021",
+      "category": "valid",
+      "image_url": "https://upload.wikimedia.org/wikipedia/commons/5/56/Antique_Late_19th_Century_Ziegler_Sultanabad_West_Central_Persian_Carpet_10ft_8in_x14ft_2in.jpg",
+      "status": "created",
+      "http_status": 200,
+      "request_attempts": 1,
+      "rate_limited_retries": 0,
+      "rug_id": "072613a4-99df-4a9e-9b81-ec06ef3f34ae",
+      "response": {
+        "rug": {
+          "id": "072613a4-99df-4a9e-9b81-ec06ef3f34ae",
+          "intake_label": null,
+          "ai_description": null,
+          "stock_id": "CERT-LOCAL-20260319T050926-021",
+          "width_total_in": 96,
+          "length_total_in": 120,
+          "status": "available",
+          "enrichment_status": "processing",
+          "review_reason_code": null,
+          "primary_image_url": "https://nlypymygmysfgxekhudr.supabase.co/storage/v1/object/public/rug-images/1f3d032b-8411-48a9-8a44-1f3cb9df67a5/072613a4-99df-4a9e-9b81-ec06ef3f34ae/primary-1773897004907.jpg"
+        },
+        "ai_status": "processing"
+      },
+      "duration_ms": 1389
+    },
+    {
+      "row_id": "real-022",
+      "stock_id": "CERT-LOCAL-20260319T050926-022",
+      "category": "valid",
+      "image_url": "https://upload.wikimedia.org/wikipedia/commons/5/5f/Antique_Persian_Sultanabad_Rug_with_an_Ivory_Field.jpg",
+      "status": "created",
+      "http_status": 200,
+      "request_attempts": 1,
+      "rate_limited_retries": 0,
+      "rug_id": "a510549a-8400-44f1-bb44-a33825152917",
+      "response": {
+        "rug": {
+          "id": "a510549a-8400-44f1-bb44-a33825152917",
+          "intake_label": null,
+          "ai_description": null,
+          "stock_id": "CERT-LOCAL-20260319T050926-022",
+          "width_total_in": 96,
+          "length_total_in": 120,
+          "status": "available",
+          "enrichment_status": "processing",
+          "review_reason_code": null,
+          "primary_image_url": "https://nlypymygmysfgxekhudr.supabase.co/storage/v1/object/public/rug-images/1f3d032b-8411-48a9-8a44-1f3cb9df67a5/a510549a-8400-44f1-bb44-a33825152917/primary-1773897006303.jpg"
+        },
+        "ai_status": "processing"
+      },
+      "duration_ms": 1711
+    },
+    {
+      "row_id": "real-023",
+      "stock_id": "CERT-LOCAL-20260319T050926-023",
+      "category": "valid",
+      "image_url": "https://upload.wikimedia.org/wikipedia/commons/6/64/Antique_Persian_Sultanabad_Rug_with_a_Blue_Field.jpg",
+      "status": "created",
+      "http_status": 200,
+      "request_attempts": 1,
+      "rate_limited_retries": 0,
+      "rug_id": "ddcb9ad3-2cb3-4a68-8f29-046b99c17fe7",
+      "response": {
+        "rug": {
+          "id": "ddcb9ad3-2cb3-4a68-8f29-046b99c17fe7",
+          "intake_label": null,
+          "ai_description": null,
+          "stock_id": "CERT-LOCAL-20260319T050926-023",
+          "width_total_in": 96,
+          "length_total_in": 120,
+          "status": "available",
+          "enrichment_status": "processing",
+          "review_reason_code": null,
+          "primary_image_url": "https://nlypymygmysfgxekhudr.supabase.co/storage/v1/object/public/rug-images/1f3d032b-8411-48a9-8a44-1f3cb9df67a5/ddcb9ad3-2cb3-4a68-8f29-046b99c17fe7/primary-1773897008085.jpg"
+        },
+        "ai_status": "processing"
+      },
+      "duration_ms": 1907
+    },
+    {
+      "row_id": "real-024",
+      "stock_id": "CERT-LOCAL-20260319T050926-024",
+      "category": "valid",
+      "image_url": "https://upload.wikimedia.org/wikipedia/commons/6/6b/Antique_tabriz_carpet_413021.jpg",
+      "status": "created",
+      "http_status": 200,
+      "request_attempts": 1,
+      "rate_limited_retries": 0,
+      "rug_id": "4ed505b2-a6fe-4521-a95b-bde93da0f814",
+      "response": {
+        "rug": {
+          "id": "4ed505b2-a6fe-4521-a95b-bde93da0f814",
+          "intake_label": null,
+          "ai_description": null,
+          "stock_id": "CERT-LOCAL-20260319T050926-024",
+          "width_total_in": 96,
+          "length_total_in": 120,
+          "status": "available",
+          "enrichment_status": "processing",
+          "review_reason_code": null,
+          "primary_image_url": "https://nlypymygmysfgxekhudr.supabase.co/storage/v1/object/public/rug-images/1f3d032b-8411-48a9-8a44-1f3cb9df67a5/4ed505b2-a6fe-4521-a95b-bde93da0f814/primary-1773897009879.jpg"
+        },
+        "ai_status": "processing"
+      },
+      "duration_ms": 1486
+    },
+    {
+      "row_id": "real-025",
+      "stock_id": "CERT-LOCAL-20260319T050926-025",
+      "category": "valid",
+      "image_url": "https://upload.wikimedia.org/wikipedia/commons/6/6b/Bijar_Rug_Persian_Informal_Navy_ca._1880.jpg",
+      "status": "created",
+      "http_status": 200,
+      "request_attempts": 1,
+      "rate_limited_retries": 0,
+      "rug_id": "d78527be-0d60-4599-a5f3-65d6edc5b444",
+      "response": {
+        "rug": {
+          "id": "d78527be-0d60-4599-a5f3-65d6edc5b444",
+          "intake_label": null,
+          "ai_description": null,
+          "stock_id": "CERT-LOCAL-20260319T050926-025",
+          "width_total_in": 96,
+          "length_total_in": 120,
+          "status": "available",
+          "enrichment_status": "processing",
+          "review_reason_code": null,
+          "primary_image_url": "https://nlypymygmysfgxekhudr.supabase.co/storage/v1/object/public/rug-images/1f3d032b-8411-48a9-8a44-1f3cb9df67a5/d78527be-0d60-4599-a5f3-65d6edc5b444/primary-1773897011456.jpg"
+        },
+        "ai_status": "processing"
+      },
+      "duration_ms": 1458
+    },
+    {
+      "row_id": "real-026",
+      "stock_id": "CERT-LOCAL-20260319T050926-026",
+      "category": "valid",
+      "image_url": "https://upload.wikimedia.org/wikipedia/commons/6/6c/Isfahan_Garden_carpet.jpg",
+      "status": "created",
+      "http_status": 200,
+      "request_attempts": 1,
+      "rate_limited_retries": 0,
+      "rug_id": "bbfbf03f-8d6e-4601-89f7-03348067ef9e",
+      "response": {
+        "rug": {
+          "id": "bbfbf03f-8d6e-4601-89f7-03348067ef9e",
+          "intake_label": null,
+          "ai_description": null,
+          "stock_id": "CERT-LOCAL-20260319T050926-026",
+          "width_total_in": 96,
+          "length_total_in": 120,
+          "status": "available",
+          "enrichment_status": "processing",
+          "review_reason_code": null,
+          "primary_image_url": "https://nlypymygmysfgxekhudr.supabase.co/storage/v1/object/public/rug-images/1f3d032b-8411-48a9-8a44-1f3cb9df67a5/bbfbf03f-8d6e-4601-89f7-03348067ef9e/primary-1773897012870.jpg"
+        },
+        "ai_status": "processing"
+      },
+      "duration_ms": 1955
+    },
+    {
+      "row_id": "real-027",
+      "stock_id": "CERT-LOCAL-20260319T050926-027",
+      "category": "valid",
+      "image_url": "https://upload.wikimedia.org/wikipedia/commons/8/83/Fine_Bidjar_rug.jpg",
+      "status": "created",
+      "http_status": 200,
+      "request_attempts": 1,
+      "rate_limited_retries": 0,
+      "rug_id": "6608fe19-bd83-49da-82af-c8a955d540f8",
+      "response": {
+        "rug": {
+          "id": "6608fe19-bd83-49da-82af-c8a955d540f8",
+          "intake_label": null,
+          "ai_description": null,
+          "stock_id": "CERT-LOCAL-20260319T050926-027",
+          "width_total_in": 96,
+          "length_total_in": 120,
+          "status": "available",
+          "enrichment_status": "processing",
+          "review_reason_code": null,
+          "primary_image_url": "https://nlypymygmysfgxekhudr.supabase.co/storage/v1/object/public/rug-images/1f3d032b-8411-48a9-8a44-1f3cb9df67a5/6608fe19-bd83-49da-82af-c8a955d540f8/primary-1773897014787.jpg"
+        },
+        "ai_status": "processing"
+      },
+      "duration_ms": 1453
+    },
+    {
+      "row_id": "real-028",
+      "stock_id": "CERT-LOCAL-20260319T050926-028",
+      "category": "valid",
+      "image_url": "https://upload.wikimedia.org/wikipedia/commons/8/87/Silk_Kashan_Carpet_MET_SC40563.jpg",
+      "status": "created",
+      "http_status": 200,
+      "request_attempts": 1,
+      "rate_limited_retries": 0,
+      "rug_id": "fdda9820-3179-457a-80c7-db92b8b87a0b",
+      "response": {
+        "rug": {
+          "id": "fdda9820-3179-457a-80c7-db92b8b87a0b",
+          "intake_label": null,
+          "ai_description": null,
+          "stock_id": "CERT-LOCAL-20260319T050926-028",
+          "width_total_in": 96,
+          "length_total_in": 120,
+          "status": "available",
+          "enrichment_status": "processing",
+          "review_reason_code": null,
+          "primary_image_url": "https://nlypymygmysfgxekhudr.supabase.co/storage/v1/object/public/rug-images/1f3d032b-8411-48a9-8a44-1f3cb9df67a5/fdda9820-3179-457a-80c7-db92b8b87a0b/primary-1773897016186.jpg"
+        },
+        "ai_status": "processing"
+      },
+      "duration_ms": 1452
+    },
+    {
+      "row_id": "real-029",
+      "stock_id": "CERT-LOCAL-20260319T050926-029",
+      "category": "valid",
+      "image_url": "https://upload.wikimedia.org/wikipedia/commons/8/8d/Modern_Bidjar_rug.jpg",
+      "status": "created",
+      "http_status": 200,
+      "request_attempts": 1,
+      "rate_limited_retries": 0,
+      "rug_id": "ee49964f-503a-4c52-a5e3-93385177e73c",
+      "response": {
+        "rug": {
+          "id": "ee49964f-503a-4c52-a5e3-93385177e73c",
+          "intake_label": null,
+          "ai_description": null,
+          "stock_id": "CERT-LOCAL-20260319T050926-029",
+          "width_total_in": 96,
+          "length_total_in": 120,
+          "status": "available",
+          "enrichment_status": "processing",
+          "review_reason_code": null,
+          "primary_image_url": "https://nlypymygmysfgxekhudr.supabase.co/storage/v1/object/public/rug-images/1f3d032b-8411-48a9-8a44-1f3cb9df67a5/ee49964f-503a-4c52-a5e3-93385177e73c/primary-1773897017671.jpg"
+        },
+        "ai_status": "processing"
+      },
+      "duration_ms": 1219
+    },
+    {
+      "row_id": "real-030",
+      "stock_id": "CERT-LOCAL-20260319T050926-030",
+      "category": "valid",
+      "image_url": "https://upload.wikimedia.org/wikipedia/commons/9/91/Antique_Persian_Kerman_Rug.jpg",
+      "status": "created",
+      "http_status": 200,
+      "request_attempts": 1,
+      "rate_limited_retries": 0,
+      "rug_id": "5a0b5f72-11b4-40fc-96c9-73b190413b3c",
+      "response": {
+        "rug": {
+          "id": "5a0b5f72-11b4-40fc-96c9-73b190413b3c",
+          "intake_label": null,
+          "ai_description": null,
+          "stock_id": "CERT-LOCAL-20260319T050926-030",
+          "width_total_in": 96,
+          "length_total_in": 120,
+          "status": "available",
+          "enrichment_status": "processing",
+          "review_reason_code": null,
+          "primary_image_url": "https://nlypymygmysfgxekhudr.supabase.co/storage/v1/object/public/rug-images/1f3d032b-8411-48a9-8a44-1f3cb9df67a5/5a0b5f72-11b4-40fc-96c9-73b190413b3c/primary-1773897018942.jpg"
+        },
+        "ai_status": "processing"
+      },
+      "duration_ms": 2168
+    },
+    {
+      "row_id": "real-031",
+      "stock_id": "CERT-LOCAL-20260319T050926-031",
+      "category": "valid",
+      "image_url": "https://upload.wikimedia.org/wikipedia/commons/9/93/Silk_Kashan_Carpet_MET_wb-58.46b.jpeg",
+      "status": "created",
+      "http_status": 200,
+      "request_attempts": 1,
+      "rate_limited_retries": 0,
+      "rug_id": "72f68c2a-f001-4c58-b0d8-cb5d9d0a2dc3",
+      "response": {
+        "rug": {
+          "id": "72f68c2a-f001-4c58-b0d8-cb5d9d0a2dc3",
+          "intake_label": null,
+          "ai_description": null,
+          "stock_id": "CERT-LOCAL-20260319T050926-031",
+          "width_total_in": 96,
+          "length_total_in": 120,
+          "status": "available",
+          "enrichment_status": "processing",
+          "review_reason_code": null,
+          "primary_image_url": "https://nlypymygmysfgxekhudr.supabase.co/storage/v1/object/public/rug-images/1f3d032b-8411-48a9-8a44-1f3cb9df67a5/72f68c2a-f001-4c58-b0d8-cb5d9d0a2dc3/primary-1773897021099.jpg"
+        },
+        "ai_status": "processing"
+      },
+      "duration_ms": 1710
+    },
+    {
+      "row_id": "real-032",
+      "stock_id": "CERT-LOCAL-20260319T050926-032",
+      "category": "valid",
+      "image_url": "https://upload.wikimedia.org/wikipedia/commons/9/94/Antique_tabriz_carpet_430831.jpg",
+      "status": "created",
+      "http_status": 200,
+      "request_attempts": 1,
+      "rate_limited_retries": 0,
+      "rug_id": "7dae74f4-72f4-48d4-93e8-387f60984146",
+      "response": {
+        "rug": {
+          "id": "7dae74f4-72f4-48d4-93e8-387f60984146",
+          "intake_label": null,
+          "ai_description": null,
+          "stock_id": "CERT-LOCAL-20260319T050926-032",
+          "width_total_in": 96,
+          "length_total_in": 120,
+          "status": "available",
+          "enrichment_status": "processing",
+          "review_reason_code": null,
+          "primary_image_url": "https://nlypymygmysfgxekhudr.supabase.co/storage/v1/object/public/rug-images/1f3d032b-8411-48a9-8a44-1f3cb9df67a5/7dae74f4-72f4-48d4-93e8-387f60984146/primary-1773897022761.jpg"
+        },
+        "ai_status": "processing"
+      },
+      "duration_ms": 1079
+    },
+    {
+      "row_id": "real-033",
+      "stock_id": "CERT-LOCAL-20260319T050926-033",
+      "category": "valid",
+      "image_url": "https://upload.wikimedia.org/wikipedia/commons/9/98/Antique_Heriz_Serapi_Persian_Carpet.jpg",
+      "status": "created",
+      "http_status": 200,
+      "request_attempts": 1,
+      "rate_limited_retries": 0,
+      "rug_id": "04920e63-7c2d-4d89-9c13-bcf1fead4e96",
+      "response": {
+        "rug": {
+          "id": "04920e63-7c2d-4d89-9c13-bcf1fead4e96",
+          "intake_label": null,
+          "ai_description": null,
+          "stock_id": "CERT-LOCAL-20260319T050926-033",
+          "width_total_in": 96,
+          "length_total_in": 120,
+          "status": "available",
+          "enrichment_status": "processing",
+          "review_reason_code": null,
+          "primary_image_url": "https://nlypymygmysfgxekhudr.supabase.co/storage/v1/object/public/rug-images/1f3d032b-8411-48a9-8a44-1f3cb9df67a5/04920e63-7c2d-4d89-9c13-bcf1fead4e96/primary-1773897023798.jpg"
+        },
+        "ai_status": "processing"
+      },
+      "duration_ms": 1090
+    },
+    {
+      "row_id": "real-034",
+      "stock_id": "CERT-LOCAL-20260319T050926-034",
+      "category": "valid",
+      "image_url": "https://upload.wikimedia.org/wikipedia/commons/9/9b/A_highly_important_Safavid_silk_and_metal-thread_%27Polonaise%27_carpet%2C_probably_Isfahan%2C_central_Persia%2C_early_17th_century.jpg",
+      "status": "created",
+      "http_status": 200,
+      "request_attempts": 1,
+      "rate_limited_retries": 0,
+      "rug_id": "71f6d60d-811f-4188-80ec-7eb8cea84ca7",
+      "response": {
+        "rug": {
+          "id": "71f6d60d-811f-4188-80ec-7eb8cea84ca7",
+          "intake_label": null,
+          "ai_description": null,
+          "stock_id": "CERT-LOCAL-20260319T050926-034",
+          "width_total_in": 96,
+          "length_total_in": 120,
+          "status": "available",
+          "enrichment_status": "processing",
+          "review_reason_code": null,
+          "primary_image_url": "https://nlypymygmysfgxekhudr.supabase.co/storage/v1/object/public/rug-images/1f3d032b-8411-48a9-8a44-1f3cb9df67a5/71f6d60d-811f-4188-80ec-7eb8cea84ca7/primary-1773897025392.jpg"
+        },
+        "ai_status": "processing"
+      },
+      "duration_ms": 3206
+    },
+    {
+      "row_id": "real-035",
+      "stock_id": "CERT-LOCAL-20260319T050926-035",
+      "category": "valid",
+      "image_url": "https://upload.wikimedia.org/wikipedia/commons/9/9b/Afshar_rug%2C_Kerman_Province%2C_late_19th_century.jpg",
+      "status": "created",
+      "http_status": 200,
+      "request_attempts": 1,
+      "rate_limited_retries": 0,
+      "rug_id": "3a00f1b2-1a48-4d07-aaec-79cd5bb7cb8a",
+      "response": {
+        "rug": {
+          "id": "3a00f1b2-1a48-4d07-aaec-79cd5bb7cb8a",
+          "intake_label": null,
+          "ai_description": null,
+          "stock_id": "CERT-LOCAL-20260319T050926-035",
+          "width_total_in": 96,
+          "length_total_in": 120,
+          "status": "available",
+          "enrichment_status": "processing",
+          "review_reason_code": null,
+          "primary_image_url": "https://nlypymygmysfgxekhudr.supabase.co/storage/v1/object/public/rug-images/1f3d032b-8411-48a9-8a44-1f3cb9df67a5/3a00f1b2-1a48-4d07-aaec-79cd5bb7cb8a/primary-1773897028079.jpg"
+        },
+        "ai_status": "processing"
+      },
+      "duration_ms": 1244
+    },
+    {
+      "row_id": "real-036",
+      "stock_id": "CERT-LOCAL-20260319T050926-036",
+      "category": "valid",
+      "image_url": "https://upload.wikimedia.org/wikipedia/commons/a/a1/Silk_Kashan_Carpet_MET_RT195.jpg",
+      "status": "created",
+      "http_status": 200,
+      "request_attempts": 1,
+      "rate_limited_retries": 0,
+      "rug_id": "25f8bb84-16f8-477d-9894-96c8410e616a",
+      "response": {
+        "rug": {
+          "id": "25f8bb84-16f8-477d-9894-96c8410e616a",
+          "intake_label": null,
+          "ai_description": null,
+          "stock_id": "CERT-LOCAL-20260319T050926-036",
+          "width_total_in": 96,
+          "length_total_in": 120,
+          "status": "available",
+          "enrichment_status": "processing",
+          "review_reason_code": null,
+          "primary_image_url": "https://nlypymygmysfgxekhudr.supabase.co/storage/v1/object/public/rug-images/1f3d032b-8411-48a9-8a44-1f3cb9df67a5/25f8bb84-16f8-477d-9894-96c8410e616a/primary-1773897029370.jpg"
+        },
+        "ai_status": "processing"
+      },
+      "duration_ms": 1375
+    },
+    {
+      "row_id": "real-037",
+      "stock_id": "CERT-LOCAL-20260319T050926-037",
+      "category": "valid",
+      "image_url": "https://upload.wikimedia.org/wikipedia/commons/0/06/Antique_Turkish_Oushak_Carpet.jpg",
+      "status": "created",
+      "http_status": 200,
+      "request_attempts": 1,
+      "rate_limited_retries": 0,
+      "rug_id": "619f6e1f-ad7b-4475-8324-8d285ff581de",
+      "response": {
+        "rug": {
+          "id": "619f6e1f-ad7b-4475-8324-8d285ff581de",
+          "intake_label": null,
+          "ai_description": null,
+          "stock_id": "CERT-LOCAL-20260319T050926-037",
+          "width_total_in": 96,
+          "length_total_in": 120,
+          "status": "available",
+          "enrichment_status": "processing",
+          "review_reason_code": null,
+          "primary_image_url": "https://nlypymygmysfgxekhudr.supabase.co/storage/v1/object/public/rug-images/1f3d032b-8411-48a9-8a44-1f3cb9df67a5/619f6e1f-ad7b-4475-8324-8d285ff581de/primary-1773897030775.jpg"
+        },
+        "ai_status": "processing"
+      },
+      "duration_ms": 1238
+    },
+    {
+      "row_id": "real-038",
+      "stock_id": "CERT-LOCAL-20260319T050926-038",
+      "category": "valid",
+      "image_url": "https://upload.wikimedia.org/wikipedia/commons/0/0e/Star_Ushak_Carpet_MET_DP270101.jpg",
+      "status": "created",
+      "http_status": 200,
+      "request_attempts": 1,
+      "rate_limited_retries": 0,
+      "rug_id": "c6816922-fdc6-4e35-8a2d-50a1934cc63b",
+      "response": {
+        "rug": {
+          "id": "c6816922-fdc6-4e35-8a2d-50a1934cc63b",
+          "intake_label": null,
+          "ai_description": null,
+          "stock_id": "CERT-LOCAL-20260319T050926-038",
+          "width_total_in": 96,
+          "length_total_in": 120,
+          "status": "available",
+          "enrichment_status": "processing",
+          "review_reason_code": null,
+          "primary_image_url": "https://nlypymygmysfgxekhudr.supabase.co/storage/v1/object/public/rug-images/1f3d032b-8411-48a9-8a44-1f3cb9df67a5/c6816922-fdc6-4e35-8a2d-50a1934cc63b/primary-1773897032178.jpg"
+        },
+        "ai_status": "processing"
+      },
+      "duration_ms": 2094
+    },
+    {
+      "row_id": "real-039",
+      "stock_id": "CERT-LOCAL-20260319T050926-039",
+      "category": "valid",
+      "image_url": "https://upload.wikimedia.org/wikipedia/commons/1/1d/Second_half_19th_century_Shirvan_Kilim.png",
+      "status": "created",
+      "http_status": 200,
+      "request_attempts": 1,
+      "rate_limited_retries": 0,
+      "rug_id": "725e2fce-a3f0-4a14-ad27-d6ff38ce65c5",
+      "response": {
+        "rug": {
+          "id": "725e2fce-a3f0-4a14-ad27-d6ff38ce65c5",
+          "intake_label": null,
+          "ai_description": null,
+          "stock_id": "CERT-LOCAL-20260319T050926-039",
+          "width_total_in": 96,
+          "length_total_in": 120,
+          "status": "available",
+          "enrichment_status": "processing",
+          "review_reason_code": null,
+          "primary_image_url": "https://nlypymygmysfgxekhudr.supabase.co/storage/v1/object/public/rug-images/1f3d032b-8411-48a9-8a44-1f3cb9df67a5/725e2fce-a3f0-4a14-ad27-d6ff38ce65c5/primary-1773897034339.png"
+        },
+        "ai_status": "processing"
+      },
+      "duration_ms": 1868
+    },
+    {
+      "row_id": "real-040",
+      "stock_id": "CERT-LOCAL-20260319T050926-040",
+      "category": "valid",
+      "image_url": "https://upload.wikimedia.org/wikipedia/commons/3/38/Farwayart-kilim-pillows.jpg",
+      "status": "created",
+      "http_status": 200,
+      "request_attempts": 1,
+      "rate_limited_retries": 0,
+      "rug_id": "60a0bef9-857a-4b32-b36a-96f3358fb9c8",
+      "response": {
+        "rug": {
+          "id": "60a0bef9-857a-4b32-b36a-96f3358fb9c8",
+          "intake_label": null,
+          "ai_description": null,
+          "stock_id": "CERT-LOCAL-20260319T050926-040",
+          "width_total_in": 96,
+          "length_total_in": 120,
+          "status": "available",
+          "enrichment_status": "processing",
+          "review_reason_code": null,
+          "primary_image_url": "https://nlypymygmysfgxekhudr.supabase.co/storage/v1/object/public/rug-images/1f3d032b-8411-48a9-8a44-1f3cb9df67a5/60a0bef9-857a-4b32-b36a-96f3358fb9c8/primary-1773897035950.jpg"
+        },
+        "ai_status": "processing"
+      },
+      "duration_ms": 1334
+    },
+    {
+      "row_id": "real-041",
+      "stock_id": "CERT-LOCAL-20260319T050926-041",
+      "category": "hard_valid",
+      "image_url": "https://upload.wikimedia.org/wikipedia/commons/3/3b/Star_Ushak_Carpet_MET_DP270097.jpg",
+      "status": "created",
+      "http_status": 200,
+      "request_attempts": 1,
+      "rate_limited_retries": 0,
+      "rug_id": "afc4dfdd-2d05-4be8-bb0b-391d38aef528",
+      "response": {
+        "rug": {
+          "id": "afc4dfdd-2d05-4be8-bb0b-391d38aef528",
+          "intake_label": null,
+          "ai_description": null,
+          "stock_id": "CERT-LOCAL-20260319T050926-041",
+          "width_total_in": 96,
+          "length_total_in": 120,
+          "status": "available",
+          "enrichment_status": "processing",
+          "review_reason_code": null,
+          "primary_image_url": "https://nlypymygmysfgxekhudr.supabase.co/storage/v1/object/public/rug-images/1f3d032b-8411-48a9-8a44-1f3cb9df67a5/afc4dfdd-2d05-4be8-bb0b-391d38aef528/primary-1773897037425.jpg"
+        },
+        "ai_status": "processing"
+      },
+      "duration_ms": 1768
+    },
+    {
+      "row_id": "real-042",
+      "stock_id": "CERT-LOCAL-20260319T050926-042",
+      "category": "hard_valid",
+      "image_url": "https://upload.wikimedia.org/wikipedia/commons/4/48/Antique_Turkish_Oushak_Rug.jpg",
+      "status": "created",
+      "http_status": 200,
+      "request_attempts": 1,
+      "rate_limited_retries": 0,
+      "rug_id": "16775754-376e-4d34-8bed-955f1f551d59",
+      "response": {
+        "rug": {
+          "id": "16775754-376e-4d34-8bed-955f1f551d59",
+          "intake_label": null,
+          "ai_description": null,
+          "stock_id": "CERT-LOCAL-20260319T050926-042",
+          "width_total_in": 96,
+          "length_total_in": 120,
+          "status": "available",
+          "enrichment_status": "processing",
+          "review_reason_code": null,
+          "primary_image_url": "https://nlypymygmysfgxekhudr.supabase.co/storage/v1/object/public/rug-images/1f3d032b-8411-48a9-8a44-1f3cb9df67a5/16775754-376e-4d34-8bed-955f1f551d59/primary-1773897039060.jpg"
+        },
+        "ai_status": "processing"
+      },
+      "duration_ms": 1829
+    },
+    {
+      "row_id": "real-043",
+      "stock_id": "CERT-LOCAL-20260319T050926-043",
+      "category": "hard_valid",
+      "image_url": "https://upload.wikimedia.org/wikipedia/commons/6/61/Antique_oushak_carpet_with_a_pale_red_and_green_tone.jpg",
+      "status": "created",
+      "http_status": 200,
+      "request_attempts": 1,
+      "rate_limited_retries": 0,
+      "rug_id": "964cdd12-b53f-4aaf-a9d6-e6b3e21789fa",
+      "response": {
+        "rug": {
+          "id": "964cdd12-b53f-4aaf-a9d6-e6b3e21789fa",
+          "intake_label": null,
+          "ai_description": null,
+          "stock_id": "CERT-LOCAL-20260319T050926-043",
+          "width_total_in": 96,
+          "length_total_in": 120,
+          "status": "available",
+          "enrichment_status": "processing",
+          "review_reason_code": null,
+          "primary_image_url": "https://nlypymygmysfgxekhudr.supabase.co/storage/v1/object/public/rug-images/1f3d032b-8411-48a9-8a44-1f3cb9df67a5/964cdd12-b53f-4aaf-a9d6-e6b3e21789fa/primary-1773897040858.jpg"
+        },
+        "ai_status": "processing"
+      },
+      "duration_ms": 1996
+    },
+    {
+      "row_id": "real-044",
+      "stock_id": "CERT-LOCAL-20260319T050926-044",
+      "category": "hard_valid",
+      "image_url": "https://upload.wikimedia.org/wikipedia/commons/6/65/Star_Ushak_Carpet_MET_DP270103.jpg",
+      "status": "created",
+      "http_status": 200,
+      "request_attempts": 1,
+      "rate_limited_retries": 0,
+      "rug_id": "c867ab96-d50c-416c-97e2-d91896b52d46",
+      "response": {
+        "rug": {
+          "id": "c867ab96-d50c-416c-97e2-d91896b52d46",
+          "intake_label": null,
+          "ai_description": null,
+          "stock_id": "CERT-LOCAL-20260319T050926-044",
+          "width_total_in": 96,
+          "length_total_in": 120,
+          "status": "available",
+          "enrichment_status": "processing",
+          "review_reason_code": null,
+          "primary_image_url": "https://nlypymygmysfgxekhudr.supabase.co/storage/v1/object/public/rug-images/1f3d032b-8411-48a9-8a44-1f3cb9df67a5/c867ab96-d50c-416c-97e2-d91896b52d46/primary-1773897043062.jpg"
+        },
+        "ai_status": "processing"
+      },
+      "duration_ms": 1809
+    },
+    {
+      "row_id": "real-045",
+      "stock_id": "CERT-LOCAL-20260319T050926-045",
+      "category": "hard_valid",
+      "image_url": "https://upload.wikimedia.org/wikipedia/commons/0/01/Ovchulug_Shirvan_school_rug.jpg",
+      "status": "created",
+      "http_status": 200,
+      "request_attempts": 1,
+      "rate_limited_retries": 0,
+      "rug_id": "89ee3f0b-1df6-4525-8984-7543c1cf2764",
+      "response": {
+        "rug": {
+          "id": "89ee3f0b-1df6-4525-8984-7543c1cf2764",
+          "intake_label": null,
+          "ai_description": null,
+          "stock_id": "CERT-LOCAL-20260319T050926-045",
+          "width_total_in": 96,
+          "length_total_in": 120,
+          "status": "available",
+          "enrichment_status": "processing",
+          "review_reason_code": null,
+          "primary_image_url": "https://nlypymygmysfgxekhudr.supabase.co/storage/v1/object/public/rug-images/1f3d032b-8411-48a9-8a44-1f3cb9df67a5/89ee3f0b-1df6-4525-8984-7543c1cf2764/primary-1773897044869.jpg"
+        },
+        "ai_status": "processing"
+      },
+      "duration_ms": 1671
+    },
+    {
+      "row_id": "real-046",
+      "stock_id": "CERT-LOCAL-20260319T050926-046",
+      "category": "hard_valid",
+      "image_url": "https://upload.wikimedia.org/wikipedia/commons/0/04/Karachov_Kazak_rug%2C_mid-19th_C.jpg",
+      "status": "created",
+      "http_status": 200,
+      "request_attempts": 1,
+      "rate_limited_retries": 0,
+      "rug_id": "f8c82de9-c831-4468-82ce-841353e3bc70",
+      "response": {
+        "rug": {
+          "id": "f8c82de9-c831-4468-82ce-841353e3bc70",
+          "intake_label": null,
+          "ai_description": null,
+          "stock_id": "CERT-LOCAL-20260319T050926-046",
+          "width_total_in": 96,
+          "length_total_in": 120,
+          "status": "available",
+          "enrichment_status": "processing",
+          "review_reason_code": null,
+          "primary_image_url": "https://nlypymygmysfgxekhudr.supabase.co/storage/v1/object/public/rug-images/1f3d032b-8411-48a9-8a44-1f3cb9df67a5/f8c82de9-c831-4468-82ce-841353e3bc70/primary-1773897046596.jpg"
+        },
+        "ai_status": "processing"
+      },
+      "duration_ms": 1680
+    },
+    {
+      "row_id": "real-047",
+      "stock_id": "CERT-LOCAL-20260319T050926-047",
+      "category": "hard_valid",
+      "image_url": "https://upload.wikimedia.org/wikipedia/commons/1/15/Green_Ground_Karachopt_Kazak_Rug_Sothebys.jpg",
+      "status": "created",
+      "http_status": 200,
+      "request_attempts": 1,
+      "rate_limited_retries": 0,
+      "rug_id": "dd56dada-6f55-427c-86a9-683feaa391d8",
+      "response": {
+        "rug": {
+          "id": "dd56dada-6f55-427c-86a9-683feaa391d8",
+          "intake_label": null,
+          "ai_description": null,
+          "stock_id": "CERT-LOCAL-20260319T050926-047",
+          "width_total_in": 96,
+          "length_total_in": 120,
+          "status": "available",
+          "enrichment_status": "processing",
+          "review_reason_code": null,
+          "primary_image_url": "https://nlypymygmysfgxekhudr.supabase.co/storage/v1/object/public/rug-images/1f3d032b-8411-48a9-8a44-1f3cb9df67a5/dd56dada-6f55-427c-86a9-683feaa391d8/primary-1773897048455.jpg"
+        },
+        "ai_status": "processing"
+      },
+      "duration_ms": 2179
+    },
+    {
+      "row_id": "real-048",
+      "stock_id": "CERT-LOCAL-20260319T050926-048",
+      "category": "hard_valid",
+      "image_url": "https://upload.wikimedia.org/wikipedia/commons/6/63/Qashqai_handmade_gabbeh_rug%2C_registration_celebration%2C_Afif-Abad_Garden%2C_Shiraz_-_24_April_2018_07.jpg",
+      "status": "created",
+      "http_status": 200,
+      "request_attempts": 1,
+      "rate_limited_retries": 0,
+      "rug_id": "219cf1a9-a3bc-4031-9d09-08275b1bcd03",
+      "response": {
+        "rug": {
+          "id": "219cf1a9-a3bc-4031-9d09-08275b1bcd03",
+          "intake_label": null,
+          "ai_description": null,
+          "stock_id": "CERT-LOCAL-20260319T050926-048",
+          "width_total_in": 96,
+          "length_total_in": 120,
+          "status": "available",
+          "enrichment_status": "processing",
+          "review_reason_code": null,
+          "primary_image_url": "https://nlypymygmysfgxekhudr.supabase.co/storage/v1/object/public/rug-images/1f3d032b-8411-48a9-8a44-1f3cb9df67a5/219cf1a9-a3bc-4031-9d09-08275b1bcd03/primary-1773897050649.jpg"
+        },
+        "ai_status": "processing"
+      },
+      "duration_ms": 1640
+    },
+    {
+      "row_id": "real-049",
+      "stock_id": "CERT-LOCAL-20260319T050926-049",
+      "category": "hard_valid",
+      "image_url": "https://upload.wikimedia.org/wikipedia/commons/6/6c/Qashqai_handmade_gabbeh_rug%2C_registration_celebration%2C_Afif-Abad_Garden%2C_Shiraz_-_24_April_2018_04.jpg",
+      "status": "created",
+      "http_status": 200,
+      "request_attempts": 1,
+      "rate_limited_retries": 0,
+      "rug_id": "f0ddcc5c-331d-4e91-b509-de8d3ed3060d",
+      "response": {
+        "rug": {
+          "id": "f0ddcc5c-331d-4e91-b509-de8d3ed3060d",
+          "intake_label": null,
+          "ai_description": null,
+          "stock_id": "CERT-LOCAL-20260319T050926-049",
+          "width_total_in": 96,
+          "length_total_in": 120,
+          "status": "available",
+          "enrichment_status": "processing",
+          "review_reason_code": null,
+          "primary_image_url": "https://nlypymygmysfgxekhudr.supabase.co/storage/v1/object/public/rug-images/1f3d032b-8411-48a9-8a44-1f3cb9df67a5/f0ddcc5c-331d-4e91-b509-de8d3ed3060d/primary-1773897052023.jpg"
+        },
+        "ai_status": "processing"
+      },
+      "duration_ms": 1585
+    },
+    {
+      "row_id": "real-050",
+      "stock_id": "CERT-LOCAL-20260319T050926-050",
+      "category": "hard_valid",
+      "image_url": "https://upload.wikimedia.org/wikipedia/commons/1/1c/Kazak_rug_from_Azerbaijan_998a.jpg",
+      "status": "created",
+      "http_status": 200,
+      "request_attempts": 1,
+      "rate_limited_retries": 0,
+      "rug_id": "d5fd2795-90d6-4bcc-b210-8f930cf437f7",
+      "response": {
+        "rug": {
+          "id": "d5fd2795-90d6-4bcc-b210-8f930cf437f7",
+          "intake_label": null,
+          "ai_description": null,
+          "stock_id": "CERT-LOCAL-20260319T050926-050",
+          "width_total_in": 96,
+          "length_total_in": 120,
+          "status": "available",
+          "enrichment_status": "processing",
+          "review_reason_code": null,
+          "primary_image_url": "https://nlypymygmysfgxekhudr.supabase.co/storage/v1/object/public/rug-images/1f3d032b-8411-48a9-8a44-1f3cb9df67a5/d5fd2795-90d6-4bcc-b210-8f930cf437f7/primary-1773897053720.jpg"
+        },
+        "ai_status": "processing"
+      },
+      "duration_ms": 1824
+    },
+    {
+      "row_id": "real-051",
+      "stock_id": "CERT-LOCAL-20260319T050926-051",
+      "category": "invalid",
+      "image_url": "https://upload.wikimedia.org/wikipedia/commons/7/7e/Airplane_over_the_new_runway_%283402148058%29.jpg",
+      "status": "created",
+      "http_status": 200,
+      "request_attempts": 1,
+      "rate_limited_retries": 0,
+      "rug_id": "8611b5b5-3667-48ef-9f14-5ea39e1bd898",
+      "response": {
+        "rug": {
+          "id": "8611b5b5-3667-48ef-9f14-5ea39e1bd898",
+          "intake_label": null,
+          "ai_description": null,
+          "stock_id": "CERT-LOCAL-20260319T050926-051",
+          "width_total_in": 96,
+          "length_total_in": 120,
+          "status": "available",
+          "enrichment_status": "processing",
+          "review_reason_code": null,
+          "primary_image_url": "https://nlypymygmysfgxekhudr.supabase.co/storage/v1/object/public/rug-images/1f3d032b-8411-48a9-8a44-1f3cb9df67a5/8611b5b5-3667-48ef-9f14-5ea39e1bd898/primary-1773897055865.jpg"
+        },
+        "ai_status": "processing"
+      },
+      "duration_ms": 2126
+    },
+    {
+      "row_id": "real-052",
+      "stock_id": "CERT-LOCAL-20260319T050926-052",
+      "category": "invalid",
+      "image_url": "https://upload.wikimedia.org/wikipedia/commons/3/35/Close-up_of_a_cat-CN.jpg",
+      "status": "created",
+      "http_status": 200,
+      "request_attempts": 1,
+      "rate_limited_retries": 0,
+      "rug_id": "4938fb36-0cc9-4b80-9854-5719fe88d54d",
+      "response": {
+        "rug": {
+          "id": "4938fb36-0cc9-4b80-9854-5719fe88d54d",
+          "intake_label": null,
+          "ai_description": null,
+          "stock_id": "CERT-LOCAL-20260319T050926-052",
+          "width_total_in": 96,
+          "length_total_in": 120,
+          "status": "available",
+          "enrichment_status": "processing",
+          "review_reason_code": null,
+          "primary_image_url": "https://nlypymygmysfgxekhudr.supabase.co/storage/v1/object/public/rug-images/1f3d032b-8411-48a9-8a44-1f3cb9df67a5/4938fb36-0cc9-4b80-9854-5719fe88d54d/primary-1773897058167.jpg"
+        },
+        "ai_status": "processing"
+      },
+      "duration_ms": 2694
+    },
+    {
+      "row_id": "real-053",
+      "stock_id": "CERT-LOCAL-20260319T050926-053",
+      "category": "invalid",
+      "image_url": "https://upload.wikimedia.org/wikipedia/commons/b/b0/Jersey_City_Skyline_Jan_2006.jpg",
+      "status": "created",
+      "http_status": 200,
+      "request_attempts": 1,
+      "rate_limited_retries": 0,
+      "rug_id": "6a38559b-e5f4-4dee-866f-59960365afe7",
+      "response": {
+        "rug": {
+          "id": "6a38559b-e5f4-4dee-866f-59960365afe7",
+          "intake_label": null,
+          "ai_description": null,
+          "stock_id": "CERT-LOCAL-20260319T050926-053",
+          "width_total_in": 96,
+          "length_total_in": 120,
+          "status": "available",
+          "enrichment_status": "processing",
+          "review_reason_code": null,
+          "primary_image_url": "https://nlypymygmysfgxekhudr.supabase.co/storage/v1/object/public/rug-images/1f3d032b-8411-48a9-8a44-1f3cb9df67a5/6a38559b-e5f4-4dee-866f-59960365afe7/primary-1773897060585.jpg"
+        },
+        "ai_status": "processing"
+      },
+      "duration_ms": 1723
+    },
+    {
+      "row_id": "real-054",
+      "stock_id": "CERT-LOCAL-20260319T050926-054",
+      "category": "invalid",
+      "image_url": "https://upload.wikimedia.org/wikipedia/commons/1/18/Moonscape%2C_Lunar_landscape%2C_Mountain_valley%2C_Lamayuru%2C_Ladakh%2C_India.jpg",
+      "status": "created",
+      "http_status": 200,
+      "request_attempts": 1,
+      "rate_limited_retries": 0,
+      "rug_id": "a1cd5327-87bb-4d38-9c27-bd0cfa77997e",
+      "response": {
+        "rug": {
+          "id": "a1cd5327-87bb-4d38-9c27-bd0cfa77997e",
+          "intake_label": null,
+          "ai_description": null,
+          "stock_id": "CERT-LOCAL-20260319T050926-054",
+          "width_total_in": 96,
+          "length_total_in": 120,
+          "status": "available",
+          "enrichment_status": "processing",
+          "review_reason_code": null,
+          "primary_image_url": "https://nlypymygmysfgxekhudr.supabase.co/storage/v1/object/public/rug-images/1f3d032b-8411-48a9-8a44-1f3cb9df67a5/a1cd5327-87bb-4d38-9c27-bd0cfa77997e/primary-1773897063255.jpg"
+        },
+        "ai_status": "processing"
+      },
+      "duration_ms": 4765
+    },
+    {
+      "row_id": "real-055",
+      "stock_id": "CERT-LOCAL-20260319T050926-055",
+      "category": "invalid",
+      "image_url": "https://upload.wikimedia.org/wikipedia/commons/0/06/Peugeot_Type_26_03.jpg",
+      "status": "created",
+      "http_status": 200,
+      "request_attempts": 1,
+      "rate_limited_retries": 0,
+      "rug_id": "ba185ef7-80a0-4063-ad99-49308c2b5e37",
+      "response": {
+        "rug": {
+          "id": "ba185ef7-80a0-4063-ad99-49308c2b5e37",
+          "intake_label": null,
+          "ai_description": null,
+          "stock_id": "CERT-LOCAL-20260319T050926-055",
+          "width_total_in": 96,
+          "length_total_in": 120,
+          "status": "available",
+          "enrichment_status": "processing",
+          "review_reason_code": null,
+          "primary_image_url": "https://nlypymygmysfgxekhudr.supabase.co/storage/v1/object/public/rug-images/1f3d032b-8411-48a9-8a44-1f3cb9df67a5/ba185ef7-80a0-4063-ad99-49308c2b5e37/primary-1773897066855.jpg"
+        },
+        "ai_status": "processing"
+      },
+      "duration_ms": 1570
+    },
+    {
+      "row_id": "real-056",
+      "stock_id": "CERT-LOCAL-20260319T050926-056",
+      "category": "invalid",
+      "image_url": "https://upload.wikimedia.org/wikipedia/commons/9/9b/Sunset_at_Patenga_beach.jpg",
+      "status": "created",
+      "http_status": 200,
+      "request_attempts": 1,
+      "rate_limited_retries": 0,
+      "rug_id": "e9ff3be8-8dd9-4594-a366-48450574c46d",
+      "response": {
+        "rug": {
+          "id": "e9ff3be8-8dd9-4594-a366-48450574c46d",
+          "intake_label": null,
+          "ai_description": null,
+          "stock_id": "CERT-LOCAL-20260319T050926-056",
+          "width_total_in": 96,
+          "length_total_in": 120,
+          "status": "available",
+          "enrichment_status": "processing",
+          "review_reason_code": null,
+          "primary_image_url": "https://nlypymygmysfgxekhudr.supabase.co/storage/v1/object/public/rug-images/1f3d032b-8411-48a9-8a44-1f3cb9df67a5/e9ff3be8-8dd9-4594-a366-48450574c46d/primary-1773897068352.jpg"
+        },
+        "ai_status": "processing"
+      },
+      "duration_ms": 1667
+    },
+    {
+      "row_id": "real-057",
+      "stock_id": "CERT-LOCAL-20260319T050926-057",
+      "category": "invalid",
+      "image_url": "https://upload.wikimedia.org/wikipedia/commons/d/da/FEMA_-_44994_-_FEMA_Public_Assistance_specialist_in_Illinois.jpg",
+      "status": "created",
+      "http_status": 200,
+      "request_attempts": 1,
+      "rate_limited_retries": 0,
+      "rug_id": "3dba9653-0fd2-4886-afba-c626292dac0b",
+      "response": {
+        "rug": {
+          "id": "3dba9653-0fd2-4886-afba-c626292dac0b",
+          "intake_label": null,
+          "ai_description": null,
+          "stock_id": "CERT-LOCAL-20260319T050926-057",
+          "width_total_in": 96,
+          "length_total_in": 120,
+          "status": "available",
+          "enrichment_status": "processing",
+          "review_reason_code": null,
+          "primary_image_url": "https://nlypymygmysfgxekhudr.supabase.co/storage/v1/object/public/rug-images/1f3d032b-8411-48a9-8a44-1f3cb9df67a5/3dba9653-0fd2-4886-afba-c626292dac0b/primary-1773897070507.jpg"
+        },
+        "ai_status": "processing"
+      },
+      "duration_ms": 2038
+    },
+    {
+      "row_id": "real-058",
+      "stock_id": "CERT-LOCAL-20260319T050926-058",
+      "category": "invalid",
+      "image_url": "https://upload.wikimedia.org/wikipedia/commons/a/a9/Christiaen_van_Couwenbergh_-_Woman_with_a_Basket_of_Fruit_-_WGA05569.jpg",
+      "status": "created",
+      "http_status": 200,
+      "request_attempts": 1,
+      "rate_limited_retries": 0,
+      "rug_id": "0bd821a0-bda4-4077-8388-673edc5b823d",
+      "response": {
+        "rug": {
+          "id": "0bd821a0-bda4-4077-8388-673edc5b823d",
+          "intake_label": null,
+          "ai_description": null,
+          "stock_id": "CERT-LOCAL-20260319T050926-058",
+          "width_total_in": 96,
+          "length_total_in": 120,
+          "status": "available",
+          "enrichment_status": "processing",
+          "review_reason_code": null,
+          "primary_image_url": "https://nlypymygmysfgxekhudr.supabase.co/storage/v1/object/public/rug-images/1f3d032b-8411-48a9-8a44-1f3cb9df67a5/0bd821a0-bda4-4077-8388-673edc5b823d/primary-1773897071928.jpg"
+        },
+        "ai_status": "processing"
+      },
+      "duration_ms": 1307
+    },
+    {
+      "row_id": "real-059",
+      "stock_id": "CERT-LOCAL-20260319T050926-059",
+      "category": "invalid",
+      "image_url": "https://upload.wikimedia.org/wikipedia/commons/2/2a/JREast-Kashima-soccer-stadium-station-entrance.jpg",
+      "status": "created",
+      "http_status": 200,
+      "request_attempts": 1,
+      "rate_limited_retries": 0,
+      "rug_id": "3f8a48f4-d50c-4a06-b94a-7631d2d83643",
+      "response": {
+        "rug": {
+          "id": "3f8a48f4-d50c-4a06-b94a-7631d2d83643",
+          "intake_label": null,
+          "ai_description": null,
+          "stock_id": "CERT-LOCAL-20260319T050926-059",
+          "width_total_in": 96,
+          "length_total_in": 120,
+          "status": "available",
+          "enrichment_status": "processing",
+          "review_reason_code": null,
+          "primary_image_url": "https://nlypymygmysfgxekhudr.supabase.co/storage/v1/object/public/rug-images/1f3d032b-8411-48a9-8a44-1f3cb9df67a5/3f8a48f4-d50c-4a06-b94a-7631d2d83643/primary-1773897073438.jpg"
+        },
+        "ai_status": "processing"
+      },
+      "duration_ms": 2129
+    },
+    {
+      "row_id": "real-060",
+      "stock_id": "CERT-LOCAL-20260319T050926-060",
+      "category": "invalid",
+      "image_url": "https://upload.wikimedia.org/wikipedia/commons/4/4d/Waterfall_in_a_forest_in_Japan_500px_photo_%28188688579%29.jpg",
+      "status": "created",
+      "http_status": 200,
+      "request_attempts": 1,
+      "rate_limited_retries": 0,
+      "rug_id": "fce52827-2f29-4a48-a09a-00192212b200",
+      "response": {
+        "rug": {
+          "id": "fce52827-2f29-4a48-a09a-00192212b200",
+          "intake_label": null,
+          "ai_description": null,
+          "stock_id": "CERT-LOCAL-20260319T050926-060",
+          "width_total_in": 96,
+          "length_total_in": 120,
+          "status": "available",
+          "enrichment_status": "processing",
+          "review_reason_code": null,
+          "primary_image_url": "https://nlypymygmysfgxekhudr.supabase.co/storage/v1/object/public/rug-images/1f3d032b-8411-48a9-8a44-1f3cb9df67a5/fce52827-2f29-4a48-a09a-00192212b200/primary-1773897075804.jpg"
+        },
+        "ai_status": "processing"
+      },
+      "duration_ms": 1889
+    }
+  ],
+  "worker_runs": [
+    {
+      "timestamp": "2026-03-19T05:11:44.258Z",
+      "status": 200,
+      "ok": true,
+      "summary": {
+        "claimed": 5,
+        "processed": 5,
+        "budget_exhausted": false,
+        "outcomes": {
+          "ready": 5,
+          "needs_review_incomplete": 0,
+          "retry_scheduled": 0,
+          "needs_review_failed": 0,
+          "skipped_missing_rug": 0
+        },
+        "errors": []
+      }
+    },
+    {
+      "timestamp": "2026-03-19T05:12:12.656Z",
+      "status": 200,
+      "ok": true,
+      "summary": {
+        "claimed": 5,
+        "processed": 5,
+        "budget_exhausted": false,
+        "outcomes": {
+          "ready": 5,
+          "needs_review_incomplete": 0,
+          "retry_scheduled": 0,
+          "needs_review_failed": 0,
+          "skipped_missing_rug": 0
+        },
+        "errors": []
+      }
+    },
+    {
+      "timestamp": "2026-03-19T05:12:44.760Z",
+      "status": 200,
+      "ok": true,
+      "summary": {
+        "claimed": 5,
+        "processed": 5,
+        "budget_exhausted": false,
+        "outcomes": {
+          "ready": 5,
+          "needs_review_incomplete": 0,
+          "retry_scheduled": 0,
+          "needs_review_failed": 0,
+          "skipped_missing_rug": 0
+        },
+        "errors": []
+      }
+    },
+    {
+      "timestamp": "2026-03-19T05:13:19.121Z",
+      "status": 200,
+      "ok": true,
+      "summary": {
+        "claimed": 5,
+        "processed": 5,
+        "budget_exhausted": false,
+        "outcomes": {
+          "ready": 5,
+          "needs_review_incomplete": 0,
+          "retry_scheduled": 0,
+          "needs_review_failed": 0,
+          "skipped_missing_rug": 0
+        },
+        "errors": []
+      }
+    },
+    {
+      "timestamp": "2026-03-19T05:13:45.472Z",
+      "status": 200,
+      "ok": true,
+      "summary": {
+        "claimed": 5,
+        "processed": 5,
+        "budget_exhausted": false,
+        "outcomes": {
+          "ready": 5,
+          "needs_review_incomplete": 0,
+          "retry_scheduled": 0,
+          "needs_review_failed": 0,
+          "skipped_missing_rug": 0
+        },
+        "errors": []
+      }
+    },
+    {
+      "timestamp": "2026-03-19T05:14:18.543Z",
+      "status": 200,
+      "ok": true,
+      "summary": {
+        "claimed": 5,
+        "processed": 5,
+        "budget_exhausted": false,
+        "outcomes": {
+          "ready": 5,
+          "needs_review_incomplete": 0,
+          "retry_scheduled": 0,
+          "needs_review_failed": 0,
+          "skipped_missing_rug": 0
+        },
+        "errors": []
+      }
+    },
+    {
+      "timestamp": "2026-03-19T05:14:44.744Z",
+      "status": 200,
+      "ok": true,
+      "summary": {
+        "claimed": 5,
+        "processed": 5,
+        "budget_exhausted": false,
+        "outcomes": {
+          "ready": 5,
+          "needs_review_incomplete": 0,
+          "retry_scheduled": 0,
+          "needs_review_failed": 0,
+          "skipped_missing_rug": 0
+        },
+        "errors": []
+      }
+    },
+    {
+      "timestamp": "2026-03-19T05:15:15.047Z",
+      "status": 200,
+      "ok": true,
+      "summary": {
+        "claimed": 5,
+        "processed": 5,
+        "budget_exhausted": false,
+        "outcomes": {
+          "ready": 5,
+          "needs_review_incomplete": 0,
+          "retry_scheduled": 0,
+          "needs_review_failed": 0,
+          "skipped_missing_rug": 0
+        },
+        "errors": []
+      }
+    },
+    {
+      "timestamp": "2026-03-19T05:15:42.280Z",
+      "status": 200,
+      "ok": true,
+      "summary": {
+        "claimed": 5,
+        "processed": 5,
+        "budget_exhausted": false,
+        "outcomes": {
+          "ready": 5,
+          "needs_review_incomplete": 0,
+          "retry_scheduled": 0,
+          "needs_review_failed": 0,
+          "skipped_missing_rug": 0
+        },
+        "errors": []
+      }
+    },
+    {
+      "timestamp": "2026-03-19T05:16:07.539Z",
+      "status": 200,
+      "ok": true,
+      "summary": {
+        "claimed": 5,
+        "processed": 5,
+        "budget_exhausted": false,
+        "outcomes": {
+          "ready": 4,
+          "needs_review_incomplete": 1,
+          "retry_scheduled": 0,
+          "needs_review_failed": 0,
+          "skipped_missing_rug": 0
+        },
+        "errors": []
+      }
+    },
+    {
+      "timestamp": "2026-03-19T05:16:30.938Z",
+      "status": 200,
+      "ok": true,
+      "summary": {
+        "claimed": 5,
+        "processed": 5,
+        "budget_exhausted": false,
+        "outcomes": {
+          "ready": 0,
+          "needs_review_incomplete": 5,
+          "retry_scheduled": 0,
+          "needs_review_failed": 0,
+          "skipped_missing_rug": 0
+        },
+        "errors": []
+      }
+    },
+    {
+      "timestamp": "2026-03-19T05:16:54.877Z",
+      "status": 200,
+      "ok": true,
+      "summary": {
+        "claimed": 5,
+        "processed": 5,
+        "budget_exhausted": false,
+        "outcomes": {
+          "ready": 0,
+          "needs_review_incomplete": 5,
+          "retry_scheduled": 0,
+          "needs_review_failed": 0,
+          "skipped_missing_rug": 0
+        },
+        "errors": []
+      }
+    }
+  ],
+  "rugs": [
+    {
+      "id": "8e80938f-fa4b-465f-a669-39176543ac9a",
+      "tenant_id": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5",
+      "stock_id": "CERT-LOCAL-20260319T050926-001",
+      "status": "available",
+      "intake_label": "Antique Persian Kashan",
+      "ai_description": "This rug is an intricately designed Persian Kashan with a central medallion and floral motifs. It features rich colors such as red, navy, and ivory, typical of antique craftsmanship.",
+      "ai_structured_fields": {
+        "mood": "traditional",
+        "style": "Kashan",
+        "origin": "Persian",
+        "pattern": [
+          "medallion center",
+          "floral motif"
+        ],
+        "age_category": "antique",
+        "primary_colors": [
+          "red",
+          "navy",
+          "ivory"
+        ]
+      },
+      "enrichment_status": "ready",
+      "review_reason_code": null,
+      "width_total_in": 96,
+      "length_total_in": 120,
+      "created_at": "2026-03-19T05:09:26.97055+00:00"
+    },
+    {
+      "id": "78ed416f-8067-45d6-b541-7bce5ab0f6f6",
+      "tenant_id": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5",
+      "stock_id": "CERT-LOCAL-20260319T050926-002",
+      "status": "available",
+      "intake_label": "Persian Isfahan Traditional",
+      "ai_description": "The rug features an intricate floral design typical of Persian Isfahan pieces, primarily in ivory, beige, and gold tones. Its delicate motifs and classic borders convey a traditional mood.",
+      "ai_structured_fields": {
+        "mood": "traditional",
+        "style": "Isfahan",
+        "origin": "Persian",
+        "pattern": [
+          "floral motif",
+          "floral border"
+        ],
+        "age_category": "traditional",
+        "primary_colors": [
+          "ivory",
+          "beige",
+          "gold"
+        ]
+      },
+      "enrichment_status": "ready",
+      "review_reason_code": null,
+      "width_total_in": 96,
+      "length_total_in": 120,
+      "created_at": "2026-03-19T05:09:29.223329+00:00"
+    },
+    {
+      "id": "38e220e3-cbfb-41ba-9368-67d0d216d345",
+      "tenant_id": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5",
+      "stock_id": "CERT-LOCAL-20260319T050926-003",
+      "status": "available",
+      "intake_label": "Contemporary Persian Qom",
+      "ai_description": "This rug features an intricate pictorial design with a vibrant landscape scene and architectural elements, showcasing detailed imagery of birds and plants. The rug emphasizes traditional Persian artistry with a contemporary aesthetic.",
+      "ai_structured_fields": {
+        "mood": "traditional",
+        "style": "Qom",
+        "origin": "Persian",
+        "pattern": [
+          "pictorial",
+          "floral motif"
+        ],
+        "age_category": "contemporary",
+        "primary_colors": [
+          "red",
+          "blue",
+          "ivory",
+          "gold",
+          "brown"
+        ]
+      },
+      "enrichment_status": "ready",
+      "review_reason_code": null,
+      "width_total_in": 96,
+      "length_total_in": 120,
+      "created_at": "2026-03-19T05:09:31.332626+00:00"
+    },
+    {
+      "id": "8d3fceb3-2cad-4822-82c2-3d0382a9fde9",
+      "tenant_id": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5",
+      "stock_id": "CERT-LOCAL-20260319T050926-004",
+      "status": "available",
+      "intake_label": "Antique Persian",
+      "ai_description": "The rug showcases a central medallion with intricate floral motifs on a red background and an elaborate border. It exhibits an antique Persian style with traditional craftsmanship.",
+      "ai_structured_fields": {
+        "mood": "traditional",
+        "origin": "Persian",
+        "pattern": [
+          "medallion center",
+          "floral motif"
+        ],
+        "age_category": "antique",
+        "primary_colors": [
+          "red",
+          "navy",
+          "gold"
+        ]
+      },
+      "enrichment_status": "ready",
+      "review_reason_code": null,
+      "width_total_in": 96,
+      "length_total_in": 120,
+      "created_at": "2026-03-19T05:09:33.191391+00:00"
+    },
+    {
+      "id": "20950889-56f4-4a4c-9ae0-8d3388ee7a48",
+      "tenant_id": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5",
+      "stock_id": "CERT-LOCAL-20260319T050926-005",
+      "status": "available",
+      "intake_label": "Antique Persian Kashan",
+      "ai_description": "This is an antique Persian Kashan rug featuring a central medallion design with intricate floral motifs and a detailed border. Predominantly in red and navy against an ivory background, it exemplifies traditional craftsmanship.",
+      "ai_structured_fields": {
+        "mood": "traditional",
+        "style": "Kashan",
+        "origin": "Persian",
+        "pattern": [
+          "medallion center",
+          "floral motif",
+          "floral border"
+        ],
+        "age_category": "antique",
+        "primary_colors": [
+          "red",
+          "navy",
+          "ivory"
+        ]
+      },
+      "enrichment_status": "ready",
+      "review_reason_code": null,
+      "width_total_in": 96,
+      "length_total_in": 120,
+      "created_at": "2026-03-19T05:09:34.965866+00:00"
+    },
+    {
+      "id": "c79e2a90-bde3-4ce9-b5ef-d5293da3368a",
+      "tenant_id": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5",
+      "stock_id": "CERT-LOCAL-20260319T050926-006",
+      "status": "available",
+      "intake_label": "Antique Persian Sultanabad",
+      "ai_description": "This rug features a rich floral design in warm tones of red, green, and gold, typical of the Sultanabad style. The intricate patterns and color palette suggest an antique Persian origin.",
+      "ai_structured_fields": {
+        "mood": "traditional",
+        "style": "Sultanabad",
+        "origin": "Persian",
+        "pattern": [
+          "floral motif",
+          "all-over pattern"
+        ],
+        "age_category": "antique",
+        "primary_colors": [
+          "red",
+          "green",
+          "gold"
+        ]
+      },
+      "enrichment_status": "ready",
+      "review_reason_code": null,
+      "width_total_in": 96,
+      "length_total_in": 120,
+      "created_at": "2026-03-19T05:09:36.586936+00:00"
+    },
+    {
+      "id": "87f5dfa1-7485-4d27-86b8-d7e9b71c0a34",
+      "tenant_id": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5",
+      "stock_id": "CERT-LOCAL-20260319T050926-007",
+      "status": "available",
+      "intake_label": "Antique Persian Sultanabad",
+      "ai_description": "This is an antique Persian Sultanabad rug featuring an intricate all-over pattern with floral motifs on a dark field. The border has detailed designs enhancing its traditional appeal.",
+      "ai_structured_fields": {
+        "mood": "traditional",
+        "style": "Sultanabad",
+        "origin": "Persian",
+        "pattern": [
+          "all-over pattern",
+          "floral motif"
+        ],
+        "age_category": "antique",
+        "primary_colors": [
+          "navy",
+          "ivory",
+          "brown"
+        ]
+      },
+      "enrichment_status": "ready",
+      "review_reason_code": null,
+      "width_total_in": 96,
+      "length_total_in": 120,
+      "created_at": "2026-03-19T05:09:39.362709+00:00"
+    },
+    {
+      "id": "e4210a49-5203-4bad-98c2-48ea7ba1626e",
+      "tenant_id": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5",
+      "stock_id": "CERT-LOCAL-20260319T050926-008",
+      "status": "available",
+      "intake_label": "Antique Persian Tabriz",
+      "ai_description": "This rug is a finely detailed Persian Tabriz, showcasing a rich red field with intricate floral motifs and a contrasting floral border. It reflects traditional craftsmanship from the antique era.",
+      "ai_structured_fields": {
+        "mood": "traditional",
+        "style": "Tabriz",
+        "origin": "Persian",
+        "pattern": [
+          "floral motif",
+          "floral border"
+        ],
+        "age_category": "antique",
+        "primary_colors": [
+          "red",
+          "ivory",
+          "black",
+          "navy"
+        ]
+      },
+      "enrichment_status": "ready",
+      "review_reason_code": null,
+      "width_total_in": 96,
+      "length_total_in": 120,
+      "created_at": "2026-03-19T05:09:42.612942+00:00"
+    },
+    {
+      "id": "fcf67904-21af-40e5-849a-8d6b6ccd5f64",
+      "tenant_id": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5",
+      "stock_id": "CERT-LOCAL-20260319T050926-009",
+      "status": "available",
+      "intake_label": "Antique Persian Tabriz",
+      "ai_description": "This rug features a classic Persian Tabriz design with an intricate medallion center. Rich tones of red, navy, and gold dominate its traditional aesthetic.",
+      "ai_structured_fields": {
+        "mood": "traditional",
+        "style": "Tabriz",
+        "origin": "Persian",
+        "pattern": [
+          "medallion center",
+          "floral motif"
+        ],
+        "age_category": "antique",
+        "primary_colors": [
+          "red",
+          "navy",
+          "gold"
+        ]
+      },
+      "enrichment_status": "ready",
+      "review_reason_code": null,
+      "width_total_in": 96,
+      "length_total_in": 120,
+      "created_at": "2026-03-19T05:09:45.049945+00:00"
+    },
+    {
+      "id": "5455b60d-ad2c-4341-9f10-cd43e4a26b7d",
+      "tenant_id": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5",
+      "stock_id": "CERT-LOCAL-20260319T050926-010",
+      "status": "available",
+      "intake_label": "Antique Persian Qom",
+      "ai_description": "This rug features a rich pictorial design with intricate motifs set against a vibrant red field, complemented by a detailed floral border.",
+      "ai_structured_fields": {
+        "mood": "traditional",
+        "style": "Qom",
+        "origin": "Persian",
+        "pattern": [
+          "pictorial",
+          "floral border"
+        ],
+        "age_category": "antique",
+        "primary_colors": [
+          "red",
+          "navy",
+          "ivory"
+        ]
+      },
+      "enrichment_status": "ready",
+      "review_reason_code": null,
+      "width_total_in": 96,
+      "length_total_in": 120,
+      "created_at": "2026-03-19T05:09:47.087557+00:00"
+    },
+    {
+      "id": "569c3c3f-17a8-4dea-909e-bb484b9a3087",
+      "tenant_id": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5",
+      "stock_id": "CERT-LOCAL-20260319T050926-011",
+      "status": "available",
+      "intake_label": "Antique Persian Qom",
+      "ai_description": "This is an antique Persian rug featuring a vivid pictorial scene with animals and figures against a red background. Its intricate border enhances its traditional aesthetic.",
+      "ai_structured_fields": {
+        "mood": "traditional",
+        "style": "Qom",
+        "origin": "Persian",
+        "pattern": [
+          "pictorial"
+        ],
+        "age_category": "antique",
+        "primary_colors": [
+          "red",
+          "navy",
+          "ivory",
+          "gold"
+        ]
+      },
+      "enrichment_status": "ready",
+      "review_reason_code": null,
+      "width_total_in": 96,
+      "length_total_in": 120,
+      "created_at": "2026-03-19T05:09:48.128882+00:00"
+    },
+    {
+      "id": "79accdfd-bfde-4c0d-8f1a-a63c5d40ed7f",
+      "tenant_id": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5",
+      "stock_id": "CERT-LOCAL-20260319T050926-012",
+      "status": "available",
+      "intake_label": "Persian Isfahan Traditional",
+      "ai_description": "This is a Persian Isfahan rug featuring a central medallion with intricate floral motifs and a surrounding floral border. The design is detailed and showcases traditional craftsmanship.",
+      "ai_structured_fields": {
+        "mood": "traditional",
+        "style": "Isfahan",
+        "origin": "Persian",
+        "pattern": [
+          "medallion center",
+          "floral motif",
+          "floral border"
+        ],
+        "age_category": "traditional",
+        "primary_colors": [
+          "ivory",
+          "brown",
+          "blue"
+        ]
+      },
+      "enrichment_status": "ready",
+      "review_reason_code": null,
+      "width_total_in": 96,
+      "length_total_in": 120,
+      "created_at": "2026-03-19T05:09:49.233115+00:00"
+    },
+    {
+      "id": "c898a77f-2575-41b2-95dd-dc62f4ae32cf",
+      "tenant_id": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5",
+      "stock_id": "CERT-LOCAL-20260319T050926-013",
+      "status": "available",
+      "intake_label": "Antique Persian Heriz",
+      "ai_description": "This rug features a striking central medallion with geometric and floral motifs typical of Persian Heriz rugs. The dominant color palette includes red, teal, and gold, contributing to its bold, traditional appearance.",
+      "ai_structured_fields": {
+        "mood": "traditional",
+        "style": "Heriz",
+        "origin": "Persian",
+        "pattern": [
+          "medallion center",
+          "floral motif"
+        ],
+        "age_category": "antique",
+        "primary_colors": [
+          "red",
+          "teal",
+          "gold"
+        ]
+      },
+      "enrichment_status": "ready",
+      "review_reason_code": null,
+      "width_total_in": 96,
+      "length_total_in": 120,
+      "created_at": "2026-03-19T05:09:50.487211+00:00"
+    },
+    {
+      "id": "152ced71-346e-4330-8692-9ab048c4c205",
+      "tenant_id": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5",
+      "stock_id": "CERT-LOCAL-20260319T050926-014",
+      "status": "available",
+      "intake_label": "Vintage Persian",
+      "ai_description": "The rug exhibits a worn and distressed surface, indicative of age and use. The colors include gold, red, and green with a traditional design style.",
+      "ai_structured_fields": {
+        "mood": "traditional",
+        "origin": "Persian",
+        "pattern": [
+          "floral motif"
+        ],
+        "age_category": "vintage",
+        "primary_colors": [
+          "gold",
+          "red",
+          "green"
+        ]
+      },
+      "enrichment_status": "ready",
+      "review_reason_code": null,
+      "width_total_in": 96,
+      "length_total_in": 120,
+      "created_at": "2026-03-19T05:09:52.705802+00:00"
+    },
+    {
+      "id": "4ee131b5-f56d-4ffc-97e1-a8e725d2ff41",
+      "tenant_id": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5",
+      "stock_id": "CERT-LOCAL-20260319T050926-015",
+      "status": "available",
+      "intake_label": "Persian Qom Traditional",
+      "ai_description": "This is a Persian Qom rug featuring a detailed pictorial design with animal and floral motifs. It exhibits a traditional and intricate decorative style, typical of high-quality Persian craftsmanship.",
+      "ai_structured_fields": {
+        "mood": "traditional",
+        "style": "Qom",
+        "origin": "Persian",
+        "pattern": [
+          "pictorial",
+          "floral motif"
+        ],
+        "age_category": "traditional",
+        "primary_colors": [
+          "ivory",
+          "blue",
+          "pink",
+          "green"
+        ]
+      },
+      "enrichment_status": "ready",
+      "review_reason_code": null,
+      "width_total_in": 96,
+      "length_total_in": 120,
+      "created_at": "2026-03-19T05:09:54.461002+00:00"
+    },
+    {
+      "id": "3c6f0d33-057f-470b-819d-32c880f1adf2",
+      "tenant_id": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5",
+      "stock_id": "CERT-LOCAL-20260319T050926-016",
+      "status": "available",
+      "intake_label": "Persian Qom",
+      "ai_description": "This rug features a detailed pictorial design with portraits and intricate calligraphy. The rich color palette includes red, ivory, and brown, creating a traditional and striking appearance.",
+      "ai_structured_fields": {
+        "mood": "traditional",
+        "style": "Qom",
+        "origin": "Persian",
+        "pattern": [
+          "pictorial",
+          "floral motif"
+        ],
+        "primary_colors": [
+          "red",
+          "ivory",
+          "brown"
+        ]
+      },
+      "enrichment_status": "ready",
+      "review_reason_code": null,
+      "width_total_in": 96,
+      "length_total_in": 120,
+      "created_at": "2026-03-19T05:09:55.873909+00:00"
+    },
+    {
+      "id": "774a204d-75b2-4712-9324-4fd6d6238dc4",
+      "tenant_id": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5",
+      "stock_id": "CERT-LOCAL-20260319T050926-017",
+      "status": "available",
+      "intake_label": "Antique Persian Sultanabad",
+      "ai_description": "This is an antique Persian Sultanabad rug showcasing an intricate floral motif with a central medallion design. The rich red, navy, and gold colors highlight its classic appeal.",
+      "ai_structured_fields": {
+        "mood": "traditional",
+        "style": "Sultanabad",
+        "origin": "Persian",
+        "pattern": [
+          "medallion center",
+          "floral motif"
+        ],
+        "age_category": "antique",
+        "primary_colors": [
+          "red",
+          "navy",
+          "gold"
+        ]
+      },
+      "enrichment_status": "ready",
+      "review_reason_code": null,
+      "width_total_in": 96,
+      "length_total_in": 120,
+      "created_at": "2026-03-19T05:09:57.742089+00:00"
+    },
+    {
+      "id": "31fff2b4-1d9e-4755-b98e-66f3b48db89f",
+      "tenant_id": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5",
+      "stock_id": "CERT-LOCAL-20260319T050926-018",
+      "status": "available",
+      "intake_label": "Vintage Persian Kashan",
+      "ai_description": "This is a vintage Persian Kashan rug featuring a central medallion with intricate floral motifs. Dominantly navy with accents of red, ivory, and pink.",
+      "ai_structured_fields": {
+        "mood": "traditional",
+        "style": "Kashan",
+        "origin": "Persian",
+        "pattern": [
+          "medallion center",
+          "floral motif",
+          "floral border"
+        ],
+        "age_category": "vintage",
+        "primary_colors": [
+          "navy",
+          "red",
+          "ivory",
+          "pink"
+        ]
+      },
+      "enrichment_status": "ready",
+      "review_reason_code": null,
+      "width_total_in": 96,
+      "length_total_in": 120,
+      "created_at": "2026-03-19T05:09:59.553574+00:00"
+    },
+    {
+      "id": "eb51b364-4c72-4577-9164-e94d903dd5ab",
+      "tenant_id": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5",
+      "stock_id": "CERT-LOCAL-20260319T050926-019",
+      "status": "available",
+      "intake_label": "Vintage Caucasian Shirvan",
+      "ai_description": "This is a vintage Caucasian Shirvan rug featuring a geometric design with a dark color palette of navy, red, and gold tones. The intricate pattern and bold borders highlight its traditional craftsmanship.",
+      "ai_structured_fields": {
+        "mood": "traditional",
+        "style": "Shirvan",
+        "origin": "Caucasian",
+        "pattern": [
+          "geometric design"
+        ],
+        "age_category": "vintage",
+        "primary_colors": [
+          "navy",
+          "red",
+          "gold"
+        ]
+      },
+      "enrichment_status": "ready",
+      "review_reason_code": null,
+      "width_total_in": 96,
+      "length_total_in": 120,
+      "created_at": "2026-03-19T05:10:01.502792+00:00"
+    },
+    {
+      "id": "9a16dda2-e138-4deb-896f-53e6052efbcb",
+      "tenant_id": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5",
+      "stock_id": "CERT-LOCAL-20260319T050926-020",
+      "status": "available",
+      "intake_label": "Vintage Persian Tabriz",
+      "ai_description": "This rug features a complex floral motif with a rich red background and intricate borders, typical of Persian artistry. It exudes a vintage charm with its elaborate detailing and harmonious color palette.",
+      "ai_structured_fields": {
+        "mood": "traditional",
+        "style": "Tabriz",
+        "origin": "Persian",
+        "pattern": [
+          "floral motif",
+          "floral border"
+        ],
+        "age_category": "vintage",
+        "primary_colors": [
+          "red",
+          "ivory",
+          "navy"
+        ]
+      },
+      "enrichment_status": "ready",
+      "review_reason_code": null,
+      "width_total_in": 96,
+      "length_total_in": 120,
+      "created_at": "2026-03-19T05:10:03.654327+00:00"
+    },
+    {
+      "id": "072613a4-99df-4a9e-9b81-ec06ef3f34ae",
+      "tenant_id": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5",
+      "stock_id": "CERT-LOCAL-20260319T050926-021",
+      "status": "available",
+      "intake_label": "Antique Persian Bakhtiari",
+      "ai_description": "This is an antique Persian Bakhtiari rug featuring a rich botanical design with a navy field and vibrant floral motifs. The intricate borders complement the central pattern, showcasing traditional craftsmanship.",
+      "ai_structured_fields": {
+        "mood": "traditional",
+        "style": "Bakhtiari",
+        "origin": "Persian",
+        "pattern": [
+          "floral motif"
+        ],
+        "age_category": "antique",
+        "primary_colors": [
+          "navy",
+          "ivory",
+          "red",
+          "blue",
+          "green"
+        ]
+      },
+      "enrichment_status": "ready",
+      "review_reason_code": null,
+      "width_total_in": 96,
+      "length_total_in": 120,
+      "created_at": "2026-03-19T05:10:04.846157+00:00"
+    },
+    {
+      "id": "a510549a-8400-44f1-bb44-a33825152917",
+      "tenant_id": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5",
+      "stock_id": "CERT-LOCAL-20260319T050926-022",
+      "status": "available",
+      "intake_label": "Antique Persian Sultanabad",
+      "ai_description": "This is an antique Persian Sultanabad rug featuring a floral motif in soft ivory, blue, and rust tones. Its intricate pattern and aged appearance suggest a high level of craftsmanship.",
+      "ai_structured_fields": {
+        "mood": "traditional",
+        "style": "Sultanabad",
+        "origin": "Persian",
+        "pattern": [
+          "floral motif",
+          "all-over pattern"
+        ],
+        "age_category": "antique",
+        "primary_colors": [
+          "ivory",
+          "blue",
+          "rust"
+        ]
+      },
+      "enrichment_status": "ready",
+      "review_reason_code": null,
+      "width_total_in": 96,
+      "length_total_in": 120,
+      "created_at": "2026-03-19T05:10:06.24818+00:00"
+    },
+    {
+      "id": "ddcb9ad3-2cb3-4a68-8f29-046b99c17fe7",
+      "tenant_id": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5",
+      "stock_id": "CERT-LOCAL-20260319T050926-023",
+      "status": "available",
+      "intake_label": "Antique Persian Heriz",
+      "ai_description": "This is an antique Persian Heriz rug featuring a vibrant all-over floral pattern with a rich combination of blue, red, and ivory colors. The classic design and quality craftsmanship reflect the traditional themes of the Heriz style.",
+      "ai_structured_fields": {
+        "mood": "traditional",
+        "style": "Heriz",
+        "origin": "Persian",
+        "pattern": [
+          "all-over pattern",
+          "floral motif"
+        ],
+        "age_category": "antique",
+        "primary_colors": [
+          "blue",
+          "red",
+          "ivory"
+        ]
+      },
+      "enrichment_status": "ready",
+      "review_reason_code": null,
+      "width_total_in": 96,
+      "length_total_in": 120,
+      "created_at": "2026-03-19T05:10:08.028988+00:00"
+    },
+    {
+      "id": "4ed505b2-a6fe-4521-a95b-bde93da0f814",
+      "tenant_id": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5",
+      "stock_id": "CERT-LOCAL-20260319T050926-024",
+      "status": "available",
+      "intake_label": "Vintage Persian Bakhtiari",
+      "ai_description": "This vintage Persian Bakhtiari rug features a lattice pattern with various floral and pictorial motifs. The rich color palette includes rust, ivory, and gold tones, creating a visually intricate piece.",
+      "ai_structured_fields": {
+        "mood": "traditional",
+        "style": "Bakhtiari",
+        "origin": "Persian",
+        "pattern": [
+          "geometric design",
+          "floral motif",
+          "pictorial"
+        ],
+        "age_category": "vintage",
+        "primary_colors": [
+          "rust",
+          "ivory",
+          "gold"
+        ]
+      },
+      "enrichment_status": "ready",
+      "review_reason_code": null,
+      "width_total_in": 96,
+      "length_total_in": 120,
+      "created_at": "2026-03-19T05:10:09.825415+00:00"
+    },
+    {
+      "id": "d78527be-0d60-4599-a5f3-65d6edc5b444",
+      "tenant_id": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5",
+      "stock_id": "CERT-LOCAL-20260319T050926-025",
+      "status": "available",
+      "intake_label": "Antique Persian Tabriz",
+      "ai_description": "This is an antique Persian Tabriz rug featuring a detailed floral motif with rich red and navy hues. The intricate design and classic border enhance its traditional appeal.",
+      "ai_structured_fields": {
+        "mood": "traditional",
+        "style": "Tabriz",
+        "origin": "Persian",
+        "pattern": [
+          "floral motif",
+          "floral border"
+        ],
+        "age_category": "antique",
+        "primary_colors": [
+          "navy",
+          "red",
+          "green"
+        ]
+      },
+      "enrichment_status": "ready",
+      "review_reason_code": null,
+      "width_total_in": 96,
+      "length_total_in": 120,
+      "created_at": "2026-03-19T05:10:11.392303+00:00"
+    },
+    {
+      "id": "bbfbf03f-8d6e-4601-89f7-03348067ef9e",
+      "tenant_id": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5",
+      "stock_id": "CERT-LOCAL-20260319T050926-026",
+      "status": "available",
+      "intake_label": "Antique Caucasian Karabagh",
+      "ai_description": "This is an antique Caucasian Karabagh rug featuring a complex geometric design with a central medallion. The rug displays rich greens, blues, and oranges.",
+      "ai_structured_fields": {
+        "mood": "traditional",
+        "style": "Karabagh",
+        "origin": "Caucasian",
+        "pattern": [
+          "medallion center",
+          "geometric design"
+        ],
+        "age_category": "antique",
+        "primary_colors": [
+          "green",
+          "blue",
+          "orange"
+        ]
+      },
+      "enrichment_status": "ready",
+      "review_reason_code": null,
+      "width_total_in": 96,
+      "length_total_in": 120,
+      "created_at": "2026-03-19T05:10:12.814252+00:00"
+    },
+    {
+      "id": "6608fe19-bd83-49da-82af-c8a955d540f8",
+      "tenant_id": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5",
+      "stock_id": "CERT-LOCAL-20260319T050926-027",
+      "status": "available",
+      "intake_label": "Persian Heriz Traditional",
+      "ai_description": "This rug features a rich red field with an intricate geometric design, typical of Persian Heriz styles. Its bold medallion and complex border add to its traditional charm.",
+      "ai_structured_fields": {
+        "mood": "traditional",
+        "style": "Heriz",
+        "origin": "Persian",
+        "pattern": [
+          "medallion center",
+          "geometric design",
+          "floral border"
+        ],
+        "age_category": "traditional",
+        "primary_colors": [
+          "red",
+          "navy",
+          "ivory",
+          "brown"
+        ]
+      },
+      "enrichment_status": "ready",
+      "review_reason_code": null,
+      "width_total_in": 96,
+      "length_total_in": 120,
+      "created_at": "2026-03-19T05:10:14.726936+00:00"
+    },
+    {
+      "id": "fdda9820-3179-457a-80c7-db92b8b87a0b",
+      "tenant_id": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5",
+      "stock_id": "CERT-LOCAL-20260319T050926-028",
+      "status": "available",
+      "intake_label": "Antique Persian Tabriz",
+      "ai_description": "This is an antique Persian Tabriz rug featuring a complex floral motif with a prominent medallion and a rich color palette including navy, red, and ivory. Its intricate design and detailed border showcase traditional artistry.",
+      "ai_structured_fields": {
+        "mood": "traditional",
+        "style": "Tabriz",
+        "origin": "Persian",
+        "pattern": [
+          "floral motif",
+          "medallion center"
+        ],
+        "age_category": "antique",
+        "primary_colors": [
+          "navy",
+          "red",
+          "ivory"
+        ]
+      },
+      "enrichment_status": "ready",
+      "review_reason_code": null,
+      "width_total_in": 96,
+      "length_total_in": 120,
+      "created_at": "2026-03-19T05:10:16.132609+00:00"
+    },
+    {
+      "id": "ee49964f-503a-4c52-a5e3-93385177e73c",
+      "tenant_id": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5",
+      "stock_id": "CERT-LOCAL-20260319T050926-029",
+      "status": "available",
+      "intake_label": "Persian Heriz Traditional",
+      "ai_description": "This rug is a Persian Heriz with a striking geometric medallion design in rich red and navy tones. Its traditional style and durable construction make it an excellent choice for a classic decor setting.",
+      "ai_structured_fields": {
+        "mood": "traditional",
+        "style": "Heriz",
+        "origin": "Persian",
+        "pattern": [
+          "medallion center",
+          "floral motif",
+          "geometric design"
+        ],
+        "age_category": "traditional",
+        "primary_colors": [
+          "red",
+          "navy",
+          "ivory"
+        ]
+      },
+      "enrichment_status": "ready",
+      "review_reason_code": null,
+      "width_total_in": 96,
+      "length_total_in": 120,
+      "created_at": "2026-03-19T05:10:17.617648+00:00"
+    },
+    {
+      "id": "5a0b5f72-11b4-40fc-96c9-73b190413b3c",
+      "tenant_id": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5",
+      "stock_id": "CERT-LOCAL-20260319T050926-030",
+      "status": "available",
+      "intake_label": "Antique Persian Bakhtiari",
+      "ai_description": "This is an antique Persian Bakhtiari rug featuring a geometric design with floral motifs. The rich red, navy, and cream colors create a traditional and vibrant appearance.",
+      "ai_structured_fields": {
+        "mood": "traditional",
+        "style": "Bakhtiari",
+        "origin": "Persian",
+        "pattern": [
+          "geometric design",
+          "floral motif"
+        ],
+        "age_category": "antique",
+        "primary_colors": [
+          "red",
+          "navy",
+          "cream"
+        ]
+      },
+      "enrichment_status": "ready",
+      "review_reason_code": null,
+      "width_total_in": 96,
+      "length_total_in": 120,
+      "created_at": "2026-03-19T05:10:18.89185+00:00"
+    },
+    {
+      "id": "72f68c2a-f001-4c58-b0d8-cb5d9d0a2dc3",
+      "tenant_id": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5",
+      "stock_id": "CERT-LOCAL-20260319T050926-031",
+      "status": "available",
+      "intake_label": "Antique Turkish Oushak",
+      "ai_description": "This is an antique Turkish Oushak rug featuring large-scale floral motifs in soft, muted shades of pink, green, and gold. The worn texture suggests it has aged gracefully, adding a historical charm.",
+      "ai_structured_fields": {
+        "mood": "traditional",
+        "style": "Oushak",
+        "origin": "Turkish",
+        "pattern": [
+          "floral motif"
+        ],
+        "age_category": "antique",
+        "primary_colors": [
+          "green",
+          "pink",
+          "gold"
+        ]
+      },
+      "enrichment_status": "ready",
+      "review_reason_code": null,
+      "width_total_in": 96,
+      "length_total_in": 120,
+      "created_at": "2026-03-19T05:10:21.047416+00:00"
+    },
+    {
+      "id": "7dae74f4-72f4-48d4-93e8-387f60984146",
+      "tenant_id": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5",
+      "stock_id": "CERT-LOCAL-20260319T050926-032",
+      "status": "available",
+      "intake_label": "Antique Persian Sultanabad",
+      "ai_description": "An antique Persian Sultanabad rug featuring a floral motif with a rich rust field and complementary borders. The lush botanical design embodies traditional craftsmanship.",
+      "ai_structured_fields": {
+        "mood": "traditional",
+        "style": "Sultanabad",
+        "origin": "Persian",
+        "pattern": [
+          "floral motif",
+          "floral border"
+        ],
+        "age_category": "antique",
+        "primary_colors": [
+          "rust",
+          "ivory",
+          "blue"
+        ]
+      },
+      "enrichment_status": "ready",
+      "review_reason_code": null,
+      "width_total_in": 96,
+      "length_total_in": 120,
+      "created_at": "2026-03-19T05:10:22.707309+00:00"
+    },
+    {
+      "id": "04920e63-7c2d-4d89-9c13-bcf1fead4e96",
+      "tenant_id": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5",
+      "stock_id": "CERT-LOCAL-20260319T050926-033",
+      "status": "available",
+      "intake_label": "Antique Persian Heriz",
+      "ai_description": "This is an antique Persian Heriz rug featuring a bold medallion center design. The rug displays a rich palette of navy, red, and ivory, embodying a traditional mood.",
+      "ai_structured_fields": {
+        "mood": "traditional",
+        "style": "Heriz",
+        "origin": "Persian",
+        "pattern": [
+          "medallion center",
+          "geometric design",
+          "floral motif"
+        ],
+        "age_category": "antique",
+        "primary_colors": [
+          "red",
+          "navy",
+          "ivory"
+        ]
+      },
+      "enrichment_status": "ready",
+      "review_reason_code": null,
+      "width_total_in": 96,
+      "length_total_in": 120,
+      "created_at": "2026-03-19T05:10:23.750472+00:00"
+    },
+    {
+      "id": "71f6d60d-811f-4188-80ec-7eb8cea84ca7",
+      "tenant_id": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5",
+      "stock_id": "CERT-LOCAL-20260319T050926-034",
+      "status": "available",
+      "intake_label": "Antique Persian Tabriz",
+      "ai_description": "This is an antique Persian Tabriz rug featuring detailed floral motifs and a central medallion design. The intricate patterns are set against a rich palette of red, green, and gold.",
+      "ai_structured_fields": {
+        "mood": "traditional",
+        "style": "Tabriz",
+        "origin": "Persian",
+        "pattern": [
+          "medallion center",
+          "floral motif"
+        ],
+        "age_category": "antique",
+        "primary_colors": [
+          "red",
+          "green",
+          "gold"
+        ]
+      },
+      "enrichment_status": "ready",
+      "review_reason_code": null,
+      "width_total_in": 96,
+      "length_total_in": 120,
+      "created_at": "2026-03-19T05:10:25.308814+00:00"
+    },
+    {
+      "id": "3a00f1b2-1a48-4d07-aaec-79cd5bb7cb8a",
+      "tenant_id": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5",
+      "stock_id": "CERT-LOCAL-20260319T050926-035",
+      "status": "available",
+      "intake_label": "Vintage Persian Bakhtiari",
+      "ai_description": "This is a vintage Persian Bakhtiari rug featuring a vivid geometric design with intricate floral motifs. The vibrant primary colors include red, blue, and ivory, lending a rich and traditional aesthetic.",
+      "ai_structured_fields": {
+        "mood": "traditional",
+        "style": "Bakhtiari",
+        "origin": "Persian",
+        "pattern": [
+          "geometric design",
+          "floral motif"
+        ],
+        "age_category": "vintage",
+        "primary_colors": [
+          "red",
+          "blue",
+          "ivory"
+        ]
+      },
+      "enrichment_status": "ready",
+      "review_reason_code": null,
+      "width_total_in": 96,
+      "length_total_in": 120,
+      "created_at": "2026-03-19T05:10:28.024801+00:00"
+    },
+    {
+      "id": "25f8bb84-16f8-477d-9894-96c8410e616a",
+      "tenant_id": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5",
+      "stock_id": "CERT-LOCAL-20260319T050926-036",
+      "status": "available",
+      "intake_label": "Antique Persian Tabriz",
+      "ai_description": "This is an intricately designed antique Persian Tabriz rug featuring a central medallion and floral motifs. The rich red and green tones contribute to its traditional atmosphere.",
+      "ai_structured_fields": {
+        "mood": "traditional",
+        "style": "Tabriz",
+        "origin": "Persian",
+        "pattern": [
+          "medallion center",
+          "floral motif"
+        ],
+        "age_category": "antique",
+        "primary_colors": [
+          "red",
+          "green",
+          "blue",
+          "ivory"
+        ]
+      },
+      "enrichment_status": "ready",
+      "review_reason_code": null,
+      "width_total_in": 96,
+      "length_total_in": 120,
+      "created_at": "2026-03-19T05:10:29.317323+00:00"
+    },
+    {
+      "id": "619f6e1f-ad7b-4475-8324-8d285ff581de",
+      "tenant_id": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5",
+      "stock_id": "CERT-LOCAL-20260319T050926-037",
+      "status": "available",
+      "intake_label": "Antique Turkish Oushak",
+      "ai_description": "This is an antique Turkish Oushak rug, characterized by its soft motifs and warm color palette. The rug features an all-over pattern with floral and geometric elements, typical of traditional Oushak designs.",
+      "ai_structured_fields": {
+        "mood": "traditional",
+        "style": "Oushak",
+        "origin": "Turkish",
+        "pattern": [
+          "all-over pattern",
+          "floral motif",
+          "geometric design"
+        ],
+        "age_category": "antique",
+        "primary_colors": [
+          "orange",
+          "ivory",
+          "gold"
+        ]
+      },
+      "enrichment_status": "ready",
+      "review_reason_code": null,
+      "width_total_in": 96,
+      "length_total_in": 120,
+      "created_at": "2026-03-19T05:10:30.7175+00:00"
+    },
+    {
+      "id": "c6816922-fdc6-4e35-8a2d-50a1934cc63b",
+      "tenant_id": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5",
+      "stock_id": "CERT-LOCAL-20260319T050926-038",
+      "status": "available",
+      "intake_label": "Antique Persian Heriz",
+      "ai_description": "This is an antique Persian Heriz rug featuring a geometric design with a prominent medallion and floral motifs. The primary colors are rich rust, navy, and teal accentuated by ivory and gold tones.",
+      "ai_structured_fields": {
+        "mood": "traditional",
+        "style": "Heriz",
+        "origin": "Persian",
+        "pattern": [
+          "geometric design",
+          "medallion center",
+          "floral motif"
+        ],
+        "age_category": "antique",
+        "primary_colors": [
+          "rust",
+          "navy",
+          "teal",
+          "ivory",
+          "gold"
+        ]
+      },
+      "enrichment_status": "ready",
+      "review_reason_code": null,
+      "width_total_in": 96,
+      "length_total_in": 120,
+      "created_at": "2026-03-19T05:10:32.117991+00:00"
+    },
+    {
+      "id": "725e2fce-a3f0-4a14-ad27-d6ff38ce65c5",
+      "tenant_id": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5",
+      "stock_id": "CERT-LOCAL-20260319T050926-039",
+      "status": "available",
+      "intake_label": "Vintage Caucasian Kilim",
+      "ai_description": "This is a vintage Caucasian Kilim rug, featuring bold geometric patterns with a mix of red, blue, and ivory colors. The flat-weave construction highlights its traditional tribal design, suitable for eclectic or transitional decor.",
+      "ai_structured_fields": {
+        "mood": "eclectic",
+        "style": "Kilim",
+        "origin": "Caucasian",
+        "pattern": [
+          "geometric design",
+          "tribal design"
+        ],
+        "age_category": "vintage",
+        "primary_colors": [
+          "red",
+          "blue",
+          "ivory"
+        ]
+      },
+      "enrichment_status": "ready",
+      "review_reason_code": null,
+      "width_total_in": 96,
+      "length_total_in": 120,
+      "created_at": "2026-03-19T05:10:34.276989+00:00"
+    },
+    {
+      "id": "60a0bef9-857a-4b32-b36a-96f3358fb9c8",
+      "tenant_id": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5",
+      "stock_id": "CERT-LOCAL-20260319T050926-040",
+      "status": "available",
+      "intake_label": "Caucasian Kilim Traditional",
+      "ai_description": "This is a flat-weave Kilim rug, featuring a vibrant geometric design with tribal motifs. It showcases a combination of red, purple, and orange hues, typical of traditional Caucasian styles.",
+      "ai_structured_fields": {
+        "mood": "traditional",
+        "style": "Kilim",
+        "origin": "Caucasian",
+        "pattern": [
+          "geometric design",
+          "tribal design"
+        ],
+        "age_category": "traditional",
+        "primary_colors": [
+          "red",
+          "purple",
+          "orange"
+        ]
+      },
+      "enrichment_status": "ready",
+      "review_reason_code": null,
+      "width_total_in": 96,
+      "length_total_in": 120,
+      "created_at": "2026-03-19T05:10:35.88877+00:00"
+    },
+    {
+      "id": "afc4dfdd-2d05-4be8-bb0b-391d38aef528",
+      "tenant_id": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5",
+      "stock_id": "CERT-LOCAL-20260319T050926-041",
+      "status": "available",
+      "intake_label": "Antique Persian Heriz",
+      "ai_description": "This rug features a bold, geometric design with central medallion motifs, set against a rich red field. The floral patterns in blue, ivory, and gold enhance its traditional Persian style.",
+      "ai_structured_fields": {
+        "mood": "traditional",
+        "style": "Heriz",
+        "origin": "Persian",
+        "pattern": [
+          "medallion center",
+          "geometric design",
+          "floral motif"
+        ],
+        "age_category": "antique",
+        "primary_colors": [
+          "red",
+          "navy",
+          "ivory",
+          "gold"
+        ]
+      },
+      "enrichment_status": "ready",
+      "review_reason_code": null,
+      "width_total_in": 96,
+      "length_total_in": 120,
+      "created_at": "2026-03-19T05:10:37.376948+00:00"
+    },
+    {
+      "id": "16775754-376e-4d34-8bed-955f1f551d59",
+      "tenant_id": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5",
+      "stock_id": "CERT-LOCAL-20260319T050926-042",
+      "status": "available",
+      "intake_label": "Contemporary Turkish Oushak",
+      "ai_description": "This is a contemporary rug with Oushak influences, featuring a subtle geometric design with neutral tones. Its understated elegance makes it suitable for modern interiors.",
+      "ai_structured_fields": {
+        "mood": "modern",
+        "style": "Oushak",
+        "origin": "Turkish",
+        "pattern": [
+          "geometric design"
+        ],
+        "age_category": "contemporary",
+        "primary_colors": [
+          "cream",
+          "gray"
+        ]
+      },
+      "enrichment_status": "ready",
+      "review_reason_code": null,
+      "width_total_in": 96,
+      "length_total_in": 120,
+      "created_at": "2026-03-19T05:10:39.002056+00:00"
+    },
+    {
+      "id": "964cdd12-b53f-4aaf-a9d6-e6b3e21789fa",
+      "tenant_id": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5",
+      "stock_id": "CERT-LOCAL-20260319T050926-043",
+      "status": "available",
+      "intake_label": "Vintage Turkish Oushak",
+      "ai_description": "This is a vintage Turkish Oushak rug featuring a geometric design with muted red and green tones. The central medallion and border patterns are characteristic of traditional Oushak styles.",
+      "ai_structured_fields": {
+        "mood": "traditional",
+        "style": "Oushak",
+        "origin": "Turkish",
+        "pattern": [
+          "medallion center",
+          "geometric design"
+        ],
+        "age_category": "vintage",
+        "primary_colors": [
+          "green",
+          "red",
+          "ivory"
+        ]
+      },
+      "enrichment_status": "ready",
+      "review_reason_code": null,
+      "width_total_in": 96,
+      "length_total_in": 120,
+      "created_at": "2026-03-19T05:10:40.797673+00:00"
+    },
+    {
+      "id": "c867ab96-d50c-416c-97e2-d91896b52d46",
+      "tenant_id": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5",
+      "stock_id": "CERT-LOCAL-20260319T050926-044",
+      "status": "available",
+      "intake_label": "Antique Persian Serapi",
+      "ai_description": "This is an antique Persian Serapi rug featuring a bold medallion and geometric design. The rich color palette includes red and navy, accented by ivory and brown tones.",
+      "ai_structured_fields": {
+        "mood": "traditional",
+        "style": "Serapi",
+        "origin": "Persian",
+        "pattern": [
+          "medallion center",
+          "geometric design"
+        ],
+        "age_category": "antique",
+        "primary_colors": [
+          "red",
+          "navy",
+          "brown"
+        ]
+      },
+      "enrichment_status": "ready",
+      "review_reason_code": null,
+      "width_total_in": 96,
+      "length_total_in": 120,
+      "created_at": "2026-03-19T05:10:43.004941+00:00"
+    },
+    {
+      "id": "89ee3f0b-1df6-4525-8984-7543c1cf2764",
+      "tenant_id": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5",
+      "stock_id": "CERT-LOCAL-20260319T050926-045",
+      "status": "available",
+      "intake_label": "Vintage Persian Gabbeh",
+      "ai_description": "This vibrant vintage Persian rug features a bold tribal design with pictorial elements, depicting a rider on horseback. The vivid red background is accented by striking blue and ivory motifs.",
+      "ai_structured_fields": {
+        "mood": "eclectic",
+        "style": "Gabbeh",
+        "origin": "Persian",
+        "pattern": [
+          "pictorial",
+          "tribal design"
+        ],
+        "age_category": "vintage",
+        "primary_colors": [
+          "red",
+          "blue",
+          "ivory"
+        ]
+      },
+      "enrichment_status": "ready",
+      "review_reason_code": null,
+      "width_total_in": 96,
+      "length_total_in": 120,
+      "created_at": "2026-03-19T05:10:44.812672+00:00"
+    },
+    {
+      "id": "f8c82de9-c831-4468-82ce-841353e3bc70",
+      "tenant_id": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5",
+      "stock_id": "CERT-LOCAL-20260319T050926-046",
+      "status": "available",
+      "intake_label": "Antique Caucasian Kazak",
+      "ai_description": "This is an antique Caucasian Kazak rug featuring vibrant geometric patterns and a rich color palette of red, teal, and ivory. Its distinct tribal design and traditional craftsmanship make it a timeless collectible piece.",
+      "ai_structured_fields": {
+        "mood": "traditional",
+        "style": "Kazak",
+        "origin": "Caucasian",
+        "pattern": [
+          "geometric design",
+          "tribal design"
+        ],
+        "age_category": "antique",
+        "primary_colors": [
+          "red",
+          "teal",
+          "ivory"
+        ]
+      },
+      "enrichment_status": "ready",
+      "review_reason_code": null,
+      "width_total_in": 96,
+      "length_total_in": 120,
+      "created_at": "2026-03-19T05:10:46.545648+00:00"
+    },
+    {
+      "id": "dd56dada-6f55-427c-86a9-683feaa391d8",
+      "tenant_id": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5",
+      "stock_id": "CERT-LOCAL-20260319T050926-047",
+      "status": "available",
+      "intake_label": "Caucasian Kazak Traditional",
+      "ai_description": "This is a traditional Caucasian Kazak rug featuring bold geometric patterns with a strong central medallion and vibrant colors. It displays a classic tribal design with multiple borders and intricate motifs.",
+      "ai_structured_fields": {
+        "mood": "traditional",
+        "style": "Kazak",
+        "origin": "Caucasian",
+        "pattern": [
+          "medallion center",
+          "geometric design",
+          "tribal design"
+        ],
+        "age_category": "traditional",
+        "primary_colors": [
+          "red",
+          "green",
+          "ivory",
+          "black",
+          "gold"
+        ]
+      },
+      "enrichment_status": "ready",
+      "review_reason_code": null,
+      "width_total_in": 96,
+      "length_total_in": 120,
+      "created_at": "2026-03-19T05:10:48.401342+00:00"
+    },
+    {
+      "id": "219cf1a9-a3bc-4031-9d09-08275b1bcd03",
+      "tenant_id": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5",
+      "stock_id": "CERT-LOCAL-20260319T050926-048",
+      "status": "available",
+      "intake_label": "Non-Rug Scene",
+      "ai_description": "The image features a building and two people in traditional attire, not a rug.",
+      "ai_structured_fields": null,
+      "enrichment_status": "needs_review",
+      "review_reason_code": "ANALYSIS_INCOMPLETE",
+      "width_total_in": 96,
+      "length_total_in": 120,
+      "created_at": "2026-03-19T05:10:50.594418+00:00"
+    },
+    {
+      "id": "f0ddcc5c-331d-4e91-b509-de8d3ed3060d",
+      "tenant_id": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5",
+      "stock_id": "CERT-LOCAL-20260319T050926-049",
+      "status": "available",
+      "intake_label": "Caucasian Shirvan Traditional",
+      "ai_description": "A collection of rugs with distinct ethnic patterns, featuring geometric and floral motifs in rich reds, browns, and neutral tones. The prominent piece is a Shirvan-style rug with a medallion center.",
+      "ai_structured_fields": {
+        "mood": "traditional",
+        "style": "Shirvan",
+        "origin": "Caucasian",
+        "pattern": [
+          "medallion center",
+          "geometric design",
+          "floral motif"
+        ],
+        "age_category": "traditional",
+        "primary_colors": [
+          "red",
+          "brown",
+          "ivory"
+        ]
+      },
+      "enrichment_status": "ready",
+      "review_reason_code": null,
+      "width_total_in": 96,
+      "length_total_in": 120,
+      "created_at": "2026-03-19T05:10:51.972209+00:00"
+    },
+    {
+      "id": "d5fd2795-90d6-4bcc-b210-8f930cf437f7",
+      "tenant_id": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5",
+      "stock_id": "CERT-LOCAL-20260319T050926-050",
+      "status": "available",
+      "intake_label": "Caucasian Kazak Traditional",
+      "ai_description": "A vibrant rug featuring traditional geometric patterns typical of Caucasian Kazak designs. Bold reds and rich colors create a striking visual impact.",
+      "ai_structured_fields": {
+        "mood": "traditional",
+        "style": "Kazak",
+        "origin": "Caucasian",
+        "pattern": [
+          "geometric design"
+        ],
+        "age_category": "traditional",
+        "primary_colors": [
+          "red",
+          "navy",
+          "ivory"
+        ]
+      },
+      "enrichment_status": "ready",
+      "review_reason_code": null,
+      "width_total_in": 96,
+      "length_total_in": 120,
+      "created_at": "2026-03-19T05:10:53.651952+00:00"
+    },
+    {
+      "id": "8611b5b5-3667-48ef-9f14-5ea39e1bd898",
+      "tenant_id": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5",
+      "stock_id": "CERT-LOCAL-20260319T050926-051",
+      "status": "available",
+      "intake_label": null,
+      "ai_description": "The image does not depict a rug but shows an airplane in flight near a construction area.",
+      "ai_structured_fields": null,
+      "enrichment_status": "needs_review",
+      "review_reason_code": "ANALYSIS_INCOMPLETE",
+      "width_total_in": 96,
+      "length_total_in": 120,
+      "created_at": "2026-03-19T05:10:55.807759+00:00"
+    },
+    {
+      "id": "4938fb36-0cc9-4b80-9854-5719fe88d54d",
+      "tenant_id": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5",
+      "stock_id": "CERT-LOCAL-20260319T050926-052",
+      "status": "available",
+      "intake_label": null,
+      "ai_description": "The image features a cat, making it unsuitable for rug analysis.",
+      "ai_structured_fields": null,
+      "enrichment_status": "needs_review",
+      "review_reason_code": "ANALYSIS_INCOMPLETE",
+      "width_total_in": 96,
+      "length_total_in": 120,
+      "created_at": "2026-03-19T05:10:58.116834+00:00"
+    },
+    {
+      "id": "6a38559b-e5f4-4dee-866f-59960365afe7",
+      "tenant_id": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5",
+      "stock_id": "CERT-LOCAL-20260319T050926-053",
+      "status": "available",
+      "intake_label": "Scene Not A Rug",
+      "ai_description": "The image provided is of a city skyline and not a rug.",
+      "ai_structured_fields": null,
+      "enrichment_status": "needs_review",
+      "review_reason_code": "ANALYSIS_INCOMPLETE",
+      "width_total_in": 96,
+      "length_total_in": 120,
+      "created_at": "2026-03-19T05:11:00.537041+00:00"
+    },
+    {
+      "id": "a1cd5327-87bb-4d38-9c27-bd0cfa77997e",
+      "tenant_id": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5",
+      "stock_id": "CERT-LOCAL-20260319T050926-054",
+      "status": "available",
+      "intake_label": "Null (no Rug Present)",
+      "ai_description": "The image depicts a mountainous landscape without any visible rugs.",
+      "ai_structured_fields": null,
+      "enrichment_status": "needs_review",
+      "review_reason_code": "ANALYSIS_INCOMPLETE",
+      "width_total_in": 96,
+      "length_total_in": 120,
+      "created_at": "2026-03-19T05:11:03.199186+00:00"
+    },
+    {
+      "id": "ba185ef7-80a0-4063-ad99-49308c2b5e37",
+      "tenant_id": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5",
+      "stock_id": "CERT-LOCAL-20260319T050926-055",
+      "status": "available",
+      "intake_label": null,
+      "ai_description": "The image is of an engine or machinery, not a rug.",
+      "ai_structured_fields": null,
+      "enrichment_status": "needs_review",
+      "review_reason_code": "ANALYSIS_INCOMPLETE",
+      "width_total_in": 96,
+      "length_total_in": 120,
+      "created_at": "2026-03-19T05:11:06.806409+00:00"
+    },
+    {
+      "id": "e9ff3be8-8dd9-4594-a366-48450574c46d",
+      "tenant_id": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5",
+      "stock_id": "CERT-LOCAL-20260319T050926-056",
+      "status": "available",
+      "intake_label": null,
+      "ai_description": "The image is a landscape photograph of a sunset over a rocky shoreline, not a rug.",
+      "ai_structured_fields": null,
+      "enrichment_status": "needs_review",
+      "review_reason_code": "ANALYSIS_INCOMPLETE",
+      "width_total_in": 96,
+      "length_total_in": 120,
+      "created_at": "2026-03-19T05:11:08.298434+00:00"
+    },
+    {
+      "id": "3dba9653-0fd2-4886-afba-c626292dac0b",
+      "tenant_id": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5",
+      "stock_id": "CERT-LOCAL-20260319T050926-057",
+      "status": "available",
+      "intake_label": null,
+      "ai_description": "The image depicts a group of people working in an office setting, no rug is visible.",
+      "ai_structured_fields": null,
+      "enrichment_status": "needs_review",
+      "review_reason_code": "ANALYSIS_INCOMPLETE",
+      "width_total_in": 96,
+      "length_total_in": 120,
+      "created_at": "2026-03-19T05:11:10.457647+00:00"
+    },
+    {
+      "id": "0bd821a0-bda4-4077-8388-673edc5b823d",
+      "tenant_id": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5",
+      "stock_id": "CERT-LOCAL-20260319T050926-058",
+      "status": "available",
+      "intake_label": null,
+      "ai_description": "The image displays a classic portrait painting, not a rug.",
+      "ai_structured_fields": null,
+      "enrichment_status": "needs_review",
+      "review_reason_code": "ANALYSIS_INCOMPLETE",
+      "width_total_in": 96,
+      "length_total_in": 120,
+      "created_at": "2026-03-19T05:11:11.858378+00:00"
+    },
+    {
+      "id": "3f8a48f4-d50c-4a06-b94a-7631d2d83643",
+      "tenant_id": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5",
+      "stock_id": "CERT-LOCAL-20260319T050926-059",
+      "status": "available",
+      "intake_label": null,
+      "ai_description": "The image shows an entrance to a soccer stadium with people and flags visible, not a rug.",
+      "ai_structured_fields": null,
+      "enrichment_status": "needs_review",
+      "review_reason_code": "ANALYSIS_INCOMPLETE",
+      "width_total_in": 96,
+      "length_total_in": 120,
+      "created_at": "2026-03-19T05:11:13.378229+00:00"
+    },
+    {
+      "id": "fce52827-2f29-4a48-a09a-00192212b200",
+      "tenant_id": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5",
+      "stock_id": "CERT-LOCAL-20260319T050926-060",
+      "status": "available",
+      "intake_label": null,
+      "ai_description": "The image shows a scenic forest waterfall, not a rug.",
+      "ai_structured_fields": null,
+      "enrichment_status": "needs_review",
+      "review_reason_code": "ANALYSIS_INCOMPLETE",
+      "width_total_in": 96,
+      "length_total_in": 120,
+      "created_at": "2026-03-19T05:11:15.745+00:00"
+    }
+  ],
+  "rug_images": [
+    {
+      "rug_id": "8e80938f-fa4b-465f-a669-39176543ac9a",
+      "path": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5/8e80938f-fa4b-465f-a669-39176543ac9a/primary-1773896967020.jpg",
+      "image_sha256": "e7304954d4e62af58d4b523a6c99b74ae153852e1eea08aa00aa64053c8defcd"
+    },
+    {
+      "rug_id": "78ed416f-8067-45d6-b541-7bce5ab0f6f6",
+      "path": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5/78ed416f-8067-45d6-b541-7bce5ab0f6f6/primary-1773896969279.jpg",
+      "image_sha256": "dc700b090bd56acdf2fda532ea1a2cd0810511568bd237e95bf0cab5022a5e83"
+    },
+    {
+      "rug_id": "8d3fceb3-2cad-4822-82c2-3d0382a9fde9",
+      "path": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5/8d3fceb3-2cad-4822-82c2-3d0382a9fde9/primary-1773896973251.jpg",
+      "image_sha256": "35557ac97c1a7243b00c677b8d8a5143d60aac2fb624fe3460f154fd760a24e8"
+    },
+    {
+      "rug_id": "20950889-56f4-4a4c-9ae0-8d3388ee7a48",
+      "path": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5/20950889-56f4-4a4c-9ae0-8d3388ee7a48/primary-1773896975019.jpg",
+      "image_sha256": "e52af389f9d7ed1c400c4d86d7c478f5c52c35efa7794b1e5e0d12605aa4220b"
+    },
+    {
+      "rug_id": "87f5dfa1-7485-4d27-86b8-d7e9b71c0a34",
+      "path": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5/87f5dfa1-7485-4d27-86b8-d7e9b71c0a34/primary-1773896979455.jpg",
+      "image_sha256": "7d7ae074a22c87e11d975888b74a5ac1625cb6586cc9eebb1d079acf6f00ffde"
+    },
+    {
+      "rug_id": "e4210a49-5203-4bad-98c2-48ea7ba1626e",
+      "path": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5/e4210a49-5203-4bad-98c2-48ea7ba1626e/primary-1773896982717.jpg",
+      "image_sha256": "e5f404f8feee7431f9921217ae51f314e3de7fde47f94b79ed719b2db6a9835d"
+    },
+    {
+      "rug_id": "5455b60d-ad2c-4341-9f10-cd43e4a26b7d",
+      "path": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5/5455b60d-ad2c-4341-9f10-cd43e4a26b7d/primary-1773896987146.jpg",
+      "image_sha256": "4471373499f2a74d176abdaf3cdf376ee39796979bb8502ad2eb0e41c2fa4962"
+    },
+    {
+      "rug_id": "569c3c3f-17a8-4dea-909e-bb484b9a3087",
+      "path": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5/569c3c3f-17a8-4dea-909e-bb484b9a3087/primary-1773896988191.jpg",
+      "image_sha256": "c0d6efd172d610bb741e3ca118b544fb022945a874f63b2a502663b2f2c13536"
+    },
+    {
+      "rug_id": "c898a77f-2575-41b2-95dd-dc62f4ae32cf",
+      "path": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5/c898a77f-2575-41b2-95dd-dc62f4ae32cf/primary-1773896990541.jpg",
+      "image_sha256": "12664f36ed9c9f254f8e16388a37eb647be1107140036b0414dcf75819ffcd43"
+    },
+    {
+      "rug_id": "152ced71-346e-4330-8692-9ab048c4c205",
+      "path": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5/152ced71-346e-4330-8692-9ab048c4c205/primary-1773896992766.jpg",
+      "image_sha256": "a3a284c420e707d002fd5248576cc4c45ccac73fa792406c9396a5d428c9060a"
+    },
+    {
+      "rug_id": "3c6f0d33-057f-470b-819d-32c880f1adf2",
+      "path": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5/3c6f0d33-057f-470b-819d-32c880f1adf2/primary-1773896995928.jpg",
+      "image_sha256": "9e42385d0a57316c8f52db9941d7a64225bdf5d8a69bcacc59cf9ee5913fd6d9"
+    },
+    {
+      "rug_id": "774a204d-75b2-4712-9324-4fd6d6238dc4",
+      "path": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5/774a204d-75b2-4712-9324-4fd6d6238dc4/primary-1773896997825.jpg",
+      "image_sha256": "637265115abd46d644faf76e1ad8ad39ddf9d0c709ea9edba3bec65480160112"
+    },
+    {
+      "rug_id": "eb51b364-4c72-4577-9164-e94d903dd5ab",
+      "path": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5/eb51b364-4c72-4577-9164-e94d903dd5ab/primary-1773897001565.jpg",
+      "image_sha256": "57d4f545b6c9d58d7ec0992bb8f93be9c98559be531e10771d1a76c52b0584f3"
+    },
+    {
+      "rug_id": "9a16dda2-e138-4deb-896f-53e6052efbcb",
+      "path": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5/9a16dda2-e138-4deb-896f-53e6052efbcb/primary-1773897003708.jpg",
+      "image_sha256": "333f1544495d61fe5ed483e40c5421343c6ead98a20c4bad9daf5920ba598863"
+    },
+    {
+      "rug_id": "a510549a-8400-44f1-bb44-a33825152917",
+      "path": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5/a510549a-8400-44f1-bb44-a33825152917/primary-1773897006303.jpg",
+      "image_sha256": "68a48d2007d5a3ed64dd8d70045ee94f95fc5a1377aac9f0abc32554556379e7"
+    },
+    {
+      "rug_id": "ddcb9ad3-2cb3-4a68-8f29-046b99c17fe7",
+      "path": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5/ddcb9ad3-2cb3-4a68-8f29-046b99c17fe7/primary-1773897008085.jpg",
+      "image_sha256": "a2e1a76cffd8a03fe02566b6cf4bf8b360496bdb47e0750b88674d647457aa13"
+    },
+    {
+      "rug_id": "d78527be-0d60-4599-a5f3-65d6edc5b444",
+      "path": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5/d78527be-0d60-4599-a5f3-65d6edc5b444/primary-1773897011456.jpg",
+      "image_sha256": "f5b831ae343c5ddeca6aeb731a0d65ca731797e76622d4f433bb181eb9d2fcf6"
+    },
+    {
+      "rug_id": "bbfbf03f-8d6e-4601-89f7-03348067ef9e",
+      "path": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5/bbfbf03f-8d6e-4601-89f7-03348067ef9e/primary-1773897012870.jpg",
+      "image_sha256": "a290803d5fc5196502ad6d8f71190688a96d9e444c9e52b4c45aada32d0ba472"
+    },
+    {
+      "rug_id": "fdda9820-3179-457a-80c7-db92b8b87a0b",
+      "path": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5/fdda9820-3179-457a-80c7-db92b8b87a0b/primary-1773897016186.jpg",
+      "image_sha256": "41bfa50171781b989ce15510c301982eb2ba7eec787ee21812f2522349a56c2e"
+    },
+    {
+      "rug_id": "ee49964f-503a-4c52-a5e3-93385177e73c",
+      "path": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5/ee49964f-503a-4c52-a5e3-93385177e73c/primary-1773897017671.jpg",
+      "image_sha256": "2d3fe8e5bd04167dec524df274f369a2b35c30d3b5bd21daed62837c4c320828"
+    },
+    {
+      "rug_id": "72f68c2a-f001-4c58-b0d8-cb5d9d0a2dc3",
+      "path": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5/72f68c2a-f001-4c58-b0d8-cb5d9d0a2dc3/primary-1773897021099.jpg",
+      "image_sha256": "5397120678d8086943e1887e9e20573ba6b9927b670fd4beb41e2762e487c326"
+    },
+    {
+      "rug_id": "7dae74f4-72f4-48d4-93e8-387f60984146",
+      "path": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5/7dae74f4-72f4-48d4-93e8-387f60984146/primary-1773897022761.jpg",
+      "image_sha256": "0ef73f66c679c610720a77ec3ce9b2129fc9013f70429fde4498cc76bf9bba6a"
+    },
+    {
+      "rug_id": "71f6d60d-811f-4188-80ec-7eb8cea84ca7",
+      "path": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5/71f6d60d-811f-4188-80ec-7eb8cea84ca7/primary-1773897025392.jpg",
+      "image_sha256": "af9857f9a23f4142c11be29a9a1d80536808d031b6673cf28940a166afe25099"
+    },
+    {
+      "rug_id": "3a00f1b2-1a48-4d07-aaec-79cd5bb7cb8a",
+      "path": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5/3a00f1b2-1a48-4d07-aaec-79cd5bb7cb8a/primary-1773897028079.jpg",
+      "image_sha256": "893226a3ba3e42284a1c1a5dd4e10655c70d7d3be8ee6fe06b375cec7b35d9a3"
+    },
+    {
+      "rug_id": "619f6e1f-ad7b-4475-8324-8d285ff581de",
+      "path": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5/619f6e1f-ad7b-4475-8324-8d285ff581de/primary-1773897030775.jpg",
+      "image_sha256": "07a20818df0fdf3523b0a68fd32cb1167ba93f5396653b915f92cf03858427b2"
+    },
+    {
+      "rug_id": "c6816922-fdc6-4e35-8a2d-50a1934cc63b",
+      "path": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5/c6816922-fdc6-4e35-8a2d-50a1934cc63b/primary-1773897032178.jpg",
+      "image_sha256": "5a791174b74f66a740f87661adba3eac258f8b1e8092448ab128be97829d0c02"
+    },
+    {
+      "rug_id": "60a0bef9-857a-4b32-b36a-96f3358fb9c8",
+      "path": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5/60a0bef9-857a-4b32-b36a-96f3358fb9c8/primary-1773897035950.jpg",
+      "image_sha256": "2e5f12b061356a64e7c29d9f808598ea21c10bf84145fd32884e73bd67ad148f"
+    },
+    {
+      "rug_id": "afc4dfdd-2d05-4be8-bb0b-391d38aef528",
+      "path": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5/afc4dfdd-2d05-4be8-bb0b-391d38aef528/primary-1773897037425.jpg",
+      "image_sha256": "3662597f84b409ee64eae23afe9335a3c6c8edd706cabf463aa876cc98c09f8a"
+    },
+    {
+      "rug_id": "964cdd12-b53f-4aaf-a9d6-e6b3e21789fa",
+      "path": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5/964cdd12-b53f-4aaf-a9d6-e6b3e21789fa/primary-1773897040858.jpg",
+      "image_sha256": "3cc796242f5d4b7993eb596a95f2a8d172f5f57271ef8e456c8869a6753d77cf"
+    },
+    {
+      "rug_id": "89ee3f0b-1df6-4525-8984-7543c1cf2764",
+      "path": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5/89ee3f0b-1df6-4525-8984-7543c1cf2764/primary-1773897044869.jpg",
+      "image_sha256": "4fa277ec0be6e5abae3af738b4809411e2373f6db764da3ba643bba0ddd2101a"
+    },
+    {
+      "rug_id": "38e220e3-cbfb-41ba-9368-67d0d216d345",
+      "path": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5/38e220e3-cbfb-41ba-9368-67d0d216d345/primary-1773896971385.jpg",
+      "image_sha256": "d277c005161977d91130f6cbd3a0ab2316a79b36ce4e3fe6b542c0eaac370bc3"
+    },
+    {
+      "rug_id": "c79e2a90-bde3-4ce9-b5ef-d5293da3368a",
+      "path": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5/c79e2a90-bde3-4ce9-b5ef-d5293da3368a/primary-1773896976634.jpg",
+      "image_sha256": "b4276e428f137b5ba978e60be7ff77c49f485541b8c5d7f53f9056671079a651"
+    },
+    {
+      "rug_id": "fcf67904-21af-40e5-849a-8d6b6ccd5f64",
+      "path": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5/fcf67904-21af-40e5-849a-8d6b6ccd5f64/primary-1773896985124.jpg",
+      "image_sha256": "49fc882be2d9eee2c7171fd817e08e63cfe821d3a21ff85333476b7cf17226b2"
+    },
+    {
+      "rug_id": "79accdfd-bfde-4c0d-8f1a-a63c5d40ed7f",
+      "path": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5/79accdfd-bfde-4c0d-8f1a-a63c5d40ed7f/primary-1773896989287.jpg",
+      "image_sha256": "b1c7ff8fa511d55ee2235c4d5aa9c606a04dd846223b846413a77044738b6378"
+    },
+    {
+      "rug_id": "4ee131b5-f56d-4ffc-97e1-a8e725d2ff41",
+      "path": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5/4ee131b5-f56d-4ffc-97e1-a8e725d2ff41/primary-1773896994517.jpg",
+      "image_sha256": "d34e6c9b3d3cce17ae65e1248381efe6e95ccd2737c4e83ad943609324a4d6d5"
+    },
+    {
+      "rug_id": "31fff2b4-1d9e-4755-b98e-66f3b48db89f",
+      "path": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5/31fff2b4-1d9e-4755-b98e-66f3b48db89f/primary-1773896999606.jpg",
+      "image_sha256": "c47b437a21e946270524122c034ed68472a63c8ca3c6c76587c819b48474ae6a"
+    },
+    {
+      "rug_id": "072613a4-99df-4a9e-9b81-ec06ef3f34ae",
+      "path": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5/072613a4-99df-4a9e-9b81-ec06ef3f34ae/primary-1773897004907.jpg",
+      "image_sha256": "9ad4204f3bf8ccfe25d9cc26de97eb72fbb4ce91a8a07166760df35b472c9f6f"
+    },
+    {
+      "rug_id": "4ed505b2-a6fe-4521-a95b-bde93da0f814",
+      "path": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5/4ed505b2-a6fe-4521-a95b-bde93da0f814/primary-1773897009879.jpg",
+      "image_sha256": "b92a8bafbfb87f553e1b779c5800148e8975dda8fb1dbd1c9c8de115ca238f16"
+    },
+    {
+      "rug_id": "6608fe19-bd83-49da-82af-c8a955d540f8",
+      "path": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5/6608fe19-bd83-49da-82af-c8a955d540f8/primary-1773897014787.jpg",
+      "image_sha256": "46ddeaf0d68181eebc36a0214bcc254531a930562a7b476786034a57640da789"
+    },
+    {
+      "rug_id": "5a0b5f72-11b4-40fc-96c9-73b190413b3c",
+      "path": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5/5a0b5f72-11b4-40fc-96c9-73b190413b3c/primary-1773897018942.jpg",
+      "image_sha256": "c5afd98e91862592d2f1c0eb38d26890e029f3feb812137266173ee4ab16e564"
+    },
+    {
+      "rug_id": "04920e63-7c2d-4d89-9c13-bcf1fead4e96",
+      "path": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5/04920e63-7c2d-4d89-9c13-bcf1fead4e96/primary-1773897023798.jpg",
+      "image_sha256": "a19d483e6476579519049ca9983d2ac488de711d56e9b0b8ed7f57633afd255c"
+    },
+    {
+      "rug_id": "25f8bb84-16f8-477d-9894-96c8410e616a",
+      "path": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5/25f8bb84-16f8-477d-9894-96c8410e616a/primary-1773897029370.jpg",
+      "image_sha256": "8c8f4076a2a318f476c3012269572e5e21ed57b4788e30a9b4978c72bb8e1080"
+    },
+    {
+      "rug_id": "725e2fce-a3f0-4a14-ad27-d6ff38ce65c5",
+      "path": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5/725e2fce-a3f0-4a14-ad27-d6ff38ce65c5/primary-1773897034339.png",
+      "image_sha256": "e16157d17ab94f73fbfa027aee8ca325bac21b001dc3f8c2c934d503e5cf3d9e"
+    },
+    {
+      "rug_id": "16775754-376e-4d34-8bed-955f1f551d59",
+      "path": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5/16775754-376e-4d34-8bed-955f1f551d59/primary-1773897039060.jpg",
+      "image_sha256": "182f87b52b1b251442e84cdafdf1d74c80f5cb5436e532074068b1e4b9dfc100"
+    },
+    {
+      "rug_id": "c867ab96-d50c-416c-97e2-d91896b52d46",
+      "path": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5/c867ab96-d50c-416c-97e2-d91896b52d46/primary-1773897043062.jpg",
+      "image_sha256": "5c485cdc137202b80b497b528ae7b8e73be4cdc095cc050ca62ca46b385df5d3"
+    },
+    {
+      "rug_id": "f8c82de9-c831-4468-82ce-841353e3bc70",
+      "path": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5/f8c82de9-c831-4468-82ce-841353e3bc70/primary-1773897046596.jpg",
+      "image_sha256": "534b68e3a67ffc2cb2fd9d3c6fc114ec720814528e2a5464a7563ac971c144a1"
+    },
+    {
+      "rug_id": "dd56dada-6f55-427c-86a9-683feaa391d8",
+      "path": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5/dd56dada-6f55-427c-86a9-683feaa391d8/primary-1773897048455.jpg",
+      "image_sha256": "338df096b676ec3f86c02d726e6a78a0f94c49be010f122a422cf71bba7bfe28"
+    },
+    {
+      "rug_id": "219cf1a9-a3bc-4031-9d09-08275b1bcd03",
+      "path": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5/219cf1a9-a3bc-4031-9d09-08275b1bcd03/primary-1773897050649.jpg",
+      "image_sha256": "8723b01023b78847223a11719a75fa71809ea5dbb9e8f57f8711b82b4fc2ec41"
+    },
+    {
+      "rug_id": "f0ddcc5c-331d-4e91-b509-de8d3ed3060d",
+      "path": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5/f0ddcc5c-331d-4e91-b509-de8d3ed3060d/primary-1773897052023.jpg",
+      "image_sha256": "330ad06e29a4aeebf210b01e775b4f6412df52e8ee28c61723bcd5e3f0318396"
+    },
+    {
+      "rug_id": "d5fd2795-90d6-4bcc-b210-8f930cf437f7",
+      "path": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5/d5fd2795-90d6-4bcc-b210-8f930cf437f7/primary-1773897053720.jpg",
+      "image_sha256": "a32d6bcf3c09f6d56d7e33af982435530de17a0f4cf0e6ac6f2f4ef7b2c520d4"
+    },
+    {
+      "rug_id": "8611b5b5-3667-48ef-9f14-5ea39e1bd898",
+      "path": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5/8611b5b5-3667-48ef-9f14-5ea39e1bd898/primary-1773897055865.jpg",
+      "image_sha256": "87e426f50816e3ff0f6214b8807dea64e46a779419391d5ea548ed548b3a9648"
+    },
+    {
+      "rug_id": "4938fb36-0cc9-4b80-9854-5719fe88d54d",
+      "path": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5/4938fb36-0cc9-4b80-9854-5719fe88d54d/primary-1773897058167.jpg",
+      "image_sha256": "370a361dac2aeaf8ab0aa6cdb5863d5a89c53f8ec856805a3dcf6c2b7be1d525"
+    },
+    {
+      "rug_id": "6a38559b-e5f4-4dee-866f-59960365afe7",
+      "path": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5/6a38559b-e5f4-4dee-866f-59960365afe7/primary-1773897060585.jpg",
+      "image_sha256": "59e2e882f4230335a883e2c5b8945ee3b5f5a1241f70c28f568a39ade13d10d9"
+    },
+    {
+      "rug_id": "a1cd5327-87bb-4d38-9c27-bd0cfa77997e",
+      "path": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5/a1cd5327-87bb-4d38-9c27-bd0cfa77997e/primary-1773897063255.jpg",
+      "image_sha256": "822fdefc4c045c25490256c7ef89a5b9736d6460f1964eed16c571f5577e338a"
+    },
+    {
+      "rug_id": "ba185ef7-80a0-4063-ad99-49308c2b5e37",
+      "path": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5/ba185ef7-80a0-4063-ad99-49308c2b5e37/primary-1773897066855.jpg",
+      "image_sha256": "b3ba77ce7380c17c02299eadbd137ad613c8091720c6693341af6b9c94614016"
+    },
+    {
+      "rug_id": "e9ff3be8-8dd9-4594-a366-48450574c46d",
+      "path": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5/e9ff3be8-8dd9-4594-a366-48450574c46d/primary-1773897068352.jpg",
+      "image_sha256": "7dd6206ac89bb6c9bbb6cecc99b118aa32a27e549ea3878ac0c54b744ddb35e0"
+    },
+    {
+      "rug_id": "3dba9653-0fd2-4886-afba-c626292dac0b",
+      "path": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5/3dba9653-0fd2-4886-afba-c626292dac0b/primary-1773897070507.jpg",
+      "image_sha256": "c307acdcf7200609f3b54999f3ddff023870defea56b59776e98cc098b2b17f2"
+    },
+    {
+      "rug_id": "0bd821a0-bda4-4077-8388-673edc5b823d",
+      "path": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5/0bd821a0-bda4-4077-8388-673edc5b823d/primary-1773897071928.jpg",
+      "image_sha256": "373ff5dd91f0dd4734372b2a1d6fd9fef7aa8d3252d9aa8ac6fa36b82603f564"
+    },
+    {
+      "rug_id": "3f8a48f4-d50c-4a06-b94a-7631d2d83643",
+      "path": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5/3f8a48f4-d50c-4a06-b94a-7631d2d83643/primary-1773897073438.jpg",
+      "image_sha256": "421ba80c5413e981aa9d0b492e3060088b1f5a7cad6e9ba97dca57a021eba4bd"
+    },
+    {
+      "rug_id": "fce52827-2f29-4a48-a09a-00192212b200",
+      "path": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5/fce52827-2f29-4a48-a09a-00192212b200/primary-1773897075804.jpg",
+      "image_sha256": "7ff28b81ef37eacbbe7f10701257c7ba36946660b469dd25d96518fd7c4c095b"
+    }
+  ],
+  "jobs": [
+    {
+      "rug_id": "fce52827-2f29-4a48-a09a-00192212b200",
+      "state": "needs_review",
+      "attempt_count": 0,
+      "max_attempts": 3,
+      "next_attempt_at": null,
+      "last_error": "Structured output incomplete for deterministic title."
+    },
+    {
+      "rug_id": "bbfbf03f-8d6e-4601-89f7-03348067ef9e",
+      "state": "completed",
+      "attempt_count": 0,
+      "max_attempts": 3,
+      "next_attempt_at": null,
+      "last_error": null
+    },
+    {
+      "rug_id": "6608fe19-bd83-49da-82af-c8a955d540f8",
+      "state": "completed",
+      "attempt_count": 0,
+      "max_attempts": 3,
+      "next_attempt_at": null,
+      "last_error": null
+    },
+    {
+      "rug_id": "ee49964f-503a-4c52-a5e3-93385177e73c",
+      "state": "completed",
+      "attempt_count": 0,
+      "max_attempts": 3,
+      "next_attempt_at": null,
+      "last_error": null
+    },
+    {
+      "rug_id": "5a0b5f72-11b4-40fc-96c9-73b190413b3c",
+      "state": "completed",
+      "attempt_count": 0,
+      "max_attempts": 3,
+      "next_attempt_at": null,
+      "last_error": null
+    },
+    {
+      "rug_id": "7dae74f4-72f4-48d4-93e8-387f60984146",
+      "state": "completed",
+      "attempt_count": 0,
+      "max_attempts": 3,
+      "next_attempt_at": null,
+      "last_error": null
+    },
+    {
+      "rug_id": "04920e63-7c2d-4d89-9c13-bcf1fead4e96",
+      "state": "completed",
+      "attempt_count": 0,
+      "max_attempts": 3,
+      "next_attempt_at": null,
+      "last_error": null
+    },
+    {
+      "rug_id": "3a00f1b2-1a48-4d07-aaec-79cd5bb7cb8a",
+      "state": "completed",
+      "attempt_count": 0,
+      "max_attempts": 3,
+      "next_attempt_at": null,
+      "last_error": null
+    },
+    {
+      "rug_id": "25f8bb84-16f8-477d-9894-96c8410e616a",
+      "state": "completed",
+      "attempt_count": 0,
+      "max_attempts": 3,
+      "next_attempt_at": null,
+      "last_error": null
+    },
+    {
+      "rug_id": "c6816922-fdc6-4e35-8a2d-50a1934cc63b",
+      "state": "completed",
+      "attempt_count": 0,
+      "max_attempts": 3,
+      "next_attempt_at": null,
+      "last_error": null
+    },
+    {
+      "rug_id": "725e2fce-a3f0-4a14-ad27-d6ff38ce65c5",
+      "state": "completed",
+      "attempt_count": 0,
+      "max_attempts": 3,
+      "next_attempt_at": null,
+      "last_error": null
+    },
+    {
+      "rug_id": "afc4dfdd-2d05-4be8-bb0b-391d38aef528",
+      "state": "completed",
+      "attempt_count": 0,
+      "max_attempts": 3,
+      "next_attempt_at": null,
+      "last_error": null
+    },
+    {
+      "rug_id": "16775754-376e-4d34-8bed-955f1f551d59",
+      "state": "completed",
+      "attempt_count": 0,
+      "max_attempts": 3,
+      "next_attempt_at": null,
+      "last_error": null
+    },
+    {
+      "rug_id": "89ee3f0b-1df6-4525-8984-7543c1cf2764",
+      "state": "completed",
+      "attempt_count": 0,
+      "max_attempts": 3,
+      "next_attempt_at": null,
+      "last_error": null
+    },
+    {
+      "rug_id": "219cf1a9-a3bc-4031-9d09-08275b1bcd03",
+      "state": "needs_review",
+      "attempt_count": 0,
+      "max_attempts": 3,
+      "next_attempt_at": null,
+      "last_error": "Structured output incomplete for deterministic title."
+    },
+    {
+      "rug_id": "8611b5b5-3667-48ef-9f14-5ea39e1bd898",
+      "state": "needs_review",
+      "attempt_count": 0,
+      "max_attempts": 3,
+      "next_attempt_at": null,
+      "last_error": "Structured output incomplete for deterministic title."
+    },
+    {
+      "rug_id": "a1cd5327-87bb-4d38-9c27-bd0cfa77997e",
+      "state": "needs_review",
+      "attempt_count": 0,
+      "max_attempts": 3,
+      "next_attempt_at": null,
+      "last_error": "Structured output incomplete for deterministic title."
+    },
+    {
+      "rug_id": "78ed416f-8067-45d6-b541-7bce5ab0f6f6",
+      "state": "completed",
+      "attempt_count": 0,
+      "max_attempts": 3,
+      "next_attempt_at": null,
+      "last_error": null
+    },
+    {
+      "rug_id": "38e220e3-cbfb-41ba-9368-67d0d216d345",
+      "state": "completed",
+      "attempt_count": 0,
+      "max_attempts": 3,
+      "next_attempt_at": null,
+      "last_error": null
+    },
+    {
+      "rug_id": "20950889-56f4-4a4c-9ae0-8d3388ee7a48",
+      "state": "completed",
+      "attempt_count": 0,
+      "max_attempts": 3,
+      "next_attempt_at": null,
+      "last_error": null
+    },
+    {
+      "rug_id": "3dba9653-0fd2-4886-afba-c626292dac0b",
+      "state": "needs_review",
+      "attempt_count": 0,
+      "max_attempts": 3,
+      "next_attempt_at": null,
+      "last_error": "Structured output incomplete for deterministic title."
+    },
+    {
+      "rug_id": "c79e2a90-bde3-4ce9-b5ef-d5293da3368a",
+      "state": "completed",
+      "attempt_count": 0,
+      "max_attempts": 3,
+      "next_attempt_at": null,
+      "last_error": null
+    },
+    {
+      "rug_id": "e4210a49-5203-4bad-98c2-48ea7ba1626e",
+      "state": "completed",
+      "attempt_count": 0,
+      "max_attempts": 3,
+      "next_attempt_at": null,
+      "last_error": null
+    },
+    {
+      "rug_id": "fcf67904-21af-40e5-849a-8d6b6ccd5f64",
+      "state": "completed",
+      "attempt_count": 0,
+      "max_attempts": 3,
+      "next_attempt_at": null,
+      "last_error": null
+    },
+    {
+      "rug_id": "569c3c3f-17a8-4dea-909e-bb484b9a3087",
+      "state": "completed",
+      "attempt_count": 0,
+      "max_attempts": 3,
+      "next_attempt_at": null,
+      "last_error": null
+    },
+    {
+      "rug_id": "79accdfd-bfde-4c0d-8f1a-a63c5d40ed7f",
+      "state": "completed",
+      "attempt_count": 0,
+      "max_attempts": 3,
+      "next_attempt_at": null,
+      "last_error": null
+    },
+    {
+      "rug_id": "152ced71-346e-4330-8692-9ab048c4c205",
+      "state": "completed",
+      "attempt_count": 0,
+      "max_attempts": 3,
+      "next_attempt_at": null,
+      "last_error": null
+    },
+    {
+      "rug_id": "4ee131b5-f56d-4ffc-97e1-a8e725d2ff41",
+      "state": "completed",
+      "attempt_count": 0,
+      "max_attempts": 3,
+      "next_attempt_at": null,
+      "last_error": null
+    },
+    {
+      "rug_id": "774a204d-75b2-4712-9324-4fd6d6238dc4",
+      "state": "completed",
+      "attempt_count": 0,
+      "max_attempts": 3,
+      "next_attempt_at": null,
+      "last_error": null
+    },
+    {
+      "rug_id": "31fff2b4-1d9e-4755-b98e-66f3b48db89f",
+      "state": "completed",
+      "attempt_count": 0,
+      "max_attempts": 3,
+      "next_attempt_at": null,
+      "last_error": null
+    },
+    {
+      "rug_id": "9a16dda2-e138-4deb-896f-53e6052efbcb",
+      "state": "completed",
+      "attempt_count": 0,
+      "max_attempts": 3,
+      "next_attempt_at": null,
+      "last_error": null
+    },
+    {
+      "rug_id": "072613a4-99df-4a9e-9b81-ec06ef3f34ae",
+      "state": "completed",
+      "attempt_count": 0,
+      "max_attempts": 3,
+      "next_attempt_at": null,
+      "last_error": null
+    },
+    {
+      "rug_id": "ddcb9ad3-2cb3-4a68-8f29-046b99c17fe7",
+      "state": "completed",
+      "attempt_count": 0,
+      "max_attempts": 3,
+      "next_attempt_at": null,
+      "last_error": null
+    },
+    {
+      "rug_id": "4ed505b2-a6fe-4521-a95b-bde93da0f814",
+      "state": "completed",
+      "attempt_count": 0,
+      "max_attempts": 3,
+      "next_attempt_at": null,
+      "last_error": null
+    },
+    {
+      "rug_id": "d78527be-0d60-4599-a5f3-65d6edc5b444",
+      "state": "completed",
+      "attempt_count": 0,
+      "max_attempts": 3,
+      "next_attempt_at": null,
+      "last_error": null
+    },
+    {
+      "rug_id": "e9ff3be8-8dd9-4594-a366-48450574c46d",
+      "state": "needs_review",
+      "attempt_count": 0,
+      "max_attempts": 3,
+      "next_attempt_at": null,
+      "last_error": "Structured output incomplete for deterministic title."
+    },
+    {
+      "rug_id": "fdda9820-3179-457a-80c7-db92b8b87a0b",
+      "state": "completed",
+      "attempt_count": 0,
+      "max_attempts": 3,
+      "next_attempt_at": null,
+      "last_error": null
+    },
+    {
+      "rug_id": "0bd821a0-bda4-4077-8388-673edc5b823d",
+      "state": "needs_review",
+      "attempt_count": 0,
+      "max_attempts": 3,
+      "next_attempt_at": null,
+      "last_error": "Structured output incomplete for deterministic title."
+    },
+    {
+      "rug_id": "3f8a48f4-d50c-4a06-b94a-7631d2d83643",
+      "state": "needs_review",
+      "attempt_count": 0,
+      "max_attempts": 3,
+      "next_attempt_at": null,
+      "last_error": "Structured output incomplete for deterministic title."
+    },
+    {
+      "rug_id": "72f68c2a-f001-4c58-b0d8-cb5d9d0a2dc3",
+      "state": "completed",
+      "attempt_count": 0,
+      "max_attempts": 3,
+      "next_attempt_at": null,
+      "last_error": null
+    },
+    {
+      "rug_id": "71f6d60d-811f-4188-80ec-7eb8cea84ca7",
+      "state": "completed",
+      "attempt_count": 0,
+      "max_attempts": 3,
+      "next_attempt_at": null,
+      "last_error": null
+    },
+    {
+      "rug_id": "619f6e1f-ad7b-4475-8324-8d285ff581de",
+      "state": "completed",
+      "attempt_count": 0,
+      "max_attempts": 3,
+      "next_attempt_at": null,
+      "last_error": null
+    },
+    {
+      "rug_id": "60a0bef9-857a-4b32-b36a-96f3358fb9c8",
+      "state": "completed",
+      "attempt_count": 0,
+      "max_attempts": 3,
+      "next_attempt_at": null,
+      "last_error": null
+    },
+    {
+      "rug_id": "964cdd12-b53f-4aaf-a9d6-e6b3e21789fa",
+      "state": "completed",
+      "attempt_count": 0,
+      "max_attempts": 3,
+      "next_attempt_at": null,
+      "last_error": null
+    },
+    {
+      "rug_id": "c867ab96-d50c-416c-97e2-d91896b52d46",
+      "state": "completed",
+      "attempt_count": 0,
+      "max_attempts": 3,
+      "next_attempt_at": null,
+      "last_error": null
+    },
+    {
+      "rug_id": "f8c82de9-c831-4468-82ce-841353e3bc70",
+      "state": "completed",
+      "attempt_count": 0,
+      "max_attempts": 3,
+      "next_attempt_at": null,
+      "last_error": null
+    },
+    {
+      "rug_id": "dd56dada-6f55-427c-86a9-683feaa391d8",
+      "state": "completed",
+      "attempt_count": 0,
+      "max_attempts": 3,
+      "next_attempt_at": null,
+      "last_error": null
+    },
+    {
+      "rug_id": "f0ddcc5c-331d-4e91-b509-de8d3ed3060d",
+      "state": "completed",
+      "attempt_count": 0,
+      "max_attempts": 3,
+      "next_attempt_at": null,
+      "last_error": null
+    },
+    {
+      "rug_id": "8e80938f-fa4b-465f-a669-39176543ac9a",
+      "state": "completed",
+      "attempt_count": 0,
+      "max_attempts": 3,
+      "next_attempt_at": null,
+      "last_error": null
+    },
+    {
+      "rug_id": "8d3fceb3-2cad-4822-82c2-3d0382a9fde9",
+      "state": "completed",
+      "attempt_count": 0,
+      "max_attempts": 3,
+      "next_attempt_at": null,
+      "last_error": null
+    },
+    {
+      "rug_id": "d5fd2795-90d6-4bcc-b210-8f930cf437f7",
+      "state": "completed",
+      "attempt_count": 0,
+      "max_attempts": 3,
+      "next_attempt_at": null,
+      "last_error": null
+    },
+    {
+      "rug_id": "87f5dfa1-7485-4d27-86b8-d7e9b71c0a34",
+      "state": "completed",
+      "attempt_count": 0,
+      "max_attempts": 3,
+      "next_attempt_at": null,
+      "last_error": null
+    },
+    {
+      "rug_id": "5455b60d-ad2c-4341-9f10-cd43e4a26b7d",
+      "state": "completed",
+      "attempt_count": 0,
+      "max_attempts": 3,
+      "next_attempt_at": null,
+      "last_error": null
+    },
+    {
+      "rug_id": "c898a77f-2575-41b2-95dd-dc62f4ae32cf",
+      "state": "completed",
+      "attempt_count": 0,
+      "max_attempts": 3,
+      "next_attempt_at": null,
+      "last_error": null
+    },
+    {
+      "rug_id": "4938fb36-0cc9-4b80-9854-5719fe88d54d",
+      "state": "needs_review",
+      "attempt_count": 0,
+      "max_attempts": 3,
+      "next_attempt_at": null,
+      "last_error": "Structured output incomplete for deterministic title."
+    },
+    {
+      "rug_id": "3c6f0d33-057f-470b-819d-32c880f1adf2",
+      "state": "completed",
+      "attempt_count": 0,
+      "max_attempts": 3,
+      "next_attempt_at": null,
+      "last_error": null
+    },
+    {
+      "rug_id": "eb51b364-4c72-4577-9164-e94d903dd5ab",
+      "state": "completed",
+      "attempt_count": 0,
+      "max_attempts": 3,
+      "next_attempt_at": null,
+      "last_error": null
+    },
+    {
+      "rug_id": "6a38559b-e5f4-4dee-866f-59960365afe7",
+      "state": "needs_review",
+      "attempt_count": 0,
+      "max_attempts": 3,
+      "next_attempt_at": null,
+      "last_error": "Structured output incomplete for deterministic title."
+    },
+    {
+      "rug_id": "a510549a-8400-44f1-bb44-a33825152917",
+      "state": "completed",
+      "attempt_count": 0,
+      "max_attempts": 3,
+      "next_attempt_at": null,
+      "last_error": null
+    },
+    {
+      "rug_id": "ba185ef7-80a0-4063-ad99-49308c2b5e37",
+      "state": "needs_review",
+      "attempt_count": 0,
+      "max_attempts": 3,
+      "next_attempt_at": null,
+      "last_error": "Structured output incomplete for deterministic title."
+    }
+  ]
+}

@@ -18,6 +18,7 @@ Minimum critical values:
 - OpenAI key
 - `TENANT_ID`
 - `STORE_PASSCODE` (if staff gate enabled)
+- `CRON_SECRET` (required for `/api/inventory/enrichment/worker`)
 - fallback branding env vars (`STORE_NAME`, `STORE_LOGO_URL`) optional
 
 ## 3) Deploy
@@ -39,8 +40,9 @@ Minimum critical values:
 
 ## 5) Intake + Detail Validation
 
-1. `POST /api/inventory/intake` returns quickly with `ai_status: "processing"`.
-2. After processing, rug row has non-null `ai_description` and `ai_structured_fields`.
+1. `POST /api/inventory/intake` returns quickly with `ai_status: "processing"` and `enrichment_status: "processing"`.
+2. Worker cron (`/api/inventory/enrichment/worker`) drains queue and resolves rugs to `ready` or `needs_review`.
+3. After processing, `ready` rugs have deterministic title + structured fields.
 3. `GET /api/rugs/{id}` returns `effective_fields`, `size_display`, and image URL.
 4. Confirm retail payloads expose only retail-safe fields (no raw staff override internals).
 

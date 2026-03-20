@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse, after } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { rugImagePathToPublicUrl } from "@/lib/storage/rug-images";
 import { badRequest, internalError } from "@/lib/errors/http-errors";
@@ -12,16 +12,17 @@ import {
   validateImageFile,
 } from "@/lib/intake/validation";
 import { isStaffUnlockedFromRequest } from "@/lib/auth/staff";
-import { requestVisionEnrichment } from "@/lib/inventory/vision-enrichment";
-import {
-  buildTradeTitle,
-  sanitizeFallbackTradeLabel,
-} from "@/lib/inventory/title-builder";
 import {
   checkLocalRateLimit,
   checkRateLimit,
   inventoryWriteRateLimit,
 } from "@/lib/rate-limit";
+import {
+  deriveRugLabelForDuplicate,
+  enqueueInventoryEnrichmentJob,
+} from "@/lib/inventory/enrichment-jobs";
+import { hashBytesSha256 } from "@/lib/inventory/image-hash";
+import { fetchRugRecordById } from "@/lib/inventory/rug-record";
 
 const RUG_IMAGES_BUCKET = "rug-images";
 
@@ -48,13 +49,9 @@ function buildStoragePath(tenantId: string, rugId: string, image: File): string 
   return `${tenantId}/${rugId}/primary-${Date.now()}.${ext}`;
 }
 
-function parseStockIdField(value: FormDataEntryValue | null): {
-  ok: true;
-  value: string | null;
-} | {
-  ok: false;
-  error: string;
-} {
+function parseStockIdField(value: FormDataEntryValue | null):
+  | { ok: true; value: string | null }
+  | { ok: false; error: string } {
   if (value === null || value === undefined) {
     return { ok: true, value: null };
   }
@@ -150,69 +147,52 @@ async function cleanupFailedWrite(input: {
   }
 }
 
-async function applyFallbackLabel(input: { tenantId: string; rugId: string }) {
-  await supabaseAdmin
-    .from("rugs")
-    .update({
-      intake_label: `Rug ${input.rugId.slice(0, 6)}`,
-      ai_description: null,
-      ai_structured_fields: null,
-    })
-    .eq("tenant_id", input.tenantId)
-    .eq("id", input.rugId);
-}
-
-async function runVisionEnrichment(input: {
+async function findExistingRugByImageHash(input: {
   tenantId: string;
-  rugId: string;
-  imageUrl: string;
-  widthTotalIn: number;
-  lengthTotalIn: number;
-}) {
-  const enrichment = await requestVisionEnrichment({
-    imageUrl: input.imageUrl,
-    widthTotalIn: input.widthTotalIn,
-    lengthTotalIn: input.lengthTotalIn,
-  });
-
-  if (!enrichment) {
-    await applyFallbackLabel({ tenantId: input.tenantId, rugId: input.rugId });
-    return;
-  }
-
-  const computedTradeTitle = buildTradeTitle({
-    aiFields: enrichment.aiStructuredFields,
-    widthTotalIn: input.widthTotalIn,
-    lengthTotalIn: input.lengthTotalIn,
-    fallbackLabel: enrichment.intakeLabel,
-  });
-  const safeFallbackTitle = sanitizeFallbackTradeLabel(enrichment.intakeLabel);
-
+  imageSha256: string;
+}): Promise<{ id: string; label: string | null } | null> {
   const result = await supabaseAdmin
-    .from("rugs")
-    .update({
-      intake_label: computedTradeTitle ?? safeFallbackTitle ?? "Gallery Rug",
-      ai_description: enrichment.aiDescription,
-      ai_structured_fields: enrichment.aiStructuredFields,
-    })
+    .from("rug_images")
+    .select("rug_id")
     .eq("tenant_id", input.tenantId)
-    .eq("id", input.rugId);
+    .eq("image_sha256", input.imageSha256)
+    .limit(1)
+    .maybeSingle();
 
   if (result.error) {
-    await applyFallbackLabel({ tenantId: input.tenantId, rugId: input.rugId });
+    return null;
   }
+
+  const rugId =
+    result.data && typeof result.data.rug_id === "string"
+      ? result.data.rug_id
+      : null;
+  if (!rugId) return null;
+
+  const rug = await fetchRugRecordById({
+    supabase: supabaseAdmin,
+    tenantId: input.tenantId,
+    id: rugId,
+  });
+
+  return {
+    id: rugId,
+    label: deriveRugLabelForDuplicate(rug),
+  };
 }
 
-function scheduleBackgroundTask(task: () => Promise<void>) {
-  try {
-    after(async () => {
-      await task();
-    });
-  } catch {
-    void task().catch((error) => {
-      console.error("[intake] background task failed", error);
-    });
-  }
+function duplicateImageResponse(input: { id: string; label: string | null }) {
+  return NextResponse.json(
+    {
+      error: "This photo matches a rug that already exists in inventory.",
+      code: "DUPLICATE_IMAGE",
+      existing_rug: {
+        id: input.id,
+        label: input.label,
+      },
+    },
+    { status: 409 }
+  );
 }
 
 export async function POST(req: NextRequest) {
@@ -255,6 +235,17 @@ export async function POST(req: NextRequest) {
     return badRequest("tenant_id is required.");
   }
 
+  const imageBuffer = Buffer.from(await parsed.value.image.arrayBuffer());
+  const imageSha256 = hashBytesSha256(imageBuffer);
+
+  const existingDuplicate = await findExistingRugByImageHash({
+    tenantId,
+    imageSha256,
+  });
+  if (existingDuplicate) {
+    return duplicateImageResponse(existingDuplicate);
+  }
+
   const rugId = crypto.randomUUID();
   const normalizedStockId =
     parsed.value.stockId ?? `AUTO-${rugId.slice(0, 8).toUpperCase()}`;
@@ -269,6 +260,8 @@ export async function POST(req: NextRequest) {
       intake_label: null,
       ai_description: null,
       ai_structured_fields: null,
+      enrichment_status: "processing",
+      review_reason_code: null,
       width_ft: parsed.value.widthFt,
       width_in: parsed.value.widthIn,
       length_ft: parsed.value.lengthFt,
@@ -282,8 +275,6 @@ export async function POST(req: NextRequest) {
   }
 
   const storagePath = buildStoragePath(tenantId, rugId, parsed.value.image);
-  const imageBuffer = Buffer.from(await parsed.value.image.arrayBuffer());
-
   const upload = await supabaseAdmin.storage
     .from(RUG_IMAGES_BUCKET)
     .upload(storagePath, imageBuffer, {
@@ -302,44 +293,43 @@ export async function POST(req: NextRequest) {
       tenant_id: tenantId,
       rug_id: rugId,
       path: storagePath,
+      image_sha256: imageSha256,
     })
     .select("rug_id")
     .single();
 
   if (imageInsert.error || !imageInsert.data) {
+    const duplicateAfterInsert = await findExistingRugByImageHash({
+      tenantId,
+      imageSha256,
+    });
+
     await cleanupFailedWrite({
       tenantId,
       rugId,
       storagePath,
     });
+
+    if (duplicateAfterInsert) {
+      return duplicateImageResponse(duplicateAfterInsert);
+    }
     return internalError("Unable to finalize intake image metadata.");
   }
 
-  const primaryImageUrl = rugImagePathToPublicUrl(supabaseAdmin, storagePath);
-
-  if (primaryImageUrl) {
-    scheduleBackgroundTask(async () => {
-      try {
-        await runVisionEnrichment({
-          tenantId,
-          rugId,
-          imageUrl: primaryImageUrl,
-          widthTotalIn: parsed.value.widthTotalIn,
-          lengthTotalIn: parsed.value.lengthTotalIn,
-        });
-      } catch (error) {
-        console.error("[intake] vision enrichment failed", {
-          tenant_id: tenantId,
-          rug_id: rugId,
-          error,
-        });
-      }
+  const enqueueResult = await enqueueInventoryEnrichmentJob({
+    tenantId,
+    rugId,
+  });
+  if (!enqueueResult.ok) {
+    await cleanupFailedWrite({
+      tenantId,
+      rugId,
+      storagePath,
     });
-  } else {
-    scheduleBackgroundTask(async () => {
-      await applyFallbackLabel({ tenantId, rugId });
-    });
+    return internalError("Unable to queue AI enrichment job.");
   }
+
+  const primaryImageUrl = rugImagePathToPublicUrl(supabaseAdmin, storagePath);
 
   return NextResponse.json({
     rug: {
@@ -350,6 +340,8 @@ export async function POST(req: NextRequest) {
       width_total_in: parsed.value.widthTotalIn,
       length_total_in: parsed.value.lengthTotalIn,
       status: "available",
+      enrichment_status: "processing",
+      review_reason_code: null,
       primary_image_url: primaryImageUrl,
     },
     ai_status: "processing",

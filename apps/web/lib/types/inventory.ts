@@ -1,3 +1,8 @@
+import type {
+  EnrichmentStatus,
+  ReviewReasonCode,
+} from "@/lib/inventory/enrichment-state";
+
 export type InventoryStatusFilter = "all" | "available" | "sold" | "on_hold";
 
 export type InventorySort = "newest" | "oldest";
@@ -86,6 +91,8 @@ export type InventoryBrowserRow = {
   staff_overrides: StaffOverrides | null;
   stock_id: string | null;
   status: string | null;
+  enrichment_status: EnrichmentStatus | null;
+  review_reason_code: ReviewReasonCode | null;
   width_total_in: number | null;
   length_total_in: number | null;
   ai_description: string | null;
@@ -113,6 +120,8 @@ export type StaffInventoryRugDetail = {
   effective_fields: EffectiveRugFields;
   stock_id: string | null;
   status: string | null;
+  enrichment_status: EnrichmentStatus | null;
+  review_reason_code: ReviewReasonCode | null;
   width_total_in: number | null;
   length_total_in: number | null;
   created_at: string | null;

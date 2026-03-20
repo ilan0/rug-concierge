@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Pencil } from "lucide-react";
 import { RugImage } from "@/components/ui/rug-image";
 import { StaffRugDetailModal } from "@/components/inventory/staff-rug-detail-modal";
+import { reviewReasonMessage } from "@/lib/inventory/enrichment-state";
 import type { InventoryBrowserRow } from "@/lib/types/inventory";
 import { formatRugSize } from "@/lib/utils/format";
 
@@ -52,21 +53,30 @@ export function StatusBadge({ status }: { status: string | null }) {
 
 function readiness(row: InventoryBrowserRow): {
   displayLabel: string;
-  ready: boolean;
+  enrichmentState: "processing" | "ready" | "needs_review";
+  reviewMessage: string | null;
   autoNamed: boolean;
 } {
   const sizeLabel = formatRugSize(row.width_total_in, row.length_total_in);
   const mergedLabel = row.effective_label?.trim() || row.intake_label?.trim() || null;
   const label = mergedLabel || sizeLabel || "Untitled";
-  const ready = Boolean(mergedLabel);
+  const enrichmentState =
+    row.enrichment_status ??
+    (mergedLabel ? "ready" : "processing");
+  const ready = enrichmentState === "ready";
   const hasStaffLabelOverride = Boolean(
     row.staff_overrides?.label && row.staff_overrides.label.trim().length > 0
   );
   const autoNamed = ready && /^rug\s+[a-f0-9-]{6,}$/i.test(label) && !hasStaffLabelOverride;
+  const reviewMessage =
+    enrichmentState === "needs_review"
+      ? reviewReasonMessage(row.review_reason_code)
+      : null;
 
   return {
     displayLabel: label,
-    ready,
+    enrichmentState,
+    reviewMessage,
     autoNamed,
   };
 }
@@ -92,7 +102,8 @@ export function InventoryTableClient({ rows }: InventoryTableClientProps) {
         <>
           <div className="space-y-3 md:hidden">
             {rows.map((row) => {
-              const { displayLabel, ready, autoNamed } = readiness(row);
+              const { displayLabel, enrichmentState, reviewMessage, autoNamed } =
+                readiness(row);
               return (
                 <article
                   key={row.id}
@@ -104,13 +115,24 @@ export function InventoryTableClient({ rows }: InventoryTableClientProps) {
                       <RugImage src={row.primary_image_url} alt={displayLabel} />
                     </div>
                     <div className="min-w-0 space-y-1">
-                      <p className={ready ? "text-lg font-semibold leading-tight" : "text-lg leading-tight text-muted-foreground"}>
+                      <p
+                        className={
+                          enrichmentState === "ready"
+                            ? "text-lg font-semibold leading-tight"
+                            : "text-lg leading-tight text-muted-foreground"
+                        }
+                      >
                         {displayLabel}
                       </p>
-                      {!ready ? (
+                      {enrichmentState === "processing" ? (
                         <p className="inline-flex items-center gap-1.5 text-xs text-amber-600">
                           <span className="size-2 rounded-full bg-amber-400" />
                           Processing...
+                        </p>
+                      ) : enrichmentState === "needs_review" ? (
+                        <p className="inline-flex items-center gap-1.5 text-xs text-red-700">
+                          <span className="size-2 rounded-full bg-red-500" />
+                          Needs Review
                         </p>
                       ) : autoNamed ? (
                         <button
@@ -123,6 +145,9 @@ export function InventoryTableClient({ rows }: InventoryTableClientProps) {
                         >
                           Auto-named
                         </button>
+                      ) : null}
+                      {enrichmentState === "needs_review" && reviewMessage ? (
+                        <p className="text-xs text-red-700">{reviewMessage}</p>
                       ) : null}
                     </div>
                   </div>
@@ -184,7 +209,8 @@ export function InventoryTableClient({ rows }: InventoryTableClientProps) {
               </thead>
               <tbody>
                 {rows.map((row) => {
-                  const { displayLabel, ready, autoNamed } = readiness(row);
+                  const { displayLabel, enrichmentState, reviewMessage, autoNamed } =
+                    readiness(row);
                   return (
                     <tr
                       key={row.id}
@@ -199,18 +225,28 @@ export function InventoryTableClient({ rows }: InventoryTableClientProps) {
                       <td className="p-3 align-top">
                         <p
                           className={
-                            ready
+                            enrichmentState === "ready"
                               ? "line-clamp-3 break-words font-medium leading-snug"
                               : "line-clamp-3 break-words leading-snug text-muted-foreground"
                           }
                         >
                           {displayLabel}
                         </p>
-                        {!ready ? (
+                        {enrichmentState === "processing" ? (
                           <p className="mt-1 inline-flex items-center gap-1.5 text-xs text-amber-600">
                             <span className="size-2 rounded-full bg-amber-400" />
                             Processing...
                           </p>
+                        ) : enrichmentState === "needs_review" ? (
+                          <>
+                            <p className="mt-1 inline-flex items-center gap-1.5 text-xs text-red-700">
+                              <span className="size-2 rounded-full bg-red-500" />
+                              Needs Review
+                            </p>
+                            {reviewMessage ? (
+                              <p className="mt-1 text-xs text-red-700">{reviewMessage}</p>
+                            ) : null}
+                          </>
                         ) : autoNamed ? (
                           <button
                             type="button"

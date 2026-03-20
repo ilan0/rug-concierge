@@ -696,6 +696,7 @@ async function runCandidateQuery(input: {
       .from("rugs")
       .select(selectColumns)
       .eq("status", "available")
+      .eq("enrichment_status", "ready")
       .order("created_at", { ascending: false, nullsFirst: false })
       .order("id", { ascending: false })
       .limit(input.limit);
@@ -719,9 +720,9 @@ async function runCandidateQuery(input: {
   };
 
   const selectCandidates = [
-    "id, tenant_id, intake_label, status, width_total_in, length_total_in, ai_description, ai_structured_fields, staff_overrides",
-    "id, tenant_id, intake_label, status, width_total_in, length_total_in, ai_description, ai_structured_fields",
-    "id, tenant_id, intake_label, status, width_total_in, length_total_in, ai_description",
+    "id, tenant_id, intake_label, status, enrichment_status, review_reason_code, width_total_in, length_total_in, ai_description, ai_structured_fields, staff_overrides",
+    "id, tenant_id, intake_label, status, enrichment_status, review_reason_code, width_total_in, length_total_in, ai_description, ai_structured_fields",
+    "id, tenant_id, intake_label, status, enrichment_status, review_reason_code, width_total_in, length_total_in, ai_description",
   ];
 
   let queryResult = await buildQuery(selectCandidates[0]);
@@ -738,6 +739,7 @@ async function runCandidateQuery(input: {
       filters: {
         tenant_id: input.tenantId,
         status: "available",
+        enrichment_status: "ready",
         limit: input.limit,
         size_bounds: bounds
           ? {
@@ -760,6 +762,7 @@ async function runCandidateQuery(input: {
     filters: {
       tenant_id: input.tenantId,
       status: "available",
+      enrichment_status: "ready",
       limit: input.limit,
       size_bounds: bounds
         ? {

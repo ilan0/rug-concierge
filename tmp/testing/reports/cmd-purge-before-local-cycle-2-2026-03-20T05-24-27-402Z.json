@@ -1,0 +1,17 @@
+{
+  "generated_at": "2026-03-20T05:24:31.367Z",
+  "cycle": 2,
+  "label": "purge-before-local",
+  "command": "npx",
+  "args": [
+    "tsx",
+    "scripts/purge-tenant-inventory.ts",
+    "--tenant-id=1f3d032b-8411-48a9-8a44-1f3cb9df67a5",
+    "--apply"
+  ],
+  "code": 0,
+  "ok": true,
+  "report_path": null,
+  "stdout": "{\n  \"generated_at\": \"2026-03-20T05:24:31.343Z\",\n  \"tenant_id\": \"1f3d032b-8411-48a9-8a44-1f3cb9df67a5\",\n  \"apply\": true,\n  \"storage_paths_found\": 60,\n  \"before\": {\n    \"rugs\": 60,\n    \"rug_images\": 60,\n    \"inventory_enrichment_jobs\": 60\n  },\n  \"after\": {\n    \"rugs\": 0,\n    \"rug_images\": 0,\n    \"inventory_enrichment_jobs\": 0\n  }\n}\n",
+  "stderr": ""
+}

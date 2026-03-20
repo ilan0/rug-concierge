@@ -1,15 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { supabaseAdmin } from "@/lib/supabase/admin";
-import { badRequest, internalError } from "@/lib/errors/http-errors";
+import { internalError } from "@/lib/errors/http-errors";
 import { isStaffUnlockedFromRequest } from "@/lib/auth/staff";
 import { resolveAuthoritativeTenantForServer } from "@/lib/auth/tenant";
-import { fetchPrimaryRugImagesForRugs } from "@/lib/storage/rug-images";
-import { requestVisionEnrichment } from "@/lib/inventory/vision-enrichment";
-import {
-  buildTradeTitle,
-  sanitizeFallbackTradeLabel,
-} from "@/lib/inventory/title-builder";
 import {
   checkLocalRateLimit,
   checkRateLimit,
@@ -19,7 +13,12 @@ import {
   fetchRugRecordById,
   toStaffInventoryRugDetail,
 } from "@/lib/inventory/rug-record";
+import { fetchPrimaryRugImagesForRugs } from "@/lib/storage/rug-images";
 import { parseRouteParamsWithSchema } from "@/lib/http/route-validation";
+import {
+  enqueueInventoryEnrichmentJob,
+  setRugProcessingState,
+} from "@/lib/inventory/enrichment-jobs";
 
 const RUG_ID_PARAMS_SCHEMA = z.object({ id: z.string().uuid() }).strict();
 
@@ -87,40 +86,19 @@ export async function POST(
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 
-  const image = await withPrimaryImage({ tenantId, rugId: params.value.id });
-  if (!image.primaryImageUrl) {
-    return badRequest("Rug does not have a primary image to analyze.");
-  }
-
-  const enrichment = await requestVisionEnrichment({
-    imageUrl: image.primaryImageUrl,
-    widthTotalIn: existing.width_total_in,
-    lengthTotalIn: existing.length_total_in,
+  await setRugProcessingState({
+    tenantId,
+    rugId: params.value.id,
+    supabase: supabaseAdmin,
   });
-  if (!enrichment) {
-    return internalError("Vision enrichment failed for this rug.");
-  }
 
-  const computedTradeTitle = buildTradeTitle({
-    aiFields: enrichment.aiStructuredFields,
-    widthTotalIn: existing.width_total_in,
-    lengthTotalIn: existing.length_total_in,
-    fallbackLabel: enrichment.intakeLabel,
+  const enqueueResult = await enqueueInventoryEnrichmentJob({
+    tenantId,
+    rugId: params.value.id,
+    supabase: supabaseAdmin,
   });
-  const safeFallbackTitle = sanitizeFallbackTradeLabel(enrichment.intakeLabel);
-
-  const updateResult = await supabaseAdmin
-    .from("rugs")
-    .update({
-      intake_label: computedTradeTitle ?? safeFallbackTitle ?? "Gallery Rug",
-      ai_description: enrichment.aiDescription,
-      ai_structured_fields: enrichment.aiStructuredFields,
-    })
-    .eq("tenant_id", tenantId)
-    .eq("id", params.value.id);
-
-  if (updateResult.error) {
-    return internalError("Unable to save enrichment result.");
+  if (!enqueueResult.ok) {
+    return internalError("Unable to queue AI enrichment job.");
   }
 
   const updatedRow = await fetchRugRecordById({

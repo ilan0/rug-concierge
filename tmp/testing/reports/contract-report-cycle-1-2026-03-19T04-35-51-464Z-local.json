@@ -1,0 +1,17 @@
+{
+  "generated_at": "2026-03-19T04:36:14.398Z",
+  "cycle": 1,
+  "label": "contract-local",
+  "command": "node",
+  "args": [
+    "tmp/testing/contract-suite.mjs",
+    "--base_url=http://127.0.0.1:4201",
+    "--skip_rate_limit=1",
+    "--report=/Users/ilannabatkhorian/Documents/rug-concierge/tmp/testing/reports/contract-report-cycle-1-2026-03-19T04-35-51-464Z-local.json"
+  ],
+  "code": 0,
+  "ok": true,
+  "report_path": "/Users/ilannabatkhorian/Documents/rug-concierge/tmp/testing/reports/contract-report-cycle-1-2026-03-19T04-35-51-464Z-local.json",
+  "stdout": "{\n  \"ok\": true,\n  \"report\": \"/Users/ilannabatkhorian/Documents/rug-concierge/tmp/testing/reports/contract-report-cycle-1-2026-03-19T04-35-51-464Z-local.json\",\n  \"summary\": {\n    \"total\": 11,\n    \"passed\": 11,\n    \"failed\": 0\n  }\n}\n",
+  "stderr": ""
+}

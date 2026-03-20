@@ -1,0 +1,221 @@
+{
+  "generated_at": "2026-03-19T03:08:40.918Z",
+  "passed": true,
+  "checks": [
+    {
+      "name": "canonical doc exists: docs/master-context.md",
+      "passed": true,
+      "details": "ok"
+    },
+    {
+      "name": "canonical doc exists: docs/data/schema.md",
+      "passed": true,
+      "details": "ok"
+    },
+    {
+      "name": "canonical doc exists: docs/deployment/runbook.md",
+      "passed": true,
+      "details": "ok"
+    },
+    {
+      "name": "canonical doc exists: docs/deployment/env-vars.md",
+      "passed": true,
+      "details": "ok"
+    },
+    {
+      "name": "canonical doc exists: docs/testing/operations.md",
+      "passed": true,
+      "details": "ok"
+    },
+    {
+      "name": "canonical doc exists: docs/design/architecture-flow.md",
+      "passed": true,
+      "details": "ok"
+    },
+    {
+      "name": "pointer doc is reduced: docs/design/chat-orchestration.md",
+      "passed": true,
+      "details": "ok"
+    },
+    {
+      "name": "pointer doc is reduced: docs/design/concierge-flow.md",
+      "passed": true,
+      "details": "ok"
+    },
+    {
+      "name": "pointer doc is reduced: docs/design/role-capability-matrix.md",
+      "passed": true,
+      "details": "ok"
+    },
+    {
+      "name": "pointer doc is reduced: docs/testing/README.md",
+      "passed": true,
+      "details": "ok"
+    },
+    {
+      "name": "forbidden token absent: contextual_blurb",
+      "passed": true,
+      "details": "ok"
+    },
+    {
+      "name": "forbidden token absent: /api/ui-access",
+      "passed": true,
+      "details": "ok"
+    },
+    {
+      "name": "master context has source-of-truth table",
+      "passed": true,
+      "details": "ok"
+    },
+    {
+      "name": "referenced path exists: docs/master-context.md",
+      "passed": true,
+      "details": "ok"
+    },
+    {
+      "name": "referenced path exists: docs/data/schema.md",
+      "passed": true,
+      "details": "ok"
+    },
+    {
+      "name": "referenced path exists: docs/deployment/runbook.md",
+      "passed": true,
+      "details": "ok"
+    },
+    {
+      "name": "referenced path exists: docs/deployment/env-vars.md",
+      "passed": true,
+      "details": "ok"
+    },
+    {
+      "name": "referenced path exists: docs/testing/operations.md",
+      "passed": true,
+      "details": "ok"
+    },
+    {
+      "name": "referenced path exists: docs/design/architecture-flow.md",
+      "passed": true,
+      "details": "ok"
+    },
+    {
+      "name": "referenced path exists: docs/design/chat-orchestration.md",
+      "passed": true,
+      "details": "ok"
+    },
+    {
+      "name": "referenced path exists: docs/design/concierge-flow.md",
+      "passed": true,
+      "details": "ok"
+    },
+    {
+      "name": "referenced path exists: docs/design/role-capability-matrix.md",
+      "passed": true,
+      "details": "ok"
+    },
+    {
+      "name": "referenced path exists: docs/testing/README.md",
+      "passed": true,
+      "details": "ok"
+    },
+    {
+      "name": "referenced path exists: docs/deployment/overview.md",
+      "passed": true,
+      "details": "ok"
+    },
+    {
+      "name": "referenced path exists: docs/inventory/images.md",
+      "passed": true,
+      "details": "ok"
+    },
+    {
+      "name": "referenced path exists: docs/prompts/system.md",
+      "passed": true,
+      "details": "ok"
+    },
+    {
+      "name": "referenced path exists: docs/prompts/general-chat.md",
+      "passed": true,
+      "details": "ok"
+    },
+    {
+      "name": "referenced path exists: docs/prompts/recommendation.md",
+      "passed": true,
+      "details": "ok"
+    },
+    {
+      "name": "referenced path exists: docs/prompts/recommendation-structured-output.md",
+      "passed": true,
+      "details": "ok"
+    },
+    {
+      "name": "referenced path exists: apps/web/lib/supabase/admin.ts",
+      "passed": true,
+      "details": "ok"
+    },
+    {
+      "name": "referenced path exists: apps/web/lib/auth/roles.ts",
+      "passed": true,
+      "details": "ok"
+    },
+    {
+      "name": "referenced path exists: apps/web/lib/auth/capabilities.ts",
+      "passed": true,
+      "details": "ok"
+    },
+    {
+      "name": "referenced path exists: apps/web/lib/http/guards.ts",
+      "passed": true,
+      "details": "ok"
+    },
+    {
+      "name": "referenced path exists: scripts/seed-demo-rugs.ts",
+      "passed": true,
+      "details": "ok"
+    },
+    {
+      "name": "referenced path exists: apps/web/lib/auth/request-role.ts",
+      "passed": true,
+      "details": "ok"
+    },
+    {
+      "name": "referenced path exists: apps/web/lib/auth/tenant.ts",
+      "passed": true,
+      "details": "ok"
+    },
+    {
+      "name": "referenced path exists: apps/web/lib/branding/tenant-branding.ts",
+      "passed": true,
+      "details": "ok"
+    },
+    {
+      "name": "referenced path exists: apps/web/lib/inventory/rug-record.ts",
+      "passed": true,
+      "details": "ok"
+    },
+    {
+      "name": "referenced path exists: apps/web/lib/inventory/filters.ts",
+      "passed": true,
+      "details": "ok"
+    },
+    {
+      "name": "referenced path exists: apps/web/lib/recommend/pipeline.ts",
+      "passed": true,
+      "details": "ok"
+    },
+    {
+      "name": "referenced path exists: apps/web/lib/ai/recommend.ts",
+      "passed": true,
+      "details": "ok"
+    },
+    {
+      "name": "referenced path exists: apps/web/lib/http/route-validation.ts",
+      "passed": true,
+      "details": "ok"
+    },
+    {
+      "name": "referenced path exists: scripts/re-enrich-rugs.ts",
+      "passed": true,
+      "details": "ok"
+    }
+  ]
+}

@@ -1,0 +1,874 @@
+{
+  "generated_at": "2026-03-19T04:25:14.405Z",
+  "mode": "local-pilot",
+  "manifest_path": "tmp/testing/manifests/manifest-real-60.json",
+  "run_report_path": "tmp/testing/reports/golden-run-report-local-pilot.json",
+  "pass": false,
+  "gates": {
+    "title_compliance_100": false,
+    "invalid_to_needs_review_100": false,
+    "origin_accuracy_ge_95": false,
+    "style_accuracy_ge_92": false,
+    "age_format_plausibility_ge_90": true,
+    "integrity_100": true,
+    "no_failures": false
+  },
+  "metrics": {
+    "valid_created": 50,
+    "invalid_created": 10,
+    "integrity_rate": 1,
+    "title_compliance_rate": 0.84,
+    "invalid_needs_review_rate": 0.9,
+    "origin_accuracy_rate": 0.52,
+    "style_accuracy_rate": 0.5,
+    "age_format_plausibility_rate": 1,
+    "denominators": {
+      "origin": 50,
+      "style": 50,
+      "age_format": 50
+    }
+  },
+  "warnings": [
+    {
+      "row_id": "real-001",
+      "stock_id": "CERT-LOCAL-PILOT-20260319T040824-001",
+      "issue": "style_family_soft_match:persian_classical",
+      "details": {
+        "expected": "Isfahan",
+        "actual": "Tabriz"
+      }
+    },
+    {
+      "row_id": "real-002",
+      "stock_id": "CERT-LOCAL-PILOT-20260319T040824-002",
+      "issue": "style_family_soft_match:persian_classical",
+      "details": {
+        "expected": "Sultanabad",
+        "actual": "Kashan"
+      }
+    },
+    {
+      "row_id": "real-008",
+      "stock_id": "CERT-LOCAL-PILOT-20260319T040824-008",
+      "issue": "style_family_soft_match:persian_classical",
+      "details": {
+        "expected": "Isfahan",
+        "actual": "Tabriz"
+      }
+    },
+    {
+      "row_id": "real-012",
+      "stock_id": "CERT-LOCAL-PILOT-20260319T040824-012",
+      "issue": "style_family_soft_match:persian_classical",
+      "details": {
+        "expected": "Kashan",
+        "actual": "Tabriz"
+      }
+    },
+    {
+      "row_id": "real-022",
+      "stock_id": "CERT-LOCAL-PILOT-20260319T040824-022",
+      "issue": "style_family_soft_match:persian_classical",
+      "details": {
+        "expected": "Kerman",
+        "actual": "Sultanabad"
+      }
+    },
+    {
+      "row_id": "real-023",
+      "stock_id": "CERT-LOCAL-PILOT-20260319T040824-023",
+      "issue": "style_family_soft_match:persian_classical",
+      "details": {
+        "expected": "Kashan",
+        "actual": "Tabriz"
+      }
+    },
+    {
+      "row_id": "real-028",
+      "stock_id": "CERT-LOCAL-PILOT-20260319T040824-028",
+      "issue": "style_family_soft_match:persian_classical",
+      "details": {
+        "expected": "Tabriz",
+        "actual": "Sultanabad"
+      }
+    },
+    {
+      "row_id": "real-029",
+      "stock_id": "CERT-LOCAL-PILOT-20260319T040824-029",
+      "issue": "style_family_soft_match:persian_classical",
+      "details": {
+        "expected": "Kashan",
+        "actual": "Sultanabad"
+      }
+    },
+    {
+      "row_id": "real-030",
+      "stock_id": "CERT-LOCAL-PILOT-20260319T040824-030",
+      "issue": "style_family_soft_match:persian_classical",
+      "details": {
+        "expected": "Tabriz",
+        "actual": "Kerman"
+      }
+    },
+    {
+      "row_id": "real-032",
+      "stock_id": "CERT-LOCAL-PILOT-20260319T040824-032",
+      "issue": "style_family_soft_match:persian_classical",
+      "details": {
+        "expected": "Heriz",
+        "actual": "Qom"
+      }
+    },
+    {
+      "row_id": "real-037",
+      "stock_id": "CERT-LOCAL-PILOT-20260319T040824-037",
+      "issue": "soft_style_equivalence:oushak<->sultanabad",
+      "details": {
+        "expected": "Oushak",
+        "actual": "Sultanabad"
+      }
+    },
+    {
+      "row_id": "real-047",
+      "stock_id": "CERT-LOCAL-PILOT-20260319T040824-047",
+      "issue": "soft_style_equivalence:kazak<->shirvan",
+      "details": {
+        "expected": "Shirvan",
+        "actual": "Kazak"
+      }
+    }
+  ],
+  "failures": [
+    {
+      "row_id": "real-003",
+      "stock_id": "CERT-LOCAL-PILOT-20260319T040824-003",
+      "category": "valid",
+      "issue": "title_non_compliant",
+      "details": {
+        "title": ""
+      }
+    },
+    {
+      "row_id": "real-003",
+      "stock_id": "CERT-LOCAL-PILOT-20260319T040824-003",
+      "category": "valid",
+      "issue": "origin_mismatch",
+      "details": {
+        "expected": "Persian",
+        "actual": null
+      }
+    },
+    {
+      "row_id": "real-003",
+      "stock_id": "CERT-LOCAL-PILOT-20260319T040824-003",
+      "category": "valid",
+      "issue": "style_mismatch",
+      "details": {
+        "expected": "Bakhtiari",
+        "actual": null
+      }
+    },
+    {
+      "row_id": "real-003",
+      "stock_id": "CERT-LOCAL-PILOT-20260319T040824-003",
+      "category": "valid",
+      "issue": "valid_rug_not_ready",
+      "details": {
+        "enrichment_status": "needs_review",
+        "review_reason_code": "ANALYSIS_INCOMPLETE"
+      }
+    },
+    {
+      "row_id": "real-004",
+      "stock_id": "CERT-LOCAL-PILOT-20260319T040824-004",
+      "category": "valid",
+      "issue": "style_mismatch",
+      "details": {
+        "expected": "Tabriz",
+        "actual": null
+      }
+    },
+    {
+      "row_id": "real-005",
+      "stock_id": "CERT-LOCAL-PILOT-20260319T040824-005",
+      "category": "valid",
+      "issue": "title_non_compliant",
+      "details": {
+        "title": ""
+      }
+    },
+    {
+      "row_id": "real-005",
+      "stock_id": "CERT-LOCAL-PILOT-20260319T040824-005",
+      "category": "valid",
+      "issue": "origin_mismatch",
+      "details": {
+        "expected": "Persian",
+        "actual": null
+      }
+    },
+    {
+      "row_id": "real-005",
+      "stock_id": "CERT-LOCAL-PILOT-20260319T040824-005",
+      "category": "valid",
+      "issue": "style_mismatch",
+      "details": {
+        "expected": "Bakhtiari",
+        "actual": null
+      }
+    },
+    {
+      "row_id": "real-005",
+      "stock_id": "CERT-LOCAL-PILOT-20260319T040824-005",
+      "category": "valid",
+      "issue": "valid_rug_not_ready",
+      "details": {
+        "enrichment_status": "needs_review",
+        "review_reason_code": "ANALYSIS_INCOMPLETE"
+      }
+    },
+    {
+      "row_id": "real-006",
+      "stock_id": "CERT-LOCAL-PILOT-20260319T040824-006",
+      "category": "valid",
+      "issue": "origin_mismatch",
+      "details": {
+        "expected": "Persian",
+        "actual": null
+      }
+    },
+    {
+      "row_id": "real-006",
+      "stock_id": "CERT-LOCAL-PILOT-20260319T040824-006",
+      "category": "valid",
+      "issue": "style_mismatch",
+      "details": {
+        "expected": "Qashqai",
+        "actual": "Kilim"
+      }
+    },
+    {
+      "row_id": "real-006",
+      "stock_id": "CERT-LOCAL-PILOT-20260319T040824-006",
+      "category": "valid",
+      "issue": "valid_rug_not_ready",
+      "details": {
+        "enrichment_status": "needs_review",
+        "review_reason_code": "ANALYSIS_INCOMPLETE"
+      }
+    },
+    {
+      "row_id": "real-007",
+      "stock_id": "CERT-LOCAL-PILOT-20260319T040824-007",
+      "category": "valid",
+      "issue": "origin_mismatch",
+      "details": {
+        "expected": "Persian",
+        "actual": null
+      }
+    },
+    {
+      "row_id": "real-007",
+      "stock_id": "CERT-LOCAL-PILOT-20260319T040824-007",
+      "category": "valid",
+      "issue": "style_mismatch",
+      "details": {
+        "expected": "Sultanabad",
+        "actual": null
+      }
+    },
+    {
+      "row_id": "real-007",
+      "stock_id": "CERT-LOCAL-PILOT-20260319T040824-007",
+      "category": "valid",
+      "issue": "valid_rug_not_ready",
+      "details": {
+        "enrichment_status": "needs_review",
+        "review_reason_code": "ANALYSIS_INCOMPLETE"
+      }
+    },
+    {
+      "row_id": "real-009",
+      "stock_id": "CERT-LOCAL-PILOT-20260319T040824-009",
+      "category": "valid",
+      "issue": "title_non_compliant",
+      "details": {
+        "title": ""
+      }
+    },
+    {
+      "row_id": "real-009",
+      "stock_id": "CERT-LOCAL-PILOT-20260319T040824-009",
+      "category": "valid",
+      "issue": "origin_mismatch",
+      "details": {
+        "expected": "Persian",
+        "actual": null
+      }
+    },
+    {
+      "row_id": "real-009",
+      "stock_id": "CERT-LOCAL-PILOT-20260319T040824-009",
+      "category": "valid",
+      "issue": "style_mismatch",
+      "details": {
+        "expected": "Hamadan",
+        "actual": null
+      }
+    },
+    {
+      "row_id": "real-009",
+      "stock_id": "CERT-LOCAL-PILOT-20260319T040824-009",
+      "category": "valid",
+      "issue": "valid_rug_not_ready",
+      "details": {
+        "enrichment_status": "needs_review",
+        "review_reason_code": "ANALYSIS_INCOMPLETE"
+      }
+    },
+    {
+      "row_id": "real-010",
+      "stock_id": "CERT-LOCAL-PILOT-20260319T040824-010",
+      "category": "valid",
+      "issue": "origin_mismatch",
+      "details": {
+        "expected": "Persian",
+        "actual": null
+      }
+    },
+    {
+      "row_id": "real-010",
+      "stock_id": "CERT-LOCAL-PILOT-20260319T040824-010",
+      "category": "valid",
+      "issue": "style_mismatch",
+      "details": {
+        "expected": "Hamadan",
+        "actual": null
+      }
+    },
+    {
+      "row_id": "real-010",
+      "stock_id": "CERT-LOCAL-PILOT-20260319T040824-010",
+      "category": "valid",
+      "issue": "valid_rug_not_ready",
+      "details": {
+        "enrichment_status": "needs_review",
+        "review_reason_code": "ANALYSIS_INCOMPLETE"
+      }
+    },
+    {
+      "row_id": "real-014",
+      "stock_id": "CERT-LOCAL-PILOT-20260319T040824-014",
+      "category": "valid",
+      "issue": "origin_mismatch",
+      "details": {
+        "expected": "Persian",
+        "actual": null
+      }
+    },
+    {
+      "row_id": "real-014",
+      "stock_id": "CERT-LOCAL-PILOT-20260319T040824-014",
+      "category": "valid",
+      "issue": "style_mismatch",
+      "details": {
+        "expected": "Hamadan",
+        "actual": null
+      }
+    },
+    {
+      "row_id": "real-014",
+      "stock_id": "CERT-LOCAL-PILOT-20260319T040824-014",
+      "category": "valid",
+      "issue": "valid_rug_not_ready",
+      "details": {
+        "enrichment_status": "needs_review",
+        "review_reason_code": "ANALYSIS_INCOMPLETE"
+      }
+    },
+    {
+      "row_id": "real-015",
+      "stock_id": "CERT-LOCAL-PILOT-20260319T040824-015",
+      "category": "valid",
+      "issue": "title_non_compliant",
+      "details": {
+        "title": ""
+      }
+    },
+    {
+      "row_id": "real-015",
+      "stock_id": "CERT-LOCAL-PILOT-20260319T040824-015",
+      "category": "valid",
+      "issue": "origin_mismatch",
+      "details": {
+        "expected": "Persian",
+        "actual": null
+      }
+    },
+    {
+      "row_id": "real-015",
+      "stock_id": "CERT-LOCAL-PILOT-20260319T040824-015",
+      "category": "valid",
+      "issue": "style_mismatch",
+      "details": {
+        "expected": "Hamadan",
+        "actual": null
+      }
+    },
+    {
+      "row_id": "real-015",
+      "stock_id": "CERT-LOCAL-PILOT-20260319T040824-015",
+      "category": "valid",
+      "issue": "valid_rug_not_ready",
+      "details": {
+        "enrichment_status": "needs_review",
+        "review_reason_code": "ANALYSIS_INCOMPLETE"
+      }
+    },
+    {
+      "row_id": "real-017",
+      "stock_id": "CERT-LOCAL-PILOT-20260319T040824-017",
+      "category": "valid",
+      "issue": "title_non_compliant",
+      "details": {
+        "title": ""
+      }
+    },
+    {
+      "row_id": "real-017",
+      "stock_id": "CERT-LOCAL-PILOT-20260319T040824-017",
+      "category": "valid",
+      "issue": "origin_mismatch",
+      "details": {
+        "expected": "Persian",
+        "actual": null
+      }
+    },
+    {
+      "row_id": "real-017",
+      "stock_id": "CERT-LOCAL-PILOT-20260319T040824-017",
+      "category": "valid",
+      "issue": "style_mismatch",
+      "details": {
+        "expected": "Hamadan",
+        "actual": null
+      }
+    },
+    {
+      "row_id": "real-017",
+      "stock_id": "CERT-LOCAL-PILOT-20260319T040824-017",
+      "category": "valid",
+      "issue": "valid_rug_not_ready",
+      "details": {
+        "enrichment_status": "needs_review",
+        "review_reason_code": "ANALYSIS_INCOMPLETE"
+      }
+    },
+    {
+      "row_id": "real-018",
+      "stock_id": "CERT-LOCAL-PILOT-20260319T040824-018",
+      "category": "valid",
+      "issue": "title_non_compliant",
+      "details": {
+        "title": ""
+      }
+    },
+    {
+      "row_id": "real-018",
+      "stock_id": "CERT-LOCAL-PILOT-20260319T040824-018",
+      "category": "valid",
+      "issue": "origin_mismatch",
+      "details": {
+        "expected": "Persian",
+        "actual": null
+      }
+    },
+    {
+      "row_id": "real-018",
+      "stock_id": "CERT-LOCAL-PILOT-20260319T040824-018",
+      "category": "valid",
+      "issue": "style_mismatch",
+      "details": {
+        "expected": "Bakhtiari",
+        "actual": null
+      }
+    },
+    {
+      "row_id": "real-018",
+      "stock_id": "CERT-LOCAL-PILOT-20260319T040824-018",
+      "category": "valid",
+      "issue": "valid_rug_not_ready",
+      "details": {
+        "enrichment_status": "needs_review",
+        "review_reason_code": "ANALYSIS_INCOMPLETE"
+      }
+    },
+    {
+      "row_id": "real-019",
+      "stock_id": "CERT-LOCAL-PILOT-20260319T040824-019",
+      "category": "valid",
+      "issue": "origin_mismatch",
+      "details": {
+        "expected": "Persian",
+        "actual": "Turkish"
+      }
+    },
+    {
+      "row_id": "real-019",
+      "stock_id": "CERT-LOCAL-PILOT-20260319T040824-019",
+      "category": "valid",
+      "issue": "style_mismatch",
+      "details": {
+        "expected": "Kashan",
+        "actual": "Oushak"
+      }
+    },
+    {
+      "row_id": "real-020",
+      "stock_id": "CERT-LOCAL-PILOT-20260319T040824-020",
+      "category": "valid",
+      "issue": "origin_mismatch",
+      "details": {
+        "expected": "Persian",
+        "actual": null
+      }
+    },
+    {
+      "row_id": "real-020",
+      "stock_id": "CERT-LOCAL-PILOT-20260319T040824-020",
+      "category": "valid",
+      "issue": "style_mismatch",
+      "details": {
+        "expected": "Hamadan",
+        "actual": null
+      }
+    },
+    {
+      "row_id": "real-020",
+      "stock_id": "CERT-LOCAL-PILOT-20260319T040824-020",
+      "category": "valid",
+      "issue": "valid_rug_not_ready",
+      "details": {
+        "enrichment_status": "needs_review",
+        "review_reason_code": "ANALYSIS_INCOMPLETE"
+      }
+    },
+    {
+      "row_id": "real-021",
+      "stock_id": "CERT-LOCAL-PILOT-20260319T040824-021",
+      "category": "valid",
+      "issue": "origin_mismatch",
+      "details": {
+        "expected": "Persian",
+        "actual": "Caucasian"
+      }
+    },
+    {
+      "row_id": "real-021",
+      "stock_id": "CERT-LOCAL-PILOT-20260319T040824-021",
+      "category": "valid",
+      "issue": "style_mismatch",
+      "details": {
+        "expected": "Hamadan",
+        "actual": null
+      }
+    },
+    {
+      "row_id": "real-021",
+      "stock_id": "CERT-LOCAL-PILOT-20260319T040824-021",
+      "category": "valid",
+      "issue": "valid_rug_not_ready",
+      "details": {
+        "enrichment_status": "needs_review",
+        "review_reason_code": "ANALYSIS_INCOMPLETE"
+      }
+    },
+    {
+      "row_id": "real-024",
+      "stock_id": "CERT-LOCAL-PILOT-20260319T040824-024",
+      "category": "valid",
+      "issue": "style_mismatch",
+      "details": {
+        "expected": "Qom",
+        "actual": null
+      }
+    },
+    {
+      "row_id": "real-024",
+      "stock_id": "CERT-LOCAL-PILOT-20260319T040824-024",
+      "category": "valid",
+      "issue": "valid_rug_not_ready",
+      "details": {
+        "enrichment_status": "needs_review",
+        "review_reason_code": "ANALYSIS_INCOMPLETE"
+      }
+    },
+    {
+      "row_id": "real-025",
+      "stock_id": "CERT-LOCAL-PILOT-20260319T040824-025",
+      "category": "valid",
+      "issue": "origin_mismatch",
+      "details": {
+        "expected": "Persian",
+        "actual": null
+      }
+    },
+    {
+      "row_id": "real-025",
+      "stock_id": "CERT-LOCAL-PILOT-20260319T040824-025",
+      "category": "valid",
+      "issue": "style_mismatch",
+      "details": {
+        "expected": "Hamadan",
+        "actual": null
+      }
+    },
+    {
+      "row_id": "real-025",
+      "stock_id": "CERT-LOCAL-PILOT-20260319T040824-025",
+      "category": "valid",
+      "issue": "valid_rug_not_ready",
+      "details": {
+        "enrichment_status": "needs_review",
+        "review_reason_code": "ANALYSIS_INCOMPLETE"
+      }
+    },
+    {
+      "row_id": "real-026",
+      "stock_id": "CERT-LOCAL-PILOT-20260319T040824-026",
+      "category": "valid",
+      "issue": "title_non_compliant",
+      "details": {
+        "title": ""
+      }
+    },
+    {
+      "row_id": "real-026",
+      "stock_id": "CERT-LOCAL-PILOT-20260319T040824-026",
+      "category": "valid",
+      "issue": "origin_mismatch",
+      "details": {
+        "expected": "Persian",
+        "actual": null
+      }
+    },
+    {
+      "row_id": "real-026",
+      "stock_id": "CERT-LOCAL-PILOT-20260319T040824-026",
+      "category": "valid",
+      "issue": "style_mismatch",
+      "details": {
+        "expected": "Bakhtiari",
+        "actual": null
+      }
+    },
+    {
+      "row_id": "real-026",
+      "stock_id": "CERT-LOCAL-PILOT-20260319T040824-026",
+      "category": "valid",
+      "issue": "valid_rug_not_ready",
+      "details": {
+        "enrichment_status": "needs_review",
+        "review_reason_code": "ANALYSIS_INCOMPLETE"
+      }
+    },
+    {
+      "row_id": "real-031",
+      "stock_id": "CERT-LOCAL-PILOT-20260319T040824-031",
+      "category": "valid",
+      "issue": "title_non_compliant",
+      "details": {
+        "title": ""
+      }
+    },
+    {
+      "row_id": "real-031",
+      "stock_id": "CERT-LOCAL-PILOT-20260319T040824-031",
+      "category": "valid",
+      "issue": "origin_mismatch",
+      "details": {
+        "expected": "Persian",
+        "actual": null
+      }
+    },
+    {
+      "row_id": "real-031",
+      "stock_id": "CERT-LOCAL-PILOT-20260319T040824-031",
+      "category": "valid",
+      "issue": "style_mismatch",
+      "details": {
+        "expected": "Hamadan",
+        "actual": null
+      }
+    },
+    {
+      "row_id": "real-031",
+      "stock_id": "CERT-LOCAL-PILOT-20260319T040824-031",
+      "category": "valid",
+      "issue": "valid_rug_not_ready",
+      "details": {
+        "enrichment_status": "needs_review",
+        "review_reason_code": "ANALYSIS_INCOMPLETE"
+      }
+    },
+    {
+      "row_id": "real-035",
+      "stock_id": "CERT-LOCAL-PILOT-20260319T040824-035",
+      "category": "valid",
+      "issue": "style_mismatch",
+      "details": {
+        "expected": "Tabriz",
+        "actual": null
+      }
+    },
+    {
+      "row_id": "real-036",
+      "stock_id": "CERT-LOCAL-PILOT-20260319T040824-036",
+      "category": "valid",
+      "issue": "style_mismatch",
+      "details": {
+        "expected": "Hamadan",
+        "actual": "Baluch"
+      }
+    },
+    {
+      "row_id": "real-037",
+      "stock_id": "CERT-LOCAL-PILOT-20260319T040824-037",
+      "category": "valid",
+      "issue": "origin_mismatch",
+      "details": {
+        "expected": "Turkish",
+        "actual": "Persian"
+      }
+    },
+    {
+      "row_id": "real-038",
+      "stock_id": "CERT-LOCAL-PILOT-20260319T040824-038",
+      "category": "valid",
+      "issue": "origin_mismatch",
+      "details": {
+        "expected": "Turkish",
+        "actual": "Persian"
+      }
+    },
+    {
+      "row_id": "real-038",
+      "stock_id": "CERT-LOCAL-PILOT-20260319T040824-038",
+      "category": "valid",
+      "issue": "style_mismatch",
+      "details": {
+        "expected": "Oushak",
+        "actual": "Heriz"
+      }
+    },
+    {
+      "row_id": "real-039",
+      "stock_id": "CERT-LOCAL-PILOT-20260319T040824-039",
+      "category": "valid",
+      "issue": "origin_mismatch",
+      "details": {
+        "expected": "Turkish",
+        "actual": "Caucasian"
+      }
+    },
+    {
+      "row_id": "real-040",
+      "stock_id": "CERT-LOCAL-PILOT-20260319T040824-040",
+      "category": "valid",
+      "issue": "origin_mismatch",
+      "details": {
+        "expected": "Turkish",
+        "actual": "Caucasian"
+      }
+    },
+    {
+      "row_id": "real-041",
+      "stock_id": "CERT-LOCAL-PILOT-20260319T040824-041",
+      "category": "hard_valid",
+      "issue": "origin_mismatch",
+      "details": {
+        "expected": "Turkish",
+        "actual": "Persian"
+      }
+    },
+    {
+      "row_id": "real-041",
+      "stock_id": "CERT-LOCAL-PILOT-20260319T040824-041",
+      "category": "hard_valid",
+      "issue": "style_mismatch",
+      "details": {
+        "expected": "Oushak",
+        "actual": "Heriz"
+      }
+    },
+    {
+      "row_id": "real-044",
+      "stock_id": "CERT-LOCAL-PILOT-20260319T040824-044",
+      "category": "hard_valid",
+      "issue": "origin_mismatch",
+      "details": {
+        "expected": "Turkish",
+        "actual": "Caucasian"
+      }
+    },
+    {
+      "row_id": "real-044",
+      "stock_id": "CERT-LOCAL-PILOT-20260319T040824-044",
+      "category": "hard_valid",
+      "issue": "style_mismatch",
+      "details": {
+        "expected": "Oushak",
+        "actual": "Kazak"
+      }
+    },
+    {
+      "row_id": "real-045",
+      "stock_id": "CERT-LOCAL-PILOT-20260319T040824-045",
+      "category": "hard_valid",
+      "issue": "origin_mismatch",
+      "details": {
+        "expected": "Caucasian",
+        "actual": "Persian"
+      }
+    },
+    {
+      "row_id": "real-045",
+      "stock_id": "CERT-LOCAL-PILOT-20260319T040824-045",
+      "category": "hard_valid",
+      "issue": "style_mismatch",
+      "details": {
+        "expected": "Shirvan",
+        "actual": "Gabbeh"
+      }
+    },
+    {
+      "row_id": "real-048",
+      "stock_id": "CERT-LOCAL-PILOT-20260319T040824-048",
+      "category": "hard_valid",
+      "issue": "origin_mismatch",
+      "details": {
+        "expected": "Afghan",
+        "actual": "Caucasian"
+      }
+    },
+    {
+      "row_id": "real-048",
+      "stock_id": "CERT-LOCAL-PILOT-20260319T040824-048",
+      "category": "hard_valid",
+      "issue": "style_mismatch",
+      "details": {
+        "expected": "Gabbeh",
+        "actual": "Kilim"
+      }
+    },
+    {
+      "row_id": "real-052",
+      "stock_id": "CERT-LOCAL-PILOT-20260319T040824-052",
+      "category": "invalid",
+      "issue": "invalid_rug_not_needs_review",
+      "details": {
+        "enrichment_status": "ready"
+      }
+    }
+  ]
+}

@@ -1,0 +1,27 @@
+{
+  "generated_at": "2026-03-20T05:59:25.486Z",
+  "cycle": 2,
+  "failures": [],
+  "artifacts": [
+    "/Users/ilannabatkhorian/Documents/rug-concierge/tmp/testing/reports/cmd-purge-before-local-cycle-2-2026-03-20T05-24-27-402Z.json",
+    "/Users/ilannabatkhorian/Documents/rug-concierge/tmp/testing/manifests/manifest-real-60.json",
+    "/Users/ilannabatkhorian/Documents/rug-concierge/tmp/testing/reports/cmd-unit-tests-cycle-2-2026-03-20T05-24-27-402Z.json",
+    "/Users/ilannabatkhorian/Documents/rug-concierge/tmp/testing/reports/e2e-playwright-cycle-2-2026-03-20T05-24-27-402Z.json",
+    "/Users/ilannabatkhorian/Documents/rug-concierge/tmp/testing/reports/cmd-contract-local-cycle-2-2026-03-20T05-24-27-402Z.json",
+    "/Users/ilannabatkhorian/Documents/rug-concierge/tmp/testing/reports/contract-report-cycle-2-2026-03-20T05-24-27-402Z-local.json",
+    "/Users/ilannabatkhorian/Documents/rug-concierge/tmp/testing/reports/live-smoke-cycle-2-2026-03-20T05-24-27-402Z.json",
+    "/Users/ilannabatkhorian/Documents/rug-concierge/tmp/testing/reports/edge-worker-cycle-2-2026-03-20T05-24-27-402Z.json",
+    "/Users/ilannabatkhorian/Documents/rug-concierge/tmp/testing/reports/cmd-real-images-local-cycle-2-2026-03-20T05-24-27-402Z.json",
+    "/Users/ilannabatkhorian/Documents/rug-concierge/tmp/testing/reports/golden-run-report-local-cycle-2-2026-03-20T05-24-27-402Z.json",
+    "/Users/ilannabatkhorian/Documents/rug-concierge/tmp/testing/reports/cmd-quality-audit-local-cycle-2-2026-03-20T05-24-27-402Z.json",
+    "/Users/ilannabatkhorian/Documents/rug-concierge/tmp/testing/reports/quality-audit-local-cycle-2-2026-03-20T05-24-27-402Z.json",
+    "/Users/ilannabatkhorian/Documents/rug-concierge/tmp/testing/reports/cmd-purge-before-prod-cycle-2-2026-03-20T05-24-27-402Z.json",
+    "/Users/ilannabatkhorian/Documents/rug-concierge/tmp/testing/reports/cmd-contract-prod-cycle-2-2026-03-20T05-24-27-402Z.json",
+    "/Users/ilannabatkhorian/Documents/rug-concierge/tmp/testing/reports/contract-report-cycle-2-2026-03-20T05-24-27-402Z-prod.json",
+    "/Users/ilannabatkhorian/Documents/rug-concierge/tmp/testing/reports/cmd-real-images-prod-cycle-2-2026-03-20T05-24-27-402Z.json",
+    "/Users/ilannabatkhorian/Documents/rug-concierge/tmp/testing/reports/golden-run-report-prod-cycle-2-2026-03-20T05-24-27-402Z.json",
+    "/Users/ilannabatkhorian/Documents/rug-concierge/tmp/testing/reports/cmd-quality-audit-prod-cycle-2-2026-03-20T05-24-27-402Z.json",
+    "/Users/ilannabatkhorian/Documents/rug-concierge/tmp/testing/reports/quality-audit-prod-cycle-2-2026-03-20T05-24-27-402Z.json"
+  ],
+  "pass": true
+}

@@ -35,6 +35,10 @@ export function mapApiErrorToFriendlyMessage(
     return "This action requires staff access.";
   }
 
+  if (status === 409 || code === "DUPLICATE_IMAGE") {
+    return "Duplicate detected: this exact photo already exists in your inventory.";
+  }
+
   if (status === 400 || code === "BAD_REQUEST") {
     if (
       includesAny(raw, [

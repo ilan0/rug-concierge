@@ -34,6 +34,7 @@
 - `ALLOW_DYNAMIC_TENANT_ID`
 - `ENABLE_RECOMMENDATION_QA_LOGGING`
 - `ENABLE_E2E_TRACE_ARTIFACTS`
+- `CRON_SECRET` (required when inventory enrichment worker cron is enabled)
 
 ## Script/Automation Support
 

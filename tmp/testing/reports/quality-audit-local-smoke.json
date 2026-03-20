@@ -1,0 +1,84 @@
+{
+  "generated_at": "2026-03-19T03:55:31.021Z",
+  "mode": "local-smoke",
+  "manifest_path": "tmp/testing/manifests/manifest-real-5.json",
+  "run_report_path": "tmp/testing/reports/golden-run-report-local-smoke.json",
+  "pass": false,
+  "gates": {
+    "title_compliance_100": true,
+    "invalid_to_needs_review_100": false,
+    "origin_accuracy_ge_95": false,
+    "style_accuracy_ge_92": false,
+    "age_format_plausibility_ge_90": true,
+    "integrity_100": true,
+    "no_failures": false
+  },
+  "metrics": {
+    "valid_created": 5,
+    "invalid_created": 0,
+    "integrity_rate": 1,
+    "title_compliance_rate": 1,
+    "invalid_needs_review_rate": 0,
+    "origin_accuracy_rate": 0.8,
+    "style_accuracy_rate": 0.2,
+    "age_format_plausibility_rate": 1,
+    "denominators": {
+      "origin": 5,
+      "style": 5,
+      "age_format": 5
+    }
+  },
+  "warnings": [],
+  "failures": [
+    {
+      "row_id": "real-002",
+      "stock_id": "CERT-LOCAL-SMOKE-20260319T035443-002",
+      "category": "valid",
+      "issue": "style_mismatch",
+      "details": {
+        "expected": "Sultanabad",
+        "actual": "Kashan"
+      }
+    },
+    {
+      "row_id": "real-003",
+      "stock_id": "CERT-LOCAL-SMOKE-20260319T035443-003",
+      "category": "valid",
+      "issue": "origin_mismatch",
+      "details": {
+        "expected": "Caucasian",
+        "actual": "Persian"
+      }
+    },
+    {
+      "row_id": "real-003",
+      "stock_id": "CERT-LOCAL-SMOKE-20260319T035443-003",
+      "category": "valid",
+      "issue": "style_mismatch",
+      "details": {
+        "expected": "Shirvan",
+        "actual": "Gabbeh"
+      }
+    },
+    {
+      "row_id": "real-004",
+      "stock_id": "CERT-LOCAL-SMOKE-20260319T035443-004",
+      "category": "valid",
+      "issue": "style_mismatch",
+      "details": {
+        "expected": "Sultanabad",
+        "actual": "Tabriz"
+      }
+    },
+    {
+      "row_id": "real-005",
+      "stock_id": "CERT-LOCAL-SMOKE-20260319T035443-005",
+      "category": "valid",
+      "issue": "style_mismatch",
+      "details": {
+        "expected": "Isfahan",
+        "actual": "Kashan"
+      }
+    }
+  ]
+}

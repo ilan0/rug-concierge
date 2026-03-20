@@ -34,7 +34,11 @@ export async function GET(
     tenantId,
     id: params.value.id,
   });
-  if (!row || row.status !== "available") {
+  if (
+    !row ||
+    row.status !== "available" ||
+    row.enrichment_status !== "ready"
+  ) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 

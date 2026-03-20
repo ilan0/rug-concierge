@@ -2,6 +2,10 @@ import {
   aiStructuredFieldsSchema,
   staffOverridesSchema,
 } from "@/lib/inventory/schemas";
+import {
+  isEnrichmentStatus,
+  isReviewReasonCode,
+} from "@/lib/inventory/enrichment-state";
 import { resolveEffectiveFields } from "@/lib/inventory/resolve-fields";
 import type {
   InventoryBrowserRow,
@@ -10,9 +14,9 @@ import type {
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 export const RUG_SELECT_WITH_OVERRIDES =
-  "id, tenant_id, intake_label, ai_description, ai_structured_fields, staff_overrides, stock_id, status, width_total_in, length_total_in, created_at";
+  "id, tenant_id, intake_label, ai_description, ai_structured_fields, staff_overrides, stock_id, status, enrichment_status, review_reason_code, width_total_in, length_total_in, created_at";
 export const RUG_SELECT_LEGACY =
-  "id, tenant_id, intake_label, ai_description, ai_structured_fields, stock_id, status, width_total_in, length_total_in, created_at";
+  "id, tenant_id, intake_label, ai_description, ai_structured_fields, stock_id, status, enrichment_status, review_reason_code, width_total_in, length_total_in, created_at";
 export const RUG_SELECT_MINIMAL =
   "id, tenant_id, intake_label, ai_description, stock_id, status, width_total_in, length_total_in, created_at";
 
@@ -31,6 +35,8 @@ export type RugRecord = {
   staff_overrides: InventoryBrowserRow["staff_overrides"];
   stock_id: string | null;
   status: string | null;
+  enrichment_status: InventoryBrowserRow["enrichment_status"];
+  review_reason_code: InventoryBrowserRow["review_reason_code"];
   width_total_in: number | null;
   length_total_in: number | null;
   created_at: string | null;
@@ -42,6 +48,18 @@ function toStringOrNull(value: unknown): string | null {
 
 function toNumberOrNull(value: unknown): number | null {
   return typeof value === "number" && Number.isFinite(value) ? value : null;
+}
+
+function toEnrichmentStatusOrNull(
+  value: unknown
+): InventoryBrowserRow["enrichment_status"] {
+  return isEnrichmentStatus(value) ? value : null;
+}
+
+function toReviewReasonCodeOrNull(
+  value: unknown
+): InventoryBrowserRow["review_reason_code"] {
+  return isReviewReasonCode(value) ? value : null;
 }
 
 function toAiStructuredFieldsOrNull(
@@ -85,6 +103,8 @@ export function parseRugRecord(row: unknown): RugRecord | null {
     staff_overrides: toStaffOverridesOrNull(record.staff_overrides),
     stock_id: toStringOrNull(record.stock_id),
     status: toStringOrNull(record.status),
+    enrichment_status: toEnrichmentStatusOrNull(record.enrichment_status),
+    review_reason_code: toReviewReasonCodeOrNull(record.review_reason_code),
     width_total_in: toNumberOrNull(record.width_total_in),
     length_total_in: toNumberOrNull(record.length_total_in),
     created_at: toStringOrNull(record.created_at),
@@ -111,6 +131,8 @@ export function toInventoryBrowserRow(row: RugRecord): InventoryBrowserRow {
     staff_overrides: row.staff_overrides,
     stock_id: row.stock_id,
     status: row.status,
+    enrichment_status: row.enrichment_status,
+    review_reason_code: row.review_reason_code,
     width_total_in: row.width_total_in,
     length_total_in: row.length_total_in,
     ai_description: row.ai_description,
@@ -137,6 +159,8 @@ export function toStaffInventoryRugDetail(input: {
     ),
     stock_id: input.row.stock_id,
     status: input.row.status,
+    enrichment_status: input.row.enrichment_status,
+    review_reason_code: input.row.review_reason_code,
     width_total_in: input.row.width_total_in,
     length_total_in: input.row.length_total_in,
     created_at: input.row.created_at,
@@ -177,4 +201,3 @@ export async function fetchRugRecordById(input: {
   if (result.error || !result.data) return null;
   return parseRugRecord(result.data);
 }
-

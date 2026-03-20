@@ -1,0 +1,155 @@
+{
+  "generated_at": "2026-03-20T05:24:49.676Z",
+  "base_url": "http://127.0.0.1:4201",
+  "tenant_id": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5",
+  "mode": "default_without_rate_limit",
+  "summary": {
+    "total": 11,
+    "passed": 11,
+    "failed": 0
+  },
+  "cases": [
+    {
+      "name": "locked_staff_rejected",
+      "expected_status": 401,
+      "actual_status": 401,
+      "response": {
+        "error": "staff_locked"
+      },
+      "passed": true
+    },
+    {
+      "name": "passcode_unlock_success",
+      "expected_status": 200,
+      "actual_status": 200,
+      "response": {
+        "ok": true
+      },
+      "passed": true
+    },
+    {
+      "name": "passcode_unlock_invalid",
+      "expected_status": 401,
+      "actual_status": 401,
+      "response": {
+        "error": "Invalid passcode"
+      },
+      "passed": true
+    },
+    {
+      "name": "missing_image_validation",
+      "expected_status": 400,
+      "actual_status": 400,
+      "response": {
+        "error": "image is required.",
+        "code": "BAD_REQUEST"
+      },
+      "passed": true
+    },
+    {
+      "name": "invalid_mime_validation",
+      "expected_status": 400,
+      "actual_status": 400,
+      "response": {
+        "error": "image must be one of: jpeg, jpg, png, webp, heic, heif, or avif.",
+        "code": "BAD_REQUEST"
+      },
+      "passed": true
+    },
+    {
+      "name": "oversize_validation",
+      "expected_status": [
+        400,
+        413
+      ],
+      "actual_status": 400,
+      "response": {
+        "error": "image must be 10MB or smaller.",
+        "code": "BAD_REQUEST"
+      },
+      "passed": true
+    },
+    {
+      "name": "invalid_dimensions_validation",
+      "expected_status": 400,
+      "actual_status": 400,
+      "response": {
+        "error": "width and length must be greater than zero.",
+        "code": "BAD_REQUEST"
+      },
+      "passed": true
+    },
+    {
+      "name": "stock_id_too_long_validation",
+      "expected_status": 400,
+      "actual_status": 400,
+      "response": {
+        "error": "stock_id must be 80 characters or fewer.",
+        "code": "BAD_REQUEST"
+      },
+      "passed": true
+    },
+    {
+      "name": "valid_payload_accepted",
+      "expected_status": 200,
+      "actual_status": 200,
+      "response": {
+        "rug": {
+          "id": "5e03bc1b-7714-4604-84c8-243b06f44738",
+          "intake_label": null,
+          "ai_description": null,
+          "stock_id": "CONTRACT-VALID-1773984287787",
+          "width_total_in": 96,
+          "length_total_in": 120,
+          "status": "available",
+          "enrichment_status": "processing",
+          "review_reason_code": null,
+          "primary_image_url": "https://nlypymygmysfgxekhudr.supabase.co/storage/v1/object/public/rug-images/1f3d032b-8411-48a9-8a44-1f3cb9df67a5/5e03bc1b-7714-4604-84c8-243b06f44738/primary-1773984288111.png"
+        },
+        "ai_status": "processing"
+      },
+      "passed": true
+    },
+    {
+      "name": "re_enrich_missing_rug",
+      "expected_status": 404,
+      "actual_status": 404,
+      "response": {
+        "error": "Not found"
+      },
+      "passed": true
+    },
+    {
+      "name": "re_enrich_valid_row",
+      "expected_status": 200,
+      "actual_status": 200,
+      "response": {
+        "id": "5e03bc1b-7714-4604-84c8-243b06f44738",
+        "tenant_id": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5",
+        "intake_label": null,
+        "ai_description": null,
+        "ai_structured_fields": null,
+        "staff_overrides": null,
+        "effective_fields": {
+          "label": "Untitled Rug",
+          "origin": null,
+          "style": null,
+          "pattern": null,
+          "primary_colors": null,
+          "age_category": null,
+          "mood": null
+        },
+        "stock_id": "CONTRACT-VALID-1773984287787",
+        "status": "available",
+        "enrichment_status": "processing",
+        "review_reason_code": null,
+        "width_total_in": 96,
+        "length_total_in": 120,
+        "created_at": "2026-03-20T05:24:48.054839+00:00",
+        "primary_image_url": "https://nlypymygmysfgxekhudr.supabase.co/storage/v1/object/public/rug-images/1f3d032b-8411-48a9-8a44-1f3cb9df67a5/5e03bc1b-7714-4604-84c8-243b06f44738/primary-1773984288111.png",
+        "primary_image_caption": null
+      },
+      "passed": true
+    }
+  ]
+}

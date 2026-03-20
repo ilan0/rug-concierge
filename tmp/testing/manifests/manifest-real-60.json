@@ -1,0 +1,1166 @@
+{
+  "generated_at": "2026-03-20T04:40:27.087Z",
+  "generator": "tmp/testing/build-manifest-real-60.mjs",
+  "count": 60,
+  "rows": [
+    {
+      "id": "real-001",
+      "category": "valid",
+      "source": "wikimedia_commons",
+      "source_title": "File:Persia Sultanabad carpet (detail).jpg",
+      "image_url": "https://upload.wikimedia.org/wikipedia/commons/0/01/Persia_Sultanabad_carpet_%28detail%29.jpg",
+      "is_valid_rug": true,
+      "expected_origin": "Persian",
+      "expected_style_family": null,
+      "expected_age_category_hint": null,
+      "expected_format": "area",
+      "upload_dimensions": {
+        "width_ft": 8,
+        "width_in": 0,
+        "length_ft": 10,
+        "length_in": 0
+      },
+      "note": "high-confidence single rug photo"
+    },
+    {
+      "id": "real-002",
+      "category": "valid",
+      "source": "wikimedia_commons",
+      "source_title": "File:Rug esfahan detail.jpg",
+      "image_url": "https://upload.wikimedia.org/wikipedia/commons/0/0e/Rug_esfahan_detail.jpg",
+      "is_valid_rug": true,
+      "expected_origin": null,
+      "expected_style_family": null,
+      "expected_age_category_hint": null,
+      "expected_format": "area",
+      "upload_dimensions": {
+        "width_ft": 8,
+        "width_in": 0,
+        "length_ft": 10,
+        "length_in": 0
+      },
+      "note": "high-confidence single rug photo"
+    },
+    {
+      "id": "real-003",
+      "category": "valid",
+      "source": "wikimedia_commons",
+      "source_title": "File:A close up view of the pictorial masterpiece rug by Mohammad Seirafian, Isfahan, Iran.jpg",
+      "image_url": "https://upload.wikimedia.org/wikipedia/commons/1/15/A_close_up_view_of_the_pictorial_masterpiece_rug_by_Mohammad_Seirafian%2C_Isfahan%2C_Iran.jpg",
+      "is_valid_rug": true,
+      "expected_origin": "Persian",
+      "expected_style_family": null,
+      "expected_age_category_hint": null,
+      "expected_format": "area",
+      "upload_dimensions": {
+        "width_ft": 8,
+        "width_in": 0,
+        "length_ft": 10,
+        "length_in": 0
+      },
+      "note": "high-confidence single rug photo"
+    },
+    {
+      "id": "real-004",
+      "category": "valid",
+      "source": "wikimedia_commons",
+      "source_title": "File:42556-Antique-Persian-Tabriz-Carpets-hires.jpg",
+      "image_url": "https://upload.wikimedia.org/wikipedia/commons/1/1c/42556-Antique-Persian-Tabriz-Carpets-hires.jpg",
+      "is_valid_rug": true,
+      "expected_origin": "Persian",
+      "expected_style_family": "Tabriz",
+      "expected_age_category_hint": null,
+      "expected_format": "area",
+      "upload_dimensions": {
+        "width_ft": 8,
+        "width_in": 0,
+        "length_ft": 10,
+        "length_in": 0
+      },
+      "note": "high-confidence single rug photo"
+    },
+    {
+      "id": "real-005",
+      "category": "valid",
+      "source": "wikimedia_commons",
+      "source_title": "File:Silk Kashan Carpet MET SC40543.jpg",
+      "image_url": "https://upload.wikimedia.org/wikipedia/commons/2/26/Silk_Kashan_Carpet_MET_SC40543.jpg",
+      "is_valid_rug": true,
+      "expected_origin": null,
+      "expected_style_family": "Kashan",
+      "expected_age_category_hint": null,
+      "expected_format": "area",
+      "upload_dimensions": {
+        "width_ft": 8,
+        "width_in": 0,
+        "length_ft": 10,
+        "length_in": 0
+      },
+      "note": "high-confidence single rug photo"
+    },
+    {
+      "id": "real-006",
+      "category": "valid",
+      "source": "wikimedia_commons",
+      "source_title": "File:Fragment of Tabriz carpet \"Ovchulug\".jpg",
+      "image_url": "https://upload.wikimedia.org/wikipedia/commons/2/2e/Fragment_of_Tabriz_carpet_%22Ovchulug%22.jpg",
+      "is_valid_rug": true,
+      "expected_origin": null,
+      "expected_style_family": "Tabriz",
+      "expected_age_category_hint": null,
+      "expected_format": "area",
+      "upload_dimensions": {
+        "width_ft": 8,
+        "width_in": 0,
+        "length_ft": 10,
+        "length_in": 0
+      },
+      "note": "high-confidence single rug photo"
+    },
+    {
+      "id": "real-007",
+      "category": "valid",
+      "source": "wikimedia_commons",
+      "source_title": "File:Heriz Azeri carpet vaq-vaq.jpg",
+      "image_url": "https://upload.wikimedia.org/wikipedia/commons/3/30/Heriz_Azeri_carpet_vaq-vaq.jpg",
+      "is_valid_rug": true,
+      "expected_origin": null,
+      "expected_style_family": "Heriz",
+      "expected_age_category_hint": null,
+      "expected_format": "area",
+      "upload_dimensions": {
+        "width_ft": 8,
+        "width_in": 0,
+        "length_ft": 10,
+        "length_in": 0
+      },
+      "note": "high-confidence single rug photo"
+    },
+    {
+      "id": "real-008",
+      "category": "valid",
+      "source": "wikimedia_commons",
+      "source_title": "File:Isfahan Rug.jpg",
+      "image_url": "https://upload.wikimedia.org/wikipedia/commons/3/30/Isfahan_Rug.jpg",
+      "is_valid_rug": true,
+      "expected_origin": null,
+      "expected_style_family": null,
+      "expected_age_category_hint": null,
+      "expected_format": "area",
+      "upload_dimensions": {
+        "width_ft": 8,
+        "width_in": 0,
+        "length_ft": 10,
+        "length_in": 0
+      },
+      "note": "high-confidence single rug photo"
+    },
+    {
+      "id": "real-009",
+      "category": "valid",
+      "source": "wikimedia_commons",
+      "source_title": "File:Four Season Persian Tabriz Rug.jpg",
+      "image_url": "https://upload.wikimedia.org/wikipedia/commons/3/3e/Four_Season_Persian_Tabriz_Rug.jpg",
+      "is_valid_rug": true,
+      "expected_origin": "Persian",
+      "expected_style_family": "Tabriz",
+      "expected_age_category_hint": null,
+      "expected_format": "area",
+      "upload_dimensions": {
+        "width_ft": 8,
+        "width_in": 0,
+        "length_ft": 10,
+        "length_in": 0
+      },
+      "note": "high-confidence single rug photo"
+    },
+    {
+      "id": "real-010",
+      "category": "valid",
+      "source": "wikimedia_commons",
+      "source_title": "File:A pictorial Isfahan rug, signed Ahmad Esfahani, central Persia, circa 1900.jpg",
+      "image_url": "https://upload.wikimedia.org/wikipedia/commons/4/41/A_pictorial_Isfahan_rug%2C_signed_Ahmad_Esfahani%2C_central_Persia%2C_circa_1900.jpg",
+      "is_valid_rug": true,
+      "expected_origin": "Persian",
+      "expected_style_family": null,
+      "expected_age_category_hint": null,
+      "expected_format": "area",
+      "upload_dimensions": {
+        "width_ft": 8,
+        "width_in": 0,
+        "length_ft": 10,
+        "length_in": 0
+      },
+      "note": "high-confidence single rug photo"
+    },
+    {
+      "id": "real-011",
+      "category": "valid",
+      "source": "wikimedia_commons",
+      "source_title": "File:Silk Kashan Carpet MET TP327.jpg",
+      "image_url": "https://upload.wikimedia.org/wikipedia/commons/4/4a/Silk_Kashan_Carpet_MET_TP327.jpg",
+      "is_valid_rug": true,
+      "expected_origin": null,
+      "expected_style_family": "Kashan",
+      "expected_age_category_hint": null,
+      "expected_format": "area",
+      "upload_dimensions": {
+        "width_ft": 8,
+        "width_in": 0,
+        "length_ft": 10,
+        "length_in": 0
+      },
+      "note": "high-confidence single rug photo"
+    },
+    {
+      "id": "real-012",
+      "category": "valid",
+      "source": "wikimedia_commons",
+      "source_title": "File:Tabriz Khoi rug circa 1900.jpg",
+      "image_url": "https://upload.wikimedia.org/wikipedia/commons/4/4f/Tabriz_Khoi_rug_circa_1900.jpg",
+      "is_valid_rug": true,
+      "expected_origin": null,
+      "expected_style_family": "Tabriz",
+      "expected_age_category_hint": null,
+      "expected_format": "area",
+      "upload_dimensions": {
+        "width_ft": 8,
+        "width_in": 0,
+        "length_ft": 10,
+        "length_in": 0
+      },
+      "note": "high-confidence single rug photo"
+    },
+    {
+      "id": "real-013",
+      "category": "valid",
+      "source": "wikimedia_commons",
+      "source_title": "File:Silk Kashan Carpet MET SC150780.jpg",
+      "image_url": "https://upload.wikimedia.org/wikipedia/commons/5/52/Silk_Kashan_Carpet_MET_SC150780.jpg",
+      "is_valid_rug": true,
+      "expected_origin": null,
+      "expected_style_family": "Kashan",
+      "expected_age_category_hint": null,
+      "expected_format": "area",
+      "upload_dimensions": {
+        "width_ft": 8,
+        "width_in": 0,
+        "length_ft": 10,
+        "length_in": 0
+      },
+      "note": "high-confidence single rug photo"
+    },
+    {
+      "id": "real-014",
+      "category": "valid",
+      "source": "wikimedia_commons",
+      "source_title": "File:Antique Late 19th Century Ziegler Sultanabad West Central Persian Carpet 10ft 8in x14ft 2in.jpg",
+      "image_url": "https://upload.wikimedia.org/wikipedia/commons/5/56/Antique_Late_19th_Century_Ziegler_Sultanabad_West_Central_Persian_Carpet_10ft_8in_x14ft_2in.jpg",
+      "is_valid_rug": true,
+      "expected_origin": "Persian",
+      "expected_style_family": "Sultanabad",
+      "expected_age_category_hint": null,
+      "expected_format": "area",
+      "upload_dimensions": {
+        "width_ft": 8,
+        "width_in": 0,
+        "length_ft": 10,
+        "length_in": 0
+      },
+      "note": "high-confidence single rug photo"
+    },
+    {
+      "id": "real-015",
+      "category": "valid",
+      "source": "wikimedia_commons",
+      "source_title": "File:Antique Persian Sultanabad Rug with an Ivory Field.jpg",
+      "image_url": "https://upload.wikimedia.org/wikipedia/commons/5/5f/Antique_Persian_Sultanabad_Rug_with_an_Ivory_Field.jpg",
+      "is_valid_rug": true,
+      "expected_origin": "Persian",
+      "expected_style_family": "Sultanabad",
+      "expected_age_category_hint": null,
+      "expected_format": "area",
+      "upload_dimensions": {
+        "width_ft": 8,
+        "width_in": 0,
+        "length_ft": 10,
+        "length_in": 0
+      },
+      "note": "high-confidence single rug photo"
+    },
+    {
+      "id": "real-016",
+      "category": "valid",
+      "source": "wikimedia_commons",
+      "source_title": "File:Antique Persian Sultanabad Rug with a Blue Field.jpg",
+      "image_url": "https://upload.wikimedia.org/wikipedia/commons/6/64/Antique_Persian_Sultanabad_Rug_with_a_Blue_Field.jpg",
+      "is_valid_rug": true,
+      "expected_origin": "Persian",
+      "expected_style_family": "Sultanabad",
+      "expected_age_category_hint": null,
+      "expected_format": "area",
+      "upload_dimensions": {
+        "width_ft": 8,
+        "width_in": 0,
+        "length_ft": 10,
+        "length_in": 0
+      },
+      "note": "high-confidence single rug photo"
+    },
+    {
+      "id": "real-017",
+      "category": "valid",
+      "source": "wikimedia_commons",
+      "source_title": "File:Antique tabriz carpet 413021.jpg",
+      "image_url": "https://upload.wikimedia.org/wikipedia/commons/6/6b/Antique_tabriz_carpet_413021.jpg",
+      "is_valid_rug": true,
+      "expected_origin": null,
+      "expected_style_family": "Tabriz",
+      "expected_age_category_hint": null,
+      "expected_format": "area",
+      "upload_dimensions": {
+        "width_ft": 8,
+        "width_in": 0,
+        "length_ft": 10,
+        "length_in": 0
+      },
+      "note": "high-confidence single rug photo"
+    },
+    {
+      "id": "real-018",
+      "category": "valid",
+      "source": "wikimedia_commons",
+      "source_title": "File:Bijar Rug Persian Informal Navy ca. 1880.jpg",
+      "image_url": "https://upload.wikimedia.org/wikipedia/commons/6/6b/Bijar_Rug_Persian_Informal_Navy_ca._1880.jpg",
+      "is_valid_rug": true,
+      "expected_origin": "Persian",
+      "expected_style_family": null,
+      "expected_age_category_hint": null,
+      "expected_format": "area",
+      "upload_dimensions": {
+        "width_ft": 8,
+        "width_in": 0,
+        "length_ft": 10,
+        "length_in": 0
+      },
+      "note": "high-confidence single rug photo"
+    },
+    {
+      "id": "real-019",
+      "category": "valid",
+      "source": "wikimedia_commons",
+      "source_title": "File:Isfahan Garden carpet.jpg",
+      "image_url": "https://upload.wikimedia.org/wikipedia/commons/6/6c/Isfahan_Garden_carpet.jpg",
+      "is_valid_rug": true,
+      "expected_origin": null,
+      "expected_style_family": null,
+      "expected_age_category_hint": null,
+      "expected_format": "area",
+      "upload_dimensions": {
+        "width_ft": 8,
+        "width_in": 0,
+        "length_ft": 10,
+        "length_in": 0
+      },
+      "note": "high-confidence single rug photo"
+    },
+    {
+      "id": "real-020",
+      "category": "valid",
+      "source": "wikimedia_commons",
+      "source_title": "File:Fine Bidjar rug.jpg",
+      "image_url": "https://upload.wikimedia.org/wikipedia/commons/8/83/Fine_Bidjar_rug.jpg",
+      "is_valid_rug": true,
+      "expected_origin": null,
+      "expected_style_family": null,
+      "expected_age_category_hint": null,
+      "expected_format": "area",
+      "upload_dimensions": {
+        "width_ft": 8,
+        "width_in": 0,
+        "length_ft": 10,
+        "length_in": 0
+      },
+      "note": "high-confidence single rug photo"
+    },
+    {
+      "id": "real-021",
+      "category": "valid",
+      "source": "wikimedia_commons",
+      "source_title": "File:Silk Kashan Carpet MET SC40563.jpg",
+      "image_url": "https://upload.wikimedia.org/wikipedia/commons/8/87/Silk_Kashan_Carpet_MET_SC40563.jpg",
+      "is_valid_rug": true,
+      "expected_origin": null,
+      "expected_style_family": "Kashan",
+      "expected_age_category_hint": null,
+      "expected_format": "area",
+      "upload_dimensions": {
+        "width_ft": 8,
+        "width_in": 0,
+        "length_ft": 10,
+        "length_in": 0
+      },
+      "note": "high-confidence single rug photo"
+    },
+    {
+      "id": "real-022",
+      "category": "valid",
+      "source": "wikimedia_commons",
+      "source_title": "File:Modern Bidjar rug.jpg",
+      "image_url": "https://upload.wikimedia.org/wikipedia/commons/8/8d/Modern_Bidjar_rug.jpg",
+      "is_valid_rug": true,
+      "expected_origin": null,
+      "expected_style_family": null,
+      "expected_age_category_hint": null,
+      "expected_format": "area",
+      "upload_dimensions": {
+        "width_ft": 8,
+        "width_in": 0,
+        "length_ft": 10,
+        "length_in": 0
+      },
+      "note": "high-confidence single rug photo"
+    },
+    {
+      "id": "real-023",
+      "category": "valid",
+      "source": "wikimedia_commons",
+      "source_title": "File:Antique tabriz carpet 430831.jpg",
+      "image_url": "https://upload.wikimedia.org/wikipedia/commons/9/94/Antique_tabriz_carpet_430831.jpg",
+      "is_valid_rug": true,
+      "expected_origin": null,
+      "expected_style_family": "Tabriz",
+      "expected_age_category_hint": null,
+      "expected_format": "area",
+      "upload_dimensions": {
+        "width_ft": 8,
+        "width_in": 0,
+        "length_ft": 10,
+        "length_in": 0
+      },
+      "note": "high-confidence single rug photo"
+    },
+    {
+      "id": "real-024",
+      "category": "valid",
+      "source": "wikimedia_commons",
+      "source_title": "File:Antique Heriz Serapi Persian Carpet.jpg",
+      "image_url": "https://upload.wikimedia.org/wikipedia/commons/9/98/Antique_Heriz_Serapi_Persian_Carpet.jpg",
+      "is_valid_rug": true,
+      "expected_origin": "Persian",
+      "expected_style_family": "Heriz",
+      "expected_age_category_hint": null,
+      "expected_format": "area",
+      "upload_dimensions": {
+        "width_ft": 8,
+        "width_in": 0,
+        "length_ft": 10,
+        "length_in": 0
+      },
+      "note": "high-confidence single rug photo"
+    },
+    {
+      "id": "real-025",
+      "category": "valid",
+      "source": "wikimedia_commons",
+      "source_title": "File:Silk Kashan Carpet MET RT195.jpg",
+      "image_url": "https://upload.wikimedia.org/wikipedia/commons/a/a1/Silk_Kashan_Carpet_MET_RT195.jpg",
+      "is_valid_rug": true,
+      "expected_origin": null,
+      "expected_style_family": "Kashan",
+      "expected_age_category_hint": null,
+      "expected_format": "area",
+      "upload_dimensions": {
+        "width_ft": 8,
+        "width_in": 0,
+        "length_ft": 10,
+        "length_in": 0
+      },
+      "note": "high-confidence single rug photo"
+    },
+    {
+      "id": "real-026",
+      "category": "valid",
+      "source": "wikimedia_commons",
+      "source_title": "File:Silk Kashan Carpet MET SC150899.jpg",
+      "image_url": "https://upload.wikimedia.org/wikipedia/commons/a/a3/Silk_Kashan_Carpet_MET_SC150899.jpg",
+      "is_valid_rug": true,
+      "expected_origin": null,
+      "expected_style_family": "Kashan",
+      "expected_age_category_hint": null,
+      "expected_format": "area",
+      "upload_dimensions": {
+        "width_ft": 8,
+        "width_in": 0,
+        "length_ft": 10,
+        "length_in": 0
+      },
+      "note": "high-confidence single rug photo"
+    },
+    {
+      "id": "real-027",
+      "category": "valid",
+      "source": "wikimedia_commons",
+      "source_title": "File:Antique Persian Sultanabad Rug with a Red Border and a Dark Field.jpg",
+      "image_url": "https://upload.wikimedia.org/wikipedia/commons/a/a7/Antique_Persian_Sultanabad_Rug_with_a_Red_Border_and_a_Dark_Field.jpg",
+      "is_valid_rug": true,
+      "expected_origin": "Persian",
+      "expected_style_family": "Sultanabad",
+      "expected_age_category_hint": null,
+      "expected_format": "area",
+      "upload_dimensions": {
+        "width_ft": 8,
+        "width_in": 0,
+        "length_ft": 10,
+        "length_in": 0
+      },
+      "note": "high-confidence single rug photo"
+    },
+    {
+      "id": "real-028",
+      "category": "valid",
+      "source": "wikimedia_commons",
+      "source_title": "File:A pictorial masterpiece rug by Mohammad Seirafian, Isfahan, Iran.jpg",
+      "image_url": "https://upload.wikimedia.org/wikipedia/commons/a/aa/A_pictorial_masterpiece_rug_by_Mohammad_Seirafian%2C_Isfahan%2C_Iran.jpg",
+      "is_valid_rug": true,
+      "expected_origin": "Persian",
+      "expected_style_family": null,
+      "expected_age_category_hint": null,
+      "expected_format": "area",
+      "upload_dimensions": {
+        "width_ft": 8,
+        "width_in": 0,
+        "length_ft": 10,
+        "length_in": 0
+      },
+      "note": "high-confidence single rug photo"
+    },
+    {
+      "id": "real-029",
+      "category": "valid",
+      "source": "wikimedia_commons",
+      "source_title": "File:Heriz Azeri carpet 002.jpg",
+      "image_url": "https://upload.wikimedia.org/wikipedia/commons/a/ab/Heriz_Azeri_carpet_002.jpg",
+      "is_valid_rug": true,
+      "expected_origin": null,
+      "expected_style_family": "Heriz",
+      "expected_age_category_hint": null,
+      "expected_format": "area",
+      "upload_dimensions": {
+        "width_ft": 8,
+        "width_in": 0,
+        "length_ft": 10,
+        "length_in": 0
+      },
+      "note": "high-confidence single rug photo"
+    },
+    {
+      "id": "real-030",
+      "category": "valid",
+      "source": "wikimedia_commons",
+      "source_title": "File:Polonaise carpet with flying cranes - Kashan (Iran) - 16-17th century - MET - Inventory number 43.84.jpg",
+      "image_url": "https://upload.wikimedia.org/wikipedia/commons/a/af/Polonaise_carpet_with_flying_cranes_-_Kashan_%28Iran%29_-_16-17th_century_-_MET_-_Inventory_number_43.84.jpg",
+      "is_valid_rug": true,
+      "expected_origin": "Persian",
+      "expected_style_family": "Kashan",
+      "expected_age_category_hint": null,
+      "expected_format": "area",
+      "upload_dimensions": {
+        "width_ft": 8,
+        "width_in": 0,
+        "length_ft": 10,
+        "length_in": 0
+      },
+      "note": "high-confidence single rug photo"
+    },
+    {
+      "id": "real-031",
+      "category": "valid",
+      "source": "wikimedia_commons",
+      "source_title": "File:Antique tabriz persian rug 32471.jpg",
+      "image_url": "https://upload.wikimedia.org/wikipedia/commons/b/b4/Antique_tabriz_persian_rug_32471.jpg",
+      "is_valid_rug": true,
+      "expected_origin": "Persian",
+      "expected_style_family": "Tabriz",
+      "expected_age_category_hint": null,
+      "expected_format": "area",
+      "upload_dimensions": {
+        "width_ft": 8,
+        "width_in": 0,
+        "length_ft": 10,
+        "length_in": 0
+      },
+      "note": "high-confidence single rug photo"
+    },
+    {
+      "id": "real-032",
+      "category": "valid",
+      "source": "wikimedia_commons",
+      "source_title": "File:Indo-Isfahan rug, 17th century.jpg",
+      "image_url": "https://upload.wikimedia.org/wikipedia/commons/b/be/Indo-Isfahan_rug%2C_17th_century.jpg",
+      "is_valid_rug": true,
+      "expected_origin": null,
+      "expected_style_family": null,
+      "expected_age_category_hint": null,
+      "expected_format": "area",
+      "upload_dimensions": {
+        "width_ft": 8,
+        "width_in": 0,
+        "length_ft": 10,
+        "length_in": 0
+      },
+      "note": "high-confidence single rug photo"
+    },
+    {
+      "id": "real-033",
+      "category": "valid",
+      "source": "wikimedia_commons",
+      "source_title": "File:Beautiful silk rug by Mohammad Seirafian, Isfahan, Iran.JPG",
+      "image_url": "https://upload.wikimedia.org/wikipedia/commons/d/d6/Beautiful_silk_rug_by_Mohammad_Seirafian%2C_Isfahan%2C_Iran.JPG",
+      "is_valid_rug": true,
+      "expected_origin": "Persian",
+      "expected_style_family": null,
+      "expected_age_category_hint": null,
+      "expected_format": "area",
+      "upload_dimensions": {
+        "width_ft": 8,
+        "width_in": 0,
+        "length_ft": 10,
+        "length_in": 0
+      },
+      "note": "high-confidence single rug photo"
+    },
+    {
+      "id": "real-034",
+      "category": "valid",
+      "source": "wikimedia_commons",
+      "source_title": "File:Veggie Bidjar Rug (3614163243).jpg",
+      "image_url": "https://upload.wikimedia.org/wikipedia/commons/d/d9/Veggie_Bidjar_Rug_%283614163243%29.jpg",
+      "is_valid_rug": true,
+      "expected_origin": null,
+      "expected_style_family": null,
+      "expected_age_category_hint": null,
+      "expected_format": "area",
+      "upload_dimensions": {
+        "width_ft": 8,
+        "width_in": 0,
+        "length_ft": 10,
+        "length_in": 0
+      },
+      "note": "high-confidence single rug photo"
+    },
+    {
+      "id": "real-035",
+      "category": "valid",
+      "source": "wikimedia_commons",
+      "source_title": "File:Antique Persian Sultanabad Rug.jpg",
+      "image_url": "https://upload.wikimedia.org/wikipedia/commons/d/dc/Antique_Persian_Sultanabad_Rug.jpg",
+      "is_valid_rug": true,
+      "expected_origin": "Persian",
+      "expected_style_family": "Sultanabad",
+      "expected_age_category_hint": null,
+      "expected_format": "area",
+      "upload_dimensions": {
+        "width_ft": 8,
+        "width_in": 0,
+        "length_ft": 10,
+        "length_in": 0
+      },
+      "note": "high-confidence single rug photo"
+    },
+    {
+      "id": "real-036",
+      "category": "valid",
+      "source": "wikimedia_commons",
+      "source_title": "File:Silk Kashan Carpet MET SC150779.jpg",
+      "image_url": "https://upload.wikimedia.org/wikipedia/commons/e/e1/Silk_Kashan_Carpet_MET_SC150779.jpg",
+      "is_valid_rug": true,
+      "expected_origin": null,
+      "expected_style_family": "Kashan",
+      "expected_age_category_hint": null,
+      "expected_format": "area",
+      "upload_dimensions": {
+        "width_ft": 8,
+        "width_in": 0,
+        "length_ft": 10,
+        "length_in": 0
+      },
+      "note": "high-confidence single rug photo"
+    },
+    {
+      "id": "real-037",
+      "category": "valid",
+      "source": "wikimedia_commons",
+      "source_title": "File:Motasham Kashan carpet from central Persia, 10' 4 in x 13' 3 in.jpg",
+      "image_url": "https://upload.wikimedia.org/wikipedia/commons/e/e9/Motasham_Kashan_carpet_from_central_Persia%2C_10%27_4_in_x_13%27_3_in.jpg",
+      "is_valid_rug": true,
+      "expected_origin": "Persian",
+      "expected_style_family": "Kashan",
+      "expected_age_category_hint": null,
+      "expected_format": "area",
+      "upload_dimensions": {
+        "width_ft": 8,
+        "width_in": 0,
+        "length_ft": 10,
+        "length_in": 0
+      },
+      "note": "high-confidence single rug photo"
+    },
+    {
+      "id": "real-038",
+      "category": "valid",
+      "source": "wikimedia_commons",
+      "source_title": "File:Antique Serapi carpet, Heriz region, Northwest Persia, 9ft 11in x 12ft 10in, circa 1875,.jpg",
+      "image_url": "https://upload.wikimedia.org/wikipedia/commons/f/f6/Antique_Serapi_carpet%2C_Heriz_region%2C_Northwest_Persia%2C_9ft_11in_x_12ft_10in%2C_circa_1875%2C.jpg",
+      "is_valid_rug": true,
+      "expected_origin": "Persian",
+      "expected_style_family": "Heriz",
+      "expected_age_category_hint": null,
+      "expected_format": "area",
+      "upload_dimensions": {
+        "width_ft": 8,
+        "width_in": 0,
+        "length_ft": 10,
+        "length_in": 0
+      },
+      "note": "high-confidence single rug photo"
+    },
+    {
+      "id": "real-039",
+      "category": "valid",
+      "source": "wikimedia_commons",
+      "source_title": "File:Kashan rug.jpg",
+      "image_url": "https://upload.wikimedia.org/wikipedia/commons/f/fb/Kashan_rug.jpg",
+      "is_valid_rug": true,
+      "expected_origin": null,
+      "expected_style_family": "Kashan",
+      "expected_age_category_hint": null,
+      "expected_format": "area",
+      "upload_dimensions": {
+        "width_ft": 8,
+        "width_in": 0,
+        "length_ft": 10,
+        "length_in": 0
+      },
+      "note": "high-confidence single rug photo"
+    },
+    {
+      "id": "real-040",
+      "category": "valid",
+      "source": "wikimedia_commons",
+      "source_title": "File:Polonaise carpet - Kashan (Iran) - 17th century - MET - Inventory number 31.70.jpg",
+      "image_url": "https://upload.wikimedia.org/wikipedia/commons/f/fc/Polonaise_carpet_-_Kashan_%28Iran%29_-_17th_century_-_MET_-_Inventory_number_31.70.jpg",
+      "is_valid_rug": true,
+      "expected_origin": "Persian",
+      "expected_style_family": "Kashan",
+      "expected_age_category_hint": null,
+      "expected_format": "area",
+      "upload_dimensions": {
+        "width_ft": 8,
+        "width_in": 0,
+        "length_ft": 10,
+        "length_in": 0
+      },
+      "note": "high-confidence single rug photo"
+    },
+    {
+      "id": "real-041",
+      "category": "hard_valid",
+      "source": "wikimedia_commons",
+      "source_title": "File:Antique Turkish Oushak Carpet.jpg",
+      "image_url": "https://upload.wikimedia.org/wikipedia/commons/0/06/Antique_Turkish_Oushak_Carpet.jpg",
+      "is_valid_rug": true,
+      "expected_origin": "Turkish",
+      "expected_style_family": null,
+      "expected_age_category_hint": null,
+      "expected_format": "area",
+      "upload_dimensions": {
+        "width_ft": 8,
+        "width_in": 0,
+        "length_ft": 10,
+        "length_in": 0
+      },
+      "note": "adversarial-quality valid rug image"
+    },
+    {
+      "id": "real-042",
+      "category": "hard_valid",
+      "source": "wikimedia_commons",
+      "source_title": "File:Star Ushak Carpet MET DP270101.jpg",
+      "image_url": "https://upload.wikimedia.org/wikipedia/commons/0/0e/Star_Ushak_Carpet_MET_DP270101.jpg",
+      "is_valid_rug": true,
+      "expected_origin": null,
+      "expected_style_family": null,
+      "expected_age_category_hint": null,
+      "expected_format": "area",
+      "upload_dimensions": {
+        "width_ft": 8,
+        "width_in": 0,
+        "length_ft": 10,
+        "length_in": 0
+      },
+      "note": "adversarial-quality valid rug image"
+    },
+    {
+      "id": "real-043",
+      "category": "hard_valid",
+      "source": "wikimedia_commons",
+      "source_title": "File:Ovchulug Shirvan school rug.jpg",
+      "image_url": "https://upload.wikimedia.org/wikipedia/commons/0/01/Ovchulug_Shirvan_school_rug.jpg",
+      "is_valid_rug": true,
+      "expected_origin": null,
+      "expected_style_family": null,
+      "expected_age_category_hint": null,
+      "expected_format": "area",
+      "upload_dimensions": {
+        "width_ft": 8,
+        "width_in": 0,
+        "length_ft": 10,
+        "length_in": 0
+      },
+      "note": "adversarial-quality valid rug image"
+    },
+    {
+      "id": "real-044",
+      "category": "hard_valid",
+      "source": "wikimedia_commons",
+      "source_title": "File:Karachov Kazak rug, mid-19th C.jpg",
+      "image_url": "https://upload.wikimedia.org/wikipedia/commons/0/04/Karachov_Kazak_rug%2C_mid-19th_C.jpg",
+      "is_valid_rug": true,
+      "expected_origin": null,
+      "expected_style_family": null,
+      "expected_age_category_hint": null,
+      "expected_format": "area",
+      "upload_dimensions": {
+        "width_ft": 8,
+        "width_in": 0,
+        "length_ft": 10,
+        "length_in": 0
+      },
+      "note": "adversarial-quality valid rug image"
+    },
+    {
+      "id": "real-045",
+      "category": "hard_valid",
+      "source": "wikimedia_commons",
+      "source_title": "File:Green Ground Karachopt Kazak Rug Sothebys.jpg",
+      "image_url": "https://upload.wikimedia.org/wikipedia/commons/1/15/Green_Ground_Karachopt_Kazak_Rug_Sothebys.jpg",
+      "is_valid_rug": true,
+      "expected_origin": null,
+      "expected_style_family": null,
+      "expected_age_category_hint": null,
+      "expected_format": "area",
+      "upload_dimensions": {
+        "width_ft": 8,
+        "width_in": 0,
+        "length_ft": 10,
+        "length_in": 0
+      },
+      "note": "adversarial-quality valid rug image"
+    },
+    {
+      "id": "real-046",
+      "category": "hard_valid",
+      "source": "wikimedia_commons",
+      "source_title": "File:Kazak rug from Azerbaijan 998a.jpg",
+      "image_url": "https://upload.wikimedia.org/wikipedia/commons/1/1c/Kazak_rug_from_Azerbaijan_998a.jpg",
+      "is_valid_rug": true,
+      "expected_origin": null,
+      "expected_style_family": null,
+      "expected_age_category_hint": null,
+      "expected_format": "area",
+      "upload_dimensions": {
+        "width_ft": 8,
+        "width_in": 0,
+        "length_ft": 10,
+        "length_in": 0
+      },
+      "note": "adversarial-quality valid rug image"
+    },
+    {
+      "id": "real-047",
+      "category": "hard_valid",
+      "source": "wikimedia_commons",
+      "source_title": "File:Second half 19th century Shirvan Kilim.png",
+      "image_url": "https://upload.wikimedia.org/wikipedia/commons/1/1d/Second_half_19th_century_Shirvan_Kilim.png",
+      "is_valid_rug": true,
+      "expected_origin": null,
+      "expected_style_family": null,
+      "expected_age_category_hint": null,
+      "expected_format": "area",
+      "upload_dimensions": {
+        "width_ft": 8,
+        "width_in": 0,
+        "length_ft": 10,
+        "length_in": 0
+      },
+      "note": "adversarial-quality valid rug image"
+    },
+    {
+      "id": "real-048",
+      "category": "hard_valid",
+      "source": "wikimedia_commons",
+      "source_title": "File:Farwayart-kilim-pillows.jpg",
+      "image_url": "https://upload.wikimedia.org/wikipedia/commons/3/38/Farwayart-kilim-pillows.jpg",
+      "is_valid_rug": true,
+      "expected_origin": null,
+      "expected_style_family": null,
+      "expected_age_category_hint": null,
+      "expected_format": "area",
+      "upload_dimensions": {
+        "width_ft": 8,
+        "width_in": 0,
+        "length_ft": 10,
+        "length_in": 0
+      },
+      "note": "adversarial-quality valid rug image"
+    },
+    {
+      "id": "real-049",
+      "category": "hard_valid",
+      "source": "wikimedia_commons",
+      "source_title": "File:Star Ushak Carpet MET DP270097.jpg",
+      "image_url": "https://upload.wikimedia.org/wikipedia/commons/3/3b/Star_Ushak_Carpet_MET_DP270097.jpg",
+      "is_valid_rug": true,
+      "expected_origin": null,
+      "expected_style_family": null,
+      "expected_age_category_hint": null,
+      "expected_format": "area",
+      "upload_dimensions": {
+        "width_ft": 8,
+        "width_in": 0,
+        "length_ft": 10,
+        "length_in": 0
+      },
+      "note": "adversarial-quality valid rug image"
+    },
+    {
+      "id": "real-050",
+      "category": "hard_valid",
+      "source": "wikimedia_commons",
+      "source_title": "File:Kazak rug from Azerbaijan 911.jpg",
+      "image_url": "https://upload.wikimedia.org/wikipedia/commons/4/44/Kazak_rug_from_Azerbaijan_911.jpg",
+      "is_valid_rug": true,
+      "expected_origin": null,
+      "expected_style_family": null,
+      "expected_age_category_hint": null,
+      "expected_format": "area",
+      "upload_dimensions": {
+        "width_ft": 8,
+        "width_in": 0,
+        "length_ft": 10,
+        "length_in": 0
+      },
+      "note": "adversarial-quality valid rug image"
+    },
+    {
+      "id": "real-051",
+      "category": "invalid",
+      "source": "wikimedia_commons",
+      "source_title": "File:Airplane over the new runway (3402148058).jpg",
+      "image_url": "https://upload.wikimedia.org/wikipedia/commons/7/7e/Airplane_over_the_new_runway_%283402148058%29.jpg",
+      "is_valid_rug": false,
+      "expected_origin": null,
+      "expected_style_family": null,
+      "expected_age_category_hint": null,
+      "expected_format": null,
+      "upload_dimensions": {
+        "width_ft": 8,
+        "width_in": 0,
+        "length_ft": 10,
+        "length_in": 0
+      },
+      "note": "non-rug or scene-level image"
+    },
+    {
+      "id": "real-052",
+      "category": "invalid",
+      "source": "wikimedia_commons",
+      "source_title": "File:Hawker Sea Fury FB 10 F-AZXJ OTT 2013 10.jpg",
+      "image_url": "https://upload.wikimedia.org/wikipedia/commons/1/15/Hawker_Sea_Fury_FB_10_F-AZXJ_OTT_2013_10.jpg",
+      "is_valid_rug": false,
+      "expected_origin": null,
+      "expected_style_family": null,
+      "expected_age_category_hint": null,
+      "expected_format": null,
+      "upload_dimensions": {
+        "width_ft": 8,
+        "width_in": 0,
+        "length_ft": 10,
+        "length_in": 0
+      },
+      "note": "non-rug or scene-level image"
+    },
+    {
+      "id": "real-053",
+      "category": "invalid",
+      "source": "wikimedia_commons",
+      "source_title": "File:Close-up portrait of unidentified man - NARA - 285624.jpg",
+      "image_url": "https://upload.wikimedia.org/wikipedia/commons/8/8a/Close-up_portrait_of_unidentified_man_-_NARA_-_285624.jpg",
+      "is_valid_rug": false,
+      "expected_origin": null,
+      "expected_style_family": null,
+      "expected_age_category_hint": null,
+      "expected_format": null,
+      "upload_dimensions": {
+        "width_ft": 8,
+        "width_in": 0,
+        "length_ft": 10,
+        "length_in": 0
+      },
+      "note": "non-rug or scene-level image"
+    },
+    {
+      "id": "real-054",
+      "category": "invalid",
+      "source": "wikimedia_commons",
+      "source_title": "File:Close up portrait of a sheep's face (AM 77501-1).jpg",
+      "image_url": "https://upload.wikimedia.org/wikipedia/commons/d/d4/Close_up_portrait_of_a_sheep%27s_face_%28AM_77501-1%29.jpg",
+      "is_valid_rug": false,
+      "expected_origin": null,
+      "expected_style_family": null,
+      "expected_age_category_hint": null,
+      "expected_format": null,
+      "upload_dimensions": {
+        "width_ft": 8,
+        "width_in": 0,
+        "length_ft": 10,
+        "length_in": 0
+      },
+      "note": "non-rug or scene-level image"
+    },
+    {
+      "id": "real-055",
+      "category": "invalid",
+      "source": "wikimedia_commons",
+      "source_title": "File:Jersey City Skyline Jan 2006.jpg",
+      "image_url": "https://upload.wikimedia.org/wikipedia/commons/b/b0/Jersey_City_Skyline_Jan_2006.jpg",
+      "is_valid_rug": false,
+      "expected_origin": null,
+      "expected_style_family": null,
+      "expected_age_category_hint": null,
+      "expected_format": null,
+      "upload_dimensions": {
+        "width_ft": 8,
+        "width_in": 0,
+        "length_ft": 10,
+        "length_in": 0
+      },
+      "note": "non-rug or scene-level image"
+    },
+    {
+      "id": "real-056",
+      "category": "invalid",
+      "source": "wikimedia_commons",
+      "source_title": "File:New York City at night HDR.jpg",
+      "image_url": "https://upload.wikimedia.org/wikipedia/commons/2/22/New_York_City_at_night_HDR.jpg",
+      "is_valid_rug": false,
+      "expected_origin": null,
+      "expected_style_family": null,
+      "expected_age_category_hint": null,
+      "expected_format": null,
+      "upload_dimensions": {
+        "width_ft": 8,
+        "width_in": 0,
+        "length_ft": 10,
+        "length_in": 0
+      },
+      "note": "non-rug or scene-level image"
+    },
+    {
+      "id": "real-057",
+      "category": "invalid",
+      "source": "wikimedia_commons",
+      "source_title": "File:Peugeot Type 26 03.jpg",
+      "image_url": "https://upload.wikimedia.org/wikipedia/commons/0/06/Peugeot_Type_26_03.jpg",
+      "is_valid_rug": false,
+      "expected_origin": null,
+      "expected_style_family": null,
+      "expected_age_category_hint": null,
+      "expected_format": null,
+      "upload_dimensions": {
+        "width_ft": 8,
+        "width_in": 0,
+        "length_ft": 10,
+        "length_in": 0
+      },
+      "note": "non-rug or scene-level image"
+    },
+    {
+      "id": "real-058",
+      "category": "invalid",
+      "source": "wikimedia_commons",
+      "source_title": "File:Dülmen, -Oldtimertreffen- -- 2003 -- 1.jpg",
+      "image_url": "https://upload.wikimedia.org/wikipedia/commons/3/3f/D%C3%BClmen%2C_-Oldtimertreffen-_--_2003_--_1.jpg",
+      "is_valid_rug": false,
+      "expected_origin": null,
+      "expected_style_family": null,
+      "expected_age_category_hint": null,
+      "expected_format": null,
+      "upload_dimensions": {
+        "width_ft": 8,
+        "width_in": 0,
+        "length_ft": 10,
+        "length_in": 0
+      },
+      "note": "non-rug or scene-level image"
+    },
+    {
+      "id": "real-059",
+      "category": "invalid",
+      "source": "wikimedia_commons",
+      "source_title": "File:Sunset at Patenga beach.jpg",
+      "image_url": "https://upload.wikimedia.org/wikipedia/commons/9/9b/Sunset_at_Patenga_beach.jpg",
+      "is_valid_rug": false,
+      "expected_origin": null,
+      "expected_style_family": null,
+      "expected_age_category_hint": null,
+      "expected_format": null,
+      "upload_dimensions": {
+        "width_ft": 8,
+        "width_in": 0,
+        "length_ft": 10,
+        "length_in": 0
+      },
+      "note": "non-rug or scene-level image"
+    },
+    {
+      "id": "real-060",
+      "category": "invalid",
+      "source": "wikimedia_commons",
+      "source_title": "File:Sunset at Rockaway Beach in Pacifica.jpg",
+      "image_url": "https://upload.wikimedia.org/wikipedia/commons/4/49/Sunset_at_Rockaway_Beach_in_Pacifica.jpg",
+      "is_valid_rug": false,
+      "expected_origin": null,
+      "expected_style_family": null,
+      "expected_age_category_hint": null,
+      "expected_format": null,
+      "upload_dimensions": {
+        "width_ft": 8,
+        "width_in": 0,
+        "length_ft": 10,
+        "length_in": 0
+      },
+      "note": "non-rug or scene-level image"
+    }
+  ],
+  "tags": {
+    "style_vocab": [
+      "Heriz",
+      "Kashan",
+      "Isfahan",
+      "Tabriz",
+      "Kerman",
+      "Bidjar",
+      "Sarouk",
+      "Sultanabad",
+      "Gabbeh",
+      "Kilim",
+      "Oushak",
+      "Kazak",
+      "Shirvan",
+      "Beni Ourain"
+    ],
+    "slug": "manifest-real-60-2026-03-20t04-40-27-092z"
+  }
+}
