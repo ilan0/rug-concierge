@@ -10,6 +10,11 @@ import {
 import type { ChatAiContextPacket } from "@/lib/chat/context-packet";
 import type { RoleType } from "@/lib/chat/types";
 import {
+  ENABLE_GENERAL_CHAT_AI,
+  OPENAI_API_KEY,
+  OPENAI_CHAT_MODEL,
+} from "@/lib/config";
+import {
   buildGeneralChatPromptSections,
   getRolePrompt,
   groupGeneralChatSectionsByRole,
@@ -17,7 +22,6 @@ import {
 import type { PromptLayerId } from "@/lib/prompts/layer-ids";
 
 const OPENAI_RESPONSES_URL = "https://api.openai.com/v1/responses";
-const OPENAI_MODEL = process.env.OPENAI_MODEL ?? "gpt-4.1-nano";
 const MAX_ASSISTANT_MESSAGE_CHARS = 420;
 const MAX_NOTE_CHARS = 220;
 const MAX_FOLLOW_UP_QUESTION_CHARS = 220;
@@ -334,17 +338,16 @@ export async function generateGeneralChatResponse(input: {
   forceClarification?: boolean;
   trace?: GeneralChatAiTrace;
 }): Promise<GeneralChatModelResponse> {
-  const generalChatEnabled = process.env.ENABLE_GENERAL_CHAT_AI !== "0";
-  if (!generalChatEnabled) {
+  if (!ENABLE_GENERAL_CHAT_AI) {
     if (input.trace) {
       input.trace.called = false;
-      input.trace.model = OPENAI_MODEL;
+      input.trace.model = OPENAI_CHAT_MODEL;
       input.trace.prompt_layers = [];
       input.trace.request_payload = null;
       input.trace.response_status = null;
       input.trace.response_payload = null;
       input.trace.parsed_response = null;
-      input.trace.fallback_reason = "General chat AI disabled via ENABLE_GENERAL_CHAT_AI";
+      input.trace.fallback_reason = "General chat AI disabled by configuration";
       input.trace.error = null;
       input.trace.incomplete_detected = false;
       input.trace.retry_attempted = false;
@@ -352,26 +355,6 @@ export async function generateGeneralChatResponse(input: {
       input.trace.text_postprocess_applied = false;
     }
     return fallbackResponse("GENERAL_CHAT_AI_RUNTIME:fallback_disabled");
-  }
-
-  const apiKey = process.env.OPENAI_API_KEY;
-  if (!apiKey) {
-    if (input.trace) {
-      input.trace.called = false;
-      input.trace.model = OPENAI_MODEL;
-      input.trace.prompt_layers = [];
-      input.trace.request_payload = null;
-      input.trace.response_status = null;
-      input.trace.response_payload = null;
-      input.trace.parsed_response = null;
-      input.trace.fallback_reason = "Missing OPENAI_API_KEY";
-      input.trace.error = null;
-      input.trace.incomplete_detected = false;
-      input.trace.retry_attempted = false;
-      input.trace.retry_succeeded = false;
-      input.trace.text_postprocess_applied = false;
-    }
-    return fallbackResponse("GENERAL_CHAT_AI_RUNTIME:fallback_missing_api_key");
   }
 
   const prompts = getRecommendationPromptBundle();
@@ -404,7 +387,7 @@ export async function generateGeneralChatResponse(input: {
   });
 
   const requestPayload = {
-    model: OPENAI_MODEL,
+    model: OPENAI_CHAT_MODEL,
     input: [
       ...groupGeneralChatSectionsByRole(promptSections),
       ...(input.forceClarification
@@ -435,7 +418,7 @@ export async function generateGeneralChatResponse(input: {
 
   if (input.trace) {
     input.trace.called = true;
-    input.trace.model = OPENAI_MODEL;
+    input.trace.model = OPENAI_CHAT_MODEL;
     input.trace.prompt_layers = promptSections.map((section) => ({
       id: section.id,
       role: section.role,
@@ -456,7 +439,7 @@ export async function generateGeneralChatResponse(input: {
 
   const firstAttempt = await postOpenAiResponses({
     url: OPENAI_RESPONSES_URL,
-    apiKey,
+    apiKey: OPENAI_API_KEY,
     requestPayload,
     surface: "general_chat",
   });
@@ -495,7 +478,7 @@ export async function generateGeneralChatResponse(input: {
     );
     const retryAttempt = await postOpenAiResponses({
       url: OPENAI_RESPONSES_URL,
-      apiKey,
+      apiKey: OPENAI_API_KEY,
       requestPayload: retryPayload,
       surface: "general_chat",
     });

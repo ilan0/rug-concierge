@@ -38,8 +38,8 @@ import { parseJsonBodyWithSchema } from "@/lib/http/route-validation";
 import {
   readTrimmedString,
 } from "@/lib/http/validators";
+import { CHAT_MEMORY_ENABLED } from "@/lib/config";
 import {
-  checkLocalRateLimit,
   checkRateLimit,
   chatRateLimit,
 } from "@/lib/rate-limit";
@@ -81,13 +81,7 @@ export async function POST(req: Request) {
       req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
       req.headers.get("x-real-ip") ??
       "unknown";
-    const chatRateLimitResult = chatRateLimit
-      ? await checkRateLimit(chatRateLimit, `chat:${ip}`)
-      : checkLocalRateLimit({
-          key: `chat:${ip}`,
-          maxRequests: 20,
-          windowMs: 10 * 60 * 1000,
-        });
+    const chatRateLimitResult = await checkRateLimit(chatRateLimit, `chat:${ip}`);
     if (!chatRateLimitResult.allowed) {
       return NextResponse.json(
         {
@@ -174,7 +168,7 @@ export async function POST(req: Request) {
       ),
     });
     const effectiveMode = routeDecision.mode;
-    const memoryEnabled = process.env.CHAT_MEMORY_V1 !== "0";
+    const memoryEnabled = CHAT_MEMORY_ENABLED;
 
     if (effectiveMode === "recommendation") {
       const recommendationCapabilityError = requireRoleCapabilityOrError(

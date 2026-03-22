@@ -15,7 +15,7 @@
 
 const STORAGE_BUCKET = "rug-images";
 const RUG_PAGE_SIZE = 500;
-const OPENAI_MODEL = "gpt-image-1.5";
+const OPENAI_IMAGE_GENERATION_MODEL = "gpt-image-1.5";
 const OPENAI_IMAGE_SIZE = "1024x1024";
 const OPENAI_IMAGE_QUALITY = "medium";
 const OPENAI_OUTPUT_FORMAT = "webp";
@@ -50,17 +50,13 @@ async function fetchWithTimeout(url, options, timeoutMs) {
 }
 
 function readRequiredEnv() {
-  const supabaseUrl = (
-    process.env.SUPABASE_URL ??
-    process.env.NEXT_PUBLIC_SUPABASE_URL ??
-    ""
-  ).trim();
-  const supabaseSecretKey = (process.env.SUPABASE_SECRET_KEY ?? "").trim();
-  const openAiApiKey = (process.env.OPENAI_API_KEY ?? "").trim();
+  const supabaseUrl = readTrimmedEnv("SUPABASE_URL");
+  const supabaseSecretKey = readTrimmedEnv("SUPABASE_SECRET_KEY");
+  const openAiApiKey = readTrimmedEnv("OPENAI_API_KEY");
 
   if (!supabaseUrl || !supabaseSecretKey) {
     console.error(
-      "[seed-rug-images] Missing required env. Expected SUPABASE_URL (or NEXT_PUBLIC_SUPABASE_URL) and SUPABASE_SECRET_KEY."
+      "[seed-rug-images] Missing required env. Expected SUPABASE_URL and SUPABASE_SECRET_KEY."
     );
     process.exit(1);
   }
@@ -73,6 +69,13 @@ function readRequiredEnv() {
   }
 
   return { supabaseUrl, supabaseSecretKey, openAiApiKey };
+}
+
+function readTrimmedEnv(name) {
+  const value = process.env[name];
+  if (typeof value !== "string") return null;
+  const trimmed = value.trim();
+  return trimmed.length > 0 ? trimmed : null;
 }
 
 async function loadDeps() {
@@ -150,7 +153,7 @@ async function generateRugImageWebpFromOpenAi(input) {
         Authorization: `Bearer ${openAiApiKey}`,
       },
       body: JSON.stringify({
-        model: OPENAI_MODEL,
+        model: OPENAI_IMAGE_GENERATION_MODEL,
         prompt,
         size: OPENAI_IMAGE_SIZE,
         quality: OPENAI_IMAGE_QUALITY,

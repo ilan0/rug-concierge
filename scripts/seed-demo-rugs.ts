@@ -91,20 +91,19 @@ function loadEnv() {
   loadEnvFileIfExists(path.join(cwd, "apps/web/.env.local"));
 }
 
+function readTrimmedEnv(name: string): string | null {
+  const value = process.env[name];
+  if (typeof value !== "string") return null;
+  const trimmed = value.trim();
+  return trimmed.length > 0 ? trimmed : null;
+}
+
 function assertEnv(name: string): string {
-  const value = (process.env[name] ?? "").trim();
+  const value = readTrimmedEnv(name);
   if (!value) {
     throw new Error(`Missing ${name} environment variable.`);
   }
   return value;
-}
-
-function assertAnyEnv(names: string[]): string {
-  for (const name of names) {
-    const value = (process.env[name] ?? "").trim();
-    if (value) return value;
-  }
-  throw new Error(`Missing one of: ${names.join(", ")} environment variables.`);
 }
 
 async function fetchWithTimeout(url: string, timeoutMs = IMAGE_FETCH_TIMEOUT_MS): Promise<Response> {
@@ -304,10 +303,7 @@ async function main() {
 
   const tenantId = assertEnv("TENANT_ID");
   const supabaseUrl = assertEnv("SUPABASE_URL");
-  const supabaseKey = assertAnyEnv([
-    "SUPABASE_SECRET_KEY",
-    "SUPABASE_SERVICE_ROLE_KEY",
-  ]);
+  const supabaseKey = assertEnv("SUPABASE_SECRET_KEY");
 
   const supabase = createClient(supabaseUrl, supabaseKey, {
     auth: { persistSession: false },

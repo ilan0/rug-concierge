@@ -2,48 +2,91 @@ import { cookies } from "next/headers";
 import type { NextRequest } from "next/server";
 import {
   buildDeviceAuthCookieValue,
-  getCookieSecret,
   timingSafeCookieValueMatch,
 } from "@/lib/auth/device-auth";
+import { IS_PRODUCTION } from "@/lib/config";
+import { getConfiguredTenantRuntimeSecrets } from "@/lib/tenant-secrets";
 
 export const STAFF_COOKIE = "staff_unlocked";
-const STAFF_COOKIE_LEGACY_VALUE = "1";
-const STAFF_COOKIE_SCOPE_ID = "staff-unlock";
 
-function getExpectedStaffCookieValue(): string {
-  const cookieSecret = getCookieSecret();
-  if (!cookieSecret) return STAFF_COOKIE_LEGACY_VALUE;
+export type StaffUnlockCheckResult =
+  | { ok: true; unlocked: boolean }
+  | { ok: false; message: string };
+
+export function buildStaffUnlockCookieValue(input: {
+  tenantId: string;
+  cookieSecret: string;
+}): string {
   return buildDeviceAuthCookieValue({
-    tenantId: STAFF_COOKIE_SCOPE_ID,
-    cookieSecret,
+    tenantId: input.tenantId,
+    cookieSecret: input.cookieSecret,
   });
 }
 
-export function getStaffUnlockCookieValue(): string {
-  return getExpectedStaffCookieValue();
-}
-
-function matchesExpectedStaffCookieValue(value: string | undefined): boolean {
-  if (!value) return false;
-  const expected = getExpectedStaffCookieValue();
-  if (expected === STAFF_COOKIE_LEGACY_VALUE) {
-    return value === STAFF_COOKIE_LEGACY_VALUE;
+async function getExpectedStaffCookieValue(): Promise<
+  { ok: true; value: string } | { ok: false; message: string }
+> {
+  const secretsResult = await getConfiguredTenantRuntimeSecrets();
+  if (!secretsResult.ok) {
+    return { ok: false, message: secretsResult.message };
   }
-  return timingSafeCookieValueMatch({
-    submittedCookieValue: value,
-    expectedCookieValue: expected,
-  });
+
+  const cookieSecret = secretsResult.secrets.cookieSecret;
+  if (!cookieSecret) {
+    return {
+      ok: false,
+      message: `Cookie secret is not configured for tenant "${secretsResult.tenantId}".`,
+    };
+  }
+
+  return {
+    ok: true,
+    value: buildStaffUnlockCookieValue({
+      tenantId: secretsResult.tenantId,
+      cookieSecret,
+    }),
+  };
+}
+
+async function checkStaffUnlockCookieValue(
+  value: string | undefined
+): Promise<StaffUnlockCheckResult> {
+  if (!value) return { ok: true, unlocked: false };
+
+  const expected = await getExpectedStaffCookieValue();
+  if (!expected.ok) {
+    return expected;
+  }
+
+  return {
+    ok: true,
+    unlocked: timingSafeCookieValueMatch({
+      submittedCookieValue: value,
+      expectedCookieValue: expected.value,
+    }),
+  };
 }
 
 /** Server component usage — reads cookie store */
 export async function isStaffUnlocked(): Promise<boolean> {
   const jar = await cookies();
-  return matchesExpectedStaffCookieValue(jar.get(STAFF_COOKIE)?.value);
+  const result = await checkStaffUnlockCookieValue(jar.get(STAFF_COOKIE)?.value);
+  return result.ok ? result.unlocked : false;
 }
 
 /** Middleware/route handler usage — reads from request */
-export function isStaffUnlockedFromRequest(req: NextRequest): boolean {
-  return matchesExpectedStaffCookieValue(req.cookies.get(STAFF_COOKIE)?.value);
+export async function getStaffUnlockStateFromRequest(
+  req: NextRequest
+): Promise<StaffUnlockCheckResult> {
+  return checkStaffUnlockCookieValue(req.cookies.get(STAFF_COOKIE)?.value);
+}
+
+/** Middleware/route handler usage — reads from request */
+export async function isStaffUnlockedFromRequest(
+  req: NextRequest
+): Promise<boolean> {
+  const result = await getStaffUnlockStateFromRequest(req);
+  return result.ok ? result.unlocked : false;
 }
 
 /** Cookie options used when setting */
@@ -51,5 +94,5 @@ export const STAFF_COOKIE_OPTIONS = {
   httpOnly: true,
   sameSite: "lax" as const,
   path: "/",
-  secure: process.env.NODE_ENV === "production",
+  secure: IS_PRODUCTION,
 } as const;

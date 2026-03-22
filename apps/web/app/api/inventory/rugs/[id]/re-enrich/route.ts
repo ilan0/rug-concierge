@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { internalError } from "@/lib/errors/http-errors";
-import { isStaffUnlockedFromRequest } from "@/lib/auth/staff";
+import { getStaffUnlockStateFromRequest } from "@/lib/auth/staff";
 import { resolveAuthoritativeTenantForServer } from "@/lib/auth/tenant";
 import {
   checkLocalRateLimit,
@@ -26,6 +26,10 @@ function staffLockedResponse() {
   return NextResponse.json({ error: "staff_locked" }, { status: 401 });
 }
 
+function staffAuthMisconfiguredResponse(message: string) {
+  return NextResponse.json({ error: message }, { status: 503 });
+}
+
 async function withPrimaryImage(input: { tenantId: string; rugId: string }) {
   const imageMap = await fetchPrimaryRugImagesForRugs({
     supabase: supabaseAdmin,
@@ -43,7 +47,11 @@ export async function POST(
   req: NextRequest,
   context: { params: Promise<{ id: string }> }
 ) {
-  if (!isStaffUnlockedFromRequest(req)) {
+  const staffUnlockState = await getStaffUnlockStateFromRequest(req);
+  if (!staffUnlockState.ok) {
+    return staffAuthMisconfiguredResponse(staffUnlockState.message);
+  }
+  if (!staffUnlockState.unlocked) {
     return staffLockedResponse();
   }
 

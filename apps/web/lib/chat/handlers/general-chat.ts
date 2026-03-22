@@ -9,6 +9,7 @@ import {
   buildAiContextPacket,
   getAiContextPacketStats,
 } from "@/lib/chat/context-packet";
+import { OPENAI_CHAT_MODEL } from "@/lib/config";
 import type { ChatTurnHandlerInput, GeneralChatResponse } from "@/lib/chat/types";
 import { writeE2eTraceArtifact } from "@/lib/qa/e2e-trace";
 
@@ -32,7 +33,7 @@ export async function handleGeneralChatTurn(
 
   const aiTrace: GeneralChatAiTrace = {
     called: false,
-    model: process.env.OPENAI_MODEL ?? "gpt-4.1-nano",
+    model: OPENAI_CHAT_MODEL,
     prompt_layers: [],
     request_payload: null,
     response_status: null,

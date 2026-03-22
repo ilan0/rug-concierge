@@ -3,6 +3,10 @@ import {
   type ParsedAiStructuredFields,
 } from "@/lib/inventory/schemas";
 import { postOpenAiResponses } from "@/lib/ai/response-quality";
+import {
+  OPENAI_API_KEY,
+  OPENAI_VISION_MODEL,
+} from "@/lib/config";
 import { formatRugSize } from "@/lib/utils/format";
 
 const OPENAI_RESPONSES_URL = "https://api.openai.com/v1/responses";
@@ -412,16 +416,13 @@ export async function requestVisionEnrichment(input: {
   widthTotalIn: number | null;
   lengthTotalIn: number | null;
 }): Promise<VisionEnrichmentResult | null> {
-  const apiKey = process.env.OPENAI_API_KEY;
-  if (!apiKey) return null;
-
   const sizeDisplay =
     typeof input.widthTotalIn === "number" && typeof input.lengthTotalIn === "number"
       ? formatRugSize(input.widthTotalIn, input.lengthTotalIn)
       : null;
 
   const requestPayload = {
-    model: "gpt-4o",
+    model: OPENAI_VISION_MODEL,
     input: [
       {
         role: "system",
@@ -462,7 +463,7 @@ export async function requestVisionEnrichment(input: {
 
   const response = await postOpenAiResponses({
     url: OPENAI_RESPONSES_URL,
-    apiKey,
+    apiKey: OPENAI_API_KEY,
     requestPayload,
     surface: "vision_enrichment",
   });

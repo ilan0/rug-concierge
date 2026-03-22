@@ -1,16 +1,23 @@
 import { NextResponse } from "next/server";
 import { getResolvedBranding } from "@/lib/branding/tenant-branding";
-
-function readTrimmedEnv(name: string): string | null {
-  const raw = process.env[name];
-  if (typeof raw !== "string") return null;
-  const trimmed = raw.trim();
-  return trimmed.length > 0 ? trimmed : null;
-}
+import {
+  getConfiguredTenantSettings,
+  readTenantPasscodeGatedFromSettings,
+} from "@/lib/tenant-settings";
 
 export async function GET() {
-  const branding = await getResolvedBranding();
-  const isPasscodeGated = Boolean(readTrimmedEnv("STORE_PASSCODE"));
+  const [branding, settingsResult] = await Promise.all([
+    getResolvedBranding(),
+    getConfiguredTenantSettings(),
+  ]);
+
+  if (!settingsResult.ok) {
+    return NextResponse.json({ error: settingsResult.message }, { status: 503 });
+  }
+
+  const isPasscodeGated = readTenantPasscodeGatedFromSettings(
+    settingsResult.settings
+  );
 
   return NextResponse.json({
     storeName: branding.storeName,

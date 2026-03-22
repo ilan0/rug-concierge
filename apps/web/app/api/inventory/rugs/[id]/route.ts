@@ -3,7 +3,7 @@ import { z } from "zod";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { internalError } from "@/lib/errors/http-errors";
 import { resolveAuthoritativeTenantForServer } from "@/lib/auth/tenant";
-import { isStaffUnlockedFromRequest } from "@/lib/auth/staff";
+import { getStaffUnlockStateFromRequest } from "@/lib/auth/staff";
 import { fetchPrimaryRugImagesForRugs } from "@/lib/storage/rug-images";
 import { buildTradeTitle } from "@/lib/inventory/title-builder";
 import {
@@ -36,6 +36,10 @@ const PATCH_BODY_SCHEMA = z
 
 function staffLockedResponse() {
   return NextResponse.json({ error: "staff_locked" }, { status: 401 });
+}
+
+function staffAuthMisconfiguredResponse(message: string) {
+  return NextResponse.json({ error: message }, { status: 503 });
 }
 
 async function enforceInventoryRateLimit(
@@ -89,7 +93,11 @@ export async function GET(
   req: NextRequest,
   context: { params: Promise<{ id: string }> }
 ) {
-  if (!isStaffUnlockedFromRequest(req)) {
+  const staffUnlockState = await getStaffUnlockStateFromRequest(req);
+  if (!staffUnlockState.ok) {
+    return staffAuthMisconfiguredResponse(staffUnlockState.message);
+  }
+  if (!staffUnlockState.unlocked) {
     return staffLockedResponse();
   }
   const rateLimited = await enforceInventoryRateLimit(req, "read");
@@ -124,7 +132,11 @@ export async function PATCH(
   req: NextRequest,
   context: { params: Promise<{ id: string }> }
 ) {
-  if (!isStaffUnlockedFromRequest(req)) {
+  const staffUnlockState = await getStaffUnlockStateFromRequest(req);
+  if (!staffUnlockState.ok) {
+    return staffAuthMisconfiguredResponse(staffUnlockState.message);
+  }
+  if (!staffUnlockState.unlocked) {
     return staffLockedResponse();
   }
   const rateLimited = await enforceInventoryRateLimit(req, "write");
@@ -251,7 +263,11 @@ export async function DELETE(
   req: NextRequest,
   context: { params: Promise<{ id: string }> }
 ) {
-  if (!isStaffUnlockedFromRequest(req)) {
+  const staffUnlockState = await getStaffUnlockStateFromRequest(req);
+  if (!staffUnlockState.ok) {
+    return staffAuthMisconfiguredResponse(staffUnlockState.message);
+  }
+  if (!staffUnlockState.unlocked) {
     return staffLockedResponse();
   }
   const rateLimited = await enforceInventoryRateLimit(req, "write");

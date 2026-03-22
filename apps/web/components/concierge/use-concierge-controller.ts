@@ -167,7 +167,7 @@ export function useConciergeController(input: UseConciergeControllerInput) {
     .find((turn) => turn.role === "assistant");
   const latestAssistantMode = latestAssistantTurn?.fineMode;
 
-  const isDeveloperRole = debug && process.env.NODE_ENV !== "production";
+  const isDeveloperRole = debug;
   const canUseDebugTrace = isDeveloperRole;
   const canOpenOperator = isDeveloperRole;
 

@@ -1,17 +1,10 @@
-function readTrimmedEnv(name: string): string | null {
-  const raw = process.env[name];
-  if (typeof raw !== "string") return null;
-  const trimmed = raw.trim();
-  return trimmed.length > 0 ? trimmed : null;
-}
+import {
+  ALLOW_DYNAMIC_TENANT_ID,
+  TENANT_ID,
+} from "@/lib/config";
 
-function allowDynamicTenantResolution(): boolean {
-  if (process.env.NODE_ENV !== "production") return true;
-  return readTrimmedEnv("ALLOW_DYNAMIC_TENANT_ID") === "1";
-}
-
-export function getConfiguredTenantId(): string | null {
-  return readTrimmedEnv("TENANT_ID");
+export function getConfiguredTenantId(): string {
+  return TENANT_ID;
 }
 
 export function normalizeTenantId(value: unknown): string | null {
@@ -41,7 +34,7 @@ export function resolveAuthoritativeTenantForServer(input: {
 }): string | null {
   const configuredTenant = getConfiguredTenantId();
   if (configuredTenant) return configuredTenant;
-  if (!allowDynamicTenantResolution()) return null;
+  if (!ALLOW_DYNAMIC_TENANT_ID) return null;
   return normalizeTenantId(input.requestTenantId) ?? normalizeTenantId(input.cookieTenantId) ?? null;
 }
 

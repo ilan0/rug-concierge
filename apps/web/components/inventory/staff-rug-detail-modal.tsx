@@ -8,6 +8,16 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -46,6 +56,8 @@ type EditDraft = {
   stock_id: string;
   status: "available" | "on_hold" | "sold";
 };
+
+type UnsavedAction = "close-modal" | "exit-edit-mode";
 
 const ORIGIN_OPTIONS = [
   "Persian",
@@ -196,6 +208,9 @@ export function StaffRugDetailModal({
   const [colorInput, setColorInput] = useState("");
   const [showPatternAddInput, setShowPatternAddInput] = useState(false);
   const [showColorAddInput, setShowColorAddInput] = useState(false);
+  const [unsavedDialogOpen, setUnsavedDialogOpen] = useState(false);
+  const [pendingUnsavedAction, setPendingUnsavedAction] =
+    useState<UnsavedAction | null>(null);
   const labelInputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
@@ -268,6 +283,21 @@ export function StaffRugDetailModal({
   const baselineDraft = useMemo(() => (detail ? detailToDraft(detail) : null), [detail]);
   const hasUnsavedChanges =
     editMode && draft && baselineDraft ? !draftsEqual(draft, baselineDraft) : false;
+
+  const resetDraftFromDetail = () => {
+    if (!detail) return;
+    setDraft(detailToDraft(detail));
+  };
+
+  const promptUnsavedChanges = (action: UnsavedAction) => {
+    setPendingUnsavedAction(action);
+    setUnsavedDialogOpen(true);
+  };
+
+  const closeUnsavedDialog = () => {
+    setUnsavedDialogOpen(false);
+    setPendingUnsavedAction(null);
+  };
 
   const onToggleListValue = (field: "pattern" | "primary_colors", value: string) => {
     setDraft((prev) => {
@@ -434,23 +464,7 @@ export function StaffRugDetailModal({
       onClose();
       return;
     }
-
-    const shouldSave = window.confirm(
-      "You have unsaved changes.\n\nPress OK to Save and close.\nPress Cancel for discard options."
-    );
-    if (shouldSave) {
-      const saved = await onSaveEdits();
-      if (saved) onClose();
-      return;
-    }
-
-    const shouldDiscard = window.confirm("Discard unsaved changes and close?");
-    if (!shouldDiscard) return;
-    if (detail) {
-      setDraft(detailToDraft(detail));
-    }
-    setEditMode(false);
-    onClose();
+    promptUnsavedChanges("close-modal");
   };
 
   const onToggleEditMode = async () => {
@@ -462,19 +476,36 @@ export function StaffRugDetailModal({
       setEditMode(false);
       return;
     }
-    const shouldSave = window.confirm(
-      "You have unsaved changes.\n\nPress OK to Save.\nPress Cancel for discard options."
-    );
-    if (shouldSave) {
-      await onSaveEdits();
+    promptUnsavedChanges("exit-edit-mode");
+  };
+
+  const onConfirmUnsavedDialog = async (choice: "save" | "discard" | "cancel") => {
+    if (!pendingUnsavedAction) return;
+
+    if (choice === "cancel") {
+      closeUnsavedDialog();
       return;
     }
-    const shouldDiscard = window.confirm("Discard unsaved changes?");
-    if (!shouldDiscard) return;
-    if (detail) {
-      setDraft(detailToDraft(detail));
+
+    if (choice === "discard") {
+      resetDraftFromDetail();
+      setEditMode(false);
+      const action = pendingUnsavedAction;
+      closeUnsavedDialog();
+      if (action === "close-modal") {
+        onClose();
+      }
+      return;
     }
-    setEditMode(false);
+
+    const saved = await onSaveEdits();
+    if (!saved) return;
+
+    const action = pendingUnsavedAction;
+    closeUnsavedDialog();
+    if (action === "close-modal") {
+      onClose();
+    }
   };
 
   return (
@@ -958,6 +989,47 @@ export function StaffRugDetailModal({
           ) : null}
         </div>
       </DialogContent>
+      <AlertDialog
+        open={unsavedDialogOpen}
+        onOpenChange={(nextOpen) => {
+          if (!nextOpen) {
+            closeUnsavedDialog();
+          }
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Unsaved changes</AlertDialogTitle>
+            <AlertDialogDescription>
+              {pendingUnsavedAction === "close-modal"
+                ? "Save your edits before closing this rug, or discard them and close without saving."
+                : "Save your edits before leaving edit mode, or discard them and exit without saving."}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel
+              onClick={() => void onConfirmUnsavedDialog("cancel")}
+              disabled={saving}
+            >
+              Cancel
+            </AlertDialogCancel>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => void onConfirmUnsavedDialog("discard")}
+              disabled={saving}
+            >
+              Discard
+            </Button>
+            <AlertDialogAction
+              onClick={() => void onConfirmUnsavedDialog("save")}
+              disabled={saving}
+            >
+              {saving ? "Saving..." : "Save changes"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Dialog>
   );
 }

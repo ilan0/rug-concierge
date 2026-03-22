@@ -172,6 +172,13 @@ function loadLocalEnvFile() {
   }
 }
 
+function readTrimmedEnv(name: string): string | null {
+  const value = process.env[name];
+  if (typeof value !== "string") return null;
+  const trimmed = value.trim();
+  return trimmed.length > 0 ? trimmed : null;
+}
+
 function parseArgs(argv: string[]): ScriptOptions {
   const options: ScriptOptions = {
     tenantId: "",
@@ -196,7 +203,10 @@ function parseArgs(argv: string[]): ScriptOptions {
   }
 
   if (!options.tenantId) {
-    options.tenantId = (process.env.TENANT_ID ?? "").trim();
+    const tenantIdFromEnv = readTrimmedEnv("TENANT_ID");
+    if (tenantIdFromEnv) {
+      options.tenantId = tenantIdFromEnv;
+    }
   }
   if (!options.tenantId) {
     throw new Error("Missing --tenant-id=<uuid> (or TENANT_ID env var).");
@@ -206,19 +216,11 @@ function parseArgs(argv: string[]): ScriptOptions {
 }
 
 function assertEnv(name: string): string {
-  const value = (process.env[name] ?? "").trim();
+  const value = readTrimmedEnv(name);
   if (!value) {
     throw new Error(`Missing ${name} environment variable.`);
   }
   return value;
-}
-
-function assertAnyEnv(names: string[]): string {
-  for (const name of names) {
-    const value = (process.env[name] ?? "").trim();
-    if (value) return value;
-  }
-  throw new Error(`Missing one of: ${names.join(", ")} environment variables.`);
 }
 
 function toPlainText(value: string): string {
@@ -558,10 +560,7 @@ async function main() {
   const options = parseArgs(process.argv.slice(2));
 
   const supabaseUrl = assertEnv("SUPABASE_URL");
-  const supabaseSecretKey = assertAnyEnv([
-    "SUPABASE_SECRET_KEY",
-    "SUPABASE_SERVICE_ROLE_KEY",
-  ]);
+  const supabaseSecretKey = assertEnv("SUPABASE_SECRET_KEY");
   const supabase = createClient(supabaseUrl, supabaseSecretKey, {
     auth: { persistSession: false },
   });

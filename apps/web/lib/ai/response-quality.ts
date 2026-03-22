@@ -1,6 +1,19 @@
+import {
+  OPENAI_MAX_OUTPUT_TOKENS_GENERAL_CHAT,
+  OPENAI_MAX_OUTPUT_TOKENS_RECOMMENDATION,
+  OPENAI_MAX_OUTPUT_TOKENS_VISION_ENRICHMENT,
+  OPENAI_RETRY_ATTEMPTS,
+  OPENAI_RETRY_ATTEMPTS_GENERAL_CHAT,
+  OPENAI_RETRY_ATTEMPTS_RECOMMENDATION,
+  OPENAI_RETRY_ATTEMPTS_VISION_ENRICHMENT,
+  OPENAI_RETRY_BASE_MS,
+  OPENAI_TIMEOUT_MS,
+  OPENAI_TIMEOUT_MS_GENERAL_CHAT,
+  OPENAI_TIMEOUT_MS_RECOMMENDATION,
+  OPENAI_TIMEOUT_MS_VISION_ENRICHMENT,
+} from "@/lib/config";
+
 const DEFAULT_PREVIEW_MAX_CHARS = 120;
-const DEFAULT_OPENAI_RETRY_ATTEMPTS = 3;
-const DEFAULT_OPENAI_RETRY_BASE_MS = 350;
 
 export type OpenAiSurface =
   | "general_chat"
@@ -15,51 +28,27 @@ export type OpenAiAttempt = {
   ok: boolean;
 };
 
-function parsePositiveInt(value: string | undefined): number | null {
-  if (!value) return null;
-  const parsed = Number.parseInt(value, 10);
-  if (!Number.isFinite(parsed) || parsed <= 0) return null;
-  return parsed;
-}
-
 function getOpenAiTimeoutMs(surface: OpenAiSurface): number {
-  const globalTimeout = parsePositiveInt(process.env.OPENAI_TIMEOUT_MS);
   const bySurface: Record<OpenAiSurface, number> = {
-    general_chat: 20_000,
-    recommendation: 5_500,
-    vision_enrichment: 25_000,
-  };
-  const envBySurface: Partial<Record<OpenAiSurface, string | undefined>> = {
-    general_chat: process.env.OPENAI_TIMEOUT_MS_GENERAL_CHAT,
-    recommendation: process.env.OPENAI_TIMEOUT_MS_RECOMMENDATION,
-    vision_enrichment: process.env.OPENAI_TIMEOUT_MS_VISION_ENRICHMENT,
+    general_chat: OPENAI_TIMEOUT_MS_GENERAL_CHAT,
+    recommendation: OPENAI_TIMEOUT_MS_RECOMMENDATION,
+    vision_enrichment: OPENAI_TIMEOUT_MS_VISION_ENRICHMENT,
   };
 
-  return parsePositiveInt(envBySurface[surface]) ?? globalTimeout ?? bySurface[surface];
+  return bySurface[surface] ?? OPENAI_TIMEOUT_MS;
 }
 
 function getOpenAiRetryAttempts(surface: OpenAiSurface): number {
-  const globalRetryAttempts = parsePositiveInt(process.env.OPENAI_RETRY_ATTEMPTS);
   const bySurface: Record<OpenAiSurface, number> = {
-    general_chat: DEFAULT_OPENAI_RETRY_ATTEMPTS,
-    recommendation: 1,
-    vision_enrichment: 3,
+    general_chat: OPENAI_RETRY_ATTEMPTS_GENERAL_CHAT,
+    recommendation: OPENAI_RETRY_ATTEMPTS_RECOMMENDATION,
+    vision_enrichment: OPENAI_RETRY_ATTEMPTS_VISION_ENRICHMENT,
   };
-  const envBySurface: Partial<Record<OpenAiSurface, string | undefined>> = {
-    general_chat: process.env.OPENAI_RETRY_ATTEMPTS_GENERAL_CHAT,
-    recommendation: process.env.OPENAI_RETRY_ATTEMPTS_RECOMMENDATION,
-    vision_enrichment: process.env.OPENAI_RETRY_ATTEMPTS_VISION_ENRICHMENT,
-  };
-  const parsed = parsePositiveInt(envBySurface[surface]) ?? globalRetryAttempts;
-  if (!parsed) return bySurface[surface];
-  return Math.min(parsed, 5);
+  return Math.min(bySurface[surface] ?? OPENAI_RETRY_ATTEMPTS, 5);
 }
 
 function getOpenAiRetryBaseMs(): number {
-  return (
-    parsePositiveInt(process.env.OPENAI_RETRY_BASE_MS) ??
-    DEFAULT_OPENAI_RETRY_BASE_MS
-  );
+  return OPENAI_RETRY_BASE_MS;
 }
 
 function isRetryableOpenAiStatus(status: number): boolean {
@@ -79,19 +68,13 @@ async function sleep(ms: number): Promise<void> {
 }
 
 export function getMaxOutputTokens(surface: OpenAiSurface): number {
-  const defaultBySurface: Record<OpenAiSurface, number> = {
-    general_chat: 300,
-    recommendation: 500,
-    vision_enrichment: 450,
+  const bySurface: Record<OpenAiSurface, number> = {
+    general_chat: OPENAI_MAX_OUTPUT_TOKENS_GENERAL_CHAT,
+    recommendation: OPENAI_MAX_OUTPUT_TOKENS_RECOMMENDATION,
+    vision_enrichment: OPENAI_MAX_OUTPUT_TOKENS_VISION_ENRICHMENT,
   };
 
-  const envBySurface: Record<OpenAiSurface, string | undefined> = {
-    general_chat: process.env.OPENAI_MAX_OUTPUT_TOKENS_GENERAL_CHAT,
-    recommendation: process.env.OPENAI_MAX_OUTPUT_TOKENS_RECOMMENDATION,
-    vision_enrichment: process.env.OPENAI_MAX_OUTPUT_TOKENS_VISION_ENRICHMENT,
-  };
-
-  return parsePositiveInt(envBySurface[surface]) ?? defaultBySurface[surface];
+  return bySurface[surface];
 }
 
 export function normalizeText(value: string): string {

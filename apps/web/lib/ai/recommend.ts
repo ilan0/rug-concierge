@@ -14,6 +14,10 @@ import {
   buildRecommendationPromptSections,
   groupPromptSectionsByRole,
 } from "@/lib/prompts/recommendation-stack";
+import {
+  OPENAI_API_KEY,
+  OPENAI_CHAT_MODEL,
+} from "@/lib/config";
 
 // Flow overview
 // 1) If candidate inventory is empty -> return no_match.
@@ -24,7 +28,6 @@ import {
 // 6) If any API/parse/validation failure occurs -> return deterministic fallback.
 
 const OPENAI_RESPONSES_URL = "https://api.openai.com/v1/responses";
-const OPENAI_MODEL = process.env.OPENAI_MODEL ?? "gpt-4.1-nano";
 const MAX_RECOMMENDATIONS = 8;
 const CONFIDENCE_MIN = 0.35;
 const CONFIDENCE_MAX = 0.95;
@@ -38,9 +41,6 @@ const MAX_FACTOR_CHARS = 100;
 const MAX_NOTES_CHARS = 220;
 const RETRY_SYSTEM_INSTRUCTION =
   "Retry and return one complete JSON object that matches the schema exactly. Keep answers concise and finish all sentences.";
-const ENABLE_PARSE_RETRY =
-  (process.env.OPENAI_RECOMMENDATION_PARSE_RETRY ?? "").trim() === "1";
-
 type RecommendationPromptContext = {
   role?: "retail_customer" | "store_staff";
   chat_context?: {
@@ -850,8 +850,14 @@ function sanitizeResponse(
   // This blocks hallucinated IDs from passing through.
   const allowedIds = new Set(inventory.map((rug) => rug.id));
   const inventoryById = new Map(inventory.map((rug) => [rug.id, rug]));
-  const recommendations = response.recommendations
-    .filter((rec) => allowedIds.has(rec.rug_id))
+  const seenRugIds = new Set<string>();
+  const dedupedRecommendations = response.recommendations.filter((rec) => {
+    if (!allowedIds.has(rec.rug_id)) return false;
+    if (seenRugIds.has(rec.rug_id)) return false;
+    seenRugIds.add(rec.rug_id);
+    return true;
+  });
+  const recommendations = dedupedRecommendations
     .slice(0, MAX_RECOMMENDATIONS)
     .map((rec) => {
       const rug = inventoryById.get(rec.rug_id);
@@ -943,7 +949,7 @@ export async function rankAndExplain(
   if (inventory.length === 0) {
     if (trace) {
       trace.called = false;
-      trace.model = OPENAI_MODEL;
+      trace.model = OPENAI_CHAT_MODEL;
       trace.prompt_layers = [];
       trace.request_payload = null;
       trace.response_status = null;
@@ -974,7 +980,7 @@ export async function rankAndExplain(
   if (shouldUseDeterministicPath({ inventory, constraints, userMessage })) {
     if (trace) {
       trace.called = false;
-      trace.model = OPENAI_MODEL;
+      trace.model = OPENAI_CHAT_MODEL;
       trace.prompt_layers = [];
       trace.request_payload = null;
       trace.response_status = null;
@@ -991,30 +997,6 @@ export async function rankAndExplain(
     return applyTonePolish({
       ...fallbackRecommendations(inventory, constraints, userMessage),
       notes: "Deterministic fast-path response.",
-    });
-  }
-
-  const apiKey = process.env.OPENAI_API_KEY;
-  if (!apiKey) {
-    if (trace) {
-      trace.called = false;
-      trace.model = OPENAI_MODEL;
-      trace.prompt_layers = [];
-      trace.request_payload = null;
-      trace.response_status = null;
-      trace.response_payload = null;
-      trace.parsed_response = null;
-      trace.fallback_reason = "Missing OPENAI_API_KEY";
-      trace.error = null;
-      trace.incomplete_detected = false;
-      trace.retry_attempted = false;
-      trace.retry_succeeded = false;
-      trace.text_postprocess_applied = false;
-    }
-    // Missing key should not crash the endpoint.
-    return applyTonePolish({
-      ...fallbackRecommendations(inventory, constraints, userMessage),
-      notes: "Missing OPENAI_API_KEY. Returned local fallback.",
     });
   }
 
@@ -1046,7 +1028,7 @@ export async function rankAndExplain(
   const requestInput = groupPromptSectionsByRole(promptSections);
 
   const requestPayload = {
-    model: OPENAI_MODEL,
+    model: OPENAI_CHAT_MODEL,
     input: requestInput,
     max_output_tokens: getMaxOutputTokens("recommendation"),
     text: {
@@ -1062,7 +1044,7 @@ export async function rankAndExplain(
 
   if (trace) {
     trace.called = true;
-    trace.model = OPENAI_MODEL;
+    trace.model = OPENAI_CHAT_MODEL;
     trace.prompt_layers = promptSections.map((section) => ({
       id: section.id,
       role: section.role,
@@ -1083,7 +1065,7 @@ export async function rankAndExplain(
 
   const firstAttempt = await postOpenAiResponses({
     url: OPENAI_RESPONSES_URL,
-    apiKey,
+    apiKey: OPENAI_API_KEY,
     requestPayload,
     surface: "recommendation",
   });
@@ -1109,7 +1091,6 @@ export async function rankAndExplain(
 
   let parsed = parseRecommendationResponse(firstAttempt.response_payload);
   const shouldRetry =
-    ENABLE_PARSE_RETRY &&
     shouldRetryAfterAttempt({
       attempt: firstAttempt,
       parseSucceeded: Boolean(parsed),
@@ -1127,7 +1108,7 @@ export async function rankAndExplain(
     );
     const retryAttempt = await postOpenAiResponses({
       url: OPENAI_RESPONSES_URL,
-      apiKey,
+      apiKey: OPENAI_API_KEY,
       requestPayload: retryPayload,
       surface: "recommendation",
     });

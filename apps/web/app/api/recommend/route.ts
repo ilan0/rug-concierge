@@ -24,7 +24,6 @@ import {
   readUserMessage,
 } from "@/lib/http/validators";
 import {
-  checkLocalRateLimit,
   checkRateLimit,
   recommendRateLimit,
 } from "@/lib/rate-limit";
@@ -78,13 +77,10 @@ export async function POST(req: Request) {
       req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
       req.headers.get("x-real-ip") ??
       "unknown";
-    const recommendRateLimitResult = recommendRateLimit
-      ? await checkRateLimit(recommendRateLimit, `recommend:${ip}`)
-      : checkLocalRateLimit({
-          key: `recommend:${ip}`,
-          maxRequests: 30,
-          windowMs: 10 * 60 * 1000,
-        });
+    const recommendRateLimitResult = await checkRateLimit(
+      recommendRateLimit,
+      `recommend:${ip}`
+    );
     if (!recommendRateLimitResult.allowed) {
       return NextResponse.json(
         {

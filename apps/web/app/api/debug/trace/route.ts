@@ -3,6 +3,7 @@ import { existsSync } from "node:fs";
 import { readdir, readFile } from "node:fs/promises";
 import path from "node:path";
 import { z } from "zod";
+import { IS_PRODUCTION } from "@/lib/config";
 import { parseSearchParamsWithSchema } from "@/lib/http/route-validation";
 
 const DEBUG_TRACE_QUERY_SCHEMA = z
@@ -42,7 +43,7 @@ function resolveRepoRootFromCwd(): string {
 }
 
 export async function GET(req: Request) {
-  if (process.env.NODE_ENV === "production") {
+  if (IS_PRODUCTION) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 

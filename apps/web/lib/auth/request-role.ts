@@ -3,6 +3,7 @@ import {
   normalizeAppRole,
   type AppRole,
 } from "@/lib/auth/roles";
+import { IS_PRODUCTION } from "@/lib/config";
 
 export type ResolvedRequestRole = {
   role: AppRole;
@@ -50,7 +51,7 @@ export async function resolveRequestRole(input?: {
       ? input.requestedRole
       : null;
 
-  const allowDeveloperRole = process.env.NODE_ENV !== "production";
+  const allowDeveloperRole = !IS_PRODUCTION;
   if (requestRole && (requestRole !== "developer" || allowDeveloperRole)) {
     return {
       role: requestRole,

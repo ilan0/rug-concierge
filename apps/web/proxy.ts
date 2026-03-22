@@ -14,9 +14,9 @@ function isConciergeRoute(pathname: string): boolean {
   return pathname === CONCIERGE_ROUTE || pathname.startsWith(`${CONCIERGE_ROUTE}/`);
 }
 
-export function proxy(req: NextRequest) {
+export async function proxy(req: NextRequest) {
   const { pathname } = req.nextUrl;
-  const staffUnlocked = isStaffUnlockedFromRequest(req);
+  const staffUnlocked = await isStaffUnlockedFromRequest(req);
 
   if (isStaffRoute(pathname) && !staffUnlocked) {
     const url = req.nextUrl.clone();

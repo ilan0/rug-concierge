@@ -3,11 +3,11 @@ import { z } from "zod";
 import {
   STAFF_COOKIE,
   STAFF_COOKIE_OPTIONS,
-  getStaffUnlockCookieValue,
+  buildStaffUnlockCookieValue,
 } from "@/lib/auth/staff";
 import { timingSafePasscodeMatch } from "@/lib/auth/device-auth";
+import { getConfiguredTenantRuntimeSecrets } from "@/lib/tenant-secrets";
 import {
-  checkLocalRateLimit,
   checkRateLimit,
   passcodeRateLimit,
 } from "@/lib/rate-limit";
@@ -19,18 +19,19 @@ const PASSCODE_BODY_SCHEMA = z
   })
   .strict();
 
+function serviceUnavailable(message: string) {
+  return NextResponse.json({ error: message }, { status: 503 });
+}
+
 export async function POST(req: NextRequest) {
   const ip =
     req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
     req.headers.get("x-real-ip") ??
     "unknown";
-  const passcodeRateLimitResult = passcodeRateLimit
-    ? await checkRateLimit(passcodeRateLimit, `passcode:${ip}`)
-    : checkLocalRateLimit({
-        key: `passcode:${ip}`,
-        maxRequests: 5,
-        windowMs: 5 * 60 * 1000,
-      });
+  const passcodeRateLimitResult = await checkRateLimit(
+    passcodeRateLimit,
+    `passcode:${ip}`
+  );
   if (!passcodeRateLimitResult.allowed) {
     const retryAfterSeconds = passcodeRateLimitResult.resetAtMs
       ? Math.max(
@@ -60,21 +61,41 @@ export async function POST(req: NextRequest) {
   if (!parsedBody.ok) return parsedBody.response;
   const { passcode } = parsedBody.value;
 
-  const expected = process.env.STORE_PASSCODE?.trim();
-  if (!expected) {
-    return NextResponse.json(
-      { error: "Passcode not configured" },
-      { status: 503 }
+  const secretsResult = await getConfiguredTenantRuntimeSecrets();
+  if (!secretsResult.ok) {
+    return serviceUnavailable(secretsResult.message);
+  }
+
+  const { tenantId, secrets } = secretsResult;
+  if (!secrets.storePasscode) {
+    return serviceUnavailable(
+      `Store passcode is not configured for tenant "${tenantId}".`
+    );
+  }
+
+  if (!secrets.cookieSecret) {
+    return serviceUnavailable(
+      `Cookie secret is not configured for tenant "${tenantId}".`
     );
   }
 
   if (
-    !timingSafePasscodeMatch({ submitted: passcode, expected })
+    !timingSafePasscodeMatch({
+      submitted: passcode,
+      expected: secrets.storePasscode,
+    })
   ) {
     return NextResponse.json({ error: "Invalid passcode" }, { status: 401 });
   }
 
   const res = NextResponse.json({ ok: true });
-  res.cookies.set(STAFF_COOKIE, getStaffUnlockCookieValue(), STAFF_COOKIE_OPTIONS);
+  res.cookies.set(
+    STAFF_COOKIE,
+    buildStaffUnlockCookieValue({
+      tenantId,
+      cookieSecret: secrets.cookieSecret,
+    }),
+    STAFF_COOKIE_OPTIONS
+  );
   return res;
 }

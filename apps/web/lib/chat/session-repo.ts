@@ -3,6 +3,7 @@ import type {
   SessionData,
   SessionMessage,
 } from "@/lib/chat/types";
+import { CHAT_PERSISTENCE_FAIL_OPEN } from "@/lib/config";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 
 const CHAT_SESSIONS_TABLE = "chat_sessions";
@@ -11,8 +12,7 @@ const CHAT_MESSAGES_TABLE = "chat_messages";
 const warningCache = new Set<string>();
 
 function shouldFailClosedOnPersistenceError(): boolean {
-  if (process.env.NODE_ENV !== "production") return false;
-  return process.env.CHAT_PERSISTENCE_FAIL_OPEN === "1" ? false : true;
+  return !CHAT_PERSISTENCE_FAIL_OPEN;
 }
 
 function persistenceError(message: string): never {

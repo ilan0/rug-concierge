@@ -30,7 +30,6 @@ Primary UI shell for Rug Concierge.
 - concierge is always available
 - staff route tabs are hidden in locked mode and shown only after unlock
 - staff routes (`/inventory`, `/intake`) require `staff_unlocked` cookie
-- legacy `staff_unlocked=1` works only when `COOKIE_SECRET` is unset
 - unlock with `POST /api/auth/passcode`, lock with `POST /api/auth/lock`
 
 ## Core Docs

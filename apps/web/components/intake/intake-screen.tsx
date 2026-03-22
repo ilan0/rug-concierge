@@ -364,6 +364,12 @@ export function IntakeScreen({ tenantId }: IntakeScreenProps) {
     if (parsedLengthIn === null) {
       nextFieldErrors.lengthIn = "Enter length inches (0-11).";
     }
+    if (parsedWidthFt === null || parsedWidthIn === null) {
+      nextFieldErrors.width = "Enter width using whole feet and inches.";
+    }
+    if (parsedLengthFt === null || parsedLengthIn === null) {
+      nextFieldErrors.length = "Enter length using whole feet and inches.";
+    }
     if (parsedWidthFt !== null && parsedWidthIn !== null) {
       const widthTotal = parsedWidthFt * 12 + parsedWidthIn;
       if (widthTotal <= 0) {
@@ -825,6 +831,11 @@ export function IntakeScreen({ tenantId }: IntakeScreenProps) {
                       </span>
                     </div>
                   </div>
+                  {fieldErrors.width || fieldErrors.widthFt || fieldErrors.widthIn ? (
+                    <p className="text-xs text-destructive">
+                      {fieldErrors.width ?? fieldErrors.widthFt ?? fieldErrors.widthIn}
+                    </p>
+                  ) : null}
                 </div>
 
                 <div className="space-y-2">
@@ -887,6 +898,11 @@ export function IntakeScreen({ tenantId }: IntakeScreenProps) {
                       </span>
                     </div>
                   </div>
+                  {fieldErrors.length || fieldErrors.lengthFt || fieldErrors.lengthIn ? (
+                    <p className="text-xs text-destructive">
+                      {fieldErrors.length ?? fieldErrors.lengthFt ?? fieldErrors.lengthIn}
+                    </p>
+                  ) : null}
                 </div>
               </div>
 
@@ -978,10 +994,10 @@ export function IntakeScreen({ tenantId }: IntakeScreenProps) {
                         <Camera className="size-6" />
                       </span>
                       <p className="text-lg font-semibold text-foreground">
-                        Select up to 20 rug photos
+                        Add up to 20 rug photos
                       </p>
                       <p className="text-sm text-muted-foreground">
-                        Upload one session, then process each photo through the standard intake endpoint.
+                        Add the photos now, then review shared dimensions or turn on overrides for any photo that needs them.
                       </p>
                     </div>
                   </button>
@@ -990,10 +1006,10 @@ export function IntakeScreen({ tenantId }: IntakeScreenProps) {
 
               <div className="space-y-2 rounded-xl border border-border/60 bg-background/50 p-3">
                 <Label>
-                  Shared Default Dimensions <span className="text-destructive">*</span>
+                  Shared Dimensions for This Batch <span className="text-destructive">*</span>
                 </Label>
                 <p className="text-xs text-muted-foreground">
-                  These dimensions apply to every photo unless that photo has an override.
+                  These sizes apply to every photo unless you turn on an override.
                 </p>
                 <div className="grid gap-3 sm:grid-cols-2">
                   <div className="grid grid-cols-2 gap-2">
@@ -1003,9 +1019,9 @@ export function IntakeScreen({ tenantId }: IntakeScreenProps) {
                         onChange={(event) => setBatchWidthFt(event.target.value)}
                         inputMode="numeric"
                         pattern="[0-9]*"
-                        placeholder="Width ft"
+                        placeholder="0"
                         disabled={isBatchSubmitting}
-                        className="pr-9"
+                        className="h-12 pr-9 text-base"
                       />
                       <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">
                         ft
@@ -1017,9 +1033,9 @@ export function IntakeScreen({ tenantId }: IntakeScreenProps) {
                         onChange={(event) => setBatchWidthIn(event.target.value)}
                         inputMode="numeric"
                         pattern="[0-9]*"
-                        placeholder="Width in"
+                        placeholder="0"
                         disabled={isBatchSubmitting}
-                        className="pr-9"
+                        className="h-12 pr-9 text-base"
                       />
                       <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">
                         in
@@ -1034,9 +1050,9 @@ export function IntakeScreen({ tenantId }: IntakeScreenProps) {
                         onChange={(event) => setBatchLengthFt(event.target.value)}
                         inputMode="numeric"
                         pattern="[0-9]*"
-                        placeholder="Length ft"
+                        placeholder="0"
                         disabled={isBatchSubmitting}
-                        className="pr-9"
+                        className="h-12 pr-9 text-base"
                       />
                       <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">
                         ft
@@ -1048,9 +1064,9 @@ export function IntakeScreen({ tenantId }: IntakeScreenProps) {
                         onChange={(event) => setBatchLengthIn(event.target.value)}
                         inputMode="numeric"
                         pattern="[0-9]*"
-                        placeholder="Length in"
+                        placeholder="0"
                         disabled={isBatchSubmitting}
-                        className="pr-9"
+                        className="h-12 pr-9 text-base"
                       />
                       <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">
                         in
@@ -1120,78 +1136,98 @@ export function IntakeScreen({ tenantId }: IntakeScreenProps) {
                               />
                             </div>
 
-                            <label className="flex items-center gap-2 self-end text-sm">
-                              <input
-                                type="checkbox"
-                                checked={item.overrideDimensions}
-                                onChange={(event) =>
-                                  updateBatchItem(item.id, {
-                                    overrideDimensions: event.target.checked,
-                                  })
-                                }
-                                disabled={isBatchSubmitting}
-                              />
-                              Override dimensions for this photo
-                            </label>
-                          </div>
+                              <label className="flex items-center gap-2 self-end text-sm">
+                                <input
+                                  type="checkbox"
+                                  checked={item.overrideDimensions}
+                                  onChange={(event) =>
+                                    updateBatchItem(item.id, {
+                                      overrideDimensions: event.target.checked,
+                                    })
+                                  }
+                                  disabled={isBatchSubmitting}
+                                />
+                                Override dimensions for this photo
+                              </label>
+                            </div>
 
                           {item.overrideDimensions ? (
                             <div className="grid gap-2 sm:grid-cols-2">
                               <div className="grid grid-cols-2 gap-2">
-                                <Input
-                                  value={item.overrideWidthFt}
-                                  onChange={(event) =>
-                                    updateBatchItem(item.id, {
-                                      overrideWidthFt: event.target.value,
-                                    })
-                                  }
-                                  inputMode="numeric"
-                                  pattern="[0-9]*"
-                                  placeholder="Width ft"
-                                  disabled={isBatchSubmitting}
-                                  className="h-9"
-                                />
-                                <Input
-                                  value={item.overrideWidthIn}
-                                  onChange={(event) =>
-                                    updateBatchItem(item.id, {
-                                      overrideWidthIn: event.target.value,
-                                    })
-                                  }
-                                  inputMode="numeric"
-                                  pattern="[0-9]*"
-                                  placeholder="Width in"
-                                  disabled={isBatchSubmitting}
-                                  className="h-9"
-                                />
+                                <div className="relative">
+                                  <Input
+                                    value={item.overrideWidthFt}
+                                    onChange={(event) =>
+                                      updateBatchItem(item.id, {
+                                        overrideWidthFt: event.target.value,
+                                      })
+                                    }
+                                    inputMode="numeric"
+                                    pattern="[0-9]*"
+                                    placeholder="0"
+                                    disabled={isBatchSubmitting}
+                                    className="h-9 pr-9 text-sm"
+                                  />
+                                  <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">
+                                    ft
+                                  </span>
+                                </div>
+                                <div className="relative">
+                                  <Input
+                                    value={item.overrideWidthIn}
+                                    onChange={(event) =>
+                                      updateBatchItem(item.id, {
+                                        overrideWidthIn: event.target.value,
+                                      })
+                                    }
+                                    inputMode="numeric"
+                                    pattern="[0-9]*"
+                                    placeholder="0"
+                                    disabled={isBatchSubmitting}
+                                    className="h-9 pr-9 text-sm"
+                                  />
+                                  <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">
+                                    in
+                                  </span>
+                                </div>
                               </div>
                               <div className="grid grid-cols-2 gap-2">
-                                <Input
-                                  value={item.overrideLengthFt}
-                                  onChange={(event) =>
-                                    updateBatchItem(item.id, {
-                                      overrideLengthFt: event.target.value,
-                                    })
-                                  }
-                                  inputMode="numeric"
-                                  pattern="[0-9]*"
-                                  placeholder="Length ft"
-                                  disabled={isBatchSubmitting}
-                                  className="h-9"
-                                />
-                                <Input
-                                  value={item.overrideLengthIn}
-                                  onChange={(event) =>
-                                    updateBatchItem(item.id, {
-                                      overrideLengthIn: event.target.value,
-                                    })
-                                  }
-                                  inputMode="numeric"
-                                  pattern="[0-9]*"
-                                  placeholder="Length in"
-                                  disabled={isBatchSubmitting}
-                                  className="h-9"
-                                />
+                                <div className="relative">
+                                  <Input
+                                    value={item.overrideLengthFt}
+                                    onChange={(event) =>
+                                      updateBatchItem(item.id, {
+                                        overrideLengthFt: event.target.value,
+                                      })
+                                    }
+                                    inputMode="numeric"
+                                    pattern="[0-9]*"
+                                    placeholder="0"
+                                    disabled={isBatchSubmitting}
+                                    className="h-9 pr-9 text-sm"
+                                  />
+                                  <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">
+                                    ft
+                                  </span>
+                                </div>
+                                <div className="relative">
+                                  <Input
+                                    value={item.overrideLengthIn}
+                                    onChange={(event) =>
+                                      updateBatchItem(item.id, {
+                                        overrideLengthIn: event.target.value,
+                                      })
+                                    }
+                                    inputMode="numeric"
+                                    pattern="[0-9]*"
+                                    placeholder="0"
+                                    disabled={isBatchSubmitting}
+                                    className="h-9 pr-9 text-sm"
+                                  />
+                                  <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">
+                                    in
+                                  </span>
+                                </div>
                               </div>
                             </div>
                           ) : null}
@@ -1228,7 +1264,7 @@ export function IntakeScreen({ tenantId }: IntakeScreenProps) {
                   {isBatchSubmitting ? "Uploading Batch..." : "Upload Batch"}
                 </Button>
                 <p className="text-xs text-muted-foreground">
-                  Uploads run sequentially to reduce rate-limit collisions.
+                  Uploads are handled in the background to keep things reliable.
                 </p>
               </div>
             </form>

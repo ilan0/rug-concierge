@@ -4,16 +4,14 @@ import {
   INVENTORY_ENRICHMENT_WORKER_RUN_BUDGET_MS,
   runInventoryEnrichmentWorker,
 } from "@/lib/inventory/enrichment-jobs";
+import { getConfiguredTenantRuntimeSecrets } from "@/lib/tenant-secrets";
 
 function unauthorizedResponse() {
   return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 }
 
-function serverMisconfiguredResponse() {
-  return NextResponse.json(
-    { error: "CRON_SECRET is not configured." },
-    { status: 500 }
-  );
+function serverMisconfiguredResponse(message: string) {
+  return NextResponse.json({ error: message }, { status: 503 });
 }
 
 function isAuthorizedRequest(req: NextRequest, secret: string): boolean {
@@ -23,12 +21,19 @@ function isAuthorizedRequest(req: NextRequest, secret: string): boolean {
 }
 
 export async function POST(req: NextRequest) {
-  const cronSecret = process.env.CRON_SECRET?.trim() ?? "";
-  if (!cronSecret) {
-    return serverMisconfiguredResponse();
+  const secretsResult = await getConfiguredTenantRuntimeSecrets();
+  if (!secretsResult.ok) {
+    return serverMisconfiguredResponse(secretsResult.message);
   }
 
-  if (!isAuthorizedRequest(req, cronSecret)) {
+  const { tenantId, secrets } = secretsResult;
+  if (!secrets.cronSecret) {
+    return serverMisconfiguredResponse(
+      `Cron secret is not configured for tenant "${tenantId}".`
+    );
+  }
+
+  if (!isAuthorizedRequest(req, secrets.cronSecret)) {
     return unauthorizedResponse();
   }
 

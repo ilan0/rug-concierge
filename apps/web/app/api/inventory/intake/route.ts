@@ -11,9 +11,8 @@ import {
   validateDimensionTuple,
   validateImageFile,
 } from "@/lib/intake/validation";
-import { isStaffUnlockedFromRequest } from "@/lib/auth/staff";
+import { getStaffUnlockStateFromRequest } from "@/lib/auth/staff";
 import {
-  checkLocalRateLimit,
   checkRateLimit,
   inventoryWriteRateLimit,
 } from "@/lib/rate-limit";
@@ -196,7 +195,11 @@ function duplicateImageResponse(input: { id: string; label: string | null }) {
 }
 
 export async function POST(req: NextRequest) {
-  if (!isStaffUnlockedFromRequest(req)) {
+  const staffUnlockState = await getStaffUnlockStateFromRequest(req);
+  if (!staffUnlockState.ok) {
+    return NextResponse.json({ error: staffUnlockState.message }, { status: 503 });
+  }
+  if (!staffUnlockState.unlocked) {
     return NextResponse.json({ error: "staff_locked" }, { status: 401 });
   }
 
@@ -204,13 +207,10 @@ export async function POST(req: NextRequest) {
     req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
     req.headers.get("x-real-ip") ??
     "unknown";
-  const rateLimitResult = inventoryWriteRateLimit
-    ? await checkRateLimit(inventoryWriteRateLimit, `inventory:intake:${ip}`)
-    : checkLocalRateLimit({
-        key: `inventory:intake:${ip}`,
-        maxRequests: 30,
-        windowMs: 10 * 60 * 1000,
-      });
+  const rateLimitResult = await checkRateLimit(
+    inventoryWriteRateLimit,
+    `inventory:intake:${ip}`
+  );
   if (!rateLimitResult.allowed) {
     return NextResponse.json(
       { error: "Too many intake requests. Please wait and try again." },

@@ -3,6 +3,7 @@
     "tenants": [
       "id",
       "settings",
+      "secrets",
       "created_at"
     ],
     "rugs": [

@@ -1,6 +1,7 @@
 import { appendFile, mkdir } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import path from "node:path";
+import { IS_PRODUCTION } from "@/lib/config";
 
 type RecommendationQaEvent = {
   request_id: string;
@@ -16,6 +17,12 @@ type RecommendationQaEvent = {
   error: string | null;
   created_at: string;
 };
+
+const RECOMMENDATION_DEBUG_LOG_SEGMENTS = [
+  "tmp",
+  "qa",
+  "recommendation-log.ndjson",
+] as const;
 
 function resolveRepoRootFromCwd(): string {
   const cwd = process.cwd();
@@ -46,20 +53,12 @@ function resolveRepoRootFromCwd(): string {
 }
 
 function getLogPath(): string {
-  const configured = process.env.RECOMMENDATION_QA_LOG_PATH;
-  if (configured && configured.trim()) {
-    return path.resolve(configured);
-  }
-
   const repoRoot = resolveRepoRootFromCwd();
-  return path.resolve(repoRoot, "tmp/qa/recommendation-log.ndjson");
+  return path.resolve(repoRoot, ...RECOMMENDATION_DEBUG_LOG_SEGMENTS);
 }
 
 function shouldWriteRecommendationQaLog(): boolean {
-  const override = process.env.ENABLE_RECOMMENDATION_QA_LOGGING;
-  if (override === "1") return true;
-  if (override === "0") return false;
-  return process.env.NODE_ENV !== "production";
+  return !IS_PRODUCTION;
 }
 
 export async function logRecommendationQaEvent(

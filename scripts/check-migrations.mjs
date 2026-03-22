@@ -51,6 +51,13 @@ function loadEnv() {
   loadEnvFileIfExists(path.resolve(repoRoot, "apps/web/.env.local"));
 }
 
+function readTrimmedEnv(name) {
+  const value = process.env[name];
+  if (typeof value !== "string") return null;
+  const trimmed = value.trim();
+  return trimmed.length > 0 ? trimmed : null;
+}
+
 function getMigrationFiles() {
   return fs
     .readdirSync(migrationsDir)
@@ -116,11 +123,8 @@ async function main() {
   );
 
   loadEnv();
-  const supabaseUrl = process.env.SUPABASE_URL?.trim() ?? "";
-  const supabaseKey =
-    process.env.SUPABASE_SECRET_KEY?.trim() ??
-    process.env.SUPABASE_SERVICE_ROLE_KEY?.trim() ??
-    "";
+  const supabaseUrl = readTrimmedEnv("SUPABASE_URL");
+  const supabaseKey = readTrimmedEnv("SUPABASE_SECRET_KEY");
 
   if (!supabaseUrl || !supabaseKey) {
     addCheck(
@@ -195,4 +199,3 @@ main().catch((error) => {
   console.error(error instanceof Error ? error.message : String(error));
   process.exit(1);
 });
-

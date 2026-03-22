@@ -1,6 +1,7 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import path from "node:path";
+import { IS_PRODUCTION } from "@/lib/config";
 
 export type E2eTraceMeta = {
   run_id: string;
@@ -66,11 +67,7 @@ function getArtifactPath(meta: E2eTraceMeta, channel: string, traceId: string): 
 }
 
 function isE2eTraceEnabled(): boolean {
-  const override = process.env.ENABLE_E2E_TRACE_ARTIFACTS;
-  if (override === "1") return true;
-  if (override === "0") return false;
-  if (process.env.QA_MODE === "1") return true;
-  return process.env.NODE_ENV !== "production";
+  return !IS_PRODUCTION;
 }
 
 export function parseE2eTraceMeta(req: Request): E2eTraceMeta | null {

@@ -11,6 +11,7 @@ import type { E2eTraceMeta } from "@/lib/qa/e2e-trace";
 import { writeE2eTraceArtifact } from "@/lib/qa/e2e-trace";
 import type { HardConstraints, InventoryRug } from "@/lib/types/recommendation";
 import type { RecommendationResponse } from "@/lib/ai/recommend";
+import { OPENAI_CHAT_MODEL } from "@/lib/config";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 const SQL_QUERY_LIMIT = 220;
@@ -89,7 +90,7 @@ export async function runRecommendationPipeline(
   const timings: Record<string, number> = {};
   const aiTrace: RecommendationAiTrace = {
     called: false,
-    model: process.env.OPENAI_MODEL ?? "gpt-4.1-nano",
+    model: OPENAI_CHAT_MODEL,
     prompt_layers: [],
     request_payload: null,
     response_status: null,

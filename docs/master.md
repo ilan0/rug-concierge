@@ -19,8 +19,9 @@ App roles:
 - `store_staff`
 - `developer`
 
-Staff access is gated by `STORE_PASSCODE` and the signed `staff_unlocked` cookie.
-Legacy fallback remains `staff_unlocked=1` when `COOKIE_SECRET` is not configured.
+Staff access is gated by tenant-scoped secrets in `tenants.secrets`:
+- `store_passcode` for unlock verification
+- `cookie_secret` for the signed `staff_unlocked` cookie
 Locked `/inventory` and `/intake` requests redirect to `/concierge`.
 
 Staff-protected inventory routes:
@@ -32,7 +33,7 @@ Staff-protected inventory routes:
 
 ## Tenant Resolution
 `TENANT_ID` is the authoritative tenant binding when configured.
-Dynamic fallback is disabled by default unless `ALLOW_DYNAMIC_TENANT_ID=1`.
+Dynamic fallback is disabled.
 Tenant scope is enforced on inventory-backed reads and writes.
 
 ## Core Runtime Invariants
@@ -107,7 +108,7 @@ Duplicate response shape:
 ### Enrichment Queue
 Durable queue state lives in `inventory_enrichment_jobs`.
 The worker route is `POST /api/inventory/enrichment/worker`.
-It is protected by `Authorization: Bearer <CRON_SECRET>`.
+It is protected by `Authorization: Bearer <cron_secret>` loaded from `tenants.secrets`.
 
 Worker behavior:
 - claims up to 5 jobs per run
@@ -188,34 +189,27 @@ Customer-facing flows include only rugs that are both:
 
 ## Environment Variables
 Required runtime variables:
+- `TENANT_ID`
 - `SUPABASE_URL`
 - `SUPABASE_SECRET_KEY`
-- `NEXT_PUBLIC_SUPABASE_URL`
-- `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
 - `OPENAI_API_KEY`
-- `COOKIE_SECRET`
-
-Strongly recommended:
-- `TENANT_ID`
-- `STORE_PASSCODE`
-- `CRON_SECRET`
-
-Other notable runtime/env controls:
-- `OPENAI_MODEL`
-- `OPENAI_TIMEOUT_MS`
-- `OPENAI_RETRY_ATTEMPTS`
-- `OPENAI_RETRY_BASE_MS`
-- `CHAT_MEMORY_V1`
+- `OPENAI_CHAT_MODEL`
+- `OPENAI_VISION_MODEL`
+- `UPSTASH_REDIS_REST_URL`
+- `UPSTASH_REDIS_REST_TOKEN`
 - `ENABLE_GENERAL_CHAT_AI`
-- `ALLOW_DYNAMIC_TENANT_ID`
-- `ENABLE_E2E_TRACE_ARTIFACTS`
-- `ENABLE_RECOMMENDATION_QA_LOGGING`
-- `RECOMMENDATION_QA_LOG_PATH`
+
+Per-tenant secrets are stored in `tenants.secrets` and fetched at runtime in
+auth/cron paths only:
+- `store_passcode`
+- `cookie_secret`
+- `cron_secret`
+
+Operational tunables such as OpenAI retry/timeouts, chat memory, and tenant fallback behavior are hardcoded in `apps/web/lib/config.ts`.
 
 Branding source order:
 1. `tenants.settings.branding`
-2. env fallback (`STORE_NAME`, `STORE_LOGO_URL`)
-3. default `Rug Concierge`
+2. default `Rug Concierge`
 
 ## Scripts
 - `scripts/seed-demo-rugs.ts`: seed demo inventory

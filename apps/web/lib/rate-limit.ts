@@ -1,21 +1,19 @@
 import { Ratelimit } from "@upstash/ratelimit";
 import { Redis } from "@upstash/redis";
+import {
+  UPSTASH_REDIS_REST_TOKEN,
+  UPSTASH_REDIS_REST_URL,
+} from "@/lib/config";
 
-function createRedis(): Redis | null {
-  const url = process.env.UPSTASH_REDIS_REST_URL ?? process.env.KV_REST_API_URL;
-  const token =
-    process.env.UPSTASH_REDIS_REST_TOKEN ?? process.env.KV_REST_API_TOKEN;
-  if (!url || !token) return null;
-  return new Redis({ url, token });
+function createRedis(): Redis {
+  return new Redis({
+    url: UPSTASH_REDIS_REST_URL,
+    token: UPSTASH_REDIS_REST_TOKEN,
+  });
 }
 
 const redis = createRedis();
 const localWindows = new Map<string, number[]>();
-
-function shouldFailOpenRateLimit(): boolean {
-  if (process.env.NODE_ENV !== "production") return true;
-  return process.env.RATE_LIMIT_FAIL_OPEN === "1";
-}
 
 export async function checkRateLimit(
   limiter: Ratelimit,
@@ -29,12 +27,6 @@ export async function checkRateLimit(
       resetAtMs: result.reset,
     };
   } catch {
-    if (shouldFailOpenRateLimit()) {
-      if (process.env.NODE_ENV === "production") {
-        console.warn("[rate-limit] Redis unavailable - failing open");
-      }
-      return { allowed: true, remaining: 0, resetAtMs: null };
-    }
     console.error("[rate-limit] Redis unavailable - failing closed");
     return { allowed: false, remaining: 0, resetAtMs: null };
   }
@@ -63,47 +55,37 @@ export function checkLocalRateLimit(input: {
   };
 }
 
-export const chatRateLimit = redis
-  ? new Ratelimit({
-      redis,
-      limiter: Ratelimit.slidingWindow(20, "10 m"),
-      prefix: "rl:chat",
-      analytics: false,
-    })
-  : null;
+export const chatRateLimit = new Ratelimit({
+  redis,
+  limiter: Ratelimit.slidingWindow(20, "10 m"),
+  prefix: "rl:chat",
+  analytics: false,
+});
 
-export const passcodeRateLimit = redis
-  ? new Ratelimit({
-      redis,
-      limiter: Ratelimit.fixedWindow(5, "5 m"),
-      prefix: "rl:passcode",
-      analytics: false,
-    })
-  : null;
+export const passcodeRateLimit = new Ratelimit({
+  redis,
+  limiter: Ratelimit.fixedWindow(5, "5 m"),
+  prefix: "rl:passcode",
+  analytics: false,
+});
 
-export const recommendRateLimit = redis
-  ? new Ratelimit({
-      redis,
-      limiter: Ratelimit.slidingWindow(30, "10 m"),
-      prefix: "rl:recommend",
-      analytics: false,
-    })
-  : null;
+export const recommendRateLimit = new Ratelimit({
+  redis,
+  limiter: Ratelimit.slidingWindow(30, "10 m"),
+  prefix: "rl:recommend",
+  analytics: false,
+});
 
-export const inventoryReadRateLimit = redis
-  ? new Ratelimit({
-      redis,
-      limiter: Ratelimit.slidingWindow(120, "10 m"),
-      prefix: "rl:inventory:read",
-      analytics: false,
-    })
-  : null;
+export const inventoryReadRateLimit = new Ratelimit({
+  redis,
+  limiter: Ratelimit.slidingWindow(120, "10 m"),
+  prefix: "rl:inventory:read",
+  analytics: false,
+});
 
-export const inventoryWriteRateLimit = redis
-  ? new Ratelimit({
-      redis,
-      limiter: Ratelimit.fixedWindow(30, "10 m"),
-      prefix: "rl:inventory:write",
-      analytics: false,
-    })
-  : null;
+export const inventoryWriteRateLimit = new Ratelimit({
+  redis,
+  limiter: Ratelimit.fixedWindow(30, "10 m"),
+  prefix: "rl:inventory:write",
+  analytics: false,
+});

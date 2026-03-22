@@ -10,14 +10,10 @@ import {
   upsertSessionToDb,
   type SaveSessionInput,
 } from "@/lib/chat/session-repo";
+import { MAX_IN_MEMORY_SESSIONS } from "@/lib/config";
 
 const sessions = new Map<string, SessionData>();
 const sessionLocks = new Map<string, Promise<void>>();
-const MAX_IN_MEMORY_SESSIONS = (() => {
-  const raw = Number.parseInt(process.env.MAX_IN_MEMORY_SESSIONS ?? "", 10);
-  if (!Number.isFinite(raw) || raw < 50) return 500;
-  return raw;
-})();
 
 export class SessionTenantMismatchError extends Error {
   constructor(message = "Session tenant_id does not match request tenant_id.") {

@@ -44,6 +44,13 @@ function loadEnv() {
   loadEnvFile(path.resolve(process.cwd(), "apps/web/.env.local"));
 }
 
+function readTrimmedEnv(name: string): string | null {
+  const value = process.env[name];
+  if (typeof value !== "string") return null;
+  const trimmed = value.trim();
+  return trimmed.length > 0 ? trimmed : null;
+}
+
 function printHelpAndExit(): never {
   console.log(
     [
@@ -81,7 +88,10 @@ function parseArgs(argv: string[]): ScriptOptions {
   }
 
   if (!options.tenantId) {
-    options.tenantId = (process.env.TENANT_ID ?? "").trim();
+    const tenantIdFromEnv = readTrimmedEnv("TENANT_ID");
+    if (tenantIdFromEnv) {
+      options.tenantId = tenantIdFromEnv;
+    }
   }
   if (!options.tenantId) {
     throw new Error("Missing --tenant-id=<tenant> (or TENANT_ID env var).");
@@ -91,17 +101,9 @@ function parseArgs(argv: string[]): ScriptOptions {
 }
 
 function requireEnv(name: string): string {
-  const value = (process.env[name] ?? "").trim();
+  const value = readTrimmedEnv(name);
   if (!value) throw new Error(`Missing ${name} environment variable.`);
   return value;
-}
-
-function requireAnyEnv(names: string[]): string {
-  for (const name of names) {
-    const value = (process.env[name] ?? "").trim();
-    if (value) return value;
-  }
-  throw new Error(`Missing one of: ${names.join(", ")} environment variables.`);
 }
 
 async function fetchCount(input: {
@@ -222,10 +224,7 @@ async function main() {
   const options = parseArgs(process.argv.slice(2));
 
   const supabaseUrl = requireEnv("SUPABASE_URL");
-  const supabaseKey = requireAnyEnv([
-    "SUPABASE_SECRET_KEY",
-    "SUPABASE_SERVICE_ROLE_KEY",
-  ]);
+  const supabaseKey = requireEnv("SUPABASE_SECRET_KEY");
   const supabase = createClient(supabaseUrl, supabaseKey, {
     auth: { persistSession: false },
   });
