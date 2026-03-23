@@ -31,6 +31,11 @@ type UseConciergeControllerInput = {
 
 type UiRecommendationState = NonNullable<UiChatResponseBody["recommendation_state"]>;
 
+type SendUserTurnOptions = {
+  appendUserTurn?: boolean;
+  preserveFailedMessage?: boolean;
+};
+
 function storageSessionKey(tenantId: string): string {
   return `rug_concierge_session_id:${tenantId}`;
 }
@@ -188,24 +193,32 @@ export function useConciergeController(input: UseConciergeControllerInput) {
     tenant_id: tenantId,
   });
 
-  const sendUserTurn = async (userMessage: string) => {
+  const sendUserTurn = async (
+    userMessage: string,
+    options: SendUserTurnOptions = {}
+  ) => {
     if (!userMessage.trim()) return;
     setError(null);
     setIsLoading(true);
-    setLastFailedMessage(null);
+    const shouldAppendUserTurn = options.appendUserTurn ?? true;
+    if (!options.preserveFailedMessage) {
+      setLastFailedMessage(null);
+    }
 
     const debugCaseId =
       debug && canUseDebugTrace
         ? toSlug(`turn-${Date.now()}-${crypto.randomUUID().slice(0, 8)}`)
         : null;
 
-    const userTurn: Turn = {
-      id: crypto.randomUUID(),
-      role: "user",
-      text: userMessage,
-      createdAt: new Date().toISOString(),
-    };
-    setTurns((prev) => [...prev, userTurn]);
+    if (shouldAppendUserTurn) {
+      const userTurn: Turn = {
+        id: crypto.randomUUID(),
+        role: "user",
+        text: userMessage,
+        createdAt: new Date().toISOString(),
+      };
+      setTurns((prev) => [...prev, userTurn]);
+    }
 
     try {
       const { payload, headers } = await sendChatTurn(
@@ -267,11 +280,16 @@ export function useConciergeController(input: UseConciergeControllerInput) {
 
       setTurns((prev) => [...prev, assistantTurn]);
       setSelectedTurnId(assistantTurn.id);
+      if (options.preserveFailedMessage) {
+        setLastFailedMessage(null);
+      }
     } catch (nextError) {
       const details =
         nextError instanceof Error ? nextError.message : "Failed to send message.";
       setError(details);
-      setLastFailedMessage(userMessage);
+      if (!options.preserveFailedMessage) {
+        setLastFailedMessage(userMessage);
+      }
     } finally {
       setIsLoading(false);
     }
@@ -294,7 +312,10 @@ export function useConciergeController(input: UseConciergeControllerInput) {
 
   const onRetryLastMessage = async () => {
     if (!lastFailedMessage || isLoading) return;
-    await sendUserTurn(lastFailedMessage);
+    await sendUserTurn(lastFailedMessage, {
+      appendUserTurn: false,
+      preserveFailedMessage: true,
+    });
   };
 
   const onReset = () => {

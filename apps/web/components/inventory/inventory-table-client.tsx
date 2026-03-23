@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Pencil } from "lucide-react";
 import { RugImage } from "@/components/ui/rug-image";
 import { StaffRugDetailModal } from "@/components/inventory/staff-rug-detail-modal";
@@ -41,13 +42,6 @@ export function StatusBadge({ status }: { status: string | null }) {
         On Hold
       </span>
     );
-  if (status === "sold")
-    return (
-      <span className="inline-flex items-center gap-1.5 text-sm font-medium text-red-700">
-        <span className="size-2 shrink-0 rounded-full bg-red-500" />
-        Sold
-      </span>
-    );
   return <span className="text-sm text-muted-foreground">{status ?? "-"}</span>;
 }
 
@@ -82,6 +76,7 @@ function readiness(row: InventoryBrowserRow): {
 }
 
 export function InventoryTableClient({ rows }: InventoryTableClientProps) {
+  const router = useRouter();
   const [selectedRow, setSelectedRow] = useState<InventoryBrowserRow | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [initialEditField, setInitialEditField] = useState<"label" | null>(null);
@@ -112,7 +107,11 @@ export function InventoryTableClient({ rows }: InventoryTableClientProps) {
                 >
                   <div className="mb-2 flex items-start gap-2.5">
                     <div className="h-16 w-14 shrink-0 overflow-hidden rounded-md border border-border/70 bg-muted">
-                      <RugImage src={row.primary_image_url} alt={displayLabel} />
+                      <RugImage
+                        src={row.primary_image_url}
+                        alt={displayLabel}
+                        loading="eager"
+                      />
                     </div>
                     <div className="min-w-0 space-y-1">
                       <p
@@ -219,7 +218,11 @@ export function InventoryTableClient({ rows }: InventoryTableClientProps) {
                     >
                       <td className="p-3 align-top">
                         <div className="h-20 w-[3.4rem] overflow-hidden rounded-md border border-border/70 bg-muted">
-                          <RugImage src={row.primary_image_url} alt={displayLabel} />
+                        <RugImage
+                          src={row.primary_image_url}
+                          alt={displayLabel}
+                          loading="eager"
+                        />
                         </div>
                       </td>
                       <td className="p-3 align-top">
@@ -305,6 +308,8 @@ export function InventoryTableClient({ rows }: InventoryTableClientProps) {
         onClose={() => {
           setModalOpen(false);
           setInitialEditField(null);
+          setSelectedRow(null);
+          router.refresh();
         }}
       />
     </>

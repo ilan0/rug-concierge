@@ -26,6 +26,7 @@ export type ConversationMemory = {
   stable_facts: string[];
   open_threads: string[];
   last_user_intent: "general_chat" | "recommendation" | "unknown";
+  no_match_attempts: number;
   updated_at: string;
   version: "v1";
 };
@@ -43,6 +44,11 @@ export type RecommendationState = {
     last_result_mode?: "recommendation" | "no_match" | "clarifying_question";
     last_relaxed_size_tolerance_in?: number | null;
     last_blockers?: string[];
+    last_recommended_size_in?: {
+      width_in: number;
+      length_in: number;
+    } | null;
+    no_match_attempts?: number;
     updated_at?: string;
   };
 };
@@ -90,5 +96,9 @@ export type RecommendationTurnResponse = Omit<RecommendationResponse, "mode"> & 
   runtime_update?: {
     relaxed_size_tolerance_in?: number | null;
     blockers?: string[];
+    last_recommended_size_in?: {
+      width_in: number;
+      length_in: number;
+    } | null;
   };
 };

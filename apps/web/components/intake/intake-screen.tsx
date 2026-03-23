@@ -34,8 +34,6 @@ type IntakeScreenProps = {
 
 type IntakeMode = "single" | "batch";
 
-type SubmitIntent = "save" | "save_and_add_another";
-
 type IntakeFieldErrors = {
   photo: string | null;
   widthFt: string | null;
@@ -240,7 +238,6 @@ export function IntakeScreen({ tenantId }: IntakeScreenProps) {
   const [lengthIn, setLengthIn] = useState("");
   const [stockId, setStockId] = useState("");
   const [imageFile, setImageFile] = useState<File | null>(null);
-  const [submitIntent, setSubmitIntent] = useState<SubmitIntent>("save");
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] =
@@ -309,12 +306,8 @@ export function IntakeScreen({ tenantId }: IntakeScreenProps) {
     }
   };
 
-  const clearFormForAnother = () => {
+  const clearFormAfterSave = () => {
     clearImage();
-    setWidthFt("");
-    setWidthIn("");
-    setLengthFt("");
-    setLengthIn("");
     setStockId("");
     setFieldErrors(EMPTY_FIELD_ERRORS);
   };
@@ -435,11 +428,7 @@ export function IntakeScreen({ tenantId }: IntakeScreenProps) {
       setLastSaved(payload.rug);
       setNotice("Rug saved. AI enrichment is running in the background.");
 
-      if (submitIntent === "save_and_add_another") {
-        clearFormForAnother();
-      } else {
-        clearImage();
-      }
+      clearFormAfterSave();
     } catch (nextError) {
       setError(
         nextError instanceof Error
@@ -925,18 +914,8 @@ export function IntakeScreen({ tenantId }: IntakeScreenProps) {
                   type="submit"
                   size="lg"
                   disabled={isSaving}
-                  onClick={() => setSubmitIntent("save")}
                 >
-                  {isSaving ? "Saving..." : "Save Rug"}
-                </Button>
-                <Button
-                  type="submit"
-                  size="lg"
-                  variant="secondary"
-                  disabled={isSaving}
-                  onClick={() => setSubmitIntent("save_and_add_another")}
-                >
-                  {isSaving ? "Saving..." : "Save & Add Another"}
+                  {isSaving ? "Saving..." : "Add to inventory"}
                 </Button>
               </div>
             </form>

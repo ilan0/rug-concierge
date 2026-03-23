@@ -169,6 +169,19 @@ export async function POST(req: Request) {
     });
     const effectiveMode = routeDecision.mode;
     const memoryEnabled = CHAT_MEMORY_ENABLED;
+    const currentNoMatchAttempts =
+      nextSession.conversation_memory.no_match_attempts ?? 0;
+    const startingNoMatchAttempts =
+      routeDecision.rule_id === "EXPLICIT_RECOMMENDATION_REQUEST"
+        ? 0
+        : currentNoMatchAttempts;
+    const sessionForHandler: SessionData = {
+      ...nextSession,
+      conversation_memory: {
+        ...nextSession.conversation_memory,
+        no_match_attempts: startingNoMatchAttempts,
+      },
+    };
 
     if (effectiveMode === "recommendation") {
       const recommendationCapabilityError = requireRoleCapabilityOrError(
@@ -211,7 +224,7 @@ export async function POST(req: Request) {
     const handlerInput = {
       message: turnMessage,
       role,
-      session: nextSession,
+      session: sessionForHandler,
       ai_context_packet: aiContextPacket ?? undefined,
       tenant_id: tenantId,
       mode: effectiveMode,
@@ -247,10 +260,16 @@ export async function POST(req: Request) {
     };
 
     const nextConversationMemory = memoryEnabled
-      ? mergeConversationMemory(nextSession.conversation_memory, {
+      ? mergeConversationMemory(sessionForHandler.conversation_memory, {
           userMessage: userTurn.content,
           assistantMessage: handlerResult.assistant_message,
           lastUserIntent: responseMode,
+          noMatchAttempts:
+            effectiveMode === "recommendation"
+              ? handlerResult.mode === "no_match"
+                ? startingNoMatchAttempts + 1
+                : 0
+              : currentNoMatchAttempts,
         })
       : nextSession.conversation_memory;
 
@@ -285,6 +304,23 @@ export async function POST(req: Request) {
             handlerResult.runtime_update?.blockers
               ? handlerResult.runtime_update.blockers
               : nextSession.recommendation_state.runtime?.last_blockers ?? [],
+          last_recommended_size_in:
+            "runtime_update" in handlerResult &&
+            handlerResult.runtime_update &&
+            Object.prototype.hasOwnProperty.call(
+              handlerResult.runtime_update,
+              "last_recommended_size_in"
+            ) &&
+            handlerResult.runtime_update.last_recommended_size_in
+              ? handlerResult.runtime_update.last_recommended_size_in
+              : nextSession.recommendation_state.runtime
+                    ?.last_recommended_size_in ?? null,
+          no_match_attempts:
+            effectiveMode === "recommendation"
+              ? handlerResult.mode === "no_match"
+                ? startingNoMatchAttempts + 1
+                : 0
+              : currentNoMatchAttempts,
           updated_at: new Date().toISOString(),
         },
       },

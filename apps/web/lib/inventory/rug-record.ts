@@ -9,6 +9,7 @@ import {
 import { resolveEffectiveFields } from "@/lib/inventory/resolve-fields";
 import type {
   InventoryBrowserRow,
+  InventoryRugStatus,
   StaffInventoryRugDetail,
 } from "@/lib/types/inventory";
 import type { SupabaseClient } from "@supabase/supabase-js";
@@ -34,7 +35,7 @@ export type RugRecord = {
   ai_structured_fields: InventoryBrowserRow["ai_structured_fields"];
   staff_overrides: InventoryBrowserRow["staff_overrides"];
   stock_id: string | null;
-  status: string | null;
+  status: InventoryRugStatus | null;
   enrichment_status: InventoryBrowserRow["enrichment_status"];
   review_reason_code: InventoryBrowserRow["review_reason_code"];
   width_total_in: number | null;
@@ -44,6 +45,12 @@ export type RugRecord = {
 
 function toStringOrNull(value: unknown): string | null {
   return typeof value === "string" ? value : null;
+}
+
+function toInventoryRugStatusOrNull(
+  value: unknown
+): InventoryRugStatus | null {
+  return value === "available" || value === "on_hold" ? value : null;
 }
 
 function toNumberOrNull(value: unknown): number | null {
@@ -102,7 +109,7 @@ export function parseRugRecord(row: unknown): RugRecord | null {
     ai_structured_fields: toAiStructuredFieldsOrNull(record.ai_structured_fields),
     staff_overrides: toStaffOverridesOrNull(record.staff_overrides),
     stock_id: toStringOrNull(record.stock_id),
-    status: toStringOrNull(record.status),
+    status: toInventoryRugStatusOrNull(record.status),
     enrichment_status: toEnrichmentStatusOrNull(record.enrichment_status),
     review_reason_code: toReviewReasonCodeOrNull(record.review_reason_code),
     width_total_in: toNumberOrNull(record.width_total_in),

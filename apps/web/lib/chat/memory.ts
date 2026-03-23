@@ -123,6 +123,7 @@ export function buildInitialConversationMemory(now = new Date().toISOString()) {
     stable_facts: [] as string[],
     open_threads: [] as string[],
     last_user_intent: "unknown" as const,
+    no_match_attempts: 0,
     updated_at: now,
     version: "v1" as const,
   };
@@ -196,6 +197,7 @@ export function mergeConversationMemory(
     userMessage: string;
     assistantMessage: string;
     lastUserIntent: ChatMode;
+    noMatchAttempts?: number;
     memoryHints?: string[];
     now?: string;
   }
@@ -229,6 +231,10 @@ export function mergeConversationMemory(
     stable_facts: stableFacts,
     open_threads: openThreads,
     last_user_intent: input.lastUserIntent,
+    no_match_attempts:
+      typeof input.noMatchAttempts === "number" && Number.isFinite(input.noMatchAttempts)
+        ? Math.max(0, Math.floor(input.noMatchAttempts))
+        : base.no_match_attempts,
     updated_at: nextNow,
     version: "v1",
   };
@@ -266,6 +272,10 @@ export function ensureConversationMemory(
       memory.last_user_intent === "recommendation"
         ? memory.last_user_intent
         : "unknown",
+    no_match_attempts:
+      typeof memory.no_match_attempts === "number" && Number.isFinite(memory.no_match_attempts)
+        ? Math.max(0, Math.floor(memory.no_match_attempts))
+        : 0,
     updated_at: typeof memory.updated_at === "string" ? memory.updated_at : new Date().toISOString(),
     version: "v1",
   };

@@ -1,5 +1,10 @@
 import type { HardConstraints, InventoryRug } from "@/lib/types/recommendation";
-import { getSizeBounds, matchesSizeWithBounds } from "@/lib/filters/size-bounds";
+import {
+  getSizeBounds,
+  matchesSizeWithBounds,
+  matchesSizeWithWindow,
+  type SizeWindow,
+} from "@/lib/filters/size-bounds";
 import { resolveEffectiveFields } from "@/lib/inventory/resolve-fields";
 
 function normalizeText(value: string): string {
@@ -131,7 +136,26 @@ function matchesStyles(rug: InventoryRug, constraints: HardConstraints): boolean
   );
 }
 
-function matchesSize(rug: InventoryRug, constraints: HardConstraints): boolean {
+function matchesSize(
+  rug: InventoryRug,
+  constraints: HardConstraints,
+  sizeWindow?: SizeWindow | null
+): boolean {
+  if (sizeWindow) {
+    if (
+      typeof rug.width_total_in !== "number" ||
+      typeof rug.length_total_in !== "number"
+    ) {
+      return false;
+    }
+
+    return matchesSizeWithWindow(
+      rug.width_total_in,
+      rug.length_total_in,
+      sizeWindow
+    );
+  }
+
   const bounds = getSizeBounds(constraints.size);
   if (!bounds) return true;
 
@@ -147,11 +171,12 @@ function matchesSize(rug: InventoryRug, constraints: HardConstraints): boolean {
 
 export function filterByHardConstraints(
   inventory: InventoryRug[],
-  constraints: HardConstraints
+  constraints: HardConstraints,
+  sizeWindow?: SizeWindow | null
 ): InventoryRug[] {
   return inventory.filter((rug) => {
     if (rug.status !== "available") return false;
-    if (!matchesSize(rug, constraints)) return false;
+    if (!matchesSize(rug, constraints, sizeWindow)) return false;
     if (!matchesColors(rug, constraints)) return false;
     if (!matchesStyles(rug, constraints)) return false;
     if (!matchesShape(rug, constraints)) return false;

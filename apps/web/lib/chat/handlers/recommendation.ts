@@ -17,6 +17,10 @@ export async function handleRecommendationTurn(
     input.message.toLowerCase().trim()
   );
   const priorResultMode = input.session.recommendation_state.runtime?.last_result_mode ?? null;
+  const noMatchAttempts =
+    input.session.conversation_memory.no_match_attempts ?? 0;
+  const lastRecommendedSizeIn =
+    input.session.recommendation_state.runtime?.last_recommended_size_in ?? null;
 
   if (!hasTenantId(input.tenant_id)) {
     return {
@@ -35,6 +39,8 @@ export async function handleRecommendationTurn(
     constraints,
     followupIntent,
     priorResultMode,
+    noMatchAttempts,
+    lastRecommendedSizeIn,
     promptContext: {
       role: promptRole,
       chat_context: input.ai_context_packet
@@ -77,6 +83,11 @@ export async function handleRecommendationTurn(
       relaxed_size_tolerance_in:
         result.meta?.relaxed_size_tolerance_in ?? null,
       blockers: result.meta?.blockers ?? [],
+      ...(result.meta?.last_recommended_size_in
+        ? {
+            last_recommended_size_in: result.meta.last_recommended_size_in,
+          }
+        : {}),
     },
   };
 }

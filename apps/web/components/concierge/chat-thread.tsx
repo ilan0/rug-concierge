@@ -101,6 +101,7 @@ export function ChatThread(input: ChatThreadProps) {
     () => turns.map((turn) => turn.id).join("|"),
     [turns]
   );
+  const latestTurnRole = turns[turns.length - 1]?.role ?? null;
 
   const updatePinnedState = useCallback(() => {
     if (typeof window === "undefined") return;
@@ -130,9 +131,19 @@ export function ChatThread(input: ChatThreadProps) {
       hasCompletedInitialAutoScrollPass.current = true;
       return;
     }
+    if (latestTurnRole !== "assistant") return;
     if (!isLoading && turns.length === 0) return;
-    window.scrollTo({ top: document.documentElement.scrollHeight, behavior: "auto" });
-  }, [latestTurnSignature, isLoading, isPinnedToBottom, turns.length]);
+    window.scrollTo({
+      top: document.documentElement.scrollHeight,
+      behavior: "smooth",
+    });
+  }, [
+    latestTurnRole,
+    latestTurnSignature,
+    isLoading,
+    isPinnedToBottom,
+    turns.length,
+  ]);
 
   const jumpToLatest = useCallback(() => {
     if (typeof window === "undefined") return;

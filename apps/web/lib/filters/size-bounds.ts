@@ -10,6 +10,23 @@ export type SizeBounds = {
   toleranceIn: number;
 };
 
+export type SizeWindow = {
+  minWidthIn?: number;
+  maxWidthIn?: number;
+  minLengthIn?: number;
+  maxLengthIn?: number;
+};
+
+function isWithinWindow(
+  value: number,
+  minValue?: number,
+  maxValue?: number
+): boolean {
+  if (typeof minValue === "number" && value < minValue) return false;
+  if (typeof maxValue === "number" && value > maxValue) return false;
+  return true;
+}
+
 export function getSizeBounds(size: HardConstraints["size"]): SizeBounds | null {
   if (!size) return null;
 
@@ -43,3 +60,18 @@ export function matchesSizeWithBounds(
   return directMatch || rotatedMatch;
 }
 
+export function matchesSizeWithWindow(
+  widthTotalIn: number,
+  lengthTotalIn: number,
+  window: SizeWindow
+): boolean {
+  const directMatch =
+    isWithinWindow(widthTotalIn, window.minWidthIn, window.maxWidthIn) &&
+    isWithinWindow(lengthTotalIn, window.minLengthIn, window.maxLengthIn);
+
+  const rotatedMatch =
+    isWithinWindow(widthTotalIn, window.minLengthIn, window.maxLengthIn) &&
+    isWithinWindow(lengthTotalIn, window.minWidthIn, window.maxWidthIn);
+
+  return directMatch || rotatedMatch;
+}

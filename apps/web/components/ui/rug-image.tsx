@@ -9,6 +9,7 @@ type RugImageProps = {
   className?: string;
   placeholderClassName?: string;
   placeholderLabel?: string;
+  loading?: "eager" | "lazy";
 };
 
 type RugImageSourceProps = {
@@ -17,6 +18,7 @@ type RugImageSourceProps = {
   className?: string;
   placeholderClassName?: string;
   placeholderLabel: string;
+  loading: "eager" | "lazy";
 };
 
 type RugImagePlaceholderProps = {
@@ -45,6 +47,7 @@ function RugImageSource({
   className,
   placeholderClassName,
   placeholderLabel,
+  loading,
 }: RugImageSourceProps) {
   const imgRef = useRef<HTMLImageElement | null>(null);
   const [loaded, setLoaded] = useState(false);
@@ -87,7 +90,7 @@ function RugImageSource({
           "h-full w-full object-cover transition-opacity duration-200",
           loaded ? "opacity-100" : "opacity-0"
         )}
-        loading="lazy"
+        loading={loading}
         decoding="async"
         onLoad={() => setLoaded(true)}
         onError={() => {
@@ -104,6 +107,7 @@ export function RugImage({
   className,
   placeholderClassName,
   placeholderLabel = "No image",
+  loading = "lazy",
 }: RugImageProps) {
   const normalizedSrc = useMemo(() => {
     if (typeof src !== "string") return null;
@@ -120,6 +124,7 @@ export function RugImage({
         className={className}
         placeholderClassName={placeholderClassName}
         placeholderLabel={placeholderLabel}
+        loading={loading}
       />
     );
   }

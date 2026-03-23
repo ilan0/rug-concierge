@@ -29,7 +29,7 @@ const RUG_ID_PARAMS_SCHEMA = z.object({ id: z.string().uuid() }).strict();
 const PATCH_BODY_SCHEMA = z
   .object({
     stock_id: z.string().max(80).nullable().optional(),
-    status: z.enum(["available", "sold", "on_hold"]).optional(),
+    status: z.enum(["available", "on_hold"]).optional(),
     staff_overrides: staffOverridesSchema.optional(),
   })
   .strict();

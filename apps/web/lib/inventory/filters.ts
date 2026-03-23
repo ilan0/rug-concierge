@@ -33,7 +33,6 @@ const DEFAULT_FILTERS: InventoryFilters = {
 const ALLOWED_STATUS: InventoryStatusFilter[] = [
   "all",
   "available",
-  "sold",
   "on_hold",
 ];
 

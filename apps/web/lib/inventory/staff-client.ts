@@ -8,18 +8,23 @@ import {
   isReviewReasonCode,
 } from "@/lib/inventory/enrichment-state";
 import type {
+  InventoryRugStatus,
   StaffInventoryRugDetail,
   StaffOverrides,
 } from "@/lib/types/inventory";
 
 export type StaffRugPatchInput = {
   stock_id?: string | null;
-  status?: "available" | "sold" | "on_hold";
+  status?: InventoryRugStatus;
   staff_overrides?: StaffOverrides;
 };
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return Boolean(value) && typeof value === "object" && !Array.isArray(value);
+}
+
+function toInventoryRugStatusOrNull(value: unknown): InventoryRugStatus | null {
+  return value === "available" || value === "on_hold" ? value : null;
 }
 
 function toAiStructuredFields(value: unknown) {
@@ -85,7 +90,7 @@ function parseStaffRugDetail(payload: unknown): StaffInventoryRugDetail {
     staff_overrides: toStaffOverrides(payload.staff_overrides),
     effective_fields: effectiveFields,
     stock_id: typeof payload.stock_id === "string" ? payload.stock_id : null,
-    status: typeof payload.status === "string" ? payload.status : null,
+    status: toInventoryRugStatusOrNull(payload.status),
     enrichment_status: isEnrichmentStatus(payload.enrichment_status)
       ? payload.enrichment_status
       : null,

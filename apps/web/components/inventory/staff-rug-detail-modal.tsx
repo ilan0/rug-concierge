@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   Dialog,
   DialogContent,
@@ -34,6 +35,7 @@ import { reviewReasonMessage } from "@/lib/inventory/enrichment-state";
 import { resolveEffectiveFields } from "@/lib/inventory/resolve-fields";
 import type {
   InventoryBrowserRow,
+  InventoryRugStatus,
   StaffInventoryRugDetail,
 } from "@/lib/types/inventory";
 import { formatRugSize } from "@/lib/utils/format";
@@ -54,12 +56,14 @@ type EditDraft = {
   age_category: string;
   mood: string;
   stock_id: string;
-  status: "available" | "on_hold" | "sold";
+  status: InventoryRugStatus;
 };
 
 type UnsavedAction = "close-modal" | "exit-edit-mode";
+type DangerousAction = "re-analyze" | "delete";
 
 const ORIGIN_OPTIONS = [
+  "",
   "Persian",
   "Afghan",
   "Turkish",
@@ -152,10 +156,7 @@ function detailToDraft(detail: StaffInventoryRugDetail): EditDraft {
     age_category: detail.effective_fields.age_category ?? "new",
     mood: detail.effective_fields.mood ?? "traditional",
     stock_id: detail.stock_id ?? "",
-    status:
-      detail.status === "on_hold" || detail.status === "sold"
-        ? detail.status
-        : "available",
+    status: detail.status === "on_hold" ? "on_hold" : "available",
   };
 }
 
@@ -211,7 +212,11 @@ export function StaffRugDetailModal({
   const [unsavedDialogOpen, setUnsavedDialogOpen] = useState(false);
   const [pendingUnsavedAction, setPendingUnsavedAction] =
     useState<UnsavedAction | null>(null);
+  const [dangerousAction, setDangerousAction] = useState<DangerousAction | null>(
+    null
+  );
   const labelInputRef = useRef<HTMLInputElement | null>(null);
+  const router = useRouter();
 
   useEffect(() => {
     if (!open || !row) return;
@@ -373,7 +378,7 @@ export function StaffRugDetailModal({
     }
   };
 
-  const onQuickStatusChange = async (status: "available" | "on_hold" | "sold") => {
+  const onQuickStatusChange = async (status: InventoryRugStatus) => {
     if (!detail || saving) return;
     setSaving(true);
     setError(null);
@@ -395,12 +400,6 @@ export function StaffRugDetailModal({
 
   const onReAnalyze = async () => {
     if (!detail || reAnalyzing || deleting) return;
-    if (typeof window !== "undefined") {
-      const confirmed = window.confirm(
-        "Queue AI re-analysis for this rug? Staff overrides will be preserved."
-      );
-      if (!confirmed) return;
-    }
     setReAnalyzing(true);
     setError(null);
     try {
@@ -422,22 +421,14 @@ export function StaffRugDetailModal({
 
   const onDeleteRug = async () => {
     if (!detail || deleting || saving || reAnalyzing) return;
-    if (typeof window !== "undefined") {
-      const confirmed = window.confirm(
-        "Delete this rug from inventory? This cannot be undone."
-      );
-      if (!confirmed) return;
-    }
-
     setDeleting(true);
     setError(null);
     try {
       await deleteStaffRug(detail.id);
       toast.success("Rug deleted.");
       onClose();
-      if (typeof window !== "undefined") {
-        window.location.reload();
-      }
+      router.replace("/inventory");
+      router.refresh();
     } catch (nextError) {
       const message =
         nextError instanceof Error
@@ -455,6 +446,27 @@ export function StaffRugDetailModal({
     const currentAvailable = detail.status === "available";
     if (currentAvailable === nextAvailable) return;
     await onQuickStatusChange(nextAvailable ? "available" : "on_hold");
+  };
+
+  const openDangerousAction = (action: DangerousAction) => {
+    if (saving || reAnalyzing || deleting) return;
+    setDangerousAction(action);
+  };
+
+  const closeDangerousAction = () => {
+    if (saving || reAnalyzing || deleting) return;
+    setDangerousAction(null);
+  };
+
+  const confirmDangerousAction = async () => {
+    const action = dangerousAction;
+    if (!action) return;
+    setDangerousAction(null);
+    if (action === "re-analyze") {
+      await onReAnalyze();
+      return;
+    }
+    await onDeleteRug();
   };
 
   const onRequestClose = async () => {
@@ -564,7 +576,7 @@ export function StaffRugDetailModal({
                     variant="ghost"
                     size="sm"
                     className="h-8 px-2.5 text-xs"
-                    onClick={() => void onReAnalyze()}
+                    onClick={() => openDangerousAction("re-analyze")}
                     disabled={saving || reAnalyzing || deleting}
                     aria-label="Re-analyze"
                   >
@@ -578,7 +590,7 @@ export function StaffRugDetailModal({
                     variant="ghost"
                     size="sm"
                     className="h-8 px-2.5 text-xs text-red-700 hover:bg-red-50 hover:text-red-700"
-                    onClick={() => void onDeleteRug()}
+                    onClick={() => openDangerousAction("delete")}
                     disabled={saving || reAnalyzing || deleting}
                     aria-label="Delete rug"
                   >
@@ -615,14 +627,15 @@ export function StaffRugDetailModal({
 
               <div className="flex flex-col gap-5 sm:flex-row sm:items-start">
                 <div className="shrink-0 sm:w-52">
-                  <div className="aspect-[3/4] max-h-56 overflow-hidden rounded-xl border border-border/65 bg-muted sm:max-h-none">
-                    <RugImage
-                      src={detail.primary_image_url}
-                      alt={title}
-                      placeholderLabel="No image available"
-                    />
+                    <div className="aspect-[3/4] max-h-56 overflow-hidden rounded-xl border border-border/65 bg-muted sm:max-h-none">
+                      <RugImage
+                        src={detail.primary_image_url}
+                        alt={title}
+                        placeholderLabel="No image available"
+                        loading="eager"
+                      />
+                    </div>
                   </div>
-                </div>
 
                 <div className="min-w-0 flex-1 space-y-4">
                   {detail.enrichment_status === "needs_review" ? (
@@ -733,7 +746,11 @@ export function StaffRugDetailModal({
                                 )
                               }
                             >
-                              {draft.origin && !ORIGIN_OPTIONS.includes(draft.origin as (typeof ORIGIN_OPTIONS)[number]) ? (
+                              <option value="">— Select origin —</option>
+                              {draft.origin &&
+                              !ORIGIN_OPTIONS.includes(
+                                draft.origin as (typeof ORIGIN_OPTIONS)[number]
+                              ) ? (
                                 <option value={draft.origin}>{draft.origin}</option>
                               ) : null}
                               {ORIGIN_OPTIONS.map((option) => (
@@ -989,6 +1006,54 @@ export function StaffRugDetailModal({
           ) : null}
         </div>
       </DialogContent>
+      <AlertDialog
+        open={dangerousAction !== null}
+        onOpenChange={(nextOpen) => {
+          if (!nextOpen) {
+            closeDangerousAction();
+          }
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {dangerousAction === "delete"
+                ? "Delete this rug?"
+                : "Re-analyze this rug?"}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {dangerousAction === "delete"
+                ? "This cannot be undone."
+                : "This will overwrite any manual edits. Re-analyze?"}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={saving || reAnalyzing || deleting}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              className={
+                dangerousAction === "delete"
+                  ? "bg-red-600 text-white hover:bg-red-700 focus:ring-red-500"
+                  : undefined
+              }
+              disabled={saving || reAnalyzing || deleting}
+              onClick={(event) => {
+                event.preventDefault();
+                void confirmDangerousAction();
+              }}
+            >
+              {dangerousAction === "delete"
+                ? deleting
+                  ? "Deleting..."
+                  : "Delete"
+                : reAnalyzing
+                  ? "Re-analyzing..."
+                  : "Re-analyze"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
       <AlertDialog
         open={unsavedDialogOpen}
         onOpenChange={(nextOpen) => {

@@ -1,6 +1,6 @@
 import { filterByHardConstraints } from "@/lib/filters/hard-constraints";
 import { shapeCandidatesForAI } from "@/lib/filters/candidate-shaping";
-import { getSizeBounds } from "@/lib/filters/size-bounds";
+import { getSizeBounds, type SizeWindow } from "@/lib/filters/size-bounds";
 import { resolveEffectiveFields } from "@/lib/inventory/resolve-fields";
 import { parseRugRecord } from "@/lib/inventory/rug-record";
 import { fetchPrimaryRugImagesForRugs } from "@/lib/storage/rug-images";
@@ -30,6 +30,11 @@ type RunRecommendationPipelineInput = {
     | "more_like_this"
     | "tighten";
   priorResultMode?: "recommendation" | "no_match" | "clarifying_question" | null;
+  noMatchAttempts?: number;
+  lastRecommendedSizeIn?: {
+    width_in: number;
+    length_in: number;
+  } | null;
   promptContext?: {
     role?: "retail_customer" | "store_staff";
     chat_context?: {
@@ -53,6 +58,10 @@ type RunRecommendationPipelineResult =
       meta?: {
         relaxed_size_tolerance_in?: number | null;
         blockers?: string[];
+        last_recommended_size_in?: {
+          width_in: number;
+          length_in: number;
+        } | null;
       };
     }
   | { ok: false; error: string };
@@ -64,7 +73,119 @@ type PipelineQueryTrace = {
   error: string | null;
 };
 
+type RecommendationSizeIn = {
+  width_in: number;
+  length_in: number;
+};
+
 const SIZE_RELAXATION_STEPS_IN = [0, 4, 8, 12, 18, 24] as const;
+
+function isDirectionalFollowupIntent(
+  followupIntent:
+    | "none"
+    | "closest"
+    | "larger"
+    | "smaller"
+    | "more_like_this"
+    | "tighten"
+): followupIntent is "closest" | "larger" | "smaller" {
+  return (
+    followupIntent === "closest" ||
+    followupIntent === "larger" ||
+    followupIntent === "smaller"
+  );
+}
+
+function toSizeConstraint(
+  size: RecommendationSizeIn | null | undefined
+): NonNullable<HardConstraints["size"]> | null {
+  if (!size) return null;
+  return {
+    widthIn: size.width_in,
+    lengthIn: size.length_in,
+  };
+}
+
+function buildSizeSearchWindow(input: {
+  constraints: HardConstraints;
+  followupIntent:
+    | "none"
+    | "closest"
+    | "larger"
+    | "smaller"
+    | "more_like_this"
+    | "tighten";
+  lastRecommendedSizeIn?: RecommendationSizeIn | null;
+}): {
+  sizeReference: NonNullable<HardConstraints["size"]> | null;
+  sizeWindow: SizeWindow | null;
+} {
+  if (input.constraints.size) {
+    const bounds = getSizeBounds(input.constraints.size);
+    return {
+      sizeReference: input.constraints.size,
+      sizeWindow: bounds
+        ? {
+            minWidthIn: bounds.minWidthIn,
+            maxWidthIn: bounds.maxWidthIn,
+            minLengthIn: bounds.minLengthIn,
+            maxLengthIn: bounds.maxLengthIn,
+          }
+        : null,
+    };
+  }
+
+  const anchor = toSizeConstraint(input.lastRecommendedSizeIn);
+  if (!anchor || !isDirectionalFollowupIntent(input.followupIntent)) {
+    return {
+      sizeReference: null,
+      sizeWindow: null,
+    };
+  }
+
+  if (input.followupIntent === "smaller") {
+    return {
+      sizeReference: anchor,
+      sizeWindow: {
+        maxWidthIn: anchor.widthIn,
+        maxLengthIn: anchor.lengthIn,
+      },
+    };
+  }
+
+  if (input.followupIntent === "larger") {
+    return {
+      sizeReference: anchor,
+      sizeWindow: {
+        minWidthIn: anchor.widthIn,
+        minLengthIn: anchor.lengthIn,
+      },
+    };
+  }
+
+  const bounds = getSizeBounds(anchor);
+  return {
+    sizeReference: anchor,
+    sizeWindow: bounds
+      ? {
+          minWidthIn: bounds.minWidthIn,
+          maxWidthIn: bounds.maxWidthIn,
+          minLengthIn: bounds.minLengthIn,
+          maxLengthIn: bounds.maxLengthIn,
+        }
+      : null,
+  };
+}
+
+function toRuntimeSizeIn(
+  size: RecommendationSizeIn | null | undefined
+): { width_in: number; length_in: number } | null {
+  if (!size) return null;
+  return {
+    width_in: size.width_in,
+    length_in: size.length_in,
+  };
+}
 
 // Flow overview
 // Shared server recommendation pipeline:
@@ -118,20 +239,26 @@ export async function runRecommendationPipeline(
   };
 
   try {
-    const shouldPrepareClosestRelaxation = shouldAttemptClosestRelaxation({
-      followupIntent: input.followupIntent ?? "none",
-      priorResultMode: input.priorResultMode ?? null,
+    const followupIntent = input.followupIntent ?? "none";
+    const sizeSearch = buildSizeSearchWindow({
       constraints: input.constraints,
+      followupIntent,
+      lastRecommendedSizeIn: input.lastRecommendedSizeIn ?? null,
     });
-    const sqlConstraintEnvelope = shouldPrepareClosestRelaxation
-      ? expandSizeToleranceForFetch(input.constraints)
-      : input.constraints;
+    const effectiveConstraints: HardConstraints =
+      sizeSearch.sizeReference && !input.constraints.size
+        ? {
+            ...input.constraints,
+            size: sizeSearch.sizeReference,
+          }
+        : input.constraints;
 
     const sqlStart = Date.now();
     const inventory = await fetchInventoryCandidates({
       requestId,
       tenantId: input.tenantId,
-      constraints: sqlConstraintEnvelope,
+      constraints: effectiveConstraints,
+      sizeWindow: sizeSearch.sizeWindow,
       limit: SQL_QUERY_LIMIT,
       queryTrace,
     });
@@ -177,17 +304,20 @@ export async function runRecommendationPipeline(
       return { ok: false, error: errorMessage };
     }
 
-    let effectiveConstraints = input.constraints;
     let relaxedToleranceIn: number | null = null;
 
     const hardFilterStart = Date.now();
-    let candidates = filterByHardConstraints(inventory, effectiveConstraints);
+    let candidates = filterByHardConstraints(
+      inventory,
+      effectiveConstraints,
+      sizeSearch.sizeWindow
+    );
     timings.filter_hard_constraints_ms = Date.now() - hardFilterStart;
 
     if (
       candidates.length === 0 &&
       shouldAttemptClosestRelaxation({
-        followupIntent: input.followupIntent ?? "none",
+        followupIntent,
         priorResultMode: input.priorResultMode ?? null,
         constraints: effectiveConstraints,
       })
@@ -197,17 +327,84 @@ export async function runRecommendationPipeline(
         effectiveConstraints
       );
       candidates = relaxed.candidates;
-      effectiveConstraints = relaxed.constraints;
       relaxedToleranceIn = relaxed.relaxedToleranceIn;
     }
 
     let blockers: string[] = [];
     if (candidates.length === 0) {
       blockers = detectHardConstraintBlockers(inventory, effectiveConstraints);
+      const hasRepeatNoMatch = (input.noMatchAttempts ?? 0) > 0;
+      if (hasRepeatNoMatch) {
+      const response = buildTerminalNoMatchResponse({
+          constraints: effectiveConstraints,
+          followupIntent,
+          blockers,
+          relaxedToleranceIn,
+        });
+
+        const logStart = Date.now();
+        await logRecommendationQaEvent({
+          request_id: requestId,
+          tenant_id: input.tenantId,
+          user_message: input.userMessage,
+          constraints: effectiveConstraints,
+          sql_candidate_count: inventory.length,
+          filtered_candidate_count: 0,
+          ai_candidate_count: 0,
+          response_mode: response.mode,
+          recommendation_ids: [],
+          notes: response.notes,
+          error: null,
+          created_at: new Date().toISOString(),
+        });
+        timings.qa_log_ms = Date.now() - logStart;
+
+        const tracePath = await writeTrace({
+          request_id: requestId,
+          flow_path: flowPath,
+          source_route: input.traceMeta?.source_route ?? null,
+          session_id: input.traceMeta?.session_id ?? null,
+          role: input.traceMeta?.role ?? null,
+          tenant_id: input.tenantId,
+          user_message: input.userMessage,
+          constraints: effectiveConstraints,
+          prompt_context: input.promptContext ?? null,
+          query_trace: queryTrace,
+          candidate_counts: {
+            sql_candidates: inventory.length,
+            hard_filtered_candidates: 0,
+            ai_candidates: 0,
+          },
+          timing_ms: {
+            ...timings,
+            total_ms: Date.now() - startedAt,
+          },
+          ai_trace: aiTrace,
+          result: {
+            mode: response.mode,
+            notes: response.notes,
+            recommendation_ids: [],
+            recommendation_count: 0,
+            blockers,
+            relaxed_size_tolerance_in: relaxedToleranceIn,
+          },
+          error: null,
+        });
+
+        return {
+          ok: true,
+          response,
+          trace_id: tracePath ? requestId : null,
+          meta: {
+            relaxed_size_tolerance_in: relaxedToleranceIn,
+            blockers,
+            last_recommended_size_in: toRuntimeSizeIn(null),
+          },
+        };
+      }
       const response = buildGuidedNoMatchResponse({
-        userMessage: input.userMessage,
         constraints: effectiveConstraints,
-        followupIntent: input.followupIntent ?? "none",
+        followupIntent,
         blockers,
         relaxedToleranceIn,
       });
@@ -268,6 +465,7 @@ export async function runRecommendationPipeline(
         meta: {
           relaxed_size_tolerance_in: relaxedToleranceIn,
           blockers,
+          last_recommended_size_in: toRuntimeSizeIn(null),
         },
       };
     }
@@ -290,6 +488,10 @@ export async function runRecommendationPipeline(
       aiTrace
     );
     timings.rank_and_explain_ms = Date.now() - aiStart;
+    const lastRecommendedSizeIn = findLastRecommendedSizeIn(
+      response.recommendations,
+      candidates
+    );
 
     const logStart = Date.now();
     await logRecommendationQaEvent({
@@ -346,6 +548,7 @@ export async function runRecommendationPipeline(
       meta: {
         relaxed_size_tolerance_in: relaxedToleranceIn,
         blockers,
+        last_recommended_size_in: toRuntimeSizeIn(lastRecommendedSizeIn),
       },
     };
   } catch {
@@ -396,20 +599,6 @@ function shouldAttemptClosestRelaxation(input: {
   }
 
   return input.priorResultMode === "no_match";
-}
-
-function expandSizeToleranceForFetch(constraints: HardConstraints): HardConstraints {
-  if (!constraints.size) return constraints;
-  return {
-    ...constraints,
-    size: {
-      ...constraints.size,
-      toleranceIn: Math.max(
-        constraints.size.toleranceIn ?? 0,
-        SIZE_RELAXATION_STEPS_IN[SIZE_RELAXATION_STEPS_IN.length - 1]
-      ),
-    },
-  };
 }
 
 function applyClosestRelaxationLadder(
@@ -520,7 +709,6 @@ function blockerLabel(blocker: string): string {
 }
 
 function buildGuidedNoMatchResponse(input: {
-  userMessage: string;
   constraints: HardConstraints;
   followupIntent:
     | "none"
@@ -577,18 +765,86 @@ function buildGuidedNoMatchResponse(input: {
   };
 }
 
+function buildTerminalNoMatchResponse(input: {
+  constraints: HardConstraints;
+  followupIntent:
+    | "none"
+    | "closest"
+    | "larger"
+    | "smaller"
+    | "more_like_this"
+    | "tighten";
+  blockers: string[];
+  relaxedToleranceIn: number | null;
+}): RecommendationResponse {
+  const constraintSummary = describeHardConstraints(input.constraints);
+  const summaryText =
+    constraintSummary.length > 0
+      ? `I couldn't find anything that fits ${constraintSummary.join(" + ")}.`
+      : "I couldn't find anything that fits your request.";
+
+  let assistantMessage =
+    "We don't have anything that fits right now - would you like to start over or describe something different?";
+
+  if (
+    (input.followupIntent === "closest" ||
+      input.followupIntent === "larger" ||
+      input.followupIntent === "smaller") &&
+    typeof input.relaxedToleranceIn === "number"
+  ) {
+    assistantMessage = `${summaryText} I already widened the search up to ±${input.relaxedToleranceIn}" and still couldn't find a match. ${assistantMessage}`;
+  }
+
+  if (input.blockers.length > 0) {
+    assistantMessage = `${assistantMessage} The main blockers appear to be ${input.blockers
+      .map((blocker) => blockerLabel(blocker))
+      .join(" + ")} constraints.`;
+  }
+
+  return {
+    mode: "no_match",
+    assistant_message: assistantMessage,
+    questions: [],
+    recommendations: [],
+    notes: "NO_MATCH_TERMINAL",
+  };
+}
+
+function findLastRecommendedSizeIn(
+  recommendations: RecommendationResponse["recommendations"],
+  candidates: InventoryRug[]
+): RecommendationSizeIn | null {
+  for (const recommendation of recommendations) {
+    const candidate = candidates.find((rug) => rug.id === recommendation.rug_id);
+    if (
+      candidate &&
+      typeof candidate.width_total_in === "number" &&
+      typeof candidate.length_total_in === "number"
+    ) {
+      return {
+        width_in: candidate.width_total_in,
+        length_in: candidate.length_total_in,
+      };
+    }
+  }
+
+  return null;
+}
+
 async function fetchInventoryCandidates(input: {
   requestId: string;
   tenantId: string;
   constraints: HardConstraints;
+  sizeWindow: SizeWindow | null;
   limit: number;
   queryTrace: PipelineQueryTrace[];
 }): Promise<InventoryRug[] | null> {
   const supabase = await getSupabaseAdminSafe();
   if (!supabase) return null;
 
-  const sizeBounds = getSizeBounds(input.constraints.size);
-  const variants = buildQueryVariants({ hasSize: Boolean(sizeBounds) });
+  const variants = buildQueryVariants({
+    hasSize: Boolean(input.sizeWindow || input.constraints.size),
+  });
 
   const results = await Promise.all(
     variants.map((variant) =>
@@ -596,7 +852,7 @@ async function fetchInventoryCandidates(input: {
         supabase,
         tenantId: input.tenantId,
         limit: input.limit,
-        sizeBounds,
+        sizeWindow: input.sizeWindow,
         variant,
         queryTrace: input.queryTrace,
       })
@@ -684,11 +940,11 @@ async function runCandidateQuery(input: {
   supabase: SupabaseClient;
   tenantId: string;
   limit: number;
-  sizeBounds: ReturnType<typeof getSizeBounds>;
+  sizeWindow: SizeWindow | null;
   variant: "base" | "size_direct" | "size_rotated";
   queryTrace: PipelineQueryTrace[];
 }): Promise<InventoryRug[] | null> {
-  const bounds = input.sizeBounds;
+  const bounds = input.sizeWindow;
   const wantsSize = input.variant !== "base";
   const rotated = input.variant === "size_rotated";
 
@@ -710,11 +966,10 @@ async function runCandidateQuery(input: {
       const lengthMin = rotated ? bounds.minWidthIn : bounds.minLengthIn;
       const lengthMax = rotated ? bounds.maxWidthIn : bounds.maxLengthIn;
 
-      query = query
-        .gte("width_total_in", widthMin)
-        .lte("width_total_in", widthMax)
-        .gte("length_total_in", lengthMin)
-        .lte("length_total_in", lengthMax);
+      if (typeof widthMin === "number") query = query.gte("width_total_in", widthMin);
+      if (typeof widthMax === "number") query = query.lte("width_total_in", widthMax);
+      if (typeof lengthMin === "number") query = query.gte("length_total_in", lengthMin);
+      if (typeof lengthMax === "number") query = query.lte("length_total_in", lengthMax);
     }
 
     return query;
@@ -742,15 +997,7 @@ async function runCandidateQuery(input: {
         status: "available",
         enrichment_status: "ready",
         limit: input.limit,
-        size_bounds: bounds
-          ? {
-              min_width_in: bounds.minWidthIn,
-              max_width_in: bounds.maxWidthIn,
-              min_length_in: bounds.minLengthIn,
-              max_length_in: bounds.maxLengthIn,
-              rotated,
-            }
-          : null,
+        size_bounds: bounds ? { ...bounds, rotated } : null,
       },
       row_count: 0,
       error: error?.message ?? "Unknown query failure",
@@ -765,15 +1012,7 @@ async function runCandidateQuery(input: {
       status: "available",
       enrichment_status: "ready",
       limit: input.limit,
-      size_bounds: bounds
-        ? {
-            min_width_in: bounds.minWidthIn,
-            max_width_in: bounds.maxWidthIn,
-            min_length_in: bounds.minLengthIn,
-            max_length_in: bounds.maxLengthIn,
-            rotated,
-          }
-        : null,
+      size_bounds: bounds ? { ...bounds, rotated } : null,
     },
     row_count: data.length,
     error: null,

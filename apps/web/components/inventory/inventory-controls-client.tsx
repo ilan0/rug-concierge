@@ -62,7 +62,6 @@ type SizeInputParts = {
 const STATUS_OPTIONS: Array<{ value: InventoryStatusFilter; label: string }> = [
   { value: "available", label: "Available" },
   { value: "all", label: "All" },
-  { value: "sold", label: "Sold" },
   { value: "on_hold", label: "On Hold" },
 ];
 

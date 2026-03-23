@@ -18,7 +18,7 @@ export type IntakeCreatedRug = {
   stock_id: string | null;
   intake_label: string | null;
   ai_description: string | null;
-  status: string | null;
+  status: "available" | "on_hold" | null;
   enrichment_status: EnrichmentStatus | null;
   review_reason_code: ReviewReasonCode | null;
   width_total_in: number;
