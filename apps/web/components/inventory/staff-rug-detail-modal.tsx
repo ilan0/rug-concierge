@@ -59,7 +59,7 @@ type EditDraft = {
   status: InventoryRugStatus;
 };
 
-type UnsavedAction = "close-modal" | "exit-edit-mode";
+type UnsavedAction = "close-modal" | "exit-edit-mode" | "availability-toggle";
 type DangerousAction = "re-analyze" | "delete";
 
 const ORIGIN_OPTIONS = [
@@ -153,8 +153,8 @@ function detailToDraft(detail: StaffInventoryRugDetail): EditDraft {
     style: detail.effective_fields.style ?? "",
     pattern: normalizeList(detail.effective_fields.pattern ?? []),
     primary_colors: normalizeList(detail.effective_fields.primary_colors ?? []),
-    age_category: detail.effective_fields.age_category ?? "new",
-    mood: detail.effective_fields.mood ?? "traditional",
+    age_category: detail.effective_fields.age_category ?? "",
+    mood: detail.effective_fields.mood ?? "",
     stock_id: detail.stock_id ?? "",
     status: detail.status === "on_hold" ? "on_hold" : "available",
   };
@@ -164,7 +164,8 @@ function rowToDetail(row: InventoryBrowserRow): StaffInventoryRugDetail {
   const effectiveFields = resolveEffectiveFields(
     row.intake_label,
     row.ai_structured_fields,
-    row.staff_overrides
+    row.staff_overrides,
+    row.ai_description
   );
 
   return {
@@ -212,6 +213,9 @@ export function StaffRugDetailModal({
   const [unsavedDialogOpen, setUnsavedDialogOpen] = useState(false);
   const [pendingUnsavedAction, setPendingUnsavedAction] =
     useState<UnsavedAction | null>(null);
+  const [pendingAvailabilityStatus, setPendingAvailabilityStatus] = useState<
+    InventoryRugStatus | null
+  >(null);
   const [dangerousAction, setDangerousAction] = useState<DangerousAction | null>(
     null
   );
@@ -302,6 +306,7 @@ export function StaffRugDetailModal({
   const closeUnsavedDialog = () => {
     setUnsavedDialogOpen(false);
     setPendingUnsavedAction(null);
+    setPendingAvailabilityStatus(null);
   };
 
   const onToggleListValue = (field: "pattern" | "primary_colors", value: string) => {
@@ -445,7 +450,13 @@ export function StaffRugDetailModal({
     if (!detail || saving || reAnalyzing || deleting) return;
     const currentAvailable = detail.status === "available";
     if (currentAvailable === nextAvailable) return;
-    await onQuickStatusChange(nextAvailable ? "available" : "on_hold");
+    const nextStatus = nextAvailable ? "available" : "on_hold";
+    if (hasUnsavedChanges) {
+      setPendingAvailabilityStatus(nextStatus);
+      promptUnsavedChanges("availability-toggle");
+      return;
+    }
+    await onQuickStatusChange(nextStatus);
   };
 
   const openDangerousAction = (action: DangerousAction) => {
@@ -501,11 +512,20 @@ export function StaffRugDetailModal({
 
     if (choice === "discard") {
       resetDraftFromDetail();
-      setEditMode(false);
       const action = pendingUnsavedAction;
+      const availabilityStatus = pendingAvailabilityStatus;
       closeUnsavedDialog();
       if (action === "close-modal") {
+        setEditMode(false);
         onClose();
+        return;
+      }
+      if (action === "exit-edit-mode") {
+        setEditMode(false);
+        return;
+      }
+      if (action === "availability-toggle" && availabilityStatus) {
+        await onQuickStatusChange(availabilityStatus);
       }
       return;
     }
@@ -514,9 +534,14 @@ export function StaffRugDetailModal({
     if (!saved) return;
 
     const action = pendingUnsavedAction;
+    const availabilityStatus = pendingAvailabilityStatus;
     closeUnsavedDialog();
     if (action === "close-modal") {
       onClose();
+      return;
+    }
+    if (action === "availability-toggle" && availabilityStatus) {
+      await onQuickStatusChange(availabilityStatus);
     }
   };
 
@@ -925,6 +950,7 @@ export function StaffRugDetailModal({
                                 )
                               }
                             >
+                              <option value="">— Select age —</option>
                               {AGE_OPTIONS.map((option) => (
                                 <option key={option} value={option}>
                                   {option}
@@ -953,6 +979,7 @@ export function StaffRugDetailModal({
                                 )
                               }
                             >
+                              <option value="">— Select mood —</option>
                               {MOOD_OPTIONS.map((option) => (
                                 <option key={option} value={option}>
                                   {option}
@@ -1068,7 +1095,9 @@ export function StaffRugDetailModal({
             <AlertDialogDescription>
               {pendingUnsavedAction === "close-modal"
                 ? "Save your edits before closing this rug, or discard them and close without saving."
-                : "Save your edits before leaving edit mode, or discard them and exit without saving."}
+                : pendingUnsavedAction === "exit-edit-mode"
+                  ? "Save your edits before leaving edit mode, or discard them and exit without saving."
+                  : "Save your edits before changing availability, or discard them and continue."}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

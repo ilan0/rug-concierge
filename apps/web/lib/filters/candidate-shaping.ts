@@ -153,7 +153,8 @@ function scoreStructuredMatch(
     : resolveEffectiveFields(
         rug.intake_label ?? null,
         rug.ai_structured_fields ?? null,
-        rug.staff_overrides ?? null
+        rug.staff_overrides ?? null,
+        rug.ai_description ?? null
       );
 
   const haystack = normalizeText(
@@ -186,7 +187,8 @@ function scoreColorMatch(rug: InventoryRug, constraints: HardConstraints, userMe
     : resolveEffectiveFields(
         rug.intake_label ?? null,
         rug.ai_structured_fields ?? null,
-        rug.staff_overrides ?? null
+        rug.staff_overrides ?? null,
+        rug.ai_description ?? null
       );
   const haystack = normalizeText(
     `${(fields.primary_colors ?? []).join(" ")} ${rug.ai_description ?? ""} ${
@@ -238,7 +240,8 @@ function scoreMetadataCompleteness(rug: InventoryRug): number {
     : resolveEffectiveFields(
         rug.intake_label ?? null,
         rug.ai_structured_fields ?? null,
-        rug.staff_overrides ?? null
+        rug.staff_overrides ?? null,
+        rug.ai_description ?? null
       );
 
   let score = 0;
@@ -287,7 +290,8 @@ function diversityKey(rug: InventoryRug): string {
     : resolveEffectiveFields(
         rug.intake_label ?? null,
         rug.ai_structured_fields ?? null,
-        rug.staff_overrides ?? null
+        rug.staff_overrides ?? null,
+        rug.ai_description ?? null
       );
   return normalizeText(
     `${fields.style ?? ""}|${fields.origin ?? ""}|${fields.mood ?? ""}|${

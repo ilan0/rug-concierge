@@ -188,7 +188,7 @@ export function useConciergeController(input: UseConciergeControllerInput) {
 
   const buildChatRequestPayload = (userMessage: string): UiChatRequest => ({
     session_id: sessionId ?? undefined,
-    role: "retail_customer",
+    role: debug ? "store_staff" : "retail_customer",
     message: userMessage,
     tenant_id: tenantId,
   });

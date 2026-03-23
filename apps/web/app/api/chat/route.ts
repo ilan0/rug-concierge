@@ -25,7 +25,6 @@ import {
 } from "@/lib/qa/e2e-trace";
 import { badRequest, forbidden, internalError } from "@/lib/errors/http-errors";
 import {
-  hasTenantId,
   normalizeTenantId,
   requireTenantId,
   resolveAuthoritativeTenantForServer,
@@ -154,11 +153,6 @@ export async function POST(req: Request) {
     const routeDecision = routeTurnMode({
       message: userMessage,
       role,
-      last_mode:
-        nextSession.recommendation_state.runtime?.last_result_mode ===
-        "recommendation"
-          ? "recommendation"
-          : null,
       last_result_mode:
         nextSession.recommendation_state.runtime?.last_result_mode ?? null,
       has_recent_recommendations: Boolean(
@@ -169,8 +163,10 @@ export async function POST(req: Request) {
     });
     const effectiveMode = routeDecision.mode;
     const memoryEnabled = CHAT_MEMORY_ENABLED;
-    const currentNoMatchAttempts =
-      nextSession.conversation_memory.no_match_attempts ?? 0;
+    const currentNoMatchAttempts = Math.max(
+      nextSession.conversation_memory.no_match_attempts ?? 0,
+      nextSession.recommendation_state.runtime?.no_match_attempts ?? 0
+    );
     const startingNoMatchAttempts =
       routeDecision.rule_id === "EXPLICIT_RECOMMENDATION_REQUEST"
         ? 0
@@ -195,9 +191,6 @@ export async function POST(req: Request) {
     if (effectiveMode === "recommendation") {
       const tenantError = requireTenantId(tenantId, "inventory-backed flow");
       if (tenantError) return badRequest(tenantError);
-    }
-    if (effectiveMode === "recommendation" && !hasTenantId(tenantId)) {
-      return badRequest("tenant_id is required for this inventory-backed request.");
     }
 
     const turnMessage = userMessage;

@@ -124,7 +124,8 @@ export function toInventoryBrowserRow(row: RugRecord): InventoryBrowserRow {
   const effectiveFields = resolveEffectiveFields(
     row.intake_label,
     row.ai_structured_fields,
-    row.staff_overrides
+    row.staff_overrides,
+    row.ai_description
   );
 
   return {
@@ -162,7 +163,8 @@ export function toStaffInventoryRugDetail(input: {
     effective_fields: resolveEffectiveFields(
       input.row.intake_label,
       input.row.ai_structured_fields,
-      input.row.staff_overrides
+      input.row.staff_overrides,
+      input.row.ai_description
     ),
     stock_id: input.row.stock_id,
     status: input.row.status,

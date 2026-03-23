@@ -25,7 +25,8 @@ function normalizeOverrides(
 export function resolveEffectiveFields(
   intakeLabel: string | null,
   aiFields: RugAiStructuredFields | null,
-  staffOverrides: StaffOverrides | null
+  staffOverrides: StaffOverrides | null,
+  aiDescription: string | null = null
 ): EffectiveRugFields {
   const normalizedOverrides = normalizeOverrides(staffOverrides);
   const base = aiFields ?? {};
@@ -33,7 +34,7 @@ export function resolveEffectiveFields(
     styleRaw: base.style ?? null,
     pattern: base.pattern ?? [],
     mood: base.mood ?? null,
-    aiDescription: "",
+    aiDescription,
   });
 
   return {

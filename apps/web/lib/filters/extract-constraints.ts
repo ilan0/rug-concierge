@@ -163,7 +163,7 @@ export function normalizeHardConstraints(input: unknown): HardConstraints {
 function parseSizeFromMessage(userMessage: string): HardConstraints["size"] | undefined {
   const text = userMessage.toLowerCase();
   const sizePattern =
-    /(\d{1,3}(?:\.\d+)?)\s*(?:ft|feet|')?\s*[x×]\s*(\d{1,3}(?:\.\d+)?)\s*(?:ft|feet|')?(?:\s*-?\s*ish)?/i;
+    /(\d{1,3}(?:\.\d+)?)\s*(?:ft|feet|')?\s*(?:[x×]|\bby\b)\s*(\d{1,3}(?:\.\d+)?)\s*(?:ft|feet|')?(?:\s*-?\s*ish)?/i;
   const match = text.match(sizePattern);
   if (!match) return undefined;
 

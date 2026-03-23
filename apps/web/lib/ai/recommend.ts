@@ -239,7 +239,8 @@ function effectiveFields(rug: InventoryRug) {
     resolveEffectiveFields(
       rug.intake_label ?? null,
       rug.ai_structured_fields ?? null,
-      rug.staff_overrides ?? null
+      rug.staff_overrides ?? null,
+      rug.ai_description ?? null
     )
   );
 }

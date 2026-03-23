@@ -44,7 +44,7 @@ export async function resolveApiRoleOrError(
     };
   }
 
-  const resolution = await resolveRequestRole({
+  const resolution = resolveRequestRole({
     requestedRole: requestedRoleInput.requestedRole,
     defaultRole: input.defaultRole ?? "retail_customer",
   });

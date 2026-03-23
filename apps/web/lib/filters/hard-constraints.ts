@@ -17,7 +17,8 @@ function toSearchText(rug: InventoryRug): string {
     : resolveEffectiveFields(
         rug.intake_label ?? null,
         rug.ai_structured_fields ?? null,
-        rug.staff_overrides ?? null
+        rug.staff_overrides ?? null,
+        rug.ai_description ?? null
       );
 
   const parts: string[] = [
@@ -40,7 +41,8 @@ function toPrimaryColors(rug: InventoryRug): string[] {
     : resolveEffectiveFields(
         rug.intake_label ?? null,
         rug.ai_structured_fields ?? null,
-        rug.staff_overrides ?? null
+        rug.staff_overrides ?? null,
+        rug.ai_description ?? null
       );
 
   return (fields.primary_colors ?? [])
@@ -54,7 +56,8 @@ function toStyles(rug: InventoryRug): string[] {
     : resolveEffectiveFields(
         rug.intake_label ?? null,
         rug.ai_structured_fields ?? null,
-        rug.staff_overrides ?? null
+        rug.staff_overrides ?? null,
+        rug.ai_description ?? null
       );
 
   const styleTokens = [fields.style ?? "", ...(fields.pattern ?? [])];

@@ -17,8 +17,10 @@ export async function handleRecommendationTurn(
     input.message.toLowerCase().trim()
   );
   const priorResultMode = input.session.recommendation_state.runtime?.last_result_mode ?? null;
-  const noMatchAttempts =
-    input.session.conversation_memory.no_match_attempts ?? 0;
+  const noMatchAttempts = Math.max(
+    input.session.conversation_memory.no_match_attempts ?? 0,
+    input.session.recommendation_state.runtime?.no_match_attempts ?? 0
+  );
   const lastRecommendedSizeIn =
     input.session.recommendation_state.runtime?.last_recommended_size_in ?? null;
 

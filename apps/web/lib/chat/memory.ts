@@ -198,7 +198,6 @@ export function mergeConversationMemory(
     assistantMessage: string;
     lastUserIntent: ChatMode;
     noMatchAttempts?: number;
-    memoryHints?: string[];
     now?: string;
   }
 ): SessionData["conversation_memory"] {
@@ -206,9 +205,8 @@ export function mergeConversationMemory(
   const base = previous ?? buildInitialConversationMemory(nextNow);
 
   const extractedFacts = extractStableFactsFromUserMessage(input.userMessage);
-  const memoryHints = compactList(input.memoryHints ?? [], MAX_STABLE_FACTS, MAX_STABLE_FACT_CHARS);
   const stableFacts = compactList(
-    [...extractedFacts, ...memoryHints, ...base.stable_facts],
+    [...extractedFacts, ...base.stable_facts],
     MAX_STABLE_FACTS,
     MAX_STABLE_FACT_CHARS
   );

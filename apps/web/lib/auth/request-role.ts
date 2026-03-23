@@ -42,10 +42,10 @@ export function getRequestedRoleFromBody(input: RequestRoleFields): {
   return { requestedRole: undefined, error: null };
 }
 
-export async function resolveRequestRole(input?: {
+export function resolveRequestRole(input?: {
   requestedRole?: unknown;
   defaultRole?: AppRole;
-}): Promise<ResolvedRequestRole> {
+}): ResolvedRequestRole {
   const requestRole =
     input?.requestedRole && isAppRole(input.requestedRole)
       ? input.requestedRole

@@ -6,7 +6,6 @@ import type {
 type RouteTurnModeInput = {
   message: string;
   role: RoleType;
-  last_mode?: ChatMode | null;
   last_result_mode?: "recommendation" | "no_match" | "clarifying_question" | null;
   has_recent_recommendations?: boolean;
 };
@@ -59,8 +58,7 @@ const ROUTE_RULES: RouteRule[] = [
     id: "RECOMMENDATION_FOLLOWUP",
     when: (input, text) =>
       parseRecommendationFollowupIntent(text) !== "none" &&
-      (input.last_mode === "recommendation" ||
-        input.last_result_mode === "recommendation" ||
+      (input.last_result_mode === "recommendation" ||
         input.last_result_mode === "no_match" ||
         Boolean(input.has_recent_recommendations)),
     decide: () => ({

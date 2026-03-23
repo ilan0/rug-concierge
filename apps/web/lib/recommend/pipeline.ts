@@ -78,7 +78,7 @@ type RecommendationSizeIn = {
   length_in: number;
 };
 
-const SIZE_RELAXATION_STEPS_IN = [0, 4, 8, 12, 18, 24] as const;
+const SIZE_RELAXATION_STEPS_IN = [4, 8, 12, 18, 24] as const;
 
 function isDirectionalFollowupIntent(
   followupIntent:
@@ -332,10 +332,17 @@ export async function runRecommendationPipeline(
 
     let blockers: string[] = [];
     if (candidates.length === 0) {
-      blockers = detectHardConstraintBlockers(inventory, effectiveConstraints);
-      const hasRepeatNoMatch = (input.noMatchAttempts ?? 0) > 0;
+      blockers = detectHardConstraintBlockers(
+        inventory,
+        effectiveConstraints,
+        sizeSearch.sizeWindow
+      );
+      const hasRepeatNoMatch =
+        (input.noMatchAttempts ?? 0) > 0 ||
+        (input.priorResultMode === "no_match" &&
+          typeof relaxedToleranceIn === "number");
       if (hasRepeatNoMatch) {
-      const response = buildTerminalNoMatchResponse({
+        const response = buildTerminalNoMatchResponse({
           constraints: effectiveConstraints,
           followupIntent,
           blockers,
@@ -590,11 +597,10 @@ function shouldAttemptClosestRelaxation(input: {
   constraints: HardConstraints;
 }): boolean {
   if (!input.constraints.size) return false;
-  if (
-    input.followupIntent !== "closest" &&
-    input.followupIntent !== "larger" &&
-    input.followupIntent !== "smaller"
-  ) {
+  if (input.followupIntent === "closest") {
+    return true;
+  }
+  if (input.followupIntent !== "larger" && input.followupIntent !== "smaller") {
     return false;
   }
 
@@ -644,7 +650,8 @@ function applyClosestRelaxationLadder(
 
 function detectHardConstraintBlockers(
   inventory: InventoryRug[],
-  constraints: HardConstraints
+  constraints: HardConstraints,
+  sizeWindow?: SizeWindow | null
 ): string[] {
   const blockers: string[] = [];
   const activeKeys: Array<keyof HardConstraints> = [];
@@ -655,7 +662,7 @@ function detectHardConstraintBlockers(
 
   if (activeKeys.length === 0) return blockers;
 
-  const baseline = filterByHardConstraints(inventory, constraints);
+  const baseline = filterByHardConstraints(inventory, constraints, sizeWindow);
   if (baseline.length > 0) return blockers;
 
   for (const key of activeKeys) {
@@ -663,7 +670,12 @@ function detectHardConstraintBlockers(
       ...constraints,
       [key]: undefined,
     };
-    const relaxedMatches = filterByHardConstraints(inventory, relaxed);
+    const relaxedSizeWindow = key === "size" ? null : sizeWindow ?? null;
+    const relaxedMatches = filterByHardConstraints(
+      inventory,
+      relaxed,
+      relaxedSizeWindow
+    );
     if (relaxedMatches.length > 0) {
       blockers.push(key);
     }
@@ -905,7 +917,8 @@ async function fetchInventoryCandidates(input: {
     const effectiveFields = resolveEffectiveFields(
       rug.intake_label ?? null,
       rug.ai_structured_fields ?? null,
-      rug.staff_overrides ?? null
+      rug.staff_overrides ?? null,
+      rug.ai_description ?? null
     );
 
     return {
