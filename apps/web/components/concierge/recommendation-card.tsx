@@ -5,6 +5,7 @@ import type { UiRecommendationItem } from "@/lib/types/chat-ui";
 import { RugImage } from "@/components/ui/rug-image";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import {
   RugDetailModal,
   type RugDetailData,
@@ -14,7 +15,6 @@ import { toast } from "sonner";
 type RecommendationCardProps = {
   item: UiRecommendationItem;
   showTechnicalMeta?: boolean;
-  maxVisibleReasons?: number;
   onAskAboutRug?: (rugTitle: string) => void;
 };
 
@@ -40,17 +40,11 @@ function isRugDetailData(value: unknown): value is RugDetailData {
 export function RecommendationCard({
   item,
   showTechnicalMeta = false,
-  maxVisibleReasons,
   onAskAboutRug,
 }: RecommendationCardProps) {
   const tags = [item.origin, item.style, item.mood].filter(
     (value): value is string => typeof value === "string" && value.trim().length > 0
   );
-  const visibleReasonCount =
-    typeof maxVisibleReasons === "number"
-      ? Math.max(0, maxVisibleReasons)
-      : item.match_reasons.length;
-  const visibleReasons = item.match_reasons.slice(0, visibleReasonCount);
 
   const [detailOpen, setDetailOpen] = useState(false);
   const [detailLoading, setDetailLoading] = useState(false);
@@ -172,7 +166,7 @@ export function RecommendationCard({
           }
         }}
       >
-        <div className="h-52 w-full overflow-hidden bg-muted">
+        <div className="h-60 w-full overflow-hidden bg-muted">
           <RugImage
             src={item.primary_image_url}
             alt={item.primary_image_caption ?? item.title}
@@ -180,9 +174,11 @@ export function RecommendationCard({
             placeholderLabel="No rug image"
           />
         </div>
-        <CardHeader className="pb-1 pt-4">
+        <CardHeader className="pb-1 pt-3">
           <div className="flex items-start justify-between gap-3">
-            <CardTitle className="text-[22px] leading-[1.25]">{item.title}</CardTitle>
+            <CardTitle className="line-clamp-2 text-[20px] leading-[1.25]">
+              {item.title}
+            </CardTitle>
             {showTechnicalMeta ? (
               <Badge
                 variant={
@@ -198,10 +194,18 @@ export function RecommendationCard({
             ) : null}
           </div>
         </CardHeader>
-        <CardContent className="space-y-4 pb-5 pt-1 text-[17px] leading-[1.6] md:min-h-[288px] lg:min-h-[302px]">
+        <CardContent className="space-y-3 pb-4 pt-1 text-[17px] leading-[1.6]">
+          <p className="space-y-1.5">
+            <span className="block text-[11px] font-semibold uppercase tracking-[0.08em] text-primary">
+              Size
+            </span>
+            <span className="block whitespace-nowrap text-lg font-medium leading-[1.2] sm:text-xl">
+              {item.size_text ?? "-"}
+            </span>
+          </p>
           {tags.length > 0 ? (
             <div className="flex flex-wrap gap-1.5">
-              {tags.slice(0, 3).map((tag) => (
+              {tags.slice(0, 2).map((tag) => (
                 <span
                   key={`${item.rug_id}-${tag}`}
                   className="rounded-full border border-border/55 bg-background px-2.5 py-0.5 text-[11px] font-medium text-foreground/75"
@@ -211,25 +215,19 @@ export function RecommendationCard({
               ))}
             </div>
           ) : null}
-
-          <p className="space-y-1">
-            <span className="block text-[12px] font-semibold uppercase tracking-[0.08em] text-primary">
-              Size
-            </span>
-            <span className="block whitespace-nowrap text-xl font-medium leading-[1.15] sm:text-2xl">
-              {item.size_text ?? "-"}
-            </span>
-          </p>
-
-          <div>
-            <p className="text-[12px] font-semibold uppercase tracking-[0.08em] text-primary">
-              Why this fits
-            </p>
-            <div className="mt-2 space-y-2 text-sm leading-relaxed md:min-h-[4.5rem]">
-              {visibleReasons.map((reason) => (
-                <p key={reason}>{reason}</p>
-              ))}
-            </div>
+          <div className="pt-1">
+            <Button
+              type="button"
+              variant="outline"
+              className="h-9 rounded-xl border-primary/35 bg-primary/5 px-3 text-sm hover:bg-primary/12"
+              onClick={(event) => {
+                event.stopPropagation();
+                onAskAboutThisRug();
+              }}
+              disabled={!onAskAboutRug}
+            >
+              Ask about this rug
+            </Button>
           </div>
         </CardContent>
       </Card>

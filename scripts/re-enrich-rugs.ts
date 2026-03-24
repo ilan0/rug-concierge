@@ -4,6 +4,10 @@ import fs from "node:fs";
 import path from "node:path";
 import { createClient } from "@supabase/supabase-js";
 import { z } from "zod";
+import {
+  CANONICAL_COLORS,
+  normalizeColorList,
+} from "../apps/web/lib/config/color-taxonomy";
 import { rugImagePathToPublicUrl } from "../apps/web/lib/storage/rug-images";
 import { resolveStyleValue } from "../apps/web/lib/inventory/style-normalization";
 
@@ -11,6 +15,7 @@ const OPENAI_RESPONSES_URL = "https://api.openai.com/v1/responses";
 const MAX_CONCURRENCY = 2;
 const BATCH_DELAY_MS = 1000;
 const MAX_429_RETRIES = 3;
+const COLOR_PROMPT_LIST = CANONICAL_COLORS.map((value) => `"${value}"`).join(",");
 
 const VISION_OUTPUT_JSON_SCHEMA = {
   type: "object",
@@ -46,6 +51,8 @@ const VISION_OUTPUT_JSON_SCHEMA = {
                     "Indian",
                     "Caucasian",
                     "Pakistani",
+                    "Moroccan",
+                    "Central Asian",
                     "Other",
                   ],
                 },
@@ -59,26 +66,28 @@ const VISION_OUTPUT_JSON_SCHEMA = {
             },
             primary_colors: {
               type: "array",
-              items: { type: "string", maxLength: 32 },
-              maxItems: 8,
+              items: { type: "string", enum: CANONICAL_COLORS },
+              maxItems: 4,
             },
             age_category: {
               anyOf: [
                 { type: "null" },
                 {
                   type: "string",
-                  enum: ["antique", "semi-antique", "vintage", "new"],
+                  enum: [
+                    "antique",
+                    "semi-antique",
+                    "vintage",
+                    "traditional",
+                    "contemporary",
+                    "new",
+                  ],
                 },
               ],
             },
             mood: {
-              anyOf: [
-                { type: "null" },
-                {
-                  type: "string",
-                  enum: ["traditional", "transitional", "eclectic", "modern"],
-                },
-              ],
+              type: "string",
+              enum: ["traditional", "transitional", "eclectic", "modern"],
             },
           },
         },
@@ -97,6 +106,8 @@ const aiStructuredFieldsSchema = z
         "Indian",
         "Caucasian",
         "Pakistani",
+        "Moroccan",
+        "Central Asian",
         "Other",
       ])
       .nullable()
@@ -104,18 +115,22 @@ const aiStructuredFieldsSchema = z
     style: z.string().trim().min(1).max(80).nullable().optional(),
     pattern: z.array(z.string().trim().min(1).max(48)).max(8).nullable().optional(),
     primary_colors: z
-      .array(z.string().trim().min(1).max(32))
-      .max(8)
+      .array(z.enum(CANONICAL_COLORS))
+      .max(4)
       .nullable()
       .optional(),
     age_category: z
-      .enum(["antique", "semi-antique", "vintage", "new"])
+      .enum([
+        "antique",
+        "semi-antique",
+        "vintage",
+        "traditional",
+        "contemporary",
+        "new",
+      ])
       .nullable()
       .optional(),
-    mood: z
-      .enum(["traditional", "transitional", "eclectic", "modern"])
-      .nullable()
-      .optional(),
+    mood: z.enum(["traditional", "transitional", "eclectic", "modern"]),
   })
   .strict();
 
@@ -295,10 +310,11 @@ function normalizeStructuredFields(input: {
     if (next.length > 0) normalized.pattern = next.slice(0, 8);
   }
   if (Array.isArray(value.primary_colors) && value.primary_colors.length > 0) {
-    const next = value.primary_colors
-      .map((item) => toPlainText(item).slice(0, 32).toLowerCase())
-      .filter((item) => item.length > 0);
-    if (next.length > 0) normalized.primary_colors = next.slice(0, 8);
+    const next = normalizeColorList(
+      value.primary_colors.map((item) => toPlainText(item).slice(0, 32).toLowerCase()),
+      4
+    );
+    if (next.length > 0) normalized.primary_colors = next.slice(0, 4);
   }
   if (value.age_category) normalized.age_category = value.age_category;
   if (value.mood) normalized.mood = value.mood;
@@ -372,18 +388,18 @@ async function requestVisionEnrichment(input: {
   lengthTotalIn: number | null;
 }): Promise<VisionEnrichmentResult | null> {
   const apiKey = assertEnv("OPENAI_API_KEY");
+  const model = assertEnv("OPENAI_VISION_MODEL");
   const sizeDisplay = formatSize(input.widthTotalIn, input.lengthTotalIn);
 
   const requestPayload = {
-    model: "gpt-4o",
+    model,
     input: [
       {
         role: "system",
         content: [
           {
             type: "input_text",
-            text:
-              "You are an expert rug appraiser. Analyze the rug in this photo and return valid JSON only. Use measured size as context for scale only. Never include dimensions in the intake_label. Leave uncertain fields as null and unknown list fields as empty arrays.\\n\\nStyle is important: provide a concise style value whenever possible (named style preferred, otherwise broad style like Traditional, Tribal, Geometric, Floral, Modern, Transitional). Use null only when truly impossible.\\n\\nReturn shape:\\n{\\n  \\\"intake_label\\\": \\\"3-6 words, descriptive, no dimensions\\\",\\n  \\\"ai_description\\\": \\\"1-2 sentences: style tradition, palette, motifs, room fit\\\",\\n  \\\"ai_structured_fields\\\": {\\n    \\\"origin\\\": \\\"Persian|Afghan|Turkish|Indian|Caucasian|Pakistani|Other|null\\\",\\n    \\\"style\\\": \\\"named style like Heriz/Serapi/Gabbeh/Kilim or concise broad style, or null only when impossible\\\",\\n    \\\"pattern\\\": [\\\"medallion center\\\", \\\"all-over pattern\\\", \\\"geometric design\\\", \\\"floral motif\\\", \\\"tribal design\\\", \\\"floral border\\\", \\\"pictorial\\\", \\\"plain field\\\"],\\n    \\\"primary_colors\\\": [\\\"red\\\",\\\"navy\\\",\\\"ivory\\\",\\\"gold\\\",\\\"rust\\\",\\\"teal\\\",\\\"brown\\\",\\\"green\\\",\\\"blue\\\",\\\"black\\\",\\\"cream\\\",\\\"coral\\\"],\\n    \\\"age_category\\\": \\\"antique|semi-antique|vintage|new|null\\\",\\n    \\\"mood\\\": \\\"traditional|transitional|eclectic|modern|null\\\"\\n  }\\n}",
+            text: `You are an expert luxury rug appraiser. Analyze the rug photo and return valid JSON only. Use measured size as scale context only. Never include dimensions in intake_label. Leave uncertain scalar fields as null and unknown list fields as empty arrays.\n\nPrimary objective: extract accurate trade vocabulary into ai_structured_fields (especially origin, style/weave name, and age_category).\n\nConfidence rules (strict): do not guess. If origin/style/age_category is uncertain, return null.\n- If the image is a storefront, signage, non-rug scene, or too partial/blurry to classify confidently, return origin/style/age_category as null.\n- Do not default age_category to traditional.\n- Use age_category=traditional only when the rug is clearly hand-knotted in a traditional design and the era is not clearly antique/semi-antique/vintage.\n\nStyle rules (strict): style is for named weave/style types only. Use values like Heriz, Serapi, Kashan, Isfahan, Tabriz, Kerman, Nain, Qom, Bidjar, Malayer, Sarouk, Sultanabad, Bakhtiari, Hamadan, Mashad, Qashqai, Gabbeh, Kilim, Soumak, Baluch, Turkmen, Bokhara, Oushak, Kazak, Shirvan, Karabagh, Beni Ourain, Azilal, and similar named types. If a specific named style cannot be identified, return style as null. Never use pattern descriptors for style.\n\nColor rules (strict): primary_colors must use this canonical list only: [${COLOR_PROMPT_LIST}].\n- Return 1-4 colors only.\n- Order by dominance: field color first, primary border second, accent details third by visual prominence.\n- If the image suggests a non-listed color term, map it to the closest canonical color.\n- Do not return abstract adjectives like "dark" or "light" as colors.\n\nMood rules (strict): mood is always required.\n- Always return exactly one mood value.\n- Never return mood as null.\n\nShape guidance (strict): if the rug is not a standard rectangular area rug, explicitly state the shape in ai_description.\n- Valid non-rectangular shapes are square, round, oval, and runner.\n- Never infer shape from dimensions alone.\n\nintake_label is fallback-only and must still use trade vocabulary. Use era + origin + style when available. Do not produce color-led or pattern-led labels.\nCorrect style example: "Heriz". Incorrect style example: "Geometric".\nCorrect intake_label example: "Antique Persian Heriz". Incorrect intake_label example: "Red geometric tribal rug".\nDo not invent quality claims such as Fine, Very Fine, Rare, or Collectible.\n\nReturn shape:\n{\n  "intake_label": "3-6 words, fallback trade title, no dimensions, no color-led phrasing",\n  "ai_description": "1-2 sentences: concise visual and merchandising summary",\n  "ai_structured_fields": {\n    "origin": "Persian|Afghan|Turkish|Indian|Caucasian|Pakistani|Moroccan|Central Asian|Other|null",\n    "style": "named weave/style only (for example Heriz, Oushak, Gabbeh, Bokhara) or null",\n    "pattern": ["medallion center", "all-over pattern", "geometric design", "floral motif", "tribal design", "floral border", "pictorial", "plain field"],\n    "primary_colors": [${COLOR_PROMPT_LIST}],\n    "age_category": "antique|semi-antique|vintage|traditional|contemporary|new|null",\n    "mood": "traditional|transitional|eclectic|modern"\n  }\n}`,
           },
         ],
       },

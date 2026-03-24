@@ -6,6 +6,8 @@ export type ExactSizePresetSpec = {
   toleranceIn: number;
 };
 
+type SimilaritySizePreset = Exclude<InventorySizePreset, "runner" | "round-oval">;
+
 export type SizePresetMeta = {
   value: InventorySizePreset;
   label: string;
@@ -37,6 +39,33 @@ const EXACT_SIZE_PRESET_SPECS: Record<
   "8x10": { widthIn: 96, lengthIn: 120, toleranceIn: 12 },
   "9x12": { widthIn: 108, lengthIn: 144, toleranceIn: 12 },
   "10x14": { widthIn: 120, lengthIn: 168, toleranceIn: 12 },
+};
+
+const SIMILARITY_SIZE_PRESET_ORDER: readonly SimilaritySizePreset[] = [
+  "accent",
+  "3x5",
+  "4x6",
+  "5x8",
+  "6x9",
+  "8x10",
+  "9x12",
+  "10x14",
+  "oversized",
+] as const;
+
+const SIMILARITY_SIZE_PRESET_ANCHORS: Record<
+  SimilaritySizePreset,
+  { widthIn: number; lengthIn: number }
+> = {
+  accent: { widthIn: 24, lengthIn: 36 },
+  "3x5": { widthIn: 36, lengthIn: 60 },
+  "4x6": { widthIn: 48, lengthIn: 72 },
+  "5x8": { widthIn: 60, lengthIn: 96 },
+  "6x9": { widthIn: 72, lengthIn: 108 },
+  "8x10": { widthIn: 96, lengthIn: 120 },
+  "9x12": { widthIn: 108, lengthIn: 144 },
+  "10x14": { widthIn: 120, lengthIn: 168 },
+  oversized: { widthIn: 132, lengthIn: 180 },
 };
 
 const SIZE_PRESET_LABEL_BY_VALUE = new Map<string, string>(
@@ -98,4 +127,85 @@ export function splitSizePresetGroups(): {
     (option) => option.value
   );
   return { featured, more };
+}
+
+function sizeDistance(input: {
+  widthIn: number;
+  lengthIn: number;
+  anchorWidthIn: number;
+  anchorLengthIn: number;
+}): number {
+  const direct =
+    Math.abs(input.widthIn - input.anchorWidthIn) +
+    Math.abs(input.lengthIn - input.anchorLengthIn);
+  const rotated =
+    Math.abs(input.widthIn - input.anchorLengthIn) +
+    Math.abs(input.lengthIn - input.anchorWidthIn);
+  return Math.min(direct, rotated);
+}
+
+export function toSimilaritySizePreset(input: {
+  widthIn: number;
+  lengthIn: number;
+}): InventorySizePreset {
+  const { widthIn, lengthIn } = input;
+  let bestPreset: SimilaritySizePreset = "accent";
+  let bestDistance = Number.POSITIVE_INFINITY;
+
+  for (const preset of SIMILARITY_SIZE_PRESET_ORDER) {
+    const anchor = SIMILARITY_SIZE_PRESET_ANCHORS[preset];
+    const distance = sizeDistance({
+      widthIn,
+      lengthIn,
+      anchorWidthIn: anchor.widthIn,
+      anchorLengthIn: anchor.lengthIn,
+    });
+
+    if (distance < bestDistance) {
+      bestDistance = distance;
+      bestPreset = preset;
+    }
+  }
+
+  return bestPreset;
+}
+
+export function getAdjacentSizePresets(
+  preset: InventorySizePreset,
+  steps = 1
+): InventorySizePreset[] {
+  if (preset === "runner" || preset === "round-oval") {
+    return [preset];
+  }
+
+  const index = SIMILARITY_SIZE_PRESET_ORDER.indexOf(preset);
+  if (index < 0) return [preset];
+
+  const out: InventorySizePreset[] = [];
+  for (let offset = -steps; offset <= steps; offset += 1) {
+    const nextIndex = index + offset;
+    if (nextIndex < 0 || nextIndex >= SIMILARITY_SIZE_PRESET_ORDER.length) continue;
+    out.push(SIMILARITY_SIZE_PRESET_ORDER[nextIndex]);
+  }
+
+  return Array.from(new Set(out));
+}
+
+export function getSizePresetDistance(
+  left: InventorySizePreset,
+  right: InventorySizePreset
+): number | null {
+  if (
+    left === "runner" ||
+    left === "round-oval" ||
+    right === "runner" ||
+    right === "round-oval"
+  ) {
+    return left === right ? 0 : null;
+  }
+
+  const leftIndex = SIMILARITY_SIZE_PRESET_ORDER.indexOf(left);
+  const rightIndex = SIMILARITY_SIZE_PRESET_ORDER.indexOf(right);
+  if (leftIndex < 0 || rightIndex < 0) return null;
+  return Math.abs(leftIndex - rightIndex);
 }

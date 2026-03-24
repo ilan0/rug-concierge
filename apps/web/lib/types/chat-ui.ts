@@ -35,7 +35,7 @@ type UiGeneralResponse = {
 };
 
 type UiRecommendationResponse = {
-  mode: "recommendation" | "clarifying_question" | "no_match";
+  mode: "recommendation" | "clarifying_question" | "disambiguation" | "no_match";
   assistant_message: string;
   questions: string[];
   recommendations: UiRecommendationItem[];
@@ -50,6 +50,7 @@ export type UiChatResponseBody = {
     | "general_chat"
     | "recommendation"
     | "clarifying_question"
+    | "disambiguation"
     | "no_match";
   recommendation_state?: {
     hard_constraints: HardConstraints;
@@ -61,9 +62,27 @@ export type UiChatResponseBody = {
       notes?: string[];
     };
     runtime?: {
-      last_result_mode?: "recommendation" | "no_match" | "clarifying_question";
+      last_result_mode?:
+        | "recommendation"
+        | "no_match"
+        | "clarifying_question"
+        | "disambiguation";
       last_relaxed_size_tolerance_in?: number | null;
       last_blockers?: string[];
+      liked_rug_ids?: string[];
+      dismissed_rug_ids?: string[];
+      liked_attributes?: {
+        colors: string[];
+        styles: string[];
+        origins: string[];
+      };
+      recently_shown_rugs?: Array<{
+        id: string;
+        label: string;
+        colors: string[];
+        style: string | null;
+        origin: string | null;
+      }>;
       updated_at?: string;
     };
   };

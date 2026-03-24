@@ -16,7 +16,11 @@ export function getChatLayerPreview(input: {
   if (input.mode === "recommendation") {
     return getRecommendationLayerPreview({
       role: input.role,
+      discoveryMode: false,
       hasChatMemoryContext: input.hasChatMemoryContext,
+      hasCustomerContext: false,
+      hasRecentlyShownContext: false,
+      hasLikedAttributesContext: false,
       hasRecentTurnsContext: input.hasRecentTurnsContext,
     });
   }

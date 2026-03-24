@@ -3,12 +3,14 @@ import { z } from "zod";
 import { handleGeneralChatTurn } from "@/lib/chat/handlers/general-chat";
 import { handleRecommendationTurn } from "@/lib/chat/handlers/recommendation";
 import { routeTurnMode } from "@/lib/chat/router";
+import { parseTurn, type TurnParserTrace } from "@/lib/ai/turn-parser";
 import {
   getOrCreateSession,
   saveSession,
   SessionTenantMismatchError,
 } from "@/lib/chat/session-store";
 import { updateRecommendationStateForTurn } from "@/lib/chat/state";
+import { compileTurnPolicy } from "@/lib/chat/policy-compiler";
 import { buildPromptLayers } from "@/lib/chat/prompt-builder";
 import {
   buildAiContextPacket,
@@ -43,6 +45,7 @@ import {
   chatRateLimit,
 } from "@/lib/rate-limit";
 import type {
+  ChatTurnRequest,
   RoleType,
   SessionData,
   SessionMessage,
@@ -62,6 +65,37 @@ const CHAT_BODY_SCHEMA = z
 const MAX_SESSION_ID_CHARS = 64;
 const UUID_PATTERN =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+type ReactionType = "like" | "dismiss" | null;
+
+function normalizeList(values: string[]): string[] {
+  return Array.from(
+    new Set(
+      values
+        .map((value) => value.trim().toLowerCase())
+        .filter((value) => value.length > 0)
+    )
+  ).slice(0, 12);
+}
+
+function detectReactionType(message: string): ReactionType {
+  const text = message.toLowerCase();
+  if (
+    /\b(don't like|do not like|dislike|hate|pass on|skip this|not this one|too .+ for me|no thanks)\b/.test(
+      text
+    )
+  ) {
+    return "dismiss";
+  }
+  if (
+    /\b(i like|i love|love this|keep this|this works|yes this|great option|perfect)\b/.test(
+      text
+    )
+  ) {
+    return "like";
+  }
+  return null;
+}
 
 export async function POST(req: Request) {
   const startedAt = Date.now();
@@ -122,6 +156,18 @@ export async function POST(req: Request) {
     if (!roleResult.ok) return roleResult.response;
     const role: RoleType = roleResult.role;
     const traceMeta = requestedTraceMeta;
+    const parserTrace: TurnParserTrace = {
+      called: false,
+      model: "",
+      request_payload: null,
+      response_status: null,
+      response_payload: null,
+      parsed: null,
+      fallback_reason: null,
+      error: null,
+      incomplete_detected: false,
+      latency_ms: null,
+    };
 
     const requestedTenantId = normalizeTenantId(body.tenant_id);
     const authoritativeTenantId = resolveAuthoritativeTenantForServer({
@@ -139,9 +185,30 @@ export async function POST(req: Request) {
       created_at: new Date().toISOString(),
     };
 
+    const parsedTurn = await parseTurn({
+      message: userMessage,
+      context: {
+        last_result_mode: session.recommendation_state.runtime?.last_result_mode ?? null,
+        has_recent_recommendations: Boolean(
+          session.recommendation_state.runtime?.last_result_mode === "recommendation" ||
+            session.recommendation_state.runtime?.last_result_mode === "no_match" ||
+            session.recommendation_state.runtime?.last_result_mode === "disambiguation"
+        ),
+        recently_shown_rugs:
+          session.recommendation_state.runtime?.recently_shown_rugs ?? [],
+      },
+      trace: parserTrace,
+    });
+    const compiledPolicy = compileTurnPolicy({
+      parsedTurn,
+      explicitConstraints: body.constraints,
+    });
+    const sparseCompiledConstraints: ChatTurnRequest["constraints"] =
+      compiledPolicy.hard_constraints;
+
     const withRecommendationState = updateRecommendationStateForTurn(session, {
       message: userMessage,
-      constraints: body.constraints,
+      constraints: sparseCompiledConstraints,
     });
     const nextSession: SessionData = {
       ...withRecommendationState,
@@ -158,8 +225,10 @@ export async function POST(req: Request) {
       has_recent_recommendations: Boolean(
         nextSession.recommendation_state.runtime?.last_result_mode ===
           "recommendation" ||
-          nextSession.recommendation_state.runtime?.last_result_mode === "no_match"
+          nextSession.recommendation_state.runtime?.last_result_mode === "no_match" ||
+          nextSession.recommendation_state.runtime?.last_result_mode === "disambiguation"
       ),
+      parsed_turn: parsedTurn,
     });
     const effectiveMode = routeDecision.mode;
     const memoryEnabled = CHAT_MEMORY_ENABLED;
@@ -221,7 +290,12 @@ export async function POST(req: Request) {
       ai_context_packet: aiContextPacket ?? undefined,
       tenant_id: tenantId,
       mode: effectiveMode,
+      followup_intent: compiledPolicy.followup_intent,
       needs_clarification: routeDecision.needs_clarification,
+      constraint_confidence: compiledPolicy.confidence,
+      referenced_rug_id: parsedTurn.referenced_rug_id,
+      rug_reference_ambiguous: parsedTurn.rug_reference_ambiguous,
+      is_discovery_turn: parsedTurn.mode === "discovery",
       trace_meta: traceMeta ?? undefined,
     } as const;
 
@@ -263,8 +337,56 @@ export async function POST(req: Request) {
                 ? startingNoMatchAttempts + 1
                 : 0
               : currentNoMatchAttempts,
+          sessionFacts: parsedTurn.session_facts ?? [],
         })
       : nextSession.conversation_memory;
+
+    const previousRuntime = nextSession.recommendation_state.runtime ?? {};
+    const runtimeUpdate =
+      "runtime_update" in handlerResult ? handlerResult.runtime_update : null;
+    const nextRecentlyShownRugs = Array.isArray(runtimeUpdate?.recently_shown_rugs)
+      ? runtimeUpdate.recently_shown_rugs
+      : previousRuntime.recently_shown_rugs ?? [];
+    let nextLikedRugIds = Array.isArray(runtimeUpdate?.liked_rug_ids)
+      ? runtimeUpdate.liked_rug_ids
+      : previousRuntime.liked_rug_ids ?? [];
+    let nextDismissedRugIds = Array.isArray(runtimeUpdate?.dismissed_rug_ids)
+      ? runtimeUpdate.dismissed_rug_ids
+      : previousRuntime.dismissed_rug_ids ?? [];
+    const nextLikedAttributes =
+      runtimeUpdate?.liked_attributes ??
+      previousRuntime.liked_attributes ?? {
+        colors: [],
+        styles: [],
+        origins: [],
+      };
+
+    const reactionType = detectReactionType(userMessage);
+    const referencedRugId = parsedTurn.referenced_rug_id ?? null;
+    if (referencedRugId && reactionType) {
+      if (reactionType === "like") {
+        nextLikedRugIds = normalizeList([...nextLikedRugIds, referencedRugId]);
+        nextDismissedRugIds = nextDismissedRugIds.filter((id) => id !== referencedRugId);
+        const referencedRug = nextRecentlyShownRugs.find((rug) => rug.id === referencedRugId);
+        if (referencedRug) {
+          nextLikedAttributes.colors = normalizeList([
+            ...(nextLikedAttributes.colors ?? []),
+            ...(referencedRug.colors ?? []),
+          ]).slice(0, 8);
+          nextLikedAttributes.styles = normalizeList([
+            ...(nextLikedAttributes.styles ?? []),
+            referencedRug.style ?? "",
+          ]).slice(0, 8);
+          nextLikedAttributes.origins = normalizeList([
+            ...(nextLikedAttributes.origins ?? []),
+            referencedRug.origin ?? "",
+          ]).slice(0, 8);
+        }
+      } else if (reactionType === "dismiss") {
+        nextDismissedRugIds = normalizeList([...nextDismissedRugIds, referencedRugId]);
+        nextLikedRugIds = nextLikedRugIds.filter((id) => id !== referencedRugId);
+      }
+    }
 
     const updatedSession: SessionData = {
       ...nextSession,
@@ -279,7 +401,8 @@ export async function POST(req: Request) {
           last_result_mode:
             handlerResult.mode === "recommendation" ||
             handlerResult.mode === "no_match" ||
-            handlerResult.mode === "clarifying_question"
+            handlerResult.mode === "clarifying_question" ||
+            handlerResult.mode === "disambiguation"
               ? handlerResult.mode
               : nextSession.recommendation_state.runtime?.last_result_mode,
           last_relaxed_size_tolerance_in:
@@ -308,6 +431,18 @@ export async function POST(req: Request) {
               ? handlerResult.runtime_update.last_recommended_size_in
               : nextSession.recommendation_state.runtime
                     ?.last_recommended_size_in ?? null,
+          liked_rug_ids:
+            nextLikedRugIds,
+          dismissed_rug_ids:
+            nextDismissedRugIds,
+          liked_attributes:
+            {
+              colors: normalizeList(nextLikedAttributes.colors ?? []).slice(0, 8),
+              styles: normalizeList(nextLikedAttributes.styles ?? []).slice(0, 8),
+              origins: normalizeList(nextLikedAttributes.origins ?? []).slice(0, 8),
+            },
+          recently_shown_rugs:
+            nextRecentlyShownRugs,
           no_match_attempts:
             effectiveMode === "recommendation"
               ? handlerResult.mode === "no_match"
@@ -353,6 +488,17 @@ export async function POST(req: Request) {
             rule_id: routeDecision.rule_id,
             confidence: routeDecision.confidence,
             needs_clarification: routeDecision.needs_clarification,
+            parser_trace: {
+              called: parserTrace.called,
+              model: parserTrace.model,
+              response_status: parserTrace.response_status,
+              fallback_reason: parserTrace.fallback_reason,
+              incomplete_detected: parserTrace.incomplete_detected,
+              latency_ms: parserTrace.latency_ms,
+              parsed: parserTrace.parsed,
+              error: parserTrace.error,
+            },
+            compiled_policy: compiledPolicy,
             handler:
               effectiveMode === "recommendation"
                 ? "handleRecommendationTurn"

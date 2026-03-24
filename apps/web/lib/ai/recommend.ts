@@ -24,11 +24,11 @@ import {
 // 2) Build an authoritative inventory context payload from backend candidates.
 // 3) Call OpenAI Responses API with strict JSON schema output.
 // 4) Parse and validate model output shape.
-// 5) Enforce backend safety (IDs must be subset of candidate set; trim to top 8).
+// 5) Enforce backend safety (IDs must be subset of candidate set; trim to top 10).
 // 6) If any API/parse/validation failure occurs -> return deterministic fallback.
 
 const OPENAI_RESPONSES_URL = "https://api.openai.com/v1/responses";
-const MAX_RECOMMENDATIONS = 8;
+const MAX_RECOMMENDATIONS = 10;
 const CONFIDENCE_MIN = 0.35;
 const CONFIDENCE_MAX = 0.95;
 const MAX_ASSISTANT_MESSAGE_CHARS = 420;
@@ -43,9 +43,23 @@ const RETRY_SYSTEM_INSTRUCTION =
   "Retry and return one complete JSON object that matches the schema exactly. Keep answers concise and finish all sentences.";
 type RecommendationPromptContext = {
   role?: "retail_customer" | "store_staff";
+  discovery_mode?: boolean;
   chat_context?: {
     structured_state?: unknown;
     conversation_memory?: unknown;
+    customer_context?: string[];
+    recently_shown_rugs?: Array<{
+      id: string;
+      label: string;
+      colors: string[];
+      style: string | null;
+      origin: string | null;
+    }>;
+    liked_attributes?: {
+      colors: string[];
+      styles: string[];
+      origins: string[];
+    };
     recent_turns?: unknown[];
   };
 };
@@ -72,7 +86,7 @@ export type RecommendationAiTrace = {
 };
 
 export type RecommendationResponse = {
-  mode: "recommendations" | "clarifying_question" | "no_match";
+  mode: "recommendations" | "clarifying_question" | "no_match" | "disambiguation";
   assistant_message: string;
   questions: string[];
   recommendations: {
@@ -85,7 +99,6 @@ export type RecommendationResponse = {
     primary_image_url: string | null;
     primary_image_caption: string | null;
     size_text: string | null;
-    price_usd: number | null;
     match_reasons: string[];
     confidence: number;
     confidence_tier: "high" | "medium" | "low";
@@ -110,7 +123,7 @@ const RECOMMENDATION_SCHEMA = {
   properties: {
     mode: {
       type: "string",
-      enum: ["recommendations", "clarifying_question", "no_match"],
+      enum: ["recommendations", "clarifying_question", "no_match", "disambiguation"],
     },
     assistant_message: {
       type: "string",
@@ -138,7 +151,6 @@ const RECOMMENDATION_SCHEMA = {
           "style",
           "mood",
           "size_text",
-          "price_usd",
           "match_reasons",
           "confidence",
           "confidence_tier",
@@ -153,7 +165,6 @@ const RECOMMENDATION_SCHEMA = {
           style: { type: ["string", "null"], maxLength: 80 },
           mood: { type: ["string", "null"], maxLength: 32 },
           size_text: { type: ["string", "null"], maxLength: MAX_SIZE_TEXT_CHARS },
-          price_usd: { type: ["number", "null"] },
           match_reasons: {
             type: "array",
             minItems: 1,
@@ -272,10 +283,6 @@ function toContextInventory(inventory: InventoryRug[]) {
           : "New arrival — description pending",
     };
   });
-}
-
-function toPriceUsd(): number | null {
-  return null;
 }
 
 function toImageUrl(rug: InventoryRug): string | null {
@@ -402,6 +409,15 @@ function applyTonePolish(response: RecommendationResponse): RecommendationRespon
       ...response,
       assistant_message: withGuidance,
       questions: uniqueCompactList(response.questions, 1),
+    };
+  }
+
+  if (response.mode === "disambiguation") {
+    return {
+      ...response,
+      assistant_message: toPlainText(response.assistant_message),
+      questions: [],
+      recommendations: response.recommendations.slice(0, 3),
     };
   }
 
@@ -606,7 +622,6 @@ function fallbackRecommendations(
       primary_image_url: toImageUrl(rug),
       primary_image_caption: toImageCaption(),
       size_text: sizeText(rug),
-      price_usd: toPriceUsd(),
       match_reasons: buildGroundedMatchReasons(
         rug,
         constraints,
@@ -656,7 +671,8 @@ function isRecommendationResponse(value: unknown): value is RecommendationRespon
   if (
     data.mode !== "recommendations" &&
     data.mode !== "clarifying_question" &&
-    data.mode !== "no_match"
+    data.mode !== "no_match" &&
+    data.mode !== "disambiguation"
   ) {
     return false;
   }
@@ -717,7 +733,6 @@ function isRecommendationResponse(value: unknown): value is RecommendationRespon
         ((typeof rec.size_text === "string" &&
           normalizeText(rec.size_text).length <= MAX_SIZE_TEXT_CHARS) ||
           rec.size_text === null) &&
-        (typeof rec.price_usd === "number" || rec.price_usd === null) &&
         matchReasons !== null &&
         matchReasons.length >= 1 &&
         matchReasons.length <= 3 &&
@@ -876,7 +891,6 @@ function sanitizeResponse(
         primary_image_url: toImageUrl(rug),
         primary_image_caption: toImageCaption(),
         size_text: sizeText(rug),
-        price_usd: toPriceUsd(),
         match_reasons: buildGroundedMatchReasons(
           rug,
           constraints,
@@ -924,6 +938,20 @@ function sanitizeResponse(
       ...response,
       questions: cappedQuestions.slice(0, 1),
       recommendations: [],
+    });
+  }
+
+  if (response.mode === "disambiguation") {
+    if (recommendations.length === 0) {
+      return applyTonePolish({
+        ...fallbackRecommendations(inventory, constraints, userMessage),
+        notes: "Adjusted invalid disambiguation from model output.",
+      });
+    }
+    return applyTonePolish({
+      ...response,
+      questions: [],
+      recommendations: recommendations.slice(0, 3),
     });
   }
 
@@ -1011,7 +1039,19 @@ export async function rankAndExplain(
 
   const promptSections = buildRecommendationPromptSections({
     role: promptContext?.role ?? "retail_customer",
+    discoveryMode: Boolean(promptContext?.discovery_mode),
     hasChatMemoryContext: Boolean(promptContext?.chat_context),
+    hasCustomerContext:
+      Array.isArray(promptContext?.chat_context?.customer_context) &&
+      (promptContext?.chat_context?.customer_context?.length ?? 0) > 0,
+    hasRecentlyShownContext:
+      Array.isArray(promptContext?.chat_context?.recently_shown_rugs) &&
+      (promptContext?.chat_context?.recently_shown_rugs?.length ?? 0) > 0,
+    hasLikedAttributesContext:
+      Boolean(promptContext?.chat_context?.liked_attributes) &&
+      ((promptContext?.chat_context?.liked_attributes?.colors?.length ?? 0) > 0 ||
+        (promptContext?.chat_context?.liked_attributes?.styles?.length ?? 0) > 0 ||
+        (promptContext?.chat_context?.liked_attributes?.origins?.length ?? 0) > 0),
     hasRecentTurnsContext:
       Array.isArray(promptContext?.chat_context?.recent_turns) &&
       (promptContext?.chat_context?.recent_turns?.length ?? 0) > 0,

@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { CANONICAL_COLORS } from "@/lib/config/color-taxonomy";
 
 export const RUG_ORIGIN_VALUES = [
   "Persian",
@@ -31,12 +32,15 @@ export const RUG_MOOD_VALUES = [
 const stringArrayField = (maxItems: number, maxChars: number) =>
   z.array(z.string().trim().min(1).max(maxChars)).max(maxItems).nullable().optional();
 
+const canonicalColorArrayField = () =>
+  z.array(z.enum(CANONICAL_COLORS)).max(8).nullable().optional();
+
 export const aiStructuredFieldsSchema = z
   .object({
     origin: z.enum(RUG_ORIGIN_VALUES).nullable().optional(),
     style: z.string().trim().min(1).max(80).nullable().optional(),
     pattern: stringArrayField(8, 48),
-    primary_colors: stringArrayField(8, 32),
+    primary_colors: canonicalColorArrayField(),
     age_category: z.enum(RUG_AGE_CATEGORY_VALUES).nullable().optional(),
     mood: z.enum(RUG_MOOD_VALUES).nullable().optional(),
   })
@@ -56,7 +60,7 @@ export const staffOverridesSchema = z
     origin: z.string().trim().min(1).max(60).nullable().optional(),
     style: z.string().trim().min(1).max(80).nullable().optional(),
     pattern: stringArrayField(8, 48),
-    primary_colors: stringArrayField(8, 32),
+    primary_colors: canonicalColorArrayField(),
     age_category: z.enum(RUG_AGE_CATEGORY_VALUES).nullable().optional(),
     mood: z.enum(RUG_MOOD_VALUES).nullable().optional(),
   })

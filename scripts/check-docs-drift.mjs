@@ -13,6 +13,7 @@ const allowedDocs = new Set([
   "docs/prompts/general-chat.md",
   "docs/prompts/recommendation.md",
   "docs/prompts/recommendation-structured-output.md",
+  "docs/prompts/turn-parser.md",
 ]);
 
 const forbiddenTokens = [

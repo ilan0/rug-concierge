@@ -1,5 +1,10 @@
 import type { HardConstraints, InventoryRug } from "@/lib/types/recommendation";
 import { resolveEffectiveFields } from "@/lib/inventory/resolve-fields";
+import {
+  expandColorRequestToFamily,
+  extractCanonicalColorsFromText,
+  normalizeColorList,
+} from "@/lib/config/color-taxonomy";
 
 // Keep candidate list bounded and deterministic with a quality-first pre-score.
 
@@ -20,17 +25,8 @@ type ShapeOptions = {
   constraints?: HardConstraints;
   userMessage?: string;
   followupIntent?: FollowupIntent;
+  discoveryMode?: boolean;
 };
-
-const ROOM_HINTS = [
-  "living room",
-  "dining room",
-  "bedroom",
-  "kitchen",
-  "hallway",
-  "entryway",
-  "office",
-] as const;
 
 const STYLE_HINTS = [
   "traditional",
@@ -48,22 +44,18 @@ const STYLE_HINTS = [
   "geometric",
 ] as const;
 
-const COLOR_HINTS = [
-  "red",
-  "navy",
-  "ivory",
-  "gold",
-  "rust",
-  "teal",
-  "brown",
-  "green",
-  "blue",
-  "black",
-  "cream",
-  "coral",
-  "beige",
-  "gray",
-  "white",
+const AVOID_CONTEXT_PHRASES = [
+  "avoid",
+  "no",
+  "not",
+  "without",
+  "skip",
+  "exclude",
+  "except",
+  "don't want",
+  "dont want",
+  "rather than",
+  "instead of",
 ] as const;
 
 function normalizeText(value: string): string {
@@ -74,16 +66,81 @@ function unique(values: string[]): string[] {
   return Array.from(new Set(values.filter((value) => value.length > 0)));
 }
 
-function extractMessageSignals(userMessage: string): {
-  rooms: string[];
-  styles: string[];
-  colors: string[];
+function escapeRegExp(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function splitMessageSegments(userMessage: string): string[] {
+  return normalizeText(userMessage)
+    .split(/(?:[.!?;]+|\bbut\b|\bexcept\b|\brather than\b|\binstead of\b)/i)
+    .map((segment) => segment.trim())
+    .filter((segment) => segment.length > 0);
+}
+
+function splitSegmentAroundAvoidPhrase(segment: string): {
+  requestedSegment: string;
+  avoidSegment: string;
 } {
-  const normalized = normalizeText(userMessage);
+  let matchIndex = Number.POSITIVE_INFINITY;
+  let matchLength = 0;
+
+  for (const phrase of AVOID_CONTEXT_PHRASES) {
+    const match = new RegExp(`\\b${escapeRegExp(phrase)}\\b`, "i").exec(segment);
+    if (!match || typeof match.index !== "number") continue;
+    if (match.index >= matchIndex) continue;
+    matchIndex = match.index;
+    matchLength = match[0].length;
+  }
+
+  if (!Number.isFinite(matchIndex)) {
+    return {
+      requestedSegment: segment,
+      avoidSegment: "",
+    };
+  }
+
   return {
-    rooms: ROOM_HINTS.filter((token) => normalized.includes(token)),
-    styles: STYLE_HINTS.filter((token) => normalized.includes(token)),
-    colors: COLOR_HINTS.filter((token) => normalized.includes(token)),
+    requestedSegment: segment.slice(0, matchIndex).trim(),
+    avoidSegment: segment.slice(matchIndex + matchLength).trim(),
+  };
+}
+
+function extractStyleTokens(text: string): string[] {
+  return STYLE_HINTS.filter((token) =>
+    new RegExp(`\\b${escapeRegExp(token)}\\b`, "i").test(text)
+  );
+}
+
+function extractMessageSignals(userMessage: string): {
+  requestedStyles: string[];
+  requestedColors: string[];
+  avoidStyles: string[];
+  avoidColors: string[];
+} {
+  const requestedStyles: string[] = [];
+  const requestedColors: string[] = [];
+  const avoidStyles: string[] = [];
+  const avoidColors: string[] = [];
+
+  for (const segment of splitMessageSegments(userMessage)) {
+    const { requestedSegment, avoidSegment } = splitSegmentAroundAvoidPhrase(segment);
+
+    if (requestedSegment) {
+      requestedColors.push(...extractCanonicalColorsFromText(requestedSegment, 8));
+      requestedStyles.push(...extractStyleTokens(requestedSegment));
+    }
+
+    if (avoidSegment) {
+      avoidColors.push(...extractCanonicalColorsFromText(avoidSegment, 8));
+      avoidStyles.push(...extractStyleTokens(avoidSegment));
+    }
+  }
+
+  return {
+    requestedStyles: unique(requestedStyles),
+    requestedColors: unique(requestedColors),
+    avoidStyles: unique(avoidStyles),
+    avoidColors: unique(avoidColors),
   };
 }
 
@@ -143,7 +200,7 @@ function scoreStructuredMatch(
   constraints: HardConstraints
 ): number {
   const signals = unique([
-    ...extractMessageSignals(userMessage).styles,
+    ...extractMessageSignals(userMessage).requestedStyles,
     ...((constraints.styles ?? []).map((value) => normalizeText(value))),
   ]);
   if (signals.length === 0) return 10;
@@ -177,8 +234,8 @@ function scoreStructuredMatch(
 
 function scoreColorMatch(rug: InventoryRug, constraints: HardConstraints, userMessage: string): number {
   const requested = unique([
-    ...(constraints.colors ?? []).map((color) => normalizeText(color)),
-    ...extractMessageSignals(userMessage).colors,
+    ...normalizeColorList(constraints.colors ?? [], 8),
+    ...extractMessageSignals(userMessage).requestedColors,
   ]);
   if (requested.length === 0) return 8;
 
@@ -190,12 +247,27 @@ function scoreColorMatch(rug: InventoryRug, constraints: HardConstraints, userMe
         rug.staff_overrides ?? null,
         rug.ai_description ?? null
       );
-  const haystack = normalizeText(
-    `${(fields.primary_colors ?? []).join(" ")} ${rug.ai_description ?? ""} ${
-      rug.intake_label ?? ""
-    }`
-  );
-  const matches = requested.filter((token) => haystack.includes(token)).length;
+  const candidateColors = new Set([
+    ...normalizeColorList(fields.primary_colors ?? [], 8),
+    ...extractCanonicalColorsFromText(
+      normalizeText(
+        [
+          fields.label ?? "",
+          fields.origin ?? "",
+          fields.style ?? "",
+          fields.mood ?? "",
+          ...(fields.pattern ?? []),
+          rug.ai_description ?? "",
+          rug.intake_label ?? "",
+          ...(fields.primary_colors ?? []),
+        ].join(" ")
+      ),
+      8
+    ),
+  ]);
+  const requestedColors = expandColorRequestToFamily(requested);
+  const matches = requestedColors.filter((token) => candidateColors.has(token))
+    .length;
   if (matches >= 2) return 15;
   if (matches === 1) return 11;
   return 3;
@@ -207,31 +279,6 @@ function scoreShapeSuitability(rug: InventoryRug, constraints: HardConstraints):
   if (constraints.shape === inferredShape) return 15;
   if (constraints.shape === "area" && inferredShape === "oversized") return 11;
   return 2;
-}
-
-function scoreRoomSuitability(rug: InventoryRug, userMessage: string): number {
-  const rooms = extractMessageSignals(userMessage).rooms;
-  if (rooms.length === 0) return 8;
-
-  const inferredShape = inferShapeFromRug(rug);
-  const longSide = Math.max(rug.width_total_in ?? 0, rug.length_total_in ?? 0);
-  const shortSide = Math.min(rug.width_total_in ?? 0, rug.length_total_in ?? 0);
-  const room = rooms[0];
-
-  if (room === "hallway") {
-    return inferredShape === "runner" ? 15 : 2;
-  }
-  if (room === "dining room") {
-    return longSide >= 120 && shortSide >= 84 ? 14 : 6;
-  }
-  if (room === "living room") {
-    return longSide >= 96 && shortSide >= 60 ? 13 : 7;
-  }
-  if (room === "bedroom") {
-    return longSide >= 72 && shortSide >= 48 ? 13 : 6;
-  }
-
-  return 9;
 }
 
 function scoreMetadataCompleteness(rug: InventoryRug): number {
@@ -252,6 +299,96 @@ function scoreMetadataCompleteness(rug: InventoryRug): number {
   if ((fields.pattern ?? []).length > 0) score += 1;
   if ((fields.primary_colors ?? []).length > 0) score += 2;
   return score;
+}
+
+function toCandidateColorTokens(rug: InventoryRug): Set<string> {
+  const fields = rug.effective_fields
+    ? rug.effective_fields
+    : resolveEffectiveFields(
+        rug.intake_label ?? null,
+        rug.ai_structured_fields ?? null,
+        rug.staff_overrides ?? null,
+        rug.ai_description ?? null
+      );
+
+  return new Set([
+    ...normalizeColorList(fields.primary_colors ?? [], 8),
+    ...extractCanonicalColorsFromText(
+      normalizeText(
+        [
+          fields.label ?? "",
+          fields.origin ?? "",
+          fields.style ?? "",
+          fields.mood ?? "",
+          ...(fields.pattern ?? []),
+          rug.ai_description ?? "",
+          rug.intake_label ?? "",
+          ...(fields.primary_colors ?? []),
+        ].join(" ")
+      ),
+      8
+    ),
+  ]);
+}
+
+function scoreAvoidPenalty(rug: InventoryRug, userMessage: string, constraints: HardConstraints): number {
+  const signals = extractMessageSignals(userMessage);
+  const avoidColors = unique([
+    ...normalizeColorList(constraints.avoid_preferences?.colors ?? [], 8),
+    ...signals.avoidColors,
+  ]);
+  const avoidStyles = unique([
+    ...((constraints.avoid_preferences?.styles ?? []).map((value) =>
+      normalizeText(value)
+    )),
+    ...signals.avoidStyles.map((value) => normalizeText(value)),
+  ]);
+  const avoidShapes = Array.from(
+    new Set(constraints.avoid_preferences?.shapes ?? [])
+  );
+
+  if (
+    avoidColors.length === 0 &&
+    avoidStyles.length === 0 &&
+    avoidShapes.length === 0
+  ) {
+    return 0;
+  }
+
+  const fields = rug.effective_fields
+    ? rug.effective_fields
+    : resolveEffectiveFields(
+        rug.intake_label ?? null,
+        rug.ai_structured_fields ?? null,
+        rug.staff_overrides ?? null,
+        rug.ai_description ?? null
+      );
+  const candidateColors = toCandidateColorTokens(rug);
+  const candidateText = normalizeText(
+    [
+      fields.label ?? "",
+      rug.intake_label ?? "",
+      rug.ai_description ?? "",
+      fields.style ?? "",
+      fields.origin ?? "",
+      fields.mood ?? "",
+      ...(fields.pattern ?? []),
+    ].join(" ")
+  );
+
+  const avoidedColorTokens = expandColorRequestToFamily(avoidColors);
+  const colorMatches = avoidedColorTokens.filter((token) => candidateColors.has(token))
+    .length;
+  const styleMatches = avoidStyles.filter((token) =>
+    candidateText.includes(token)
+  ).length;
+  const candidateShape = inferShapeFromRug(rug);
+  const shapeMatches = avoidShapes.includes(candidateShape) ? 1 : 0;
+
+  const colorPenalty = Math.min(colorMatches * 16, 32);
+  const stylePenalty = Math.min(styleMatches * 12, 24);
+  const shapePenalty = shapeMatches > 0 ? 18 : 0;
+  return -(colorPenalty + stylePenalty + shapePenalty);
 }
 
 function followupBias(
@@ -300,6 +437,25 @@ function diversityKey(rug: InventoryRug): string {
   );
 }
 
+function scoreDiscoveryRange(rug: InventoryRug): number {
+  const fields = rug.effective_fields
+    ? rug.effective_fields
+    : resolveEffectiveFields(
+        rug.intake_label ?? null,
+        rug.ai_structured_fields ?? null,
+        rug.staff_overrides ?? null,
+        rug.ai_description ?? null
+      );
+
+  let score = 0;
+  if (fields.style) score += 4;
+  if (fields.origin) score += 4;
+  if (fields.mood) score += 3;
+  if ((fields.pattern ?? []).length > 0) score += 3;
+  if ((fields.primary_colors ?? []).length > 0) score += 4;
+  return score;
+}
+
 export function shapeCandidatesForAI(
   candidates: InventoryRug[],
   options?: ShapeOptions
@@ -308,16 +464,18 @@ export function shapeCandidatesForAI(
   const constraints = options?.constraints ?? {};
   const userMessage = options?.userMessage ?? "";
   const followupIntent = options?.followupIntent ?? "none";
+  const discoveryMode = options?.discoveryMode ?? false;
 
   const scored = candidates.map((rug) => {
-    const baseScore =
-      scoreSizeProximity(rug, constraints) +
-      scoreStructuredMatch(rug, userMessage, constraints) +
-      scoreColorMatch(rug, constraints, userMessage) +
-      scoreShapeSuitability(rug, constraints) +
-      scoreRoomSuitability(rug, userMessage) +
-      scoreMetadataCompleteness(rug) +
-      followupBias(rug, constraints, followupIntent);
+    const baseScore = discoveryMode
+      ? scoreMetadataCompleteness(rug) + scoreDiscoveryRange(rug)
+      : scoreSizeProximity(rug, constraints) +
+        scoreStructuredMatch(rug, userMessage, constraints) +
+        scoreColorMatch(rug, constraints, userMessage) +
+        scoreShapeSuitability(rug, constraints) +
+        scoreAvoidPenalty(rug, userMessage, constraints) +
+        scoreMetadataCompleteness(rug) +
+        followupBias(rug, constraints, followupIntent);
 
     return { rug, baseScore };
   });
@@ -339,8 +497,9 @@ export function shapeCandidatesForAI(
 
     const key = diversityKey(item.rug);
     const seenCount = seenKeys.get(key) ?? 0;
-    const diversityPenalty = seenCount * 4;
-    if (item.baseScore - diversityPenalty < 10 && selected.length > 0) {
+    const diversityPenalty = seenCount * (discoveryMode ? 6 : 4);
+    const minimumScore = discoveryMode ? 8 : 10;
+    if (item.baseScore - diversityPenalty < minimumScore && selected.length > 0) {
       continue;
     }
 

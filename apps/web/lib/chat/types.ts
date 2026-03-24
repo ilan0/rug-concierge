@@ -5,6 +5,7 @@ import type {
 import type { RecommendationResponse } from "@/lib/ai/recommend";
 import type { E2eTraceMeta } from "@/lib/qa/e2e-trace";
 import type { AppRole } from "@/lib/auth/roles";
+import type { RecommendationFollowupIntent } from "@/lib/chat/router";
 
 export type RoleType = AppRole;
 
@@ -13,6 +14,7 @@ export type ChatFineMode =
   | "general_chat"
   | "recommendation"
   | "clarifying_question"
+  | "disambiguation"
   | "no_match";
 
 export type SessionMessage = {
@@ -41,13 +43,31 @@ export type RecommendationState = {
     notes?: string[];
   };
   runtime?: {
-    last_result_mode?: "recommendation" | "no_match" | "clarifying_question";
+    last_result_mode?:
+      | "recommendation"
+      | "no_match"
+      | "clarifying_question"
+      | "disambiguation";
     last_relaxed_size_tolerance_in?: number | null;
     last_blockers?: string[];
     last_recommended_size_in?: {
       width_in: number;
       length_in: number;
     } | null;
+    liked_rug_ids?: string[];
+    dismissed_rug_ids?: string[];
+    liked_attributes?: {
+      colors: string[];
+      styles: string[];
+      origins: string[];
+    };
+    recently_shown_rugs?: Array<{
+      id: string;
+      label: string;
+      colors: string[];
+      style: string | null;
+      origin: string | null;
+    }>;
     no_match_attempts?: number;
     updated_at?: string;
   };
@@ -77,11 +97,16 @@ export type ChatTurnHandlerInput = {
   message: string;
   role: RoleType;
   mode: ChatMode;
+  followup_intent?: RecommendationFollowupIntent;
   session: SessionData;
   ai_context_packet?: import("@/lib/chat/context-packet").ChatAiContextPacket;
   tenant_id: string | null;
   trace_meta?: E2eTraceMeta;
   needs_clarification?: boolean;
+  constraint_confidence?: "high" | "medium" | "low";
+  referenced_rug_id?: string;
+  rug_reference_ambiguous?: boolean;
+  is_discovery_turn?: boolean;
 };
 
 export type GeneralChatResponse = {
@@ -92,7 +117,7 @@ export type GeneralChatResponse = {
 };
 
 export type RecommendationTurnResponse = Omit<RecommendationResponse, "mode"> & {
-  mode: "recommendation" | "clarifying_question" | "no_match";
+  mode: "recommendation" | "clarifying_question" | "disambiguation" | "no_match";
   runtime_update?: {
     relaxed_size_tolerance_in?: number | null;
     blockers?: string[];
@@ -100,5 +125,19 @@ export type RecommendationTurnResponse = Omit<RecommendationResponse, "mode"> & 
       width_in: number;
       length_in: number;
     } | null;
+    liked_rug_ids?: string[];
+    dismissed_rug_ids?: string[];
+    liked_attributes?: {
+      colors: string[];
+      styles: string[];
+      origins: string[];
+    };
+    recently_shown_rugs?: Array<{
+      id: string;
+      label: string;
+      colors: string[];
+      style: string | null;
+      origin: string | null;
+    }>;
   };
 };

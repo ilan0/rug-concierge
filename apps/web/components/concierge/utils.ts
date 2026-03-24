@@ -3,9 +3,9 @@ import type { DebugTraceSummary, ConciergeVariant } from "@/components/concierge
 
 export const STARTER_PROMPTS: Record<ConciergeVariant, string[]> = {
   concierge: [
-    "Show me what you have",
-    "Need an 8x10 living room rug",
-    "Show dining room options",
+    "Help me find a living room anchor rug",
+    "Show me a range to react to",
+    "I need something around 8x10",
   ],
 };
 
@@ -30,6 +30,7 @@ export function modeLabel(
   if (!mode) return null;
   if (mode === "recommendation") return "recommendations";
   if (mode === "clarifying_question") return "clarifying question";
+  if (mode === "disambiguation") return "disambiguation";
   if (mode === "no_match") return "no match";
   if (mode === "general_chat") return "general chat";
   return mode;

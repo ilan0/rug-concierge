@@ -2,12 +2,19 @@ import type {
   ChatMode,
   RoleType,
 } from "@/lib/chat/types";
+import type { ParsedTurn } from "@/lib/chat/turn-parser-contract";
 
 type RouteTurnModeInput = {
   message: string;
   role: RoleType;
-  last_result_mode?: "recommendation" | "no_match" | "clarifying_question" | null;
+  last_result_mode?:
+    | "recommendation"
+    | "no_match"
+    | "clarifying_question"
+    | "disambiguation"
+    | null;
   has_recent_recommendations?: boolean;
+  parsed_turn?: ParsedTurn | null;
 };
 
 export type RecommendationFollowupIntent =
@@ -97,6 +104,59 @@ const ROUTE_RULES: RouteRule[] = [
 ];
 
 export function routeTurnMode(input: RouteTurnModeInput): RouteDecision {
+  if (input.parsed_turn) {
+    const parsed = input.parsed_turn;
+    if (parsed.mode === "recommendation_followup") {
+      return {
+        mode: "recommendation",
+        rule_id: "RECOMMENDATION_FOLLOWUP",
+        confidence: parsed.confidence,
+        needs_clarification: false,
+      };
+    }
+
+    if (parsed.mode === "recommendation") {
+      return {
+        mode: "recommendation",
+        rule_id: "EXPLICIT_RECOMMENDATION_REQUEST",
+        confidence: parsed.confidence,
+        needs_clarification: false,
+      };
+    }
+
+    if (parsed.mode === "discovery") {
+      return {
+        mode: "recommendation",
+        rule_id: "EXPLICIT_RECOMMENDATION_REQUEST",
+        confidence: parsed.confidence,
+        needs_clarification: false,
+      };
+    }
+
+    if (parsed.mode === "advice") {
+      return {
+        mode: "general_chat",
+        rule_id: "GENERAL_ADVICE_OR_EDUCATION",
+        confidence: parsed.confidence,
+        needs_clarification: false,
+      };
+    }
+
+    const hasConstraintSignals =
+      Boolean(parsed.constraints.size) ||
+      (parsed.constraints.colors?.length ?? 0) > 0 ||
+      (parsed.constraints.styles?.length ?? 0) > 0 ||
+      Boolean(parsed.constraints.shape);
+    return {
+      mode: "general_chat",
+      rule_id: hasConstraintSignals
+        ? "AMBIGUOUS_WITH_CONSTRAINTS_ONLY"
+        : "DEFAULT_GENERAL_CHAT",
+      confidence: parsed.confidence,
+      needs_clarification: hasConstraintSignals && parsed.confidence === "low",
+    };
+  }
+
   const text = input.message.toLowerCase().trim();
   for (const rule of ROUTE_RULES) {
     if (!rule.when(input, text)) continue;

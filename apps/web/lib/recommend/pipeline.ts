@@ -2,7 +2,14 @@ import { filterByHardConstraints } from "@/lib/filters/hard-constraints";
 import { shapeCandidatesForAI } from "@/lib/filters/candidate-shaping";
 import { getSizeBounds, type SizeWindow } from "@/lib/filters/size-bounds";
 import { resolveEffectiveFields } from "@/lib/inventory/resolve-fields";
+import { toSimilaritySizePreset } from "@/lib/inventory/size-presets";
 import { parseRugRecord } from "@/lib/inventory/rug-record";
+import {
+  isReasonableLongSideRatio,
+  isWithinRelaxedBucketDistance,
+  resolveRequestedSizePreset,
+} from "@/lib/recommend/size-similarity-policy";
+import { expandColorRequestToFamily } from "@/lib/config/color-taxonomy";
 import { fetchPrimaryRugImagesForRugs } from "@/lib/storage/rug-images";
 import { rankAndExplain } from "@/lib/ai/recommend";
 import type { RecommendationAiTrace } from "@/lib/ai/recommend";
@@ -14,8 +21,14 @@ import type { RecommendationResponse } from "@/lib/ai/recommend";
 import { OPENAI_CHAT_MODEL } from "@/lib/config";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
-const SQL_QUERY_LIMIT = 220;
+const MIN_DYNAMIC_SQL_QUERY_LIMIT = 120;
+const MAX_DYNAMIC_SQL_QUERY_LIMIT = 400;
+const DEFAULT_DYNAMIC_SQL_QUERY_LIMIT = 220;
 const AI_CANDIDATE_LIMIT = 40;
+const BROADENED_NO_MATCH_NOTE_CODE = "BROADENED_SIZE_COLOR_STYLE";
+const SIZE_REASONABLENESS_GUARD_NOTE_CODE = "SIZE_OUT_OF_REASONABLE_RANGE";
+const STYLE_RELAXATION_NOTE_CODE = "STYLE_RELAXED_TO_ORIGIN_OR_MOOD";
+const STYLE_DROPPED_NOTE_CODE = "STYLE_DROPPED_AFTER_FALLBACK";
 
 type RunRecommendationPipelineInput = {
   requestId?: string;
@@ -29,17 +42,38 @@ type RunRecommendationPipelineInput = {
     | "smaller"
     | "more_like_this"
     | "tighten";
-  priorResultMode?: "recommendation" | "no_match" | "clarifying_question" | null;
+  priorResultMode?:
+    | "recommendation"
+    | "no_match"
+    | "clarifying_question"
+    | "disambiguation"
+    | null;
   noMatchAttempts?: number;
+  constraintConfidence?: "high" | "medium" | "low";
+  discoveryRequested?: boolean;
   lastRecommendedSizeIn?: {
     width_in: number;
     length_in: number;
   } | null;
   promptContext?: {
     role?: "retail_customer" | "store_staff";
+    discovery_mode?: boolean;
     chat_context?: {
       structured_state?: unknown;
       conversation_memory?: unknown;
+      customer_context?: string[];
+      recently_shown_rugs?: Array<{
+        id: string;
+        label: string;
+        colors: string[];
+        style: string | null;
+        origin: string | null;
+      }>;
+      liked_attributes?: {
+        colors: string[];
+        styles: string[];
+        origins: string[];
+      };
       recent_turns?: unknown[];
     };
   };
@@ -62,6 +96,13 @@ type RunRecommendationPipelineResult =
           width_in: number;
           length_in: number;
         } | null;
+        recently_shown_rugs?: Array<{
+          id: string;
+          label: string;
+          colors: string[];
+          style: string | null;
+          origin: string | null;
+        }>;
       };
     }
   | { ok: false; error: string };
@@ -72,6 +113,11 @@ type PipelineQueryTrace = {
   row_count: number;
   error: string | null;
 };
+
+type BroadeningStage =
+  | "none"
+  | "size_relaxation_ladder"
+  | "size_relaxation_ladder_plus_color_style_relaxation";
 
 type RecommendationSizeIn = {
   width_in: number;
@@ -187,6 +233,297 @@ function toRuntimeSizeIn(
   };
 }
 
+function hasAnyRequestedConstraints(constraints: HardConstraints): boolean {
+  return Boolean(
+    constraints.size ||
+      (constraints.colors && constraints.colors.length > 0) ||
+      (constraints.styles && constraints.styles.length > 0) ||
+      constraints.shape
+  );
+}
+
+function isDiscoveryMode(input: {
+  discoveryRequested: boolean;
+  constraints: HardConstraints;
+  priorResultMode:
+    | "recommendation"
+    | "no_match"
+    | "clarifying_question"
+    | "disambiguation"
+    | null;
+}): boolean {
+  if (input.discoveryRequested) return true;
+  if (hasAnyRequestedConstraints(input.constraints)) return false;
+  return (
+    input.priorResultMode === null ||
+    input.priorResultMode === "clarifying_question"
+  );
+}
+
+function constraintStrictness(
+  constraints: HardConstraints,
+  key: "size" | "colors" | "styles" | "shape"
+): "must" | "prefer" {
+  return constraints.strictness?.[key] === "must" ? "must" : "prefer";
+}
+
+function toMustOnlyConstraints(constraints: HardConstraints): HardConstraints {
+  return {
+    size:
+      constraints.size && constraintStrictness(constraints, "size") === "must"
+        ? constraints.size
+        : undefined,
+    // Color is never a hard exclusion. It is handled as SQL prefilter + ranking signal.
+    colors: undefined,
+    styles:
+      constraints.styles &&
+      constraints.styles.length > 0 &&
+      constraintStrictness(constraints, "styles") === "must"
+        ? constraints.styles
+        : undefined,
+    shape:
+      constraints.shape && constraintStrictness(constraints, "shape") === "must"
+        ? constraints.shape
+        : undefined,
+    strictness: constraints.strictness,
+    avoid_preferences: constraints.avoid_preferences,
+  };
+}
+
+function resolveColorSqlPrefilterTokens(input: {
+  constraints: HardConstraints;
+  discoveryMode: boolean;
+  confidence: "high" | "medium" | "low";
+}): string[] {
+  if (input.discoveryMode) {
+    return [];
+  }
+  if (input.confidence === "low") {
+    return [];
+  }
+  if (!input.constraints.colors || input.constraints.colors.length === 0) {
+    return [];
+  }
+  return expandColorRequestToFamily(input.constraints.colors).slice(0, 10);
+}
+
+function canDropColors(constraints: HardConstraints): boolean {
+  return (
+    Boolean(constraints.colors && constraints.colors.length > 0) &&
+    constraintStrictness(constraints, "colors") !== "must"
+  );
+}
+
+const STYLE_TO_ORIGIN_FAMILY: Record<string, string[]> = {
+  heriz: ["Persian"],
+  serapi: ["Persian"],
+  kashan: ["Persian"],
+  isfahan: ["Persian"],
+  tabriz: ["Persian"],
+  kerman: ["Persian"],
+  nain: ["Persian"],
+  qom: ["Persian"],
+  bidjar: ["Persian"],
+  malayer: ["Persian"],
+  sarouk: ["Persian"],
+  sultanabad: ["Persian"],
+  bakhtiari: ["Persian"],
+  hamadan: ["Persian"],
+  mashad: ["Persian"],
+  qashqai: ["Persian"],
+  oushak: ["Turkish"],
+  kazak: ["Caucasian"],
+  shirvan: ["Caucasian"],
+  karabagh: ["Caucasian"],
+  bokhara: ["Central Asian"],
+  turkmen: ["Central Asian"],
+  baluch: ["Central Asian", "Afghan"],
+  gabbeh: ["Afghan"],
+  beniourain: ["Moroccan"],
+  azilal: ["Moroccan"],
+};
+
+const MOOD_ADJACENCY: Record<string, string[]> = {
+  traditional: ["transitional", "eclectic"],
+  transitional: ["traditional", "eclectic", "modern"],
+  eclectic: ["transitional", "traditional", "modern"],
+  modern: ["eclectic", "transitional"],
+};
+
+function normalizeStyleToken(value: string): string {
+  return value
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, "");
+}
+
+function applyStyleFallback(input: {
+  inventory: InventoryRug[];
+  constraints: HardConstraints;
+  sizeWindow: SizeWindow | null;
+}): {
+  constraints: HardConstraints;
+  candidates: InventoryRug[];
+  stage: "none" | "origin_or_mood_family" | "style_dropped";
+} {
+  if (
+    !input.constraints.styles ||
+    input.constraints.styles.length === 0 ||
+    constraintStrictness(input.constraints, "styles") === "must"
+  ) {
+    return {
+      constraints: input.constraints,
+      candidates: filterByHardConstraints(
+        input.inventory,
+        input.constraints,
+        input.sizeWindow
+      ),
+      stage: "none",
+    };
+  }
+
+  const styleAgnosticConstraints: HardConstraints = {
+    ...input.constraints,
+    styles: undefined,
+  };
+  const styleAgnosticCandidates = filterByHardConstraints(
+    input.inventory,
+    styleAgnosticConstraints,
+    input.sizeWindow
+  );
+
+  if (styleAgnosticCandidates.length === 0) {
+    return {
+      constraints: styleAgnosticConstraints,
+      candidates: [],
+      stage: "style_dropped",
+    };
+  }
+
+  const originTargets = new Set<string>();
+  const moodTargets = new Set<string>();
+  for (const rawStyle of input.constraints.styles) {
+    const normalizedStyle = normalizeStyleToken(rawStyle);
+    if (STYLE_TO_ORIGIN_FAMILY[normalizedStyle]) {
+      for (const origin of STYLE_TO_ORIGIN_FAMILY[normalizedStyle]) {
+        originTargets.add(origin.toLowerCase());
+      }
+    }
+    if (MOOD_ADJACENCY[normalizedStyle]) {
+      moodTargets.add(normalizedStyle);
+      for (const adjacent of MOOD_ADJACENCY[normalizedStyle]) {
+        moodTargets.add(adjacent);
+      }
+    }
+  }
+
+  const adjacencyCandidates = styleAgnosticCandidates.filter((rug) => {
+    const fields = rug.effective_fields;
+    const origin = (fields?.origin ?? "").toLowerCase();
+    const mood = (fields?.mood ?? "").toLowerCase();
+    const originMatch = originTargets.size > 0 && originTargets.has(origin);
+    const moodMatch = moodTargets.size > 0 && moodTargets.has(mood);
+    return originMatch || moodMatch;
+  });
+
+  if (adjacencyCandidates.length > 0) {
+    return {
+      constraints: styleAgnosticConstraints,
+      candidates: adjacencyCandidates,
+      stage: "origin_or_mood_family",
+    };
+  }
+
+  return {
+    constraints: styleAgnosticConstraints,
+    candidates: styleAgnosticCandidates,
+    stage: "style_dropped",
+  };
+}
+
+function applyPreferSizeReasonablenessGuard(
+  candidates: InventoryRug[],
+  constraints: HardConstraints
+): InventoryRug[] {
+  if (!constraints.size) return candidates;
+  if (constraintStrictness(constraints, "size") === "must") return candidates;
+
+  const requestedPreset = resolveRequestedSizePreset({
+    widthIn: constraints.size.widthIn,
+    lengthIn: constraints.size.lengthIn,
+  });
+  const requestedLongSide = Math.max(
+    constraints.size.widthIn,
+    constraints.size.lengthIn
+  );
+
+  return candidates.filter((rug) => {
+    if (
+      typeof rug.width_total_in !== "number" ||
+      typeof rug.length_total_in !== "number"
+    ) {
+      return false;
+    }
+    const candidatePreset = toSimilaritySizePreset({
+      widthIn: rug.width_total_in,
+      lengthIn: rug.length_total_in,
+    });
+    const candidateLongSide = Math.max(rug.width_total_in, rug.length_total_in);
+
+    return (
+      isWithinRelaxedBucketDistance({
+        requestedPreset,
+        candidatePreset,
+      }) &&
+      isReasonableLongSideRatio({
+        requestedLongSideIn: requestedLongSide,
+        candidateLongSideIn: candidateLongSide,
+      })
+    );
+  });
+}
+
+function resolveDynamicSqlQueryLimit(input: {
+  roughInventorySize: number | null;
+  hasConstraints: boolean;
+}): number {
+  if (input.roughInventorySize === null) {
+    return DEFAULT_DYNAMIC_SQL_QUERY_LIMIT;
+  }
+
+  const size = Math.max(0, input.roughInventorySize);
+  let limit = DEFAULT_DYNAMIC_SQL_QUERY_LIMIT;
+
+  if (size <= 150) {
+    limit = input.hasConstraints ? 160 : 120;
+  } else if (size <= 500) {
+    limit = input.hasConstraints ? 220 : 160;
+  } else if (size <= 1500) {
+    limit = input.hasConstraints ? 280 : 220;
+  } else if (size <= 3000) {
+    limit = input.hasConstraints ? 340 : 300;
+  } else {
+    limit = 400;
+  }
+
+  return Math.max(
+    MIN_DYNAMIC_SQL_QUERY_LIMIT,
+    Math.min(MAX_DYNAMIC_SQL_QUERY_LIMIT, limit)
+  );
+}
+
+function appendNotesCode(
+  notes: string | null | undefined,
+  code: string
+): string {
+  if (!notes || notes.trim().length === 0) {
+    return code;
+  }
+  if (notes.includes(code)) {
+    return notes;
+  }
+  return `${notes} | ${code}`;
+}
+
 // Flow overview
 // Shared server recommendation pipeline:
 // - query candidates from Supabase (SQL-first hard filtering)
@@ -209,6 +546,11 @@ export async function runRecommendationPipeline(
   ];
   const queryTrace: PipelineQueryTrace[] = [];
   const timings: Record<string, number> = {};
+  let dynamicLimit = DEFAULT_DYNAMIC_SQL_QUERY_LIMIT;
+  let colorSqlPrefilterTokens: string[] = [];
+  let discoveryMode = false;
+  let broadeningApplied = false;
+  let broadeningStage: BroadeningStage = "none";
   const aiTrace: RecommendationAiTrace = {
     called: false,
     model: OPENAI_CHAT_MODEL,
@@ -252,14 +594,51 @@ export async function runRecommendationPipeline(
             size: sizeSearch.sizeReference,
           }
         : input.constraints;
+    const requestedConstraints: HardConstraints = effectiveConstraints;
+    discoveryMode = isDiscoveryMode({
+      discoveryRequested: Boolean(input.discoveryRequested),
+      constraints: requestedConstraints,
+      priorResultMode: input.priorResultMode ?? null,
+    });
+    const mustOnlyConstraints = toMustOnlyConstraints(requestedConstraints);
+    const forceSizeWindowByIntent =
+      followupIntent === "closest" ||
+      followupIntent === "larger" ||
+      followupIntent === "smaller";
+    const activeHardConstraints: HardConstraints =
+      forceSizeWindowByIntent && requestedConstraints.size
+        ? {
+            ...mustOnlyConstraints,
+            size: requestedConstraints.size,
+          }
+        : mustOnlyConstraints;
+    const activeHardSizeWindow: SizeWindow | null =
+      (forceSizeWindowByIntent || Boolean(activeHardConstraints.size)) &&
+      sizeSearch.sizeWindow
+        ? sizeSearch.sizeWindow
+        : null;
+
+    const inventoryCountStart = Date.now();
+    const roughInventorySize = await countRoughInventorySize(input.tenantId);
+    timings.count_rough_inventory_size_ms = Date.now() - inventoryCountStart;
+    dynamicLimit = resolveDynamicSqlQueryLimit({
+      roughInventorySize,
+      hasConstraints: hasAnyRequestedConstraints(effectiveConstraints),
+    });
+    colorSqlPrefilterTokens = resolveColorSqlPrefilterTokens({
+      constraints: requestedConstraints,
+      discoveryMode,
+      confidence: input.constraintConfidence ?? "low",
+    });
 
     const sqlStart = Date.now();
     const inventory = await fetchInventoryCandidates({
       requestId,
       tenantId: input.tenantId,
-      constraints: effectiveConstraints,
-      sizeWindow: sizeSearch.sizeWindow,
-      limit: SQL_QUERY_LIMIT,
+      constraints: activeHardConstraints,
+      sizeWindow: activeHardSizeWindow,
+      limit: dynamicLimit,
+      colorSqlPrefilterTokens,
       queryTrace,
     });
     timings.fetch_inventory_candidates_ms = Date.now() - sqlStart;
@@ -292,6 +671,11 @@ export async function runRecommendationPipeline(
         constraints: input.constraints,
         prompt_context: input.promptContext ?? null,
         query_trace: queryTrace,
+        dynamic_limit: dynamicLimit,
+        discovery_mode: discoveryMode,
+        color_sql_prefilter_tokens: colorSqlPrefilterTokens,
+        broadening_applied: broadeningApplied,
+        broadening_stage: broadeningStage,
         timing_ms: {
           ...timings,
           total_ms: Date.now() - startedAt,
@@ -305,56 +689,164 @@ export async function runRecommendationPipeline(
     }
 
     let relaxedToleranceIn: number | null = null;
+    let filteredByConstraints = activeHardConstraints;
+    let filteredBySizeWindow = activeHardSizeWindow;
+    let failedSizeReasonablenessGuard = false;
+    let styleFallbackStage: "none" | "origin_or_mood_family" | "style_dropped" =
+      "none";
 
     const hardFilterStart = Date.now();
     let candidates = filterByHardConstraints(
       inventory,
-      effectiveConstraints,
-      sizeSearch.sizeWindow
+      activeHardConstraints,
+      activeHardSizeWindow
     );
     timings.filter_hard_constraints_ms = Date.now() - hardFilterStart;
+
+    if (candidates.length > 0 && requestedConstraints.size) {
+      const reasonedCandidates = applyPreferSizeReasonablenessGuard(
+        candidates,
+        requestedConstraints
+      );
+      if (reasonedCandidates.length > 0) {
+        candidates = reasonedCandidates;
+      } else if (constraintStrictness(requestedConstraints, "size") !== "must") {
+        candidates = [];
+        failedSizeReasonablenessGuard = true;
+      }
+    }
 
     if (
       candidates.length === 0 &&
       shouldAttemptClosestRelaxation({
         followupIntent,
         priorResultMode: input.priorResultMode ?? null,
-        constraints: effectiveConstraints,
+        constraints: activeHardConstraints,
       })
     ) {
       const relaxed = applyClosestRelaxationLadder(
         inventory,
-        effectiveConstraints
+        activeHardConstraints
       );
       candidates = relaxed.candidates;
       relaxedToleranceIn = relaxed.relaxedToleranceIn;
+      filteredByConstraints = relaxed.constraints;
+      filteredBySizeWindow = null;
+      broadeningApplied = true;
+      broadeningStage = "size_relaxation_ladder";
     }
 
     let blockers: string[] = [];
+
+    if (
+      candidates.length === 0 &&
+      Boolean(filteredByConstraints.styles && filteredByConstraints.styles.length > 0) &&
+      constraintStrictness(filteredByConstraints, "styles") !== "must"
+    ) {
+      const styleFallback = applyStyleFallback({
+        inventory,
+        constraints: filteredByConstraints,
+        sizeWindow: filteredBySizeWindow,
+      });
+      filteredByConstraints = styleFallback.constraints;
+      candidates = styleFallback.candidates;
+      styleFallbackStage = styleFallback.stage;
+      broadeningApplied = styleFallback.stage !== "none" || broadeningApplied;
+    }
+
+    if (
+      candidates.length === 0 &&
+      Boolean(filteredByConstraints.size) &&
+      canDropColors(filteredByConstraints)
+    ) {
+      const broadenedConstraints: HardConstraints = {
+        ...filteredByConstraints,
+        colors:
+          constraintStrictness(filteredByConstraints, "colors") === "must"
+            ? filteredByConstraints.colors
+            : undefined,
+      };
+      const broadenedCandidates = filterByHardConstraints(
+        inventory,
+        broadenedConstraints
+      );
+      filteredByConstraints = broadenedConstraints;
+      filteredBySizeWindow = null;
+      candidates = broadenedCandidates;
+      broadeningApplied = true;
+      broadeningStage =
+        broadeningStage === "size_relaxation_ladder"
+          ? "size_relaxation_ladder_plus_color_style_relaxation"
+          : "size_relaxation_ladder_plus_color_style_relaxation";
+    }
+
+    if (candidates.length > 0 && requestedConstraints.size) {
+      const reasonedCandidates = applyPreferSizeReasonablenessGuard(
+        candidates,
+        requestedConstraints
+      );
+      if (reasonedCandidates.length > 0) {
+        candidates = reasonedCandidates;
+      } else if (constraintStrictness(requestedConstraints, "size") !== "must") {
+        candidates = [];
+        failedSizeReasonablenessGuard = true;
+      }
+    }
+
     if (candidates.length === 0) {
       blockers = detectHardConstraintBlockers(
         inventory,
-        effectiveConstraints,
-        sizeSearch.sizeWindow
+        filteredByConstraints,
+        filteredBySizeWindow
       );
+      if (failedSizeReasonablenessGuard && !blockers.includes("size")) {
+        blockers = ["size", ...blockers];
+      }
       const hasRepeatNoMatch =
+        failedSizeReasonablenessGuard ||
         (input.noMatchAttempts ?? 0) > 0 ||
         (input.priorResultMode === "no_match" &&
           typeof relaxedToleranceIn === "number");
       if (hasRepeatNoMatch) {
         const response = buildTerminalNoMatchResponse({
-          constraints: effectiveConstraints,
+          constraints: requestedConstraints,
           followupIntent,
           blockers,
           relaxedToleranceIn,
         });
+        if (
+          broadeningStage ===
+          "size_relaxation_ladder_plus_color_style_relaxation"
+        ) {
+          response.notes = appendNotesCode(
+            response.notes,
+            BROADENED_NO_MATCH_NOTE_CODE
+          );
+        }
+        if (failedSizeReasonablenessGuard) {
+          response.notes = appendNotesCode(
+            response.notes,
+            SIZE_REASONABLENESS_GUARD_NOTE_CODE
+          );
+        }
+        if (styleFallbackStage === "origin_or_mood_family") {
+          response.notes = appendNotesCode(
+            response.notes,
+            STYLE_RELAXATION_NOTE_CODE
+          );
+        } else if (styleFallbackStage === "style_dropped") {
+          response.notes = appendNotesCode(
+            response.notes,
+            STYLE_DROPPED_NOTE_CODE
+          );
+        }
 
         const logStart = Date.now();
         await logRecommendationQaEvent({
           request_id: requestId,
           tenant_id: input.tenantId,
           user_message: input.userMessage,
-          constraints: effectiveConstraints,
+          constraints: requestedConstraints,
           sql_candidate_count: inventory.length,
           filtered_candidate_count: 0,
           ai_candidate_count: 0,
@@ -374,9 +866,14 @@ export async function runRecommendationPipeline(
           role: input.traceMeta?.role ?? null,
           tenant_id: input.tenantId,
           user_message: input.userMessage,
-          constraints: effectiveConstraints,
+          constraints: requestedConstraints,
           prompt_context: input.promptContext ?? null,
           query_trace: queryTrace,
+          dynamic_limit: dynamicLimit,
+          discovery_mode: discoveryMode,
+          color_sql_prefilter_tokens: colorSqlPrefilterTokens,
+          broadening_applied: broadeningApplied,
+          broadening_stage: broadeningStage,
           candidate_counts: {
             sql_candidates: inventory.length,
             hard_filtered_candidates: 0,
@@ -406,22 +903,50 @@ export async function runRecommendationPipeline(
             relaxed_size_tolerance_in: relaxedToleranceIn,
             blockers,
             last_recommended_size_in: toRuntimeSizeIn(null),
+            recently_shown_rugs: [],
           },
         };
       }
+
       const response = buildGuidedNoMatchResponse({
-        constraints: effectiveConstraints,
+        constraints: requestedConstraints,
         followupIntent,
         blockers,
         relaxedToleranceIn,
       });
+      if (
+        broadeningStage ===
+        "size_relaxation_ladder_plus_color_style_relaxation"
+      ) {
+        response.notes = appendNotesCode(
+          response.notes,
+          BROADENED_NO_MATCH_NOTE_CODE
+        );
+      }
+      if (failedSizeReasonablenessGuard) {
+        response.notes = appendNotesCode(
+          response.notes,
+          SIZE_REASONABLENESS_GUARD_NOTE_CODE
+        );
+      }
+      if (styleFallbackStage === "origin_or_mood_family") {
+        response.notes = appendNotesCode(
+          response.notes,
+          STYLE_RELAXATION_NOTE_CODE
+        );
+      } else if (styleFallbackStage === "style_dropped") {
+        response.notes = appendNotesCode(
+          response.notes,
+          STYLE_DROPPED_NOTE_CODE
+        );
+      }
 
       const logStart = Date.now();
       await logRecommendationQaEvent({
         request_id: requestId,
         tenant_id: input.tenantId,
         user_message: input.userMessage,
-        constraints: effectiveConstraints,
+        constraints: requestedConstraints,
         sql_candidate_count: inventory.length,
         filtered_candidate_count: 0,
         ai_candidate_count: 0,
@@ -441,9 +966,14 @@ export async function runRecommendationPipeline(
         role: input.traceMeta?.role ?? null,
         tenant_id: input.tenantId,
         user_message: input.userMessage,
-        constraints: effectiveConstraints,
+        constraints: requestedConstraints,
         prompt_context: input.promptContext ?? null,
         query_trace: queryTrace,
+        dynamic_limit: dynamicLimit,
+        discovery_mode: discoveryMode,
+        color_sql_prefilter_tokens: colorSqlPrefilterTokens,
+        broadening_applied: broadeningApplied,
+        broadening_stage: broadeningStage,
         candidate_counts: {
           sql_candidates: inventory.length,
           hard_filtered_candidates: 0,
@@ -473,6 +1003,7 @@ export async function runRecommendationPipeline(
           relaxed_size_tolerance_in: relaxedToleranceIn,
           blockers,
           last_recommended_size_in: toRuntimeSizeIn(null),
+          recently_shown_rugs: [],
         },
       };
     }
@@ -481,17 +1012,21 @@ export async function runRecommendationPipeline(
     const aiCandidates = shapeCandidatesForAI(candidates, {
       maxCandidates: AI_CANDIDATE_LIMIT,
       userMessage: input.userMessage,
-      constraints: effectiveConstraints,
+      constraints: requestedConstraints,
       followupIntent: input.followupIntent ?? "none",
+      discoveryMode,
     });
     timings.shape_candidates_ms = Date.now() - shapeStart;
 
     const aiStart = Date.now();
     const response = await rankAndExplain(
       aiCandidates,
-      effectiveConstraints,
+      requestedConstraints,
       input.userMessage,
-      input.promptContext,
+      {
+        ...input.promptContext,
+        discovery_mode: discoveryMode,
+      },
       aiTrace
     );
     timings.rank_and_explain_ms = Date.now() - aiStart;
@@ -499,13 +1034,31 @@ export async function runRecommendationPipeline(
       response.recommendations,
       candidates
     );
+    const recentlyShownRugs = findRecentlyShownRugs(
+      response.recommendations,
+      candidates
+    );
+    if (
+      broadeningStage ===
+      "size_relaxation_ladder_plus_color_style_relaxation"
+    ) {
+      response.notes = appendNotesCode(
+        response.notes,
+        BROADENED_NO_MATCH_NOTE_CODE
+      );
+    }
+    if (styleFallbackStage === "origin_or_mood_family") {
+      response.notes = appendNotesCode(response.notes, STYLE_RELAXATION_NOTE_CODE);
+    } else if (styleFallbackStage === "style_dropped") {
+      response.notes = appendNotesCode(response.notes, STYLE_DROPPED_NOTE_CODE);
+    }
 
     const logStart = Date.now();
     await logRecommendationQaEvent({
       request_id: requestId,
       tenant_id: input.tenantId,
       user_message: input.userMessage,
-      constraints: effectiveConstraints,
+      constraints: requestedConstraints,
       sql_candidate_count: inventory.length,
       filtered_candidate_count: candidates.length,
       ai_candidate_count: aiCandidates.length,
@@ -525,9 +1078,14 @@ export async function runRecommendationPipeline(
       role: input.traceMeta?.role ?? null,
       tenant_id: input.tenantId,
       user_message: input.userMessage,
-      constraints: effectiveConstraints,
+      constraints: requestedConstraints,
       prompt_context: input.promptContext ?? null,
       query_trace: queryTrace,
+      dynamic_limit: dynamicLimit,
+      discovery_mode: discoveryMode,
+      color_sql_prefilter_tokens: colorSqlPrefilterTokens,
+      broadening_applied: broadeningApplied,
+      broadening_stage: broadeningStage,
       candidate_counts: {
         sql_candidates: inventory.length,
         hard_filtered_candidates: candidates.length,
@@ -556,6 +1114,7 @@ export async function runRecommendationPipeline(
         relaxed_size_tolerance_in: relaxedToleranceIn,
         blockers,
         last_recommended_size_in: toRuntimeSizeIn(lastRecommendedSizeIn),
+        recently_shown_rugs: recentlyShownRugs,
       },
     };
   } catch {
@@ -570,6 +1129,11 @@ export async function runRecommendationPipeline(
       constraints: input.constraints,
       prompt_context: input.promptContext ?? null,
       query_trace: queryTrace,
+      dynamic_limit: dynamicLimit,
+      discovery_mode: discoveryMode,
+      color_sql_prefilter_tokens: colorSqlPrefilterTokens,
+      broadening_applied: broadeningApplied,
+      broadening_stage: broadeningStage,
       timing_ms: {
         ...timings,
         total_ms: Date.now() - startedAt,
@@ -593,18 +1157,22 @@ function shouldAttemptClosestRelaxation(input: {
     | "smaller"
     | "more_like_this"
     | "tighten";
-  priorResultMode: "recommendation" | "no_match" | "clarifying_question" | null;
+  priorResultMode:
+    | "recommendation"
+    | "no_match"
+    | "clarifying_question"
+    | "disambiguation"
+    | null;
   constraints: HardConstraints;
 }): boolean {
   if (!input.constraints.size) return false;
   if (input.followupIntent === "closest") {
     return true;
   }
-  if (input.followupIntent !== "larger" && input.followupIntent !== "smaller") {
-    return false;
+  if (input.followupIntent === "larger" || input.followupIntent === "smaller") {
+    return input.priorResultMode === "no_match";
   }
-
-  return input.priorResultMode === "no_match";
+  return false;
 }
 
 function applyClosestRelaxationLadder(
@@ -623,6 +1191,7 @@ function applyClosestRelaxationLadder(
     };
   }
 
+  let lastTriedConstraints = constraints;
   for (const tolerance of SIZE_RELAXATION_STEPS_IN) {
     const nextConstraints: HardConstraints = {
       ...constraints,
@@ -631,6 +1200,7 @@ function applyClosestRelaxationLadder(
         toleranceIn: tolerance,
       },
     };
+    lastTriedConstraints = nextConstraints;
     const candidates = filterByHardConstraints(inventory, nextConstraints);
     if (candidates.length > 0) {
       return {
@@ -642,7 +1212,7 @@ function applyClosestRelaxationLadder(
   }
 
   return {
-    constraints,
+    constraints: lastTriedConstraints,
     candidates: [],
     relaxedToleranceIn: SIZE_RELAXATION_STEPS_IN[SIZE_RELAXATION_STEPS_IN.length - 1],
   };
@@ -843,12 +1413,72 @@ function findLastRecommendedSizeIn(
   return null;
 }
 
+function findRecentlyShownRugs(
+  recommendations: RecommendationResponse["recommendations"],
+  candidates: InventoryRug[]
+): Array<{
+  id: string;
+  label: string;
+  colors: string[];
+  style: string | null;
+  origin: string | null;
+}> {
+  const byId = new Map(candidates.map((rug) => [rug.id, rug]));
+  const output: Array<{
+    id: string;
+    label: string;
+    colors: string[];
+    style: string | null;
+    origin: string | null;
+  }> = [];
+
+  for (const recommendation of recommendations) {
+    const rug = byId.get(recommendation.rug_id);
+    if (!rug) continue;
+    const fields = rug.effective_fields ?? null;
+    output.push({
+      id: recommendation.rug_id,
+      label: recommendation.title,
+      colors:
+        Array.isArray(fields?.primary_colors) &&
+        fields.primary_colors.length > 0
+          ? fields.primary_colors.slice(0, 6)
+          : [],
+      style: recommendation.style ?? fields?.style ?? null,
+      origin: recommendation.origin ?? fields?.origin ?? null,
+    });
+  }
+
+  return output.slice(0, 10);
+}
+
+async function countRoughInventorySize(
+  tenantId: string
+): Promise<number | null> {
+  const supabase = await getSupabaseAdminSafe();
+  if (!supabase) return null;
+
+  const result = await supabase
+    .from("rugs")
+    .select("id", { count: "exact", head: true })
+    .eq("tenant_id", tenantId)
+    .eq("status", "available")
+    .eq("enrichment_status", "ready");
+
+  if (result.error) {
+    return null;
+  }
+
+  return result.count ?? null;
+}
+
 async function fetchInventoryCandidates(input: {
   requestId: string;
   tenantId: string;
   constraints: HardConstraints;
   sizeWindow: SizeWindow | null;
   limit: number;
+  colorSqlPrefilterTokens: string[];
   queryTrace: PipelineQueryTrace[];
 }): Promise<InventoryRug[] | null> {
   const supabase = await getSupabaseAdminSafe();
@@ -865,6 +1495,7 @@ async function fetchInventoryCandidates(input: {
         tenantId: input.tenantId,
         limit: input.limit,
         sizeWindow: input.sizeWindow,
+        colorSqlPrefilterTokens: input.colorSqlPrefilterTokens,
         variant,
         queryTrace: input.queryTrace,
       })
@@ -954,6 +1585,7 @@ async function runCandidateQuery(input: {
   tenantId: string;
   limit: number;
   sizeWindow: SizeWindow | null;
+  colorSqlPrefilterTokens: string[];
   variant: "base" | "size_direct" | "size_rotated";
   queryTrace: PipelineQueryTrace[];
 }): Promise<InventoryRug[] | null> {
@@ -967,8 +1599,7 @@ async function runCandidateQuery(input: {
       .select(selectColumns)
       .eq("status", "available")
       .eq("enrichment_status", "ready")
-      .order("created_at", { ascending: false, nullsFirst: false })
-      .order("id", { ascending: false })
+      .order("id", { ascending: true })
       .limit(input.limit);
 
     query = query.eq("tenant_id", input.tenantId);
@@ -983,6 +1614,23 @@ async function runCandidateQuery(input: {
       if (typeof widthMax === "number") query = query.lte("width_total_in", widthMax);
       if (typeof lengthMin === "number") query = query.gte("length_total_in", lengthMin);
       if (typeof lengthMax === "number") query = query.lte("length_total_in", lengthMax);
+    }
+
+    if (input.colorSqlPrefilterTokens.length > 0) {
+      const terms = input.colorSqlPrefilterTokens
+        .map((token) => token.trim().toLowerCase())
+        .filter((token) => token.length > 0)
+        .slice(0, 10)
+        .flatMap((token) => [
+          `ai_structured_fields->primary_colors.cs.[\"${token}\"]`,
+          `staff_overrides->primary_colors.cs.[\"${token}\"]`,
+          `ai_description.ilike.*${token}*`,
+          `intake_label.ilike.*${token}*`,
+        ]);
+
+      if (terms.length > 0) {
+        query = query.or(terms.join(","));
+      }
     }
 
     return query;
@@ -1011,6 +1659,10 @@ async function runCandidateQuery(input: {
         enrichment_status: "ready",
         limit: input.limit,
         size_bounds: bounds ? { ...bounds, rotated } : null,
+        color_sql_prefilter_tokens:
+          input.colorSqlPrefilterTokens.length > 0
+            ? input.colorSqlPrefilterTokens
+            : null,
       },
       row_count: 0,
       error: error?.message ?? "Unknown query failure",
@@ -1026,6 +1678,10 @@ async function runCandidateQuery(input: {
       enrichment_status: "ready",
       limit: input.limit,
       size_bounds: bounds ? { ...bounds, rotated } : null,
+      color_sql_prefilter_tokens:
+        input.colorSqlPrefilterTokens.length > 0
+          ? input.colorSqlPrefilterTokens
+          : null,
     },
     row_count: data.length,
     error: null,

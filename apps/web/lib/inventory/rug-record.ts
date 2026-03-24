@@ -2,6 +2,7 @@ import {
   aiStructuredFieldsSchema,
   staffOverridesSchema,
 } from "@/lib/inventory/schemas";
+import { normalizeColorList } from "@/lib/config/color-taxonomy";
 import {
   isEnrichmentStatus,
   isReviewReasonCode,
@@ -73,7 +74,14 @@ function toAiStructuredFieldsOrNull(
   value: unknown
 ): InventoryBrowserRow["ai_structured_fields"] {
   if (!value || typeof value !== "object" || Array.isArray(value)) return null;
-  const parsed = aiStructuredFieldsSchema.safeParse(value);
+  const normalized = { ...(value as Record<string, unknown>) };
+  if (Array.isArray(normalized.primary_colors)) {
+    normalized.primary_colors = normalizeColorList(
+      normalized.primary_colors as string[],
+      8
+    );
+  }
+  const parsed = aiStructuredFieldsSchema.safeParse(normalized);
   return parsed.success ? parsed.data : null;
 }
 
@@ -81,7 +89,14 @@ function toStaffOverridesOrNull(
   value: unknown
 ): InventoryBrowserRow["staff_overrides"] {
   if (!value || typeof value !== "object" || Array.isArray(value)) return null;
-  const parsed = staffOverridesSchema.safeParse(value);
+  const normalized = { ...(value as Record<string, unknown>) };
+  if (Array.isArray(normalized.primary_colors)) {
+    normalized.primary_colors = normalizeColorList(
+      normalized.primary_colors as string[],
+      8
+    );
+  }
+  const parsed = staffOverridesSchema.safeParse(normalized);
   return parsed.success ? parsed.data : null;
 }
 

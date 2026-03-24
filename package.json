@@ -9,6 +9,7 @@
     "dev": "npm --workspace apps/web run dev",
     "build": "npm --workspace apps/web run build",
     "lint": "npm --workspace apps/web run lint",
+    "test:concierge-rework": "npm --workspace apps/web exec tsx ../../scripts/testing/concierge-rework-scenarios.ts",
     "check:docs": "node scripts/check-docs-drift.mjs",
     "check:migrations": "node scripts/check-migrations.mjs",
     "quality:release": "npm --workspace apps/web exec tsc --noEmit && npm --workspace apps/web run lint && npm --workspace apps/web run build && npm run check:docs && npm run check:migrations"

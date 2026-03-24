@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { RecommendationCard } from "@/components/concierge/recommendation-card";
@@ -96,6 +97,7 @@ export function ChatThread(input: ChatThreadProps) {
   const [isPinnedToBottom, setIsPinnedToBottom] = useState(true);
   const [showJumpToLatest, setShowJumpToLatest] = useState(false);
   const hasCompletedInitialAutoScrollPass = useRef(false);
+  const recommendationRowRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
   const latestTurnSignature = useMemo(
     () => turns.map((turn) => turn.id).join("|"),
@@ -152,6 +154,19 @@ export function ChatThread(input: ChatThreadProps) {
     setShowJumpToLatest(false);
   }, []);
 
+  const scrollRecommendationRow = useCallback(
+    (turnId: string, direction: "left" | "right") => {
+      const row = recommendationRowRefs.current[turnId];
+      if (!row) return;
+      const amount = Math.max(260, Math.round(row.clientWidth * 0.9));
+      row.scrollBy({
+        left: direction === "right" ? amount : -amount,
+        behavior: "smooth",
+      });
+    },
+    []
+  );
+
   useEffect(() => {
     onJumpToLatestVisibilityChange?.(showJumpToLatest);
   }, [showJumpToLatest, onJumpToLatestVisibilityChange]);
@@ -172,7 +187,8 @@ export function ChatThread(input: ChatThreadProps) {
               </p>
             </div>
             <p className={cn("whitespace-pre-wrap text-foreground", bodyTextClassName)}>
-              Tell me what kind of rug you&apos;re looking for.
+              Tell me about your space, preferred look, or size range and I&apos;ll start
+              with options that fit.
             </p>
             <div className="mt-5 flex max-w-full flex-col gap-3 sm:max-w-[42rem] sm:flex-row sm:flex-wrap">
               {emptyStatePrompts.map((prompt) => (
@@ -287,16 +303,54 @@ export function ChatThread(input: ChatThreadProps) {
                 ) : null}
 
                 {hasRecommendations ? (
-                  <div className="mt-6 grid grid-cols-1 gap-5 md:grid-cols-2 [&>*:last-child:nth-child(odd)]:md:col-span-2 [&>*:last-child:nth-child(odd)]:md:mx-auto [&>*:last-child:nth-child(odd)]:md:max-w-[calc(50%-10px)]">
-                    {turn.recommendations?.map((item) => (
-                      <RecommendationCard
-                        item={item}
-                        key={item.rug_id}
-                        showTechnicalMeta={isDeveloperView}
-                        maxVisibleReasons={2}
-                        onAskAboutRug={onAskAboutRug}
-                      />
-                    ))}
+                  <div className="mt-6">
+                    <div className="mb-2 hidden items-center justify-end gap-2 md:flex">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="icon"
+                        className="h-8 w-8 rounded-full"
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          scrollRecommendationRow(turn.id, "left");
+                        }}
+                      >
+                        <ChevronLeft className="h-4 w-4" />
+                        <span className="sr-only">Scroll recommendations left</span>
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="icon"
+                        className="h-8 w-8 rounded-full"
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          scrollRecommendationRow(turn.id, "right");
+                        }}
+                      >
+                        <ChevronRight className="h-4 w-4" />
+                        <span className="sr-only">Scroll recommendations right</span>
+                      </Button>
+                    </div>
+                    <div
+                      ref={(element) => {
+                        recommendationRowRefs.current[turn.id] = element;
+                      }}
+                      className="flex snap-x snap-mandatory gap-4 overflow-x-auto pb-2 [scrollbar-width:thin]"
+                    >
+                      {turn.recommendations?.map((item) => (
+                        <div
+                          key={item.rug_id}
+                          className="min-w-[82%] snap-start sm:min-w-[360px] md:min-w-[400px] lg:min-w-[430px]"
+                        >
+                          <RecommendationCard
+                            item={item}
+                            showTechnicalMeta={isDeveloperView}
+                            onAskAboutRug={onAskAboutRug}
+                          />
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 ) : null}
               </article>

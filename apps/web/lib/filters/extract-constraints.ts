@@ -1,32 +1,12 @@
 import type {
   HardConstraints,
+  RecommendationConstraintStrictness,
   RecommendationRoomPreference,
   RecommendationShapeConstraint,
 } from "@/lib/types/recommendation";
+import { extractCanonicalColorsFromText } from "@/lib/config/color-taxonomy";
 
 const MAX_CONSTRAINT_TOKENS = 6;
-
-const COLOR_SYNONYMS: Array<{ token: string; canonical: string }> = [
-  { token: "ivory", canonical: "ivory" },
-  { token: "cream", canonical: "cream" },
-  { token: "beige", canonical: "beige" },
-  { token: "tan", canonical: "beige" },
-  { token: "gold", canonical: "gold" },
-  { token: "yellow", canonical: "gold" },
-  { token: "rust", canonical: "rust" },
-  { token: "orange", canonical: "rust" },
-  { token: "coral", canonical: "coral" },
-  { token: "red", canonical: "red" },
-  { token: "blue", canonical: "blue" },
-  { token: "navy", canonical: "navy" },
-  { token: "teal", canonical: "teal" },
-  { token: "green", canonical: "green" },
-  { token: "brown", canonical: "brown" },
-  { token: "black", canonical: "black" },
-  { token: "gray", canonical: "gray" },
-  { token: "grey", canonical: "gray" },
-  { token: "white", canonical: "white" },
-];
 
 const STYLE_TERMS: Array<{ token: string; canonical: string }> = [
   { token: "traditional", canonical: "traditional" },
@@ -138,6 +118,60 @@ function normalizeShape(value: unknown): RecommendationShapeConstraint | undefin
   return undefined;
 }
 
+function normalizeStrictnessValue(value: unknown): "must" | "prefer" | undefined {
+  const token = normalizeStringToken(value, 8);
+  if (!token) return undefined;
+  if (token === "must") return "must";
+  if (token === "prefer") return "prefer";
+  return undefined;
+}
+
+function normalizeStrictness(
+  value: unknown
+): RecommendationConstraintStrictness | undefined {
+  if (!value || typeof value !== "object") return undefined;
+  const data = value as Record<string, unknown>;
+  const strictness: RecommendationConstraintStrictness = {
+    size: normalizeStrictnessValue(data.size),
+    colors: normalizeStrictnessValue(data.colors),
+    styles: normalizeStrictnessValue(data.styles),
+    shape: normalizeStrictnessValue(data.shape),
+  };
+
+  if (!strictness.size && !strictness.colors && !strictness.styles && !strictness.shape) {
+    return undefined;
+  }
+
+  return strictness;
+}
+
+function normalizeAvoidPreferences(
+  value: unknown
+): HardConstraints["avoid_preferences"] | undefined {
+  if (!value || typeof value !== "object") return undefined;
+  const data = value as Record<string, unknown>;
+  const colors = parseTokenList(data.colors);
+  const styles = parseTokenList(data.styles);
+  const shapesRaw: unknown[] = Array.isArray(data.shapes) ? data.shapes : [];
+  const shapes = Array.from(
+    new Set(
+      shapesRaw
+        .map((shape) => normalizeShape(shape))
+        .filter((shape): shape is RecommendationShapeConstraint => Boolean(shape))
+    )
+  ).slice(0, MAX_CONSTRAINT_TOKENS);
+
+  if (colors.length === 0 && styles.length === 0 && shapes.length === 0) {
+    return undefined;
+  }
+
+  return {
+    colors: colors.length > 0 ? colors : undefined,
+    styles: styles.length > 0 ? styles : undefined,
+    shapes: shapes.length > 0 ? shapes : undefined,
+  };
+}
+
 export function normalizeHardConstraints(input: unknown): HardConstraints {
   if (!input || typeof input !== "object") {
     return {};
@@ -147,16 +181,25 @@ export function normalizeHardConstraints(input: unknown): HardConstraints {
   const hasColorsKey = Object.prototype.hasOwnProperty.call(data, "colors");
   const hasStylesKey = Object.prototype.hasOwnProperty.call(data, "styles");
   const hasShapeKey = Object.prototype.hasOwnProperty.call(data, "shape");
+  const hasStrictnessKey = Object.prototype.hasOwnProperty.call(data, "strictness");
+  const hasAvoidKey = Object.prototype.hasOwnProperty.call(
+    data,
+    "avoid_preferences"
+  );
   const size = normalizeSize(data.size);
   const colors = parseTokenList(data.colors);
   const styles = parseTokenList(data.styles);
   const shape = normalizeShape(data.shape);
+  const strictness = normalizeStrictness(data.strictness);
+  const avoidPreferences = normalizeAvoidPreferences(data.avoid_preferences);
 
   return {
     size,
     colors: hasColorsKey ? colors : undefined,
     styles: hasStylesKey ? styles : undefined,
     shape: hasShapeKey ? shape : undefined,
+    strictness: hasStrictnessKey ? strictness : undefined,
+    avoid_preferences: hasAvoidKey ? avoidPreferences : undefined,
   };
 }
 
@@ -191,11 +234,7 @@ function includesToken(text: string, token: string): boolean {
 }
 
 function parseColorsFromMessage(userMessage: string): string[] {
-  const text = userMessage.toLowerCase();
-  const matches = COLOR_SYNONYMS.filter((entry) =>
-    includesToken(text, entry.token)
-  ).map((entry) => entry.canonical);
-  return Array.from(new Set(matches)).slice(0, MAX_CONSTRAINT_TOKENS);
+  return extractCanonicalColorsFromText(userMessage, MAX_CONSTRAINT_TOKENS);
 }
 
 function parseStylesFromMessage(userMessage: string): string[] {

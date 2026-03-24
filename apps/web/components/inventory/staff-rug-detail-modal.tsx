@@ -33,6 +33,7 @@ import {
 } from "@/lib/inventory/staff-client";
 import { reviewReasonMessage } from "@/lib/inventory/enrichment-state";
 import { resolveEffectiveFields } from "@/lib/inventory/resolve-fields";
+import { CANONICAL_COLORS } from "@/lib/config/color-taxonomy";
 import type {
   InventoryBrowserRow,
   InventoryRugStatus,
@@ -94,20 +95,7 @@ const PATTERN_OPTIONS = [
   "pictorial",
   "plain field",
 ] as const;
-const COLOR_OPTIONS = [
-  "red",
-  "navy",
-  "ivory",
-  "gold",
-  "rust",
-  "teal",
-  "brown",
-  "green",
-  "blue",
-  "black",
-  "cream",
-  "coral",
-] as const;
+const COLOR_OPTIONS = CANONICAL_COLORS;
 
 function normalizeList(values: string[]): string[] {
   const unique = new Set<string>();

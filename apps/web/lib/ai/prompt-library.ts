@@ -7,6 +7,7 @@ type RecommendationPromptBundle = {
   recommendation: string;
   recommendationStructuredOutput: string;
   generalChat: string;
+  turnParser: string;
 };
 
 let cachedBundle: RecommendationPromptBundle | null = null;
@@ -69,6 +70,10 @@ export function getRecommendationPromptBundle(): RecommendationPromptBundle {
     generalChat: readPromptFileOrFallback(
       path.resolve(promptsDir, "general-chat.md"),
       "Handle freeform rug questions clearly and practically without inventing facts."
+    ),
+    turnParser: readPromptFileOrFallback(
+      path.resolve(promptsDir, "turn-parser.md"),
+      "Classify the turn and extract structured constraints. Return JSON only."
     ),
   };
 

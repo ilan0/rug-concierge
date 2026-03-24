@@ -1,12 +1,9 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import {
-  extractConstraintsFromUserMessage,
-  mergeHardConstraints,
-  normalizeHardConstraints,
-} from "@/lib/filters/extract-constraints";
+import { normalizeHardConstraints } from "@/lib/filters/extract-constraints";
 import { runRecommendationPipeline } from "@/lib/recommend/pipeline";
-import { parseRecommendationFollowupIntent } from "@/lib/chat/router";
+import { parseTurn, type TurnParserTrace } from "@/lib/ai/turn-parser";
+import { compileTurnPolicy } from "@/lib/chat/policy-compiler";
 import {
   parseE2eTraceMeta,
   writeE2eTraceArtifact,
@@ -94,6 +91,18 @@ export async function POST(req: Request) {
     const requestId = crypto.randomUUID();
     const traceMeta = parseE2eTraceMeta(req);
     const routeTraceId = crypto.randomUUID();
+    const parserTrace: TurnParserTrace = {
+      called: false,
+      model: "",
+      request_payload: null,
+      response_status: null,
+      response_payload: null,
+      parsed: null,
+      fallback_reason: null,
+      error: null,
+      incomplete_detected: false,
+      latency_ms: null,
+    };
 
     const parsedBody = await parseJsonBodyWithSchema(
       req,
@@ -160,16 +169,26 @@ export async function POST(req: Request) {
 
     // `user_message` is preferred, but we also accept `message`.
     const userMessage = readUserMessage(body);
+    const parsedTurn = userMessage
+      ? await parseTurn({
+          message: userMessage,
+          context: {
+            last_result_mode: null,
+            has_recent_recommendations: false,
+          },
+          trace: parserTrace,
+        })
+      : null;
 
-    // Explicit request constraints come from UI payload.
     const explicitConstraints = normalizeHardConstraints(body.constraints);
-    // Inferred constraints come from lightweight text parsing (e.g. "8x10-ish").
-    const inferredConstraints = extractConstraintsFromUserMessage(userMessage);
-    // Explicit values win when both sources are present.
-    const constraints: HardConstraints = mergeHardConstraints(
-      explicitConstraints,
-      inferredConstraints
-    );
+    const compiledPolicy = parsedTurn
+      ? compileTurnPolicy({
+          parsedTurn,
+          explicitConstraints: body.constraints,
+        })
+      : null;
+    const constraints: HardConstraints =
+      compiledPolicy?.hard_constraints ?? explicitConstraints;
 
     if (!userMessage && !hasMeaningfulConstraints(constraints)) {
       if (traceMeta) {
@@ -317,9 +336,8 @@ export async function POST(req: Request) {
       tenantId,
       userMessage,
       constraints,
-      followupIntent: parseRecommendationFollowupIntent(
-        userMessage.toLowerCase().trim()
-      ),
+      followupIntent: compiledPolicy?.followup_intent ?? "none",
+      constraintConfidence: compiledPolicy?.confidence ?? "low",
       priorResultMode: null,
       promptContext: undefined,
       traceMeta: traceMeta
@@ -357,6 +375,17 @@ export async function POST(req: Request) {
                 code: "RECOMMENDATION_PIPELINE_ERROR",
               },
             },
+            parser_trace: {
+              called: parserTrace.called,
+              model: parserTrace.model,
+              response_status: parserTrace.response_status,
+              fallback_reason: parserTrace.fallback_reason,
+              incomplete_detected: parserTrace.incomplete_detected,
+              latency_ms: parserTrace.latency_ms,
+              parsed: parserTrace.parsed,
+              error: parserTrace.error,
+            },
+            compiled_policy: compiledPolicy ?? null,
             timing_ms: {
               total_ms: Date.now() - startedAt,
             },
@@ -386,11 +415,24 @@ export async function POST(req: Request) {
             status: 200,
             body: {
               mode: result.response.mode,
-              notes: result.response.notes,
-              recommendation_count: result.response.recommendations.length,
-            },
+                notes: result.response.notes,
+                recommendation_count: result.response.recommendations.length,
+                parser_fallback_reason: parserTrace.fallback_reason,
+                compiled_policy_strictness: compiledPolicy?.strictness ?? null,
+              },
             pipeline_trace_id: result.trace_id ?? null,
           },
+          parser_trace: {
+            called: parserTrace.called,
+            model: parserTrace.model,
+            response_status: parserTrace.response_status,
+            fallback_reason: parserTrace.fallback_reason,
+            incomplete_detected: parserTrace.incomplete_detected,
+            latency_ms: parserTrace.latency_ms,
+            parsed: parserTrace.parsed,
+            error: parserTrace.error,
+          },
+          compiled_policy: compiledPolicy ?? null,
           timing_ms: {
             total_ms: Date.now() - startedAt,
           },

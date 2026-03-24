@@ -21,6 +21,19 @@ export type RecommendationRoomPreference =
   | "entryway"
   | "office";
 
+export type RecommendationConstraintStrictness = {
+  size?: "must" | "prefer";
+  colors?: "must" | "prefer";
+  styles?: "must" | "prefer";
+  shape?: "must" | "prefer";
+};
+
+export type RecommendationAvoidPreferences = {
+  colors?: string[];
+  styles?: string[];
+  shapes?: RecommendationShapeConstraint[];
+};
+
 export type HardConstraints = {
   size?: {
     widthIn: number;
@@ -30,6 +43,8 @@ export type HardConstraints = {
   colors?: string[];
   styles?: string[];
   shape?: RecommendationShapeConstraint;
+  strictness?: RecommendationConstraintStrictness;
+  avoid_preferences?: RecommendationAvoidPreferences;
 };
 
 export type InventoryRug = {

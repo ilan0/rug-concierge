@@ -57,37 +57,43 @@ Tenant scope is enforced on inventory-backed reads and writes.
 - `GET /api/config/public`, `GET /api/manifest`
 
 ## Chat Router
-Rule precedence in `apps/web/lib/chat/router.ts`:
-1. `EXPLICIT_RECOMMENDATION_REQUEST`
-2. `RECOMMENDATION_FOLLOWUP`
-3. `GENERAL_ADVICE_OR_EDUCATION`
-4. `AMBIGUOUS_WITH_CONSTRAINTS_ONLY`
-5. `DEFAULT_GENERAL_CHAT`
+Turn routing is parser-first:
+- `apps/web/lib/ai/turn-parser.ts` runs a structured JSON parse call (mode, followup intent, constraints, strictness, avoid).
+- `apps/web/lib/chat/policy-compiler.ts` compiles parser output into runtime constraint policy.
+- `apps/web/lib/chat/router.ts` consumes parsed mode for final routing.
+- Deterministic regex rules remain as fallback if parse output is unavailable or invalid.
 
 Behavior notes:
-- Recommendation followups only trigger when recent recommendation context exists.
-- Bare acknowledgements like `ok` do not automatically rerun recommendations.
-- Constraint-only phrases without a real recommendation intent route to clarifying general chat.
+- Recommendation followups require recommendation context.
+- Constraint-only turns can route to clarifying chat when confidence is low.
+- The parser prompt is `docs/prompts/turn-parser.md`.
 
 ## Recommendation Pipeline
 Implemented in `apps/web/lib/recommend/pipeline.ts`.
 
 Flow:
-1. Parse explicit constraints and message-derived constraints
+1. Resolve request constraints and strictness policy (`must` vs `prefer`)
 2. Query tenant inventory from Supabase
-3. Apply deterministic hard filtering
-4. Shape candidates for AI ranking
-5. Ask AI to rank/explain within bounded structured output
-6. Sanitize and fall back deterministically if needed
+3. Apply deterministic hard filtering on `must` constraints only
+4. Apply size reasonableness guard for `prefer` size requests (blocks absurd far-size substitutions)
+5. Apply size broadening ladder and optional color/style broadening when needed
+6. Shape candidates for AI ranking
+7. Ask AI to rank/explain within bounded structured output
+8. Sanitize and fall back deterministically if needed
 
-Hard constraints remain strict:
-- `size`
-- `colors`
-- `styles`
-- `shape`
+Constraint policy:
+- `must` constraints are hard filters.
+- `prefer` constraints influence pre-scoring/ranking and broadening behavior.
+- Color is always preference/ranking-only (never a hard exclusion).
+- Avoid preferences (`avoid_preferences`) are ranking penalties, not hard excludes.
 
-Closest-size followups widen size only with the ladder:
-- `0`, `4`, `8`, `12`, `18`, `24` inches
+Minimum inventory guidance:
+- This recommendation system requires at least 40 available rugs to produce meaningful results.
+- A good customer experience requires at least 80 available rugs with real diversity across sizes, styles, and color families.
+- Below 40 available rugs, sparse results and frequent no-match outcomes are expected and are not considered a product bug.
+
+Closest-size ladder:
+- `4`, `8`, `12`, `18`, `24` inches.
 
 ## Intake And Durable Enrichment
 `POST /api/inventory/intake` does all synchronous intake work:
@@ -215,6 +221,8 @@ Branding source order:
 - `scripts/seed-demo-rugs.ts`: seed demo inventory
 - `scripts/re-enrich-rugs.ts`: batch re-enrichment for existing rugs
 - `scripts/purge-tenant-inventory.ts`: destructive tenant-specific inventory reset
+- `scripts/testing/color-audit.ts`: audit live tenant color vocabulary before/after canonicalization
+- `scripts/testing/concierge-rework-scenarios.ts`: deterministic parser/policy/size-guard scenario checks
 - `scripts/check-docs-drift.mjs`: validates the master doc + runtime prompt doc layout
 - `scripts/check-migrations.mjs`: validates expected runtime schema snapshots
 
@@ -224,5 +232,6 @@ These prompt docs are runtime inputs and are intentionally kept under `docs/prom
 - `docs/prompts/general-chat.md`
 - `docs/prompts/recommendation.md`
 - `docs/prompts/recommendation-structured-output.md`
+- `docs/prompts/turn-parser.md`
 
 They are loaded by `apps/web/lib/ai/prompt-library.ts`.

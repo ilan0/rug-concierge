@@ -35,21 +35,6 @@ function toSearchText(rug: InventoryRug): string {
   return normalizeText(parts.join(" "));
 }
 
-function toPrimaryColors(rug: InventoryRug): string[] {
-  const fields = rug.effective_fields
-    ? rug.effective_fields
-    : resolveEffectiveFields(
-        rug.intake_label ?? null,
-        rug.ai_structured_fields ?? null,
-        rug.staff_overrides ?? null,
-        rug.ai_description ?? null
-      );
-
-  return (fields.primary_colors ?? [])
-    .map((value) => normalizeText(value))
-    .filter((value) => value.length > 0);
-}
-
 function toStyles(rug: InventoryRug): string[] {
   const fields = rug.effective_fields
     ? rug.effective_fields
@@ -116,17 +101,6 @@ function matchesShape(rug: InventoryRug, constraints: HardConstraints): boolean 
   return true;
 }
 
-function matchesColors(rug: InventoryRug, constraints: HardConstraints): boolean {
-  if (!constraints.colors || constraints.colors.length === 0) return true;
-  const wanted = constraints.colors.map((value) => normalizeText(value));
-  const colorTokens = new Set(toPrimaryColors(rug));
-  const searchText = toSearchText(rug);
-
-  return wanted.some(
-    (token) => colorTokens.has(token) || searchText.includes(token)
-  );
-}
-
 function matchesStyles(rug: InventoryRug, constraints: HardConstraints): boolean {
   if (!constraints.styles || constraints.styles.length === 0) return true;
 
@@ -180,7 +154,6 @@ export function filterByHardConstraints(
   return inventory.filter((rug) => {
     if (rug.status !== "available") return false;
     if (!matchesSize(rug, constraints, sizeWindow)) return false;
-    if (!matchesColors(rug, constraints)) return false;
     if (!matchesStyles(rug, constraints)) return false;
     if (!matchesShape(rug, constraints)) return false;
     return true;

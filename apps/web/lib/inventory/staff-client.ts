@@ -3,6 +3,7 @@ import {
   aiStructuredFieldsSchema,
   staffOverridesSchema,
 } from "@/lib/inventory/schemas";
+import { normalizeColorList } from "@/lib/config/color-taxonomy";
 import {
   isEnrichmentStatus,
   isReviewReasonCode,
@@ -29,13 +30,21 @@ function toInventoryRugStatusOrNull(value: unknown): InventoryRugStatus | null {
 
 function toAiStructuredFields(value: unknown) {
   if (!isRecord(value)) return null;
-  const parsed = aiStructuredFieldsSchema.safeParse(value);
+  const normalized = { ...value };
+  if (Array.isArray(normalized.primary_colors)) {
+    normalized.primary_colors = normalizeColorList(normalized.primary_colors, 8);
+  }
+  const parsed = aiStructuredFieldsSchema.safeParse(normalized);
   return parsed.success ? parsed.data : null;
 }
 
 function toStaffOverrides(value: unknown) {
   if (!isRecord(value)) return null;
-  const parsed = staffOverridesSchema.safeParse(value);
+  const normalized = { ...value };
+  if (Array.isArray(normalized.primary_colors)) {
+    normalized.primary_colors = normalizeColorList(normalized.primary_colors, 8);
+  }
+  const parsed = staffOverridesSchema.safeParse(normalized);
   return parsed.success ? parsed.data : null;
 }
 
@@ -53,7 +62,10 @@ function toEffectiveFields(
       ? value.pattern.filter((item): item is string => typeof item === "string")
       : null,
     primary_colors: Array.isArray(value.primary_colors)
-      ? value.primary_colors.filter((item): item is string => typeof item === "string")
+      ? normalizeColorList(
+          value.primary_colors.filter((item): item is string => typeof item === "string"),
+          8
+        )
       : null,
     age_category:
       typeof value.age_category === "string" ? value.age_category : null,

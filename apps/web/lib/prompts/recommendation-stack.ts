@@ -18,7 +18,11 @@ type RecommendationPromptBundleInput = {
 
 type RecommendationLayerContext = {
   role: RoleType;
+  discoveryMode: boolean;
   hasChatMemoryContext: boolean;
+  hasCustomerContext: boolean;
+  hasRecentlyShownContext: boolean;
+  hasLikedAttributesContext: boolean;
   hasRecentTurnsContext: boolean;
 };
 
@@ -27,6 +31,19 @@ type BuildRecommendationPromptSectionsInput = RecommendationLayerContext & {
   chatContext?: {
     structured_state?: unknown;
     conversation_memory?: unknown;
+    customer_context?: string[];
+    recently_shown_rugs?: Array<{
+      id: string;
+      label: string;
+      colors: string[];
+      style: string | null;
+      origin: string | null;
+    }>;
+    liked_attributes?: {
+      colors: string[];
+      styles: string[];
+      origins: string[];
+    };
     recent_turns?: unknown[];
   };
   inventoryContext: unknown[];
@@ -74,6 +91,37 @@ const RECOMMENDATION_LAYER_DEFINITIONS: RecommendationLayerDefinition[] = [
       )}`,
   },
   {
+    id: PROMPT_LAYER.contextChatMemory,
+    role: "system",
+    include: (input) => input.hasCustomerContext,
+    text: (input) =>
+      `CUSTOMER CONTEXT (stable facts):\n${JSON.stringify(
+        input.chatContext?.customer_context ?? []
+      )}`,
+  },
+  {
+    id: PROMPT_LAYER.contextChatMemory,
+    role: "system",
+    include: (input) => input.hasRecentlyShownContext,
+    text: (input) =>
+      `RECENTLY SHOWN RUGS (avoid repeating unless clearly requested):\n${JSON.stringify(
+        input.chatContext?.recently_shown_rugs ?? []
+      )}`,
+  },
+  {
+    id: PROMPT_LAYER.contextChatMemory,
+    role: "system",
+    include: (input) => input.hasLikedAttributesContext,
+    text: (input) =>
+      `LIKED ATTRIBUTES (weight these positively):\n${JSON.stringify(
+        input.chatContext?.liked_attributes ?? {
+          colors: [],
+          styles: [],
+          origins: [],
+        }
+      )}`,
+  },
+  {
     id: PROMPT_LAYER.contextRecentTurns,
     role: "system",
     include: (input) => input.hasRecentTurnsContext,
@@ -99,6 +147,13 @@ const RECOMMENDATION_LAYER_DEFINITIONS: RecommendationLayerDefinition[] = [
       `User request:\n${input.userMessage}\n\nHard constraints:\n${JSON.stringify(
         input.constraints
       )}`,
+  },
+  {
+    id: PROMPT_LAYER.taskRecommendation,
+    role: "system",
+    include: (input) => input.discoveryMode,
+    text: () =>
+      "Discovery mode is active: show an inspiring range across style/origin/mood diversity and end with one natural question about the customer's space while still returning recommendations.",
   },
 ];
 
