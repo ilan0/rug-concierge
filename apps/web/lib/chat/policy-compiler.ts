@@ -9,6 +9,20 @@ export type CompiledTurnPolicy = {
   strictness: ParsedTurn["strictness"];
   avoid: ParsedTurn["avoid"];
   confidence: ParsedTurn["confidence"];
+  policy_source:
+    | "none"
+    | "parsed_turn"
+    | "explicit_constraints"
+    | "merged_parsed_and_explicit";
+  must_prefer_avoid: {
+    must: Array<"size" | "colors" | "styles" | "shape">;
+    prefer: Array<"size" | "colors" | "styles" | "shape">;
+    avoid: {
+      colors: string[];
+      styles: string[];
+      shapes: string[];
+    };
+  };
 };
 
 function recommendedPreferToleranceIn(input: {
@@ -85,6 +99,80 @@ function mergeHardConstraints(input: {
   };
 }
 
+function hasAnyHardConstraintSignals(constraints: HardConstraints): boolean {
+  return Boolean(
+    constraints.size ||
+      (constraints.colors && constraints.colors.length > 0) ||
+      (constraints.styles && constraints.styles.length > 0) ||
+      constraints.shape ||
+      (constraints.avoid_preferences?.colors &&
+        constraints.avoid_preferences.colors.length > 0) ||
+      (constraints.avoid_preferences?.styles &&
+        constraints.avoid_preferences.styles.length > 0) ||
+      (constraints.avoid_preferences?.shapes &&
+        constraints.avoid_preferences.shapes.length > 0)
+  );
+}
+
+function hasAnyParsedSignals(parsedTurn: ParsedTurn): boolean {
+  return Boolean(
+    parsedTurn.constraints.size ||
+      parsedTurn.constraints.colors.length > 0 ||
+      parsedTurn.constraints.styles.length > 0 ||
+      parsedTurn.constraints.shape ||
+      parsedTurn.avoid.colors.length > 0 ||
+      parsedTurn.avoid.styles.length > 0 ||
+      parsedTurn.avoid.shapes.length > 0
+  );
+}
+
+function resolvePolicySource(input: {
+  parsedTurn: ParsedTurn;
+  explicitConstraints: HardConstraints;
+}): CompiledTurnPolicy["policy_source"] {
+  const hasParsed = hasAnyParsedSignals(input.parsedTurn);
+  const hasExplicit = hasAnyHardConstraintSignals(input.explicitConstraints);
+  if (hasParsed && hasExplicit) return "merged_parsed_and_explicit";
+  if (hasExplicit) return "explicit_constraints";
+  if (hasParsed) return "parsed_turn";
+  return "none";
+}
+
+function buildMustPreferAvoid(input: {
+  constraints: HardConstraints;
+  strictness: ParsedTurn["strictness"];
+}): CompiledTurnPolicy["must_prefer_avoid"] {
+  const must: Array<"size" | "colors" | "styles" | "shape"> = [];
+  const prefer: Array<"size" | "colors" | "styles" | "shape"> = [];
+
+  const pushBucket = (
+    key: "size" | "colors" | "styles" | "shape",
+    active: boolean
+  ) => {
+    if (!active) return;
+    if (input.strictness[key] === "must") {
+      must.push(key);
+    } else {
+      prefer.push(key);
+    }
+  };
+
+  pushBucket("size", Boolean(input.constraints.size));
+  pushBucket("colors", Boolean(input.constraints.colors?.length));
+  pushBucket("styles", Boolean(input.constraints.styles?.length));
+  pushBucket("shape", Boolean(input.constraints.shape));
+
+  return {
+    must,
+    prefer,
+    avoid: {
+      colors: input.constraints.avoid_preferences?.colors ?? [],
+      styles: input.constraints.avoid_preferences?.styles ?? [],
+      shapes: input.constraints.avoid_preferences?.shapes ?? [],
+    },
+  };
+}
+
 export function compileTurnPolicy(input: {
   parsedTurn: ParsedTurn;
   explicitConstraints?: unknown;
@@ -104,5 +192,13 @@ export function compileTurnPolicy(input: {
     strictness: input.parsedTurn.strictness,
     avoid: input.parsedTurn.avoid,
     confidence: input.parsedTurn.confidence,
+    policy_source: resolvePolicySource({
+      parsedTurn: input.parsedTurn,
+      explicitConstraints: explicit,
+    }),
+    must_prefer_avoid: buildMustPreferAvoid({
+      constraints: hardConstraints,
+      strictness: input.parsedTurn.strictness,
+    }),
   };
 }

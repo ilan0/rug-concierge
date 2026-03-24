@@ -349,6 +349,12 @@ export async function POST(req: Request) {
           }
         : undefined,
     });
+    const parseStatus =
+      parserTrace.error && parserTrace.error.trim().length > 0
+        ? "error"
+        : parserTrace.fallback_reason
+          ? "fallback"
+          : "success";
 
     if (!result.ok) {
       if (traceMeta) {
@@ -378,14 +384,20 @@ export async function POST(req: Request) {
             parser_trace: {
               called: parserTrace.called,
               model: parserTrace.model,
+              status: parseStatus,
               response_status: parserTrace.response_status,
+              fallback: parserTrace.fallback_reason,
               fallback_reason: parserTrace.fallback_reason,
               incomplete_detected: parserTrace.incomplete_detected,
               latency_ms: parserTrace.latency_ms,
+              normalized_payload: parserTrace.parsed,
               parsed: parserTrace.parsed,
               error: parserTrace.error,
             },
             compiled_policy: compiledPolicy ?? null,
+            policy_source: compiledPolicy?.policy_source ?? null,
+            must_prefer_avoid: compiledPolicy?.must_prefer_avoid ?? null,
+            "must-prefer-avoid": compiledPolicy?.must_prefer_avoid ?? null,
             timing_ms: {
               total_ms: Date.now() - startedAt,
             },
@@ -425,14 +437,20 @@ export async function POST(req: Request) {
           parser_trace: {
             called: parserTrace.called,
             model: parserTrace.model,
+            status: parseStatus,
             response_status: parserTrace.response_status,
+            fallback: parserTrace.fallback_reason,
             fallback_reason: parserTrace.fallback_reason,
             incomplete_detected: parserTrace.incomplete_detected,
             latency_ms: parserTrace.latency_ms,
+            normalized_payload: parserTrace.parsed,
             parsed: parserTrace.parsed,
             error: parserTrace.error,
           },
           compiled_policy: compiledPolicy ?? null,
+          policy_source: compiledPolicy?.policy_source ?? null,
+          must_prefer_avoid: compiledPolicy?.must_prefer_avoid ?? null,
+          "must-prefer-avoid": compiledPolicy?.must_prefer_avoid ?? null,
           timing_ms: {
             total_ms: Date.now() - startedAt,
           },

@@ -29,6 +29,9 @@ const BROADENED_NO_MATCH_NOTE_CODE = "BROADENED_SIZE_COLOR_STYLE";
 const SIZE_REASONABLENESS_GUARD_NOTE_CODE = "SIZE_OUT_OF_REASONABLE_RANGE";
 const STYLE_RELAXATION_NOTE_CODE = "STYLE_RELAXED_TO_ORIGIN_OR_MOOD";
 const STYLE_DROPPED_NOTE_CODE = "STYLE_DROPPED_AFTER_FALLBACK";
+const SIZE_RELAX_SOFT_NOTE_CODE = "SIZE_RELAX_SOFT";
+const SIZE_RELAX_MEDIUM_NOTE_CODE = "SIZE_RELAX_MEDIUM";
+const SIZE_RELAX_STRONG_NOTE_CODE = "SIZE_RELAX_STRONG";
 
 type RunRecommendationPipelineInput = {
   requestId?: string;
@@ -109,6 +112,7 @@ type RunRecommendationPipelineResult =
 
 type PipelineQueryTrace = {
   variant: string;
+  query_variant_reason: string;
   filters: Record<string, unknown>;
   row_count: number;
   error: string | null;
@@ -125,6 +129,13 @@ type RecommendationSizeIn = {
 };
 
 const SIZE_RELAXATION_STEPS_IN = [4, 8, 12, 18, 24] as const;
+
+type NoMatchTrace = {
+  fallback_tier: "none" | "guided" | "terminal";
+  reasonableness_gate: "not_applicable" | "passed" | "failed";
+  reasonableness_gate_result: "not_applicable" | "passed" | "failed";
+  terminal_reason_code: string | null;
+};
 
 function isDirectionalFollowupIntent(
   followupIntent:
@@ -524,6 +535,29 @@ function appendNotesCode(
   return `${notes} | ${code}`;
 }
 
+function summarizeQueryRows(queryTrace: PipelineQueryTrace[]) {
+  const byVariant = queryTrace.map((entry) => ({
+    variant: entry.variant,
+    query_variant_reason: entry.query_variant_reason,
+    row_count: entry.row_count,
+    error: entry.error,
+  }));
+  const sqlRowsTotal = queryTrace.reduce((sum, entry) => sum + entry.row_count, 0);
+  return {
+    sql_rows_total: sqlRowsTotal,
+    sql_rows_by_variant: byVariant,
+  };
+}
+
+function sizeRelaxationDisclosureCode(
+  relaxedToleranceIn: number | null
+): string | null {
+  if (typeof relaxedToleranceIn !== "number") return null;
+  if (relaxedToleranceIn <= 8) return SIZE_RELAX_SOFT_NOTE_CODE;
+  if (relaxedToleranceIn <= 18) return SIZE_RELAX_MEDIUM_NOTE_CODE;
+  return SIZE_RELAX_STRONG_NOTE_CODE;
+}
+
 // Flow overview
 // Shared server recommendation pipeline:
 // - query candidates from Supabase (SQL-first hard filtering)
@@ -549,6 +583,14 @@ export async function runRecommendationPipeline(
   let dynamicLimit = DEFAULT_DYNAMIC_SQL_QUERY_LIMIT;
   let colorSqlPrefilterTokens: string[] = [];
   let discoveryMode = false;
+  let queryVariantReason = "no_size_window_base_query";
+  let policySqlFilters: Record<string, unknown> = {};
+  let noMatchTrace: NoMatchTrace = {
+    fallback_tier: "none",
+    reasonableness_gate: "not_applicable",
+    reasonableness_gate_result: "not_applicable",
+    terminal_reason_code: null,
+  };
   let broadeningApplied = false;
   let broadeningStage: BroadeningStage = "none";
   const aiTrace: RecommendationAiTrace = {
@@ -617,6 +659,26 @@ export async function runRecommendationPipeline(
       sizeSearch.sizeWindow
         ? sizeSearch.sizeWindow
         : null;
+    queryVariantReason = activeHardSizeWindow
+      ? "size_window_active_query_direct_and_rotated"
+      : "no_size_window_base_query";
+    policySqlFilters = {
+      tenant_id: input.tenantId,
+      status: "available",
+      enrichment_status: "ready",
+      size_window: activeHardSizeWindow,
+      hard_constraints: {
+        size: Boolean(activeHardConstraints.size),
+        styles: Boolean(activeHardConstraints.styles?.length),
+        shape: Boolean(activeHardConstraints.shape),
+      },
+      color_prefilter_active: false,
+      color_prefilter: "inactive",
+      color_prefilter_state: "inactive",
+      color_prefilter_tokens: [],
+      discovery_mode: discoveryMode,
+      confidence: input.constraintConfidence ?? "low",
+    };
 
     const inventoryCountStart = Date.now();
     const roughInventorySize = await countRoughInventorySize(input.tenantId);
@@ -630,6 +692,13 @@ export async function runRecommendationPipeline(
       discoveryMode,
       confidence: input.constraintConfidence ?? "low",
     });
+    policySqlFilters = {
+      ...policySqlFilters,
+      color_prefilter_active: colorSqlPrefilterTokens.length > 0,
+      color_prefilter: colorSqlPrefilterTokens.length > 0 ? "active" : "inactive",
+      color_prefilter_state: colorSqlPrefilterTokens.length > 0 ? "active" : "inactive",
+      color_prefilter_tokens: colorSqlPrefilterTokens,
+    };
 
     const sqlStart = Date.now();
     const inventory = await fetchInventoryCandidates({
@@ -672,10 +741,14 @@ export async function runRecommendationPipeline(
         prompt_context: input.promptContext ?? null,
         query_trace: queryTrace,
         dynamic_limit: dynamicLimit,
+        policy_sql_filters: policySqlFilters,
+        query_variant_reason: queryVariantReason,
+        row_counts: summarizeQueryRows(queryTrace),
         discovery_mode: discoveryMode,
         color_sql_prefilter_tokens: colorSqlPrefilterTokens,
         broadening_applied: broadeningApplied,
         broadening_stage: broadeningStage,
+        no_match: noMatchTrace,
         timing_ms: {
           ...timings,
           total_ms: Date.now() - startedAt,
@@ -714,6 +787,14 @@ export async function runRecommendationPipeline(
         candidates = [];
         failedSizeReasonablenessGuard = true;
       }
+    }
+    if (requestedConstraints.size) {
+      const reasonablenessGate = failedSizeReasonablenessGuard ? "failed" : "passed";
+      noMatchTrace = {
+        ...noMatchTrace,
+        reasonableness_gate: reasonablenessGate,
+        reasonableness_gate_result: reasonablenessGate,
+      };
     }
 
     if (
@@ -814,6 +895,11 @@ export async function runRecommendationPipeline(
           blockers,
           relaxedToleranceIn,
         });
+        noMatchTrace = {
+          ...noMatchTrace,
+          fallback_tier: "terminal",
+          terminal_reason_code: response.notes ?? "NO_MATCH_TERMINAL",
+        };
         if (
           broadeningStage ===
           "size_relaxation_ladder_plus_color_style_relaxation"
@@ -839,6 +925,10 @@ export async function runRecommendationPipeline(
             response.notes,
             STYLE_DROPPED_NOTE_CODE
           );
+        }
+        const sizeRelaxationCode = sizeRelaxationDisclosureCode(relaxedToleranceIn);
+        if (sizeRelaxationCode) {
+          response.notes = appendNotesCode(response.notes, sizeRelaxationCode);
         }
 
         const logStart = Date.now();
@@ -870,10 +960,14 @@ export async function runRecommendationPipeline(
           prompt_context: input.promptContext ?? null,
           query_trace: queryTrace,
           dynamic_limit: dynamicLimit,
+          policy_sql_filters: policySqlFilters,
+          query_variant_reason: queryVariantReason,
+          row_counts: summarizeQueryRows(queryTrace),
           discovery_mode: discoveryMode,
           color_sql_prefilter_tokens: colorSqlPrefilterTokens,
           broadening_applied: broadeningApplied,
           broadening_stage: broadeningStage,
+          no_match: noMatchTrace,
           candidate_counts: {
             sql_candidates: inventory.length,
             hard_filtered_candidates: 0,
@@ -914,6 +1008,11 @@ export async function runRecommendationPipeline(
         blockers,
         relaxedToleranceIn,
       });
+      noMatchTrace = {
+        ...noMatchTrace,
+        fallback_tier: "guided",
+        terminal_reason_code: null,
+      };
       if (
         broadeningStage ===
         "size_relaxation_ladder_plus_color_style_relaxation"
@@ -939,6 +1038,10 @@ export async function runRecommendationPipeline(
           response.notes,
           STYLE_DROPPED_NOTE_CODE
         );
+      }
+      const sizeRelaxationCode = sizeRelaxationDisclosureCode(relaxedToleranceIn);
+      if (sizeRelaxationCode) {
+        response.notes = appendNotesCode(response.notes, sizeRelaxationCode);
       }
 
       const logStart = Date.now();
@@ -970,10 +1073,14 @@ export async function runRecommendationPipeline(
         prompt_context: input.promptContext ?? null,
         query_trace: queryTrace,
         dynamic_limit: dynamicLimit,
+        policy_sql_filters: policySqlFilters,
+        query_variant_reason: queryVariantReason,
+        row_counts: summarizeQueryRows(queryTrace),
         discovery_mode: discoveryMode,
         color_sql_prefilter_tokens: colorSqlPrefilterTokens,
         broadening_applied: broadeningApplied,
         broadening_stage: broadeningStage,
+        no_match: noMatchTrace,
         candidate_counts: {
           sql_candidates: inventory.length,
           hard_filtered_candidates: 0,
@@ -1052,6 +1159,10 @@ export async function runRecommendationPipeline(
     } else if (styleFallbackStage === "style_dropped") {
       response.notes = appendNotesCode(response.notes, STYLE_DROPPED_NOTE_CODE);
     }
+    const sizeRelaxationCode = sizeRelaxationDisclosureCode(relaxedToleranceIn);
+    if (sizeRelaxationCode) {
+      response.notes = appendNotesCode(response.notes, sizeRelaxationCode);
+    }
 
     const logStart = Date.now();
     await logRecommendationQaEvent({
@@ -1082,10 +1193,14 @@ export async function runRecommendationPipeline(
       prompt_context: input.promptContext ?? null,
       query_trace: queryTrace,
       dynamic_limit: dynamicLimit,
+      policy_sql_filters: policySqlFilters,
+      query_variant_reason: queryVariantReason,
+      row_counts: summarizeQueryRows(queryTrace),
       discovery_mode: discoveryMode,
       color_sql_prefilter_tokens: colorSqlPrefilterTokens,
       broadening_applied: broadeningApplied,
       broadening_stage: broadeningStage,
+      no_match: noMatchTrace,
       candidate_counts: {
         sql_candidates: inventory.length,
         hard_filtered_candidates: candidates.length,
@@ -1130,10 +1245,14 @@ export async function runRecommendationPipeline(
       prompt_context: input.promptContext ?? null,
       query_trace: queryTrace,
       dynamic_limit: dynamicLimit,
+      policy_sql_filters: policySqlFilters,
+      query_variant_reason: queryVariantReason,
+      row_counts: summarizeQueryRows(queryTrace),
       discovery_mode: discoveryMode,
       color_sql_prefilter_tokens: colorSqlPrefilterTokens,
       broadening_applied: broadeningApplied,
       broadening_stage: broadeningStage,
+      no_match: noMatchTrace,
       timing_ms: {
         ...timings,
         total_ms: Date.now() - startedAt,
@@ -1580,6 +1699,23 @@ function buildQueryVariants(input: { hasSize: boolean }): Array<
   return ["base"];
 }
 
+function describeQueryVariantReason(input: {
+  variant: "base" | "size_direct" | "size_rotated";
+  sizeWindow: SizeWindow | null;
+}): string {
+  if (input.variant === "base") {
+    return "no_size_window_base_query";
+  }
+  if (input.variant === "size_rotated") {
+    return input.sizeWindow
+      ? "size_window_rotated_dimensions_query"
+      : "size_query_without_window_rotated";
+  }
+  return input.sizeWindow
+    ? "size_window_direct_dimensions_query"
+    : "size_query_without_window_direct";
+}
+
 async function runCandidateQuery(input: {
   supabase: SupabaseClient;
   tenantId: string;
@@ -1592,6 +1728,10 @@ async function runCandidateQuery(input: {
   const bounds = input.sizeWindow;
   const wantsSize = input.variant !== "base";
   const rotated = input.variant === "size_rotated";
+  const queryVariantReason = describeQueryVariantReason({
+    variant: input.variant,
+    sizeWindow: input.sizeWindow,
+  });
 
   const buildQuery = (selectColumns: string) => {
     let query = input.supabase
@@ -1653,12 +1793,18 @@ async function runCandidateQuery(input: {
   if (error || !Array.isArray(data)) {
     input.queryTrace.push({
       variant: input.variant,
+      query_variant_reason: queryVariantReason,
       filters: {
         tenant_id: input.tenantId,
         status: "available",
         enrichment_status: "ready",
         limit: input.limit,
         size_bounds: bounds ? { ...bounds, rotated } : null,
+        color_prefilter_active: input.colorSqlPrefilterTokens.length > 0,
+        color_prefilter:
+          input.colorSqlPrefilterTokens.length > 0 ? "active" : "inactive",
+        color_prefilter_state:
+          input.colorSqlPrefilterTokens.length > 0 ? "active" : "inactive",
         color_sql_prefilter_tokens:
           input.colorSqlPrefilterTokens.length > 0
             ? input.colorSqlPrefilterTokens
@@ -1672,12 +1818,18 @@ async function runCandidateQuery(input: {
 
   input.queryTrace.push({
     variant: input.variant,
+    query_variant_reason: queryVariantReason,
     filters: {
       tenant_id: input.tenantId,
       status: "available",
       enrichment_status: "ready",
       limit: input.limit,
       size_bounds: bounds ? { ...bounds, rotated } : null,
+      color_prefilter_active: input.colorSqlPrefilterTokens.length > 0,
+      color_prefilter:
+        input.colorSqlPrefilterTokens.length > 0 ? "active" : "inactive",
+      color_prefilter_state:
+        input.colorSqlPrefilterTokens.length > 0 ? "active" : "inactive",
       color_sql_prefilter_tokens:
         input.colorSqlPrefilterTokens.length > 0
           ? input.colorSqlPrefilterTokens

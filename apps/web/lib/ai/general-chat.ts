@@ -309,8 +309,45 @@ function normalizeFollowUpQuestion(
   return maybeQuestion;
 }
 
-function sanitizeResponse(response: GeneralChatModelResponse): GeneralChatModelResponse {
-  const assistantMessage = toPlainText(response.assistant_message);
+function shouldOfferCollectionExamples(message: string): boolean {
+  const text = normalizeText(message).toLowerCase();
+  if (!text) return false;
+
+  const domainTopic =
+    /\b(rug|rugs|kilim|oushak|heriz|serapi|persian|afghan|turkish|style|origin|construction|weave|wool|silk|care|clean|vacuum|pile|flatweave)\b/.test(
+      text
+    );
+  if (!domainTopic) return false;
+
+  return /\b(what|how|difference|compare|tell|care|clean|explain|is|are)\b/.test(text);
+}
+
+function withCollectionBridge(assistantMessage: string, latestUserMessage: string): string {
+  const assistant = toPlainText(assistantMessage);
+  if (!shouldOfferCollectionExamples(latestUserMessage)) {
+    return assistant;
+  }
+
+  const lower = assistant.toLowerCase();
+  const alreadyBridges =
+    lower.includes("show") &&
+    (lower.includes("collection") ||
+      lower.includes("examples") ||
+      lower.includes("inventory") ||
+      lower.includes("options"));
+  if (alreadyBridges) return assistant;
+
+  return `${assistant} If you'd like, I can show examples from our current collection.`;
+}
+
+function sanitizeResponse(
+  response: GeneralChatModelResponse,
+  latestUserMessage: string
+): GeneralChatModelResponse {
+  const assistantMessage = withCollectionBridge(
+    response.assistant_message,
+    latestUserMessage
+  );
   return {
     assistant_message: assistantMessage,
     notes: response.notes ? toPlainText(response.notes) : null,
@@ -322,10 +359,15 @@ function sanitizeResponse(response: GeneralChatModelResponse): GeneralChatModelR
   };
 }
 
-function fallbackResponse(reason: string): GeneralChatModelResponse {
+function fallbackResponse(
+  reason: string,
+  latestUserMessage: string
+): GeneralChatModelResponse {
   return {
-    assistant_message:
+    assistant_message: withCollectionBridge(
       "I can help with rug care, sizing, style guidance, and practical selection advice. Tell me what you want to focus on.",
+      latestUserMessage
+    ),
     notes: reason,
     follow_up_question: null,
     memory_hints: [],
@@ -354,7 +396,10 @@ export async function generateGeneralChatResponse(input: {
       input.trace.retry_succeeded = false;
       input.trace.text_postprocess_applied = false;
     }
-    return fallbackResponse("GENERAL_CHAT_AI_RUNTIME:fallback_disabled");
+    return fallbackResponse(
+      "GENERAL_CHAT_AI_RUNTIME:fallback_disabled",
+      input.contextPacket.latest_user_message
+    );
   }
 
   const prompts = getRecommendationPromptBundle();
@@ -456,7 +501,10 @@ export async function generateGeneralChatResponse(input: {
       input.trace.fallback_reason = "OpenAI request failed";
       input.trace.error = firstAttempt.error;
     }
-    return fallbackResponse("GENERAL_CHAT_AI_RUNTIME:fallback_request_failed");
+    return fallbackResponse(
+      "GENERAL_CHAT_AI_RUNTIME:fallback_request_failed",
+      input.contextPacket.latest_user_message
+    );
   }
 
   let parsed = parseGeneralChatResponse(firstAttempt.response_payload);
@@ -504,10 +552,13 @@ export async function generateGeneralChatResponse(input: {
       input.trace.fallback_reason = "OpenAI response parsing failed";
       input.trace.error = "OpenAI response parsing failed";
     }
-    return fallbackResponse("GENERAL_CHAT_AI_RUNTIME:fallback_parse_failed");
+    return fallbackResponse(
+      "GENERAL_CHAT_AI_RUNTIME:fallback_parse_failed",
+      input.contextPacket.latest_user_message
+    );
   }
 
-  const sanitized = sanitizeResponse(parsed);
+  const sanitized = sanitizeResponse(parsed, input.contextPacket.latest_user_message);
   if (input.trace) {
     input.trace.parsed_response = sanitized;
     input.trace.fallback_reason = null;

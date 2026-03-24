@@ -121,6 +121,40 @@ function normalizeParsedTurn(input: ParsedTurn): ParsedTurn {
   };
 }
 
+function applyConfidenceHeuristic(input: {
+  message: string;
+  parsed: ParsedTurn;
+}): ParsedTurn["confidence"] {
+  const parsed = input.parsed;
+  const inferred = extractConstraintsFromUserMessage(input.message);
+  const hasHardConstraint = Boolean(
+    parsed.constraints.size ||
+      (parsed.constraints.colors?.length ?? 0) > 0 ||
+      (parsed.constraints.styles?.length ?? 0) > 0 ||
+      parsed.constraints.shape ||
+      inferred.size ||
+      (inferred.colors?.length ?? 0) > 0 ||
+      (inferred.styles?.length ?? 0) > 0 ||
+      inferred.shape
+  );
+  if (!hasHardConstraint) {
+    return "low";
+  }
+
+  const explicitRequestLanguage =
+    /\b(show|find|need|want|looking for|must|exactly|around|closest|larger|smaller)\b/i.test(
+      input.message
+    );
+  if (explicitRequestLanguage) {
+    return "high";
+  }
+
+  if (parsed.confidence === "low") {
+    return "medium";
+  }
+  return parsed.confidence;
+}
+
 function normalizeRugReferenceInput(input: ParseTurnInput["context"]["recently_shown_rugs"]): Array<{
   id: string;
   label: string;
@@ -237,17 +271,25 @@ function fallbackParsedTurn(input: ParseTurnInput): ParsedTurn {
     /\b(show me what you have|show me what you've got|surprise me|just browsing|just looking|anything interesting|open to anything|show options|show me options)\b/i.test(
       message
     );
+  const hasShoppingIntent =
+    /\b(show|find|recommend|need|want|looking for|search|browse|options|inventory)\b/i.test(
+      message
+    );
+  const isAdviceIntent =
+    /\b(what is|what's|tell me about|difference between|how do i|how to|care|clean)\b/i.test(
+      message
+    ) && !hasShoppingIntent;
 
   const mode: ParsedTurn["mode"] = isDiscoveryIntent
     ? "discovery"
     : hasFollowup
     ? "recommendation_followup"
+    : isAdviceIntent
+    ? "advice"
     : hasConstraintSignals ||
         /\b(show|find|recommend|need|want|looking for|search)\b/i.test(message)
       ? "recommendation"
-      : /\b(how|difference|compare|care|clean)\b/i.test(message)
-        ? "advice"
-        : "chat";
+      : "chat";
 
   const followupIntent: ParsedTurn["followup_intent"] =
     /\bclosest|nearest|best match\b/i.test(message)
@@ -403,7 +445,14 @@ export async function parseTurn(input: ParseTurnInput): Promise<ParsedTurn> {
 
   if (!response.ok) {
     if (trace) trace.fallback_reason = "OpenAI request failed";
-    const fallback = fallbackParsedTurn(input);
+    const fallbackBase = fallbackParsedTurn(input);
+    const fallback = {
+      ...fallbackBase,
+      confidence: applyConfidenceHeuristic({
+        message: input.message,
+        parsed: fallbackBase,
+      }),
+    } as ParsedTurn;
     if (trace) trace.parsed = fallback;
     return fallback;
   }
@@ -411,7 +460,14 @@ export async function parseTurn(input: ParseTurnInput): Promise<ParsedTurn> {
   const outputText = parseOutputText(response.response_payload);
   if (!outputText) {
     if (trace) trace.fallback_reason = "OpenAI response missing output text";
-    const fallback = fallbackParsedTurn(input);
+    const fallbackBase = fallbackParsedTurn(input);
+    const fallback = {
+      ...fallbackBase,
+      confidence: applyConfidenceHeuristic({
+        message: input.message,
+        parsed: fallbackBase,
+      }),
+    } as ParsedTurn;
     if (trace) trace.parsed = fallback;
     return fallback;
   }
@@ -425,6 +481,10 @@ export async function parseTurn(input: ParseTurnInput): Promise<ParsedTurn> {
     });
     const normalized = {
       ...baseParsed,
+      confidence: applyConfidenceHeuristic({
+        message: input.message,
+        parsed: baseParsed,
+      }),
       referenced_rug_id:
         referenceResolution.referenced_rug_id ?? baseParsed.referenced_rug_id,
       rug_reference_ambiguous:
@@ -439,7 +499,14 @@ export async function parseTurn(input: ParseTurnInput): Promise<ParsedTurn> {
         ? "OpenAI response incomplete"
         : "OpenAI response parsing failed";
     }
-    const fallback = fallbackParsedTurn(input);
+    const fallbackBase = fallbackParsedTurn(input);
+    const fallback = {
+      ...fallbackBase,
+      confidence: applyConfidenceHeuristic({
+        message: input.message,
+        parsed: fallbackBase,
+      }),
+    } as ParsedTurn;
     if (trace) trace.parsed = fallback;
     return fallback;
   }

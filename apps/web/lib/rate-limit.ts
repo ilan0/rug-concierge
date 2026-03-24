@@ -1,6 +1,7 @@
 import { Ratelimit } from "@upstash/ratelimit";
 import { Redis } from "@upstash/redis";
 import {
+  IS_PRODUCTION,
   UPSTASH_REDIS_REST_TOKEN,
   UPSTASH_REDIS_REST_URL,
 } from "@/lib/config";
@@ -27,6 +28,13 @@ export async function checkRateLimit(
       resetAtMs: result.reset,
     };
   } catch {
+    if (!IS_PRODUCTION) {
+      console.warn(
+        "[rate-limit] Redis unavailable in non-production - allowing request",
+        { identifier }
+      );
+      return { allowed: true, remaining: Number.MAX_SAFE_INTEGER, resetAtMs: null };
+    }
     console.error("[rate-limit] Redis unavailable - failing closed");
     return { allowed: false, remaining: 0, resetAtMs: null };
   }

@@ -434,6 +434,30 @@ function applyTonePolish(response: RecommendationResponse): RecommendationRespon
   };
 }
 
+function enforceDiscoveryQuestion(
+  response: RecommendationResponse,
+  discoveryMode: boolean
+): RecommendationResponse {
+  if (!discoveryMode || response.mode !== "recommendations") {
+    return response;
+  }
+
+  const assistant = toPlainText(response.assistant_message);
+  if (assistant.includes("?")) {
+    return {
+      ...response,
+      assistant_message: assistant,
+    };
+  }
+
+  const discoveryQuestion =
+    "What kind of space are you decorating so I can narrow these down for you?";
+  return {
+    ...response,
+    assistant_message: `${assistant} ${discoveryQuestion}`.trim(),
+  };
+}
+
 function getSizeDistanceIn(rug: InventoryRug, constraints: HardConstraints): number | null {
   if (
     !constraints.size ||
@@ -860,7 +884,10 @@ function sanitizeResponse(
   response: RecommendationResponse,
   inventory: InventoryRug[],
   constraints: HardConstraints,
-  userMessage: string
+  userMessage: string,
+  input?: {
+    discoveryMode?: boolean;
+  }
 ): RecommendationResponse {
   // Only keep rugs that definitely came from backend candidates.
   // This blocks hallucinated IDs from passing through.
@@ -906,15 +933,19 @@ function sanitizeResponse(
   const cappedQuestions = response.questions.slice(0, 2);
 
   if (response.mode === "no_match" && inventory.length > 0) {
-    return applyTonePolish({
+    return enforceDiscoveryQuestion(
+      applyTonePolish({
       ...fallbackRecommendations(inventory, constraints, userMessage),
       notes: "Adjusted invalid no_match from model output.",
-    });
+      }),
+      Boolean(input?.discoveryMode)
+    );
   }
 
   if (response.mode === "recommendations" && recommendations.length === 0) {
-    return applyTonePolish(
-      fallbackRecommendations(inventory, constraints, userMessage)
+    return enforceDiscoveryQuestion(
+      applyTonePolish(fallbackRecommendations(inventory, constraints, userMessage)),
+      Boolean(input?.discoveryMode)
     );
   }
 
@@ -922,44 +953,60 @@ function sanitizeResponse(
   if (response.mode === "clarifying_question") {
     const normalizedQuestions = cappedQuestions.filter((q) => q.trim().length > 0);
     if (normalizedQuestions.length === 0) {
-      return applyTonePolish(
-        fallbackRecommendations(inventory, constraints, userMessage)
+      return enforceDiscoveryQuestion(
+        applyTonePolish(fallbackRecommendations(inventory, constraints, userMessage)),
+        Boolean(input?.discoveryMode)
       );
     }
-    return applyTonePolish({
+    return enforceDiscoveryQuestion(
+      applyTonePolish({
       ...response,
       questions: normalizedQuestions.slice(0, 2),
       recommendations: [],
-    });
+      }),
+      Boolean(input?.discoveryMode)
+    );
   }
 
   if (response.mode === "no_match") {
-    return applyTonePolish({
+    return enforceDiscoveryQuestion(
+      applyTonePolish({
       ...response,
       questions: cappedQuestions.slice(0, 1),
       recommendations: [],
-    });
+      }),
+      Boolean(input?.discoveryMode)
+    );
   }
 
   if (response.mode === "disambiguation") {
     if (recommendations.length === 0) {
-      return applyTonePolish({
+      return enforceDiscoveryQuestion(
+        applyTonePolish({
         ...fallbackRecommendations(inventory, constraints, userMessage),
         notes: "Adjusted invalid disambiguation from model output.",
-      });
+        }),
+        Boolean(input?.discoveryMode)
+      );
     }
-    return applyTonePolish({
+    return enforceDiscoveryQuestion(
+      applyTonePolish({
       ...response,
       questions: [],
       recommendations: recommendations.slice(0, 3),
-    });
+      }),
+      Boolean(input?.discoveryMode)
+    );
   }
 
-  return applyTonePolish({
-    ...response,
-    questions: [],
-    recommendations,
-  });
+  return enforceDiscoveryQuestion(
+    applyTonePolish({
+      ...response,
+      questions: [],
+      recommendations,
+    }),
+    Boolean(input?.discoveryMode)
+  );
 }
 
 export async function rankAndExplain(
@@ -1124,10 +1171,13 @@ export async function rankAndExplain(
       trace.error = firstAttempt.error;
     }
     // Network/API failure -> deterministic fallback, not a hard API error.
-    return applyTonePolish({
-      ...fallbackRecommendations(inventory, constraints, userMessage),
-      notes: "OpenAI request failed. Returned local fallback.",
-    });
+    return enforceDiscoveryQuestion(
+      applyTonePolish({
+        ...fallbackRecommendations(inventory, constraints, userMessage),
+        notes: "OpenAI request failed. Returned local fallback.",
+      }),
+      Boolean(promptContext?.discovery_mode)
+    );
   }
 
   let parsed = parseRecommendationResponse(firstAttempt.response_payload);
@@ -1176,10 +1226,13 @@ export async function rankAndExplain(
       trace.error = "OpenAI response parsing failed";
     }
     // Parsing/shape failure -> deterministic fallback.
-    return applyTonePolish({
-      ...fallbackRecommendations(inventory, constraints, userMessage),
-      notes: "OpenAI response parsing failed. Returned local fallback.",
-    });
+    return enforceDiscoveryQuestion(
+      applyTonePolish({
+        ...fallbackRecommendations(inventory, constraints, userMessage),
+        notes: "OpenAI response parsing failed. Returned local fallback.",
+      }),
+      Boolean(promptContext?.discovery_mode)
+    );
   }
 
   // Final safety pass before returning to API route.
@@ -1187,7 +1240,10 @@ export async function rankAndExplain(
     parsed,
     inventory,
     constraints,
-  userMessage
+    userMessage,
+    {
+      discoveryMode: Boolean(promptContext?.discovery_mode),
+    }
   );
   if (trace) {
     trace.parsed_response = sanitized;

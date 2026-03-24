@@ -247,6 +247,69 @@ export async function POST(req: Request) {
         no_match_attempts: startingNoMatchAttempts,
       },
     };
+    const runtimeBeforeHandler = sessionForHandler.recommendation_state.runtime ?? {};
+    const immediateReactionType = detectReactionType(userMessage);
+    const immediateReferencedRugId = parsedTurn.referenced_rug_id ?? null;
+    let preHandlerLikedRugIds = normalizeList(runtimeBeforeHandler.liked_rug_ids ?? []).slice(
+      0,
+      12
+    );
+    let preHandlerDismissedRugIds = normalizeList(
+      runtimeBeforeHandler.dismissed_rug_ids ?? []
+    ).slice(0, 12);
+    const preHandlerLikedAttributes = {
+      colors: normalizeList(runtimeBeforeHandler.liked_attributes?.colors ?? []).slice(0, 8),
+      styles: normalizeList(runtimeBeforeHandler.liked_attributes?.styles ?? []).slice(0, 8),
+      origins: normalizeList(runtimeBeforeHandler.liked_attributes?.origins ?? []).slice(0, 8),
+    };
+    if (immediateReactionType && immediateReferencedRugId) {
+      if (immediateReactionType === "like") {
+        preHandlerLikedRugIds = normalizeList([
+          ...preHandlerLikedRugIds,
+          immediateReferencedRugId,
+        ]).slice(0, 12);
+        preHandlerDismissedRugIds = preHandlerDismissedRugIds.filter(
+          (id) => id !== immediateReferencedRugId
+        );
+        const referencedRug = (runtimeBeforeHandler.recently_shown_rugs ?? []).find(
+          (rug) => rug.id === immediateReferencedRugId
+        );
+        if (referencedRug) {
+          preHandlerLikedAttributes.colors = normalizeList([
+            ...preHandlerLikedAttributes.colors,
+            ...(referencedRug.colors ?? []),
+          ]).slice(0, 8);
+          preHandlerLikedAttributes.styles = normalizeList([
+            ...preHandlerLikedAttributes.styles,
+            referencedRug.style ?? "",
+          ]).slice(0, 8);
+          preHandlerLikedAttributes.origins = normalizeList([
+            ...preHandlerLikedAttributes.origins,
+            referencedRug.origin ?? "",
+          ]).slice(0, 8);
+        }
+      } else if (immediateReactionType === "dismiss") {
+        preHandlerDismissedRugIds = normalizeList([
+          ...preHandlerDismissedRugIds,
+          immediateReferencedRugId,
+        ]).slice(0, 12);
+        preHandlerLikedRugIds = preHandlerLikedRugIds.filter(
+          (id) => id !== immediateReferencedRugId
+        );
+      }
+    }
+    const sessionForHandlerWithReaction: SessionData = {
+      ...sessionForHandler,
+      recommendation_state: {
+        ...sessionForHandler.recommendation_state,
+        runtime: {
+          ...runtimeBeforeHandler,
+          liked_rug_ids: preHandlerLikedRugIds,
+          dismissed_rug_ids: preHandlerDismissedRugIds,
+          liked_attributes: preHandlerLikedAttributes,
+        },
+      },
+    };
 
     if (effectiveMode === "recommendation") {
       const recommendationCapabilityError = requireRoleCapabilityOrError(
@@ -264,9 +327,9 @@ export async function POST(req: Request) {
 
     const turnMessage = userMessage;
     const contextSessionForAi = memoryEnabled
-      ? nextSession
+      ? sessionForHandlerWithReaction
       : {
-          ...nextSession,
+          ...sessionForHandlerWithReaction,
           conversation_memory: buildInitialConversationMemory(),
           chat_history: [],
         };
@@ -286,7 +349,7 @@ export async function POST(req: Request) {
     const handlerInput = {
       message: turnMessage,
       role,
-      session: sessionForHandler,
+      session: sessionForHandlerWithReaction,
       ai_context_packet: aiContextPacket ?? undefined,
       tenant_id: tenantId,
       mode: effectiveMode,
@@ -341,52 +404,44 @@ export async function POST(req: Request) {
         })
       : nextSession.conversation_memory;
 
-    const previousRuntime = nextSession.recommendation_state.runtime ?? {};
+    const previousRuntime =
+      sessionForHandlerWithReaction.recommendation_state.runtime ?? {};
+    const likedRugIdsBefore = normalizeList(previousRuntime.liked_rug_ids ?? []).slice(0, 12);
+    const dismissedRugIdsBefore = normalizeList(previousRuntime.dismissed_rug_ids ?? []).slice(
+      0,
+      12
+    );
     const runtimeUpdate =
       "runtime_update" in handlerResult ? handlerResult.runtime_update : null;
     const nextRecentlyShownRugs = Array.isArray(runtimeUpdate?.recently_shown_rugs)
       ? runtimeUpdate.recently_shown_rugs
       : previousRuntime.recently_shown_rugs ?? [];
-    let nextLikedRugIds = Array.isArray(runtimeUpdate?.liked_rug_ids)
+    const nextLikedRugIds = Array.isArray(runtimeUpdate?.liked_rug_ids)
       ? runtimeUpdate.liked_rug_ids
       : previousRuntime.liked_rug_ids ?? [];
-    let nextDismissedRugIds = Array.isArray(runtimeUpdate?.dismissed_rug_ids)
+    const nextDismissedRugIds = Array.isArray(runtimeUpdate?.dismissed_rug_ids)
       ? runtimeUpdate.dismissed_rug_ids
       : previousRuntime.dismissed_rug_ids ?? [];
-    const nextLikedAttributes =
+    const nextLikedAttributesSource =
       runtimeUpdate?.liked_attributes ??
       previousRuntime.liked_attributes ?? {
         colors: [],
         styles: [],
         origins: [],
       };
+    const nextLikedAttributes = {
+      colors: [...(nextLikedAttributesSource.colors ?? [])],
+      styles: [...(nextLikedAttributesSource.styles ?? [])],
+      origins: [...(nextLikedAttributesSource.origins ?? [])],
+    };
+    const likedAttributesBefore = {
+      colors: normalizeList(nextLikedAttributes.colors).slice(0, 8),
+      styles: normalizeList(nextLikedAttributes.styles).slice(0, 8),
+      origins: normalizeList(nextLikedAttributes.origins).slice(0, 8),
+    };
 
-    const reactionType = detectReactionType(userMessage);
-    const referencedRugId = parsedTurn.referenced_rug_id ?? null;
-    if (referencedRugId && reactionType) {
-      if (reactionType === "like") {
-        nextLikedRugIds = normalizeList([...nextLikedRugIds, referencedRugId]);
-        nextDismissedRugIds = nextDismissedRugIds.filter((id) => id !== referencedRugId);
-        const referencedRug = nextRecentlyShownRugs.find((rug) => rug.id === referencedRugId);
-        if (referencedRug) {
-          nextLikedAttributes.colors = normalizeList([
-            ...(nextLikedAttributes.colors ?? []),
-            ...(referencedRug.colors ?? []),
-          ]).slice(0, 8);
-          nextLikedAttributes.styles = normalizeList([
-            ...(nextLikedAttributes.styles ?? []),
-            referencedRug.style ?? "",
-          ]).slice(0, 8);
-          nextLikedAttributes.origins = normalizeList([
-            ...(nextLikedAttributes.origins ?? []),
-            referencedRug.origin ?? "",
-          ]).slice(0, 8);
-        }
-      } else if (reactionType === "dismiss") {
-        nextDismissedRugIds = normalizeList([...nextDismissedRugIds, referencedRugId]);
-        nextLikedRugIds = nextLikedRugIds.filter((id) => id !== referencedRugId);
-      }
-    }
+    const reactionType = immediateReactionType;
+    const referencedRugId = immediateReferencedRugId;
 
     const updatedSession: SessionData = {
       ...nextSession,
@@ -469,6 +524,18 @@ export async function POST(req: Request) {
 
     const routeTraceId = crypto.randomUUID();
     if (traceMeta) {
+      const parseStatus = parserTrace.fallback_reason
+        ? "fallback"
+        : parserTrace.error && parserTrace.error.trim().length > 0
+          ? "error"
+          : "success";
+      const constraintModes = {
+        size: compiledPolicy.strictness.size,
+        colors: compiledPolicy.strictness.colors,
+        styles: compiledPolicy.strictness.styles,
+        shape: compiledPolicy.strictness.shape,
+        avoid: compiledPolicy.avoid,
+      };
       await writeE2eTraceArtifact({
         meta: traceMeta,
         channel: "chat-route",
@@ -488,22 +555,63 @@ export async function POST(req: Request) {
             rule_id: routeDecision.rule_id,
             confidence: routeDecision.confidence,
             needs_clarification: routeDecision.needs_clarification,
+            parser: {
+              model: parserTrace.model,
+              latency_ms: parserTrace.latency_ms,
+              status: parseStatus,
+              parse_status: parseStatus,
+              fallback: parserTrace.fallback_reason,
+              fallback_reason: parserTrace.fallback_reason,
+              normalized_payload: parserTrace.parsed,
+              normalized_parse_payload: parserTrace.parsed,
+              response_status: parserTrace.response_status,
+              incomplete_detected: parserTrace.incomplete_detected,
+              error: parserTrace.error,
+            },
+            policy: {
+              compiled_policy: compiledPolicy,
+              policy_source: compiledPolicy.policy_source,
+              must_prefer_avoid: compiledPolicy.must_prefer_avoid,
+              "must-prefer-avoid": compiledPolicy.must_prefer_avoid,
+              constraint_modes: constraintModes,
+            },
             parser_trace: {
               called: parserTrace.called,
               model: parserTrace.model,
+              status: parseStatus,
               response_status: parserTrace.response_status,
+              fallback: parserTrace.fallback_reason,
               fallback_reason: parserTrace.fallback_reason,
               incomplete_detected: parserTrace.incomplete_detected,
               latency_ms: parserTrace.latency_ms,
+              normalized_payload: parserTrace.parsed,
               parsed: parserTrace.parsed,
               error: parserTrace.error,
             },
             compiled_policy: compiledPolicy,
+            policy_source: compiledPolicy.policy_source,
+            must_prefer_avoid: compiledPolicy.must_prefer_avoid,
+            "must-prefer-avoid": compiledPolicy.must_prefer_avoid,
             handler:
               effectiveMode === "recommendation"
                 ? "handleRecommendationTurn"
                 : "handleGeneralChatTurn",
             prompt_layer_preview: promptLayerPreview,
+          },
+          reaction: {
+            detected_reaction: reactionType,
+            referenced_rug_id: referencedRugId,
+            rug_reference_ambiguous: parsedTurn.rug_reference_ambiguous ?? false,
+            liked_attributes_before: likedAttributesBefore,
+            liked_attributes_after: {
+              colors: normalizeList(nextLikedAttributes.colors ?? []).slice(0, 8),
+              styles: normalizeList(nextLikedAttributes.styles ?? []).slice(0, 8),
+              origins: normalizeList(nextLikedAttributes.origins ?? []).slice(0, 8),
+            },
+            liked_rug_ids_before: likedRugIdsBefore,
+            liked_rug_ids_after: nextLikedRugIds,
+            dismissed_rug_ids_before: dismissedRugIdsBefore,
+            dismissed_rug_ids_after: nextDismissedRugIds,
           },
           state_snapshot: {
             recommendation_state: nextSession.recommendation_state,

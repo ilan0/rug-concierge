@@ -106,6 +106,17 @@ const ROUTE_RULES: RouteRule[] = [
 export function routeTurnMode(input: RouteTurnModeInput): RouteDecision {
   if (input.parsed_turn) {
     const parsed = input.parsed_turn;
+    const hasResolvableRugReference =
+      Boolean(parsed.referenced_rug_id) || Boolean(parsed.rug_reference_ambiguous);
+    if (hasResolvableRugReference && Boolean(input.has_recent_recommendations)) {
+      return {
+        mode: "recommendation",
+        rule_id: "RECOMMENDATION_FOLLOWUP",
+        confidence: parsed.confidence,
+        needs_clarification: false,
+      };
+    }
+
     if (parsed.mode === "recommendation_followup") {
       return {
         mode: "recommendation",
