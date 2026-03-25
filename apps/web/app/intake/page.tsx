@@ -6,7 +6,7 @@ import { redirect } from "next/navigation";
 
 export default async function IntakePage() {
   const tenantId = await getServerUiTenantId();
-  const unlocked = await isStaffUnlocked();
+  const unlocked = tenantId ? await isStaffUnlocked(tenantId) : false;
   if (!tenantId) {
     return (
       <AccessGuard
@@ -22,7 +22,7 @@ export default async function IntakePage() {
 
   return (
     <>
-      <IntakeScreen tenantId={tenantId} />
+      <IntakeScreen />
     </>
   );
 }

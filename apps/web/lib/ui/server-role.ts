@@ -1,5 +1,6 @@
-import { resolveAuthoritativeTenantForServer } from "@/lib/auth/tenant";
+import { resolveTenantFromServerHeaders } from "@/lib/tenant/resolve-tenant";
 
 export async function getServerUiTenantId(): Promise<string | null> {
-  return resolveAuthoritativeTenantForServer({});
+  const resolved = await resolveTenantFromServerHeaders();
+  return resolved.ok ? resolved.tenantId : null;
 }

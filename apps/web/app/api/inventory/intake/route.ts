@@ -2,10 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { rugImagePathToPublicUrl } from "@/lib/storage/rug-images";
 import { badRequest, internalError } from "@/lib/errors/http-errors";
-import {
-  normalizeTenantId,
-  resolveAuthoritativeTenantForServer,
-} from "@/lib/auth/tenant";
+import { resolveTenantFromRequest } from "@/lib/tenant/resolve-tenant";
 import {
   parseDimensionField,
   validateDimensionTuple,
@@ -73,7 +70,6 @@ function parseMultipartForm(formData: FormData):
   | {
       ok: true;
       value: {
-        tenantId: string | null;
         stockId: string | null;
         widthFt: number;
         widthIn: number;
@@ -109,7 +105,6 @@ function parseMultipartForm(formData: FormData):
   return {
     ok: true,
     value: {
-      tenantId: normalizeTenantId(formData.get("tenant_id")),
       stockId: stockIdResult.value,
       widthFt: dimensions.value.widthFt,
       widthIn: dimensions.value.widthIn,
@@ -195,7 +190,19 @@ function duplicateImageResponse(input: { id: string; label: string | null }) {
 }
 
 export async function POST(req: NextRequest) {
-  const staffUnlockState = await getStaffUnlockStateFromRequest(req);
+  const tenantResolution = await resolveTenantFromRequest(req);
+  if (!tenantResolution.ok) {
+    return NextResponse.json(
+      { error: tenantResolution.message },
+      { status: tenantResolution.status }
+    );
+  }
+  const tenantId = tenantResolution.tenantId;
+
+  const staffUnlockState = await getStaffUnlockStateFromRequest(
+    req,
+    tenantId
+  );
   if (!staffUnlockState.ok) {
     return NextResponse.json({ error: staffUnlockState.message }, { status: 503 });
   }
@@ -226,13 +233,6 @@ export async function POST(req: NextRequest) {
   const parsed = parseMultipartForm(formData);
   if (!parsed.ok) {
     return parsed.response;
-  }
-
-  const tenantId = resolveAuthoritativeTenantForServer({
-    requestTenantId: parsed.value.tenantId,
-  });
-  if (!tenantId) {
-    return badRequest("tenant_id is required.");
   }
 
   const imageBuffer = Buffer.from(await parsed.value.image.arrayBuffer());

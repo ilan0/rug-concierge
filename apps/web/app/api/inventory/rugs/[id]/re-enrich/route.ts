@@ -3,7 +3,7 @@ import { z } from "zod";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { internalError } from "@/lib/errors/http-errors";
 import { getStaffUnlockStateFromRequest } from "@/lib/auth/staff";
-import { resolveAuthoritativeTenantForServer } from "@/lib/auth/tenant";
+import { resolveTenantFromRequest } from "@/lib/tenant/resolve-tenant";
 import {
   checkLocalRateLimit,
   checkRateLimit,
@@ -47,7 +47,16 @@ export async function POST(
   req: NextRequest,
   context: { params: Promise<{ id: string }> }
 ) {
-  const staffUnlockState = await getStaffUnlockStateFromRequest(req);
+  const tenantResolution = await resolveTenantFromRequest(req);
+  if (!tenantResolution.ok) {
+    return NextResponse.json(
+      { error: tenantResolution.message },
+      { status: tenantResolution.status }
+    );
+  }
+  const tenantId = tenantResolution.tenantId;
+
+  const staffUnlockState = await getStaffUnlockStateFromRequest(req, tenantId);
   if (!staffUnlockState.ok) {
     return staffAuthMisconfiguredResponse(staffUnlockState.message);
   }
@@ -79,11 +88,6 @@ export async function POST(
     "rug id is required."
   );
   if (!params.ok) return params.response;
-
-  const tenantId = resolveAuthoritativeTenantForServer({});
-  if (!tenantId) {
-    return internalError("Tenant is not configured.");
-  }
 
   const existing = await fetchRugRecordById({
     supabase: supabaseAdmin,

@@ -1,6 +1,6 @@
 import { DEFAULT_STORE_NAME } from "@/lib/config";
-import { getConfiguredTenantId } from "@/lib/auth/tenant";
 import { getTenantSettingsById } from "@/lib/tenant-settings";
+import { resolveTenantFromServerHeaders } from "@/lib/tenant/resolve-tenant";
 
 type BrandingSource = "tenant" | "default";
 
@@ -70,8 +70,16 @@ async function fetchTenantBranding(tenantId: string): Promise<TenantBrandingValu
   return readTenantBrandingFromSettings(settingsResult.settings);
 }
 
-export async function getResolvedBranding(): Promise<ResolvedBranding> {
-  const tenantId = getConfiguredTenantId();
+export async function getResolvedBranding(input?: {
+  tenantId?: string | null;
+}): Promise<ResolvedBranding> {
+  const explicitTenantId =
+    typeof input?.tenantId === "string" && input.tenantId.trim().length > 0
+      ? input.tenantId.trim()
+      : null;
+  const resolvedTenant =
+    explicitTenantId !== null ? null : await resolveTenantFromServerHeaders();
+  const tenantId = explicitTenantId ?? (resolvedTenant?.ok ? resolvedTenant.tenantId : null);
 
   let tenantBranding: TenantBrandingValue = {
     storeName: null,

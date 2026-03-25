@@ -1,10 +1,10 @@
-import { getConfiguredTenantId } from "@/lib/auth/tenant";
 import { supabaseAdmin } from "@/lib/supabase/admin";
+import { resolveTenantFromServerHeaders } from "@/lib/tenant/resolve-tenant";
 
 const TENANT_SECRETS_CACHE_TTL_MS = 60_000;
 
 type TenantSecretsLookupFailureCode =
-  | "tenant_not_configured"
+  | "tenant_not_resolved"
   | "tenant_not_found"
   | "query_failed";
 
@@ -158,16 +158,34 @@ export async function getConfiguredTenantRuntimeSecrets(): Promise<
   | { ok: true; tenantId: string; secrets: TenantRuntimeSecrets }
   | TenantSecretsLookupFailure
 > {
-  const tenantId = getConfiguredTenantId();
-  if (!tenantId) {
+  const resolved = await resolveTenantFromServerHeaders();
+  if (!resolved.ok) {
     return {
       ok: false,
-      code: "tenant_not_configured",
+      code: "tenant_not_resolved",
       tenantId: null,
-      message: "TENANT_ID is not configured.",
+      message: resolved.message,
     };
   }
 
+  const secretsResult = await getTenantSecretsById(resolved.tenantId);
+  if (!secretsResult.ok) {
+    return secretsResult;
+  }
+
+  return {
+    ok: true,
+    tenantId: secretsResult.tenantId,
+    secrets: readTenantRuntimeSecrets(secretsResult.secrets),
+  };
+}
+
+export async function getTenantRuntimeSecretsById(
+  tenantId: string
+): Promise<
+  | { ok: true; tenantId: string; secrets: TenantRuntimeSecrets }
+  | TenantSecretsLookupFailure
+> {
   const secretsResult = await getTenantSecretsById(tenantId);
   if (!secretsResult.ok) {
     return secretsResult;

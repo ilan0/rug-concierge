@@ -1,8 +1,19 @@
 import { NextResponse } from "next/server";
 import { getResolvedBranding } from "@/lib/branding/tenant-branding";
+import { resolveTenantFromRequest } from "@/lib/tenant/resolve-tenant";
 
-export async function GET() {
-  const branding = await getResolvedBranding();
+export async function GET(req: Request) {
+  const tenantResolution = await resolveTenantFromRequest(req);
+  if (!tenantResolution.ok) {
+    return NextResponse.json(
+      { error: tenantResolution.message },
+      { status: tenantResolution.status }
+    );
+  }
+
+  const branding = await getResolvedBranding({
+    tenantId: tenantResolution.tenantId,
+  });
 
   const manifest = {
     name: `${branding.storeName} Rug Concierge`,

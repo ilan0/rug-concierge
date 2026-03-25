@@ -161,7 +161,6 @@ export function useConciergeController(input: UseConciergeControllerInput) {
     session_id: sessionId ?? undefined,
     role: "retail_customer",
     message: userMessage,
-    tenant_id: tenantId,
   });
 
   const sendUserTurn = async (
@@ -264,7 +263,6 @@ export function useConciergeController(input: UseConciergeControllerInput) {
     try {
       const payload = await resetChatSession({
         session_id: sessionId,
-        tenant_id: tenantId,
       });
       setSessionId(payload.new_session_id);
       setTurns([]);

@@ -4,7 +4,8 @@ import {
   INVENTORY_ENRICHMENT_WORKER_RUN_BUDGET_MS,
   runInventoryEnrichmentWorker,
 } from "@/lib/inventory/enrichment-jobs";
-import { getConfiguredTenantRuntimeSecrets } from "@/lib/tenant-secrets";
+import { getTenantRuntimeSecretsById } from "@/lib/tenant-secrets";
+import { resolveTenantFromRequest } from "@/lib/tenant/resolve-tenant";
 
 function unauthorizedResponse() {
   return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -21,7 +22,15 @@ function isAuthorizedRequest(req: NextRequest, secret: string): boolean {
 }
 
 export async function POST(req: NextRequest) {
-  const secretsResult = await getConfiguredTenantRuntimeSecrets();
+  const tenantResolution = await resolveTenantFromRequest(req);
+  if (!tenantResolution.ok) {
+    return NextResponse.json(
+      { error: tenantResolution.message },
+      { status: tenantResolution.status }
+    );
+  }
+
+  const secretsResult = await getTenantRuntimeSecretsById(tenantResolution.tenantId);
   if (!secretsResult.ok) {
     return serverMisconfiguredResponse(secretsResult.message);
   }
@@ -40,6 +49,7 @@ export async function POST(req: NextRequest) {
   const workerId = `vercel-cron-${Date.now()}`;
   const summary = await runInventoryEnrichmentWorker({
     workerId,
+    tenantId,
     claimLimit: INVENTORY_ENRICHMENT_WORKER_CLAIM_LIMIT,
     runBudgetMs: INVENTORY_ENRICHMENT_WORKER_RUN_BUDGET_MS,
   });

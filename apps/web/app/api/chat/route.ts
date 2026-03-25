@@ -26,10 +26,8 @@ import {
 } from "@/lib/qa/e2e-trace";
 import { badRequest, forbidden, internalError } from "@/lib/errors/http-errors";
 import {
-  normalizeTenantId,
-  requireTenantId,
-  resolveAuthoritativeTenantForServer,
-} from "@/lib/auth/tenant";
+  resolveTenantFromRequest,
+} from "@/lib/tenant/resolve-tenant";
 import {
   requireRoleCapabilityOrError,
   resolveApiRoleOrError,
@@ -167,15 +165,24 @@ export async function POST(req: Request) {
       latency_ms: null,
     };
 
-    const requestedTenantId = normalizeTenantId(body.tenant_id);
-    const authoritativeTenantId = resolveAuthoritativeTenantForServer({
-      requestTenantId: requestedTenantId,
-    });
+    const tenantResolution = await resolveTenantFromRequest(req);
+    if (!tenantResolution.ok) {
+      return NextResponse.json(
+        {
+          error: tenantResolution.message,
+          code:
+            tenantResolution.status === 404
+              ? "TENANT_NOT_FOUND"
+              : "TENANT_RESOLUTION_FAILED",
+        },
+        { status: tenantResolution.status }
+      );
+    }
 
     const session = await getOrCreateSession(sessionId, role, {
-      tenantId: authoritativeTenantId,
+      tenantId: tenantResolution.tenantId,
     });
-    const tenantId = session.tenant_id ?? authoritativeTenantId ?? null;
+    const tenantId = session.tenant_id ?? tenantResolution.tenantId;
 
     const userTurn: SessionMessage = {
       role: "user",
@@ -314,11 +321,6 @@ export async function POST(req: Request) {
         "This role is not allowed to request recommendations."
       );
       if (recommendationCapabilityError) return recommendationCapabilityError;
-    }
-
-    if (effectiveMode === "recommendation") {
-      const tenantError = requireTenantId(tenantId, "inventory-backed flow");
-      if (tenantError) return badRequest(tenantError);
     }
 
     const turnMessage = userMessage;
@@ -542,8 +544,9 @@ export async function POST(req: Request) {
           request: {
             session_id: body.session_id ?? null,
             role,
-            requested_tenant_id: requestedTenantId,
             tenant_id: tenantId,
+            tenant_subdomain: tenantResolution.subdomain,
+            tenant_hostname: tenantResolution.hostname,
             message: userMessage,
             constraints: body.constraints ?? null,
           },
@@ -648,7 +651,7 @@ export async function POST(req: Request) {
     return response;
   } catch (error) {
     if (error instanceof SessionTenantMismatchError) {
-      return forbidden("tenant_id does not match the existing session tenant.");
+      return forbidden("Session tenant does not match the current store domain.");
     }
     return internalError(
       "Unable to process chat turn right now. Please try again.",

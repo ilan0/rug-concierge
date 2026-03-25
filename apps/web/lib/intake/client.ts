@@ -51,7 +51,6 @@ export async function createInventoryIntake(
   input: IntakeCreateRequest
 ): Promise<IntakeCreateResponse> {
   const formData = new FormData();
-  formData.set("tenant_id", input.tenant_id);
   if (typeof input.stock_id === "string" && input.stock_id.trim().length > 0) {
     formData.set("stock_id", input.stock_id.trim());
   }

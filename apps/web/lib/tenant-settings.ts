@@ -1,10 +1,10 @@
-import { getConfiguredTenantId } from "@/lib/auth/tenant";
 import { supabaseAdmin } from "@/lib/supabase/admin";
+import { resolveTenantFromServerHeaders } from "@/lib/tenant/resolve-tenant";
 
 const TENANT_SETTINGS_CACHE_TTL_MS = 60_000;
 
 type TenantSettingsLookupFailureCode =
-  | "tenant_not_configured"
+  | "tenant_not_resolved"
   | "tenant_not_found"
   | "query_failed";
 
@@ -148,15 +148,15 @@ export async function getTenantSettingsById(
 }
 
 export async function getConfiguredTenantSettings(): Promise<TenantSettingsLookupResult> {
-  const tenantId = getConfiguredTenantId();
-  if (!tenantId) {
+  const resolved = await resolveTenantFromServerHeaders();
+  if (!resolved.ok) {
     return {
       ok: false,
-      code: "tenant_not_configured",
+      code: "tenant_not_resolved",
       tenantId: null,
-      message: "TENANT_ID is not configured.",
+      message: resolved.message,
     };
   }
 
-  return getTenantSettingsById(tenantId);
+  return getTenantSettingsById(resolved.tenantId);
 }

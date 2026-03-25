@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { internalError } from "@/lib/errors/http-errors";
-import { resolveAuthoritativeTenantForServer } from "@/lib/auth/tenant";
+import { resolveTenantFromRequest } from "@/lib/tenant/resolve-tenant";
 import { fetchPrimaryRugImagesForRugs } from "@/lib/storage/rug-images";
 import {
   fetchRugRecordById,
@@ -14,7 +14,7 @@ import { parseRouteParamsWithSchema } from "@/lib/http/route-validation";
 const RUG_ID_PARAMS_SCHEMA = z.object({ id: z.string().uuid() }).strict();
 
 export async function GET(
-  _req: Request,
+  req: Request,
   context: { params: Promise<{ id: string }> }
 ) {
   const params = await parseRouteParamsWithSchema(
@@ -24,10 +24,14 @@ export async function GET(
   );
   if (!params.ok) return params.response;
 
-  const tenantId = resolveAuthoritativeTenantForServer({});
-  if (!tenantId) {
-    return internalError("Tenant is not configured.");
+  const tenantResolution = await resolveTenantFromRequest(req);
+  if (!tenantResolution.ok) {
+    return NextResponse.json(
+      { error: tenantResolution.message },
+      { status: tenantResolution.status }
+    );
   }
+  const tenantId = tenantResolution.tenantId;
 
   const row = await fetchRugRecordById({
     supabase: supabaseAdmin,

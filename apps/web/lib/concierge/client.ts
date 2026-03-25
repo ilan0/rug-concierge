@@ -116,7 +116,6 @@ export async function fetchChatDebugTrace(
 
 export async function resetChatSession(input: {
   session_id?: string | null;
-  tenant_id?: string | null;
 }): Promise<ResetChatSessionResult> {
   const response = await fetch("/api/session/reset", {
     method: "POST",
@@ -125,7 +124,6 @@ export async function resetChatSession(input: {
     },
     body: JSON.stringify({
       session_id: input.session_id ?? undefined,
-      tenant_id: input.tenant_id ?? undefined,
     }),
   });
 

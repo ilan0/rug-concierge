@@ -7,7 +7,7 @@ import { redirect } from "next/navigation";
 
 export default async function ConciergePage() {
   const tenantId = await getServerUiTenantId();
-  const unlocked = await isStaffUnlocked();
+  const unlocked = tenantId ? await isStaffUnlocked(tenantId) : false;
   if (!tenantId) {
     return (
       <AccessGuard
@@ -21,7 +21,7 @@ export default async function ConciergePage() {
     redirect("/inventory");
   }
 
-  const branding = await getResolvedBranding();
+  const branding = await getResolvedBranding({ tenantId });
 
   return (
     <>

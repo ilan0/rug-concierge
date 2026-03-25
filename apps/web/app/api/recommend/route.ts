@@ -9,12 +9,7 @@ import {
   writeE2eTraceArtifact,
 } from "@/lib/qa/e2e-trace";
 import { badRequest, internalError } from "@/lib/errors/http-errors";
-import {
-  hasTenantId,
-  normalizeTenantId,
-  requireTenantId,
-  resolveAuthoritativeTenantForServer,
-} from "@/lib/auth/tenant";
+import { resolveTenantFromRequest } from "@/lib/tenant/resolve-tenant";
 import { resolveApiRoleOrError } from "@/lib/http/guards";
 import { parseJsonBodyWithSchema } from "@/lib/http/route-validation";
 import {
@@ -53,7 +48,7 @@ function hasMeaningfulConstraints(constraints: HardConstraints): boolean {
 /**
  * POST /api/recommend
  * Recommendation-mode route only.
- * Input: optional `constraints`, optional `user_message`/`message`, and required `tenant_id`.
+ * Input: optional `constraints`, optional `user_message`/`message`.
  * Behavior: query Supabase with active hard constraints first, run backend hard checks, then ask AI to rank/explain.
  * Not for freeform chat; inventory truth stays in backend.
  */
@@ -103,6 +98,20 @@ export async function POST(req: Request) {
       incomplete_detected: false,
       latency_ms: null,
     };
+
+    const tenantResolution = await resolveTenantFromRequest(req);
+    if (!tenantResolution.ok) {
+      return NextResponse.json(
+        {
+          error: tenantResolution.message,
+          code:
+            tenantResolution.status === 404
+              ? "TENANT_NOT_FOUND"
+              : "TENANT_RESOLUTION_FAILED",
+        },
+        { status: tenantResolution.status }
+      );
+    }
 
     const parsedBody = await parseJsonBodyWithSchema(
       req,
@@ -200,7 +209,7 @@ export async function POST(req: Request) {
             flow_path: ["/api/recommend POST", "request_validation_failed"],
             request_id: requestId,
             request: {
-              tenant_id: body.tenant_id ?? null,
+              tenant_id: tenantResolution.tenantId,
               user_message: userMessage,
               constraints,
             },
@@ -240,7 +249,7 @@ export async function POST(req: Request) {
               flow_path: ["/api/recommend POST", "request_validation_failed"],
               request_id: requestId,
               request: {
-                tenant_id: body.tenant_id ?? null,
+                tenant_id: tenantResolution.tenantId,
                 user_message: userMessage,
                 constraints,
               },
@@ -272,7 +281,7 @@ export async function POST(req: Request) {
               flow_path: ["/api/recommend POST", "request_validation_failed"],
               request_id: requestId,
               request: {
-                tenant_id: body.tenant_id ?? null,
+                tenant_id: tenantResolution.tenantId,
                 user_message: userMessage,
                 constraints,
               },
@@ -293,43 +302,7 @@ export async function POST(req: Request) {
       }
     }
 
-    const tenantId = resolveAuthoritativeTenantForServer({
-      requestTenantId: normalizeTenantId(body.tenant_id),
-    });
-    const tenantError = requireTenantId(tenantId, "recommendation");
-    if (tenantError) {
-      if (traceMeta) {
-        await writeE2eTraceArtifact({
-          meta: traceMeta,
-          channel: "recommend-route",
-          trace_id: routeTraceId,
-          payload: {
-            flow_path: ["/api/recommend POST", "request_validation_failed"],
-            request_id: requestId,
-            request: {
-              tenant_id: body.tenant_id ?? null,
-              user_message: userMessage,
-              constraints,
-            },
-            response: {
-              status: 400,
-              body: {
-                error: tenantError,
-                code: "BAD_REQUEST",
-              },
-            },
-            timing_ms: {
-              total_ms: Date.now() - startedAt,
-            },
-          },
-        });
-      }
-      return badRequest(tenantError);
-    }
-
-    if (!hasTenantId(tenantId)) {
-      return badRequest("tenant_id is required for recommendation requests.");
-    }
+    const tenantId = tenantResolution.tenantId;
 
     const result = await runRecommendationPipeline({
       requestId,
@@ -371,6 +344,8 @@ export async function POST(req: Request) {
             request_id: requestId,
             request: {
               tenant_id: tenantId,
+              tenant_subdomain: tenantResolution.subdomain,
+              tenant_hostname: tenantResolution.hostname,
               user_message: userMessage,
               constraints,
             },
@@ -420,6 +395,8 @@ export async function POST(req: Request) {
           request_id: requestId,
           request: {
             tenant_id: tenantId,
+            tenant_subdomain: tenantResolution.subdomain,
+            tenant_hostname: tenantResolution.hostname,
             user_message: userMessage,
             constraints,
           },

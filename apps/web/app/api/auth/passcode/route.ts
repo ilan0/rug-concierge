@@ -6,12 +6,13 @@ import {
   buildStaffUnlockCookieValue,
 } from "@/lib/auth/staff";
 import { timingSafePasscodeMatch } from "@/lib/auth/device-auth";
-import { getConfiguredTenantRuntimeSecrets } from "@/lib/tenant-secrets";
+import { getTenantRuntimeSecretsById } from "@/lib/tenant-secrets";
 import {
   checkRateLimit,
   passcodeRateLimit,
 } from "@/lib/rate-limit";
 import { parseJsonBodyWithSchema } from "@/lib/http/route-validation";
+import { resolveTenantFromRequest } from "@/lib/tenant/resolve-tenant";
 
 const PASSCODE_BODY_SCHEMA = z
   .object({
@@ -24,6 +25,14 @@ function serviceUnavailable(message: string) {
 }
 
 export async function POST(req: NextRequest) {
+  const tenantResolution = await resolveTenantFromRequest(req);
+  if (!tenantResolution.ok) {
+    return NextResponse.json(
+      { error: tenantResolution.message },
+      { status: tenantResolution.status }
+    );
+  }
+
   const ip =
     req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
     req.headers.get("x-real-ip") ??
@@ -61,7 +70,7 @@ export async function POST(req: NextRequest) {
   if (!parsedBody.ok) return parsedBody.response;
   const { passcode } = parsedBody.value;
 
-  const secretsResult = await getConfiguredTenantRuntimeSecrets();
+  const secretsResult = await getTenantRuntimeSecretsById(tenantResolution.tenantId);
   if (!secretsResult.ok) {
     return serviceUnavailable(secretsResult.message);
   }

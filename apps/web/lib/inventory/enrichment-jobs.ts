@@ -406,6 +406,7 @@ export async function enqueueInventoryEnrichmentJob(
 
 export async function claimInventoryEnrichmentJobs(input: {
   workerId: string;
+  tenantId?: string;
   limit?: number;
   supabase?: SupabaseClient;
 }): Promise<InventoryEnrichmentJobRow[]> {
@@ -414,6 +415,55 @@ export async function claimInventoryEnrichmentJobs(input: {
     1,
     Math.min(INVENTORY_ENRICHMENT_WORKER_CLAIM_LIMIT, input.limit ?? INVENTORY_ENRICHMENT_WORKER_CLAIM_LIMIT)
   );
+
+  if (typeof input.tenantId === "string" && input.tenantId.trim().length > 0) {
+    const tenantId = input.tenantId.trim();
+    const now = nowIso();
+    const candidateResult = await supabase
+      .from("inventory_enrichment_jobs")
+      .select("*")
+      .eq("tenant_id", tenantId)
+      .in("state", ["queued", "retry_scheduled"])
+      .is("lock_owner", null)
+      .or(`next_attempt_at.is.null,next_attempt_at.lte.${now}`)
+      .order("created_at", { ascending: true })
+      .limit(limit);
+
+    if (candidateResult.error || !Array.isArray(candidateResult.data)) {
+      throw new Error(
+        candidateResult.error?.message ?? "Unable to claim tenant enrichment jobs."
+      );
+    }
+
+    const candidateIds = candidateResult.data
+      .map((row) => toStringOrNull((row as Record<string, unknown>).id))
+      .filter((id): id is string => Boolean(id));
+    if (candidateIds.length === 0) return [];
+
+    const lockPayload = {
+      state: "processing" as const,
+      lock_owner: input.workerId,
+      locked_at: nowIso(),
+      updated_at: nowIso(),
+    };
+    const lockedResult = await supabase
+      .from("inventory_enrichment_jobs")
+      .update(lockPayload)
+      .eq("tenant_id", tenantId)
+      .in("id", candidateIds)
+      .is("lock_owner", null)
+      .select("*");
+
+    if (lockedResult.error || !Array.isArray(lockedResult.data)) {
+      throw new Error(
+        lockedResult.error?.message ?? "Unable to lock tenant enrichment jobs."
+      );
+    }
+
+    return lockedResult.data
+      .map((row) => parseJobRow(row))
+      .filter((row): row is InventoryEnrichmentJobRow => row !== null);
+  }
 
   const result = await supabase.rpc("claim_inventory_enrichment_jobs", {
     claim_limit: limit,
@@ -431,6 +481,7 @@ export async function claimInventoryEnrichmentJobs(input: {
 
 export async function runInventoryEnrichmentWorker(input: {
   workerId: string;
+  tenantId?: string;
   claimLimit?: number;
   runBudgetMs?: number;
   supabase?: SupabaseClient;
@@ -449,6 +500,7 @@ export async function runInventoryEnrichmentWorker(input: {
 
   const claimed = await claimInventoryEnrichmentJobs({
     workerId: input.workerId,
+    tenantId: input.tenantId,
     limit: input.claimLimit,
     supabase,
   });

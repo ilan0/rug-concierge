@@ -5,7 +5,10 @@ import {
   timingSafeCookieValueMatch,
 } from "@/lib/auth/device-auth";
 import { IS_PRODUCTION } from "@/lib/config";
-import { getConfiguredTenantRuntimeSecrets } from "@/lib/tenant-secrets";
+import {
+  getConfiguredTenantRuntimeSecrets,
+  getTenantRuntimeSecretsById,
+} from "@/lib/tenant-secrets";
 
 export const STAFF_COOKIE = "staff_unlocked";
 
@@ -48,12 +51,41 @@ async function getExpectedStaffCookieValue(): Promise<
   };
 }
 
+async function getExpectedStaffCookieValueForTenant(tenantId: string): Promise<
+  { ok: true; value: string } | { ok: false; message: string }
+> {
+  const secretsResult = await getTenantRuntimeSecretsById(tenantId);
+  if (!secretsResult.ok) {
+    return { ok: false, message: secretsResult.message };
+  }
+
+  const cookieSecret = secretsResult.secrets.cookieSecret;
+  if (!cookieSecret) {
+    return {
+      ok: false,
+      message: `Cookie secret is not configured for tenant "${secretsResult.tenantId}".`,
+    };
+  }
+
+  return {
+    ok: true,
+    value: buildStaffUnlockCookieValue({
+      tenantId,
+      cookieSecret,
+    }),
+  };
+}
+
 async function checkStaffUnlockCookieValue(
-  value: string | undefined
+  value: string | undefined,
+  tenantId?: string | null
 ): Promise<StaffUnlockCheckResult> {
   if (!value) return { ok: true, unlocked: false };
 
-  const expected = await getExpectedStaffCookieValue();
+  const expected =
+    typeof tenantId === "string" && tenantId.trim().length > 0
+      ? await getExpectedStaffCookieValueForTenant(tenantId)
+      : await getExpectedStaffCookieValue();
   if (!expected.ok) {
     return expected;
   }
@@ -68,24 +100,29 @@ async function checkStaffUnlockCookieValue(
 }
 
 /** Server component usage — reads cookie store */
-export async function isStaffUnlocked(): Promise<boolean> {
+export async function isStaffUnlocked(tenantId?: string | null): Promise<boolean> {
   const jar = await cookies();
-  const result = await checkStaffUnlockCookieValue(jar.get(STAFF_COOKIE)?.value);
+  const result = await checkStaffUnlockCookieValue(
+    jar.get(STAFF_COOKIE)?.value,
+    tenantId
+  );
   return result.ok ? result.unlocked : false;
 }
 
 /** Middleware/route handler usage — reads from request */
 export async function getStaffUnlockStateFromRequest(
-  req: NextRequest
+  req: NextRequest,
+  tenantId?: string | null
 ): Promise<StaffUnlockCheckResult> {
-  return checkStaffUnlockCookieValue(req.cookies.get(STAFF_COOKIE)?.value);
+  return checkStaffUnlockCookieValue(req.cookies.get(STAFF_COOKIE)?.value, tenantId);
 }
 
 /** Middleware/route handler usage — reads from request */
 export async function isStaffUnlockedFromRequest(
-  req: NextRequest
+  req: NextRequest,
+  tenantId?: string | null
 ): Promise<boolean> {
-  const result = await getStaffUnlockStateFromRequest(req);
+  const result = await getStaffUnlockStateFromRequest(req, tenantId);
   return result.ok ? result.unlocked : false;
 }
 

@@ -4,7 +4,6 @@ import type {
 } from "@/lib/inventory/enrichment-state";
 
 export type IntakeCreateRequest = {
-  tenant_id: string;
   stock_id?: string | null;
   width_ft: number;
   width_in: number;

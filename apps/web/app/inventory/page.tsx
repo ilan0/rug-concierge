@@ -67,7 +67,7 @@ function getVisiblePageNumbers(
 
 export default async function InventoryPage({ searchParams }: InventoryPageProps) {
   const tenantId = await getServerUiTenantId();
-  const unlocked = await isStaffUnlocked();
+  const unlocked = tenantId ? await isStaffUnlocked(tenantId) : false;
   if (!tenantId) {
     return (
       <AccessGuard

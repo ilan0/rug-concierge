@@ -3,7 +3,6 @@ import "server-only";
 type NodeEnv = "development" | "production" | "test";
 
 type RequiredEnvName =
-  | "TENANT_ID"
   | "SUPABASE_URL"
   | "SUPABASE_SECRET_KEY"
   | "OPENAI_API_KEY"
@@ -78,7 +77,6 @@ function parseNodeEnv(): NodeEnv {
 const NODE_ENV = parseNodeEnv();
 const errors: string[] = [];
 
-const TENANT_ID = requireString("TENANT_ID", errors);
 const SUPABASE_URL = requireHttpUrl("SUPABASE_URL", errors);
 const SUPABASE_SECRET_KEY = requireString("SUPABASE_SECRET_KEY", errors);
 const OPENAI_API_KEY = requireString("OPENAI_API_KEY", errors);
@@ -109,12 +107,10 @@ export {
   OPENAI_VISION_MODEL,
   SUPABASE_SECRET_KEY,
   SUPABASE_URL,
-  TENANT_ID,
   UPSTASH_REDIS_REST_TOKEN,
   UPSTASH_REDIS_REST_URL,
 };
 
-export const ALLOW_DYNAMIC_TENANT_ID = false;
 export const CHAT_MEMORY_V1 = true;
 export const CHAT_MEMORY_ENABLED = CHAT_MEMORY_V1;
 export const CHAT_PERSISTENCE_FAIL_OPEN = true;

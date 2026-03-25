@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { internalError } from "@/lib/errors/http-errors";
-import { resolveAuthoritativeTenantForServer } from "@/lib/auth/tenant";
+import { resolveTenantFromRequest } from "@/lib/tenant/resolve-tenant";
 import { getStaffUnlockStateFromRequest } from "@/lib/auth/staff";
 import { fetchPrimaryRugImagesForRugs } from "@/lib/storage/rug-images";
 import { buildTradeTitle } from "@/lib/inventory/title-builder";
@@ -93,7 +93,16 @@ export async function GET(
   req: NextRequest,
   context: { params: Promise<{ id: string }> }
 ) {
-  const staffUnlockState = await getStaffUnlockStateFromRequest(req);
+  const tenantResolution = await resolveTenantFromRequest(req);
+  if (!tenantResolution.ok) {
+    return NextResponse.json(
+      { error: tenantResolution.message },
+      { status: tenantResolution.status }
+    );
+  }
+  const tenantId = tenantResolution.tenantId;
+
+  const staffUnlockState = await getStaffUnlockStateFromRequest(req, tenantId);
   if (!staffUnlockState.ok) {
     return staffAuthMisconfiguredResponse(staffUnlockState.message);
   }
@@ -109,11 +118,6 @@ export async function GET(
     "rug id is required."
   );
   if (!params.ok) return params.response;
-
-  const tenantId = resolveAuthoritativeTenantForServer({});
-  if (!tenantId) {
-    return internalError("Tenant is not configured.");
-  }
 
   const row = await fetchRugRecordById({
     supabase: supabaseAdmin,
@@ -132,7 +136,16 @@ export async function PATCH(
   req: NextRequest,
   context: { params: Promise<{ id: string }> }
 ) {
-  const staffUnlockState = await getStaffUnlockStateFromRequest(req);
+  const tenantResolution = await resolveTenantFromRequest(req);
+  if (!tenantResolution.ok) {
+    return NextResponse.json(
+      { error: tenantResolution.message },
+      { status: tenantResolution.status }
+    );
+  }
+  const tenantId = tenantResolution.tenantId;
+
+  const staffUnlockState = await getStaffUnlockStateFromRequest(req, tenantId);
   if (!staffUnlockState.ok) {
     return staffAuthMisconfiguredResponse(staffUnlockState.message);
   }
@@ -148,11 +161,6 @@ export async function PATCH(
     "rug id is required."
   );
   if (!params.ok) return params.response;
-
-  const tenantId = resolveAuthoritativeTenantForServer({});
-  if (!tenantId) {
-    return internalError("Tenant is not configured.");
-  }
 
   const existing = await fetchRugRecordById({
     supabase: supabaseAdmin,
@@ -263,7 +271,16 @@ export async function DELETE(
   req: NextRequest,
   context: { params: Promise<{ id: string }> }
 ) {
-  const staffUnlockState = await getStaffUnlockStateFromRequest(req);
+  const tenantResolution = await resolveTenantFromRequest(req);
+  if (!tenantResolution.ok) {
+    return NextResponse.json(
+      { error: tenantResolution.message },
+      { status: tenantResolution.status }
+    );
+  }
+  const tenantId = tenantResolution.tenantId;
+
+  const staffUnlockState = await getStaffUnlockStateFromRequest(req, tenantId);
   if (!staffUnlockState.ok) {
     return staffAuthMisconfiguredResponse(staffUnlockState.message);
   }
@@ -279,11 +296,6 @@ export async function DELETE(
     "rug id is required."
   );
   if (!params.ok) return params.response;
-
-  const tenantId = resolveAuthoritativeTenantForServer({});
-  if (!tenantId) {
-    return internalError("Tenant is not configured.");
-  }
 
   const existing = await fetchRugRecordById({
     supabase: supabaseAdmin,

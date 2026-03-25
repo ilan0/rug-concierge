@@ -28,10 +28,6 @@ import {
 import type { IntakeCreatedRug } from "@/lib/types/intake";
 import { cn } from "@/lib/utils";
 
-type IntakeScreenProps = {
-  tenantId: string;
-};
-
 type IntakeMode = "single" | "batch";
 
 type IntakeFieldErrors = {
@@ -229,7 +225,7 @@ function formatDuplicateMessage(error: IntakeRequestError): string {
   return `Duplicate detected: matches rug ${error.existingRug.id}.`;
 }
 
-export function IntakeScreen({ tenantId }: IntakeScreenProps) {
+export function IntakeScreen() {
   const [mode, setMode] = useState<IntakeMode>("single");
 
   const [widthFt, setWidthFt] = useState("");
@@ -417,7 +413,6 @@ export function IntakeScreen({ tenantId }: IntakeScreenProps) {
 
     try {
       const payload = await createInventoryIntake({
-        tenant_id: tenantId,
         stock_id: stockId.trim() || null,
         width_ft: validation.value.widthFt,
         width_in: validation.value.widthIn,
@@ -578,7 +573,6 @@ export function IntakeScreen({ tenantId }: IntakeScreenProps) {
 
       try {
         const response = await createInventoryIntake({
-          tenant_id: tenantId,
           stock_id: item.stockId.trim() || null,
           width_ft: dimensions.value.widthFt,
           width_in: dimensions.value.widthIn,

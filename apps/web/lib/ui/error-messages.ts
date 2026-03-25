@@ -42,12 +42,13 @@ export function mapApiErrorToFriendlyMessage(
   if (status === 400 || code === "BAD_REQUEST") {
     if (
       includesAny(raw, [
-        "tenant_id is required",
-        "inventory-backed",
         "tenant context",
+        "store domain",
+        "tenant not found",
+        "tenant resolution",
       ])
     ) {
-      return "Please select a tenant before requesting inventory recommendations.";
+      return "Store routing failed for this domain. Please verify the store URL and try again.";
     }
     if (includesAny(raw, ["please send a message", "message"])) {
       return "Please type a message before sending.";

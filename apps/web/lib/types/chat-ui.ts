@@ -7,7 +7,6 @@ export type UiChatRequest = {
   session_id?: string;
   role: UiRole;
   message: string;
-  tenant_id?: string;
   constraints?: HardConstraints;
 };
 
