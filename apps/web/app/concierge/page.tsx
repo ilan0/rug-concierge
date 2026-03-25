@@ -11,8 +11,8 @@ export default async function ConciergePage() {
   if (!tenantId) {
     return (
       <AccessGuard
-        title="Store Tenant Required"
-        description="Select your store tenant on Home before using concierge."
+        title="Store not found"
+        description="Store not found."
       />
     );
   }

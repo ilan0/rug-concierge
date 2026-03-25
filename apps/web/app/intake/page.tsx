@@ -10,8 +10,8 @@ export default async function IntakePage() {
   if (!tenantId) {
     return (
       <AccessGuard
-        title="Store Tenant Required"
-        description="Select your store tenant before using intake."
+        title="Store not found"
+        description="Store not found."
       />
     );
   }

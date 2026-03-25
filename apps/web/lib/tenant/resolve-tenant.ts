@@ -170,7 +170,61 @@ function readSubdomainAliasesFromSettings(settings: unknown): string[] {
   return Array.from(new Set(aliases));
 }
 
-async function lookupTenantFromDirectory(subdomain: string): Promise<string | null> {
+function readTenantHostnamesFromSettings(settings: unknown): string[] {
+  if (!settings || typeof settings !== "object" || Array.isArray(settings)) return [];
+  const typed = settings as Record<string, unknown>;
+  const hostnames: string[] = [];
+
+  const pushHostname = (value: unknown) => {
+    if (typeof value !== "string") return;
+    const normalized = normalizeHostname(value);
+    if (!normalized || isLocalHost(normalized)) return;
+    hostnames.push(normalized);
+  };
+
+  pushHostname(typed.hostname);
+  pushHostname(typed.host);
+  pushHostname(typed.domain_host);
+
+  const domain = typed.domain;
+  if (domain && typeof domain === "object" && !Array.isArray(domain)) {
+    const domainRecord = domain as Record<string, unknown>;
+    pushHostname(domainRecord.host);
+    pushHostname(domainRecord.hostname);
+    const domainHostnames = domainRecord.hostnames;
+    if (Array.isArray(domainHostnames)) {
+      for (const entry of domainHostnames) pushHostname(entry);
+    }
+  }
+
+  const domains = typed.domains;
+  if (Array.isArray(domains)) {
+    for (const entry of domains) {
+      if (typeof entry === "string") {
+        pushHostname(entry);
+        continue;
+      }
+      if (entry && typeof entry === "object") {
+        const row = entry as Record<string, unknown>;
+        pushHostname(row.host);
+        pushHostname(row.hostname);
+      }
+    }
+  }
+
+  return Array.from(new Set(hostnames));
+}
+
+function isHostnameAllowedForTenant(settings: unknown, hostname: string): boolean {
+  const allowedHostnames = readTenantHostnamesFromSettings(settings);
+  if (allowedHostnames.length === 0) return true;
+  return allowedHostnames.includes(hostname);
+}
+
+async function lookupTenantFromDirectory(
+  subdomain: string,
+  hostname: string
+): Promise<string | null> {
   const directoryQuery = await supabaseAdmin
     .from("tenants")
     .select("id, settings");
@@ -191,15 +245,11 @@ async function lookupTenantFromDirectory(subdomain: string): Promise<string | nu
   }
 
   for (const row of rows) {
+    if (!isHostnameAllowedForTenant(row.settings, hostname)) continue;
     const aliases = readSubdomainAliasesFromSettings(row.settings);
     if (aliases.includes(subdomain)) {
       return row.id;
     }
-  }
-
-  // Bootstrap fallback while only one tenant exists.
-  if (rows.length === 1) {
-    return rows[0].id;
   }
 
   return null;
@@ -226,7 +276,7 @@ async function lookupTenantBySubdomain(
   const lookupPromise = (async (): Promise<TenantResolutionResult> => {
     const query = await supabaseAdmin
       .from("tenants")
-      .select("id")
+      .select("id, settings")
       .eq("id", subdomain)
       .maybeSingle();
 
@@ -241,9 +291,17 @@ async function lookupTenantBySubdomain(
       };
     }
 
-    let resolvedTenantId = query.data?.id ? String(query.data.id).trim() : "";
+    let resolvedTenantId = "";
+    if (query.data?.id) {
+      const directTenantId = String(query.data.id).trim();
+      const directTenantSettings = (query.data as Record<string, unknown>).settings ?? null;
+      if (isHostnameAllowedForTenant(directTenantSettings, hostname)) {
+        resolvedTenantId = directTenantId;
+      }
+    }
+
     if (!resolvedTenantId) {
-      const directoryMatch = await lookupTenantFromDirectory(subdomain);
+      const directoryMatch = await lookupTenantFromDirectory(subdomain, hostname);
       resolvedTenantId = directoryMatch ?? "";
     }
 

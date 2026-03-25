@@ -71,8 +71,8 @@ export default async function InventoryPage({ searchParams }: InventoryPageProps
   if (!tenantId) {
     return (
       <AccessGuard
-        title="Store Tenant Required"
-        description="Select your store tenant before browsing inventory."
+        title="Store not found"
+        description="Store not found."
       />
     );
   }
