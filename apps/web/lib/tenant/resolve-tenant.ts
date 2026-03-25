@@ -119,6 +119,20 @@ function resolveHostname(input: RequestHeaderValues): string | null {
   );
 }
 
+function isUuidLike(value: string): boolean {
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
+    value
+  );
+}
+
+function isUuidCastError(message: string): boolean {
+  const normalized = message.toLowerCase();
+  return (
+    normalized.includes("invalid input syntax for type uuid") ||
+    normalized.includes("22p02")
+  );
+}
+
 function readSubdomainAliasesFromSettings(settings: unknown): string[] {
   if (!settings || typeof settings !== "object" || Array.isArray(settings)) return [];
   const typed = settings as Record<string, unknown>;
@@ -274,29 +288,31 @@ async function lookupTenantBySubdomain(
   if (pending) return pending;
 
   const lookupPromise = (async (): Promise<TenantResolutionResult> => {
-    const query = await supabaseAdmin
-      .from("tenants")
-      .select("id, settings")
-      .eq("id", subdomain)
-      .maybeSingle();
-
-    if (query.error) {
-      return {
-        ok: false,
-        status: 503,
-        code: "tenant_query_failed",
-        message: "Unable to resolve store from hostname right now.",
-        hostname,
-        subdomain,
-      };
-    }
-
     let resolvedTenantId = "";
-    if (query.data?.id) {
-      const directTenantId = String(query.data.id).trim();
-      const directTenantSettings = (query.data as Record<string, unknown>).settings ?? null;
-      if (isHostnameAllowedForTenant(directTenantSettings, hostname)) {
-        resolvedTenantId = directTenantId;
+    if (isUuidLike(subdomain)) {
+      const query = await supabaseAdmin
+        .from("tenants")
+        .select("id, settings")
+        .eq("id", subdomain)
+        .maybeSingle();
+
+      if (query.error && !isUuidCastError(query.error.message ?? "")) {
+        return {
+          ok: false,
+          status: 503,
+          code: "tenant_query_failed",
+          message: "Unable to resolve store from hostname right now.",
+          hostname,
+          subdomain,
+        };
+      }
+
+      if (query.data?.id) {
+        const directTenantId = String(query.data.id).trim();
+        const directTenantSettings = (query.data as Record<string, unknown>).settings ?? null;
+        if (isHostnameAllowedForTenant(directTenantSettings, hostname)) {
+          resolvedTenantId = directTenantId;
+        }
       }
     }
 
