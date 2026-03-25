@@ -3,9 +3,11 @@ import { normalizeHardConstraints } from "@/lib/filters/extract-constraints";
 import type { ParsedTurn } from "@/lib/chat/turn-parser-contract";
 
 export type CompiledTurnPolicy = {
+  intent: ParsedTurn["intent"];
   mode: ParsedTurn["mode"];
   followup_intent: ParsedTurn["followup_intent"];
   hard_constraints: HardConstraints;
+  persisted_hard_constraints: HardConstraints;
   strictness: ParsedTurn["strictness"];
   avoid: ParsedTurn["avoid"];
   confidence: ParsedTurn["confidence"];
@@ -39,12 +41,17 @@ function recommendedPreferToleranceIn(input: {
 
 function mergeHardConstraints(input: {
   explicit: HardConstraints;
+  previous: HardConstraints;
   parsed: ParsedTurn["constraints"];
   parsedAvoid: ParsedTurn["avoid"];
   strictness: ParsedTurn["strictness"];
+  intent: ParsedTurn["intent"];
 }): HardConstraints {
   const explicit = input.explicit;
   const parsed = input.parsed;
+  const useInheritedBase =
+    input.intent === "followup" || input.intent === "reaction";
+  const base = useInheritedBase ? input.previous : {};
   const mergedStrictness = {
     size: explicit.strictness?.size ?? input.strictness.size,
     colors: explicit.strictness?.colors ?? input.strictness.colors,
@@ -66,15 +73,15 @@ function mergeHardConstraints(input: {
                   lengthIn: parsed.size.lengthIn,
                 }),
         }
-      : undefined;
+      : base.size ?? undefined;
 
   const colors =
     explicit.colors ??
-    (parsed.colors.length > 0 ? parsed.colors : undefined);
+    (parsed.colors.length > 0 ? parsed.colors : base.colors ?? undefined);
   const styles =
     explicit.styles ??
-    (parsed.styles.length > 0 ? parsed.styles : undefined);
-  const shape = explicit.shape ?? parsed.shape ?? undefined;
+    (parsed.styles.length > 0 ? parsed.styles : base.styles ?? undefined);
+  const shape = explicit.shape ?? parsed.shape ?? base.shape ?? undefined;
   const parsedAvoid = {
     colors:
       input.parsedAvoid.colors.length > 0 ? input.parsedAvoid.colors : undefined,
@@ -87,14 +94,21 @@ function mergeHardConstraints(input: {
     explicit.avoid_preferences ??
     (parsedAvoid.colors || parsedAvoid.styles || parsedAvoid.shapes
       ? parsedAvoid
-      : undefined);
+      : base.avoid_preferences ?? undefined);
+
+  const strictness = {
+    size: mergedStrictness.size ?? base.strictness?.size ?? "prefer",
+    colors: mergedStrictness.colors ?? base.strictness?.colors ?? "prefer",
+    styles: mergedStrictness.styles ?? base.strictness?.styles ?? "prefer",
+    shape: mergedStrictness.shape ?? base.strictness?.shape ?? "prefer",
+  };
 
   return {
     size,
     colors,
     styles,
     shape,
-    strictness: mergedStrictness,
+    strictness,
     avoid_preferences: avoidPreferences,
   };
 }
@@ -176,19 +190,29 @@ function buildMustPreferAvoid(input: {
 export function compileTurnPolicy(input: {
   parsedTurn: ParsedTurn;
   explicitConstraints?: unknown;
+  previousConstraints?: HardConstraints;
 }): CompiledTurnPolicy {
   const explicit = normalizeHardConstraints(input.explicitConstraints);
+  const previous = normalizeHardConstraints(input.previousConstraints);
   const hardConstraints = mergeHardConstraints({
     explicit,
+    previous,
     parsed: input.parsedTurn.constraints,
     parsedAvoid: input.parsedTurn.avoid,
     strictness: input.parsedTurn.strictness,
+    intent: input.parsedTurn.intent,
   });
+  const persistedHardConstraints =
+    input.parsedTurn.intent === "educate" || input.parsedTurn.intent === "general"
+      ? previous
+      : hardConstraints;
 
   return {
+    intent: input.parsedTurn.intent,
     mode: input.parsedTurn.mode,
     followup_intent: input.parsedTurn.followup_intent,
     hard_constraints: hardConstraints,
+    persisted_hard_constraints: persistedHardConstraints,
     strictness: input.parsedTurn.strictness,
     avoid: input.parsedTurn.avoid,
     confidence: input.parsedTurn.confidence,
@@ -198,7 +222,18 @@ export function compileTurnPolicy(input: {
     }),
     must_prefer_avoid: buildMustPreferAvoid({
       constraints: hardConstraints,
-      strictness: input.parsedTurn.strictness,
+      strictness: {
+        size:
+          hardConstraints.strictness?.size ?? input.parsedTurn.strictness.size,
+        colors:
+          hardConstraints.strictness?.colors ??
+          input.parsedTurn.strictness.colors,
+        styles:
+          hardConstraints.strictness?.styles ??
+          input.parsedTurn.strictness.styles,
+        shape:
+          hardConstraints.strictness?.shape ?? input.parsedTurn.strictness.shape,
+      },
     }),
   };
 }

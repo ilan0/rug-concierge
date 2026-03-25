@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { ChatThread } from "@/components/concierge/chat-thread";
 import { MessageComposer } from "@/components/concierge/message-composer";
-import { OperatorDrawer } from "@/components/concierge/operator-drawer";
 import { useConciergeController } from "@/components/concierge/use-concierge-controller";
 import { useVisualViewportInset } from "@/components/concierge/use-visual-viewport-inset";
 import type { ConciergeVariant } from "@/components/concierge/types";
@@ -13,7 +12,6 @@ import { Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 type ConciergeScreenProps = {
-  debug: boolean;
   variant?: ConciergeVariant;
   tenantId: string;
   storeName: string;
@@ -33,13 +31,12 @@ const CONCIERGE_SUBTITLE =
   "Tell me the room, size, and style — I'll show you what's in the collection.";
 
 export function ConciergeScreen({
-  debug,
   variant = "concierge",
   tenantId,
   storeName,
   storeLogoUrl,
 }: ConciergeScreenProps) {
-  const controller = useConciergeController({ debug, variant, tenantId });
+  const controller = useConciergeController({ variant, tenantId });
   const keyboardInsetPx = useVisualViewportInset();
   const [composerHeightPx, setComposerHeightPx] = useState(INITIAL_COMPOSER_HEIGHT);
   const [isSmallViewport, setIsSmallViewport] = useState(false);
@@ -107,7 +104,7 @@ export function ConciergeScreen({
   const isActivePreRecommendation = hasMessages && !hasRecommendationTurn;
   const isActiveWithRecommendation = hasRecommendationTurn;
   const showActiveDesktopSubtitle = isActivePreRecommendation;
-  const showDesktopHeaderActions = controller.isDeveloperRole || hasMessages;
+  const showDesktopHeaderActions = hasMessages;
   const useIntroSpacer = false;
   const emptyStatePromptLimit = isSmallViewport ? 2 : 3;
 
@@ -134,17 +131,6 @@ export function ConciergeScreen({
       >
         {showDesktopHeaderActions ? (
           <div className="mb-1 hidden min-h-8 items-center justify-end gap-2 pr-4 md:flex">
-            {controller.isDeveloperRole ? (
-              <Button
-                type="button"
-                size="sm"
-                variant="ghost"
-                className="h-8 rounded-full px-3 text-xs text-muted-foreground"
-                onClick={() => controller.setOperatorOpen(true)}
-              >
-                Debug
-              </Button>
-            ) : null}
             {hasMessages ? (
               <Button
                 type="button"
@@ -226,16 +212,9 @@ export function ConciergeScreen({
           turns={controller.turns}
           isLoading={controller.isLoading}
           showSlowNotice={controller.showSlowNotice}
-          isDeveloperView={controller.isDeveloperRole}
           emptyStatePrompts={controller.starterPrompts.slice(0, emptyStatePromptLimit)}
           bodyTextClassName={BODY_SIZE}
           onChoosePrompt={controller.submitWithPrompt}
-          onAskAboutRug={(rugTitle) =>
-            controller.submitWithPrompt(
-              `Tell me more about "${rugTitle}" and why it fits my request.`
-            )
-          }
-          onSelectTurn={controller.setSelectedTurnId}
           onJumpToLatestVisibilityChange={setShowJumpToLatest}
           onJumpToLatestHandlerChange={onJumpToLatestHandlerChange}
         />
@@ -261,17 +240,6 @@ export function ConciergeScreen({
         floating={shouldFloatComposer}
       />
 
-      {controller.canOpenOperator ? (
-        <OperatorDrawer
-          open={controller.operatorOpen}
-          selectedTurn={controller.selectedTurn}
-          debug={debug}
-          canUseDebugTrace={controller.canUseDebugTrace}
-          operatorView={controller.operatorView}
-          setOperatorView={controller.setOperatorView}
-          onClose={() => controller.setOperatorOpen(false)}
-        />
-      ) : null}
     </AppShell>
   );
 }

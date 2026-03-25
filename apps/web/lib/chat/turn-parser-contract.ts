@@ -8,6 +8,14 @@ export const TURN_MODE_VALUES = [
   "chat",
 ] as const;
 
+export const TURN_INTENT_VALUES = [
+  "recommend",
+  "educate",
+  "followup",
+  "reaction",
+  "general",
+] as const;
+
 export const FOLLOWUP_INTENT_VALUES = [
   "none",
   "closest",
@@ -56,6 +64,7 @@ export const turnParserAvoidSchema = z
 
 export const parsedTurnSchema = z
   .object({
+    intent: z.enum(TURN_INTENT_VALUES).default("general"),
     mode: z.enum(TURN_MODE_VALUES),
     followup_intent: z.enum(FOLLOWUP_INTENT_VALUES).default("none"),
     constraints: turnParserConstraintsSchema.default({ colors: [], styles: [] }),
@@ -72,6 +81,7 @@ export const parsedTurnSchema = z
     }),
     session_facts: z.array(z.string().trim().min(1).max(120)).max(12).default([]),
     referenced_rug_id: z.string().trim().min(1).max(80).optional(),
+    referenced_rug_label: z.string().trim().min(1).max(160).optional(),
     rug_reference_ambiguous: z.boolean().default(false),
     confidence: z.enum(["high", "medium", "low"]).default("medium"),
   })
@@ -83,6 +93,7 @@ export const TURN_PARSER_JSON_SCHEMA = {
   type: "object",
   additionalProperties: false,
   required: [
+    "intent",
     "mode",
     "followup_intent",
     "constraints",
@@ -93,6 +104,10 @@ export const TURN_PARSER_JSON_SCHEMA = {
     "confidence",
   ],
   properties: {
+    intent: {
+      type: "string",
+      enum: TURN_INTENT_VALUES,
+    },
     mode: {
       type: "string",
       enum: TURN_MODE_VALUES,
@@ -176,6 +191,10 @@ export const TURN_PARSER_JSON_SCHEMA = {
     referenced_rug_id: {
       type: "string",
       maxLength: 80,
+    },
+    referenced_rug_label: {
+      type: "string",
+      maxLength: 160,
     },
     rug_reference_ambiguous: {
       type: "boolean",

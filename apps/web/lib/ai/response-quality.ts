@@ -81,6 +81,12 @@ export function normalizeText(value: string): string {
   return value.replace(/\s+/g, " ").trim();
 }
 
+export function endsWithSentenceBoundary(value: string): boolean {
+  const normalized = normalizeText(value);
+  if (!normalized) return false;
+  return /[.!?][)"'\]]?$/.test(normalized);
+}
+
 export function toPreviewText(value: string, maxChars = DEFAULT_PREVIEW_MAX_CHARS): string {
   const normalized = normalizeText(value);
   if (normalized.length <= maxChars) return normalized;

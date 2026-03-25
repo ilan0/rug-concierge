@@ -21,6 +21,8 @@ export function buildPromptLayers(input: BuildPromptLayersInput): string[] {
     return getRecommendationLayerPreview({
       role: input.role,
       discoveryMode: false,
+      hasConstraintMismatch: false,
+      hasThinResultsExpansion: false,
       hasChatMemoryContext: true,
       hasCustomerContext: input.session.conversation_memory.stable_facts.length > 0,
       hasRecentlyShownContext: (runtime?.recently_shown_rugs?.length ?? 0) > 0,

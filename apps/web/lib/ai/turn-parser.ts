@@ -99,6 +99,11 @@ function normalizeParsedTurn(input: ParsedTurn): ParsedTurn {
     normalizeText(input.referenced_rug_id).length > 0
       ? normalizeText(input.referenced_rug_id).slice(0, 80)
       : undefined;
+  const referencedRugLabel =
+    typeof input.referenced_rug_label === "string" &&
+    normalizeText(input.referenced_rug_label).length > 0
+      ? normalizeText(input.referenced_rug_label).slice(0, 160)
+      : undefined;
 
   return {
     ...input,
@@ -117,7 +122,120 @@ function normalizeParsedTurn(input: ParsedTurn): ParsedTurn {
     },
     session_facts: sessionFacts,
     referenced_rug_id: referencedRugId,
+    referenced_rug_label: referencedRugLabel,
     rug_reference_ambiguous: Boolean(input.rug_reference_ambiguous),
+  };
+}
+
+function hasAnyConstraintSignals(parsed: ParsedTurn): boolean {
+  return Boolean(
+    parsed.constraints.size ||
+      (parsed.constraints.colors?.length ?? 0) > 0 ||
+      (parsed.constraints.styles?.length ?? 0) > 0 ||
+      parsed.constraints.shape
+  );
+}
+
+function isDiscoveryBrowseMessage(message: string): boolean {
+  return /\b(show me what you have|show me what you've got|surprise me|just browsing|just looking|anything interesting|open to anything|show options|show me options)\b/i.test(
+    message
+  );
+}
+
+function detectQuotedRugReferenceLabel(message: string): string | null {
+  const quotedMatch = message.match(/["“”']([^"'“”]{3,160})["“”']/);
+  if (!quotedMatch) return null;
+  const label = normalizeText(quotedMatch[1] ?? "");
+  if (label.length < 3) return null;
+  if (/^\d+\s*[x×]\s*\d+$/i.test(label)) return null;
+  return label.slice(0, 160);
+}
+
+function deriveModeFromIntent(input: {
+  intent: ParsedTurn["intent"];
+  followup_intent: ParsedTurn["followup_intent"];
+  hasConstraints: boolean;
+  message: string;
+}): ParsedTurn["mode"] {
+  if (input.intent === "educate") return "advice";
+  if (input.intent === "general") return "chat";
+  if (input.intent === "followup" || input.intent === "reaction") {
+    return "recommendation_followup";
+  }
+  if (
+    input.intent === "recommend" &&
+    !input.hasConstraints &&
+    isDiscoveryBrowseMessage(input.message)
+  ) {
+    return "discovery";
+  }
+  if (input.followup_intent !== "none") {
+    return "recommendation_followup";
+  }
+  return "recommendation";
+}
+
+function applyIntentGuards(input: {
+  parsed: ParsedTurn;
+  message: string;
+}): ParsedTurn {
+  let next = input.parsed;
+  const normalizedMessage = normalizeText(input.message);
+  const messageLower = normalizedMessage.toLowerCase();
+
+  const quotedLabel = detectQuotedRugReferenceLabel(normalizedMessage);
+  const quotedReferencePrompt =
+    quotedLabel !== null &&
+    /\b(tell me more about|more about|explain|details? about|what about)\b/i.test(
+      messageLower
+    );
+
+  if (quotedReferencePrompt) {
+    next = {
+      ...next,
+      intent: "followup",
+      referenced_rug_label: quotedLabel ?? next.referenced_rug_label,
+      constraints: {
+        size: null,
+        colors: [],
+        styles: [],
+        shape: null,
+      },
+      avoid: {
+        colors: [],
+        styles: [],
+        shapes: [],
+      },
+      followup_intent: "none",
+    };
+  }
+
+  if (next.intent === "educate") {
+    next = {
+      ...next,
+      constraints: {
+        size: null,
+        colors: [],
+        styles: [],
+        shape: null,
+      },
+      avoid: {
+        colors: [],
+        styles: [],
+        shapes: [],
+      },
+      followup_intent: "none",
+    };
+  }
+
+  return {
+    ...next,
+    mode: deriveModeFromIntent({
+      intent: next.intent,
+      followup_intent: next.followup_intent,
+      hasConstraints: hasAnyConstraintSignals(next),
+      message: normalizedMessage,
+    }),
   };
 }
 
@@ -250,7 +368,8 @@ function resolveReferencedRug(input: {
 }
 
 function fallbackParsedTurn(input: ParseTurnInput): ParsedTurn {
-  const message = input.message.toLowerCase();
+  const normalizedMessage = normalizeText(input.message);
+  const message = normalizedMessage.toLowerCase();
   const inferred = extractConstraintsFromUserMessage(input.message);
   const hasConstraintSignals = Boolean(
     inferred.size ||
@@ -279,17 +398,10 @@ function fallbackParsedTurn(input: ParseTurnInput): ParsedTurn {
     /\b(what is|what's|tell me about|difference between|how do i|how to|care|clean)\b/i.test(
       message
     ) && !hasShoppingIntent;
-
-  const mode: ParsedTurn["mode"] = isDiscoveryIntent
-    ? "discovery"
-    : hasFollowup
-    ? "recommendation_followup"
-    : isAdviceIntent
-    ? "advice"
-    : hasConstraintSignals ||
-        /\b(show|find|recommend|need|want|looking for|search)\b/i.test(message)
-      ? "recommendation"
-      : "chat";
+  const hasReactionLanguage =
+    /\b(i like|i love|love this|keep this|this works|yes this|great option|perfect|don'?t like|do not like|dislike|hate|pass on|skip this|not this one|too .+ for me|no thanks)\b/i.test(
+      message
+    );
 
   const followupIntent: ParsedTurn["followup_intent"] =
     /\bclosest|nearest|best match\b/i.test(message)
@@ -317,9 +429,28 @@ function fallbackParsedTurn(input: ParseTurnInput): ParsedTurn {
     recentlyShown: normalizedRecentlyShown,
   });
 
-  return normalizeParsedTurn(
+  const quotedRugReference = detectQuotedRugReferenceLabel(normalizedMessage);
+  const hasResolvedReference = Boolean(
+    referenceResolution.referenced_rug_id ||
+      referenceResolution.rug_reference_ambiguous ||
+      quotedRugReference
+  );
+  const intent: ParsedTurn["intent"] = hasReactionLanguage && hasResolvedReference
+    ? "reaction"
+    : hasFollowup || hasResolvedReference
+      ? "followup"
+      : isAdviceIntent
+        ? "educate"
+        : isDiscoveryIntent ||
+            hasConstraintSignals ||
+            /\b(show|find|recommend|need|want|looking for|search)\b/i.test(message)
+          ? "recommend"
+          : "general";
+
+  const base = normalizeParsedTurn(
     parsedTurnSchema.parse({
-      mode,
+      intent,
+      mode: "chat",
       followup_intent: followupIntent,
       constraints: {
         size: inferred.size
@@ -345,10 +476,15 @@ function fallbackParsedTurn(input: ParseTurnInput): ParsedTurn {
       },
       session_facts: extractStableFactsFromUserMessage(input.message).slice(0, 12),
       referenced_rug_id: referenceResolution.referenced_rug_id,
+      referenced_rug_label: quotedRugReference ?? undefined,
       rug_reference_ambiguous: referenceResolution.rug_reference_ambiguous,
       confidence: "low",
     })
   );
+  return applyIntentGuards({
+    parsed: base,
+    message: input.message,
+  });
 }
 
 function initTrace(trace?: TurnParserTrace): TurnParserTrace | null {
@@ -479,7 +615,8 @@ export async function parseTurn(input: ParseTurnInput): Promise<ParsedTurn> {
       message: input.message,
       recentlyShown: normalizeRugReferenceInput(input.context.recently_shown_rugs),
     });
-    const normalized = {
+    const quotedRugReference = detectQuotedRugReferenceLabel(input.message);
+    const normalizedBase = {
       ...baseParsed,
       confidence: applyConfidenceHeuristic({
         message: input.message,
@@ -487,10 +624,16 @@ export async function parseTurn(input: ParseTurnInput): Promise<ParsedTurn> {
       }),
       referenced_rug_id:
         referenceResolution.referenced_rug_id ?? baseParsed.referenced_rug_id,
+      referenced_rug_label:
+        quotedRugReference ?? baseParsed.referenced_rug_label,
       rug_reference_ambiguous:
         referenceResolution.rug_reference_ambiguous ||
         baseParsed.rug_reference_ambiguous,
     };
+    const normalized = applyIntentGuards({
+      parsed: normalizedBase,
+      message: input.message,
+    });
     if (trace) trace.parsed = normalized;
     return normalized;
   } catch {

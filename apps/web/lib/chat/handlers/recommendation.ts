@@ -1,10 +1,87 @@
 import { runRecommendationPipeline } from "@/lib/recommend/pipeline";
 import { hasTenantId } from "@/lib/auth/tenant";
 import { parseRecommendationFollowupIntent } from "@/lib/chat/router";
+import { supabaseAdmin } from "@/lib/supabase/admin";
+import { fetchPrimaryRugImagesForRugs } from "@/lib/storage/rug-images";
+import { parseRugRecord } from "@/lib/inventory/rug-record";
+import { resolveEffectiveFields } from "@/lib/inventory/resolve-fields";
+import { formatRugSize } from "@/lib/utils/format";
 import type {
   ChatTurnHandlerInput,
   RecommendationTurnResponse,
 } from "@/lib/chat/types";
+
+async function hydrateDisambiguationRecommendations(input: {
+  tenantId: string;
+  candidates: Array<{
+    id: string;
+    label: string;
+    colors: string[];
+    style: string | null;
+    origin: string | null;
+  }>;
+}): Promise<RecommendationTurnResponse["recommendations"]> {
+  const ids = input.candidates.map((candidate) => candidate.id);
+  if (ids.length === 0) return [];
+
+  const { data, error } = await supabaseAdmin
+    .from("rugs")
+    .select(
+      "id, tenant_id, intake_label, status, width_total_in, length_total_in, ai_description, ai_structured_fields, staff_overrides, enrichment_status, review_reason_code"
+    )
+    .eq("tenant_id", input.tenantId)
+    .in("id", ids);
+
+  const parsedRows = Array.isArray(data) && !error
+    ? data
+        .map((row) => parseRugRecord(row))
+        .filter((row): row is NonNullable<ReturnType<typeof parseRugRecord>> => row !== null)
+    : [];
+
+  const byId = new Map(parsedRows.map((row) => [row.id, row]));
+  const imageMap = await fetchPrimaryRugImagesForRugs({
+    supabase: supabaseAdmin,
+    tenantId: input.tenantId,
+    rugIds: ids,
+  });
+
+  return input.candidates.slice(0, 3).map((candidate) => {
+    const row = byId.get(candidate.id);
+    const effectiveFields = row
+      ? resolveEffectiveFields(
+          row.intake_label,
+          row.ai_structured_fields,
+          row.staff_overrides,
+          row.ai_description
+        )
+      : null;
+    const image = imageMap.get(candidate.id);
+    return {
+      rug_id: candidate.id,
+      sku: null,
+      title:
+        effectiveFields?.label ??
+        row?.intake_label ??
+        candidate.label,
+      origin: effectiveFields?.origin ?? candidate.origin ?? null,
+      style: effectiveFields?.style ?? candidate.style ?? null,
+      mood: effectiveFields?.mood ?? null,
+      primary_image_url: image?.primary_image_url ?? null,
+      primary_image_caption: image?.primary_image_caption ?? null,
+      size_text:
+        row &&
+        typeof row.width_total_in === "number" &&
+        typeof row.length_total_in === "number"
+          ? formatRugSize(row.width_total_in, row.length_total_in)
+          : null,
+      match_reasons: ["Please confirm which rug you meant."],
+      confidence: 0.6,
+      confidence_tier: "medium" as const,
+      confidence_factors: ["Reference clarification requested"],
+      why_not: [],
+    };
+  });
+}
 
 // Recommendation mode handler now uses the shared SQL-first backend pipeline.
 export async function handleRecommendationTurn(
@@ -15,26 +92,35 @@ export async function handleRecommendationTurn(
       input.session.recommendation_state.runtime?.recently_shown_rugs?.slice(0, 3) ?? [];
     if (ambiguousCandidates.length > 0) {
       const labelText = ambiguousCandidates.map((rug) => rug.label).join(" or ");
+      const hydratedRecommendations = hasTenantId(input.tenant_id)
+        ? await hydrateDisambiguationRecommendations({
+            tenantId: input.tenant_id,
+            candidates: ambiguousCandidates,
+          })
+        : [];
       return {
         mode: "disambiguation",
         assistant_message: `I want to make sure I’m following correctly. Did you mean ${labelText}?`,
         questions: [],
-        recommendations: ambiguousCandidates.map((rug) => ({
-          rug_id: rug.id,
-          sku: null,
-          title: rug.label,
-          origin: rug.origin ?? null,
-          style: rug.style ?? null,
-          mood: null,
-          primary_image_url: null,
-          primary_image_caption: null,
-          size_text: null,
-          match_reasons: ["Please confirm which rug you meant."],
-          confidence: 0.6,
-          confidence_tier: "medium",
-          confidence_factors: ["Reference clarification requested"],
-          why_not: [],
-        })),
+        recommendations:
+          hydratedRecommendations.length > 0
+            ? hydratedRecommendations
+            : ambiguousCandidates.map((rug) => ({
+                rug_id: rug.id,
+                sku: null,
+                title: rug.label,
+                origin: rug.origin ?? null,
+                style: rug.style ?? null,
+                mood: null,
+                primary_image_url: null,
+                primary_image_caption: null,
+                size_text: null,
+                match_reasons: ["Please confirm which rug you meant."],
+                confidence: 0.6,
+                confidence_tier: "medium",
+                confidence_factors: ["Reference clarification requested"],
+                why_not: [],
+              })),
         notes: "RUG_REFERENCE_DISAMBIGUATION",
         runtime_update: {
           recently_shown_rugs: ambiguousCandidates,

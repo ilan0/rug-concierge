@@ -802,7 +802,7 @@ async function runLiveScenarios(baseUrl: string): Promise<void> {
     check(caseId, true);
   }
 
-  // 10) Terminal no-match for unreasonable request.
+  // 10) Unreasonable request expands to closest available with honest disclosure.
   {
     const caseId = "s10-terminal-no-match";
     const sessionId = session();
@@ -813,11 +813,16 @@ async function runLiveScenarios(baseUrl: string): Promise<void> {
     const response2 = await sendChatTurn({ baseUrl, caseId, sessionId, message: turn2 });
 
     const responseBody = asObject(response2.response, `${caseId}.response`);
-    assert(response2.fine_mode === "no_match", `${caseId}: expected no_match mode.`);
-    const questions = asArray(responseBody.questions ?? [], `${caseId}.questions`);
-    assert(questions.length === 0, `${caseId}: terminal no-match should have no questions.`);
+    assert(response2.fine_mode !== "no_match", `${caseId}: expected expanded recommendations.`);
+    assert(
+      toRecommendations(response2).length > 0,
+      `${caseId}: expected closest alternatives instead of empty no-match.`
+    );
     const notes = String(responseBody.notes ?? "");
-    assert(notes.includes("NO_MATCH_TERMINAL"), `${caseId}: expected terminal note code.`);
+    assert(
+      notes.includes("CONSTRAINT_MISMATCH_EXPANDED"),
+      `${caseId}: expected expanded mismatch disclosure note.`
+    );
 
     const traces = await fetchCaseTraces(baseUrl, caseId);
     const pipelineTrace2 = findTraceByMessage(
@@ -827,10 +832,10 @@ async function runLiveScenarios(baseUrl: string): Promise<void> {
     );
     validatePipelineTrace(pipelineTrace2, caseId);
     const noMatch = asObject(pipelineTrace2.no_match, `${caseId}.no_match`);
-    assert(noMatch.fallback_tier === "terminal", `${caseId}: expected fallback_tier=terminal.`);
+    assert(noMatch.fallback_tier === "expanded", `${caseId}: expected fallback_tier=expanded.`);
     assert(
-      String(noMatch.terminal_reason_code ?? "").includes("NO_MATCH_TERMINAL"),
-      `${caseId}: expected terminal_reason_code.`
+      noMatch.terminal_reason_code === null,
+      `${caseId}: expected terminal_reason_code=null when alternatives are shown.`
     );
 
     check(caseId, true);
@@ -1102,6 +1107,7 @@ function runDeterministicRegressionChecks(): void {
 
   {
     const parsedTurn: ParsedTurn = {
+      intent: "recommend",
       mode: "recommendation",
       followup_intent: "none",
       constraints: {

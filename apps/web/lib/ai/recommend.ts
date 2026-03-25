@@ -2,6 +2,7 @@ import type { HardConstraints, InventoryRug } from "@/lib/types/recommendation";
 import { resolveEffectiveFields } from "@/lib/inventory/resolve-fields";
 import { getRecommendationPromptBundle } from "@/lib/ai/prompt-library";
 import {
+  endsWithSentenceBoundary,
   getMaxOutputTokens,
   normalizeText,
   postOpenAiResponses,
@@ -44,6 +45,12 @@ const RETRY_SYSTEM_INSTRUCTION =
 type RecommendationPromptContext = {
   role?: "retail_customer" | "store_staff";
   discovery_mode?: boolean;
+  constraint_mismatch?: {
+    expanded_from_zero_match: boolean;
+    unmet_constraints: string[];
+    disclosure_hint: string | null;
+  };
+  expanded_due_to_thin_results?: boolean;
   chat_context?: {
     structured_state?: unknown;
     conversation_memory?: unknown;
@@ -452,10 +459,24 @@ function enforceDiscoveryQuestion(
 
   const discoveryQuestion =
     "What kind of space are you decorating so I can narrow these down for you?";
+  console.warn("[recommendation] discovery response missing follow-up question", {
+    mode: response.mode,
+    assistant_preview: sectionPreview(assistant),
+  });
   return {
     ...response,
     assistant_message: `${assistant} ${discoveryQuestion}`.trim(),
   };
+}
+
+function warnIfLikelyTruncatedAssistantMessage(input: {
+  surface: "recommendation";
+  message: string;
+}): void {
+  if (endsWithSentenceBoundary(input.message)) return;
+  console.warn(`[${input.surface}] assistant message may be truncated`, {
+    assistant_preview: sectionPreview(input.message),
+  });
 }
 
 function getSizeDistanceIn(rug: InventoryRug, constraints: HardConstraints): number | null {
@@ -1087,6 +1108,8 @@ export async function rankAndExplain(
   const promptSections = buildRecommendationPromptSections({
     role: promptContext?.role ?? "retail_customer",
     discoveryMode: Boolean(promptContext?.discovery_mode),
+    hasConstraintMismatch: Boolean(promptContext?.constraint_mismatch),
+    hasThinResultsExpansion: Boolean(promptContext?.expanded_due_to_thin_results),
     hasChatMemoryContext: Boolean(promptContext?.chat_context),
     hasCustomerContext:
       Array.isArray(promptContext?.chat_context?.customer_context) &&
@@ -1107,6 +1130,8 @@ export async function rankAndExplain(
       recommendation: promptBundle.recommendation,
       structuredOutput: promptBundle.recommendationStructuredOutput,
     },
+    constraint_mismatch: promptContext?.constraint_mismatch,
+    expanded_due_to_thin_results: promptContext?.expanded_due_to_thin_results,
     chatContext: promptContext?.chat_context,
     inventoryContext: contextInventory,
     userMessage: requestText,
@@ -1250,5 +1275,9 @@ export async function rankAndExplain(
     trace.fallback_reason = null;
     trace.error = null;
   }
+  warnIfLikelyTruncatedAssistantMessage({
+    surface: "recommendation",
+    message: sanitized.assistant_message,
+  });
   return sanitized;
 }

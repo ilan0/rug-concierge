@@ -6,10 +6,8 @@ import { RecommendationCard } from "@/components/concierge/recommendation-card";
 import type { Turn } from "@/components/concierge/types";
 import {
   formatTime,
-  modeLabel,
   shouldRenderFollowUpQuestion,
 } from "@/components/concierge/utils";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -17,12 +15,9 @@ type ChatThreadProps = {
   turns: Turn[];
   isLoading: boolean;
   showSlowNotice: boolean;
-  isDeveloperView: boolean;
   emptyStatePrompts: string[];
   bodyTextClassName: string;
   onChoosePrompt: (prompt: string) => void;
-  onAskAboutRug?: (rugTitle: string) => void;
-  onSelectTurn: (turnId: string) => void;
   onJumpToLatestVisibilityChange?: (visible: boolean) => void;
   onJumpToLatestHandlerChange?: (handler: (() => void) | null) => void;
 };
@@ -32,65 +27,14 @@ const ROLE_LABEL: Record<Turn["role"], string> = {
   assistant: "Concierge",
 };
 
-function formatConstraintSummary(input: Turn["constraintSnapshot"]) {
-  if (!input) return [];
-
-  const toFeetLabel = (inches: number): string => {
-    const feet = Math.floor(inches / 12);
-    const remainder = Math.round(inches - feet * 12);
-    if (remainder === 0) return `${feet}'`;
-    return `${feet}'${remainder}"`;
-  };
-
-  const items: string[] = [];
-  if (input.hard_constraints.size) {
-    items.push(
-      `${toFeetLabel(input.hard_constraints.size.widthIn)} x ${toFeetLabel(input.hard_constraints.size.lengthIn)}${
-        typeof input.hard_constraints.size.toleranceIn === "number"
-          ? ` ±${input.hard_constraints.size.toleranceIn}"`
-          : ""
-      }`
-    );
-  }
-  if (input.hard_constraints.colors && input.hard_constraints.colors.length > 0) {
-    items.push(`Colors ${input.hard_constraints.colors.join(", ")}`);
-  }
-  if (input.hard_constraints.styles && input.hard_constraints.styles.length > 0) {
-    items.push(`Styles ${input.hard_constraints.styles.join(", ")}`);
-  }
-  if (input.hard_constraints.shape) {
-    items.push(
-      input.hard_constraints.shape === "round_oval"
-        ? "Shape round/oval"
-        : `Shape ${input.hard_constraints.shape}`
-    );
-  }
-  if (input.soft_preferences?.style) {
-    items.push(`Style ${input.soft_preferences.style}`);
-  }
-  if (input.soft_preferences?.palette) {
-    items.push(`Palette ${input.soft_preferences.palette}`);
-  }
-  if (input.soft_preferences?.room) {
-    items.push(`Room ${input.soft_preferences.room.replaceAll("_", " ")}`);
-  }
-  if (input.soft_preferences?.material) {
-    items.push(`Material ${input.soft_preferences.material}`);
-  }
-  return items.slice(0, 4);
-}
-
 export function ChatThread(input: ChatThreadProps) {
   const {
     turns,
     isLoading,
     showSlowNotice,
-    isDeveloperView,
     emptyStatePrompts,
     bodyTextClassName,
     onChoosePrompt,
-    onAskAboutRug,
-    onSelectTurn,
     onJumpToLatestVisibilityChange,
     onJumpToLatestHandlerChange,
   } = input;
@@ -219,17 +163,6 @@ export function ChatThread(input: ChatThreadProps) {
                     ? "group ml-auto max-w-[92%] rounded-3xl border border-border/45 bg-[#e7dccf]/82 px-6 py-5 shadow-[0_1px_2px_rgba(50,30,12,0.12)] sm:max-w-[86%]"
                     : "group max-w-full rounded-3xl border border-border/45 bg-background/58 px-4 py-4 sm:px-5 sm:py-5"
                 }
-                onClick={() =>
-                  turn.role === "assistant" ? onSelectTurn(turn.id) : undefined
-                }
-                tabIndex={turn.role === "assistant" ? 0 : undefined}
-                onKeyDown={(event) => {
-                  if (turn.role !== "assistant") return;
-                  if (event.key === "Enter" || event.key === " ") {
-                    event.preventDefault();
-                    onSelectTurn(turn.id);
-                  }
-                }}
               >
                 <div className="mb-2 flex items-center justify-between gap-2">
                   <p className="text-[11px] font-semibold tracking-[0.08em] text-muted-foreground">
@@ -239,26 +172,6 @@ export function ChatThread(input: ChatThreadProps) {
                     {formatTime(turn.createdAt)}
                   </time>
                 </div>
-
-                {turn.role === "assistant" && turn.coarseMode === "recommendation" ? (
-                  <div className="mb-3 flex flex-wrap gap-2">
-                    {formatConstraintSummary(turn.constraintSnapshot).map((item) => (
-                      <Badge
-                        key={`${turn.id}-${item}`}
-                        variant="outline"
-                        className="border-border/40 bg-background/60 px-2.5 py-1 text-[11px] font-medium text-foreground/80"
-                      >
-                        {item}
-                      </Badge>
-                    ))}
-                  </div>
-                ) : null}
-
-                {turn.role === "assistant" && turn.fineMode && isDeveloperView ? (
-                  <Badge variant="outline" className="mb-2 border-border/30 text-[10px] text-muted-foreground">
-                    {modeLabel(turn.fineMode)}
-                  </Badge>
-                ) : null}
 
                 {turn.role === "assistant" ? (
                   <div
@@ -345,8 +258,6 @@ export function ChatThread(input: ChatThreadProps) {
                         >
                           <RecommendationCard
                             item={item}
-                            showTechnicalMeta={isDeveloperView}
-                            onAskAboutRug={onAskAboutRug}
                           />
                         </div>
                       ))}

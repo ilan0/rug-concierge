@@ -1,5 +1,6 @@
 import { getRecommendationPromptBundle } from "@/lib/ai/prompt-library";
 import {
+  endsWithSentenceBoundary,
   getMaxOutputTokens,
   normalizeText,
   postOpenAiResponses,
@@ -359,6 +360,13 @@ function sanitizeResponse(
   };
 }
 
+function warnIfLikelyTruncatedAssistantMessage(message: string): void {
+  if (endsWithSentenceBoundary(message)) return;
+  console.warn("[general_chat] assistant message may be truncated", {
+    assistant_preview: sectionPreview(message),
+  });
+}
+
 function fallbackResponse(
   reason: string,
   latestUserMessage: string
@@ -566,6 +574,7 @@ export async function generateGeneralChatResponse(input: {
   }
 
   const runtimeNote = "GENERAL_CHAT_AI_RUNTIME:real";
+  warnIfLikelyTruncatedAssistantMessage(sanitized.assistant_message);
   return {
     ...sanitized,
     notes: sanitized.notes ? `${runtimeNote}; ${sanitized.notes}` : runtimeNote,

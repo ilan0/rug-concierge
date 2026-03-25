@@ -19,6 +19,8 @@ type RecommendationPromptBundleInput = {
 type RecommendationLayerContext = {
   role: RoleType;
   discoveryMode: boolean;
+  hasConstraintMismatch: boolean;
+  hasThinResultsExpansion: boolean;
   hasChatMemoryContext: boolean;
   hasCustomerContext: boolean;
   hasRecentlyShownContext: boolean;
@@ -46,6 +48,12 @@ type BuildRecommendationPromptSectionsInput = RecommendationLayerContext & {
     };
     recent_turns?: unknown[];
   };
+  constraint_mismatch?: {
+    expanded_from_zero_match: boolean;
+    unmet_constraints: string[];
+    disclosure_hint: string | null;
+  };
+  expanded_due_to_thin_results?: boolean;
   inventoryContext: unknown[];
   userMessage: string;
   constraints: HardConstraints;
@@ -153,7 +161,23 @@ const RECOMMENDATION_LAYER_DEFINITIONS: RecommendationLayerDefinition[] = [
     role: "system",
     include: (input) => input.discoveryMode,
     text: () =>
-      "Discovery mode is active: show an inspiring range across style/origin/mood diversity and end with one natural question about the customer's space while still returning recommendations.",
+      "Discovery mode is active. You MUST end assistant_message with exactly one natural follow-up question about the customer's space while still returning recommendations.",
+  },
+  {
+    id: PROMPT_LAYER.taskRecommendation,
+    role: "system",
+    include: (input) => input.hasConstraintMismatch,
+    text: (input) =>
+      `Constraint mismatch expansion is active: ${JSON.stringify(
+        input.constraint_mismatch ?? null
+      )}. Include one concise, honest disclosure that exact matches were unavailable before presenting closest alternatives.`,
+  },
+  {
+    id: PROMPT_LAYER.taskRecommendation,
+    role: "system",
+    include: (input) => input.hasThinResultsExpansion,
+    text: () =>
+      "Thin-results expansion is active. Include one concise disclosure that only a few exact matches were available and similar alternatives are included.",
   },
 ];
 

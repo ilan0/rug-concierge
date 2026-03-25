@@ -17,6 +17,8 @@ export function getChatLayerPreview(input: {
     return getRecommendationLayerPreview({
       role: input.role,
       discoveryMode: false,
+      hasConstraintMismatch: false,
+      hasThinResultsExpansion: false,
       hasChatMemoryContext: input.hasChatMemoryContext,
       hasCustomerContext: false,
       hasRecentlyShownContext: false,

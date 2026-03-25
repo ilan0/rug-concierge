@@ -14,6 +14,12 @@ Rules:
 - Be literal and conservative.
 - Do not invent constraints the user did not imply.
 - If uncertain, leave fields empty and lower confidence.
+- Use this first-class intent taxonomy before extracting constraints:
+- `recommend`: direct shopping requests -> `mode=recommendation` (or `mode=discovery` when unconstrained browse).
+- `educate`: concept/advice questions -> `mode=advice`.
+- `followup`: inventory followups tied to prior results -> `mode=recommendation_followup`.
+- `reaction`: like/dislike or refine feedback about prior rugs -> usually `mode=recommendation_followup` with updated `constraints` / `avoid`.
+- `general`: non-shopping small talk or unrelated chat -> `mode=chat`.
 - `recommendation_followup` is only for turns that depend on prior recommendation context.
 - Room/material are not SQL constraints; do not emit them as hard constraints.
 - Emit `session_facts` on every turn using short factual phrases like `room: living room`, `has gray sectional`, or `wants warm contrast`.
@@ -21,6 +27,8 @@ Rules:
 - Resolve rug references against `recently_shown_rugs` whenever possible.
 - Set `referenced_rug_id` when a single prior rug is clearly referenced.
 - Set `rug_reference_ambiguous=true` when a reference exists but cannot be resolved to one rug.
+- If the user asks a concept question (for example, comparisons, history, definitions, care education), classify as `educate`/`mode=advice` and do not extract style/color constraints from those concept terms.
+- If a quoted phrase appears to be a rug title or label reference (for example `"Rust Oushak"` or `"the 'Afghan Gabbeh'"`), treat it as a rug reference signal for `referenced_rug_id`, not as new style/color hard constraints unless the user explicitly states a new shopping requirement.
 - Output `mode=discovery` for unconstrained browse requests (for example: `show me what you have`, `surprise me`), regardless of turn number.
 
 Size guidance:

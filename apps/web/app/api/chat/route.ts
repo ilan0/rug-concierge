@@ -9,7 +9,6 @@ import {
   saveSession,
   SessionTenantMismatchError,
 } from "@/lib/chat/session-store";
-import { updateRecommendationStateForTurn } from "@/lib/chat/state";
 import { compileTurnPolicy } from "@/lib/chat/policy-compiler";
 import { buildPromptLayers } from "@/lib/chat/prompt-builder";
 import {
@@ -45,7 +44,6 @@ import {
   chatRateLimit,
 } from "@/lib/rate-limit";
 import type {
-  ChatTurnRequest,
   RoleType,
   SessionData,
   SessionMessage,
@@ -202,18 +200,16 @@ export async function POST(req: Request) {
     const compiledPolicy = compileTurnPolicy({
       parsedTurn,
       explicitConstraints: body.constraints,
-    });
-    const sparseCompiledConstraints: ChatTurnRequest["constraints"] =
-      compiledPolicy.hard_constraints;
-
-    const withRecommendationState = updateRecommendationStateForTurn(session, {
-      message: userMessage,
-      constraints: sparseCompiledConstraints,
+      previousConstraints: session.recommendation_state.hard_constraints,
     });
     const nextSession: SessionData = {
-      ...withRecommendationState,
+      ...session,
+      recommendation_state: {
+        ...session.recommendation_state,
+        hard_constraints: compiledPolicy.hard_constraints,
+      },
       conversation_memory:
-        withRecommendationState.conversation_memory ??
+        session.conversation_memory ??
         buildInitialConversationMemory(),
     };
 
@@ -451,6 +447,7 @@ export async function POST(req: Request) {
       conversation_memory: nextConversationMemory,
       recommendation_state: {
         ...nextSession.recommendation_state,
+        hard_constraints: compiledPolicy.persisted_hard_constraints,
         runtime: {
           ...(nextSession.recommendation_state.runtime ?? {}),
           last_result_mode:
@@ -552,6 +549,7 @@ export async function POST(req: Request) {
           },
           routing: {
             mode: effectiveMode,
+            intent: parsedTurn.intent,
             rule_id: routeDecision.rule_id,
             confidence: routeDecision.confidence,
             needs_clarification: routeDecision.needs_clarification,
@@ -569,6 +567,7 @@ export async function POST(req: Request) {
               error: parserTrace.error,
             },
             policy: {
+              intent: compiledPolicy.intent,
               compiled_policy: compiledPolicy,
               policy_source: compiledPolicy.policy_source,
               must_prefer_avoid: compiledPolicy.must_prefer_avoid,

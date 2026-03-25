@@ -3,9 +3,7 @@
 import { useState } from "react";
 import type { UiRecommendationItem } from "@/lib/types/chat-ui";
 import { RugImage } from "@/components/ui/rug-image";
-import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import {
   RugDetailModal,
   type RugDetailData,
@@ -14,8 +12,6 @@ import { toast } from "sonner";
 
 type RecommendationCardProps = {
   item: UiRecommendationItem;
-  showTechnicalMeta?: boolean;
-  onAskAboutRug?: (rugTitle: string) => void;
 };
 
 function isRugDetailData(value: unknown): value is RugDetailData {
@@ -39,8 +35,6 @@ function isRugDetailData(value: unknown): value is RugDetailData {
 
 export function RecommendationCard({
   item,
-  showTechnicalMeta = false,
-  onAskAboutRug,
 }: RecommendationCardProps) {
   const tags = [item.origin, item.style, item.mood].filter(
     (value): value is string => typeof value === "string" && value.trim().length > 0
@@ -140,17 +134,6 @@ export function RecommendationCard({
     toast.error("Sharing is unavailable on this device.");
   };
 
-  const onAskAboutThisRug = () => {
-    if (!onAskAboutRug) return;
-    const rugTitle =
-      detail?.effective_fields.label ??
-      detail?.intake_label ??
-      item.title ??
-      "this rug";
-    setDetailOpen(false);
-    onAskAboutRug(rugTitle);
-  };
-
   return (
     <>
       <Card
@@ -175,24 +158,9 @@ export function RecommendationCard({
           />
         </div>
         <CardHeader className="pb-1 pt-3">
-          <div className="flex items-start justify-between gap-3">
-            <CardTitle className="line-clamp-2 text-[20px] leading-[1.25]">
-              {item.title}
-            </CardTitle>
-            {showTechnicalMeta ? (
-              <Badge
-                variant={
-                  item.confidence_tier === "high"
-                    ? "default"
-                    : item.confidence_tier === "medium"
-                      ? "warning"
-                      : "outline"
-                }
-              >
-                {item.confidence_tier}
-              </Badge>
-            ) : null}
-          </div>
+          <CardTitle className="line-clamp-2 text-[20px] leading-[1.25]">
+            {item.title}
+          </CardTitle>
         </CardHeader>
         <CardContent className="space-y-3 pb-4 pt-1 text-[17px] leading-[1.6]">
           <p className="space-y-1.5">
@@ -215,20 +183,6 @@ export function RecommendationCard({
               ))}
             </div>
           ) : null}
-          <div className="pt-1">
-            <Button
-              type="button"
-              variant="outline"
-              className="h-9 rounded-xl border-primary/35 bg-primary/5 px-3 text-sm hover:bg-primary/12"
-              onClick={(event) => {
-                event.stopPropagation();
-                onAskAboutThisRug();
-              }}
-              disabled={!onAskAboutRug}
-            >
-              Ask about this rug
-            </Button>
-          </div>
         </CardContent>
       </Card>
 
@@ -239,7 +193,6 @@ export function RecommendationCard({
         error={detailError}
         detail={detail}
         onShare={() => void onShare()}
-        onAskAboutThisRug={onAskAboutRug ? onAskAboutThisRug : undefined}
       />
     </>
   );

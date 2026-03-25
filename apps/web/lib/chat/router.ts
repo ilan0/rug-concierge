@@ -106,9 +106,7 @@ const ROUTE_RULES: RouteRule[] = [
 export function routeTurnMode(input: RouteTurnModeInput): RouteDecision {
   if (input.parsed_turn) {
     const parsed = input.parsed_turn;
-    const hasResolvableRugReference =
-      Boolean(parsed.referenced_rug_id) || Boolean(parsed.rug_reference_ambiguous);
-    if (hasResolvableRugReference && Boolean(input.has_recent_recommendations)) {
+    if (parsed.intent === "followup" || parsed.intent === "reaction") {
       return {
         mode: "recommendation",
         rule_id: "RECOMMENDATION_FOLLOWUP",
@@ -117,16 +115,7 @@ export function routeTurnMode(input: RouteTurnModeInput): RouteDecision {
       };
     }
 
-    if (parsed.mode === "recommendation_followup") {
-      return {
-        mode: "recommendation",
-        rule_id: "RECOMMENDATION_FOLLOWUP",
-        confidence: parsed.confidence,
-        needs_clarification: false,
-      };
-    }
-
-    if (parsed.mode === "recommendation") {
+    if (parsed.intent === "recommend") {
       return {
         mode: "recommendation",
         rule_id: "EXPLICIT_RECOMMENDATION_REQUEST",
@@ -135,16 +124,7 @@ export function routeTurnMode(input: RouteTurnModeInput): RouteDecision {
       };
     }
 
-    if (parsed.mode === "discovery") {
-      return {
-        mode: "recommendation",
-        rule_id: "EXPLICIT_RECOMMENDATION_REQUEST",
-        confidence: parsed.confidence,
-        needs_clarification: false,
-      };
-    }
-
-    if (parsed.mode === "advice") {
+    if (parsed.intent === "educate") {
       return {
         mode: "general_chat",
         rule_id: "GENERAL_ADVICE_OR_EDUCATION",
@@ -153,18 +133,27 @@ export function routeTurnMode(input: RouteTurnModeInput): RouteDecision {
       };
     }
 
-    const hasConstraintSignals =
-      Boolean(parsed.constraints.size) ||
-      (parsed.constraints.colors?.length ?? 0) > 0 ||
-      (parsed.constraints.styles?.length ?? 0) > 0 ||
-      Boolean(parsed.constraints.shape);
+    if (parsed.intent === "general") {
+      const hasConstraintSignals =
+        Boolean(parsed.constraints.size) ||
+        (parsed.constraints.colors?.length ?? 0) > 0 ||
+        (parsed.constraints.styles?.length ?? 0) > 0 ||
+        Boolean(parsed.constraints.shape);
+      return {
+        mode: "general_chat",
+        rule_id: hasConstraintSignals
+          ? "AMBIGUOUS_WITH_CONSTRAINTS_ONLY"
+          : "DEFAULT_GENERAL_CHAT",
+        confidence: parsed.confidence,
+        needs_clarification: hasConstraintSignals && parsed.confidence === "low",
+      };
+    }
+
     return {
       mode: "general_chat",
-      rule_id: hasConstraintSignals
-        ? "AMBIGUOUS_WITH_CONSTRAINTS_ONLY"
-        : "DEFAULT_GENERAL_CHAT",
+      rule_id: "DEFAULT_GENERAL_CHAT",
       confidence: parsed.confidence,
-      needs_clarification: hasConstraintSignals && parsed.confidence === "low",
+      needs_clarification: false,
     };
   }
 

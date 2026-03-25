@@ -26,12 +26,13 @@ const MAX_DYNAMIC_SQL_QUERY_LIMIT = 400;
 const DEFAULT_DYNAMIC_SQL_QUERY_LIMIT = 220;
 const AI_CANDIDATE_LIMIT = 40;
 const BROADENED_NO_MATCH_NOTE_CODE = "BROADENED_SIZE_COLOR_STYLE";
-const SIZE_REASONABLENESS_GUARD_NOTE_CODE = "SIZE_OUT_OF_REASONABLE_RANGE";
 const STYLE_RELAXATION_NOTE_CODE = "STYLE_RELAXED_TO_ORIGIN_OR_MOOD";
 const STYLE_DROPPED_NOTE_CODE = "STYLE_DROPPED_AFTER_FALLBACK";
 const SIZE_RELAX_SOFT_NOTE_CODE = "SIZE_RELAX_SOFT";
 const SIZE_RELAX_MEDIUM_NOTE_CODE = "SIZE_RELAX_MEDIUM";
 const SIZE_RELAX_STRONG_NOTE_CODE = "SIZE_RELAX_STRONG";
+const CONSTRAINT_MISMATCH_EXPANDED_NOTE_CODE = "CONSTRAINT_MISMATCH_EXPANDED";
+const THIN_RESULTS_STYLE_EXPANDED_NOTE_CODE = "THIN_RESULTS_STYLE_EXPANDED";
 
 type RunRecommendationPipelineInput = {
   requestId?: string;
@@ -79,6 +80,12 @@ type RunRecommendationPipelineInput = {
       };
       recent_turns?: unknown[];
     };
+    constraint_mismatch?: {
+      expanded_from_zero_match: boolean;
+      unmet_constraints: string[];
+      disclosure_hint: string | null;
+    };
+    expanded_due_to_thin_results?: boolean;
   };
   traceMeta?: E2eTraceMeta & {
     source_route: "/api/recommend" | "/api/chat";
@@ -121,7 +128,9 @@ type PipelineQueryTrace = {
 type BroadeningStage =
   | "none"
   | "size_relaxation_ladder"
-  | "size_relaxation_ladder_plus_color_style_relaxation";
+  | "size_relaxation_ladder_plus_color_style_relaxation"
+  | "thin_results_style_relaxation"
+  | "full_alternative_expansion";
 
 type RecommendationSizeIn = {
   width_in: number;
@@ -131,7 +140,7 @@ type RecommendationSizeIn = {
 const SIZE_RELAXATION_STEPS_IN = [4, 8, 12, 18, 24] as const;
 
 type NoMatchTrace = {
-  fallback_tier: "none" | "guided" | "terminal";
+  fallback_tier: "none" | "guided" | "terminal" | "expanded";
   reasonableness_gate: "not_applicable" | "passed" | "failed";
   reasonableness_gate_result: "not_applicable" | "passed" | "failed";
   terminal_reason_code: string | null;
@@ -672,6 +681,7 @@ export async function runRecommendationPipeline(
         styles: Boolean(activeHardConstraints.styles?.length),
         shape: Boolean(activeHardConstraints.shape),
       },
+      image_sql_filter_active: true,
       color_prefilter_active: false,
       color_prefilter: "inactive",
       color_prefilter_state: "inactive",
@@ -767,6 +777,10 @@ export async function runRecommendationPipeline(
     let failedSizeReasonablenessGuard = false;
     let styleFallbackStage: "none" | "origin_or_mood_family" | "style_dropped" =
       "none";
+    let expandedDueToThinResults = false;
+    let expandedFromZeroMatch = false;
+    let unmetConstraints: string[] = [];
+    let mismatchDisclosureHint: string | null = null;
 
     const hardFilterStart = Date.now();
     let candidates = filterByHardConstraints(
@@ -874,6 +888,30 @@ export async function runRecommendationPipeline(
       }
     }
 
+    if (
+      candidates.length > 0 &&
+      candidates.length < 4 &&
+      Boolean(filteredByConstraints.styles && filteredByConstraints.styles.length > 0) &&
+      constraintStrictness(filteredByConstraints, "styles") !== "must"
+    ) {
+      const styleRelaxedConstraints: HardConstraints = {
+        ...filteredByConstraints,
+        styles: undefined,
+      };
+      const widenedForThinResults = filterByHardConstraints(
+        inventory,
+        styleRelaxedConstraints,
+        filteredBySizeWindow
+      );
+      if (widenedForThinResults.length > candidates.length) {
+        candidates = widenedForThinResults;
+        filteredByConstraints = styleRelaxedConstraints;
+        expandedDueToThinResults = true;
+        broadeningApplied = true;
+        broadeningStage = "thin_results_style_relaxation";
+      }
+    }
+
     if (candidates.length === 0) {
       blockers = detectHardConstraintBlockers(
         inventory,
@@ -883,53 +921,46 @@ export async function runRecommendationPipeline(
       if (failedSizeReasonablenessGuard && !blockers.includes("size")) {
         blockers = ["size", ...blockers];
       }
-      const hasRepeatNoMatch =
-        failedSizeReasonablenessGuard ||
-        (input.noMatchAttempts ?? 0) > 0 ||
-        (input.priorResultMode === "no_match" &&
-          typeof relaxedToleranceIn === "number");
-      if (hasRepeatNoMatch) {
-        const response = buildTerminalNoMatchResponse({
-          constraints: requestedConstraints,
-          followupIntent,
-          blockers,
-          relaxedToleranceIn,
+      unmetConstraints =
+        blockers.length > 0
+          ? blockers
+          : listActiveConstraintKeys(filteredByConstraints);
+      mismatchDisclosureHint = buildMismatchDisclosureHint(unmetConstraints);
+
+      let broadenedCandidates = inventory;
+      if (
+        broadenedCandidates.length === 0 ||
+        Boolean(filteredBySizeWindow) ||
+        colorSqlPrefilterTokens.length > 0
+      ) {
+        const broadInventory = await fetchInventoryCandidates({
+          requestId,
+          tenantId: input.tenantId,
+          constraints: {},
+          sizeWindow: null,
+          limit: dynamicLimit,
+          colorSqlPrefilterTokens: [],
+          queryTrace,
         });
+        if (broadInventory !== null) {
+          broadenedCandidates = broadInventory;
+        }
+      }
+
+      if (broadenedCandidates.length === 0) {
+        const response: RecommendationResponse = {
+          mode: "no_match",
+          assistant_message:
+            "I don't have enough inventory available right now to make a reliable recommendation.",
+          questions: [],
+          recommendations: [],
+          notes: "INVENTORY_EMPTY",
+        };
         noMatchTrace = {
           ...noMatchTrace,
           fallback_tier: "terminal",
-          terminal_reason_code: response.notes ?? "NO_MATCH_TERMINAL",
+          terminal_reason_code: "INVENTORY_EMPTY",
         };
-        if (
-          broadeningStage ===
-          "size_relaxation_ladder_plus_color_style_relaxation"
-        ) {
-          response.notes = appendNotesCode(
-            response.notes,
-            BROADENED_NO_MATCH_NOTE_CODE
-          );
-        }
-        if (failedSizeReasonablenessGuard) {
-          response.notes = appendNotesCode(
-            response.notes,
-            SIZE_REASONABLENESS_GUARD_NOTE_CODE
-          );
-        }
-        if (styleFallbackStage === "origin_or_mood_family") {
-          response.notes = appendNotesCode(
-            response.notes,
-            STYLE_RELAXATION_NOTE_CODE
-          );
-        } else if (styleFallbackStage === "style_dropped") {
-          response.notes = appendNotesCode(
-            response.notes,
-            STYLE_DROPPED_NOTE_CODE
-          );
-        }
-        const sizeRelaxationCode = sizeRelaxationDisclosureCode(relaxedToleranceIn);
-        if (sizeRelaxationCode) {
-          response.notes = appendNotesCode(response.notes, sizeRelaxationCode);
-        }
 
         const logStart = Date.now();
         await logRecommendationQaEvent({
@@ -1002,116 +1033,14 @@ export async function runRecommendationPipeline(
         };
       }
 
-      const response = buildGuidedNoMatchResponse({
-        constraints: requestedConstraints,
-        followupIntent,
-        blockers,
-        relaxedToleranceIn,
-      });
+      candidates = broadenedCandidates;
+      expandedFromZeroMatch = true;
+      broadeningApplied = true;
+      broadeningStage = "full_alternative_expansion";
       noMatchTrace = {
         ...noMatchTrace,
-        fallback_tier: "guided",
+        fallback_tier: "expanded",
         terminal_reason_code: null,
-      };
-      if (
-        broadeningStage ===
-        "size_relaxation_ladder_plus_color_style_relaxation"
-      ) {
-        response.notes = appendNotesCode(
-          response.notes,
-          BROADENED_NO_MATCH_NOTE_CODE
-        );
-      }
-      if (failedSizeReasonablenessGuard) {
-        response.notes = appendNotesCode(
-          response.notes,
-          SIZE_REASONABLENESS_GUARD_NOTE_CODE
-        );
-      }
-      if (styleFallbackStage === "origin_or_mood_family") {
-        response.notes = appendNotesCode(
-          response.notes,
-          STYLE_RELAXATION_NOTE_CODE
-        );
-      } else if (styleFallbackStage === "style_dropped") {
-        response.notes = appendNotesCode(
-          response.notes,
-          STYLE_DROPPED_NOTE_CODE
-        );
-      }
-      const sizeRelaxationCode = sizeRelaxationDisclosureCode(relaxedToleranceIn);
-      if (sizeRelaxationCode) {
-        response.notes = appendNotesCode(response.notes, sizeRelaxationCode);
-      }
-
-      const logStart = Date.now();
-      await logRecommendationQaEvent({
-        request_id: requestId,
-        tenant_id: input.tenantId,
-        user_message: input.userMessage,
-        constraints: requestedConstraints,
-        sql_candidate_count: inventory.length,
-        filtered_candidate_count: 0,
-        ai_candidate_count: 0,
-        response_mode: response.mode,
-        recommendation_ids: [],
-        notes: response.notes,
-        error: null,
-        created_at: new Date().toISOString(),
-      });
-      timings.qa_log_ms = Date.now() - logStart;
-
-      const tracePath = await writeTrace({
-        request_id: requestId,
-        flow_path: flowPath,
-        source_route: input.traceMeta?.source_route ?? null,
-        session_id: input.traceMeta?.session_id ?? null,
-        role: input.traceMeta?.role ?? null,
-        tenant_id: input.tenantId,
-        user_message: input.userMessage,
-        constraints: requestedConstraints,
-        prompt_context: input.promptContext ?? null,
-        query_trace: queryTrace,
-        dynamic_limit: dynamicLimit,
-        policy_sql_filters: policySqlFilters,
-        query_variant_reason: queryVariantReason,
-        row_counts: summarizeQueryRows(queryTrace),
-        discovery_mode: discoveryMode,
-        color_sql_prefilter_tokens: colorSqlPrefilterTokens,
-        broadening_applied: broadeningApplied,
-        broadening_stage: broadeningStage,
-        no_match: noMatchTrace,
-        candidate_counts: {
-          sql_candidates: inventory.length,
-          hard_filtered_candidates: 0,
-          ai_candidates: 0,
-        },
-        timing_ms: {
-          ...timings,
-          total_ms: Date.now() - startedAt,
-        },
-        ai_trace: aiTrace,
-        result: {
-          mode: response.mode,
-          notes: response.notes,
-          recommendation_ids: [],
-          recommendation_count: 0,
-          blockers,
-          relaxed_size_tolerance_in: relaxedToleranceIn,
-        },
-        error: null,
-      });
-
-      return {
-        ok: true,
-        response,
-        trace_id: tracePath ? requestId : null,
-        meta: {
-          relaxed_size_tolerance_in: relaxedToleranceIn,
-          blockers,
-          last_recommended_size_in: toRuntimeSizeIn(null),
-          recently_shown_rugs: [],
-        },
       };
     }
 
@@ -1125,15 +1054,25 @@ export async function runRecommendationPipeline(
     });
     timings.shape_candidates_ms = Date.now() - shapeStart;
 
+    const aiPromptContext = {
+      ...input.promptContext,
+      discovery_mode: discoveryMode,
+      expanded_due_to_thin_results: expandedDueToThinResults,
+      constraint_mismatch: expandedFromZeroMatch
+        ? {
+            expanded_from_zero_match: true,
+            unmet_constraints: unmetConstraints,
+            disclosure_hint: mismatchDisclosureHint,
+          }
+        : undefined,
+    };
+
     const aiStart = Date.now();
     const response = await rankAndExplain(
       aiCandidates,
       requestedConstraints,
       input.userMessage,
-      {
-        ...input.promptContext,
-        discovery_mode: discoveryMode,
-      },
+      aiPromptContext,
       aiTrace
     );
     timings.rank_and_explain_ms = Date.now() - aiStart;
@@ -1163,6 +1102,18 @@ export async function runRecommendationPipeline(
     if (sizeRelaxationCode) {
       response.notes = appendNotesCode(response.notes, sizeRelaxationCode);
     }
+    if (expandedFromZeroMatch) {
+      response.notes = appendNotesCode(
+        response.notes,
+        CONSTRAINT_MISMATCH_EXPANDED_NOTE_CODE
+      );
+    }
+    if (expandedDueToThinResults) {
+      response.notes = appendNotesCode(
+        response.notes,
+        THIN_RESULTS_STYLE_EXPANDED_NOTE_CODE
+      );
+    }
 
     const logStart = Date.now();
     await logRecommendationQaEvent({
@@ -1190,7 +1141,7 @@ export async function runRecommendationPipeline(
       tenant_id: input.tenantId,
       user_message: input.userMessage,
       constraints: requestedConstraints,
-      prompt_context: input.promptContext ?? null,
+      prompt_context: aiPromptContext ?? null,
       query_trace: queryTrace,
       dynamic_limit: dynamicLimit,
       policy_sql_filters: policySqlFilters,
@@ -1373,35 +1324,6 @@ function detectHardConstraintBlockers(
   return blockers;
 }
 
-function describeHardConstraints(constraints: HardConstraints): string[] {
-  const items: string[] = [];
-  if (constraints.size) {
-    const toleranceText =
-      typeof constraints.size.toleranceIn === "number"
-        ? ` ±${constraints.size.toleranceIn}"`
-        : "";
-    items.push(
-      `size ${Math.round(constraints.size.widthIn)}" x ${Math.round(
-        constraints.size.lengthIn
-      )}"${toleranceText}`
-    );
-  }
-  if (constraints.colors && constraints.colors.length > 0) {
-    items.push(`colors ${constraints.colors.join(", ")}`);
-  }
-  if (constraints.styles && constraints.styles.length > 0) {
-    items.push(`styles ${constraints.styles.join(", ")}`);
-  }
-  if (constraints.shape) {
-    items.push(
-      constraints.shape === "round_oval"
-        ? "shape round/oval"
-        : `shape ${constraints.shape}`
-    );
-  }
-  return items;
-}
-
 function blockerLabel(blocker: string): string {
   if (blocker === "colors") return "color";
   if (blocker === "styles") return "style";
@@ -1409,106 +1331,19 @@ function blockerLabel(blocker: string): string {
   return blocker;
 }
 
-function buildGuidedNoMatchResponse(input: {
-  constraints: HardConstraints;
-  followupIntent:
-    | "none"
-    | "closest"
-    | "larger"
-    | "smaller"
-    | "more_like_this"
-    | "tighten";
-  blockers: string[];
-  relaxedToleranceIn: number | null;
-}): RecommendationResponse {
-  const constraintSummary = describeHardConstraints(input.constraints);
-  const summaryText =
-    constraintSummary.length > 0
-      ? `I couldn't find rugs matching ${constraintSummary.join(" + ")}.`
-      : "I couldn't find rugs matching your request.";
-
-  let assistantMessage = summaryText;
-  if (
-    (input.followupIntent === "closest" ||
-      input.followupIntent === "larger" ||
-      input.followupIntent === "smaller") &&
-    typeof input.relaxedToleranceIn === "number"
-  ) {
-    assistantMessage = `${summaryText} I widened size tolerance up to ±${input.relaxedToleranceIn}" and still found no valid matches.`;
-  }
-
-  if (input.blockers.length > 0) {
-    assistantMessage = `${assistantMessage} The tightest blockers appear to be ${input.blockers
-      .map((blocker) => blockerLabel(blocker))
-      .join(" + ")} constraints.`;
-  }
-
-  const questions: string[] = [];
-  if (input.blockers.includes("colors")) {
-    questions.push("Would you like to relax color and keep the other constraints strict?");
-  }
-  if (input.blockers.includes("styles")) {
-    questions.push("Would you like to relax style and keep size/color strict?");
-  }
-  if (input.blockers.includes("shape")) {
-    questions.push("Would you like to clear shape and keep the rest strict?");
-  }
-  if (questions.length === 0) {
-    questions.push("Would you like to relax one constraint so I can show the closest options?");
-  }
-
-  return {
-    mode: "no_match",
-    assistant_message: assistantMessage,
-    questions: questions.slice(0, 2),
-    recommendations: [],
-    notes: null,
-  };
+function listActiveConstraintKeys(constraints: HardConstraints): string[] {
+  const keys: string[] = [];
+  if (constraints.size) keys.push("size");
+  if (constraints.colors && constraints.colors.length > 0) keys.push("colors");
+  if (constraints.styles && constraints.styles.length > 0) keys.push("styles");
+  if (constraints.shape) keys.push("shape");
+  return keys;
 }
 
-function buildTerminalNoMatchResponse(input: {
-  constraints: HardConstraints;
-  followupIntent:
-    | "none"
-    | "closest"
-    | "larger"
-    | "smaller"
-    | "more_like_this"
-    | "tighten";
-  blockers: string[];
-  relaxedToleranceIn: number | null;
-}): RecommendationResponse {
-  const constraintSummary = describeHardConstraints(input.constraints);
-  const summaryText =
-    constraintSummary.length > 0
-      ? `I couldn't find anything that fits ${constraintSummary.join(" + ")}.`
-      : "I couldn't find anything that fits your request.";
-
-  let assistantMessage =
-    "We don't have anything that fits right now - would you like to start over or describe something different?";
-
-  if (
-    (input.followupIntent === "closest" ||
-      input.followupIntent === "larger" ||
-      input.followupIntent === "smaller") &&
-    typeof input.relaxedToleranceIn === "number"
-  ) {
-    assistantMessage = `${summaryText} I already widened the search up to ±${input.relaxedToleranceIn}" and still couldn't find a match. ${assistantMessage}`;
-  }
-
-  if (input.blockers.length > 0) {
-    assistantMessage = `${assistantMessage} The main blockers appear to be ${input.blockers
-      .map((blocker) => blockerLabel(blocker))
-      .join(" + ")} constraints.`;
-  }
-
-  return {
-    mode: "no_match",
-    assistant_message: assistantMessage,
-    questions: [],
-    recommendations: [],
-    notes: "NO_MATCH_TERMINAL",
-  };
+function buildMismatchDisclosureHint(unmetConstraints: string[]): string | null {
+  if (unmetConstraints.length === 0) return null;
+  const readable = unmetConstraints.map((item) => blockerLabel(item)).join(", ");
+  return `No exact match for ${readable}; disclose this clearly and then recommend the closest alternatives from available inventory.`;
 }
 
 function findLastRecommendedSizeIn(
@@ -1733,16 +1568,22 @@ async function runCandidateQuery(input: {
     sizeWindow: input.sizeWindow,
   });
 
-  const buildQuery = (selectColumns: string) => {
+  const buildQuery = (selectColumns: string, enforceImageJoin: boolean) => {
+    const projectedColumns = enforceImageJoin
+      ? `${selectColumns}, rug_images!inner(path)`
+      : selectColumns;
     let query = input.supabase
       .from("rugs")
-      .select(selectColumns)
+      .select(projectedColumns)
       .eq("status", "available")
       .eq("enrichment_status", "ready")
       .order("id", { ascending: true })
       .limit(input.limit);
 
     query = query.eq("tenant_id", input.tenantId);
+    if (enforceImageJoin) {
+      query = query.not("rug_images.path", "is", null).neq("rug_images.path", "");
+    }
 
     if (wantsSize && bounds) {
       const widthMin = rotated ? bounds.minLengthIn : bounds.minWidthIn;
@@ -1782,11 +1623,25 @@ async function runCandidateQuery(input: {
     "id, tenant_id, intake_label, status, enrichment_status, review_reason_code, width_total_in, length_total_in, ai_description",
   ];
 
-  let queryResult = await buildQuery(selectCandidates[0]);
+  let imageJoinEnforced = true;
+  let queryResult = await buildQuery(selectCandidates[0], true);
   for (const selectColumns of selectCandidates.slice(1)) {
     if (!queryResult.error) break;
     if (!isLikelyMissingColumnError(queryResult.error.message ?? "")) break;
-    queryResult = await buildQuery(selectColumns);
+    queryResult = await buildQuery(selectColumns, true);
+  }
+
+  if (
+    queryResult.error &&
+    /relationship|foreign key|rug_images|path/i.test(queryResult.error.message ?? "")
+  ) {
+    imageJoinEnforced = false;
+    queryResult = await buildQuery(selectCandidates[0], false);
+    for (const selectColumns of selectCandidates.slice(1)) {
+      if (!queryResult.error) break;
+      if (!isLikelyMissingColumnError(queryResult.error.message ?? "")) break;
+      queryResult = await buildQuery(selectColumns, false);
+    }
   }
 
   const { data, error } = queryResult;
@@ -1801,6 +1656,7 @@ async function runCandidateQuery(input: {
         limit: input.limit,
         size_bounds: bounds ? { ...bounds, rotated } : null,
         color_prefilter_active: input.colorSqlPrefilterTokens.length > 0,
+        image_sql_filter_active: imageJoinEnforced,
         color_prefilter:
           input.colorSqlPrefilterTokens.length > 0 ? "active" : "inactive",
         color_prefilter_state:
@@ -1826,6 +1682,7 @@ async function runCandidateQuery(input: {
       limit: input.limit,
       size_bounds: bounds ? { ...bounds, rotated } : null,
       color_prefilter_active: input.colorSqlPrefilterTokens.length > 0,
+      image_sql_filter_active: imageJoinEnforced,
       color_prefilter:
         input.colorSqlPrefilterTokens.length > 0 ? "active" : "inactive",
       color_prefilter_state:

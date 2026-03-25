@@ -7,24 +7,19 @@ import {
   type FormEvent,
 } from "react";
 import {
-  fetchChatDebugTrace,
   resetChatSession,
   sendChatTurn,
 } from "@/lib/concierge/client";
 import type { UiChatRequest, UiChatResponseBody } from "@/lib/types/chat-ui";
 import {
   STARTER_PROMPTS,
-  summarizeTracePayload,
-  toSlug,
 } from "@/components/concierge/utils";
 import type {
   ConciergeVariant,
-  OperatorView,
   Turn,
 } from "@/components/concierge/types";
 
 type UseConciergeControllerInput = {
-  debug: boolean;
   variant: ConciergeVariant;
   tenantId: string;
 };
@@ -67,19 +62,16 @@ function writeSessionStorage(key: string, value: string | null): void {
 }
 
 export function useConciergeController(input: UseConciergeControllerInput) {
-  const { debug, tenantId } = input;
+  const { tenantId } = input;
 
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [message, setMessage] = useState("");
   const [turns, setTurns] = useState<Turn[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [selectedTurnId, setSelectedTurnId] = useState<string | null>(null);
   const [recommendationState, setRecommendationState] =
     useState<UiRecommendationState | null>(null);
   const [lastFailedMessage, setLastFailedMessage] = useState<string | null>(null);
-  const [operatorOpen, setOperatorOpen] = useState(false);
-  const [operatorView, setOperatorView] = useState<OperatorView>("debug");
   const [showSlowNotice, setShowSlowNotice] = useState(false);
   const [isResettingChat, setIsResettingChat] = useState(false);
 
@@ -154,11 +146,6 @@ export function useConciergeController(input: UseConciergeControllerInput) {
     writeSessionStorage(key, JSON.stringify(turns.slice(-40)));
   }, [tenantId, turns]);
 
-  const debugRunId = useMemo(
-    () => toSlug(`concierge-debug-${new Date().toISOString().replace(/[:.]/g, "-")}`),
-    []
-  );
-
   const canSubmit = useMemo(
     () => message.trim().length > 0 && !isLoading,
     [message, isLoading]
@@ -166,29 +153,13 @@ export function useConciergeController(input: UseConciergeControllerInput) {
 
   const starterPrompts = STARTER_PROMPTS.concierge;
 
-  const selectedTurn = turns.find((turn) => turn.id === selectedTurnId) ?? null;
-  const latestAssistantTurn = [...turns]
-    .reverse()
-    .find((turn) => turn.role === "assistant");
-  const latestAssistantMode = latestAssistantTurn?.fineMode;
-
-  const isDeveloperRole = debug;
-  const canUseDebugTrace = isDeveloperRole;
-  const canOpenOperator = isDeveloperRole;
-
-  useEffect(() => {
-    if (!canOpenOperator && operatorOpen) {
-      setOperatorOpen(false);
-    }
-  }, [canOpenOperator, operatorOpen]);
-
   const getConstraintSnapshot = (
     nextState: UiRecommendationState | null | undefined
   ): Turn["constraintSnapshot"] => nextState ?? null;
 
   const buildChatRequestPayload = (userMessage: string): UiChatRequest => ({
     session_id: sessionId ?? undefined,
-    role: debug ? "store_staff" : "retail_customer",
+    role: "retail_customer",
     message: userMessage,
     tenant_id: tenantId,
   });
@@ -205,11 +176,6 @@ export function useConciergeController(input: UseConciergeControllerInput) {
       setLastFailedMessage(null);
     }
 
-    const debugCaseId =
-      debug && canUseDebugTrace
-        ? toSlug(`turn-${Date.now()}-${crypto.randomUUID().slice(0, 8)}`)
-        : null;
-
     if (shouldAppendUserTurn) {
       const userTurn: Turn = {
         id: crypto.randomUUID(),
@@ -221,45 +187,10 @@ export function useConciergeController(input: UseConciergeControllerInput) {
     }
 
     try {
-      const { payload, headers } = await sendChatTurn(
-        buildChatRequestPayload(userMessage),
-        debug && canUseDebugTrace && debugCaseId
-          ? {
-              debugTrace: {
-                runId: debugRunId,
-                caseId: debugCaseId,
-              },
-            }
-          : undefined
-      );
+      const { payload } = await sendChatTurn(buildChatRequestPayload(userMessage));
 
       setSessionId(payload.session_id);
       setRecommendationState(payload.recommendation_state ?? null);
-
-      let debugMeta: Turn["debug"] = null;
-      if (debug && canUseDebugTrace && debugCaseId) {
-        try {
-          const tracePayload = await fetchChatDebugTrace(debugRunId, debugCaseId);
-          debugMeta = {
-            runId: debugRunId,
-            caseId: debugCaseId,
-            routeTraceId: headers.chatRouteTraceId,
-            trace: summarizeTracePayload(tracePayload),
-            traceError: null,
-          };
-        } catch (traceError) {
-          debugMeta = {
-            runId: debugRunId,
-            caseId: debugCaseId,
-            routeTraceId: headers.chatRouteTraceId,
-            trace: null,
-            traceError:
-              traceError instanceof Error
-                ? traceError.message
-                : "Failed to load trace payload.",
-          };
-        }
-      }
 
       const response = payload.response;
       const assistantTurn: Turn = {
@@ -275,11 +206,9 @@ export function useConciergeController(input: UseConciergeControllerInput) {
           "follow_up_question" in response ? response.follow_up_question : null,
         constraintSnapshot: getConstraintSnapshot(payload.recommendation_state),
         createdAt: new Date().toISOString(),
-        debug: debugMeta,
       };
 
       setTurns((prev) => [...prev, assistantTurn]);
-      setSelectedTurnId(assistantTurn.id);
       if (options.preserveFailedMessage) {
         setLastFailedMessage(null);
       }
@@ -324,7 +253,6 @@ export function useConciergeController(input: UseConciergeControllerInput) {
     setMessage("");
     setError(null);
     setLastFailedMessage(null);
-    setSelectedTurnId(null);
     setRecommendationState(null);
   };
 
@@ -342,7 +270,6 @@ export function useConciergeController(input: UseConciergeControllerInput) {
       setTurns([]);
       setMessage("");
       setLastFailedMessage(null);
-      setSelectedTurnId(null);
       setRecommendationState(null);
     } catch (nextError) {
       setError(
@@ -362,24 +289,12 @@ export function useConciergeController(input: UseConciergeControllerInput) {
     turns,
     isLoading,
     error,
-    selectedTurn,
-    selectedTurnId,
-    setSelectedTurnId,
     recommendationState,
-    operatorOpen,
-    setOperatorOpen,
-    operatorView,
-    setOperatorView,
     showSlowNotice,
     isResettingChat,
-    debugRunId,
     canSubmit,
     lastFailedMessage,
     starterPrompts,
-    latestAssistantMode,
-    isDeveloperRole,
-    canUseDebugTrace,
-    canOpenOperator,
     onSubmit,
     submitWithPrompt,
     onRetryLastMessage,
