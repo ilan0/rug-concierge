@@ -357,6 +357,7 @@ export async function POST(req: Request) {
       referenced_rug_id: parsedTurn.referenced_rug_id,
       rug_reference_ambiguous: parsedTurn.rug_reference_ambiguous,
       is_discovery_turn: parsedTurn.mode === "discovery",
+      parsed_intent: parsedTurn.intent,
       trace_meta: traceMeta ?? undefined,
     } as const;
 
@@ -420,6 +421,9 @@ export async function POST(req: Request) {
     const nextDismissedRugIds = Array.isArray(runtimeUpdate?.dismissed_rug_ids)
       ? runtimeUpdate.dismissed_rug_ids
       : previousRuntime.dismissed_rug_ids ?? [];
+    const nextShownRugIds = Array.isArray(runtimeUpdate?.shown_rug_ids)
+      ? runtimeUpdate.shown_rug_ids
+      : previousRuntime.shown_rug_ids ?? [];
     const nextLikedAttributesSource =
       runtimeUpdate?.liked_attributes ??
       previousRuntime.liked_attributes ?? {
@@ -489,6 +493,7 @@ export async function POST(req: Request) {
             nextLikedRugIds,
           dismissed_rug_ids:
             nextDismissedRugIds,
+          shown_rug_ids: normalizeList(nextShownRugIds).slice(0, 80),
           liked_attributes:
             {
               colors: normalizeList(nextLikedAttributes.colors ?? []).slice(0, 8),

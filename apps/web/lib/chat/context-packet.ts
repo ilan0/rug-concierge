@@ -23,6 +23,7 @@ export type ChatAiContextPacket = {
     style: string | null;
     origin: string | null;
   }>;
+  shown_rug_ids: string[];
   liked_attributes: {
     colors: string[];
     styles: string[];
@@ -64,6 +65,12 @@ export function buildAiContextPacket(input: {
     },
     recently_shown_rugs: Array.isArray(runtime.recently_shown_rugs)
       ? runtime.recently_shown_rugs.slice(0, 10)
+      : [],
+    shown_rug_ids: Array.isArray(runtime.shown_rug_ids)
+      ? runtime.shown_rug_ids
+          .map((id) => normalizeText(id))
+          .filter((id) => id.length > 0)
+          .slice(0, 80)
       : [],
     liked_attributes: {
       colors: Array.isArray(runtime.liked_attributes?.colors)
@@ -113,19 +120,21 @@ export function getAiContextPacketStats(packet: ChatAiContextPacket) {
     packet.latest_user_message.length;
 
   return {
-    field_counts: {
+      field_counts: {
       stable_facts: packet.conversation_memory.stable_facts.length,
       open_threads: packet.conversation_memory.open_threads.length,
       customer_context: packet.customer_context.length,
-      recently_shown_rugs: packet.recently_shown_rugs.length,
-      recent_turns: packet.recent_turns.length,
-    },
+        recently_shown_rugs: packet.recently_shown_rugs.length,
+        shown_rug_ids: packet.shown_rug_ids.length,
+        recent_turns: packet.recent_turns.length,
+      },
     char_counts: {
       summary_text: packet.conversation_memory.summary_text.length,
       stable_facts_total: stableFactChars,
       open_threads_total: openThreadChars,
       customer_context_total: customerContextChars,
       recently_shown_total: recentlyShownChars,
+      shown_rug_ids_total: totalChars(packet.shown_rug_ids),
       liked_attributes_total: likedAttributesChars,
       recent_turns_total: recentTurnChars,
       latest_user_message: packet.latest_user_message.length,

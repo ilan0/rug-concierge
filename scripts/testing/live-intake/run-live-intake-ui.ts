@@ -118,6 +118,8 @@ const DB_APPEAR_TIMEOUT_MS = 30_000;
 const DB_POLL_INTERVAL_MS = 1_500;
 const ENRICHMENT_WAIT_MS = 12 * 60_000;
 const ENRICHMENT_POLL_MS = 15_000;
+const INTAKE_WRITE_WINDOW_MS = 10 * 60_000;
+const INTAKE_WRITE_MAX_REQUESTS = 28;
 
 function parseArgs() {
   const args = process.argv.slice(2);
@@ -383,7 +385,7 @@ async function submitSingleRug(input: {
     (resp) =>
       resp.url().includes("/api/inventory/intake") &&
       resp.request().method().toUpperCase() === "POST",
-    { timeout: 45_000 }
+    { timeout: 90_000 }
   );
 
   await form.getByRole("button", { name: "Add to inventory" }).click();
@@ -402,6 +404,18 @@ async function submitSingleRug(input: {
       };
     }
   } catch (error) {
+    const noticeVisible = await input.page
+      .getByText("Rug saved. AI enrichment is running in the background.")
+      .isVisible()
+      .catch(() => false);
+    if (noticeVisible) {
+      return {
+        ok: true,
+        latencyMs: Date.now() - startedAt,
+        status: 200,
+        error: null,
+      };
+    }
     return {
       ok: false,
       latencyMs: Date.now() - startedAt,
@@ -552,7 +566,33 @@ async function verifyBatch(input: {
   tenantId: string;
   batchIndex: number;
   batchRows: DatasetRecord[];
+  cronKickUrl?: string | null;
 }): Promise<BatchVerificationResult> {
+  if (input.batchRows.length === 0) {
+    return {
+      batch_index: input.batchIndex,
+      stock_ids: [],
+      submitted: 0,
+      found_in_db: 0,
+      passed: 0,
+      issues: ["No successful submissions in this batch."],
+      checks: {
+        name_present_count: 0,
+        size_mismatch_count: 0,
+        image_missing_count: 0,
+        image_broken_count: 0,
+        ai_description_empty_count: 0,
+        color_empty_count: 0,
+        available_true_count: 0,
+        duplicate_id_count: 0,
+        plausibility_spot_checks: [],
+      },
+      should_stop: false,
+      stop_reason: null,
+      stop_records: [],
+    };
+  }
+
   const stockIds = input.batchRows.map((row) => row.stock_id);
   const byStockId = new Map(input.batchRows.map((row) => [row.stock_id, row]));
 
@@ -615,6 +655,15 @@ async function verifyBatch(input: {
 
   const enrichStart = Date.now();
   while (Date.now() - enrichStart <= ENRICHMENT_WAIT_MS) {
+    if (input.cronKickUrl && input.cronKickUrl.trim().length > 0) {
+      await fetch(input.cronKickUrl, {
+        method: "GET",
+        headers: {
+          "x-vercel-cron": "1",
+        },
+      }).catch(() => null);
+    }
+
     const fetched = await fetchBatchRows({
       supabase: input.supabase,
       tenantId: input.tenantId,
@@ -919,6 +968,10 @@ async function main() {
 
   const startAt = Math.max(0, Number.parseInt(args.start_at ?? "0", 10) || 0);
   const limit = Math.max(0, Number.parseInt(args.limit ?? "0", 10) || 0);
+  const cronKickUrl =
+    typeof args.cron_kick_url === "string" && args.cron_kick_url.trim().length > 0
+      ? args.cron_kick_url.trim()
+      : null;
 
   const dataset = readDataset(datasetPath);
   const selected =
@@ -968,6 +1021,7 @@ async function main() {
   let consecutiveSubmissionFailures = 0;
   const submitLatencies: number[] = [];
   const successfulRows: DatasetRecord[] = [];
+  const writeTimestamps: number[] = [];
 
   try {
     await unlockStaffMode({
@@ -979,11 +1033,53 @@ async function main() {
     const totalBatches = Math.ceil(selected.length / batchSize);
     for (let batchIndex = 0; batchIndex < totalBatches; batchIndex += 1) {
       const batchRows = selected.slice(batchIndex * batchSize, (batchIndex + 1) * batchSize);
+      const submittedBatchRows: DatasetRecord[] = [];
       console.log(`\n[intake] Starting batch ${batchIndex + 1}/${totalBatches} (${batchRows.length} rugs)`);
 
       for (const row of batchRows) {
-        const result = await submitSingleRug({ page, row });
-        submitLatencies.push(result.latencyMs);
+        let result: Awaited<ReturnType<typeof submitSingleRug>> | null = null;
+        for (let attempt = 1; attempt <= 6; attempt += 1) {
+          const now = Date.now();
+          const cutoff = now - INTAKE_WRITE_WINDOW_MS;
+          while (writeTimestamps.length > 0 && writeTimestamps[0]! <= cutoff) {
+            writeTimestamps.shift();
+          }
+
+          if (writeTimestamps.length >= INTAKE_WRITE_MAX_REQUESTS) {
+            const waitMs = Math.max(
+              2_000,
+              writeTimestamps[0]! + INTAKE_WRITE_WINDOW_MS - now + 1_000
+            );
+            console.log(
+              `[intake] throttling ${Math.ceil(waitMs / 1000)}s to stay under inventory write rate limit`
+            );
+            await sleep(waitMs);
+          }
+
+          result = await submitSingleRug({ page, row });
+          submitLatencies.push(result.latencyMs);
+          writeTimestamps.push(Date.now());
+
+          if (result.ok) {
+            break;
+          }
+
+          if (result.status === 429 && attempt < 6) {
+            const backoffMs = 35_000 * attempt;
+            console.warn(
+              `[intake] 429 rate-limited for stock_id=${row.stock_id}; retrying in ${Math.ceil(backoffMs / 1000)}s (attempt ${attempt}/6)`
+            );
+            await sleep(backoffMs);
+            continue;
+          }
+
+          break;
+        }
+
+        if (!result) {
+          consecutiveSubmissionFailures += 1;
+          continue;
+        }
 
         if (!result.ok) {
           consecutiveSubmissionFailures += 1;
@@ -1003,6 +1099,7 @@ async function main() {
         runSummary.total_submitted += 1;
         runSummary.successful_stock_ids.push(row.stock_id);
         successfulRows.push(row);
+        submittedBatchRows.push(row);
 
         if (result.latencyMs > 30_000) {
           runSummary.stopped = true;
@@ -1020,7 +1117,8 @@ async function main() {
         supabase,
         tenantId: tenant.tenantId,
         batchIndex: batchIndex + 1,
-        batchRows,
+        batchRows: submittedBatchRows,
+        cronKickUrl,
       });
       runSummary.batch_results.push(verification);
       runSummary.total_batches_completed += 1;

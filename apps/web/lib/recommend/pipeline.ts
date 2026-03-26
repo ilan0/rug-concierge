@@ -4,6 +4,7 @@ import { getSizeBounds, type SizeWindow } from "@/lib/filters/size-bounds";
 import { resolveEffectiveFields } from "@/lib/inventory/resolve-fields";
 import { toSimilaritySizePreset } from "@/lib/inventory/size-presets";
 import { parseRugRecord } from "@/lib/inventory/rug-record";
+import { formatRugSize } from "@/lib/utils/format";
 import {
   isReasonableLongSideRatio,
   isWithinRelaxedBucketDistance,
@@ -33,6 +34,7 @@ const SIZE_RELAX_MEDIUM_NOTE_CODE = "SIZE_RELAX_MEDIUM";
 const SIZE_RELAX_STRONG_NOTE_CODE = "SIZE_RELAX_STRONG";
 const CONSTRAINT_MISMATCH_EXPANDED_NOTE_CODE = "CONSTRAINT_MISMATCH_EXPANDED";
 const THIN_RESULTS_STYLE_EXPANDED_NOTE_CODE = "THIN_RESULTS_STYLE_EXPANDED";
+const MAX_REASONABLE_REQUEST_LONG_SIDE_IN = 240;
 
 type RunRecommendationPipelineInput = {
   requestId?: string;
@@ -73,6 +75,7 @@ type RunRecommendationPipelineInput = {
         style: string | null;
         origin: string | null;
       }>;
+      shown_rug_ids?: string[];
       liked_attributes?: {
         colors: string[];
         styles: string[];
@@ -927,7 +930,8 @@ export async function runRecommendationPipeline(
           : listActiveConstraintKeys(filteredByConstraints);
       mismatchDisclosureHint = buildMismatchDisclosureHint(
         unmetConstraints,
-        filteredByConstraints
+        filteredByConstraints,
+        findLargestAvailableSizeText(inventory)
       );
 
       let broadenedCandidates = inventory;
@@ -1060,12 +1064,33 @@ export async function runRecommendationPipeline(
         unmetConstraints = Array.from(new Set([...unmetConstraints, "shape"]));
         mismatchDisclosureHint = buildMismatchDisclosureHint(
           unmetConstraints,
-          requestedConstraints
+          requestedConstraints,
+          findLargestAvailableSizeText(inventory)
         );
         broadeningApplied = true;
         if (broadeningStage === "none") {
           broadeningStage = "full_alternative_expansion";
         }
+      }
+    }
+
+    const previouslyShownIds = new Set([
+      ...(input.promptContext?.chat_context?.shown_rug_ids ?? []),
+      ...(input.promptContext?.chat_context?.recently_shown_rugs ?? []).map(
+        (rug) => rug.id
+      ),
+    ]);
+    const explicitlyRequestedRepeat =
+      /\b(show (me )?(that|those|same).*(again)|again please|same one|show it again)\b/i.test(
+        input.userMessage
+      );
+    if (!explicitlyRequestedRepeat && previouslyShownIds.size > 0 && candidates.length > 0) {
+      const unseenCandidates = candidates.filter((rug) => !previouslyShownIds.has(rug.id));
+      if (
+        unseenCandidates.length >= Math.min(4, candidates.length) ||
+        (unseenCandidates.length > 0 && candidates.length > 12)
+      ) {
+        candidates = unseenCandidates;
       }
     }
 
@@ -1365,9 +1390,32 @@ function listActiveConstraintKeys(constraints: HardConstraints): string[] {
   return keys;
 }
 
+function findLargestAvailableSizeText(inventory: InventoryRug[]): string | null {
+  let largest: { width: number; length: number; area: number } | null = null;
+  for (const rug of inventory) {
+    if (
+      typeof rug.width_total_in !== "number" ||
+      typeof rug.length_total_in !== "number"
+    ) {
+      continue;
+    }
+    const area = rug.width_total_in * rug.length_total_in;
+    if (!largest || area > largest.area) {
+      largest = {
+        width: rug.width_total_in,
+        length: rug.length_total_in,
+        area,
+      };
+    }
+  }
+  if (!largest) return null;
+  return formatRugSize(largest.width, largest.length);
+}
+
 function buildMismatchDisclosureHint(
   unmetConstraints: string[],
-  constraints: HardConstraints
+  constraints: HardConstraints,
+  largestAvailableSizeText?: string | null
 ): string | null {
   if (unmetConstraints.length === 0) return null;
   if (unmetConstraints.includes("shape")) {
@@ -1380,7 +1428,20 @@ function buildMismatchDisclosureHint(
     return "We don't have rugs in that requested shape right now, so I'm showing the closest alternatives available.";
   }
   if (unmetConstraints.includes("size") && constraints.size) {
-    return `We don't have an exact ${constraints.size.widthIn}" x ${constraints.size.lengthIn}" match right now, so I'm showing the closest available alternatives.`;
+    const requestedLongSide = Math.max(
+      constraints.size.widthIn,
+      constraints.size.lengthIn
+    );
+    const requestedText = formatRugSize(
+      constraints.size.widthIn,
+      constraints.size.lengthIn
+    );
+    if (requestedLongSide > MAX_REASONABLE_REQUEST_LONG_SIDE_IN) {
+      return largestAvailableSizeText
+        ? `We don't carry rugs at that scale. Our largest available pieces are around ${largestAvailableSizeText}, so I'm showing the biggest realistic alternatives.`
+        : "We don't carry rugs at that scale, so I'm showing the biggest realistic alternatives available.";
+    }
+    return `We don't have an exact ${requestedText} match right now, so I'm showing the closest available alternatives.`;
   }
   if (
     unmetConstraints.includes("styles") &&

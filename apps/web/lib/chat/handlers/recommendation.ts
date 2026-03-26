@@ -134,6 +134,8 @@ export async function handleRecommendationTurn(
             input.session.recommendation_state.runtime?.liked_rug_ids ?? [],
           dismissed_rug_ids:
             input.session.recommendation_state.runtime?.dismissed_rug_ids ?? [],
+          shown_rug_ids:
+            input.session.recommendation_state.runtime?.shown_rug_ids ?? [],
         },
       };
     }
@@ -182,6 +184,7 @@ export async function handleRecommendationTurn(
             conversation_memory: input.ai_context_packet.conversation_memory,
             customer_context: input.ai_context_packet.customer_context,
             recently_shown_rugs: input.ai_context_packet.recently_shown_rugs,
+            shown_rug_ids: input.ai_context_packet.shown_rug_ids,
             liked_attributes: input.ai_context_packet.liked_attributes,
             recent_turns: input.ai_context_packet.recent_turns,
           }
@@ -212,6 +215,8 @@ export async function handleRecommendationTurn(
   const recentlyShownRugs = result.meta?.recently_shown_rugs ?? [];
   const previousLikedAttributes =
     input.session.recommendation_state.runtime?.liked_attributes;
+  const previousShownRugIds =
+    input.session.recommendation_state.runtime?.shown_rug_ids ?? [];
   const requestedColors = input.session.recommendation_state.hard_constraints.colors ?? [];
   const requestedStyles = input.session.recommendation_state.hard_constraints.styles ?? [];
   const uniqueLower = (values: string[], maxItems = 8) =>
@@ -250,6 +255,10 @@ export async function handleRecommendationTurn(
         ]),
         origins: uniqueLower(previousLikedAttributes?.origins ?? []),
       },
+      shown_rug_ids: uniqueLower([
+        ...previousShownRugIds,
+        ...recentlyShownRugs.map((rug) => rug.id),
+      ], 80),
       liked_rug_ids:
         input.session.recommendation_state.runtime?.liked_rug_ids ?? [],
       dismissed_rug_ids:

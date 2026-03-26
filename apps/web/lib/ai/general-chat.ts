@@ -8,6 +8,7 @@ import {
   toPreviewText,
   withRetryInstruction,
 } from "@/lib/ai/response-quality";
+import { detectResponseLanguage } from "@/lib/ai/language";
 import type { ChatAiContextPacket } from "@/lib/chat/context-packet";
 import type { RoleType } from "@/lib/chat/types";
 import {
@@ -293,13 +294,20 @@ function withCollectionBridge(assistantMessage: string, latestUserMessage: strin
 
   const lower = assistant.toLowerCase();
   const alreadyBridges =
-    lower.includes("show") &&
-    (lower.includes("collection") ||
-      lower.includes("examples") ||
-      lower.includes("inventory") ||
-      lower.includes("options"));
+    ((lower.includes("show") || lower.includes("see") || lower.includes("explore")) &&
+      (lower.includes("collection") ||
+        lower.includes("examples") ||
+        lower.includes("inventory") ||
+        lower.includes("options") ||
+        lower.includes("pieces"))) ||
+    /\bwould you like\b[\s\S]{0,120}\b(show|see|examples|collection|inventory|options)\b/.test(
+      lower
+    );
   if (alreadyBridges) return assistant;
 
+  if (detectResponseLanguage(latestUserMessage) === "es") {
+    return `${assistant} Si quieres, puedo mostrar ejemplos de nuestra coleccion actual.`;
+  }
   return `${assistant} If you'd like, I can show examples from our current collection.`;
 }
 

@@ -1,6 +1,7 @@
 import type { RoleType } from "@/lib/chat/types";
 import type { HardConstraints } from "@/lib/types/recommendation";
 import { PROMPT_LAYER, type PromptLayerId } from "@/lib/prompts/layer-ids";
+import { detectResponseLanguage } from "@/lib/ai/language";
 
 type RecommendationLayerRole = "system" | "user";
 
@@ -85,6 +86,15 @@ const RECOMMENDATION_LAYER_DEFINITIONS: RecommendationLayerDefinition[] = [
     role: "system",
     include: () => true,
     text: (input) => input.prompts.system,
+  },
+  {
+    id: PROMPT_LAYER.taskRecommendation,
+    role: "system",
+    include: () => true,
+    text: (input) =>
+      detectResponseLanguage(input.userMessage) === "es"
+        ? "Respond in Spanish. Keep rug titles and IDs exactly as provided."
+        : "Respond in English.",
   },
   {
     id: PROMPT_LAYER.taskRecommendation,

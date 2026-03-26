@@ -11,6 +11,19 @@ function normalizeText(value: string): string {
   return value.toLowerCase().replace(/\s+/g, " ").trim();
 }
 
+const STYLE_ALIASES: Record<string, string[]> = {
+  kazak: ["caucasian kazak", "kazakh"],
+  oushak: ["ushak"],
+  kilim: ["flatweave", "flat weave"],
+  heriz: ["serapi"],
+  serapi: ["heriz"],
+  bokhara: ["bukhara"],
+  turkmen: ["turkoman"],
+  baluch: ["baluchi"],
+  tribal: ["nomadic"],
+  geometric: ["geometric tribal"],
+};
+
 function toSearchText(rug: InventoryRug): string {
   const fields = rug.effective_fields
     ? rug.effective_fields
@@ -108,9 +121,12 @@ function matchesStyles(rug: InventoryRug, constraints: HardConstraints): boolean
   const styleTokens = new Set(toStyles(rug));
   const searchText = toSearchText(rug);
 
-  return wanted.some(
-    (token) => styleTokens.has(token) || searchText.includes(token)
-  );
+  return wanted.some((token) => {
+    const candidateTerms = [token, ...(STYLE_ALIASES[token] ?? [])];
+    return candidateTerms.some(
+      (term) => styleTokens.has(term) || searchText.includes(term)
+    );
+  });
 }
 
 function matchesSize(

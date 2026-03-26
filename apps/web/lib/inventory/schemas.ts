@@ -29,6 +29,12 @@ export const RUG_MOOD_VALUES = [
   "modern",
 ] as const;
 
+export const RUG_DETECTION_CONFIDENCE_VALUES = [
+  "low",
+  "medium",
+  "high",
+] as const;
+
 const stringArrayField = (maxItems: number, maxChars: number) =>
   z.array(z.string().trim().min(1).max(maxChars)).max(maxItems).nullable().optional();
 
@@ -43,6 +49,8 @@ export const aiStructuredFieldsSchema = z
     primary_colors: canonicalColorArrayField(),
     age_category: z.enum(RUG_AGE_CATEGORY_VALUES).nullable().optional(),
     mood: z.enum(RUG_MOOD_VALUES).nullable().optional(),
+    is_rug: z.boolean().nullable().optional(),
+    is_rug_confidence: z.enum(RUG_DETECTION_CONFIDENCE_VALUES).nullable().optional(),
   })
   .strict();
 

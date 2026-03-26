@@ -17,6 +17,15 @@ import { writeE2eTraceArtifact } from "@/lib/qa/e2e-trace";
 export async function handleGeneralChatTurn(
   input: ChatTurnHandlerInput
 ): Promise<GeneralChatResponse> {
+  if (input.parsed_intent === "purchase") {
+    return {
+      mode: "general_chat",
+      assistant_message:
+        "Great choice. I can help you finalize this with store staff for pricing and checkout. If you want, I can pull up that rug's details again.",
+      notes: "PURCHASE_INTENT_HANDOFF",
+    };
+  }
+
   const layers = buildPromptLayers({
     mode: "general_chat",
     role: input.role,

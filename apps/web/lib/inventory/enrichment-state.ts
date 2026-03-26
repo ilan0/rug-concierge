@@ -9,6 +9,7 @@ export type EnrichmentStatus = (typeof ENRICHMENT_STATUS_VALUES)[number];
 export const REVIEW_REASON_CODES = [
   "ANALYSIS_INCOMPLETE",
   "ANALYSIS_FAILED",
+  "NON_RUG_DETECTED",
 ] as const;
 
 export type ReviewReasonCode = (typeof REVIEW_REASON_CODES)[number];
@@ -48,6 +49,8 @@ export function reviewReasonMessage(
   if (code === "ANALYSIS_FAILED") {
     return "Analysis failed - tap Re-analyze to try again, or enter details manually.";
   }
+  if (code === "NON_RUG_DETECTED") {
+    return "Image appears to be non-rug content - verify manually before publishing.";
+  }
   return "Needs review - please verify this rug manually.";
 }
-

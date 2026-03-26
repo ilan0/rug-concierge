@@ -15,10 +15,27 @@ const STYLE_TERMS: Array<{ token: string; canonical: string }> = [
   { token: "eclectic", canonical: "eclectic" },
   { token: "persian", canonical: "persian" },
   { token: "oushak", canonical: "oushak" },
+  { token: "ushak", canonical: "oushak" },
   { token: "heriz", canonical: "heriz" },
   { token: "serapi", canonical: "serapi" },
+  { token: "kashan", canonical: "kashan" },
+  { token: "tabriz", canonical: "tabriz" },
+  { token: "isfahan", canonical: "isfahan" },
+  { token: "sarouk", canonical: "sarouk" },
+  { token: "sultanabad", canonical: "sultanabad" },
+  { token: "bidjar", canonical: "bidjar" },
+  { token: "malayer", canonical: "malayer" },
+  { token: "kazak", canonical: "kazak" },
+  { token: "shirvan", canonical: "shirvan" },
+  { token: "kuba", canonical: "kuba" },
+  { token: "karabagh", canonical: "karabagh" },
   { token: "gabbeh", canonical: "gabbeh" },
   { token: "kilim", canonical: "kilim" },
+  { token: "bokhara", canonical: "bokhara" },
+  { token: "ersari", canonical: "ersari" },
+  { token: "turkmen", canonical: "turkmen" },
+  { token: "beni ourain", canonical: "beni ourain" },
+  { token: "azilal", canonical: "azilal" },
   { token: "tribal", canonical: "tribal" },
   { token: "floral", canonical: "floral" },
   { token: "geometric", canonical: "geometric" },
@@ -206,17 +223,32 @@ export function normalizeHardConstraints(input: unknown): HardConstraints {
 function parseSizeFromMessage(userMessage: string): HardConstraints["size"] | undefined {
   const text = userMessage.toLowerCase();
   const sizePattern =
-    /(\d{1,3}(?:\.\d+)?)\s*(?:ft|feet|')?\s*(?:[x×]|\bby\b)\s*(\d{1,3}(?:\.\d+)?)\s*(?:ft|feet|')?(?:\s*-?\s*ish)?/i;
+    /(\d{1,3}(?:\.\d+)?)\s*(ft|feet|'|in|inch|inches|")?\s*(?:[x×]|\bby\b)\s*(\d{1,3}(?:\.\d+)?)\s*(ft|feet|'|in|inch|inches|")?(?:\s*-?\s*ish)?/i;
   const match = text.match(sizePattern);
   if (!match) return undefined;
 
   const left = Number.parseFloat(match[1]);
-  const right = Number.parseFloat(match[2]);
+  const right = Number.parseFloat(match[3]);
   if (!Number.isFinite(left) || !Number.isFinite(right)) return undefined;
 
-  const mentionsInches = /\b(?:inch|inches)\b|"/i.test(text);
+  const leftUnit = (match[2] ?? "").toLowerCase();
+  const rightUnit = (match[4] ?? "").toLowerCase();
+  const hasFeetUnit =
+    /\b(?:ft|feet)\b/.test(leftUnit) ||
+    /\b(?:ft|feet)\b/.test(rightUnit) ||
+    leftUnit === "'" ||
+    rightUnit === "'";
+  const hasInchUnit =
+    /\b(?:in|inch|inches)\b/.test(leftUnit) ||
+    /\b(?:in|inch|inches)\b/.test(rightUnit) ||
+    leftUnit === "\"" ||
+    rightUnit === "\"";
+
+  const mentionsInches = hasInchUnit || /\b(?:inch|inches)\b|"/i.test(text);
+  const explicitFeet = hasFeetUnit && !hasInchUnit;
+  const explicitInches = hasInchUnit && !hasFeetUnit;
   const probablyFeet = !mentionsInches && left <= 30 && right <= 30;
-  const multiplier = probablyFeet ? 12 : 1;
+  const multiplier = explicitFeet ? 12 : explicitInches ? 1 : probablyFeet ? 12 : 1;
 
   const exactRequested = /\b(?:exact|exactly|no tolerance)\b/i.test(text);
   const approximateRequested =

@@ -6,6 +6,7 @@ import type { RecommendationResponse } from "@/lib/ai/recommend";
 import type { E2eTraceMeta } from "@/lib/qa/e2e-trace";
 import type { AppRole } from "@/lib/auth/roles";
 import type { RecommendationFollowupIntent } from "@/lib/chat/router";
+import type { ParsedTurn } from "@/lib/chat/turn-parser-contract";
 
 export type RoleType = AppRole;
 
@@ -61,6 +62,7 @@ export type RecommendationState = {
       styles: string[];
       origins: string[];
     };
+    shown_rug_ids?: string[];
     recently_shown_rugs?: Array<{
       id: string;
       label: string;
@@ -107,6 +109,7 @@ export type ChatTurnHandlerInput = {
   referenced_rug_id?: string;
   rug_reference_ambiguous?: boolean;
   is_discovery_turn?: boolean;
+  parsed_intent?: ParsedTurn["intent"];
 };
 
 export type GeneralChatResponse = {
@@ -131,6 +134,7 @@ export type RecommendationTurnResponse = Omit<RecommendationResponse, "mode"> & 
       styles: string[];
       origins: string[];
     };
+    shown_rug_ids?: string[];
     recently_shown_rugs?: Array<{
       id: string;
       label: string;

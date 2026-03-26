@@ -133,6 +133,15 @@ export function routeTurnMode(input: RouteTurnModeInput): RouteDecision {
       };
     }
 
+    if (parsed.intent === "purchase") {
+      return {
+        mode: "general_chat",
+        rule_id: "GENERAL_ADVICE_OR_EDUCATION",
+        confidence: parsed.confidence,
+        needs_clarification: false,
+      };
+    }
+
     if (parsed.intent === "general") {
       const hasConstraintSignals =
         Boolean(parsed.constraints.size) ||

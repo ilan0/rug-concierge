@@ -13,6 +13,7 @@ export const TURN_INTENT_VALUES = [
   "educate",
   "followup",
   "reaction",
+  "purchase",
   "general",
 ] as const;
 

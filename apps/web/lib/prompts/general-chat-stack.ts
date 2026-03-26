@@ -2,6 +2,7 @@ import type { RoleType } from "@/lib/chat/types";
 import type { PromptLayerId } from "@/lib/prompts/layer-ids";
 import { PROMPT_LAYER } from "@/lib/prompts/layer-ids";
 import type { ChatAiContextPacket } from "@/lib/chat/context-packet";
+import { detectResponseLanguage } from "@/lib/ai/language";
 
 type GeneralChatLayerRole = "system" | "user";
 
@@ -54,6 +55,15 @@ const GENERAL_CHAT_LAYER_DEFINITIONS: GeneralChatLayerDefinition[] = [
     role: "system",
     include: () => true,
     text: (input) => input.prompts.generalChat,
+  },
+  {
+    id: PROMPT_LAYER.taskGeneral,
+    role: "system",
+    include: () => true,
+    text: (input) =>
+      detectResponseLanguage(input.contextPacket.latest_user_message) === "es"
+        ? "Respond in Spanish."
+        : "Respond in English.",
   },
   {
     id: PROMPT_LAYER.roleRetail,

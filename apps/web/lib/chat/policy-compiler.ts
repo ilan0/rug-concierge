@@ -46,11 +46,16 @@ function mergeHardConstraints(input: {
   parsedAvoid: ParsedTurn["avoid"];
   strictness: ParsedTurn["strictness"];
   intent: ParsedTurn["intent"];
+  mode: ParsedTurn["mode"];
+  followupIntent: ParsedTurn["followup_intent"];
 }): HardConstraints {
   const explicit = input.explicit;
   const parsed = input.parsed;
   const useInheritedBase =
-    input.intent === "followup" || input.intent === "reaction";
+    input.intent === "followup" ||
+    input.intent === "reaction" ||
+    input.mode === "recommendation_followup" ||
+    input.followupIntent !== "none";
   const base = useInheritedBase ? input.previous : {};
   const mergedStrictness = {
     size: explicit.strictness?.size ?? input.strictness.size,
@@ -201,9 +206,13 @@ export function compileTurnPolicy(input: {
     parsedAvoid: input.parsedTurn.avoid,
     strictness: input.parsedTurn.strictness,
     intent: input.parsedTurn.intent,
+    mode: input.parsedTurn.mode,
+    followupIntent: input.parsedTurn.followup_intent,
   });
   const persistedHardConstraints =
-    input.parsedTurn.intent === "educate" || input.parsedTurn.intent === "general"
+    input.parsedTurn.intent === "educate" ||
+    input.parsedTurn.intent === "general" ||
+    input.parsedTurn.intent === "purchase"
       ? previous
       : hardConstraints;
 

@@ -268,9 +268,26 @@ function scoreColorMatch(rug: InventoryRug, constraints: HardConstraints, userMe
   const requestedColors = expandColorRequestToFamily(requested);
   const matches = requestedColors.filter((token) => candidateColors.has(token))
     .length;
-  if (matches >= 2) return 15;
-  if (matches === 1) return 11;
-  return 3;
+  const dominantColors = normalizeColorList((fields.primary_colors ?? []).slice(0, 2), 2);
+  const dominantSet = new Set(dominantColors);
+  const accentSet = new Set(
+    normalizeColorList((fields.primary_colors ?? []).slice(2), 6)
+  );
+
+  const dominantMatches = requestedColors.filter((token) => dominantSet.has(token)).length;
+  const accentMatches = requestedColors.filter((token) => accentSet.has(token)).length;
+  const aiDesc = normalizeText(rug.ai_description ?? "");
+  const hasDominantDescriptionCue =
+    requested.some((base) =>
+      new RegExp(`\\b(${base} (ground|field|dominant|predominant))\\b`, "i").test(aiDesc)
+    );
+
+  if (dominantMatches >= 2 || (dominantMatches >= 1 && hasDominantDescriptionCue)) return 20;
+  if (dominantMatches === 1) return 16;
+  if (matches >= 2) return 13;
+  if (accentMatches >= 1) return 9;
+  if (matches === 1) return 7;
+  return 2;
 }
 
 function scoreShapeSuitability(rug: InventoryRug, constraints: HardConstraints): number {

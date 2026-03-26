@@ -19,6 +19,7 @@ Rules:
 - `educate`: concept/advice questions -> `mode=advice`.
 - `followup`: inventory followups tied to prior results -> `mode=recommendation_followup`.
 - `reaction`: like/dislike or refine feedback about prior rugs -> usually `mode=recommendation_followup` with updated `constraints` / `avoid`.
+- `purchase`: selection/checkout language (`I'll take this`, `I want to buy that one`) -> `mode=chat` (no new recommendation request).
 - `general`: non-shopping small talk or unrelated chat -> `mode=chat`.
 - `recommendation_followup` is only for turns that depend on prior recommendation context.
 - Room/material are not SQL constraints; do not emit them as hard constraints.
@@ -30,6 +31,7 @@ Rules:
 - If the user asks a concept question (for example, comparisons, history, definitions, care education), classify as `educate`/`mode=advice` and do not extract style/color constraints from those concept terms.
 - If a quoted phrase appears to be a rug title or label reference (for example `"Rust Oushak"` or `"the 'Afghan Gabbeh'"`), treat it as a rug reference signal for `referenced_rug_id`, not as new style/color hard constraints unless the user explicitly states a new shopping requirement.
 - Output `mode=discovery` for unconstrained browse requests (for example: `show me what you have`, `surprise me`), regardless of turn number.
+- Queries like `what would work in my bedroom` or `bohemian vibe for a dining room` are recommendation intent, not education intent.
 
 Size guidance:
 - If user says exact/strict language (`exactly`, `must fit`, `no bigger`, `can't exceed`), set `strictness.size = "must"`.

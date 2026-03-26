@@ -127,6 +127,22 @@ const COLOR_ALIASES: Record<string, CanonicalColor> = {
   "multi color": "multi",
   multicolour: "multi",
   "multi colour": "multi",
+  // spanish common terms
+  blanco: "white",
+  marfil: "ivory",
+  gris: "gray",
+  negro: "black",
+  marron: "brown",
+  cafe: "brown",
+  azul: "blue",
+  turquesa: "teal",
+  verde: "green",
+  rojo: "red",
+  oxido: "rust",
+  dorado: "gold",
+  rosa: "pink",
+  morado: "purple",
+  purpura: "purple",
 };
 
 const COLOR_PARSE_INDEX: Array<{ term: string; canonical: CanonicalColor }> = [

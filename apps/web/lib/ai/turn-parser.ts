@@ -158,6 +158,7 @@ function deriveModeFromIntent(input: {
   message: string;
 }): ParsedTurn["mode"] {
   if (input.intent === "educate") return "advice";
+  if (input.intent === "purchase") return "chat";
   if (input.intent === "general") return "chat";
   if (input.intent === "followup" || input.intent === "reaction") {
     return "recommendation_followup";
@@ -210,6 +211,23 @@ function applyIntentGuards(input: {
     };
   }
 
+  const hasShoppingLanguage =
+    /\b(show|find|recommend|looking for|need|want|what would work|what works|options)\b/i.test(
+      messageLower
+    );
+  const hasDesignSignal =
+    hasAnyConstraintSignals(next) ||
+    /\b(living room|dining room|bedroom|hallway|entryway|office|vibe|bohemian|traditional|modern|persian|oushak|kilim)\b/i.test(
+      messageLower
+    );
+
+  if (next.intent === "educate" && hasShoppingLanguage && hasDesignSignal) {
+    next = {
+      ...next,
+      intent: "recommend",
+    };
+  }
+
   if (next.intent === "educate") {
     next = {
       ...next,
@@ -228,6 +246,24 @@ function applyIntentGuards(input: {
       rug_reference_ambiguous: false,
       referenced_rug_id: undefined,
       referenced_rug_label: undefined,
+    };
+  }
+
+  if (next.intent === "purchase") {
+    next = {
+      ...next,
+      constraints: {
+        size: null,
+        colors: [],
+        styles: [],
+        shape: null,
+      },
+      avoid: {
+        colors: [],
+        styles: [],
+        shapes: [],
+      },
+      followup_intent: "none",
     };
   }
 
@@ -263,7 +299,7 @@ function applyConfidenceHeuristic(input: {
   }
 
   const explicitRequestLanguage =
-    /\b(show|find|need|want|looking for|must|exactly|around|closest|larger|smaller)\b/i.test(
+    /\b(show|find|need|want|looking for|do you have|have any|must|exactly|around|closest|larger|smaller)\b/i.test(
       input.message
     );
   if (explicitRequestLanguage) {
@@ -274,6 +310,28 @@ function applyConfidenceHeuristic(input: {
     return "medium";
   }
   return parsed.confidence;
+}
+
+function shouldPreferInferredSize(input: {
+  message: string;
+  parsedSize: ParsedTurn["constraints"]["size"];
+  inferredSize:
+    | {
+        widthIn: number;
+        lengthIn: number;
+      }
+    | null
+    | undefined;
+}): boolean {
+  if (!input.parsedSize || !input.inferredSize) return false;
+  const parsedLong = Math.max(input.parsedSize.widthIn, input.parsedSize.lengthIn);
+  const inferredLong = Math.max(input.inferredSize.widthIn, input.inferredSize.lengthIn);
+  if (parsedLong <= 0 || inferredLong <= 0) return false;
+
+  const ratio = inferredLong / parsedLong;
+  const hasExplicitFeetUnits = /\b(ft|feet)\b|'/i.test(input.message);
+  if (hasExplicitFeetUnits && inferredLong > parsedLong * 2) return true;
+  return ratio >= 2.5 || ratio <= 0.4;
 }
 
 function normalizeRugReferenceInput(input: ParseTurnInput["context"]["recently_shown_rugs"]): Array<{
@@ -405,6 +463,10 @@ function fallbackParsedTurn(input: ParseTurnInput): ParsedTurn {
     /\b(i like|i love|love this|keep this|this works|yes this|great option|perfect|don'?t like|do not like|dislike|hate|pass on|skip this|not this one|too .+ for me|no thanks)\b/i.test(
       message
     );
+  const hasPurchaseLanguage =
+    /\b(i'?ll take|i will take|i'?ll buy|i want to buy|let'?s buy|i'?ll go with|checkout|check out)\b/i.test(
+      message
+    );
 
   const followupIntent: ParsedTurn["followup_intent"] =
     /\bclosest|nearest|best match\b/i.test(message)
@@ -438,7 +500,9 @@ function fallbackParsedTurn(input: ParseTurnInput): ParsedTurn {
       referenceResolution.rug_reference_ambiguous ||
       quotedRugReference
   );
-  const intent: ParsedTurn["intent"] = isAdviceIntent
+  const intent: ParsedTurn["intent"] = hasPurchaseLanguage
+    ? "purchase"
+    : isAdviceIntent
     ? "educate"
     : hasReactionLanguage && hasResolvedReference
       ? "reaction"
@@ -545,7 +609,7 @@ export async function parseTurn(input: ParseTurnInput): Promise<ParsedTurn> {
         ],
       },
     ],
-    max_output_tokens: 400,
+    max_output_tokens: 800,
     text: {
       format: {
         type: "json_schema",
@@ -633,6 +697,23 @@ export async function parseTurn(input: ParseTurnInput): Promise<ParsedTurn> {
         referenceResolution.rug_reference_ambiguous ||
         baseParsed.rug_reference_ambiguous,
     };
+    const inferred = extractConstraintsFromUserMessage(input.message);
+    if (
+      shouldPreferInferredSize({
+        message: input.message,
+        parsedSize: normalizedBase.constraints.size,
+        inferredSize: inferred.size ?? null,
+      }) &&
+      inferred.size
+    ) {
+      normalizedBase.constraints = {
+        ...normalizedBase.constraints,
+        size: {
+          widthIn: inferred.size.widthIn,
+          lengthIn: inferred.size.lengthIn,
+        },
+      };
+    }
     const normalized = applyIntentGuards({
       parsed: normalizedBase,
       message: input.message,

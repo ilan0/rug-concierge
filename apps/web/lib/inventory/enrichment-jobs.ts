@@ -48,6 +48,7 @@ export type EnqueueInventoryEnrichmentJobResult = {
 export type InventoryEnrichmentJobOutcome =
   | "ready"
   | "needs_review_incomplete"
+  | "needs_review_non_rug"
   | "retry_scheduled"
   | "needs_review_failed"
   | "skipped_missing_rug";
@@ -143,6 +144,29 @@ function parseJobRow(value: unknown): InventoryEnrichmentJobRow | null {
 function getRetryDelayMs(nextAttemptCount: number): number {
   const index = Math.max(0, Math.min(RETRY_DELAYS_MS.length - 1, nextAttemptCount - 1));
   return RETRY_DELAYS_MS[index];
+}
+
+function normalizeText(value: string | null | undefined): string {
+  if (typeof value !== "string") return "";
+  return value.toLowerCase().replace(/\s+/g, " ").trim();
+}
+
+function containsNonRugLanguage(value: string | null | undefined): boolean {
+  const text = normalizeText(value);
+  if (!text) return false;
+
+  const patterns: readonly RegExp[] = [
+    /\bnot\s+(a\s+)?rug\b/i,
+    /\bnot\s+(a\s+)?carpet\b/i,
+    /\bnon[-\s]?rug\b/i,
+    /\bdecorative art piece\b/i,
+    /\bmanuscript\b/i,
+    /\bnewspaper\b/i,
+    /\bpainting\b/i,
+    /\bwall art\b/i,
+  ];
+
+  return patterns.some((pattern) => pattern.test(text));
 }
 
 async function updateRugReviewState(input: {
@@ -320,6 +344,32 @@ async function processOneJob(input: {
     });
   }
 
+  const detectedAsNonRug =
+    enrichment.aiStructuredFields?.is_rug === false ||
+    containsNonRugLanguage(enrichment.aiDescription) ||
+    containsNonRugLanguage(enrichment.intakeLabel);
+
+  if (detectedAsNonRug) {
+    await updateRugReviewState({
+      supabase: input.supabase,
+      tenantId: input.job.tenant_id,
+      rugId: input.job.rug_id,
+      enrichmentStatus: "needs_review",
+      reviewReasonCode: "NON_RUG_DETECTED",
+      intakeLabel: "Non-Rug Image, Needs Review",
+      aiDescription: enrichment.aiDescription,
+      aiStructuredFields: enrichment.aiStructuredFields,
+    });
+    await updateJobState({
+      supabase: input.supabase,
+      jobId: input.job.id,
+      state: "needs_review",
+      nextAttemptAt: null,
+      lastError: "Detected non-rug image content.",
+    });
+    return "needs_review_non_rug";
+  }
+
   const deterministicTitle = buildTradeTitle({
     aiFields: enrichment.aiStructuredFields,
     widthTotalIn: rug.width_total_in,
@@ -492,6 +542,7 @@ export async function runInventoryEnrichmentWorker(input: {
   const outcomes: Record<InventoryEnrichmentJobOutcome, number> = {
     ready: 0,
     needs_review_incomplete: 0,
+    needs_review_non_rug: 0,
     retry_scheduled: 0,
     needs_review_failed: 0,
     skipped_missing_rug: 0,

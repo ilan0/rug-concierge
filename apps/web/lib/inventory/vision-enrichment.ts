@@ -138,6 +138,8 @@ const VISION_OUTPUT_JSON_SCHEMA = {
             "primary_colors",
             "age_category",
             "mood",
+            "is_rug",
+            "is_rug_confidence",
           ],
           properties: {
             origin: {
@@ -192,6 +194,11 @@ const VISION_OUTPUT_JSON_SCHEMA = {
             mood: {
               type: "string",
               enum: ["traditional", "transitional", "eclectic", "modern"],
+            },
+            is_rug: { type: "boolean" },
+            is_rug_confidence: {
+              type: "string",
+              enum: ["low", "medium", "high"],
             },
           },
         },
@@ -279,6 +286,28 @@ function normalizeStructuredFields(input: {
   const { value, aiDescription, intakeLabel } = input;
   if (!value) return null;
   const normalized: ParsedAiStructuredFields = {};
+  const isRug = typeof value.is_rug === "boolean" ? value.is_rug : null;
+  if (isRug !== null) {
+    normalized.is_rug = isRug;
+  }
+  if (
+    value.is_rug_confidence === "low" ||
+    value.is_rug_confidence === "medium" ||
+    value.is_rug_confidence === "high"
+  ) {
+    normalized.is_rug_confidence = value.is_rug_confidence;
+  }
+
+  if (isRug === false) {
+    if (Array.isArray(value.primary_colors) && value.primary_colors.length > 0) {
+      const colors = normalizeColorList(
+        value.primary_colors.map((item) => toPlainText(item).slice(0, 32).toLowerCase()),
+        4
+      );
+      if (colors.length > 0) normalized.primary_colors = colors.slice(0, 4);
+    }
+    return normalized;
+  }
 
   const styleFromModel = toTradeStyleValue(value.style ?? null);
   const styleFromDescription = styleFromModel
@@ -435,7 +464,7 @@ export async function requestVisionEnrichment(input: {
           {
             type: "input_text",
             text:
-              `You are an expert luxury rug appraiser. Analyze the rug photo and return valid JSON only. Use measured size as scale context only. Never include dimensions in intake_label. Leave uncertain scalar fields as null and unknown list fields as empty arrays.\n\nPrimary objective: extract accurate trade vocabulary into ai_structured_fields (especially origin, style/weave name, and age_category).\n\nConfidence rules (strict): do not guess. If origin/style/age_category is uncertain, return null.\n- If the image is a storefront, signage, non-rug scene, or too partial/blurry to classify confidently, return origin/style/age_category as null.\n- Do not default age_category to traditional.\n- Use age_category=traditional only when the rug is clearly hand-knotted in a traditional design and the era is not clearly antique/semi-antique/vintage.\n\nStyle rules (strict): style is for named weave/style types only. Use values like Heriz, Serapi, Kashan, Isfahan, Tabriz, Kerman, Nain, Qom, Bidjar, Malayer, Sarouk, Sultanabad, Bakhtiari, Hamadan, Mashad, Qashqai, Gabbeh, Kilim, Soumak, Baluch, Turkmen, Bokhara, Oushak, Kazak, Shirvan, Karabagh, Beni Ourain, Azilal, and similar named types. If a specific named style cannot be identified, return style as null. Never use pattern descriptors for style.\n\nColor rules (strict): primary_colors must use this canonical list only: [${COLOR_PROMPT_LIST}].\n- Return 1-4 colors only.\n- Order by dominance: field color first, primary border second, accent details third by visual prominence.\n- If the image suggests a non-listed color term, map it to the closest canonical color.\n- Do not return abstract adjectives like \"dark\" or \"light\" as colors.\n\nMood rules (strict): mood is always required.\n- Always return exactly one mood value.\n- Never return mood as null.\n\nShape guidance (strict): if the rug is not a standard rectangular area rug, explicitly state the shape in ai_description.\n- Valid non-rectangular shapes are square, round, oval, and runner.\n- Never infer shape from dimensions alone.\n\nintake_label is fallback-only and must still use trade vocabulary. Use era + origin + style when available. Do not produce color-led or pattern-led labels.\nCorrect style example: \"Heriz\". Incorrect style example: \"Geometric\".\nCorrect intake_label example: \"Antique Persian Heriz\". Incorrect intake_label example: \"Red geometric tribal rug\".\nDo not invent quality claims such as Fine, Very Fine, Rare, or Collectible.\n\nReturn shape:\n{\n  \"intake_label\": \"3-6 words, fallback trade title, no dimensions, no color-led phrasing\",\n  \"ai_description\": \"1-2 sentences: concise visual and merchandising summary\",\n  \"ai_structured_fields\": {\n    \"origin\": \"Persian|Afghan|Turkish|Indian|Caucasian|Pakistani|Moroccan|Central Asian|Other|null\",\n    \"style\": \"named weave/style only (for example Heriz, Oushak, Gabbeh, Bokhara) or null\",\n    \"pattern\": [\"medallion center\", \"all-over pattern\", \"geometric design\", \"floral motif\", \"tribal design\", \"floral border\", \"pictorial\", \"plain field\"],\n    \"primary_colors\": [${COLOR_PROMPT_LIST}],\n    \"age_category\": \"antique|semi-antique|vintage|traditional|contemporary|new|null\",\n    \"mood\": \"traditional|transitional|eclectic|modern\"\n  }\n}`,
+              `You are an expert luxury rug appraiser. Analyze the rug photo and return valid JSON only. Use measured size as scale context only. Never include dimensions in intake_label. Leave uncertain scalar fields as null and unknown list fields as empty arrays.\n\nPrimary objective: extract accurate trade vocabulary into ai_structured_fields (especially origin, style/weave name, and age_category).\n\nConfidence rules (strict): do not guess. If origin/style/age_category is uncertain, return null.\n- If the image is a storefront, signage, non-rug scene, or too partial/blurry to classify confidently, return origin/style/age_category as null.\n- Do not default age_category to traditional.\n- Use age_category=traditional only when the rug is clearly hand-knotted in a traditional design and the era is not clearly antique/semi-antique/vintage.\n- Always set is_rug to true only when the image clearly depicts a rug.\n- Set is_rug to false for paintings, manuscripts, newspaper pages, wall art, furniture, or any non-rug object.\n- Always set is_rug_confidence as one of: low, medium, high.\n\nStyle rules (strict): style is for named weave/style types only. Use values like Heriz, Serapi, Kashan, Isfahan, Tabriz, Kerman, Nain, Qom, Bidjar, Malayer, Sarouk, Sultanabad, Bakhtiari, Hamadan, Mashad, Qashqai, Gabbeh, Kilim, Soumak, Baluch, Turkmen, Bokhara, Oushak, Kazak, Shirvan, Karabagh, Beni Ourain, Azilal, and similar named types. If a specific named style cannot be identified, return style as null. Never use pattern descriptors for style.\n\nColor rules (strict): primary_colors must use this canonical list only: [${COLOR_PROMPT_LIST}].\n- Return 1-4 colors only.\n- Order by dominance: field color first, primary border second, accent details third by visual prominence.\n- If the image suggests a non-listed color term, map it to the closest canonical color.\n- Do not return abstract adjectives like \"dark\" or \"light\" as colors.\n\nMood rules (strict): mood is always required.\n- Always return exactly one mood value.\n- Never return mood as null.\n\nShape guidance (strict): if the rug is not a standard rectangular area rug, explicitly state the shape in ai_description.\n- Valid non-rectangular shapes are square, round, oval, and runner.\n- Never infer shape from dimensions alone.\n\nintake_label is fallback-only and must still use trade vocabulary. Use era + origin + style when available. Do not produce color-led or pattern-led labels.\nCorrect style example: \"Heriz\". Incorrect style example: \"Geometric\".\nCorrect intake_label example: \"Antique Persian Heriz\". Incorrect intake_label example: \"Red geometric tribal rug\".\nDo not invent quality claims such as Fine, Very Fine, Rare, or Collectible.\n\nReturn shape:\n{\n  \"intake_label\": \"3-6 words, fallback trade title, no dimensions, no color-led phrasing\",\n  \"ai_description\": \"1-2 sentences: concise visual and merchandising summary\",\n  \"ai_structured_fields\": {\n    \"origin\": \"Persian|Afghan|Turkish|Indian|Caucasian|Pakistani|Moroccan|Central Asian|Other|null\",\n    \"style\": \"named weave/style only (for example Heriz, Oushak, Gabbeh, Bokhara) or null\",\n    \"pattern\": [\"medallion center\", \"all-over pattern\", \"geometric design\", \"floral motif\", \"tribal design\", \"floral border\", \"pictorial\", \"plain field\"],\n    \"primary_colors\": [${COLOR_PROMPT_LIST}],\n    \"age_category\": \"antique|semi-antique|vintage|traditional|contemporary|new|null\",\n    \"mood\": \"traditional|transitional|eclectic|modern\",\n    \"is_rug\": \"boolean\",\n    \"is_rug_confidence\": \"low|medium|high\"\n  }\n}`,
           },
         ],
       },

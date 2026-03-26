@@ -41,6 +41,7 @@ export type RugAgeCategory =
   | "new";
 
 export type RugMood = "traditional" | "transitional" | "eclectic" | "modern";
+export type RugDetectionConfidence = "low" | "medium" | "high";
 
 export type RugAiStructuredFields = {
   origin?: RugOrigin | null;
@@ -49,6 +50,8 @@ export type RugAiStructuredFields = {
   primary_colors?: string[] | null;
   age_category?: RugAgeCategory | null;
   mood?: RugMood | null;
+  is_rug?: boolean | null;
+  is_rug_confidence?: RugDetectionConfidence | null;
 };
 
 export type StaffOverrides = {
