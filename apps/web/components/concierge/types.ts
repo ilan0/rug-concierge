@@ -22,7 +22,6 @@ export type Turn = {
   fineMode?: UiChatResponseBody["fine_mode"];
   recommendations?: UiRecommendationItem[];
   questions?: string[];
-  followUpQuestion?: string | null;
   constraintSnapshot?: UiChatResponseBody["recommendation_state"] | null;
   createdAt: string;
   debug?: DebugMeta | null;

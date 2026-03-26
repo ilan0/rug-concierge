@@ -25,7 +25,6 @@ import type { PromptLayerId } from "@/lib/prompts/layer-ids";
 const OPENAI_RESPONSES_URL = "https://api.openai.com/v1/responses";
 const MAX_ASSISTANT_MESSAGE_CHARS = 420;
 const MAX_NOTE_CHARS = 220;
-const MAX_FOLLOW_UP_QUESTION_CHARS = 220;
 const MAX_HINTS = 6;
 const MAX_HINT_CHARS = 90;
 const RETRY_SYSTEM_INSTRUCTION =
@@ -34,14 +33,10 @@ const RETRY_SYSTEM_INSTRUCTION =
 const GENERAL_CHAT_SCHEMA = {
   type: "object",
   additionalProperties: false,
-  required: ["assistant_message", "notes", "follow_up_question", "memory_hints"],
+  required: ["assistant_message", "notes", "memory_hints"],
   properties: {
     assistant_message: { type: "string", minLength: 1, maxLength: MAX_ASSISTANT_MESSAGE_CHARS },
     notes: { type: ["string", "null"], maxLength: MAX_NOTE_CHARS },
-    follow_up_question: {
-      type: ["string", "null"],
-      maxLength: MAX_FOLLOW_UP_QUESTION_CHARS,
-    },
     memory_hints: {
       type: "array",
       minItems: 0,
@@ -54,7 +49,6 @@ const GENERAL_CHAT_SCHEMA = {
 export type GeneralChatModelResponse = {
   assistant_message: string;
   notes: string | null;
-  follow_up_question: string | null;
   memory_hints: string[];
 };
 
@@ -225,16 +219,6 @@ function isGeneralChatResponse(value: unknown): value is GeneralChatModelRespons
     if (notes.length > MAX_NOTE_CHARS) return false;
   }
 
-  if (!(typeof data.follow_up_question === "string" || data.follow_up_question === null)) {
-    return false;
-  }
-  if (typeof data.follow_up_question === "string") {
-    const question = normalizeText(data.follow_up_question);
-    if (question.length === 0 || question.length > MAX_FOLLOW_UP_QUESTION_CHARS) {
-      return false;
-    }
-  }
-
   if (!Array.isArray(data.memory_hints)) return false;
   if (data.memory_hints.length > MAX_HINTS) return false;
   if (
@@ -288,28 +272,6 @@ function sanitizeHints(hints: string[]): string[] {
   return output;
 }
 
-function normalizeFollowUpQuestion(
-  assistantMessage: string,
-  followUpQuestion: string | null
-): string | null {
-  if (!followUpQuestion) return null;
-  const normalizedFollowUp = toPlainText(followUpQuestion);
-  if (!normalizedFollowUp) return null;
-
-  const assistant = normalizeText(assistantMessage).toLowerCase();
-  const followUp = normalizedFollowUp.toLowerCase();
-  if (assistant === followUp) return null;
-  if (assistant.includes(followUp)) return null;
-  if (followUp.includes(assistant)) return null;
-
-  const maybeQuestion = /\?$/.test(normalizedFollowUp)
-    ? normalizedFollowUp
-    : `${normalizedFollowUp}?`;
-  if (maybeQuestion.length > MAX_FOLLOW_UP_QUESTION_CHARS) return null;
-
-  return maybeQuestion;
-}
-
 function shouldOfferCollectionExamples(message: string): boolean {
   const text = normalizeText(message).toLowerCase();
   if (!text) return false;
@@ -352,10 +314,6 @@ function sanitizeResponse(
   return {
     assistant_message: assistantMessage,
     notes: response.notes ? toPlainText(response.notes) : null,
-    follow_up_question: normalizeFollowUpQuestion(
-      assistantMessage,
-      response.follow_up_question
-    ),
     memory_hints: sanitizeHints(response.memory_hints),
   };
 }
@@ -377,7 +335,6 @@ function fallbackResponse(
       latestUserMessage
     ),
     notes: reason,
-    follow_up_question: null,
     memory_hints: [],
   };
 }

@@ -45,54 +45,6 @@ export function toSlug(value: string): string {
     .slice(0, 120);
 }
 
-function normalizeForComparison(value: string): string {
-  return value
-    .normalize("NFKC")
-    .toLowerCase()
-    .replace(/[^\w\s]/g, " ")
-    .replace(/\s+/g, " ")
-    .trim();
-}
-
-function tokenSet(value: string): Set<string> {
-  return new Set(
-    normalizeForComparison(value)
-      .split(" ")
-      .map((token) => token.trim())
-      .filter((token) => token.length > 1)
-  );
-}
-
-function tokenOverlapRatio(left: string, right: string): number {
-  const leftSet = tokenSet(left);
-  const rightSet = tokenSet(right);
-  if (leftSet.size === 0 || rightSet.size === 0) return 0;
-
-  let overlap = 0;
-  for (const token of leftSet) {
-    if (rightSet.has(token)) overlap += 1;
-  }
-
-  return overlap / Math.max(leftSet.size, rightSet.size);
-}
-
-export function shouldRenderFollowUpQuestion(
-  assistantMessage: string,
-  followUpQuestion: string | null | undefined
-): boolean {
-  if (!followUpQuestion) return false;
-  const normalizedAssistant = normalizeForComparison(assistantMessage);
-  const normalizedFollowUp = normalizeForComparison(followUpQuestion);
-  if (!normalizedFollowUp) return false;
-
-  if (normalizedAssistant === normalizedFollowUp) return false;
-  if (normalizedAssistant.includes(normalizedFollowUp)) return false;
-  if (normalizedFollowUp.includes(normalizedAssistant)) return false;
-  if (tokenOverlapRatio(normalizedAssistant, normalizedFollowUp) >= 0.92) return false;
-
-  return true;
-}
-
 export function summarizeTracePayload(payload: unknown): DebugTraceSummary {
   if (!payload || typeof payload !== "object") {
     return { routeTrace: null, pipelineTrace: null, generalChatTrace: null };

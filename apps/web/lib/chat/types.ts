@@ -113,7 +113,6 @@ export type GeneralChatResponse = {
   mode: "general_chat" | "clarifying_question";
   assistant_message: string;
   notes: string | null;
-  follow_up_question?: string | null;
 };
 
 export type RecommendationTurnResponse = Omit<RecommendationResponse, "mode"> & {

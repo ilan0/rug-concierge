@@ -6,7 +6,6 @@ import { RecommendationCard } from "@/components/concierge/recommendation-card";
 import type { Turn } from "@/components/concierge/types";
 import {
   formatTime,
-  shouldRenderFollowUpQuestion,
 } from "@/components/concierge/utils";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -191,16 +190,6 @@ export function ChatThread(input: ChatThreadProps) {
                     {turn.text}
                   </p>
                 )}
-
-                {turn.role === "assistant" &&
-                shouldRenderFollowUpQuestion(turn.text, turn.followUpQuestion) ? (
-                  <div className="mt-5 rounded-xl border border-primary/30 bg-primary/8 p-3">
-                    <p className="text-xs font-semibold uppercase tracking-[0.08em] text-foreground/80">
-                      Suggested Next Step
-                    </p>
-                    <p className="mt-1 text-sm text-foreground/90">{turn.followUpQuestion}</p>
-                  </div>
-                ) : null}
 
                 {turn.role === "assistant" && turn.questions && turn.questions.length > 0 ? (
                   <div className="mt-5 rounded-xl border border-primary/30 bg-primary/8 p-3">

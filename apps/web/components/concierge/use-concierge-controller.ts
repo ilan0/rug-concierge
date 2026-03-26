@@ -201,8 +201,6 @@ export function useConciergeController(input: UseConciergeControllerInput) {
         recommendations:
           "recommendations" in response ? response.recommendations : undefined,
         questions: "questions" in response ? response.questions : undefined,
-        followUpQuestion:
-          "follow_up_question" in response ? response.follow_up_question : null,
         constraintSnapshot: getConstraintSnapshot(payload.recommendation_state),
         createdAt: new Date().toISOString(),
       };
