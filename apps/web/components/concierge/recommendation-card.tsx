@@ -153,7 +153,8 @@ export function RecommendationCard({
           <RugImage
             src={item.primary_image_url}
             alt={item.primary_image_caption ?? item.title}
-            className="h-full w-full object-cover"
+            className="h-full w-full bg-muted/70 p-2"
+            fit="contain"
             placeholderLabel="No rug image"
           />
         </div>

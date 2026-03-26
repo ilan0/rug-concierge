@@ -61,64 +61,89 @@ export function RugDetailModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[90dvh] max-w-3xl overflow-y-auto border-border/70 bg-card/96 p-0 shadow-[0_18px_46px_rgba(31,18,6,0.2)] backdrop-blur supports-[backdrop-filter]:bg-card/90">
-        <div className="space-y-4 p-4 sm:p-6">
+      <DialogContent className="max-h-[90dvh] w-[min(96vw,62rem)] overflow-hidden border-border/70 bg-card/96 p-0 shadow-[0_18px_46px_rgba(31,18,6,0.2)] backdrop-blur supports-[backdrop-filter]:bg-card/90">
+        <div className="flex h-[min(86dvh,46rem)] min-h-[26rem] flex-col">
           {isLoading ? (
-            <div className="space-y-3">
-              <p className="text-sm text-muted-foreground">Loading rug details...</p>
-              <div className="h-64 animate-pulse rounded-lg bg-muted" />
+            <div className="flex min-h-0 flex-1 flex-col px-4 py-4 sm:px-6 sm:py-5">
+              <DialogHeader className="shrink-0">
+                <DialogTitle>Loading rug details...</DialogTitle>
+                <DialogDescription>Fetching image and details.</DialogDescription>
+              </DialogHeader>
+              <div className="mt-4 min-h-0 flex-1 overflow-hidden rounded-xl border border-border/70 bg-muted/70">
+                <div className="h-full w-full animate-pulse bg-gradient-to-br from-muted via-muted/80 to-muted/60" />
+              </div>
             </div>
           ) : error ? (
-            <div className="space-y-2">
-              <DialogTitle>Unable to load details</DialogTitle>
-              <DialogDescription>{error}</DialogDescription>
+            <div className="flex min-h-0 flex-1 flex-col px-4 py-4 sm:px-6 sm:py-5">
+              <DialogHeader className="shrink-0">
+                <DialogTitle>Unable to load details</DialogTitle>
+                <DialogDescription>{error}</DialogDescription>
+              </DialogHeader>
             </div>
           ) : detail ? (
-            <>
-              <DialogHeader>
-                <DialogTitle className="font-serif text-[2rem] leading-tight">{displayLabel}</DialogTitle>
-                <DialogDescription className="italic text-foreground/75">Size: {detail.size_display}</DialogDescription>
+            <div className="flex min-h-0 flex-1 flex-col px-4 py-4 sm:px-6 sm:py-5">
+              <DialogHeader className="shrink-0 pb-2">
+                <DialogTitle className="line-clamp-2 font-serif text-[1.8rem] leading-tight sm:text-[2rem]">
+                  {displayLabel}
+                </DialogTitle>
+                <DialogDescription className="italic text-foreground/75">
+                  Size: {detail.size_display}
+                </DialogDescription>
               </DialogHeader>
 
-              <div className="overflow-hidden rounded-xl border border-border/70 bg-muted">
-                <div className="aspect-[3/4] w-full">
-                  <RugImage
-                    src={detail.primary_image_url}
-                    alt={displayLabel}
-                    placeholderLabel="No image available"
-                  />
+              <div className="grid min-h-0 flex-1 gap-3 md:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)]">
+                <div className="min-h-0 overflow-hidden rounded-xl border border-border/70 bg-muted">
+                  <div className="h-full w-full bg-muted/70 p-2 sm:p-3">
+                    <RugImage
+                      src={detail.primary_image_url}
+                      alt={displayLabel}
+                      className="h-full w-full"
+                      fit="contain"
+                      placeholderLabel="No image available"
+                    />
+                  </div>
+                </div>
+
+                <div className="min-h-0 rounded-xl border border-border/60 bg-background/70 p-3 sm:p-4">
+                  <section className="space-y-2">
+                    <h3 className="text-xs font-semibold uppercase tracking-[0.08em] text-primary">
+                      Description
+                    </h3>
+                    <p className="text-sm leading-6 text-foreground/90 [display:-webkit-box] [overflow:hidden] [-webkit-box-orient:vertical] [-webkit-line-clamp:12]">
+                      {detail.ai_description ??
+                        "Description is being generated. Check back shortly."}
+                    </p>
+                  </section>
+
+                  {valueChips.length > 0 ? (
+                    <section className="mt-3 space-y-2">
+                      <div className="flex flex-wrap gap-2">
+                        {valueChips.map((chip) => (
+                          <span
+                            key={`${detail.id}-${chip}`}
+                            className="rounded-full border border-border/55 bg-background/70 px-2.5 py-1 text-xs font-medium text-muted-foreground"
+                          >
+                            {chip}
+                          </span>
+                        ))}
+                      </div>
+                    </section>
+                  ) : null}
                 </div>
               </div>
+            </div>
+          ) : (
+            <div className="flex min-h-0 flex-1 flex-col px-4 py-4 sm:px-6 sm:py-5">
+              <DialogHeader className="shrink-0">
+                <DialogTitle>Rug details unavailable</DialogTitle>
+                <DialogDescription>
+                  We could not load this rug right now. Please try again.
+                </DialogDescription>
+              </DialogHeader>
+            </div>
+          )}
 
-              <section className="space-y-2">
-                <h3 className="text-xs font-semibold uppercase tracking-[0.08em] text-primary">
-                  Description
-                </h3>
-                <p className="text-sm leading-6 text-foreground/90">
-                  {detail.ai_description ??
-                    "Description is being generated — check back shortly."}
-                </p>
-              </section>
-
-              {valueChips.length > 0 ? (
-                <section className="space-y-2">
-                  <div className="flex flex-wrap gap-2">
-                    {valueChips.map((chip) => (
-                      <span
-                        key={`${detail.id}-${chip}`}
-                        className="rounded-full border border-border/55 bg-background/70 px-2.5 py-1 text-xs font-medium text-muted-foreground"
-                      >
-                        {chip}
-                      </span>
-                    ))}
-                  </div>
-                </section>
-              ) : null}
-
-            </>
-          ) : null}
-
-          <DialogFooter className="gap-2 border-t border-border/55 pt-3">
+          <DialogFooter className="shrink-0 gap-2 border-t border-border/55 px-4 py-3 sm:px-6">
             {onShare ? (
               <Button
                 type="button"
