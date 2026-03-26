@@ -33,18 +33,15 @@ type CachedTenantSecrets = {
 type TenantSecretsShape = {
   store_passcode?: unknown;
   cookie_secret?: unknown;
-  cron_secret?: unknown;
   auth?: {
     store_passcode?: unknown;
     cookie_secret?: unknown;
-    cron_secret?: unknown;
   };
 };
 
 export type TenantRuntimeSecrets = {
   storePasscode: string | null;
   cookieSecret: string | null;
-  cronSecret: string | null;
 };
 
 const tenantSecretsCache = new Map<string, CachedTenantSecrets>();
@@ -67,7 +64,6 @@ export function readTenantRuntimeSecrets(
     return {
       storePasscode: null,
       cookieSecret: null,
-      cronSecret: null,
     };
   }
 
@@ -82,9 +78,6 @@ export function readTenantRuntimeSecrets(
     ),
     cookieSecret: readTrimmedString(
       authSecrets?.cookie_secret ?? typedSecrets.cookie_secret
-    ),
-    cronSecret: readTrimmedString(
-      authSecrets?.cron_secret ?? typedSecrets.cron_secret
     ),
   };
 }

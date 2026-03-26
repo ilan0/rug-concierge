@@ -10,6 +10,8 @@
     "build": "npm --workspace apps/web run build",
     "lint": "npm --workspace apps/web run lint",
     "test:concierge-rework": "npm --workspace apps/web exec tsx ../../scripts/testing/concierge-rework-scenarios.ts",
+    "build:live-intake-dataset": "npm exec tsx -- scripts/testing/live-intake/build-live-intake-dataset.ts",
+    "run:live-intake-ui": "npm exec tsx -- scripts/testing/live-intake/run-live-intake-ui.ts",
     "check:docs": "node scripts/check-docs-drift.mjs",
     "check:migrations": "node scripts/check-migrations.mjs",
     "quality:release": "npm --workspace apps/web exec tsc --noEmit && npm --workspace apps/web run lint && npm --workspace apps/web run build && npm run check:docs && npm run check:migrations"
@@ -18,6 +20,7 @@
     "node": ">=20.9.0"
   },
   "devDependencies": {
+    "playwright": "^1.58.2",
     "tsx": "^4.21.0",
     "zod": "^4.3.6"
   }

@@ -14,7 +14,7 @@ Primary UI shell for Rug Concierge.
 - `/api/chat`
 - `/api/recommend`
 - `/api/inventory/intake`
-- `/api/inventory/enrichment/worker`
+- `/api/cron/inventory-enrichment`
 - `/api/inventory/rugs/[id]`
 - `/api/inventory/rugs/[id]/re-enrich`
 - `/api/rugs/[id]`

@@ -1,7 +1,7 @@
 {
   "crons": [
     {
-      "path": "/api/inventory/enrichment/worker",
+      "path": "/api/cron/inventory-enrichment",
       "schedule": "* * * * *"
     }
   ]

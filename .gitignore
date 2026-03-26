@@ -30,6 +30,7 @@ apps/web/docs/testing/
 playwright-report/
 test-results/
 tests/e2e/config.ts
+scripts/testing/live-intake/output/
 
 # OS
 .DS_Store

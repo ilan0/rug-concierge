@@ -47,7 +47,7 @@ Tenant scope is enforced on inventory-backed reads and writes.
 - `POST /api/chat`: session-aware chat router
 - `POST /api/recommend`: recommendation-only route
 - `POST /api/inventory/intake`: create rug, upload image, hard-reject exact duplicates, enqueue enrichment
-- `POST /api/inventory/enrichment/worker`: cron-secured worker that drains the durable enrichment queue
+- `GET /api/cron/inventory-enrichment`: cron-only queue dispatcher that drains durable enrichment jobs
 - `GET /api/inventory/rugs/[id]`: staff rug detail
 - `PATCH /api/inventory/rugs/[id]`: staff edits and overrides
 - `DELETE /api/inventory/rugs/[id]`: staff delete rug, image row, storage object, and cascading job row
@@ -113,12 +113,12 @@ Duplicate response shape:
 
 ### Enrichment Queue
 Durable queue state lives in `inventory_enrichment_jobs`.
-The worker route is `POST /api/inventory/enrichment/worker`.
-It is protected by `Authorization: Bearer <cron_secret>` loaded from `tenants.secrets`.
+The cron route is `GET /api/cron/inventory-enrichment`.
+It accepts only Vercel cron invocations (`x-vercel-cron` header) and runs a global worker claim across tenants.
 
 Worker behavior:
-- claims up to 5 jobs per run
-- runs inside a 45 second budget
+- claims up to 12 jobs per run
+- runs inside up to a 55 second budget
 - retries transient failures up to 3 attempts
 - backoff schedule: `60s`, `5m`, `15m`
 - reclaims stale `processing` locks older than 10 minutes via `claim_inventory_enrichment_jobs`
@@ -195,7 +195,6 @@ Customer-facing flows include only rugs that are both:
 
 ## Environment Variables
 Required runtime variables:
-- `TENANT_ID`
 - `SUPABASE_URL`
 - `SUPABASE_SECRET_KEY`
 - `OPENAI_API_KEY`
@@ -206,10 +205,9 @@ Required runtime variables:
 - `ENABLE_GENERAL_CHAT_AI`
 
 Per-tenant secrets are stored in `tenants.secrets` and fetched at runtime in
-auth/cron paths only:
+auth paths only:
 - `store_passcode`
 - `cookie_secret`
-- `cron_secret`
 
 Operational tunables such as OpenAI retry/timeouts, chat memory, and tenant fallback behavior are hardcoded in `apps/web/lib/config.ts`.
 
