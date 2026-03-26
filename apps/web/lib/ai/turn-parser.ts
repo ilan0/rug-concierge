@@ -225,6 +225,9 @@ function applyIntentGuards(input: {
         shapes: [],
       },
       followup_intent: "none",
+      rug_reference_ambiguous: false,
+      referenced_rug_id: undefined,
+      referenced_rug_label: undefined,
     };
   }
 
@@ -435,12 +438,12 @@ function fallbackParsedTurn(input: ParseTurnInput): ParsedTurn {
       referenceResolution.rug_reference_ambiguous ||
       quotedRugReference
   );
-  const intent: ParsedTurn["intent"] = hasReactionLanguage && hasResolvedReference
-    ? "reaction"
-    : hasFollowup || hasResolvedReference
-      ? "followup"
-      : isAdviceIntent
-        ? "educate"
+  const intent: ParsedTurn["intent"] = isAdviceIntent
+    ? "educate"
+    : hasReactionLanguage && hasResolvedReference
+      ? "reaction"
+      : hasFollowup || hasResolvedReference
+        ? "followup"
         : isDiscoveryIntent ||
             hasConstraintSignals ||
             /\b(show|find|recommend|need|want|looking for|search)\b/i.test(message)
@@ -542,7 +545,7 @@ export async function parseTurn(input: ParseTurnInput): Promise<ParsedTurn> {
         ],
       },
     ],
-    max_output_tokens: 260,
+    max_output_tokens: 400,
     text: {
       format: {
         type: "json_schema",

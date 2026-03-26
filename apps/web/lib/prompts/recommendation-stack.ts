@@ -68,6 +68,19 @@ type RecommendationLayerDefinition = {
 
 const RECOMMENDATION_LAYER_DEFINITIONS: RecommendationLayerDefinition[] = [
   {
+    id: PROMPT_LAYER.taskRecommendation,
+    role: "system",
+    include: () => true,
+    text: () =>
+      [
+        'Never begin a response with "Based on what you\'re looking for" or any equivalent generic transition. Open with a line that directly references what the customer asked for.',
+        "Opening pattern examples:",
+        '- Color query: "You asked for blue-forward pieces, so these are the strongest matches in stock right now."',
+        '- Style query: "For an Oushak direction, these are the closest pieces currently available."',
+        '- Discovery query: "If you are browsing openly, here is a curated range to react to across style and origin."',
+      ].join("\n"),
+  },
+  {
     id: PROMPT_LAYER.systemBase,
     role: "system",
     include: () => true,
@@ -170,7 +183,7 @@ const RECOMMENDATION_LAYER_DEFINITIONS: RecommendationLayerDefinition[] = [
     text: (input) =>
       `Constraint mismatch expansion is active: ${JSON.stringify(
         input.constraint_mismatch ?? null
-      )}. Include one concise, honest disclosure that exact matches were unavailable before presenting closest alternatives.`,
+      )}. You MUST open assistant_message with one concise, honest disclosure that exact matches were unavailable, and that disclosure must appear before any rug descriptions.`,
   },
   {
     id: PROMPT_LAYER.taskRecommendation,

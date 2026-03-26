@@ -469,6 +469,74 @@ function enforceDiscoveryQuestion(
   };
 }
 
+function buildFallbackLeadIn(
+  constraints: HardConstraints,
+  userMessage: string
+): string {
+  if (constraints.shape === "runner") {
+    return "You asked for a runner, so these are the closest available pieces in stock right now:";
+  }
+  if (constraints.shape === "round_oval") {
+    return "You asked for a round or oval piece, so these are the closest available options right now:";
+  }
+  if (constraints.size) {
+    return `You asked for around ${constraints.size.widthIn}\" x ${constraints.size.lengthIn}\", so these are the closest available fits in stock:`;
+  }
+  if (constraints.styles && constraints.styles.length > 0) {
+    return `You asked for ${constraints.styles.join(", ")} styles, so these are the best available matches right now:`;
+  }
+  if (constraints.colors && constraints.colors.length > 0) {
+    return `You asked for ${constraints.colors.join(", ")} tones, so these are the best available options right now:`;
+  }
+
+  const trimmedMessage = normalizeText(userMessage);
+  if (trimmedMessage.length > 0) {
+    return "You asked for specific guidance, so these are the strongest available options in stock right now:";
+  }
+  return "Here are the strongest available options in stock right now:";
+}
+
+function applyConstraintMismatchDisclosure(input: {
+  response: RecommendationResponse;
+  constraintMismatch?:
+    | {
+        expanded_from_zero_match: boolean;
+        unmet_constraints: string[];
+        disclosure_hint: string | null;
+      }
+    | undefined;
+}): RecommendationResponse {
+  const mismatch = input.constraintMismatch;
+  if (!mismatch?.expanded_from_zero_match) {
+    return input.response;
+  }
+  if (input.response.mode !== "recommendations") {
+    return input.response;
+  }
+
+  const current = toPlainText(input.response.assistant_message);
+  const hint = toPlainText(
+    mismatch.disclosure_hint ??
+      "We do not have an exact match for that request right now."
+  );
+  if (!hint) {
+    return input.response;
+  }
+
+  const normalizedCurrent = current.toLowerCase();
+  const normalizedHint = hint.toLowerCase();
+  if (normalizedCurrent.startsWith(normalizedHint)) {
+    return {
+      ...input.response,
+      assistant_message: current,
+    };
+  }
+  return {
+    ...input.response,
+    assistant_message: `${hint} ${current}`.trim(),
+  };
+}
+
 function warnIfLikelyTruncatedAssistantMessage(input: {
   surface: "recommendation";
   message: string;
@@ -650,7 +718,8 @@ function buildConfidence(
 function fallbackRecommendations(
   inventory: InventoryRug[],
   constraints: HardConstraints,
-  userMessage: string
+  userMessage: string,
+  promptContext?: RecommendationPromptContext
 ): RecommendationResponse {
   // If OpenAI fails, we still return a usable response so the API never
   // breaks the frontend flow.
@@ -679,10 +748,19 @@ function fallbackRecommendations(
     };
   });
 
+  const mismatchDisclosure = toPlainText(
+    promptContext?.constraint_mismatch?.expanded_from_zero_match
+      ? (promptContext.constraint_mismatch.disclosure_hint ??
+          "We do not have an exact match for that request right now.")
+      : ""
+  );
+
   return {
     mode: "recommendations",
     assistant_message:
-      "Based on what you’re looking for, here are a few rugs that could work well:",
+      mismatchDisclosure.length > 0
+        ? `${mismatchDisclosure} ${buildFallbackLeadIn(constraints, userMessage)}`
+        : buildFallbackLeadIn(constraints, userMessage),
     questions: [],
     recommendations,
     notes: "Fallback response (OpenAI unavailable or invalid).",
@@ -908,6 +986,13 @@ function sanitizeResponse(
   userMessage: string,
   input?: {
     discoveryMode?: boolean;
+    constraintMismatch?:
+      | {
+          expanded_from_zero_match: boolean;
+          unmet_constraints: string[];
+          disclosure_hint: string | null;
+        }
+      | undefined;
   }
 ): RecommendationResponse {
   // Only keep rugs that definitely came from backend candidates.
@@ -955,9 +1040,17 @@ function sanitizeResponse(
 
   if (response.mode === "no_match" && inventory.length > 0) {
     return enforceDiscoveryQuestion(
-      applyTonePolish({
-      ...fallbackRecommendations(inventory, constraints, userMessage),
-      notes: "Adjusted invalid no_match from model output.",
+      applyConstraintMismatchDisclosure({
+        response: applyTonePolish({
+          ...fallbackRecommendations(
+            inventory,
+            constraints,
+            userMessage,
+            undefined
+          ),
+          notes: "Adjusted invalid no_match from model output.",
+        }),
+        constraintMismatch: input?.constraintMismatch,
       }),
       Boolean(input?.discoveryMode)
     );
@@ -965,7 +1058,12 @@ function sanitizeResponse(
 
   if (response.mode === "recommendations" && recommendations.length === 0) {
     return enforceDiscoveryQuestion(
-      applyTonePolish(fallbackRecommendations(inventory, constraints, userMessage)),
+      applyConstraintMismatchDisclosure({
+        response: applyTonePolish(
+          fallbackRecommendations(inventory, constraints, userMessage, undefined)
+        ),
+        constraintMismatch: input?.constraintMismatch,
+      }),
       Boolean(input?.discoveryMode)
     );
   }
@@ -975,7 +1073,12 @@ function sanitizeResponse(
     const normalizedQuestions = cappedQuestions.filter((q) => q.trim().length > 0);
     if (normalizedQuestions.length === 0) {
       return enforceDiscoveryQuestion(
-        applyTonePolish(fallbackRecommendations(inventory, constraints, userMessage)),
+        applyConstraintMismatchDisclosure({
+          response: applyTonePolish(
+            fallbackRecommendations(inventory, constraints, userMessage, undefined)
+          ),
+          constraintMismatch: input?.constraintMismatch,
+        }),
         Boolean(input?.discoveryMode)
       );
     }
@@ -1003,9 +1106,17 @@ function sanitizeResponse(
   if (response.mode === "disambiguation") {
     if (recommendations.length === 0) {
       return enforceDiscoveryQuestion(
-        applyTonePolish({
-        ...fallbackRecommendations(inventory, constraints, userMessage),
-        notes: "Adjusted invalid disambiguation from model output.",
+        applyConstraintMismatchDisclosure({
+          response: applyTonePolish({
+            ...fallbackRecommendations(
+              inventory,
+              constraints,
+              userMessage,
+              undefined
+            ),
+            notes: "Adjusted invalid disambiguation from model output.",
+          }),
+          constraintMismatch: input?.constraintMismatch,
         }),
         Boolean(input?.discoveryMode)
       );
@@ -1021,10 +1132,13 @@ function sanitizeResponse(
   }
 
   return enforceDiscoveryQuestion(
-    applyTonePolish({
-      ...response,
-      questions: [],
-      recommendations,
+    applyConstraintMismatchDisclosure({
+      response: applyTonePolish({
+        ...response,
+        questions: [],
+        recommendations,
+      }),
+      constraintMismatch: input?.constraintMismatch,
     }),
     Boolean(input?.discoveryMode)
   );
@@ -1198,7 +1312,7 @@ export async function rankAndExplain(
     // Network/API failure -> deterministic fallback, not a hard API error.
     return enforceDiscoveryQuestion(
       applyTonePolish({
-        ...fallbackRecommendations(inventory, constraints, userMessage),
+        ...fallbackRecommendations(inventory, constraints, userMessage, promptContext),
         notes: "OpenAI request failed. Returned local fallback.",
       }),
       Boolean(promptContext?.discovery_mode)
@@ -1253,7 +1367,7 @@ export async function rankAndExplain(
     // Parsing/shape failure -> deterministic fallback.
     return enforceDiscoveryQuestion(
       applyTonePolish({
-        ...fallbackRecommendations(inventory, constraints, userMessage),
+        ...fallbackRecommendations(inventory, constraints, userMessage, promptContext),
         notes: "OpenAI response parsing failed. Returned local fallback.",
       }),
       Boolean(promptContext?.discovery_mode)
@@ -1268,6 +1382,7 @@ export async function rankAndExplain(
     userMessage,
     {
       discoveryMode: Boolean(promptContext?.discovery_mode),
+      constraintMismatch: promptContext?.constraint_mismatch,
     }
   );
   if (trace) {

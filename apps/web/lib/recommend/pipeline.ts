@@ -778,7 +778,7 @@ export async function runRecommendationPipeline(
     let styleFallbackStage: "none" | "origin_or_mood_family" | "style_dropped" =
       "none";
     let expandedDueToThinResults = false;
-    let expandedFromZeroMatch = false;
+    let constraintMismatchActive = false;
     let unmetConstraints: string[] = [];
     let mismatchDisclosureHint: string | null = null;
 
@@ -925,7 +925,10 @@ export async function runRecommendationPipeline(
         blockers.length > 0
           ? blockers
           : listActiveConstraintKeys(filteredByConstraints);
-      mismatchDisclosureHint = buildMismatchDisclosureHint(unmetConstraints);
+      mismatchDisclosureHint = buildMismatchDisclosureHint(
+        unmetConstraints,
+        filteredByConstraints
+      );
 
       let broadenedCandidates = inventory;
       if (
@@ -1034,7 +1037,7 @@ export async function runRecommendationPipeline(
       }
 
       candidates = broadenedCandidates;
-      expandedFromZeroMatch = true;
+      constraintMismatchActive = true;
       broadeningApplied = true;
       broadeningStage = "full_alternative_expansion";
       noMatchTrace = {
@@ -1042,6 +1045,28 @@ export async function runRecommendationPipeline(
         fallback_tier: "expanded",
         terminal_reason_code: null,
       };
+    }
+
+    if (
+      candidates.length > 0 &&
+      requestedConstraints.shape &&
+      !activeHardConstraints.shape
+    ) {
+      const shapeMatchedCandidates = filterByHardConstraints(candidates, {
+        shape: requestedConstraints.shape,
+      });
+      if (shapeMatchedCandidates.length === 0) {
+        constraintMismatchActive = true;
+        unmetConstraints = Array.from(new Set([...unmetConstraints, "shape"]));
+        mismatchDisclosureHint = buildMismatchDisclosureHint(
+          unmetConstraints,
+          requestedConstraints
+        );
+        broadeningApplied = true;
+        if (broadeningStage === "none") {
+          broadeningStage = "full_alternative_expansion";
+        }
+      }
     }
 
     const shapeStart = Date.now();
@@ -1058,7 +1083,7 @@ export async function runRecommendationPipeline(
       ...input.promptContext,
       discovery_mode: discoveryMode,
       expanded_due_to_thin_results: expandedDueToThinResults,
-      constraint_mismatch: expandedFromZeroMatch
+      constraint_mismatch: constraintMismatchActive
         ? {
             expanded_from_zero_match: true,
             unmet_constraints: unmetConstraints,
@@ -1102,7 +1127,7 @@ export async function runRecommendationPipeline(
     if (sizeRelaxationCode) {
       response.notes = appendNotesCode(response.notes, sizeRelaxationCode);
     }
-    if (expandedFromZeroMatch) {
+    if (constraintMismatchActive) {
       response.notes = appendNotesCode(
         response.notes,
         CONSTRAINT_MISMATCH_EXPANDED_NOTE_CODE
@@ -1340,8 +1365,37 @@ function listActiveConstraintKeys(constraints: HardConstraints): string[] {
   return keys;
 }
 
-function buildMismatchDisclosureHint(unmetConstraints: string[]): string | null {
+function buildMismatchDisclosureHint(
+  unmetConstraints: string[],
+  constraints: HardConstraints
+): string | null {
   if (unmetConstraints.length === 0) return null;
+  if (unmetConstraints.includes("shape")) {
+    if (constraints.shape === "runner") {
+      return "We don't have any runners in the collection right now, so I'm showing the closest alternatives that could still work for a long, narrow space.";
+    }
+    if (constraints.shape === "round_oval") {
+      return "We don't have round or oval rugs that match this request right now, so I'm showing the closest alternatives available.";
+    }
+    return "We don't have rugs in that requested shape right now, so I'm showing the closest alternatives available.";
+  }
+  if (unmetConstraints.includes("size") && constraints.size) {
+    return `We don't have an exact ${constraints.size.widthIn}" x ${constraints.size.lengthIn}" match right now, so I'm showing the closest available alternatives.`;
+  }
+  if (
+    unmetConstraints.includes("styles") &&
+    constraints.styles &&
+    constraints.styles.length > 0
+  ) {
+    return `We don't have exact ${constraints.styles.join(", ")} matches right now, so I'm showing the closest available alternatives.`;
+  }
+  if (
+    unmetConstraints.includes("colors") &&
+    constraints.colors &&
+    constraints.colors.length > 0
+  ) {
+    return `We don't have exact ${constraints.colors.join(", ")} color matches right now, so I'm showing the closest available alternatives.`;
+  }
   const readable = unmetConstraints.map((item) => blockerLabel(item)).join(", ");
   return `No exact match for ${readable}; disclose this clearly and then recommend the closest alternatives from available inventory.`;
 }
