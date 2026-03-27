@@ -243,6 +243,10 @@ export function parseRecommendationFollowupIntent(
   const followupSignals = [
     "show more",
     "more like this",
+    "keep going",
+    "keep them coming",
+    "continue",
+    "go on",
     "narrow",
     "filter",
     "under ",
@@ -266,7 +270,7 @@ export function parseRecommendationFollowupIntent(
   }
 
   if (
-    /^(yes|yeah|yep|sure|please|do it|that works|sounds good|show me more|more please)\b/.test(
+    /^(yes|yeah|yep|sure|please|do it|that works|sounds good|show me more|more please|keep going|continue)\b/.test(
       normalized
     )
   ) {

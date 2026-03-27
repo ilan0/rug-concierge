@@ -193,6 +193,7 @@ export async function POST(req: Request) {
     const compiledPolicy = parsedTurn
       ? compileTurnPolicy({
           parsedTurn,
+          message: userMessage ?? "",
           explicitConstraints: body.constraints,
         })
       : null;

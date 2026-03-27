@@ -10,6 +10,7 @@
     "build": "npm --workspace apps/web run build",
     "lint": "npm --workspace apps/web run lint",
     "test:concierge-rework": "npm --workspace apps/web exec tsx ../../scripts/testing/concierge-rework-scenarios.ts",
+    "test:concierge-gauntlet": "npm --workspace apps/web exec tsx ../../scripts/testing/concierge-500-gauntlet.ts",
     "build:live-intake-dataset": "npm exec tsx -- scripts/testing/live-intake/build-live-intake-dataset.ts",
     "run:live-intake-ui": "npm exec tsx -- scripts/testing/live-intake/run-live-intake-ui.ts",
     "check:docs": "node scripts/check-docs-drift.mjs",

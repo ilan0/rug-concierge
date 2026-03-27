@@ -440,9 +440,13 @@ function fallbackParsedTurn(input: ParseTurnInput): ParsedTurn {
   );
 
   const hasFollowup =
-    /\b(show more|more like this|closest|nearest|larger|bigger|smaller|size down|size up)\b/i.test(
+    /\b(show more|more like this|closest|nearest|larger|bigger|smaller|size down|size up|keep going|keep them coming|continue|go on|next options?)\b/i.test(
       message
     ) ||
+    (Boolean(input.context.has_recent_recommendations) &&
+      /\b(anything|something)\s+similar\b|\bsimilar (ones|options|pieces)\b/i.test(
+        message
+      )) ||
     (/^(yes|yeah|yep|sure)\b/i.test(message) &&
       Boolean(input.context.has_recent_recommendations));
 
@@ -452,11 +456,11 @@ function fallbackParsedTurn(input: ParseTurnInput): ParsedTurn {
       message
     );
   const hasShoppingIntent =
-    /\b(show|find|recommend|need|want|looking for|search|browse|options|inventory)\b/i.test(
+    /\b(show|find|recommend|need|want|looking for|search|browse|options|inventory|do you have|have any|similar|mostrar|muestrame|muéstrame|busco|quiero|necesito|recomienda)\b/i.test(
       message
     );
   const isAdviceIntent =
-    /\b(what is|what's|tell me about|difference between|how do i|how to|care|clean)\b/i.test(
+    /\b(what is|what's|tell me about|difference between|how do i|how to|care|clean|que es|qué es|cual es la diferencia|cuál es la diferencia|diferencia entre|como|cómo|explica)\b/i.test(
       message
     ) && !hasShoppingIntent;
   const hasReactionLanguage =
@@ -510,7 +514,7 @@ function fallbackParsedTurn(input: ParseTurnInput): ParsedTurn {
         ? "followup"
         : isDiscoveryIntent ||
             hasConstraintSignals ||
-            /\b(show|find|recommend|need|want|looking for|search)\b/i.test(message)
+            /\b(show|find|recommend|need|want|looking for|search|do you have|have any)\b/i.test(message)
           ? "recommend"
           : "general";
 

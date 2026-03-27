@@ -386,10 +386,33 @@ function toPlainText(value: string): string {
   );
 }
 
+function clampAssistantMessage(message: string): string {
+  const plain = toPlainText(message);
+  if (plain.length <= MAX_ASSISTANT_MESSAGE_CHARS) {
+    return plain;
+  }
+
+  const truncated = plain.slice(0, MAX_ASSISTANT_MESSAGE_CHARS).trim();
+  const preferredBoundary = truncated.match(/[\.\!\?](?!.*[\.\!\?])/);
+  if (preferredBoundary && preferredBoundary.index !== undefined) {
+    const boundaryIndex = preferredBoundary.index + preferredBoundary[0].length;
+    if (boundaryIndex >= Math.floor(MAX_ASSISTANT_MESSAGE_CHARS * 0.55)) {
+      return truncated.slice(0, boundaryIndex).trim();
+    }
+  }
+
+  const lastSpace = truncated.lastIndexOf(" ");
+  if (lastSpace > Math.floor(MAX_ASSISTANT_MESSAGE_CHARS * 0.45)) {
+    return `${truncated.slice(0, lastSpace).trim()}...`;
+  }
+
+  return `${truncated.slice(0, MAX_ASSISTANT_MESSAGE_CHARS - 3).trim()}...`;
+}
+
 function stripGenericRecommendationLeadIn(message: string): string {
   const normalized = toPlainText(message);
   return normalized.replace(
-    /^(based on what you're looking for[,:\-\s]*|here are (some|a few) (options|rugs)( that could work well)?[,:\-\s]*)/i,
+    /^(based on what you're looking for[,:\-\s]*|here are (some|a few|the) (options|rugs)( that could work well)?[,:\-\s]*|you asked for specific guidance[,:\-\s]*|here is a diverse sample from (our current )?collection[,:\-\s]*)/i,
     ""
   ).trim();
 }
@@ -414,7 +437,9 @@ function applyTonePolish(response: RecommendationResponse): RecommendationRespon
     const cleanedAssistant = stripGenericRecommendationLeadIn(response.assistant_message);
     return {
       ...response,
-      assistant_message: cleanedAssistant || toPlainText(response.assistant_message),
+      assistant_message: clampAssistantMessage(
+        cleanedAssistant || toPlainText(response.assistant_message)
+      ),
       questions: uniqueCompactList(response.questions, 2),
     };
   }
@@ -426,7 +451,7 @@ function applyTonePolish(response: RecommendationResponse): RecommendationRespon
       : `${noMatchMessage} Try relaxing one constraint and I can suggest alternatives.`;
     return {
       ...response,
-      assistant_message: withGuidance,
+      assistant_message: clampAssistantMessage(withGuidance),
       questions: uniqueCompactList(response.questions, 1),
     };
   }
@@ -435,7 +460,9 @@ function applyTonePolish(response: RecommendationResponse): RecommendationRespon
     const cleanedAssistant = stripGenericRecommendationLeadIn(response.assistant_message);
     return {
       ...response,
-      assistant_message: cleanedAssistant || toPlainText(response.assistant_message),
+      assistant_message: clampAssistantMessage(
+        cleanedAssistant || toPlainText(response.assistant_message)
+      ),
       questions: [],
       recommendations: response.recommendations.slice(0, 3),
     };
@@ -444,7 +471,9 @@ function applyTonePolish(response: RecommendationResponse): RecommendationRespon
   const cleanedAssistant = stripGenericRecommendationLeadIn(response.assistant_message);
   return {
     ...response,
-    assistant_message: cleanedAssistant || toPlainText(response.assistant_message),
+    assistant_message: clampAssistantMessage(
+      cleanedAssistant || toPlainText(response.assistant_message)
+    ),
     questions: [],
     recommendations: response.recommendations.map((rec) => ({
       ...rec,
@@ -455,24 +484,75 @@ function applyTonePolish(response: RecommendationResponse): RecommendationRespon
   };
 }
 
+function enforceRequestAnchoredOpening(input: {
+  response: RecommendationResponse;
+  constraints: HardConstraints;
+  userMessage: string;
+}): RecommendationResponse {
+  if (input.response.mode !== "recommendations") {
+    return input.response;
+  }
+  const assistant = toPlainText(input.response.assistant_message);
+  const genericLeadIn =
+    /^(based on what you're looking for|here are (some|a few|the) (options|rugs)|you asked for specific guidance|here is a diverse sample)/i.test(
+      assistant
+    );
+  if (!genericLeadIn) {
+    return input.response;
+  }
+
+  const leadIn = buildFallbackLeadIn(input.constraints, input.userMessage);
+  const stripped = stripGenericRecommendationLeadIn(assistant);
+  const rewritten = stripped.length > 0 ? `${leadIn} ${stripped}` : leadIn;
+  return {
+    ...input.response,
+    assistant_message: rewritten.trim(),
+  };
+}
+
 function enforceDiscoveryQuestion(
   response: RecommendationResponse,
   discoveryMode: boolean,
-  customerContext?: string[]
+  customerContext?: string[],
+  userMessage?: string,
+  constraints?: HardConstraints
 ): RecommendationResponse {
-  if (!discoveryMode || response.mode !== "recommendations") {
-    return response;
+  const finalize = (next: RecommendationResponse): RecommendationResponse => {
+    if (!userMessage || !constraints) {
+      return {
+        ...next,
+        assistant_message: clampAssistantMessage(next.assistant_message),
+      };
+    }
+    return enforceResponseLanguage(next, userMessage, constraints);
+  };
+
+  const anchoredResponse =
+    constraints && userMessage
+      ? enforceRequestAnchoredOpening({
+          response,
+          constraints,
+          userMessage,
+        })
+      : response;
+
+  if (!discoveryMode || anchoredResponse.mode !== "recommendations") {
+    return finalize({
+      ...anchoredResponse,
+      assistant_message: clampAssistantMessage(anchoredResponse.assistant_message),
+    });
   }
 
-  const assistant = toPlainText(response.assistant_message);
+  const assistant = toPlainText(anchoredResponse.assistant_message);
   if (assistant.includes("?")) {
-    return {
-      ...response,
-      assistant_message: assistant,
-    };
+    return finalize({
+      ...anchoredResponse,
+      assistant_message: clampAssistantMessage(assistant),
+    });
   }
 
   const language = detectResponseLanguage(assistant);
+  const normalizedUserMessage = normalizeText(userMessage ?? "");
   const hasKnownRoom = Array.isArray(customerContext)
     ? customerContext.some((fact) =>
         /\b(room|living room|dining room|bedroom|hallway|entryway|office|sala|comedor|dormitorio|pasillo)\b/i.test(
@@ -480,21 +560,67 @@ function enforceDiscoveryQuestion(
         )
       )
     : false;
+  const hasRoomSignalInMessage =
+    /\b(room|living room|dining room|bedroom|hallway|entryway|office|sala|comedor|dormitorio|pasillo)\b/i.test(
+      normalizedUserMessage
+    );
   const discoveryQuestion =
     language === "es"
-      ? hasKnownRoom
+      ? hasKnownRoom || hasRoomSignalInMessage
         ? "Prefieres que te muestre opciones mas tradicionales o mas modernas para ese espacio?"
         : "Que tipo de espacio estas decorando para afinar mejor estas opciones?"
-      : hasKnownRoom
+      : hasKnownRoom || hasRoomSignalInMessage
         ? "Do you want me to lean more traditional or more modern for that space?"
         : "What kind of space are you decorating so I can narrow these down for you?";
   console.warn("[recommendation] discovery response missing follow-up question", {
-    mode: response.mode,
+    mode: anchoredResponse.mode,
     assistant_preview: sectionPreview(assistant),
   });
+  return finalize({
+    ...anchoredResponse,
+    assistant_message: clampAssistantMessage(
+      `${assistant} ${discoveryQuestion}`.trim()
+    ),
+  });
+}
+
+function hasSpanishSignal(text: string): boolean {
+  return /[¿¡]|[áéíóúñ]|\b(puedo|mostrar|coleccion|colección|opciones|si|quieres|alfombra|estilo|aqui|aquí|buscas|para)\b/i.test(
+    text
+  );
+}
+
+function enforceResponseLanguage(
+  response: RecommendationResponse,
+  userMessage: string,
+  constraints: HardConstraints
+): RecommendationResponse {
+  if (detectResponseLanguage(userMessage) !== "es") {
+    return {
+      ...response,
+      assistant_message: clampAssistantMessage(response.assistant_message),
+    };
+  }
+
+  const assistant = toPlainText(response.assistant_message);
+  if (hasSpanishSignal(assistant)) {
+    return {
+      ...response,
+      assistant_message: clampAssistantMessage(assistant),
+    };
+  }
+
+  const spanishLeadIn =
+    response.mode === "recommendations" || response.mode === "disambiguation"
+      ? buildFallbackLeadIn(constraints, userMessage)
+      : response.mode === "no_match"
+        ? "No tengo una coincidencia exacta con esos criterios ahora mismo."
+        : "Para ayudarte mejor, necesito una aclaracion breve.";
   return {
     ...response,
-    assistant_message: `${assistant} ${discoveryQuestion}`.trim(),
+    assistant_message: clampAssistantMessage(
+      `${spanishLeadIn} ${assistant}`.trim()
+    ),
   };
 }
 
@@ -1179,7 +1305,9 @@ function sanitizeResponse(
         constraintMismatch: input?.constraintMismatch,
       }),
       Boolean(input?.discoveryMode),
-      input?.customerContext
+      input?.customerContext,
+      userMessage,
+      constraints
     );
   }
 
@@ -1192,7 +1320,9 @@ function sanitizeResponse(
         constraintMismatch: input?.constraintMismatch,
       }),
       Boolean(input?.discoveryMode),
-      input?.customerContext
+      input?.customerContext,
+      userMessage,
+      constraints
     );
   }
 
@@ -1208,7 +1338,9 @@ function sanitizeResponse(
           constraintMismatch: input?.constraintMismatch,
         }),
         Boolean(input?.discoveryMode),
-        input?.customerContext
+        input?.customerContext,
+        userMessage,
+        constraints
       );
     }
     return enforceDiscoveryQuestion(
@@ -1218,7 +1350,9 @@ function sanitizeResponse(
       recommendations: [],
       }),
       Boolean(input?.discoveryMode),
-      input?.customerContext
+      input?.customerContext,
+      userMessage,
+      constraints
     );
   }
 
@@ -1230,7 +1364,9 @@ function sanitizeResponse(
       recommendations: [],
       }),
       Boolean(input?.discoveryMode),
-      input?.customerContext
+      input?.customerContext,
+      userMessage,
+      constraints
     );
   }
 
@@ -1250,7 +1386,9 @@ function sanitizeResponse(
           constraintMismatch: input?.constraintMismatch,
         }),
         Boolean(input?.discoveryMode),
-        input?.customerContext
+        input?.customerContext,
+        userMessage,
+        constraints
       );
     }
     return enforceDiscoveryQuestion(
@@ -1260,7 +1398,9 @@ function sanitizeResponse(
       recommendations: normalizedRecommendations.slice(0, 3),
       }),
       Boolean(input?.discoveryMode),
-      input?.customerContext
+      input?.customerContext,
+      userMessage,
+      constraints
     );
   }
 
@@ -1274,7 +1414,9 @@ function sanitizeResponse(
       constraintMismatch: input?.constraintMismatch,
     }),
     Boolean(input?.discoveryMode),
-    input?.customerContext
+    input?.customerContext,
+    userMessage,
+    constraints
   );
 }
 
@@ -1460,7 +1602,9 @@ export async function rankAndExplain(
         notes: "OpenAI request failed. Returned local fallback.",
       }),
       Boolean(promptContext?.discovery_mode),
-      promptContext?.chat_context?.customer_context
+      promptContext?.chat_context?.customer_context,
+      userMessage,
+      constraints
     );
   }
 
@@ -1516,7 +1660,9 @@ export async function rankAndExplain(
         notes: "OpenAI response parsing failed. Returned local fallback.",
       }),
       Boolean(promptContext?.discovery_mode),
-      promptContext?.chat_context?.customer_context
+      promptContext?.chat_context?.customer_context,
+      userMessage,
+      constraints
     );
   }
 

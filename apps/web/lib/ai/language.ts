@@ -11,6 +11,20 @@ const SPANISH_MARKERS = [
   " necesito ",
   " busco ",
   " mostrar ",
+  " muestra ",
+  " muestrame ",
+  " muéstrame ",
+  " mas ",
+  " más ",
+  " esta ",
+  " este ",
+  " opciones ",
+  " color ",
+  " colores ",
+  " que ",
+  " qué ",
+  " como ",
+  " cómo ",
   " alfombra",
   " alfombras",
   " sala",
@@ -37,6 +51,9 @@ export function detectResponseLanguage(message: string): SupportedResponseLangua
   if (/[¿¡]/.test(message)) {
     return "es";
   }
+  if (/[áéíóúñ]/i.test(message)) {
+    return "es";
+  }
 
   let hits = 0;
   for (const marker of SPANISH_MARKERS) {
@@ -45,4 +62,3 @@ export function detectResponseLanguage(message: string): SupportedResponseLangua
 
   return hits >= 2 ? "es" : "en";
 }
-

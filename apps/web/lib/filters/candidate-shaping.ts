@@ -44,6 +44,27 @@ const STYLE_HINTS = [
   "geometric",
 ] as const;
 
+const MODERN_DIRECTION_TERMS = [
+  "modern",
+  "contemporary",
+  "minimal",
+  "minimalist",
+  "abstract",
+  "transitional",
+] as const;
+
+const TRADITIONAL_DIRECTION_TERMS = [
+  "traditional",
+  "persian",
+  "heriz",
+  "serapi",
+  "kashan",
+  "tabriz",
+  "isfahan",
+  "sultanabad",
+  "tribal",
+] as const;
+
 const AVOID_CONTEXT_PHRASES = [
   "avoid",
   "no",
@@ -230,6 +251,73 @@ function scoreStructuredMatch(
   if (matches === 2) return 16;
   if (matches === 1) return 12;
   return 4;
+}
+
+function scoreStyleIntentAlignment(
+  rug: InventoryRug,
+  userMessage: string,
+  constraints: HardConstraints
+): number {
+  const requestedStyles = unique([
+    ...((constraints.styles ?? []).map((value) => normalizeText(value))),
+    ...extractStyleTokens(userMessage).map((value) => normalizeText(value)),
+  ]);
+  if (requestedStyles.length === 0) return 0;
+
+  const fields = rug.effective_fields
+    ? rug.effective_fields
+    : resolveEffectiveFields(
+        rug.intake_label ?? null,
+        rug.ai_structured_fields ?? null,
+        rug.staff_overrides ?? null,
+        rug.ai_description ?? null
+      );
+
+  const candidateText = normalizeText(
+    [
+      fields.style ?? "",
+      fields.origin ?? "",
+      fields.mood ?? "",
+      ...(fields.pattern ?? []),
+      rug.ai_description ?? "",
+      rug.intake_label ?? "",
+      fields.label ?? "",
+    ].join(" ")
+  );
+
+  const hasModernRequest = requestedStyles.some((token) =>
+    MODERN_DIRECTION_TERMS.includes(token as (typeof MODERN_DIRECTION_TERMS)[number])
+  );
+  const hasTraditionalRequest = requestedStyles.some((token) =>
+    TRADITIONAL_DIRECTION_TERMS.includes(token as (typeof TRADITIONAL_DIRECTION_TERMS)[number])
+  );
+  const matchesRequested = requestedStyles.filter((token) =>
+    candidateText.includes(token)
+  ).length;
+  const hasModernCandidate = MODERN_DIRECTION_TERMS.some((token) =>
+    candidateText.includes(token)
+  );
+  const hasTraditionalCandidate = TRADITIONAL_DIRECTION_TERMS.some((token) =>
+    candidateText.includes(token)
+  );
+
+  let score = 0;
+  if (matchesRequested > 0) {
+    score += Math.min(18, matchesRequested * 6);
+  }
+  if (hasModernRequest && hasTraditionalCandidate && !hasModernCandidate) {
+    score -= 22;
+  }
+  if (hasTraditionalRequest && hasModernCandidate && !hasTraditionalCandidate) {
+    score -= 18;
+  }
+  if (hasModernRequest && hasModernCandidate) {
+    score += 12;
+  }
+  if (hasTraditionalRequest && hasTraditionalCandidate) {
+    score += 10;
+  }
+  return score;
 }
 
 function scoreColorMatch(rug: InventoryRug, constraints: HardConstraints, userMessage: string): number {
@@ -488,6 +576,7 @@ export function shapeCandidatesForAI(
       ? scoreMetadataCompleteness(rug) + scoreDiscoveryRange(rug)
       : scoreSizeProximity(rug, constraints) +
         scoreStructuredMatch(rug, userMessage, constraints) +
+        scoreStyleIntentAlignment(rug, userMessage, constraints) +
         scoreColorMatch(rug, constraints, userMessage) +
         scoreShapeSuitability(rug, constraints) +
         scoreAvoidPenalty(rug, userMessage, constraints) +

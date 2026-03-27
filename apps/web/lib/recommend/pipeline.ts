@@ -256,6 +256,43 @@ function toRuntimeSizeIn(
   };
 }
 
+function normalizeText(value: string): string {
+  return value.toLowerCase().replace(/\s+/g, " ").trim();
+}
+
+function hasAnyStyleMatches(
+  candidates: InventoryRug[],
+  styles: string[]
+): boolean {
+  if (styles.length === 0) return true;
+  const normalizedStyles = styles
+    .map((style) => normalizeText(style))
+    .filter((style) => style.length > 0);
+  if (normalizedStyles.length === 0) return true;
+
+  return candidates.some((rug) => {
+    const fields =
+      rug.effective_fields ??
+      resolveEffectiveFields(
+        rug.intake_label ?? null,
+        rug.ai_structured_fields ?? null,
+        rug.staff_overrides ?? null,
+        rug.ai_description ?? null
+      );
+    const haystack = normalizeText(
+      [
+        fields.style ?? "",
+        fields.origin ?? "",
+        fields.mood ?? "",
+        ...(fields.pattern ?? []),
+        rug.ai_description ?? "",
+        rug.intake_label ?? "",
+      ].join(" ")
+    );
+    return normalizedStyles.some((token) => haystack.includes(token));
+  });
+}
+
 function hasAnyRequestedConstraints(constraints: HardConstraints): boolean {
   return Boolean(
     constraints.size ||
@@ -267,20 +304,8 @@ function hasAnyRequestedConstraints(constraints: HardConstraints): boolean {
 
 function isDiscoveryMode(input: {
   discoveryRequested: boolean;
-  constraints: HardConstraints;
-  priorResultMode:
-    | "recommendation"
-    | "no_match"
-    | "clarifying_question"
-    | "disambiguation"
-    | null;
 }): boolean {
-  if (input.discoveryRequested) return true;
-  if (hasAnyRequestedConstraints(input.constraints)) return false;
-  return (
-    input.priorResultMode === null ||
-    input.priorResultMode === "clarifying_question"
-  );
+  return input.discoveryRequested;
 }
 
 function constraintStrictness(
@@ -651,8 +676,6 @@ export async function runRecommendationPipeline(
     const requestedConstraints: HardConstraints = effectiveConstraints;
     discoveryMode = isDiscoveryMode({
       discoveryRequested: Boolean(input.discoveryRequested),
-      constraints: requestedConstraints,
-      priorResultMode: input.priorResultMode ?? null,
     });
     const mustOnlyConstraints = toMustOnlyConstraints(requestedConstraints);
     const forceSizeWindowByIntent =
@@ -1072,6 +1095,22 @@ export async function runRecommendationPipeline(
           broadeningStage = "full_alternative_expansion";
         }
       }
+    }
+
+    if (
+      candidates.length > 0 &&
+      requestedConstraints.styles &&
+      requestedConstraints.styles.length > 0 &&
+      constraintStrictness(requestedConstraints, "styles") !== "must" &&
+      !hasAnyStyleMatches(candidates, requestedConstraints.styles)
+    ) {
+      constraintMismatchActive = true;
+      unmetConstraints = Array.from(new Set([...unmetConstraints, "styles"]));
+      mismatchDisclosureHint = buildMismatchDisclosureHint(
+        unmetConstraints,
+        requestedConstraints,
+        findLargestAvailableSizeText(inventory)
+      );
     }
 
     const previouslyShownIds = new Set([

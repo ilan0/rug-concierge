@@ -1,11 +1,57 @@
 import type { UiChatResponseBody } from "@/lib/types/chat-ui";
 import type { DebugTraceSummary, ConciergeVariant } from "@/components/concierge/types";
+import type { HardConstraints } from "@/lib/types/recommendation";
 
-export const STARTER_PROMPTS: Record<ConciergeVariant, string[]> = {
+export type StarterPrompt = {
+  id: string;
+  label: string;
+  message: string;
+  constraints?: HardConstraints;
+};
+
+export const STARTER_PROMPTS: Record<ConciergeVariant, StarterPrompt[]> = {
   concierge: [
-    "Help me find a living room anchor rug",
-    "Show me a range to react to",
-    "I need something around 8x10",
+    {
+      id: "living-room-anchor",
+      label: "Help me find a living room anchor rug",
+      message: "Help me find a living room anchor rug",
+      constraints: {
+        size: {
+          widthIn: 96,
+          lengthIn: 120,
+          toleranceIn: 12,
+        },
+        strictness: {
+          size: "prefer",
+          colors: "prefer",
+          styles: "prefer",
+          shape: "prefer",
+        },
+      },
+    },
+    {
+      id: "range-react",
+      label: "Show me a range to react to",
+      message: "Show me a range to react to",
+    },
+    {
+      id: "around-8x10",
+      label: "I need something around 8x10",
+      message: "I need something around 8x10",
+      constraints: {
+        size: {
+          widthIn: 96,
+          lengthIn: 120,
+          toleranceIn: 12,
+        },
+        strictness: {
+          size: "prefer",
+          colors: "prefer",
+          styles: "prefer",
+          shape: "prefer",
+        },
+      },
+    },
   ],
 };
 

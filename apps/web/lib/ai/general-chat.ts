@@ -256,6 +256,52 @@ function toPlainText(value: string): string {
   );
 }
 
+function clampAssistantMessage(message: string): string {
+  const plain = toPlainText(message);
+  if (plain.length <= MAX_ASSISTANT_MESSAGE_CHARS) return plain;
+
+  const truncated = plain.slice(0, MAX_ASSISTANT_MESSAGE_CHARS).trim();
+  const boundaryMatches = [...truncated.matchAll(/[.!?]/g)];
+  const lastBoundary = boundaryMatches.at(-1);
+  if (
+    lastBoundary &&
+    typeof lastBoundary.index === "number" &&
+    lastBoundary.index >= Math.floor(MAX_ASSISTANT_MESSAGE_CHARS * 0.55)
+  ) {
+    return truncated.slice(0, lastBoundary.index + 1).trim();
+  }
+
+  const lastSpace = truncated.lastIndexOf(" ");
+  if (lastSpace > Math.floor(MAX_ASSISTANT_MESSAGE_CHARS * 0.45)) {
+    return `${truncated.slice(0, lastSpace).trim()}...`;
+  }
+
+  return `${truncated.slice(0, MAX_ASSISTANT_MESSAGE_CHARS - 3).trim()}...`;
+}
+
+function trimToLengthPreservingWords(message: string, maxChars: number): string {
+  const plain = toPlainText(message);
+  if (plain.length <= maxChars) return plain;
+  if (maxChars <= 3) return plain.slice(0, maxChars);
+
+  const sliced = plain.slice(0, maxChars).trim();
+  const boundaryMatches = [...sliced.matchAll(/[.!?]/g)];
+  const lastBoundary = boundaryMatches.at(-1);
+  if (lastBoundary && typeof lastBoundary.index === "number") {
+    const boundaryEnd = lastBoundary.index + 1;
+    if (boundaryEnd >= Math.floor(maxChars * 0.5)) {
+      return sliced.slice(0, boundaryEnd).trim();
+    }
+  }
+
+  const lastSpace = sliced.lastIndexOf(" ");
+  if (lastSpace > Math.floor(maxChars * 0.45)) {
+    return `${sliced.slice(0, lastSpace).trim()}...`;
+  }
+
+  return `${sliced.slice(0, maxChars - 3).trim()}...`;
+}
+
 function sanitizeHints(hints: string[]): string[] {
   const seen = new Set<string>();
   const output: string[] = [];
@@ -278,7 +324,7 @@ function shouldOfferCollectionExamples(message: string): boolean {
   if (!text) return false;
 
   const domainTopic =
-    /\b(rug|rugs|kilim|oushak|heriz|serapi|persian|afghan|turkish|style|origin|construction|weave|wool|silk|care|clean|vacuum|pile|flatweave)\b/.test(
+    /\b(rug|rugs|kilim|oushak|heriz|serapi|persian|afghan|turkish|style|styles|origin|construction|weave|wool|silk|care|clean|vacuum|pile|flatweave|tribal|geometric|traditional|modern|bohemian|transitional|alfombra|alfombras|estilo|estilos|origen|tejido)\b/.test(
       text
     );
   if (!domainTopic) return false;
@@ -289,26 +335,29 @@ function shouldOfferCollectionExamples(message: string): boolean {
 function withCollectionBridge(assistantMessage: string, latestUserMessage: string): string {
   const assistant = toPlainText(assistantMessage);
   if (!shouldOfferCollectionExamples(latestUserMessage)) {
-    return assistant;
+    return clampAssistantMessage(assistant);
   }
 
   const lower = assistant.toLowerCase();
   const alreadyBridges =
-    ((lower.includes("show") || lower.includes("see") || lower.includes("explore")) &&
-      (lower.includes("collection") ||
-        lower.includes("examples") ||
-        lower.includes("inventory") ||
-        lower.includes("options") ||
-        lower.includes("pieces"))) ||
-    /\bwould you like\b[\s\S]{0,120}\b(show|see|examples|collection|inventory|options)\b/.test(
+    /\b(show)\b[\s\S]{0,120}\b(collection|examples|inventory|options|pieces)\b/.test(
+      lower
+    ) ||
+    /\bwould you like\b[\s\S]{0,120}\bshow\b[\s\S]{0,120}\b(collection|examples|inventory|options|pieces)\b/.test(
       lower
     );
-  if (alreadyBridges) return assistant;
+  if (alreadyBridges) return clampAssistantMessage(assistant);
 
-  if (detectResponseLanguage(latestUserMessage) === "es") {
-    return `${assistant} Si quieres, puedo mostrar ejemplos de nuestra coleccion actual.`;
+  const bridge =
+    detectResponseLanguage(latestUserMessage) === "es"
+      ? "Si quieres, puedo mostrar ejemplos de nuestra coleccion actual."
+      : "If you'd like, I can show examples from our current collection.";
+  const availableForAssistant = MAX_ASSISTANT_MESSAGE_CHARS - bridge.length - 1;
+  if (availableForAssistant <= 0) {
+    return clampAssistantMessage(bridge);
   }
-  return `${assistant} If you'd like, I can show examples from our current collection.`;
+  const base = trimToLengthPreservingWords(assistant, availableForAssistant);
+  return `${base} ${bridge}`.trim();
 }
 
 function sanitizeResponse(
@@ -320,7 +369,7 @@ function sanitizeResponse(
     latestUserMessage
   );
   return {
-    assistant_message: assistantMessage,
+    assistant_message: clampAssistantMessage(assistantMessage),
     notes: response.notes ? toPlainText(response.notes) : null,
     memory_hints: sanitizeHints(response.memory_hints),
   };

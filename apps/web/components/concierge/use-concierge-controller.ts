@@ -13,6 +13,7 @@ import {
 import type { UiChatRequest, UiChatResponseBody } from "@/lib/types/chat-ui";
 import {
   STARTER_PROMPTS,
+  type StarterPrompt,
 } from "@/components/concierge/utils";
 import type {
   ConciergeVariant,
@@ -29,6 +30,7 @@ type UiRecommendationState = NonNullable<UiChatResponseBody["recommendation_stat
 type SendUserTurnOptions = {
   appendUserTurn?: boolean;
   preserveFailedMessage?: boolean;
+  constraints?: UiChatRequest["constraints"];
 };
 
 function storageSessionKey(tenantId: string): string {
@@ -157,10 +159,14 @@ export function useConciergeController(input: UseConciergeControllerInput) {
     nextState: UiRecommendationState | null | undefined
   ): Turn["constraintSnapshot"] => nextState ?? null;
 
-  const buildChatRequestPayload = (userMessage: string): UiChatRequest => ({
+  const buildChatRequestPayload = (
+    userMessage: string,
+    constraints?: UiChatRequest["constraints"]
+  ): UiChatRequest => ({
     session_id: sessionId ?? undefined,
     role: "retail_customer",
     message: userMessage,
+    constraints,
   });
 
   const sendUserTurn = async (
@@ -186,7 +192,9 @@ export function useConciergeController(input: UseConciergeControllerInput) {
     }
 
     try {
-      const { payload } = await sendChatTurn(buildChatRequestPayload(userMessage));
+      const { payload } = await sendChatTurn(
+        buildChatRequestPayload(userMessage, options.constraints)
+      );
 
       setSessionId(payload.session_id);
       setRecommendationState(payload.recommendation_state ?? null);
@@ -229,11 +237,13 @@ export function useConciergeController(input: UseConciergeControllerInput) {
     await sendUserTurn(userMessage);
   };
 
-  const submitWithPrompt = (prompt: string) => {
-    const userMessage = prompt.trim();
+  const submitWithPrompt = (prompt: StarterPrompt) => {
+    const userMessage = prompt.message.trim();
     if (!userMessage || isLoading) return;
     setMessage("");
-    void sendUserTurn(userMessage);
+    void sendUserTurn(userMessage, {
+      constraints: prompt.constraints,
+    });
   };
 
   const onRetryLastMessage = async () => {

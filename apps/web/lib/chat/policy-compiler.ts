@@ -1,10 +1,14 @@
 import type { HardConstraints } from "@/lib/types/recommendation";
-import { normalizeHardConstraints } from "@/lib/filters/extract-constraints";
+import {
+  extractSoftPreferencesFromUserMessage,
+  normalizeHardConstraints,
+} from "@/lib/filters/extract-constraints";
 import type { ParsedTurn } from "@/lib/chat/turn-parser-contract";
 
 export type CompiledTurnPolicy = {
   intent: ParsedTurn["intent"];
   mode: ParsedTurn["mode"];
+  discovery_requested: boolean;
   followup_intent: ParsedTurn["followup_intent"];
   hard_constraints: HardConstraints;
   persisted_hard_constraints: HardConstraints;
@@ -27,6 +31,155 @@ export type CompiledTurnPolicy = {
   };
 };
 
+type SemanticInference = {
+  inferred_size?: NonNullable<HardConstraints["size"]>;
+  inferred_styles?: string[];
+  inferred_shape?: HardConstraints["shape"];
+  inferred_avoid_styles?: string[];
+};
+
+const MODERN_STYLE_TERMS = [
+  "modern",
+  "contemporary",
+  "minimal",
+  "minimalist",
+  "abstract",
+] as const;
+
+const TRADITIONAL_STYLE_TERMS = [
+  "traditional",
+  "classic",
+  "antique",
+  "tribal",
+  "persian",
+  "heriz",
+  "serapi",
+  "kashan",
+  "tabriz",
+  "isfahan",
+  "sultanabad",
+] as const;
+
+function normalizeText(value: string): string {
+  return value.toLowerCase().replace(/\s+/g, " ").trim();
+}
+
+function includesAny(text: string, terms: readonly string[]): boolean {
+  return terms.some((term) => new RegExp(`\\b${term}\\b`, "i").test(text));
+}
+
+function inferSemanticSignals(input: {
+  message: string;
+  parsedTurn: ParsedTurn;
+  explicit: HardConstraints;
+  previous: HardConstraints;
+  useInheritedBase: boolean;
+}): SemanticInference {
+  const message = normalizeText(input.message);
+  const allowInference =
+    input.parsedTurn.intent === "recommend" ||
+    input.parsedTurn.intent === "followup" ||
+    input.parsedTurn.intent === "reaction";
+
+  if (!allowInference) {
+    return {};
+  }
+
+  const hasExplicitSize = Boolean(
+    input.explicit.size ||
+      input.parsedTurn.constraints.size ||
+      (input.useInheritedBase && input.previous.size)
+  );
+  const hasExplicitShape = Boolean(
+    input.explicit.shape ||
+      input.parsedTurn.constraints.shape ||
+      (input.useInheritedBase && input.previous.shape)
+  );
+  const styleTokens = new Set(
+    [
+      ...(input.explicit.styles ?? []),
+      ...(input.parsedTurn.constraints.styles ?? []),
+      ...(input.useInheritedBase ? input.previous.styles ?? [] : []),
+    ].map((value) => normalizeText(value))
+  );
+  const hasModernSignal =
+    includesAny(message, MODERN_STYLE_TERMS) || styleTokens.has("modern");
+  const hasTraditionalSignal =
+    includesAny(message, TRADITIONAL_STYLE_TERMS) ||
+    styleTokens.has("traditional") ||
+    styleTokens.has("persian");
+  const softSignals = extractSoftPreferencesFromUserMessage(input.message);
+  const hasAnchorSignal = /\b(anchor|anchor rug|main rug|room anchor)\b/i.test(message);
+
+  let inferredSize: NonNullable<HardConstraints["size"]> | undefined;
+  let inferredShape: HardConstraints["shape"] | undefined;
+  let inferredStyles: string[] | undefined;
+
+  if (!hasExplicitSize) {
+    if (hasAnchorSignal || softSignals.room === "living_room") {
+      inferredSize = { widthIn: 96, lengthIn: 120, toleranceIn: 12 };
+    } else if (softSignals.room === "dining_room") {
+      inferredSize = { widthIn: 96, lengthIn: 120, toleranceIn: 12 };
+    } else if (softSignals.room === "bedroom") {
+      inferredSize = { widthIn: 60, lengthIn: 96, toleranceIn: 10 };
+    } else if (softSignals.room === "office") {
+      inferredSize = { widthIn: 60, lengthIn: 96, toleranceIn: 10 };
+    } else if (softSignals.room === "entryway") {
+      inferredSize = { widthIn: 36, lengthIn: 60, toleranceIn: 8 };
+    } else if (softSignals.room === "kitchen") {
+      inferredSize = { widthIn: 24, lengthIn: 72, toleranceIn: 8 };
+    } else if (softSignals.room === "hallway") {
+      inferredSize = { widthIn: 30, lengthIn: 120, toleranceIn: 8 };
+    }
+  }
+
+  if (!hasExplicitShape && softSignals.room === "hallway") {
+    inferredShape = "runner";
+  }
+
+  if (styleTokens.size === 0) {
+    if (hasModernSignal && !hasTraditionalSignal) {
+      inferredStyles = ["modern"];
+    } else if (hasTraditionalSignal && !hasModernSignal) {
+      inferredStyles = ["traditional"];
+    }
+  }
+
+  let inferredAvoidStyles: string[] | undefined;
+  if (hasModernSignal && !hasTraditionalSignal) {
+    inferredAvoidStyles = [
+      "traditional",
+      "tribal",
+      "persian",
+      "heriz",
+      "serapi",
+      "kashan",
+      "tabriz",
+    ];
+  } else if (hasTraditionalSignal && !hasModernSignal) {
+    inferredAvoidStyles = ["modern", "contemporary", "minimalist", "abstract"];
+  }
+
+  return {
+    inferred_size: inferredSize,
+    inferred_shape: inferredShape,
+    inferred_styles: inferredStyles,
+    inferred_avoid_styles: inferredAvoidStyles,
+  };
+}
+
+function mergeStringTokens(...groups: Array<string[] | undefined>): string[] | undefined {
+  const merged = Array.from(
+    new Set(
+      groups
+        .flatMap((group) => group ?? [])
+        .map((value) => normalizeText(value))
+        .filter((value) => value.length > 0)
+    )
+  );
+  return merged.length > 0 ? merged : undefined;
+}
+
 function recommendedPreferToleranceIn(input: {
   widthIn: number;
   lengthIn: number;
@@ -40,6 +193,7 @@ function recommendedPreferToleranceIn(input: {
 }
 
 function mergeHardConstraints(input: {
+  message: string;
   explicit: HardConstraints;
   previous: HardConstraints;
   parsed: ParsedTurn["constraints"];
@@ -57,6 +211,23 @@ function mergeHardConstraints(input: {
     input.mode === "recommendation_followup" ||
     input.followupIntent !== "none";
   const base = useInheritedBase ? input.previous : {};
+  const semantic = inferSemanticSignals({
+    message: input.message,
+    parsedTurn: {
+      intent: input.intent,
+      mode: input.mode,
+      followup_intent: input.followupIntent,
+      constraints: parsed,
+      strictness: input.strictness,
+      avoid: input.parsedAvoid,
+      session_facts: [],
+      rug_reference_ambiguous: false,
+      confidence: "medium",
+    },
+    explicit,
+    previous: input.previous,
+    useInheritedBase,
+  });
   const mergedStrictness = {
     size: explicit.strictness?.size ?? input.strictness.size,
     colors: explicit.strictness?.colors ?? input.strictness.colors,
@@ -78,15 +249,22 @@ function mergeHardConstraints(input: {
                   lengthIn: parsed.size.lengthIn,
                 }),
         }
-      : base.size ?? undefined;
+      : base.size ?? semantic.inferred_size ?? undefined;
 
   const colors =
     explicit.colors ??
     (parsed.colors.length > 0 ? parsed.colors : base.colors ?? undefined);
   const styles =
     explicit.styles ??
-    (parsed.styles.length > 0 ? parsed.styles : base.styles ?? undefined);
-  const shape = explicit.shape ?? parsed.shape ?? base.shape ?? undefined;
+    (parsed.styles.length > 0
+      ? parsed.styles
+      : base.styles ?? semantic.inferred_styles ?? undefined);
+  const shape =
+    explicit.shape ??
+    parsed.shape ??
+    base.shape ??
+    semantic.inferred_shape ??
+    undefined;
   const parsedAvoid = {
     colors:
       input.parsedAvoid.colors.length > 0 ? input.parsedAvoid.colors : undefined,
@@ -96,10 +274,33 @@ function mergeHardConstraints(input: {
       input.parsedAvoid.shapes.length > 0 ? input.parsedAvoid.shapes : undefined,
   };
   const avoidPreferences =
-    explicit.avoid_preferences ??
-    (parsedAvoid.colors || parsedAvoid.styles || parsedAvoid.shapes
-      ? parsedAvoid
-      : base.avoid_preferences ?? undefined);
+    explicit.avoid_preferences ||
+    parsedAvoid.colors ||
+    parsedAvoid.styles ||
+    parsedAvoid.shapes ||
+    base.avoid_preferences ||
+    semantic.inferred_avoid_styles
+      ? {
+          colors: mergeStringTokens(
+            base.avoid_preferences?.colors,
+            parsedAvoid.colors,
+            explicit.avoid_preferences?.colors
+          ),
+          styles: mergeStringTokens(
+            base.avoid_preferences?.styles,
+            semantic.inferred_avoid_styles,
+            parsedAvoid.styles,
+            explicit.avoid_preferences?.styles
+          ),
+          shapes: Array.from(
+            new Set([
+              ...(base.avoid_preferences?.shapes ?? []),
+              ...(parsedAvoid.shapes ?? []),
+              ...(explicit.avoid_preferences?.shapes ?? []),
+            ])
+          ),
+        }
+      : undefined;
 
   const strictness = {
     size: mergedStrictness.size ?? base.strictness?.size ?? "prefer",
@@ -114,7 +315,13 @@ function mergeHardConstraints(input: {
     styles,
     shape,
     strictness,
-    avoid_preferences: avoidPreferences,
+    avoid_preferences:
+      avoidPreferences &&
+      ((avoidPreferences.colors?.length ?? 0) > 0 ||
+        (avoidPreferences.styles?.length ?? 0) > 0 ||
+        (avoidPreferences.shapes?.length ?? 0) > 0)
+        ? avoidPreferences
+        : undefined,
   };
 }
 
@@ -192,14 +399,26 @@ function buildMustPreferAvoid(input: {
   };
 }
 
+function shouldRequestDiscoveryMode(input: {
+  parsedTurn: ParsedTurn;
+  compiledConstraints: HardConstraints;
+}): boolean {
+  if (input.parsedTurn.intent !== "recommend") return false;
+  if (input.parsedTurn.followup_intent !== "none") return false;
+  if (input.parsedTurn.mode === "discovery") return true;
+  return !hasAnyHardConstraintSignals(input.compiledConstraints);
+}
+
 export function compileTurnPolicy(input: {
   parsedTurn: ParsedTurn;
+  message?: string;
   explicitConstraints?: unknown;
   previousConstraints?: HardConstraints;
 }): CompiledTurnPolicy {
   const explicit = normalizeHardConstraints(input.explicitConstraints);
   const previous = normalizeHardConstraints(input.previousConstraints);
   const hardConstraints = mergeHardConstraints({
+    message: input.message ?? "",
     explicit,
     previous,
     parsed: input.parsedTurn.constraints,
@@ -219,6 +438,10 @@ export function compileTurnPolicy(input: {
   return {
     intent: input.parsedTurn.intent,
     mode: input.parsedTurn.mode,
+    discovery_requested: shouldRequestDiscoveryMode({
+      parsedTurn: input.parsedTurn,
+      compiledConstraints: hardConstraints,
+    }),
     followup_intent: input.parsedTurn.followup_intent,
     hard_constraints: hardConstraints,
     persisted_hard_constraints: persistedHardConstraints,

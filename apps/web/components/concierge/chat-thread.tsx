@@ -6,6 +6,7 @@ import { RecommendationCard } from "@/components/concierge/recommendation-card";
 import type { Turn } from "@/components/concierge/types";
 import {
   formatTime,
+  type StarterPrompt,
 } from "@/components/concierge/utils";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -14,9 +15,9 @@ type ChatThreadProps = {
   turns: Turn[];
   isLoading: boolean;
   showSlowNotice: boolean;
-  emptyStatePrompts: string[];
+  emptyStatePrompts: StarterPrompt[];
   bodyTextClassName: string;
-  onChoosePrompt: (prompt: string) => void;
+  onChoosePrompt: (prompt: StarterPrompt) => void;
   onJumpToLatestVisibilityChange?: (visible: boolean) => void;
   onJumpToLatestHandlerChange?: (handler: (() => void) | null) => void;
 };
@@ -136,13 +137,13 @@ export function ChatThread(input: ChatThreadProps) {
             <div className="mt-5 flex max-w-full flex-col gap-3 sm:max-w-[42rem] sm:flex-row sm:flex-wrap">
               {emptyStatePrompts.map((prompt) => (
                 <Button
-                  key={prompt}
+                  key={prompt.id}
                   type="button"
                   variant="outline"
                   className="h-auto min-h-[52px] w-full justify-start whitespace-normal break-words rounded-2xl border-primary/35 bg-primary/6 px-5 py-3 text-left text-[17px] leading-[1.35] text-foreground shadow-sm hover:border-primary/55 hover:bg-primary/12 hover:text-foreground sm:w-auto sm:max-w-full sm:justify-center sm:text-center"
                   onClick={() => onChoosePrompt(prompt)}
                 >
-                  {prompt}
+                  {prompt.label}
                 </Button>
               ))}
             </div>

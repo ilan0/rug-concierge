@@ -4,6 +4,7 @@ import { handleGeneralChatTurn } from "@/lib/chat/handlers/general-chat";
 import { handleRecommendationTurn } from "@/lib/chat/handlers/recommendation";
 import { routeTurnMode } from "@/lib/chat/router";
 import { parseTurn, type TurnParserTrace } from "@/lib/ai/turn-parser";
+import { detectResponseLanguage } from "@/lib/ai/language";
 import {
   getOrCreateSession,
   saveSession,
@@ -91,6 +92,25 @@ function detectReactionType(message: string): ReactionType {
     return "like";
   }
   return null;
+}
+
+function hasSpanishSignal(text: string): boolean {
+  return /[¿¡]|[áéíóúñ]|\b(puedo|mostrar|coleccion|colección|opciones|si|quieres|alfombra|estilo|aqui|aquí|para)\b/i.test(
+    text
+  );
+}
+
+function enforceAssistantLanguageMatch(input: {
+  userMessage: string;
+  assistantMessage: string;
+}): string {
+  if (detectResponseLanguage(input.userMessage) !== "es") {
+    return input.assistantMessage;
+  }
+  if (hasSpanishSignal(input.assistantMessage)) {
+    return input.assistantMessage;
+  }
+  return `Aqui tienes opciones de la coleccion en ese estilo. ${input.assistantMessage}`.trim();
 }
 
 export async function POST(req: Request) {
@@ -206,6 +226,7 @@ export async function POST(req: Request) {
     });
     const compiledPolicy = compileTurnPolicy({
       parsedTurn,
+      message: userMessage,
       explicitConstraints: body.constraints,
       previousConstraints: session.recommendation_state.hard_constraints,
     });
@@ -356,7 +377,7 @@ export async function POST(req: Request) {
       constraint_confidence: compiledPolicy.confidence,
       referenced_rug_id: parsedTurn.referenced_rug_id,
       rug_reference_ambiguous: parsedTurn.rug_reference_ambiguous,
-      is_discovery_turn: parsedTurn.mode === "discovery",
+      is_discovery_turn: compiledPolicy.discovery_requested,
       parsed_intent: parsedTurn.intent,
       trace_meta: traceMeta ?? undefined,
     } as const;
@@ -365,37 +386,44 @@ export async function POST(req: Request) {
       effectiveMode === "recommendation"
         ? await handleRecommendationTurn(handlerInput)
         : await handleGeneralChatTurn(handlerInput);
+    const handlerResultWithLanguage = {
+      ...handlerResult,
+      assistant_message: enforceAssistantLanguageMatch({
+        userMessage: turnMessage,
+        assistantMessage: handlerResult.assistant_message,
+      }),
+    };
 
     const responseMode = effectiveMode;
     const fineMode =
       routeDecision.needs_clarification && effectiveMode === "general_chat"
         ? "clarifying_question"
-        : handlerResult.mode;
+        : handlerResultWithLanguage.mode;
     const publicHandlerResult =
-      "runtime_update" in handlerResult
+      "runtime_update" in handlerResultWithLanguage
         ? (() => {
             const next = {
-              ...handlerResult,
+              ...handlerResultWithLanguage,
             } as Record<string, unknown>;
             delete next.runtime_update;
             return next;
           })()
-        : handlerResult;
+        : handlerResultWithLanguage;
 
     const assistantTurn: SessionMessage = {
       role: "assistant",
-      content: handlerResult.assistant_message,
+      content: handlerResultWithLanguage.assistant_message,
       created_at: new Date().toISOString(),
     };
 
     const nextConversationMemory = memoryEnabled
       ? mergeConversationMemory(sessionForHandler.conversation_memory, {
           userMessage: userTurn.content,
-          assistantMessage: handlerResult.assistant_message,
+          assistantMessage: handlerResultWithLanguage.assistant_message,
           lastUserIntent: responseMode,
           noMatchAttempts:
             effectiveMode === "recommendation"
-              ? handlerResult.mode === "no_match"
+              ? handlerResultWithLanguage.mode === "no_match"
                 ? startingNoMatchAttempts + 1
                 : 0
               : currentNoMatchAttempts,
@@ -411,7 +439,9 @@ export async function POST(req: Request) {
       12
     );
     const runtimeUpdate =
-      "runtime_update" in handlerResult ? handlerResult.runtime_update : null;
+      "runtime_update" in handlerResultWithLanguage
+        ? handlerResultWithLanguage.runtime_update
+        : null;
     const nextRecentlyShownRugs = Array.isArray(runtimeUpdate?.recently_shown_rugs)
       ? runtimeUpdate.recently_shown_rugs
       : previousRuntime.recently_shown_rugs ?? [];
@@ -457,36 +487,37 @@ export async function POST(req: Request) {
         runtime: {
           ...(nextSession.recommendation_state.runtime ?? {}),
           last_result_mode:
-            handlerResult.mode === "recommendation" ||
-            handlerResult.mode === "no_match" ||
-            handlerResult.mode === "clarifying_question" ||
-            handlerResult.mode === "disambiguation"
-              ? handlerResult.mode
+            handlerResultWithLanguage.mode === "recommendation" ||
+            handlerResultWithLanguage.mode === "no_match" ||
+            handlerResultWithLanguage.mode === "clarifying_question" ||
+            handlerResultWithLanguage.mode === "disambiguation"
+              ? handlerResultWithLanguage.mode
               : nextSession.recommendation_state.runtime?.last_result_mode,
           last_relaxed_size_tolerance_in:
-            "runtime_update" in handlerResult &&
-            handlerResult.runtime_update &&
+            "runtime_update" in handlerResultWithLanguage &&
+            handlerResultWithLanguage.runtime_update &&
             Object.prototype.hasOwnProperty.call(
-              handlerResult.runtime_update,
+              handlerResultWithLanguage.runtime_update,
               "relaxed_size_tolerance_in"
             )
-              ? handlerResult.runtime_update.relaxed_size_tolerance_in ?? null
+              ? handlerResultWithLanguage.runtime_update
+                  .relaxed_size_tolerance_in ?? null
               : nextSession.recommendation_state.runtime
                     ?.last_relaxed_size_tolerance_in ?? null,
           last_blockers:
-            "runtime_update" in handlerResult &&
-            handlerResult.runtime_update?.blockers
-              ? handlerResult.runtime_update.blockers
+            "runtime_update" in handlerResultWithLanguage &&
+            handlerResultWithLanguage.runtime_update?.blockers
+              ? handlerResultWithLanguage.runtime_update.blockers
               : nextSession.recommendation_state.runtime?.last_blockers ?? [],
           last_recommended_size_in:
-            "runtime_update" in handlerResult &&
-            handlerResult.runtime_update &&
+            "runtime_update" in handlerResultWithLanguage &&
+            handlerResultWithLanguage.runtime_update &&
             Object.prototype.hasOwnProperty.call(
-              handlerResult.runtime_update,
+              handlerResultWithLanguage.runtime_update,
               "last_recommended_size_in"
             ) &&
-            handlerResult.runtime_update.last_recommended_size_in
-              ? handlerResult.runtime_update.last_recommended_size_in
+            handlerResultWithLanguage.runtime_update.last_recommended_size_in
+              ? handlerResultWithLanguage.runtime_update.last_recommended_size_in
               : nextSession.recommendation_state.runtime
                     ?.last_recommended_size_in ?? null,
           liked_rug_ids:
@@ -504,7 +535,7 @@ export async function POST(req: Request) {
             nextRecentlyShownRugs,
           no_match_attempts:
             effectiveMode === "recommendation"
-              ? handlerResult.mode === "no_match"
+              ? handlerResultWithLanguage.mode === "no_match"
                 ? startingNoMatchAttempts + 1
                 : 0
               : currentNoMatchAttempts,
@@ -632,8 +663,8 @@ export async function POST(req: Request) {
             role,
             mode: responseMode,
             fine_mode: fineMode,
-            response_mode: handlerResult.mode,
-            notes: handlerResult.notes ?? null,
+            response_mode: handlerResultWithLanguage.mode,
+            notes: handlerResultWithLanguage.notes ?? null,
           },
           timing_ms: {
             total_ms: Date.now() - startedAt,
