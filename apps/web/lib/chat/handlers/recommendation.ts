@@ -83,6 +83,26 @@ async function hydrateDisambiguationRecommendations(input: {
   });
 }
 
+function buildDisambiguationChoiceLabel(
+  candidate: {
+    label: string;
+    colors: string[];
+    style: string | null;
+    origin: string | null;
+  },
+  duplicateLabelCount: number
+): string {
+  const base = candidate.label.trim();
+  if (duplicateLabelCount <= 1) return base;
+  const detailParts = [
+    candidate.style,
+    candidate.origin,
+    candidate.colors[0] ?? null,
+  ].filter((value): value is string => Boolean(value && value.trim().length > 0));
+  if (detailParts.length === 0) return base;
+  return `${base} (${detailParts.join(", ")})`;
+}
+
 // Recommendation mode handler now uses the shared SQL-first backend pipeline.
 export async function handleRecommendationTurn(
   input: ChatTurnHandlerInput
@@ -91,7 +111,24 @@ export async function handleRecommendationTurn(
     const ambiguousCandidates =
       input.session.recommendation_state.runtime?.recently_shown_rugs?.slice(0, 3) ?? [];
     if (ambiguousCandidates.length > 0) {
-      const labelText = ambiguousCandidates.map((rug) => rug.label).join(" or ");
+      const duplicateCount = new Map<string, number>();
+      for (const rug of ambiguousCandidates) {
+        const key = rug.label.trim().toLowerCase();
+        duplicateCount.set(key, (duplicateCount.get(key) ?? 0) + 1);
+      }
+      const labelText = ambiguousCandidates
+        .map((rug) =>
+          buildDisambiguationChoiceLabel(
+            rug,
+            duplicateCount.get(rug.label.trim().toLowerCase()) ?? 1
+          )
+        )
+        .join(" or ");
+      const normalizedMessage = input.message.toLowerCase();
+      const hasRefinementAsk =
+        /\b(bigger|larger|smaller|shorter|different color|another color|more like|less busy|cleaner)\b/.test(
+          normalizedMessage
+        );
       const hydratedRecommendations = hasTenantId(input.tenant_id)
         ? await hydrateDisambiguationRecommendations({
             tenantId: input.tenant_id,
@@ -100,7 +137,9 @@ export async function handleRecommendationTurn(
         : [];
       return {
         mode: "disambiguation",
-        assistant_message: `I want to make sure I’m following correctly. Did you mean ${labelText}?`,
+        assistant_message: hasRefinementAsk
+          ? `I can do that next. First, I want to make sure I’m following correctly: did you mean ${labelText}?`
+          : `I want to make sure I’m following correctly. Did you mean ${labelText}?`,
         questions: [],
         recommendations:
           hydratedRecommendations.length > 0

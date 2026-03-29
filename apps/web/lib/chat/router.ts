@@ -226,18 +226,18 @@ export function parseRecommendationFollowupIntent(
   if (isGeneralAdviceOrEducation(text)) return "none";
 
   const normalized = text.toLowerCase().trim();
+  if (/\b(larger|bigger|biggest|go larger|size up|go up)\b/.test(normalized)) {
+    return "larger";
+  }
+  if (/\b(smaller|shorter|go smaller|size down|go down)\b/.test(normalized)) {
+    return "smaller";
+  }
   if (
     /\b(closest|nearest|best match|closest you have|closest option|closest size)\b/.test(
       normalized
     )
   ) {
     return "closest";
-  }
-  if (/\b(larger|bigger|go larger|size up|go up)\b/.test(normalized)) {
-    return "larger";
-  }
-  if (/\b(smaller|go smaller|size down|go down)\b/.test(normalized)) {
-    return "smaller";
   }
 
   const followupSignals = [

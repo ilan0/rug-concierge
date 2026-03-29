@@ -340,10 +340,10 @@ function withCollectionBridge(assistantMessage: string, latestUserMessage: strin
 
   const lower = assistant.toLowerCase();
   const alreadyBridges =
-    /\b(show)\b[\s\S]{0,120}\b(collection|examples|inventory|options|pieces)\b/.test(
+    /\b(show)\b[\s\S]{0,120}\b(collection|examples)\b/.test(
       lower
     ) ||
-    /\bwould you like\b[\s\S]{0,120}\bshow\b[\s\S]{0,120}\b(collection|examples|inventory|options|pieces)\b/.test(
+    /\bwould you like\b[\s\S]{0,120}\bshow\b[\s\S]{0,120}\b(collection|examples)\b/.test(
       lower
     );
   if (alreadyBridges) return clampAssistantMessage(assistant);

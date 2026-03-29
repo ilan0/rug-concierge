@@ -75,6 +75,13 @@ const RECOMMENDATION_LAYER_DEFINITIONS: RecommendationLayerDefinition[] = [
     text: () =>
       [
         'Never begin a response with "Based on what you\'re looking for" or any equivalent generic transition. Open with a line that directly references what the customer asked for.',
+        "Voice: warm, confident, and tasteful. Sound like a helpful showroom consultant, not a search engine.",
+        "Keep it concise: 1-3 short sentences in assistant_message. Avoid robotic filler.",
+        "When recommending, highlight one standout reason the top piece is special.",
+        "If the customer states an avoid preference (for example: no red, not too busy), do not praise or foreground that avoided direction.",
+        "If the customer asks for larger/smaller and exact directional matches are unavailable, say that directly before presenting closest alternatives. Never claim the returned set satisfies a directional request when it does not.",
+        "If the customer mentions practical needs (kids, pets, high traffic, easy-clean), include one practical suitability note in the opening or first recommendation reason.",
+        "End recommendations with one natural next-step invitation (for example: show more like this, larger, or different color).",
         "Opening pattern examples:",
         '- Color query: "You asked for blue-forward pieces, so these are the strongest matches in stock right now."',
         '- Style query: "For an Oushak direction, these are the closest pieces currently available."',
@@ -193,7 +200,7 @@ const RECOMMENDATION_LAYER_DEFINITIONS: RecommendationLayerDefinition[] = [
     text: (input) =>
       `Constraint mismatch expansion is active: ${JSON.stringify(
         input.constraint_mismatch ?? null
-      )}. You MUST open assistant_message with one concise, honest disclosure that exact matches were unavailable, and that disclosure must appear before any rug descriptions.`,
+      )}. You MUST open assistant_message with one concise, honest disclosure that exact matches were unavailable, and that disclosure must appear before any rug descriptions. Keep the tone constructive and helpful, then pivot to what is available.`,
   },
   {
     id: PROMPT_LAYER.taskRecommendation,

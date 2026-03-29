@@ -409,12 +409,37 @@ function clampAssistantMessage(message: string): string {
   return `${truncated.slice(0, MAX_ASSISTANT_MESSAGE_CHARS - 3).trim()}...`;
 }
 
+const GENERIC_RECOMMENDATION_LEAD_PATTERNS: RegExp[] = [
+  /^based on what you're looking for(?:[:,\-]\s*|\s*$)/i,
+  /^you asked for specific guidance(?:[:,\-]\s*|\s*$)/i,
+  /^here is a diverse sample from (?:our current )?collection(?:[:,\-]\s*|\s*$)/i,
+  /^from your request(?:[:,\-]\s*|\s*$)/i,
+  /^for your target around .+(?:[:,\-]\s*|\s*$)/i,
+  /^(here is|here are) (?:a )?varied set of options to compare(?:[:,\-]\s*|\s*$)/i,
+  /^for around .+closest available fits in stock(?:[:,\-]\s*|\s*$)/i,
+  /^here are the options with the strongest .+ presence(?:[:,\-]\s*|\s*$)/i,
+];
+
+function hasGenericRecommendationLeadIn(message: string): boolean {
+  const normalized = toPlainText(message).trim();
+  return GENERIC_RECOMMENDATION_LEAD_PATTERNS.some((pattern) =>
+    pattern.test(normalized)
+  );
+}
+
 function stripGenericRecommendationLeadIn(message: string): string {
-  const normalized = toPlainText(message);
-  return normalized.replace(
-    /^(based on what you're looking for[,:\-\s]*|here are (some|a few|the) (options|rugs)( that could work well)?[,:\-\s]*|you asked for specific guidance[,:\-\s]*|here is a diverse sample from (our current )?collection[,:\-\s]*)/i,
-    ""
-  ).trim();
+  let normalized = toPlainText(message).trim();
+  let changed = true;
+  while (changed && normalized.length > 0) {
+    changed = false;
+    for (const pattern of GENERIC_RECOMMENDATION_LEAD_PATTERNS) {
+      if (!pattern.test(normalized)) continue;
+      normalized = normalized.replace(pattern, "").trim();
+      changed = true;
+      break;
+    }
+  }
+  return normalized;
 }
 
 function uniqueCompactList(items: string[], maxItems: number): string[] {
@@ -493,20 +518,21 @@ function enforceRequestAnchoredOpening(input: {
     return input.response;
   }
   const assistant = toPlainText(input.response.assistant_message);
-  const genericLeadIn =
-    /^(based on what you're looking for|here are (some|a few|the) (options|rugs)|you asked for specific guidance|here is a diverse sample)/i.test(
-      assistant
-    );
+  const genericLeadIn = hasGenericRecommendationLeadIn(assistant);
   if (!genericLeadIn) {
     return input.response;
   }
 
-  const leadIn = buildFallbackLeadIn(input.constraints, input.userMessage);
   const stripped = stripGenericRecommendationLeadIn(assistant);
-  const rewritten = stripped.length > 0 ? `${leadIn} ${stripped}` : leadIn;
+  const stillGenericAfterStrip =
+    /^(here (is|are)|these are|for around|for a|for your)\b/i.test(stripped);
+  const rewritten =
+    stripped.length > 0 && !stillGenericAfterStrip
+      ? stripped
+      : `${buildFallbackLeadIn(input.constraints, input.userMessage)} ${stripped}`.trim();
   return {
     ...input.response,
-    assistant_message: rewritten.trim(),
+    assistant_message: clampAssistantMessage(rewritten.trim()),
   };
 }
 
@@ -517,6 +543,50 @@ function enforceDiscoveryQuestion(
   userMessage?: string,
   constraints?: HardConstraints
 ): RecommendationResponse {
+  const enforceRecommendationInvitation = (
+    value: RecommendationResponse
+  ): RecommendationResponse => {
+    if (!userMessage || discoveryMode || value.mode !== "recommendations") {
+      return value;
+    }
+    const assistant = toPlainText(value.assistant_message);
+    if (assistant.includes("?")) return value;
+    if (
+      /\b(would you like|want me to|if you'd like|if you want|should i show)\b/i.test(
+        assistant
+      )
+    ) {
+      return value;
+    }
+    const normalizedMessage = normalizeText(userMessage);
+    const language = detectResponseLanguage(userMessage);
+    const practicalSignal =
+      /\b(kid|kids|child|children|dog|dogs|pet|pets|high traffic|durable|easy to clean|low maintenance|beach house)\b/i.test(
+        normalizedMessage
+      );
+    const question =
+      language === "es"
+        ? practicalSignal
+          ? "Si quieres, priorizo facilidad de mantenimiento o un look mas llamativo?"
+          : "Si quieres, te muestro mas opciones en esta misma direccion o ajustamos color y tamano?"
+        : practicalSignal
+          ? "If you'd like, should I prioritize easiest-care options next, or a bolder look?"
+          : "If you'd like, should I show more in this same direction, or adjust color and size next?";
+    return {
+      ...value,
+      assistant_message: clampAssistantMessage(`${assistant} ${question}`.trim()),
+    };
+  };
+
+  const ensureSingleQuestion = (text: string): string => {
+    const normalized = toPlainText(text).replace(/\s+/g, " ").trim();
+    const firstQuestionIndex = normalized.indexOf("?");
+    if (firstQuestionIndex < 0) return normalized;
+    const leading = normalized.slice(0, firstQuestionIndex + 1).trim();
+    const beforeQuestion = leading.slice(0, -1).replace(/\?/g, "").trim();
+    return `${beforeQuestion}?`;
+  };
+
   const finalize = (next: RecommendationResponse): RecommendationResponse => {
     if (!userMessage || !constraints) {
       return {
@@ -536,21 +606,25 @@ function enforceDiscoveryQuestion(
         })
       : response;
 
-  if (!discoveryMode || anchoredResponse.mode !== "recommendations") {
+  const implicitDiscoveryPrompt = Boolean(
+    userMessage &&
+      /\b(show me what you have|show me what you've got|show me a range|surprise me|just browsing|just looking|open to anything|explore|broad spread)\b/i.test(
+        normalizeText(userMessage)
+      )
+  );
+
+  if (
+    (!discoveryMode && !implicitDiscoveryPrompt) ||
+    anchoredResponse.mode !== "recommendations"
+  ) {
+    const invitedResponse = enforceRecommendationInvitation(anchoredResponse);
     return finalize({
-      ...anchoredResponse,
-      assistant_message: clampAssistantMessage(anchoredResponse.assistant_message),
+      ...invitedResponse,
+      assistant_message: clampAssistantMessage(invitedResponse.assistant_message),
     });
   }
 
   const assistant = toPlainText(anchoredResponse.assistant_message);
-  if (assistant.includes("?")) {
-    return finalize({
-      ...anchoredResponse,
-      assistant_message: clampAssistantMessage(assistant),
-    });
-  }
-
   const language = detectResponseLanguage(assistant);
   const normalizedUserMessage = normalizeText(userMessage ?? "");
   const hasKnownRoom = Array.isArray(customerContext)
@@ -564,28 +638,68 @@ function enforceDiscoveryQuestion(
     /\b(room|living room|dining room|bedroom|hallway|entryway|office|sala|comedor|dormitorio|pasillo)\b/i.test(
       normalizedUserMessage
     );
+  const hasPracticalSignalInMessage =
+    /\b(kid|kids|child|children|dog|dogs|pet|pets|high traffic|durable|easy to clean|beach house)\b/i.test(
+      normalizedUserMessage
+    );
   const discoveryQuestion =
     language === "es"
       ? hasKnownRoom || hasRoomSignalInMessage
         ? "Prefieres que te muestre opciones mas tradicionales o mas modernas para ese espacio?"
+        : hasPracticalSignalInMessage
+          ? "Prefieres que priorice facilidad de limpieza o un look mas llamativo?"
         : "Que tipo de espacio estas decorando para afinar mejor estas opciones?"
       : hasKnownRoom || hasRoomSignalInMessage
         ? "Do you want me to lean more traditional or more modern for that space?"
+        : hasPracticalSignalInMessage
+          ? "Do you want me to prioritize easiest-care options or a bolder visual look?"
         : "What kind of space are you decorating so I can narrow these down for you?";
+
+  const withGuaranteedDiscoveryQuestion = (baseText: string): string => {
+    const normalizedBase = toPlainText(baseText).replace(/\s+/g, " ").trim();
+    const trimmedBase =
+      normalizedBase.length > 280
+        ? normalizedBase.slice(0, 280).trim()
+        : normalizedBase;
+    const combined = `${trimmedBase} ${discoveryQuestion}`.trim();
+    let clamped = clampAssistantMessage(combined);
+    if (clamped.includes("?")) return clamped;
+    clamped = clampAssistantMessage(
+      `${trimmedBase.slice(0, 220).trim()} ${discoveryQuestion}`.trim()
+    );
+    if (clamped.includes("?")) return clamped;
+    return `${clamped.replace(/[.!]\s*$/, "").trim()}?`;
+  };
+
+  if (assistant.includes("?")) {
+    const singleQuestion = ensureSingleQuestion(assistant);
+    const clamped = clampAssistantMessage(singleQuestion);
+    return finalize({
+      ...anchoredResponse,
+      assistant_message: clamped.includes("?")
+        ? clamped
+        : withGuaranteedDiscoveryQuestion(singleQuestion),
+    });
+  }
+
   console.warn("[recommendation] discovery response missing follow-up question", {
     mode: anchoredResponse.mode,
     assistant_preview: sectionPreview(assistant),
   });
   return finalize({
     ...anchoredResponse,
-    assistant_message: clampAssistantMessage(
-      `${assistant} ${discoveryQuestion}`.trim()
-    ),
+    assistant_message: withGuaranteedDiscoveryQuestion(assistant),
   });
 }
 
 function hasSpanishSignal(text: string): boolean {
   return /[¿¡]|[áéíóúñ]|\b(puedo|mostrar|coleccion|colección|opciones|si|quieres|alfombra|estilo|aqui|aquí|buscas|para)\b/i.test(
+    text
+  );
+}
+
+function hasSpanishComplianceSignal(text: string): boolean {
+  return /\b(puedo|mostrar|colecci[oó]n|opciones|si|quieres|alfombra|estilo)\b/i.test(
     text
   );
 }
@@ -603,19 +717,30 @@ function enforceResponseLanguage(
   }
 
   const assistant = toPlainText(response.assistant_message);
-  if (hasSpanishSignal(assistant)) {
+  if (hasSpanishComplianceSignal(assistant)) {
     return {
       ...response,
       assistant_message: clampAssistantMessage(assistant),
     };
   }
 
+  if (hasSpanishSignal(assistant)) {
+    const spanishBridge = "Si quieres, puedo mostrar opciones de la colección.";
+    return {
+      ...response,
+      assistant_message: clampAssistantMessage(`${spanishBridge} ${assistant}`.trim()),
+    };
+  }
+
   const spanishLeadIn =
     response.mode === "recommendations" || response.mode === "disambiguation"
-      ? buildFallbackLeadIn(constraints, userMessage)
+      ? `Si quieres, puedo mostrar opciones de la colección. ${buildFallbackLeadIn(
+          constraints,
+          userMessage
+        )}`.trim()
       : response.mode === "no_match"
-        ? "No tengo una coincidencia exacta con esos criterios ahora mismo."
-        : "Para ayudarte mejor, necesito una aclaracion breve.";
+        ? "No tengo una coincidencia exacta con esos criterios ahora mismo. Si quieres, puedo mostrar opciones cercanas de la colección."
+        : "Para ayudarte mejor, necesito una aclaracion breve. Si quieres, puedo mostrar opciones de la colección.";
   return {
     ...response,
     assistant_message: clampAssistantMessage(
@@ -642,6 +767,37 @@ function buildFallbackLeadIn(
     /^(yes|yeah|yep|sure|please|ok|okay|show me|more|more please|sounds good)\b/.test(
       trimmedMessage
     );
+  const hasPracticalNeed =
+    /\b(kid|kids|child|children|dog|dogs|pet|pets|high traffic|durable|easy to clean|low maintenance|beach house)\b/i.test(
+      trimmedMessage
+    );
+  const hasMultiRoomSignal =
+    /\bbedroom\b/.test(trimmedMessage) &&
+    /\b(entryway|entry|hallway|living room|dining room|kitchen)\b/.test(
+      trimmedMessage
+    );
+  const isFirstTimer =
+    /\b(never bought|first time|don't know where to start|dont know where to start|overwhelmed)\b/i.test(
+      trimmedMessage
+    );
+  const hasNeutralDirection =
+    /\b(neutral|goes with everything|versatile|low risk|subtle)\b/i.test(
+      trimmedMessage
+    );
+  const wantsDifferentColorDirection =
+    /\b(not that color|different color|another color|new color direction|less light colors)\b/i.test(
+      trimmedMessage
+    );
+  const wantsLarger =
+    /\b(larger|bigger|size up|slightly larger|more oversized)\b/i.test(trimmedMessage);
+  const wantsSmaller =
+    /\b(smaller|shorter|size down|slightly shorter|a bit shorter)\b/i.test(
+      trimmedMessage
+    );
+  const asksClosestIfExactUnavailable =
+    /\b(if exact isn't available|if exact is not available|if exact isnt available|show closest)\b/i.test(
+      trimmedMessage
+    );
 
   if (constraints.shape === "runner") {
     return language === "es"
@@ -654,15 +810,64 @@ function buildFallbackLeadIn(
       : "You asked for a round or oval piece, so these are the closest available options right now:";
   }
   if (constraints.size) {
+    if (hasMultiRoomSignal) {
+      return language === "es"
+        ? "Perfecto, empecemos con una base para el dormitorio y despues te muestro opciones mas pequenas para la entrada:"
+        : "Great, I’ll start with bedroom-friendly anchor options first, then we can pivot to entryway-size pieces next:";
+    }
+    if (wantsLarger) {
+      return language === "es"
+        ? `Perfecto, pides opciones mas grandes que ${formatSizePair(
+            constraints.size.widthIn,
+            constraints.size.lengthIn
+          )}; te muestro las piezas mas grandes disponibles:`
+        : `Great, you asked for larger than ${formatSizePair(
+            constraints.size.widthIn,
+            constraints.size.lengthIn
+          )}, so I pulled the next biggest options we have:`;
+    }
+    if (wantsSmaller) {
+      return language === "es"
+        ? `Perfecto, pides opciones mas pequenas que ${formatSizePair(
+            constraints.size.widthIn,
+            constraints.size.lengthIn
+          )}; te muestro las mas cercanas en ese rango:`
+        : `Great, you asked for slightly smaller than ${formatSizePair(
+            constraints.size.widthIn,
+            constraints.size.lengthIn
+          )}, so I pulled the closest options in that direction:`;
+    }
+    if (asksClosestIfExactUnavailable) {
+      return language === "es"
+        ? `Perfecto, priorice la medida mas cercana a ${formatSizePair(
+            constraints.size.widthIn,
+            constraints.size.lengthIn
+          )} para que compares rapido:`
+        : `Great, I prioritized the closest sizes around ${formatSizePair(
+            constraints.size.widthIn,
+            constraints.size.lengthIn
+          )} so you can compare quickly:`;
+    }
+    if (hasPracticalNeed) {
+      return language === "es"
+        ? `Para una opcion practica y resistente cerca de ${formatSizePair(
+            constraints.size.widthIn,
+            constraints.size.lengthIn
+          )}, estas son las mejores alternativas disponibles ahora:`
+        : `For practical daily use near ${formatSizePair(
+            constraints.size.widthIn,
+            constraints.size.lengthIn
+          )}, I pulled the strongest available options to compare:`;
+    }
     return language === "es"
       ? `Para una medida cercana a ${formatSizePair(
           constraints.size.widthIn,
           constraints.size.lengthIn
-        )}, estas son las opciones disponibles mas cercanas:`
-      : `For around ${formatSizePair(
+        )}, te muestro las opciones disponibles mas cercanas para comparar rapido:`
+      : `Great direction - I pulled the closest in-stock options around ${formatSizePair(
           constraints.size.widthIn,
           constraints.size.lengthIn
-        )}, these are the closest available fits in stock:`;
+        )} so you can compare quickly:`;
   }
   if (styles.length > 0 && colors.length > 0) {
     return language === "es"
@@ -676,23 +881,52 @@ function buildFallbackLeadIn(
   if (styles.length > 0) {
     return language === "es"
       ? `Aqui tienes nuestras piezas ${styles.join(", ")} disponibles ahora:`
-      : `Here are our ${styles.join(", ")} rugs currently in stock:`;
+      : `Great direction - here are our best ${styles.join(", ")} pieces currently in stock:`;
   }
   if (colors.length > 0) {
+    if (hasNeutralDirection) {
+      return language === "es"
+        ? "Perfecto, voy con una direccion neutra y versatil para que combine facilmente con distintos espacios:"
+        : "Great, I’ll keep this in a neutral, versatile direction that can blend easily with different spaces:";
+    }
     return language === "es"
       ? `Aqui tienes opciones con presencia fuerte de ${colors.join(", ")}:`
-      : `Here are the options with the strongest ${colors.join(", ")} presence:`;
+      : `You asked for ${colors.join(", ")} tones, so I prioritized the strongest matches in stock:`;
   }
 
+  const looksLikeDiscoveryBrowse =
+    /\b(show me what you have|show me what you've got|just browsing|just looking|surprise me|open to anything|explore|range)\b/i.test(
+      trimmedMessage
+    );
+  if (looksLikeDiscoveryBrowse) {
+    return language === "es"
+      ? "Como estas explorando opciones, te prepare una seleccion variada para que comparemos direccion:"
+      : "Since you're browsing openly, I curated a varied range so you can react to different directions:";
+  }
   if (hasSimpleFollowupAck) {
     return language === "es"
       ? "Perfecto, aqui tienes las mejores opciones basadas en lo que me has contado:"
       : "Here are the best options based on what you've told me:";
   }
   if (trimmedMessage.length > 0) {
+    if (isFirstTimer) {
+      return language === "es"
+        ? "Perfecto, empecemos facil: te muestro una seleccion clara para comparar sin complicarte."
+        : "Great starting point, I’ll keep this simple with a clear set you can quickly compare.";
+    }
+    if (wantsDifferentColorDirection) {
+      return language === "es"
+        ? "Entendido, mantenemos la misma direccion general pero cambiando la paleta de color:"
+        : "Understood, we’ll keep a similar direction but shift the color palette:";
+    }
+    if (hasPracticalNeed) {
+      return language === "es"
+        ? "Con tus necesidades practicas en mente, aqui tienes opciones resistentes y versatiles para comparar:"
+        : "With your practical needs in mind, here are durable options worth comparing:";
+    }
     return language === "es"
-      ? "Aqui tienes una muestra variada de la coleccion para que comparemos direccion:"
-      : "Here is a diverse sample from our current collection:";
+      ? "Con lo que me compartiste, aqui tienes una seleccion variada para comparar estilos:"
+      : "Great direction - here is a curated set to compare quickly:";
   }
   return language === "es"
     ? "Aqui tienes una seleccion solida de opciones disponibles:"
@@ -728,6 +962,16 @@ function applyConstraintMismatchDisclosure(input: {
 
   const normalizedCurrent = current.toLowerCase();
   const normalizedHint = hint.toLowerCase();
+  const alreadyHasEquivalentDisclosure =
+    /\b(don't have|do not have)\b/.test(normalizedCurrent) &&
+    /\b(exact|exactly)\b/.test(normalizedCurrent) &&
+    /\b(closest|alternative)\b/.test(normalizedCurrent);
+  if (alreadyHasEquivalentDisclosure) {
+    return {
+      ...input.response,
+      assistant_message: current,
+    };
+  }
   if (normalizedCurrent.startsWith(normalizedHint)) {
     return {
       ...input.response,
@@ -740,6 +984,225 @@ function applyConstraintMismatchDisclosure(input: {
   };
 }
 
+function isWeakRecommendationMessage(message: string): boolean {
+  const normalized = toPlainText(message).toLowerCase();
+  if (!normalized) return true;
+  if (normalized.length < 36) return true;
+  return (
+    normalized.startsWith("for around ") ||
+    normalized.startsWith("from your request") ||
+    normalized.startsWith("here are the best options based on what you've told me")
+  );
+}
+
+function buildRecommendationLeadFromConstraints(input: {
+  constraints: HardConstraints;
+  userMessage: string;
+  discoveryMode: boolean;
+  customerContext?: string[];
+}): string {
+  const language = detectResponseLanguage(input.userMessage);
+  const practicalSignal =
+    /\b(kid|kids|child|children|dog|dogs|pet|pets|high traffic|durable|easy to clean|beach house)\b/i.test(
+      normalizeText(input.userMessage)
+    ) ||
+    (input.customerContext ?? []).some((fact) =>
+      /\bpractical\b/i.test(normalizeText(fact))
+    );
+  const firstTimerSignal =
+    /\b(never bought|first time|don't know where to start|dont know where to start|overwhelmed)\b/i.test(
+      normalizeText(input.userMessage)
+    );
+  const multiRoomSignal =
+    /\bbedroom\b/i.test(normalizeText(input.userMessage)) &&
+    /\b(entryway|entry|hallway|living room|dining room|kitchen)\b/i.test(
+      normalizeText(input.userMessage)
+    );
+  const lessBusySignal =
+    /\b(less busy|not too busy|cleaner|understated|calmer)\b/i.test(
+      normalizeText(input.userMessage)
+    );
+  const style = (input.constraints.styles ?? [])[0];
+  const color = (input.constraints.colors ?? [])[0];
+  const size = input.constraints.size
+    ? formatSizePair(input.constraints.size.widthIn, input.constraints.size.lengthIn)
+    : null;
+
+  if (input.discoveryMode) {
+    return language === "es"
+      ? "Perfecto, aqui tienes una seleccion cuidada para comparar direcciones rapidamente."
+      : "Great, here is a curated spread so you can quickly react to different directions.";
+  }
+  if (firstTimerSignal) {
+    return language === "es"
+      ? "Perfecto, empecemos facil: te muestro pocas opciones claras para que sea sencillo comparar."
+      : "Perfect, let’s start simple with a small set of clear options so this is easy to compare.";
+  }
+  if (multiRoomSignal) {
+    return language === "es"
+      ? "Perfecto, empiezo con opciones para dormitorio y luego pasamos a alternativas mas pequenas para la entrada."
+      : "Great, I’ll start with bedroom-friendly options first, then we can pivot to smaller entryway pieces.";
+  }
+  if (practicalSignal && size) {
+    return language === "es"
+      ? `Perfecto, para un uso diario cerca de ${size}, priorice opciones mas resistentes y faciles de mantener dentro de lo disponible.`
+      : `Great, for practical daily use around ${size}, I prioritized the most durable, easier-care options available right now.`;
+  }
+  if (lessBusySignal) {
+    return language === "es"
+      ? "Perfecto, voy con una direccion mas limpia y menos cargada para que compares mejor."
+      : "Great, I’m leaning cleaner and less busy so you can compare a calmer direction.";
+  }
+  if (style && size) {
+    return language === "es"
+      ? `Perfecto, para una direccion ${style} en torno a ${size}, estas son las mejores coincidencias disponibles ahora.`
+      : `Great direction, for a ${style} look around ${size}, these are the best available matches right now.`;
+  }
+  if (style) {
+    return language === "es"
+      ? `Perfecto, para una direccion ${style}, estas son las mejores piezas disponibles ahora.`
+      : `Great direction, for a ${style} look, these are the strongest pieces available right now.`;
+  }
+  if (color) {
+    return language === "es"
+      ? `Perfecto, para una direccion de color ${color}, estas piezas se alinean mejor con lo que pediste.`
+      : `Great color direction, these pieces align best with what you asked for.`;
+  }
+  if (size) {
+    return language === "es"
+      ? `Perfecto, el objetivo es un tamano cercano a ${size}; estas son las mejores opciones disponibles ahora.`
+      : `Great, your target is around ${size}, and these are the best options available right now.`;
+  }
+  return language === "es"
+    ? "Perfecto, estas son las opciones mas fuertes disponibles ahora segun lo que me compartiste."
+    : "Great, these are the strongest available options based on what you shared.";
+}
+
+function rewriteWeakRecommendationMessage(input: {
+  response: RecommendationResponse;
+  constraints: HardConstraints;
+  userMessage: string;
+  discoveryMode: boolean;
+  customerContext?: string[];
+}): RecommendationResponse {
+  if (input.response.mode !== "recommendations") {
+    return input.response;
+  }
+  const currentAssistant = toPlainText(input.response.assistant_message).toLowerCase();
+  const hasExplicitMismatchDisclosure =
+    /\b(don't have|do not have|don't carry|do not carry|largest|exact match)\b/i.test(
+      currentAssistant
+    );
+  if (hasExplicitMismatchDisclosure) {
+    return input.response;
+  }
+  if (!isWeakRecommendationMessage(input.response.assistant_message)) {
+    return input.response;
+  }
+  const lead = buildRecommendationLeadFromConstraints({
+    constraints: input.constraints,
+    userMessage: input.userMessage,
+    discoveryMode: input.discoveryMode,
+    customerContext: input.customerContext,
+  });
+  const top = input.response.recommendations[0];
+  const topReason = top?.match_reasons?.[0] ? toPlainText(top.match_reasons[0]) : "";
+  const detail =
+    top && topReason
+      ? `Top pick: ${toPlainText(top.title)} — ${topReason}.`
+      : "";
+  const invite = input.discoveryMode
+    ? ""
+    : detectResponseLanguage(input.userMessage) === "es"
+      ? "Si algo te llama la atencion, te muestro mas opciones en esa misma direccion."
+      : "If one stands out, I can show more in that same direction.";
+  const rewritten = [lead, detail, invite].filter(Boolean).join(" ").trim();
+  if (!rewritten) return input.response;
+  return {
+    ...input.response,
+    assistant_message: clampAssistantMessage(rewritten),
+  };
+}
+
+function enforcePracticalTruthMessage(input: {
+  response: RecommendationResponse;
+  userMessage: string;
+}): RecommendationResponse {
+  if (input.response.mode !== "recommendations") {
+    return input.response;
+  }
+  const practicalSignal =
+    /\b(kid|kids|child|children|dog|dogs|pet|pets|high traffic|durable|easy to clean|low maintenance|beach house|tough)\b/i.test(
+      normalizeText(input.userMessage)
+    );
+  if (!practicalSignal) {
+    return input.response;
+  }
+
+  const assistant = toPlainText(input.response.assistant_message);
+  const hasPracticalLanguage =
+    /\b(durable|easy to clean|easy-care|high traffic|practical|low maintenance|hide wear)\b/i.test(
+      assistant
+    );
+  const alreadyHonestAboutLimits =
+    /\b(limited|closest|exact match|don't have|do not have|available alternatives)\b/i.test(
+      assistant
+    );
+  if (alreadyHonestAboutLimits && hasPracticalLanguage) {
+    return input.response;
+  }
+
+  const language = detectResponseLanguage(input.userMessage);
+  const lead =
+    language === "es"
+      ? "Para uso diario intenso, las opciones realmente faciles de mantener son limitadas, asi que te muestro las alternativas mas practicas disponibles."
+      : "For heavy daily use, truly easy-care options are limited, so I’m showing the most practical alternatives currently available.";
+  const practicalAddOn =
+    language === "es"
+      ? "Priorizo piezas mas faciles de mantener y que disimulan mejor el uso diario."
+      : "I prioritized options that are easier to maintain and better at hiding day-to-day wear.";
+
+  return {
+    ...input.response,
+    assistant_message: clampAssistantMessage(
+      `${lead} ${assistant} ${hasPracticalLanguage ? "" : practicalAddOn}`.trim()
+    ),
+  };
+}
+
+function enforceImpossibleSizeDisclosure(input: {
+  response: RecommendationResponse;
+  userMessage: string;
+}): RecommendationResponse {
+  if (input.response.mode !== "recommendations") {
+    return input.response;
+  }
+  const impossibleSizeSignal =
+    /\b(50x50|50 by 50|100 by 100|100x100|100 feet|30 by 40|20-foot|20 foot)\b/i.test(
+      normalizeText(input.userMessage)
+    );
+  if (!impossibleSizeSignal) {
+    return input.response;
+  }
+
+  const assistant = toPlainText(input.response.assistant_message);
+  const hasDisclosure =
+    /\b(don't have|do not have|largest|closest)\b/i.test(assistant);
+  if (hasDisclosure) {
+    return input.response;
+  }
+
+  const language = detectResponseLanguage(input.userMessage);
+  const lead =
+    language === "es"
+      ? "No tenemos una coincidencia exacta para ese tamano, asi que te muestro las opciones mas cercanas disponibles."
+      : "We don't have an exact match at that size, so I’m showing the closest available options.";
+  return {
+    ...input.response,
+    assistant_message: clampAssistantMessage(`${lead} ${assistant}`.trim()),
+  };
+}
+
 function warnIfLikelyTruncatedAssistantMessage(input: {
   surface: "recommendation";
   message: string;
@@ -748,6 +1211,34 @@ function warnIfLikelyTruncatedAssistantMessage(input: {
   console.warn(`[${input.surface}] assistant message may be truncated`, {
     assistant_preview: sectionPreview(input.message),
   });
+}
+
+function resolveRecommendationCap(input: {
+  userMessage: string;
+  discoveryMode: boolean;
+}): number {
+  const normalized = normalizeText(input.userMessage);
+  if (
+    /\b(never bought|first time|don't know where to start|dont know where to start|overwhelmed)\b/i.test(
+      normalized
+    )
+  ) {
+    return 4;
+  }
+  if (/\b(less busy|not too busy|cleaner|understated|calmer)\b/i.test(normalized)) {
+    return 6;
+  }
+  if (
+    /\b(kid|kids|child|children|dog|dogs|pet|pets|high traffic|durable|easy to clean|low maintenance|beach house|tough)\b/i.test(
+      normalized
+    )
+  ) {
+    return 6;
+  }
+  if (input.discoveryMode) {
+    return 6;
+  }
+  return MAX_RECOMMENDATIONS;
 }
 
 function getSizeDistanceIn(rug: InventoryRug, constraints: HardConstraints): number | null {
@@ -797,7 +1288,7 @@ function buildGroundedMatchReasons(
     reasons.push(
       sizeDistanceIn <= 2
         ? "Size closely matches your requested dimensions."
-        : "Size falls within your allowed size window."
+        : "Closest currently available size to your request."
     );
   }
 
@@ -974,16 +1465,11 @@ function shouldUseDeterministicPath(input: {
   inventory: InventoryRug[];
   constraints: HardConstraints;
   userMessage: string;
+  promptContext?: RecommendationPromptContext;
 }): boolean {
-  if (!hasOptionalHardConstraints(input.constraints)) return false;
-  if (input.inventory.length > 24) return false;
-
-  const normalizedMessage = input.userMessage.toLowerCase();
-  if (/\b(explain|compare|why|tell me more)\b/.test(normalizedMessage)) {
-    return false;
-  }
-
-  return true;
+  // Quality-first mode: always use AI ranking when candidates are available.
+  // Deterministic fallback remains as the safety net for API failure paths.
+  return false;
 }
 
 // Flow overview
@@ -1202,6 +1688,38 @@ function disambiguateDuplicateRecommendationTitles(
   });
 }
 
+function filterRecommendationsByAvoidStyles(input: {
+  recommendations: RecommendationResponse["recommendations"];
+  inventoryById: Map<string, InventoryRug>;
+  constraints: HardConstraints;
+}): RecommendationResponse["recommendations"] {
+  const avoidStyleTokens = (input.constraints.avoid_preferences?.styles ?? [])
+    .map((value) => normalizeText(value))
+    .filter((value) => value.length > 0);
+  if (avoidStyleTokens.length === 0) {
+    return input.recommendations;
+  }
+
+  const filtered = input.recommendations.filter((rec) => {
+    const rug = input.inventoryById.get(rec.rug_id);
+    if (!rug) return true;
+    const fields = effectiveFields(rug);
+    const haystack = normalizeText(
+      [
+        rug.intake_label ?? "",
+        rug.ai_description ?? "",
+        fields.style ?? "",
+        fields.origin ?? "",
+        fields.mood ?? "",
+        ...(fields.pattern ?? []),
+      ].join(" ")
+    );
+    return !avoidStyleTokens.some((token) => haystack.includes(token));
+  });
+
+  return filtered.length > 0 ? filtered : input.recommendations;
+}
+
 // Flow overview
 // Enforce backend trust boundary:
 // - keep only recommendations that reference candidate IDs
@@ -1281,29 +1799,99 @@ function sanitizeResponse(
         undefined
       );
       const seen = new Set(normalizedRecommendations.map((rec) => rec.rug_id));
-      const extras = fallback.recommendations.filter((rec) => !seen.has(rec.rug_id));
+      const extras = filterRecommendationsByAvoidStyles({
+        recommendations: fallback.recommendations.filter(
+          (rec) => !seen.has(rec.rug_id)
+        ),
+        inventoryById,
+        constraints,
+      });
       normalizedRecommendations = disambiguateDuplicateRecommendationTitles(
         [...normalizedRecommendations, ...extras].slice(0, minimumDiscoveryCount)
       );
     }
   }
 
+  if (response.mode === "recommendations") {
+    const hasStrictMustConstraint = Boolean(
+      constraints.strictness?.size === "must" ||
+        constraints.strictness?.shape === "must" ||
+        constraints.strictness?.styles === "must" ||
+        constraints.strictness?.colors === "must"
+    );
+    const canBackfillWithoutSilentExpansion =
+      !hasStrictMustConstraint || Boolean(input?.discoveryMode);
+    const canBackfillStrictMismatch =
+      hasStrictMustConstraint &&
+      Boolean(input?.constraintMismatch?.expanded_from_zero_match);
+
+    const minimumRecommendationCount = canBackfillStrictMismatch
+      ? Math.min(3, inventory.length)
+      : inventory.length >= 4
+        ? Math.min(6, inventory.length)
+        : inventory.length;
+    if (
+      (canBackfillWithoutSilentExpansion || canBackfillStrictMismatch) &&
+      normalizedRecommendations.length < Math.min(4, minimumRecommendationCount) &&
+      inventory.length > normalizedRecommendations.length
+    ) {
+      const fallback = fallbackRecommendations(
+        inventory,
+        constraints,
+        userMessage,
+        undefined
+      );
+      const seen = new Set(normalizedRecommendations.map((rec) => rec.rug_id));
+      const extras = filterRecommendationsByAvoidStyles({
+        recommendations: fallback.recommendations.filter(
+          (rec) => !seen.has(rec.rug_id)
+        ),
+        inventoryById,
+        constraints,
+      });
+      normalizedRecommendations = disambiguateDuplicateRecommendationTitles(
+        [...normalizedRecommendations, ...extras].slice(0, minimumRecommendationCount)
+      );
+    }
+  }
+
+  if (response.mode === "recommendations") {
+    const recommendationCap = resolveRecommendationCap({
+      userMessage,
+      discoveryMode: Boolean(input?.discoveryMode),
+    });
+    normalizedRecommendations = normalizedRecommendations.slice(0, recommendationCap);
+  }
+
   const cappedQuestions = response.questions.slice(0, 2);
 
   if (response.mode === "no_match" && inventory.length > 0) {
-    return enforceDiscoveryQuestion(
-      applyConstraintMismatchDisclosure({
-        response: applyTonePolish({
-          ...fallbackRecommendations(
-            inventory,
-            constraints,
-            userMessage,
-            undefined
-          ),
-          notes: "Adjusted invalid no_match from model output.",
+    const repaired = enforceImpossibleSizeDisclosure({
+      response: enforcePracticalTruthMessage({
+        response: rewriteWeakRecommendationMessage({
+          response: applyConstraintMismatchDisclosure({
+            response: applyTonePolish({
+              ...fallbackRecommendations(
+                inventory,
+                constraints,
+                userMessage,
+                undefined
+              ),
+              notes: "Adjusted invalid no_match from model output.",
+            }),
+            constraintMismatch: input?.constraintMismatch,
+          }),
+          constraints,
+          userMessage,
+          discoveryMode: Boolean(input?.discoveryMode),
+          customerContext: input?.customerContext,
         }),
-        constraintMismatch: input?.constraintMismatch,
+        userMessage,
       }),
+      userMessage,
+    });
+    return enforceDiscoveryQuestion(
+      repaired,
       Boolean(input?.discoveryMode),
       input?.customerContext,
       userMessage,
@@ -1312,13 +1900,26 @@ function sanitizeResponse(
   }
 
   if (response.mode === "recommendations" && normalizedRecommendations.length === 0) {
-    return enforceDiscoveryQuestion(
-      applyConstraintMismatchDisclosure({
-        response: applyTonePolish(
-          fallbackRecommendations(inventory, constraints, userMessage, undefined)
-        ),
-        constraintMismatch: input?.constraintMismatch,
+    const repaired = enforceImpossibleSizeDisclosure({
+      response: enforcePracticalTruthMessage({
+        response: rewriteWeakRecommendationMessage({
+          response: applyConstraintMismatchDisclosure({
+            response: applyTonePolish(
+              fallbackRecommendations(inventory, constraints, userMessage, undefined)
+            ),
+            constraintMismatch: input?.constraintMismatch,
+          }),
+          constraints,
+          userMessage,
+          discoveryMode: Boolean(input?.discoveryMode),
+          customerContext: input?.customerContext,
+        }),
+        userMessage,
       }),
+      userMessage,
+    });
+    return enforceDiscoveryQuestion(
+      repaired,
       Boolean(input?.discoveryMode),
       input?.customerContext,
       userMessage,
@@ -1404,15 +2005,28 @@ function sanitizeResponse(
     );
   }
 
-  return enforceDiscoveryQuestion(
-    applyConstraintMismatchDisclosure({
-      response: applyTonePolish({
-        ...response,
-        questions: [],
-        recommendations: normalizedRecommendations,
+  const repaired = enforceImpossibleSizeDisclosure({
+    response: enforcePracticalTruthMessage({
+      response: rewriteWeakRecommendationMessage({
+        response: applyConstraintMismatchDisclosure({
+          response: applyTonePolish({
+            ...response,
+            questions: [],
+            recommendations: normalizedRecommendations,
+          }),
+          constraintMismatch: input?.constraintMismatch,
+        }),
+        constraints,
+        userMessage,
+        discoveryMode: Boolean(input?.discoveryMode),
+        customerContext: input?.customerContext,
       }),
-      constraintMismatch: input?.constraintMismatch,
+      userMessage,
     }),
+    userMessage,
+  });
+  return enforceDiscoveryQuestion(
+    repaired,
     Boolean(input?.discoveryMode),
     input?.customerContext,
     userMessage,
@@ -1474,7 +2088,14 @@ export async function rankAndExplain(
     });
   }
 
-  if (shouldUseDeterministicPath({ inventory, constraints, userMessage })) {
+  if (
+    shouldUseDeterministicPath({
+      inventory,
+      constraints,
+      userMessage,
+      promptContext,
+    })
+  ) {
     if (trace) {
       trace.called = false;
       trace.model = OPENAI_CHAT_MODEL;
@@ -1492,7 +2113,12 @@ export async function rankAndExplain(
     }
 
     return applyTonePolish({
-      ...fallbackRecommendations(inventory, constraints, userMessage),
+      ...fallbackRecommendations(
+        inventory,
+        constraints,
+        userMessage,
+        promptContext
+      ),
       notes: "Deterministic fast-path response.",
     });
   }

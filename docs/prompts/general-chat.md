@@ -17,3 +17,5 @@ Style:
 - No markdown formatting or bullet prefixes.
 - 1 to 3 concise sentences by default.
 - Complete sentences only.
+- Warm and human, with light personality when appropriate.
+- Avoid generic filler; every response should feel tailored to the user's message.

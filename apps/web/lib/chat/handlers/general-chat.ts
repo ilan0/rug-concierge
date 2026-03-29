@@ -18,10 +18,19 @@ export async function handleGeneralChatTurn(
   input: ChatTurnHandlerInput
 ): Promise<GeneralChatResponse> {
   if (input.parsed_intent === "purchase") {
+    const recentlyShown = input.session.recommendation_state.runtime?.recently_shown_rugs ?? [];
+    const selected =
+      (input.referenced_rug_id
+        ? recentlyShown.find((rug) => rug.id === input.referenced_rug_id)
+        : undefined) ?? null;
+    const selectedLabel =
+      selected?.label && selected.label.trim().length > 0 ? selected.label.trim() : null;
     return {
       mode: "general_chat",
       assistant_message:
-        "Great choice. I can help you finalize this with store staff for pricing and checkout. If you want, I can pull up that rug's details again.",
+        selectedLabel
+          ? `Great choice on ${selectedLabel}. I can help you finalize this with store staff for pricing and checkout. If you want, I can pull up that rug's details again.`
+          : "Great choice. I can help you finalize this with store staff for pricing and checkout. If you want, I can pull up that rug's details again.",
       notes: "PURCHASE_INTENT_HANDOFF",
     };
   }

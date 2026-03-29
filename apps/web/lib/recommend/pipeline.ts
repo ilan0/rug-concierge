@@ -10,7 +10,10 @@ import {
   isWithinRelaxedBucketDistance,
   resolveRequestedSizePreset,
 } from "@/lib/recommend/size-similarity-policy";
-import { expandColorRequestToFamily } from "@/lib/config/color-taxonomy";
+import {
+  expandColorRequestToFamily,
+  normalizeColorList,
+} from "@/lib/config/color-taxonomy";
 import { fetchPrimaryRugImagesForRugs } from "@/lib/storage/rug-images";
 import { rankAndExplain } from "@/lib/ai/recommend";
 import type { RecommendationAiTrace } from "@/lib/ai/recommend";
@@ -190,6 +193,24 @@ function buildSizeSearchWindow(input: {
   sizeWindow: SizeWindow | null;
 } {
   if (input.constraints.size) {
+    if (input.followupIntent === "smaller") {
+      return {
+        sizeReference: input.constraints.size,
+        sizeWindow: {
+          maxWidthIn: Math.max(1, input.constraints.size.widthIn - 1),
+          maxLengthIn: Math.max(1, input.constraints.size.lengthIn - 1),
+        },
+      };
+    }
+    if (input.followupIntent === "larger") {
+      return {
+        sizeReference: input.constraints.size,
+        sizeWindow: {
+          minWidthIn: input.constraints.size.widthIn + 1,
+          minLengthIn: input.constraints.size.lengthIn + 1,
+        },
+      };
+    }
     const bounds = getSizeBounds(input.constraints.size);
     return {
       sizeReference: input.constraints.size,
@@ -260,6 +281,236 @@ function normalizeText(value: string): string {
   return value.toLowerCase().replace(/\s+/g, " ").trim();
 }
 
+function dedupeCandidatesByVisualSignature(
+  candidates: InventoryRug[]
+): InventoryRug[] {
+  if (candidates.length <= 1) return candidates;
+
+  const unique: InventoryRug[] = [];
+  const seenImageKeys = new Set<string>();
+  const seenFallbackKeys = new Set<string>();
+
+  for (const rug of candidates) {
+    const effective = rug.effective_fields
+      ? rug.effective_fields
+      : resolveEffectiveFields(
+          rug.intake_label ?? null,
+          rug.ai_structured_fields ?? null,
+          rug.staff_overrides ?? null,
+          rug.ai_description ?? null
+        );
+    const fallbackKey = normalizeText(
+      [
+        effective.label ?? rug.intake_label ?? "",
+        effective.style ?? "",
+        effective.origin ?? "",
+        String(rug.width_total_in ?? ""),
+        String(rug.length_total_in ?? ""),
+      ].join("|")
+    );
+
+    const imageKey =
+      typeof rug.primary_image_url === "string"
+        ? normalizeText(rug.primary_image_url)
+        : "";
+
+    if (seenFallbackKeys.has(fallbackKey)) continue;
+    if (imageKey && seenImageKeys.has(imageKey)) continue;
+
+    seenFallbackKeys.add(fallbackKey);
+    if (imageKey) seenImageKeys.add(imageKey);
+    unique.push(rug);
+  }
+
+  return unique;
+}
+
+function candidateDominantColors(
+  rug: InventoryRug
+): ReturnType<typeof normalizeColorList> {
+  const fields =
+    rug.effective_fields ??
+    resolveEffectiveFields(
+      rug.intake_label ?? null,
+      rug.ai_structured_fields ?? null,
+      rug.staff_overrides ?? null,
+      rug.ai_description ?? null
+    );
+  return normalizeColorList((fields.primary_colors ?? []).slice(0, 2), 2);
+}
+
+function applyAvoidColorPreference(input: {
+  candidates: InventoryRug[];
+  constraints: HardConstraints;
+}): {
+  candidates: InventoryRug[];
+  avoidedColorsApplied: boolean;
+  avoidColorsUnmet: boolean;
+} {
+  const avoidColors = normalizeColorList(
+    input.constraints.avoid_preferences?.colors ?? [],
+    8
+  );
+  if (avoidColors.length === 0 || input.candidates.length === 0) {
+    return {
+      candidates: input.candidates,
+      avoidedColorsApplied: false,
+      avoidColorsUnmet: false,
+    };
+  }
+
+  const avoidFamilyTokens = new Set(expandColorRequestToFamily(avoidColors));
+  const filtered = input.candidates.filter((rug) => {
+    const dominant = candidateDominantColors(rug);
+    if (dominant.length === 0) return true;
+    return dominant.every((token) => !avoidFamilyTokens.has(token));
+  });
+
+  if (filtered.length > 0) {
+    return {
+      candidates: filtered,
+      avoidedColorsApplied: true,
+      avoidColorsUnmet: false,
+    };
+  }
+
+  return {
+    candidates: input.candidates,
+    avoidedColorsApplied: false,
+    avoidColorsUnmet: true,
+  };
+}
+
+function applyAvoidStylePreference(input: {
+  candidates: InventoryRug[];
+  constraints: HardConstraints;
+}): {
+  candidates: InventoryRug[];
+  avoidedStylesApplied: boolean;
+  avoidStylesUnmet: boolean;
+} {
+  const avoidStyles = Array.from(
+    new Set(
+      (input.constraints.avoid_preferences?.styles ?? [])
+        .map((value) => normalizeText(value))
+        .filter((value) => value.length > 0)
+    )
+  );
+  if (avoidStyles.length === 0 || input.candidates.length === 0) {
+    return {
+      candidates: input.candidates,
+      avoidedStylesApplied: false,
+      avoidStylesUnmet: false,
+    };
+  }
+
+  const filtered = input.candidates.filter((rug) => {
+    const fields =
+      rug.effective_fields ??
+      resolveEffectiveFields(
+        rug.intake_label ?? null,
+        rug.ai_structured_fields ?? null,
+        rug.staff_overrides ?? null,
+        rug.ai_description ?? null
+      );
+    const haystack = normalizeText(
+      [
+        fields.label ?? "",
+        fields.style ?? "",
+        fields.origin ?? "",
+        fields.mood ?? "",
+        ...(fields.pattern ?? []),
+        rug.intake_label ?? "",
+        rug.ai_description ?? "",
+      ].join(" ")
+    );
+    return avoidStyles.every((token) => !haystack.includes(token));
+  });
+
+  if (filtered.length > 0) {
+    return {
+      candidates: filtered,
+      avoidedStylesApplied: true,
+      avoidStylesUnmet: false,
+    };
+  }
+
+  return {
+    candidates: input.candidates,
+    avoidedStylesApplied: false,
+    avoidStylesUnmet: true,
+  };
+}
+
+function isPracticalRequest(userMessage: string, customerContext?: string[]): boolean {
+  const signalText = [userMessage, ...(customerContext ?? [])].join(" ");
+  return /\b(kid|kids|child|children|dog|dogs|pet|pets|high traffic|durable|easy to clean|low maintenance|beach house|tough|practical)\b/i.test(
+    signalText
+  );
+}
+
+function isPracticalUnsuitableRug(rug: InventoryRug): boolean {
+  const fields =
+    rug.effective_fields ??
+    resolveEffectiveFields(
+      rug.intake_label ?? null,
+      rug.ai_structured_fields ?? null,
+      rug.staff_overrides ?? null,
+      rug.ai_description ?? null
+    );
+  const haystack = normalizeText(
+    [
+      fields.label ?? "",
+      fields.style ?? "",
+      fields.origin ?? "",
+      fields.mood ?? "",
+      ...(fields.pattern ?? []),
+      rug.intake_label ?? "",
+      rug.ai_description ?? "",
+    ].join(" ")
+  );
+  return /\b(antique|semi-antique|fragile|delicate|silk|museum)\b/i.test(
+    haystack
+  ) ||
+    /\b(traditional|persian|heriz|serapi|kashan|tabriz|isfahan|sultanabad|caucasian|kazak|shirvan)\b/i.test(
+      haystack
+    );
+}
+
+function applyPracticalSuitabilityFilter(input: {
+  candidates: InventoryRug[];
+  userMessage: string;
+  customerContext?: string[];
+}): {
+  candidates: InventoryRug[];
+  practicalFilterApplied: boolean;
+  practicalUnmet: boolean;
+} {
+  if (
+    !isPracticalRequest(input.userMessage, input.customerContext) ||
+    input.candidates.length === 0
+  ) {
+    return {
+      candidates: input.candidates,
+      practicalFilterApplied: false,
+      practicalUnmet: false,
+    };
+  }
+  const filtered = input.candidates.filter((rug) => !isPracticalUnsuitableRug(rug));
+  if (filtered.length > 0) {
+    return {
+      candidates: filtered,
+      practicalFilterApplied: true,
+      practicalUnmet: false,
+    };
+  }
+  return {
+    candidates: input.candidates,
+    practicalFilterApplied: false,
+    practicalUnmet: true,
+  };
+}
+
 function hasAnyStyleMatches(
   candidates: InventoryRug[],
   styles: string[]
@@ -313,29 +564,6 @@ function constraintStrictness(
   key: "size" | "colors" | "styles" | "shape"
 ): "must" | "prefer" {
   return constraints.strictness?.[key] === "must" ? "must" : "prefer";
-}
-
-function toMustOnlyConstraints(constraints: HardConstraints): HardConstraints {
-  return {
-    size:
-      constraints.size && constraintStrictness(constraints, "size") === "must"
-        ? constraints.size
-        : undefined,
-    // Color is never a hard exclusion. It is handled as SQL prefilter + ranking signal.
-    colors: undefined,
-    styles:
-      constraints.styles &&
-      constraints.styles.length > 0 &&
-      constraintStrictness(constraints, "styles") === "must"
-        ? constraints.styles
-        : undefined,
-    shape:
-      constraints.shape && constraintStrictness(constraints, "shape") === "must"
-        ? constraints.shape
-        : undefined,
-    strictness: constraints.strictness,
-    avoid_preferences: constraints.avoid_preferences,
-  };
 }
 
 function resolveColorSqlPrefilterTokens(input: {
@@ -541,14 +769,14 @@ function resolveDynamicSqlQueryLimit(input: {
   const size = Math.max(0, input.roughInventorySize);
   let limit = DEFAULT_DYNAMIC_SQL_QUERY_LIMIT;
 
-  if (size <= 150) {
-    limit = input.hasConstraints ? 160 : 120;
-  } else if (size <= 500) {
-    limit = input.hasConstraints ? 220 : 160;
+  if (size <= 500) {
+    // For small-to-mid inventories, pull the full tenant set (up to cap) so
+    // candidate shaping sees the real distribution instead of a partial slice.
+    limit = Math.min(MAX_DYNAMIC_SQL_QUERY_LIMIT, Math.max(size, 160));
   } else if (size <= 1500) {
-    limit = input.hasConstraints ? 280 : 220;
+    limit = input.hasConstraints ? 300 : 240;
   } else if (size <= 3000) {
-    limit = input.hasConstraints ? 340 : 300;
+    limit = input.hasConstraints ? 360 : 300;
   } else {
     limit = 400;
   }
@@ -556,6 +784,33 @@ function resolveDynamicSqlQueryLimit(input: {
   return Math.max(
     MIN_DYNAMIC_SQL_QUERY_LIMIT,
     Math.min(MAX_DYNAMIC_SQL_QUERY_LIMIT, limit)
+  );
+}
+
+function toActiveHardConstraints(constraints: HardConstraints): HardConstraints {
+  return {
+    size: constraints.size ?? undefined,
+    // Color is never a hard exclusion. It is handled as SQL prefilter + ranking signal.
+    colors: undefined,
+    styles:
+      constraints.styles && constraints.styles.length > 0
+        ? constraints.styles
+        : undefined,
+    shape: constraints.shape ?? undefined,
+    strictness: constraints.strictness,
+    avoid_preferences: constraints.avoid_preferences,
+  };
+}
+
+function hasFollowupFlowIntent(
+  followupIntent: RunRecommendationPipelineInput["followupIntent"]
+): boolean {
+  return (
+    followupIntent === "more_like_this" ||
+    followupIntent === "closest" ||
+    followupIntent === "larger" ||
+    followupIntent === "smaller" ||
+    followupIntent === "tighten"
   );
 }
 
@@ -593,6 +848,36 @@ function sizeRelaxationDisclosureCode(
   if (relaxedToleranceIn <= 8) return SIZE_RELAX_SOFT_NOTE_CODE;
   if (relaxedToleranceIn <= 18) return SIZE_RELAX_MEDIUM_NOTE_CODE;
   return SIZE_RELAX_STRONG_NOTE_CODE;
+}
+
+function hasDirectionalSizeCoverage(input: {
+  candidates: InventoryRug[];
+  followupIntent:
+    | "none"
+    | "closest"
+    | "larger"
+    | "smaller"
+    | "more_like_this"
+    | "tighten";
+  anchorSize?: RecommendationSizeIn | null;
+}): boolean {
+  if (!input.anchorSize) return true;
+  if (input.followupIntent !== "larger" && input.followupIntent !== "smaller") {
+    return true;
+  }
+  const anchorLongSide = Math.max(
+    input.anchorSize.width_in,
+    input.anchorSize.length_in
+  );
+  return input.candidates.some((rug) => {
+    const width = rug.width_total_in;
+    const length = rug.length_total_in;
+    if (typeof width !== "number" || typeof length !== "number") return false;
+    const longSide = Math.max(width, length);
+    return input.followupIntent === "larger"
+      ? longSide > anchorLongSide
+      : longSide < anchorLongSide;
+  });
 }
 
 // Flow overview
@@ -677,7 +962,7 @@ export async function runRecommendationPipeline(
     discoveryMode = isDiscoveryMode({
       discoveryRequested: Boolean(input.discoveryRequested),
     });
-    const mustOnlyConstraints = toMustOnlyConstraints(requestedConstraints);
+    const activeConstraints = toActiveHardConstraints(requestedConstraints);
     const forceSizeWindowByIntent =
       followupIntent === "closest" ||
       followupIntent === "larger" ||
@@ -685,10 +970,10 @@ export async function runRecommendationPipeline(
     const activeHardConstraints: HardConstraints =
       forceSizeWindowByIntent && requestedConstraints.size
         ? {
-            ...mustOnlyConstraints,
+            ...activeConstraints,
             size: requestedConstraints.size,
           }
-        : mustOnlyConstraints;
+        : activeConstraints;
     const activeHardSizeWindow: SizeWindow | null =
       (forceSizeWindowByIntent || Boolean(activeHardConstraints.size)) &&
       sizeSearch.sizeWindow
@@ -917,8 +1202,7 @@ export async function runRecommendationPipeline(
     if (
       candidates.length > 0 &&
       candidates.length < 4 &&
-      Boolean(filteredByConstraints.styles && filteredByConstraints.styles.length > 0) &&
-      constraintStrictness(filteredByConstraints, "styles") !== "must"
+      Boolean(filteredByConstraints.styles && filteredByConstraints.styles.length > 0)
     ) {
       const styleRelaxedConstraints: HardConstraints = {
         ...filteredByConstraints,
@@ -933,6 +1217,15 @@ export async function runRecommendationPipeline(
         candidates = widenedForThinResults;
         filteredByConstraints = styleRelaxedConstraints;
         expandedDueToThinResults = true;
+        if (constraintStrictness(requestedConstraints, "styles") === "must") {
+          constraintMismatchActive = true;
+          unmetConstraints = Array.from(new Set([...unmetConstraints, "styles"]));
+          mismatchDisclosureHint = buildMismatchDisclosureHint(
+            unmetConstraints,
+            requestedConstraints,
+            findLargestAvailableSizeText(inventory)
+          );
+        }
         broadeningApplied = true;
         broadeningStage = "thin_results_style_relaxation";
       }
@@ -1113,6 +1406,85 @@ export async function runRecommendationPipeline(
       );
     }
 
+    if (candidates.length > 0) {
+      const practicalPass = applyPracticalSuitabilityFilter({
+        candidates,
+        userMessage: input.userMessage,
+        customerContext: input.promptContext?.chat_context?.customer_context ?? [],
+      });
+      if (practicalPass.practicalFilterApplied) {
+        candidates = practicalPass.candidates;
+      } else if (practicalPass.practicalUnmet) {
+        constraintMismatchActive = true;
+        unmetConstraints = Array.from(new Set([...unmetConstraints, "styles"]));
+        mismatchDisclosureHint = buildMismatchDisclosureHint(
+          unmetConstraints,
+          requestedConstraints,
+          findLargestAvailableSizeText(inventory)
+        );
+      }
+    }
+
+    if (candidates.length > 0) {
+      const avoidStylePass = applyAvoidStylePreference({
+        candidates,
+        constraints: requestedConstraints,
+      });
+      if (avoidStylePass.avoidedStylesApplied) {
+        candidates = avoidStylePass.candidates;
+      } else if (avoidStylePass.avoidStylesUnmet) {
+        constraintMismatchActive = true;
+        unmetConstraints = Array.from(new Set([...unmetConstraints, "styles"]));
+        mismatchDisclosureHint = buildMismatchDisclosureHint(
+          unmetConstraints,
+          requestedConstraints,
+          findLargestAvailableSizeText(inventory)
+        );
+      }
+    }
+
+    if (candidates.length > 0) {
+      const avoidColorPass = applyAvoidColorPreference({
+        candidates,
+        constraints: requestedConstraints,
+      });
+      if (avoidColorPass.avoidedColorsApplied) {
+        candidates = avoidColorPass.candidates;
+      } else if (avoidColorPass.avoidColorsUnmet) {
+        constraintMismatchActive = true;
+        unmetConstraints = Array.from(new Set([...unmetConstraints, "colors"]));
+        mismatchDisclosureHint = buildMismatchDisclosureHint(
+          unmetConstraints,
+          requestedConstraints,
+          findLargestAvailableSizeText(inventory)
+        );
+      }
+    }
+
+    if (
+      candidates.length > 0 &&
+      !hasDirectionalSizeCoverage({
+        candidates,
+        followupIntent: input.followupIntent ?? "none",
+        anchorSize: input.lastRecommendedSizeIn ?? null,
+      })
+    ) {
+      constraintMismatchActive = true;
+      unmetConstraints = Array.from(new Set([...unmetConstraints, "size"]));
+      mismatchDisclosureHint = buildMismatchDisclosureHint(
+        unmetConstraints,
+        requestedConstraints.size
+          ? requestedConstraints
+          : {
+              ...requestedConstraints,
+              size: toSizeConstraint(input.lastRecommendedSizeIn ?? null) ?? undefined,
+            },
+        findLargestAvailableSizeText(inventory)
+      );
+    }
+
+    candidates = dedupeCandidatesByVisualSignature(candidates);
+
     const previouslyShownIds = new Set([
       ...(input.promptContext?.chat_context?.shown_rug_ids ?? []),
       ...(input.promptContext?.chat_context?.recently_shown_rugs ?? []).map(
@@ -1123,7 +1495,13 @@ export async function runRecommendationPipeline(
       /\b(show (me )?(that|those|same).*(again)|again please|same one|show it again)\b/i.test(
         input.userMessage
       );
-    if (!explicitlyRequestedRepeat && previouslyShownIds.size > 0 && candidates.length > 0) {
+    const isFollowupFlow = hasFollowupFlowIntent(input.followupIntent ?? "none");
+    if (
+      !isFollowupFlow &&
+      !explicitlyRequestedRepeat &&
+      previouslyShownIds.size > 0 &&
+      candidates.length > 0
+    ) {
       const unseenCandidates = candidates.filter((rug) => !previouslyShownIds.has(rug.id));
       if (
         unseenCandidates.length >= Math.min(4, candidates.length) ||
@@ -1137,6 +1515,7 @@ export async function runRecommendationPipeline(
     const aiCandidates = shapeCandidatesForAI(candidates, {
       maxCandidates: AI_CANDIDATE_LIMIT,
       userMessage: input.userMessage,
+      customerContext: input.promptContext?.chat_context?.customer_context ?? [],
       constraints: requestedConstraints,
       followupIntent: input.followupIntent ?? "none",
       discoveryMode,
@@ -1496,8 +1875,7 @@ function buildMismatchDisclosureHint(
   ) {
     return `We don't have exact ${constraints.colors.join(", ")} color matches right now, so I'm showing the closest available alternatives.`;
   }
-  const readable = unmetConstraints.map((item) => blockerLabel(item)).join(", ");
-  return `No exact match for ${readable}; disclose this clearly and then recommend the closest alternatives from available inventory.`;
+  return "We don't have exact matches for all requested preferences right now, so I'm showing the closest available alternatives.";
 }
 
 function findLastRecommendedSizeIn(

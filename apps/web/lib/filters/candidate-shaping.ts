@@ -24,6 +24,7 @@ type ShapeOptions = {
   maxCandidates?: number;
   constraints?: HardConstraints;
   userMessage?: string;
+  customerContext?: string[];
   followupIntent?: FollowupIntent;
   discoveryMode?: boolean;
 };
@@ -78,6 +79,12 @@ const AVOID_CONTEXT_PHRASES = [
   "rather than",
   "instead of",
 ] as const;
+
+const PRACTICAL_SIGNAL_PATTERN =
+  /\b(kid|kids|child|children|dog|dogs|pet|pets|high traffic|durable|easy to clean|low maintenance|beach house|practical)\b/i;
+
+const MINIMAL_SIGNAL_PATTERN =
+  /\b(minimal|minimalist|understated|clean|not too busy|less busy|simple|nothing traditional)\b/i;
 
 function normalizeText(value: string): string {
   return value.toLowerCase().replace(/\s+/g, " ").trim();
@@ -406,6 +413,75 @@ function scoreMetadataCompleteness(rug: InventoryRug): number {
   return score;
 }
 
+function scorePracticalSuitability(rug: InventoryRug, signalText: string): number {
+  if (!PRACTICAL_SIGNAL_PATTERN.test(signalText)) return 0;
+
+  const fields = rug.effective_fields
+    ? rug.effective_fields
+    : resolveEffectiveFields(
+        rug.intake_label ?? null,
+        rug.ai_structured_fields ?? null,
+        rug.staff_overrides ?? null,
+        rug.ai_description ?? null
+      );
+  const haystack = normalizeText(
+    [
+      fields.label ?? "",
+      fields.style ?? "",
+      fields.origin ?? "",
+      fields.mood ?? "",
+      ...(fields.pattern ?? []),
+      rug.ai_description ?? "",
+      rug.intake_label ?? "",
+    ].join(" ")
+  );
+
+  let score = 0;
+  if (/\b(antique|semi-antique|fragile|delicate|silk|museum)\b/.test(haystack)) {
+    score -= 26;
+  }
+  if (/\b(modern|contemporary|transitional|flatweave|kilim|low pile|durable)\b/.test(haystack)) {
+    score += 14;
+  }
+  if (/\b(excellent|good)\b/.test(haystack)) {
+    score += 4;
+  }
+  return score;
+}
+
+function scoreMinimalDirectionSuitability(rug: InventoryRug, userMessage: string): number {
+  if (!MINIMAL_SIGNAL_PATTERN.test(userMessage)) return 0;
+
+  const fields = rug.effective_fields
+    ? rug.effective_fields
+    : resolveEffectiveFields(
+        rug.intake_label ?? null,
+        rug.ai_structured_fields ?? null,
+        rug.staff_overrides ?? null,
+        rug.ai_description ?? null
+      );
+  const haystack = normalizeText(
+    [
+      fields.label ?? "",
+      fields.style ?? "",
+      fields.origin ?? "",
+      fields.mood ?? "",
+      ...(fields.pattern ?? []),
+      rug.ai_description ?? "",
+      rug.intake_label ?? "",
+    ].join(" ")
+  );
+
+  let score = 0;
+  if (/\b(traditional|persian|heriz|serapi|kashan|tabriz|isfahan|tribal|ornate|floral medallion|busy)\b/.test(haystack)) {
+    score -= 24;
+  }
+  if (/\b(modern|contemporary|minimal|transitional|geometric|clean)\b/.test(haystack)) {
+    score += 16;
+  }
+  return score;
+}
+
 function toCandidateColorTokens(rug: InventoryRug): Set<string> {
   const fields = rug.effective_fields
     ? rug.effective_fields
@@ -484,16 +560,24 @@ function scoreAvoidPenalty(rug: InventoryRug, userMessage: string, constraints: 
   const avoidedColorTokens = expandColorRequestToFamily(avoidColors);
   const colorMatches = avoidedColorTokens.filter((token) => candidateColors.has(token))
     .length;
+  const dominantCandidateColors = normalizeColorList(
+    (fields.primary_colors ?? []).slice(0, 2),
+    2
+  );
+  const dominantAvoidMatches = avoidedColorTokens.filter((token) =>
+    dominantCandidateColors.includes(token)
+  ).length;
   const styleMatches = avoidStyles.filter((token) =>
     candidateText.includes(token)
   ).length;
   const candidateShape = inferShapeFromRug(rug);
   const shapeMatches = avoidShapes.includes(candidateShape) ? 1 : 0;
 
-  const colorPenalty = Math.min(colorMatches * 16, 32);
-  const stylePenalty = Math.min(styleMatches * 12, 24);
+  const colorPenalty = Math.min(colorMatches * 18, 44);
+  const dominantColorPenalty = Math.min(dominantAvoidMatches * 34, 68);
+  const stylePenalty = Math.min(styleMatches * 24, 72);
   const shapePenalty = shapeMatches > 0 ? 18 : 0;
-  return -(colorPenalty + stylePenalty + shapePenalty);
+  return -(colorPenalty + dominantColorPenalty + stylePenalty + shapePenalty);
 }
 
 function followupBias(
@@ -518,10 +602,10 @@ function followupBias(
     return Math.max(0, 8 - distance / 4);
   }
   if (followupIntent === "larger") {
-    return longSide >= targetLongSide ? 6 : -6;
+    return longSide > targetLongSide ? 18 : -22;
   }
   if (followupIntent === "smaller") {
-    return longSide <= targetLongSide ? 6 : -6;
+    return longSide < targetLongSide ? 18 : -22;
   }
   return 0;
 }
@@ -568,6 +652,10 @@ export function shapeCandidatesForAI(
   const maxCandidates = options?.maxCandidates ?? DEFAULT_MAX_CANDIDATES;
   const constraints = options?.constraints ?? {};
   const userMessage = options?.userMessage ?? "";
+  const customerContext = options?.customerContext ?? [];
+  const practicalSignalText = normalizeText(
+    [userMessage, ...customerContext].join(" ")
+  );
   const followupIntent = options?.followupIntent ?? "none";
   const discoveryMode = options?.discoveryMode ?? false;
 
@@ -579,6 +667,8 @@ export function shapeCandidatesForAI(
         scoreStyleIntentAlignment(rug, userMessage, constraints) +
         scoreColorMatch(rug, constraints, userMessage) +
         scoreShapeSuitability(rug, constraints) +
+        scorePracticalSuitability(rug, practicalSignalText) +
+        scoreMinimalDirectionSuitability(rug, userMessage) +
         scoreAvoidPenalty(rug, userMessage, constraints) +
         scoreMetadataCompleteness(rug) +
         followupBias(rug, constraints, followupIntent);
@@ -597,9 +687,38 @@ export function shapeCandidatesForAI(
 
   const selected: InventoryRug[] = [];
   const seenKeys = new Map<string, number>();
+  const discoveryFamilySeen = new Map<string, number>();
+  const discoveryOriginSeen = new Map<string, number>();
 
   for (const item of scored) {
     if (selected.length >= maxCandidates) break;
+
+    if (discoveryMode) {
+      const fields = item.rug.effective_fields
+        ? item.rug.effective_fields
+        : resolveEffectiveFields(
+            item.rug.intake_label ?? null,
+            item.rug.ai_structured_fields ?? null,
+            item.rug.staff_overrides ?? null,
+            item.rug.ai_description ?? null
+          );
+      const familyKey = normalizeText(`${fields.origin ?? ""}|${fields.style ?? ""}`);
+      const familyCount = discoveryFamilySeen.get(familyKey) ?? 0;
+      const originKey = normalizeText(fields.origin ?? "");
+      const originCount = discoveryOriginSeen.get(originKey) ?? 0;
+      if (familyKey.length > 0 && familyCount >= 2) {
+        continue;
+      }
+      if (originKey.length > 0 && originCount >= 2) {
+        continue;
+      }
+      if (familyKey.length > 0) {
+        discoveryFamilySeen.set(familyKey, familyCount + 1);
+      }
+      if (originKey.length > 0) {
+        discoveryOriginSeen.set(originKey, originCount + 1);
+      }
+    }
 
     const key = diversityKey(item.rug);
     const seenCount = seenKeys.get(key) ?? 0;

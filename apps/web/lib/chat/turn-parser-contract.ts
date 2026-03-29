@@ -81,8 +81,14 @@ export const parsedTurnSchema = z
       shapes: [],
     }),
     session_facts: z.array(z.string().trim().min(1).max(120)).max(12).default([]),
-    referenced_rug_id: z.string().trim().min(1).max(80).optional(),
-    referenced_rug_label: z.string().trim().min(1).max(160).optional(),
+    referenced_rug_id: z.preprocess(
+      (value) => (value === null ? undefined : value),
+      z.string().trim().min(1).max(80).optional()
+    ),
+    referenced_rug_label: z.preprocess(
+      (value) => (value === null ? undefined : value),
+      z.string().trim().min(1).max(160).optional()
+    ),
     rug_reference_ambiguous: z.boolean().default(false),
     confidence: z.enum(["high", "medium", "low"]).default("medium"),
   })
@@ -101,6 +107,8 @@ export const TURN_PARSER_JSON_SCHEMA = {
     "strictness",
     "avoid",
     "session_facts",
+    "referenced_rug_id",
+    "referenced_rug_label",
     "rug_reference_ambiguous",
     "confidence",
   ],
@@ -190,12 +198,10 @@ export const TURN_PARSER_JSON_SCHEMA = {
       maxItems: 12,
     },
     referenced_rug_id: {
-      type: "string",
-      maxLength: 80,
+      anyOf: [{ type: "null" }, { type: "string", maxLength: 80 }],
     },
     referenced_rug_label: {
-      type: "string",
-      maxLength: 160,
+      anyOf: [{ type: "null" }, { type: "string", maxLength: 160 }],
     },
     rug_reference_ambiguous: {
       type: "boolean",

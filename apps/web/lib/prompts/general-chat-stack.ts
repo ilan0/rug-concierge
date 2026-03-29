@@ -40,7 +40,7 @@ export function getRolePrompt(role: RoleType): string {
     return "Role: store staff. Be operational, accurate, and efficient for store workflows.";
   }
 
-  return "Role: retail customer. Be approachable and clear, with practical guidance and next steps.";
+  return "Role: retail customer. Be approachable, warm, and concise, with practical guidance and a natural next step.";
 }
 
 const GENERAL_CHAT_LAYER_DEFINITIONS: GeneralChatLayerDefinition[] = [

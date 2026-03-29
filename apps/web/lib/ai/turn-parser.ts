@@ -22,6 +22,57 @@ import {
 
 const OPENAI_RESPONSES_URL = "https://api.openai.com/v1/responses";
 
+const NON_STYLE_TOKENS = new Set([
+  "easy to clean",
+  "easy-clean",
+  "durable",
+  "high traffic",
+  "low maintenance",
+  "practical",
+  "sturdy",
+  "casual",
+  "bold",
+  "bolder",
+  "elegant",
+  "calm",
+  "calmer",
+  "clean",
+  "cleanest",
+  "neutral",
+  "understated",
+  "simple",
+]);
+
+const STYLE_KEYWORDS = [
+  "modern",
+  "contemporary",
+  "minimal",
+  "minimalist",
+  "transitional",
+  "traditional",
+  "persian",
+  "heriz",
+  "serapi",
+  "kashan",
+  "tabriz",
+  "isfahan",
+  "oushak",
+  "kilim",
+  "gabbeh",
+  "tribal",
+  "geometric",
+  "medallion",
+  "floral",
+  "kazak",
+  "shirvan",
+  "bokhara",
+  "turkmen",
+  "moroccan",
+  "beni ourain",
+  "berber",
+  "abstract",
+];
+
 export type TurnParserTrace = {
   called: boolean;
   model: string;
@@ -86,9 +137,22 @@ function parseOutputText(payload: unknown): string | null {
 
 function normalizeParsedTurn(input: ParsedTurn): ParsedTurn {
   const colors = normalizeColorList(input.constraints.colors ?? [], 8);
+  const sanitizeStyleToken = (value: string): string | null => {
+    const normalized = normalizeText(value).slice(0, 48);
+    if (!normalized) return null;
+    if (NON_STYLE_TOKENS.has(normalized)) return null;
+    if (!STYLE_KEYWORDS.some((keyword) => normalized.includes(keyword))) {
+      return null;
+    }
+    return normalized;
+  };
   const styles = (input.constraints.styles ?? [])
-    .map((style) => normalizeText(style).slice(0, 48))
-    .filter((style) => style.length > 0)
+    .map(sanitizeStyleToken)
+    .filter((style): style is string => Boolean(style))
+    .slice(0, 8);
+  const avoidStyles = (input.avoid.styles ?? [])
+    .map(sanitizeStyleToken)
+    .filter((style): style is string => Boolean(style))
     .slice(0, 8);
   const sessionFacts = (input.session_facts ?? [])
     .map((fact) => normalizeText(fact).slice(0, 120))
@@ -114,10 +178,7 @@ function normalizeParsedTurn(input: ParsedTurn): ParsedTurn {
     },
     avoid: {
       colors: normalizeColorList(input.avoid.colors ?? [], 8),
-      styles: (input.avoid.styles ?? [])
-        .map((style) => normalizeText(style).slice(0, 48))
-        .filter((style) => style.length > 0)
-        .slice(0, 8),
+      styles: avoidStyles,
       shapes: (input.avoid.shapes ?? []).slice(0, 4),
     },
     session_facts: sessionFacts,
@@ -179,6 +240,7 @@ function deriveModeFromIntent(input: {
 function applyIntentGuards(input: {
   parsed: ParsedTurn;
   message: string;
+  hasRecentRecommendations?: boolean;
 }): ParsedTurn {
   let next = input.parsed;
   const normalizedMessage = normalizeText(input.message);
@@ -215,6 +277,10 @@ function applyIntentGuards(input: {
     /\b(show|find|recommend|looking for|need|want|what would work|what works|options)\b/i.test(
       messageLower
     );
+  const hasFirstTimerBrowseSignal =
+    /\b(never bought|first time|don't know where to start|dont know where to start|overwhelmed)\b/i.test(
+      messageLower
+    );
   const hasDesignSignal =
     hasAnyConstraintSignals(next) ||
     /\b(living room|dining room|bedroom|hallway|entryway|office|vibe|bohemian|traditional|modern|persian|oushak|kilim)\b/i.test(
@@ -225,6 +291,33 @@ function applyIntentGuards(input: {
     next = {
       ...next,
       intent: "recommend",
+    };
+  }
+
+  if (next.intent === "educate" && hasFirstTimerBrowseSignal) {
+    next = {
+      ...next,
+      intent: "recommend",
+      followup_intent: "none",
+    };
+  }
+
+  if (next.intent === "general" && hasFirstTimerBrowseSignal) {
+    next = {
+      ...next,
+      intent: "recommend",
+      followup_intent: "none",
+    };
+  }
+
+  if (
+    /\b(shorter|slightly shorter|a bit shorter|little shorter)\b/i.test(messageLower) &&
+    next.followup_intent !== "larger"
+  ) {
+    next = {
+      ...next,
+      followup_intent: "smaller",
+      intent: next.intent === "recommend" ? "followup" : next.intent,
     };
   }
 
@@ -265,6 +358,51 @@ function applyIntentGuards(input: {
       },
       followup_intent: "none",
     };
+  }
+
+  if (
+    (next.intent === "general" || next.intent === "educate") &&
+    input.hasRecentRecommendations
+  ) {
+    const isAdviceQuestion =
+      /\b(what is|what's|difference between|how do i|how to|tell me about|explain)\b/i.test(
+        messageLower
+      );
+    const hasRefinementLanguage =
+      /\b(less|more|lighter|darker|not|without|with|bigger|larger|smaller|room|bedroom|living room|dining room|hallway|entryway|kitchen|blue|blues|red|reds|green|greens|ivory|beige|neutral|modern|traditional|pattern|color|style|anchor|runner|round|oval)\b/i.test(
+        messageLower
+      );
+    const hasReactionTone =
+      /\b(i like|i love|too|not my|less|more|no |without|prefer|that one|this one|first|second|third)\b/i.test(
+        messageLower
+      );
+    if (hasRefinementLanguage && !isAdviceQuestion) {
+      next = {
+        ...next,
+        intent: hasReactionTone ? "reaction" : "followup",
+      };
+    }
+  }
+
+  if (next.intent === "recommend" && input.hasRecentRecommendations) {
+    const hasFollowupCue =
+      /\b(show more|show me more|more like|show something|show anything|like the|like this|like that|another like|something like|cleanest one|that one|this one|first one|second one|third one|bigger|larger|smaller|shorter|less busy|more simple|more modern|more traditional|richer|bolder|calmer|darker|lighter|prefer mid-size|mid-size|anchor sizes|less light colors)\b/i.test(
+        messageLower
+      );
+    const hasFreshShoppingRequest =
+      /\b(i need|looking for|i want|find me|show me (?:a|an|the)?\s*\d+\s*(?:x|×|by)|exactly|must fit)\b/i.test(
+        messageLower
+      );
+    const hasReactionTone =
+      /\b(i like|i love|too|not my|not this|prefer|that one|this one|first|second|third)\b/i.test(
+        messageLower
+      );
+    if (hasFollowupCue && !hasFreshShoppingRequest) {
+      next = {
+        ...next,
+        intent: hasReactionTone ? "reaction" : "followup",
+      };
+    }
   }
 
   return {
@@ -473,12 +611,12 @@ function fallbackParsedTurn(input: ParseTurnInput): ParsedTurn {
     );
 
   const followupIntent: ParsedTurn["followup_intent"] =
-    /\bclosest|nearest|best match\b/i.test(message)
-      ? "closest"
-      : /\blarger|bigger|size up\b/i.test(message)
-        ? "larger"
-        : /\bsmaller|size down\b/i.test(message)
-          ? "smaller"
+    /\blarger|bigger|biggest|size up\b/i.test(message)
+      ? "larger"
+      : /\bsmaller|size down\b/i.test(message)
+        ? "smaller"
+        : /\bclosest|nearest|best match\b/i.test(message)
+          ? "closest"
           : hasFollowup
             ? "more_like_this"
             : "none";
@@ -555,6 +693,7 @@ function fallbackParsedTurn(input: ParseTurnInput): ParsedTurn {
   return applyIntentGuards({
     parsed: base,
     message: input.message,
+    hasRecentRecommendations: Boolean(input.context.has_recent_recommendations),
   });
 }
 
@@ -721,6 +860,7 @@ export async function parseTurn(input: ParseTurnInput): Promise<ParsedTurn> {
     const normalized = applyIntentGuards({
       parsed: normalizedBase,
       message: input.message,
+      hasRecentRecommendations: Boolean(input.context.has_recent_recommendations),
     });
     if (trace) trace.parsed = normalized;
     return normalized;

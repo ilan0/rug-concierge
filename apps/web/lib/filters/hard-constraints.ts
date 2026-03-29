@@ -24,6 +24,69 @@ const STYLE_ALIASES: Record<string, string[]> = {
   geometric: ["geometric tribal"],
 };
 
+const MODERN_STYLE_MARKERS = [
+  "modern",
+  "contemporary",
+  "minimal",
+  "minimalist",
+  "abstract",
+  "transitional",
+] as const;
+
+const TRADITIONAL_STYLE_MARKERS = [
+  "traditional",
+  "tribal",
+  "persian",
+  "heriz",
+  "serapi",
+  "kashan",
+  "tabriz",
+  "isfahan",
+  "sultanabad",
+  "oushak",
+  "kazak",
+  "karabagh",
+  "bidjar",
+] as const;
+
+const STYLE_FAMILY_OVERRIDES: Record<
+  string,
+  { include: string[]; exclude: string[] }
+> = {
+  modern: {
+    include: [...MODERN_STYLE_MARKERS],
+    exclude: [...TRADITIONAL_STYLE_MARKERS],
+  },
+  contemporary: {
+    include: [...MODERN_STYLE_MARKERS],
+    exclude: [...TRADITIONAL_STYLE_MARKERS],
+  },
+  minimal: {
+    include: [...MODERN_STYLE_MARKERS],
+    exclude: [...TRADITIONAL_STYLE_MARKERS],
+  },
+  minimalist: {
+    include: [...MODERN_STYLE_MARKERS],
+    exclude: [...TRADITIONAL_STYLE_MARKERS],
+  },
+  abstract: {
+    include: [...MODERN_STYLE_MARKERS],
+    exclude: [...TRADITIONAL_STYLE_MARKERS],
+  },
+  traditional: {
+    include: [...TRADITIONAL_STYLE_MARKERS],
+    exclude: [...MODERN_STYLE_MARKERS],
+  },
+  persian: {
+    include: [...TRADITIONAL_STYLE_MARKERS],
+    exclude: [...MODERN_STYLE_MARKERS],
+  },
+  tribal: {
+    include: [...TRADITIONAL_STYLE_MARKERS],
+    exclude: [...MODERN_STYLE_MARKERS],
+  },
+};
+
 function toSearchText(rug: InventoryRug): string {
   const fields = rug.effective_fields
     ? rug.effective_fields
@@ -121,12 +184,42 @@ function matchesStyles(rug: InventoryRug, constraints: HardConstraints): boolean
   const styleTokens = new Set(toStyles(rug));
   const searchText = toSearchText(rug);
 
-  return wanted.some((token) => {
-    const candidateTerms = [token, ...(STYLE_ALIASES[token] ?? [])];
+  const matchesAnyRequested = wanted.some((token) => {
+    const family = STYLE_FAMILY_OVERRIDES[token];
+    const candidateTerms = [
+      token,
+      ...(STYLE_ALIASES[token] ?? []),
+      ...(family?.include ?? []),
+    ];
     return candidateTerms.some(
       (term) => styleTokens.has(term) || searchText.includes(term)
     );
   });
+  if (!matchesAnyRequested) return false;
+
+  const hasTraditionalCandidate = TRADITIONAL_STYLE_MARKERS.some(
+    (token) => styleTokens.has(token) || searchText.includes(token)
+  );
+  const hasModernCandidate = MODERN_STYLE_MARKERS.some(
+    (token) => styleTokens.has(token) || searchText.includes(token)
+  );
+  const requestedModern = wanted.some((token) =>
+    MODERN_STYLE_MARKERS.includes(token as (typeof MODERN_STYLE_MARKERS)[number])
+  );
+  const requestedTraditional = wanted.some((token) =>
+    TRADITIONAL_STYLE_MARKERS.includes(
+      token as (typeof TRADITIONAL_STYLE_MARKERS)[number]
+    )
+  );
+
+  if (requestedModern && hasTraditionalCandidate && !hasModernCandidate) {
+    return false;
+  }
+  if (requestedTraditional && hasModernCandidate && !hasTraditionalCandidate) {
+    return false;
+  }
+
+  return true;
 }
 
 function matchesSize(
