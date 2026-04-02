@@ -1497,15 +1497,17 @@ export async function runRecommendationPipeline(
       );
     const isFollowupFlow = hasFollowupFlowIntent(input.followupIntent ?? "none");
     if (
-      !isFollowupFlow &&
       !explicitlyRequestedRepeat &&
       previouslyShownIds.size > 0 &&
       candidates.length > 0
     ) {
       const unseenCandidates = candidates.filter((rug) => !previouslyShownIds.has(rug.id));
+      const shouldPreferUnseen = isFollowupFlow
+        ? unseenCandidates.length > 0
+        : unseenCandidates.length >= Math.min(4, candidates.length) ||
+          (unseenCandidates.length > 0 && candidates.length > 12);
       if (
-        unseenCandidates.length >= Math.min(4, candidates.length) ||
-        (unseenCandidates.length > 0 && candidates.length > 12)
+        shouldPreferUnseen
       ) {
         candidates = unseenCandidates;
       }

@@ -625,70 +625,19 @@ function enforceDiscoveryQuestion(
   }
 
   const assistant = toPlainText(anchoredResponse.assistant_message);
-  const language = detectResponseLanguage(assistant);
-  const normalizedUserMessage = normalizeText(userMessage ?? "");
-  const hasKnownRoom = Array.isArray(customerContext)
-    ? customerContext.some((fact) =>
-        /\b(room|living room|dining room|bedroom|hallway|entryway|office|sala|comedor|dormitorio|pasillo)\b/i.test(
-          fact
-        )
-      )
-    : false;
-  const hasRoomSignalInMessage =
-    /\b(room|living room|dining room|bedroom|hallway|entryway|office|sala|comedor|dormitorio|pasillo)\b/i.test(
-      normalizedUserMessage
-    );
-  const hasPracticalSignalInMessage =
-    /\b(kid|kids|child|children|dog|dogs|pet|pets|high traffic|durable|easy to clean|beach house)\b/i.test(
-      normalizedUserMessage
-    );
-  const discoveryQuestion =
-    language === "es"
-      ? hasKnownRoom || hasRoomSignalInMessage
-        ? "Prefieres que te muestre opciones mas tradicionales o mas modernas para ese espacio?"
-        : hasPracticalSignalInMessage
-          ? "Prefieres que priorice facilidad de limpieza o un look mas llamativo?"
-        : "Que tipo de espacio estas decorando para afinar mejor estas opciones?"
-      : hasKnownRoom || hasRoomSignalInMessage
-        ? "Do you want me to lean more traditional or more modern for that space?"
-        : hasPracticalSignalInMessage
-          ? "Do you want me to prioritize easiest-care options or a bolder visual look?"
-        : "What kind of space are you decorating so I can narrow these down for you?";
-
-  const withGuaranteedDiscoveryQuestion = (baseText: string): string => {
-    const normalizedBase = toPlainText(baseText).replace(/\s+/g, " ").trim();
-    const trimmedBase =
-      normalizedBase.length > 280
-        ? normalizedBase.slice(0, 280).trim()
-        : normalizedBase;
-    const combined = `${trimmedBase} ${discoveryQuestion}`.trim();
-    let clamped = clampAssistantMessage(combined);
-    if (clamped.includes("?")) return clamped;
-    clamped = clampAssistantMessage(
-      `${trimmedBase.slice(0, 220).trim()} ${discoveryQuestion}`.trim()
-    );
-    if (clamped.includes("?")) return clamped;
-    return `${clamped.replace(/[.!]\s*$/, "").trim()}?`;
-  };
 
   if (assistant.includes("?")) {
     const singleQuestion = ensureSingleQuestion(assistant);
     const clamped = clampAssistantMessage(singleQuestion);
     return finalize({
       ...anchoredResponse,
-      assistant_message: clamped.includes("?")
-        ? clamped
-        : withGuaranteedDiscoveryQuestion(singleQuestion),
+      assistant_message: clamped,
     });
   }
 
-  console.warn("[recommendation] discovery response missing follow-up question", {
-    mode: anchoredResponse.mode,
-    assistant_preview: sectionPreview(assistant),
-  });
   return finalize({
     ...anchoredResponse,
-    assistant_message: withGuaranteedDiscoveryQuestion(assistant),
+    assistant_message: clampAssistantMessage(assistant),
   });
 }
 
@@ -813,7 +762,7 @@ function buildFallbackLeadIn(
     if (hasMultiRoomSignal) {
       return language === "es"
         ? "Perfecto, empecemos con una base para el dormitorio y despues te muestro opciones mas pequenas para la entrada:"
-        : "Great, I’ll start with bedroom-friendly anchor options first, then we can pivot to entryway-size pieces next:";
+        : "I’ll start with bedroom-friendly anchor options first, then we can pivot to entryway-size pieces next:";
     }
     if (wantsLarger) {
       return language === "es"
@@ -821,10 +770,10 @@ function buildFallbackLeadIn(
             constraints.size.widthIn,
             constraints.size.lengthIn
           )}; te muestro las piezas mas grandes disponibles:`
-        : `Great, you asked for larger than ${formatSizePair(
+        : `You asked for larger than ${formatSizePair(
             constraints.size.widthIn,
             constraints.size.lengthIn
-          )}, so I pulled the next biggest options we have:`;
+          )}, so I focused on the next biggest options we have:`;
     }
     if (wantsSmaller) {
       return language === "es"
@@ -832,10 +781,10 @@ function buildFallbackLeadIn(
             constraints.size.widthIn,
             constraints.size.lengthIn
           )}; te muestro las mas cercanas en ese rango:`
-        : `Great, you asked for slightly smaller than ${formatSizePair(
+        : `You asked for slightly smaller than ${formatSizePair(
             constraints.size.widthIn,
             constraints.size.lengthIn
-          )}, so I pulled the closest options in that direction:`;
+          )}, so I focused on the closest options in that direction:`;
     }
     if (asksClosestIfExactUnavailable) {
       return language === "es"
@@ -843,7 +792,7 @@ function buildFallbackLeadIn(
             constraints.size.widthIn,
             constraints.size.lengthIn
           )} para que compares rapido:`
-        : `Great, I prioritized the closest sizes around ${formatSizePair(
+        : `I prioritized the closest sizes around ${formatSizePair(
             constraints.size.widthIn,
             constraints.size.lengthIn
           )} so you can compare quickly:`;
@@ -864,7 +813,7 @@ function buildFallbackLeadIn(
           constraints.size.widthIn,
           constraints.size.lengthIn
         )}, te muestro las opciones disponibles mas cercanas para comparar rapido:`
-      : `Great direction - I pulled the closest in-stock options around ${formatSizePair(
+      : `I focused on the closest in-stock options around ${formatSizePair(
           constraints.size.widthIn,
           constraints.size.lengthIn
         )} so you can compare quickly:`;
@@ -881,13 +830,13 @@ function buildFallbackLeadIn(
   if (styles.length > 0) {
     return language === "es"
       ? `Aqui tienes nuestras piezas ${styles.join(", ")} disponibles ahora:`
-      : `Great direction - here are our best ${styles.join(", ")} pieces currently in stock:`;
+      : `I focused on ${styles.join(", ")} pieces currently in stock:`;
   }
   if (colors.length > 0) {
     if (hasNeutralDirection) {
       return language === "es"
         ? "Perfecto, voy con una direccion neutra y versatil para que combine facilmente con distintos espacios:"
-        : "Great, I’ll keep this in a neutral, versatile direction that can blend easily with different spaces:";
+        : "I’ll keep this in a neutral, versatile direction that can blend easily with different spaces:";
     }
     return language === "es"
       ? `Aqui tienes opciones con presencia fuerte de ${colors.join(", ")}:`
@@ -901,7 +850,7 @@ function buildFallbackLeadIn(
   if (looksLikeDiscoveryBrowse) {
     return language === "es"
       ? "Como estas explorando opciones, te prepare una seleccion variada para que comparemos direccion:"
-      : "Since you're browsing openly, I curated a varied range so you can react to different directions:";
+      : "You are browsing openly, so this set is intentionally varied to help you react to different directions:";
   }
   if (hasSimpleFollowupAck) {
     return language === "es"
@@ -912,7 +861,7 @@ function buildFallbackLeadIn(
     if (isFirstTimer) {
       return language === "es"
         ? "Perfecto, empecemos facil: te muestro una seleccion clara para comparar sin complicarte."
-        : "Great starting point, I’ll keep this simple with a clear set you can quickly compare.";
+        : "Clear starting point: I’ll keep this simple with a clear set you can quickly compare.";
     }
     if (wantsDifferentColorDirection) {
       return language === "es"
@@ -926,7 +875,7 @@ function buildFallbackLeadIn(
     }
     return language === "es"
       ? "Con lo que me compartiste, aqui tienes una seleccion variada para comparar estilos:"
-      : "Great direction - here is a curated set to compare quickly:";
+      : "I focused this set so you can compare direction quickly:";
   }
   return language === "es"
     ? "Aqui tienes una seleccion solida de opciones disponibles:"
@@ -1031,7 +980,7 @@ function buildRecommendationLeadFromConstraints(input: {
   if (input.discoveryMode) {
     return language === "es"
       ? "Perfecto, aqui tienes una seleccion cuidada para comparar direcciones rapidamente."
-      : "Great, here is a curated spread so you can quickly react to different directions.";
+      : "This spread is intentionally varied so you can react to different directions quickly.";
   }
   if (firstTimerSignal) {
     return language === "es"
@@ -1041,41 +990,41 @@ function buildRecommendationLeadFromConstraints(input: {
   if (multiRoomSignal) {
     return language === "es"
       ? "Perfecto, empiezo con opciones para dormitorio y luego pasamos a alternativas mas pequenas para la entrada."
-      : "Great, I’ll start with bedroom-friendly options first, then we can pivot to smaller entryway pieces.";
+      : "I’ll start with bedroom-friendly options first, then we can pivot to smaller entryway pieces.";
   }
   if (practicalSignal && size) {
     return language === "es"
       ? `Perfecto, para un uso diario cerca de ${size}, priorice opciones mas resistentes y faciles de mantener dentro de lo disponible.`
-      : `Great, for practical daily use around ${size}, I prioritized the most durable, easier-care options available right now.`;
+      : `For practical daily use around ${size}, I prioritized the most durable, easier-care options available right now.`;
   }
   if (lessBusySignal) {
     return language === "es"
       ? "Perfecto, voy con una direccion mas limpia y menos cargada para que compares mejor."
-      : "Great, I’m leaning cleaner and less busy so you can compare a calmer direction.";
+      : "I’m leaning cleaner and less busy so you can compare a calmer direction.";
   }
   if (style && size) {
     return language === "es"
       ? `Perfecto, para una direccion ${style} en torno a ${size}, estas son las mejores coincidencias disponibles ahora.`
-      : `Great direction, for a ${style} look around ${size}, these are the best available matches right now.`;
+      : `For a ${style} look around ${size}, these are the best available matches right now.`;
   }
   if (style) {
     return language === "es"
       ? `Perfecto, para una direccion ${style}, estas son las mejores piezas disponibles ahora.`
-      : `Great direction, for a ${style} look, these are the strongest pieces available right now.`;
+      : `For a ${style} look, these are the strongest pieces available right now.`;
   }
   if (color) {
     return language === "es"
       ? `Perfecto, para una direccion de color ${color}, estas piezas se alinean mejor con lo que pediste.`
-      : `Great color direction, these pieces align best with what you asked for.`;
+      : "These pieces align best with the color direction you asked for.";
   }
   if (size) {
     return language === "es"
       ? `Perfecto, el objetivo es un tamano cercano a ${size}; estas son las mejores opciones disponibles ahora.`
-      : `Great, your target is around ${size}, and these are the best options available right now.`;
+      : `Your target is around ${size}, and these are the best options available right now.`;
   }
   return language === "es"
     ? "Perfecto, estas son las opciones mas fuertes disponibles ahora segun lo que me compartiste."
-    : "Great, these are the strongest available options based on what you shared.";
+    : "These are the strongest available options based on what you shared.";
 }
 
 function rewriteWeakRecommendationMessage(input: {

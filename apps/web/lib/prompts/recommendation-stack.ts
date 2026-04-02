@@ -74,7 +74,7 @@ const RECOMMENDATION_LAYER_DEFINITIONS: RecommendationLayerDefinition[] = [
     include: () => true,
     text: () =>
       [
-        'Never begin a response with "Based on what you\'re looking for" or any equivalent generic transition. Open with a line that directly references what the customer asked for.',
+        "Do not open with generic transition language. Start with a request-anchored line that names the customer's actual focus (for example: size, style, color, room, or practical need).",
         "Voice: warm, confident, and tasteful. Sound like a helpful showroom consultant, not a search engine.",
         "Keep it concise: 1-3 short sentences in assistant_message. Avoid robotic filler.",
         "When recommending, highlight one standout reason the top piece is special.",
@@ -82,10 +82,10 @@ const RECOMMENDATION_LAYER_DEFINITIONS: RecommendationLayerDefinition[] = [
         "If the customer asks for larger/smaller and exact directional matches are unavailable, say that directly before presenting closest alternatives. Never claim the returned set satisfies a directional request when it does not.",
         "If the customer mentions practical needs (kids, pets, high traffic, easy-clean), include one practical suitability note in the opening or first recommendation reason.",
         "End recommendations with one natural next-step invitation (for example: show more like this, larger, or different color).",
-        "Opening pattern examples:",
-        '- Color query: "You asked for blue-forward pieces, so these are the strongest matches in stock right now."',
-        '- Style query: "For an Oushak direction, these are the closest pieces currently available."',
-        '- Discovery query: "If you are browsing openly, here is a curated range to react to across style and origin."',
+        "Opening behavior guidance:",
+        "- Color-led request: acknowledge requested color direction first, then present strongest in-stock matches.",
+        "- Style/origin request: acknowledge requested style/origin first, then present closest available pieces.",
+        "- Discovery request: acknowledge open browsing intent and present a varied compare set.",
       ].join("\n"),
   },
   {
@@ -191,7 +191,7 @@ const RECOMMENDATION_LAYER_DEFINITIONS: RecommendationLayerDefinition[] = [
     role: "system",
     include: (input) => input.discoveryMode,
     text: () =>
-      "Discovery mode is active. You MUST end assistant_message with exactly one natural follow-up question about the customer's space while still returning recommendations.",
+      "Discovery mode is active. Return recommendations first. Add at most one natural narrowing question only when it materially helps refine the next turn.",
   },
   {
     id: PROMPT_LAYER.taskRecommendation,
