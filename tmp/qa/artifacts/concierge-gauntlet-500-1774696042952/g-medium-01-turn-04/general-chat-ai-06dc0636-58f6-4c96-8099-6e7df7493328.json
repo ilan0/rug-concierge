@@ -1,0 +1,112 @@
+{
+  "trace_id": "06dc0636-58f6-4c96-8099-6e7df7493328",
+  "channel": "general-chat-ai",
+  "created_at": "2026-03-28T11:47:39.704Z",
+  "payload": {
+    "mode": "general_chat",
+    "flow_path": [
+      "handleGeneralChatTurn",
+      "buildPromptLayers",
+      "generateGeneralChatResponse"
+    ],
+    "ai_trace": {
+      "called": true,
+      "model": "gpt-4.1-mini",
+      "prompt_layers": [
+        {
+          "id": "SYSTEM_PROMPT_BASE",
+          "role": "system",
+          "chars": 758,
+          "preview": "# AI System Prompt — Rug Concierge You are an experienced rug consultant helping retail customers in a showroom environ…"
+        },
+        {
+          "id": "TASK_PROMPT_GENERAL_CHAT",
+          "role": "system",
+          "chars": 962,
+          "preview": "# General Chat Prompt — Rug Concierge You are the retail concierge for an in-store rug showroom. Handle free-form custo…"
+        },
+        {
+          "id": "TASK_PROMPT_GENERAL_CHAT",
+          "role": "system",
+          "chars": 19,
+          "preview": "Respond in English."
+        },
+        {
+          "id": "ROLE_PROMPT_RETAIL_CUSTOMER",
+          "role": "system",
+          "chars": 107,
+          "preview": "Role: retail customer. Be approachable, warm, and concise, with practical guidance and a natural next step."
+        },
+        {
+          "id": "CHAT_MEMORY_CONTEXT",
+          "role": "system",
+          "chars": 725,
+          "preview": "CHAT MEMORY CONTEXT: { \"summary_text\": \"User: I need a modern 8x10 rug | Assistant: We don't have exact modern matches…"
+        },
+        {
+          "id": "RECENT_TURNS_CONTEXT",
+          "role": "system",
+          "chars": 678,
+          "preview": "RECENT TURNS CONTEXT: [ { \"role\": \"user\", \"content\": \"Any closer matches?\", \"created_at\": \"2026-03-28T11:46:54.068Z\" },…"
+        },
+        {
+          "id": "LATEST_USER_MESSAGE",
+          "role": "user",
+          "chars": 32,
+          "preview": "How often should I rotate a rug?"
+        }
+      ],
+      "request_payload_preview": {
+        "model": "gpt-4.1-mini",
+        "message_groups": 2,
+        "system_groups": 1,
+        "user_groups": 1,
+        "system_blocks": 6,
+        "user_blocks": 1,
+        "schema_name": "general_chat_response",
+        "schema_strict": true,
+        "max_output_tokens": 500
+      },
+      "response_status": 429,
+      "response_payload_preview": {
+        "has_output_text": false,
+        "output_items": 0,
+        "content_blocks": 0,
+        "has_error": true,
+        "error_type": "insufficient_quota"
+      },
+      "parsed_response": null,
+      "fallback_reason": "OpenAI request failed",
+      "error": "OpenAI request failed with status 429",
+      "incomplete_detected": false,
+      "retry_attempted": false,
+      "retry_succeeded": false,
+      "text_postprocess_applied": false
+    },
+    "context_packet_stats": {
+      "field_counts": {
+        "stable_facts": 1,
+        "open_threads": 1,
+        "customer_context": 1,
+        "recently_shown_rugs": 1,
+        "shown_rug_ids": 1,
+        "recent_turns": 4
+      },
+      "char_counts": {
+        "summary_text": 528,
+        "stable_facts_total": 12,
+        "open_threads_total": 19,
+        "customer_context_total": 12,
+        "recently_shown_total": 73,
+        "shown_rug_ids_total": 36,
+        "liked_attributes_total": 6,
+        "recent_turns_total": 272,
+        "latest_user_message": 32,
+        "total": 954
+      }
+    },
+    "timing_ms": {
+      "generate_general_chat_ms": 12373
+    }
+  }
+}

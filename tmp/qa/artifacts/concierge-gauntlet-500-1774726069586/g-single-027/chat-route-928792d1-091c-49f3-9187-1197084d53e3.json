@@ -1,0 +1,384 @@
+{
+  "trace_id": "928792d1-091c-49f3-9187-1197084d53e3",
+  "channel": "chat-route",
+  "created_at": "2026-03-28T20:57:54.068Z",
+  "payload": {
+    "flow_path": [
+      "/api/chat POST",
+      "getOrCreateSession",
+      "updateRecommendationStateForTurn",
+      "routeTurnMode",
+      "handlerDispatch",
+      "updateConversationMemory",
+      "saveSession"
+    ],
+    "request": {
+      "session_id": "5cdbf3f7-80cf-41f9-ad2f-52ab3651033e",
+      "role": "retail_customer",
+      "tenant_id": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5",
+      "tenant_subdomain": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5",
+      "tenant_hostname": "127.0.0.1",
+      "message": "¿Qué es un kilim?",
+      "constraints": null
+    },
+    "routing": {
+      "mode": "general_chat",
+      "intent": "educate",
+      "rule_id": "GENERAL_ADVICE_OR_EDUCATION",
+      "confidence": "high",
+      "needs_clarification": false,
+      "parser": {
+        "model": "gpt-4.1-mini",
+        "latency_ms": 1842,
+        "status": "success",
+        "parse_status": "success",
+        "fallback": null,
+        "fallback_reason": null,
+        "normalized_payload": {
+          "intent": "educate",
+          "mode": "advice",
+          "followup_intent": "none",
+          "constraints": {
+            "size": null,
+            "colors": [],
+            "styles": [],
+            "shape": null
+          },
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          },
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          },
+          "session_facts": [],
+          "rug_reference_ambiguous": false,
+          "confidence": "high"
+        },
+        "normalized_parse_payload": {
+          "intent": "educate",
+          "mode": "advice",
+          "followup_intent": "none",
+          "constraints": {
+            "size": null,
+            "colors": [],
+            "styles": [],
+            "shape": null
+          },
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          },
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          },
+          "session_facts": [],
+          "rug_reference_ambiguous": false,
+          "confidence": "high"
+        },
+        "response_status": 200,
+        "incomplete_detected": false,
+        "error": null
+      },
+      "policy": {
+        "intent": "educate",
+        "compiled_policy": {
+          "intent": "educate",
+          "mode": "advice",
+          "discovery_requested": false,
+          "followup_intent": "none",
+          "hard_constraints": {
+            "strictness": {
+              "size": "prefer",
+              "colors": "prefer",
+              "styles": "prefer",
+              "shape": "prefer"
+            }
+          },
+          "persisted_hard_constraints": {},
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          },
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          },
+          "confidence": "high",
+          "policy_source": "none",
+          "must_prefer_avoid": {
+            "must": [],
+            "prefer": [],
+            "avoid": {
+              "colors": [],
+              "styles": [],
+              "shapes": []
+            }
+          }
+        },
+        "policy_source": "none",
+        "must_prefer_avoid": {
+          "must": [],
+          "prefer": [],
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          }
+        },
+        "must-prefer-avoid": {
+          "must": [],
+          "prefer": [],
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          }
+        },
+        "constraint_modes": {
+          "size": "prefer",
+          "colors": "prefer",
+          "styles": "prefer",
+          "shape": "prefer",
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          }
+        }
+      },
+      "parser_trace": {
+        "called": true,
+        "model": "gpt-4.1-mini",
+        "status": "success",
+        "response_status": 200,
+        "fallback": null,
+        "fallback_reason": null,
+        "incomplete_detected": false,
+        "latency_ms": 1842,
+        "normalized_payload": {
+          "intent": "educate",
+          "mode": "advice",
+          "followup_intent": "none",
+          "constraints": {
+            "size": null,
+            "colors": [],
+            "styles": [],
+            "shape": null
+          },
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          },
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          },
+          "session_facts": [],
+          "rug_reference_ambiguous": false,
+          "confidence": "high"
+        },
+        "parsed": {
+          "intent": "educate",
+          "mode": "advice",
+          "followup_intent": "none",
+          "constraints": {
+            "size": null,
+            "colors": [],
+            "styles": [],
+            "shape": null
+          },
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          },
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          },
+          "session_facts": [],
+          "rug_reference_ambiguous": false,
+          "confidence": "high"
+        },
+        "error": null
+      },
+      "compiled_policy": {
+        "intent": "educate",
+        "mode": "advice",
+        "discovery_requested": false,
+        "followup_intent": "none",
+        "hard_constraints": {
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          }
+        },
+        "persisted_hard_constraints": {},
+        "strictness": {
+          "size": "prefer",
+          "colors": "prefer",
+          "styles": "prefer",
+          "shape": "prefer"
+        },
+        "avoid": {
+          "colors": [],
+          "styles": [],
+          "shapes": []
+        },
+        "confidence": "high",
+        "policy_source": "none",
+        "must_prefer_avoid": {
+          "must": [],
+          "prefer": [],
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          }
+        }
+      },
+      "policy_source": "none",
+      "must_prefer_avoid": {
+        "must": [],
+        "prefer": [],
+        "avoid": {
+          "colors": [],
+          "styles": [],
+          "shapes": []
+        }
+      },
+      "must-prefer-avoid": {
+        "must": [],
+        "prefer": [],
+        "avoid": {
+          "colors": [],
+          "styles": [],
+          "shapes": []
+        }
+      },
+      "handler": "handleGeneralChatTurn",
+      "prompt_layer_preview": [
+        "SYSTEM_PROMPT_BASE",
+        "TASK_PROMPT_GENERAL_CHAT",
+        "TASK_PROMPT_GENERAL_CHAT",
+        "ROLE_PROMPT_RETAIL_CUSTOMER",
+        "LATEST_USER_MESSAGE"
+      ]
+    },
+    "reaction": {
+      "detected_reaction": null,
+      "referenced_rug_id": null,
+      "rug_reference_ambiguous": false,
+      "liked_attributes_before": {
+        "colors": [],
+        "styles": [],
+        "origins": []
+      },
+      "liked_attributes_after": {
+        "colors": [],
+        "styles": [],
+        "origins": []
+      },
+      "liked_rug_ids_before": [],
+      "liked_rug_ids_after": [],
+      "dismissed_rug_ids_before": [],
+      "dismissed_rug_ids_after": []
+    },
+    "state_snapshot": {
+      "recommendation_state": {
+        "hard_constraints": {
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          }
+        },
+        "soft_preferences": {},
+        "runtime": {}
+      },
+      "conversation_memory": {
+        "summary_text": "",
+        "stable_facts": [],
+        "open_threads": [],
+        "last_user_intent": "unknown",
+        "no_match_attempts": 0,
+        "updated_at": "2026-03-28T20:57:50.509Z",
+        "version": "v1"
+      }
+    },
+    "memory_snapshot_before": {
+      "summary_text": "",
+      "stable_facts": [],
+      "open_threads": [],
+      "last_user_intent": "unknown",
+      "no_match_attempts": 0,
+      "updated_at": "2026-03-28T20:57:50.509Z",
+      "version": "v1"
+    },
+    "memory_snapshot_after": {
+      "summary_text": "User: ¿Qué es un kilim? | Assistant: Un kilim es una alfombra plana tejida a mano, sin pelo, originaria principalmente de regiones como Turquía, Irán y el Cáucaso. Se caracteriza por sus motivos geométricos y colores vivos, y suele usarse tanto como tapiz…",
+      "stable_facts": [],
+      "open_threads": [
+        "¿Qué es un kilim?",
+        "¿Quieres que te muestre algunas muestras de kilims que tenemos en nuestra colección actual?"
+      ],
+      "last_user_intent": "general_chat",
+      "no_match_attempts": 0,
+      "updated_at": "2026-03-28T20:57:53.752Z",
+      "version": "v1"
+    },
+    "ai_context_packet_stats": {
+      "field_counts": {
+        "stable_facts": 0,
+        "open_threads": 0,
+        "customer_context": 0,
+        "recently_shown_rugs": 0,
+        "shown_rug_ids": 0,
+        "recent_turns": 0
+      },
+      "char_counts": {
+        "summary_text": 0,
+        "stable_facts_total": 0,
+        "open_threads_total": 0,
+        "customer_context_total": 0,
+        "recently_shown_total": 0,
+        "shown_rug_ids_total": 0,
+        "liked_attributes_total": 0,
+        "recent_turns_total": 0,
+        "latest_user_message": 17,
+        "total": 17
+      }
+    },
+    "response": {
+      "session_id": "5cdbf3f7-80cf-41f9-ad2f-52ab3651033e",
+      "role": "retail_customer",
+      "mode": "general_chat",
+      "fine_mode": "general_chat",
+      "response_mode": "general_chat",
+      "notes": "GENERAL_CHAT_AI_RUNTIME:real | Prompt layers assembled: SYSTEM_PROMPT_BASE -> TASK_PROMPT_GENERAL_CHAT -> TASK_PROMPT_GENERAL_CHAT -> ROLE_PROMPT_RETAIL_CUSTOMER -> LATEST_USER_MESSAGE"
+    },
+    "timing_ms": {
+      "total_ms": 8082
+    }
+  }
+}

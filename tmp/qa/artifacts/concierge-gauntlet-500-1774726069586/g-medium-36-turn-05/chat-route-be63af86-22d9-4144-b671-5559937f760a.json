@@ -1,0 +1,590 @@
+{
+  "trace_id": "be63af86-22d9-4144-b671-5559937f760a",
+  "channel": "chat-route",
+  "created_at": "2026-03-28T20:48:11.818Z",
+  "payload": {
+    "flow_path": [
+      "/api/chat POST",
+      "getOrCreateSession",
+      "updateRecommendationStateForTurn",
+      "routeTurnMode",
+      "handlerDispatch",
+      "updateConversationMemory",
+      "saveSession"
+    ],
+    "request": {
+      "session_id": "8848dc93-3a17-441c-bfdd-f6ffcf62c6aa",
+      "role": "retail_customer",
+      "tenant_id": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5",
+      "tenant_subdomain": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5",
+      "tenant_hostname": "127.0.0.1",
+      "message": "Looking for blue and ivory rugs",
+      "constraints": null
+    },
+    "routing": {
+      "mode": "recommendation",
+      "intent": "recommend",
+      "rule_id": "EXPLICIT_RECOMMENDATION_REQUEST",
+      "confidence": "high",
+      "needs_clarification": false,
+      "parser": {
+        "model": "gpt-4.1-mini",
+        "latency_ms": 1960,
+        "status": "success",
+        "parse_status": "success",
+        "fallback": null,
+        "fallback_reason": null,
+        "normalized_payload": {
+          "intent": "recommend",
+          "mode": "recommendation",
+          "followup_intent": "none",
+          "constraints": {
+            "size": null,
+            "colors": [
+              "blue",
+              "ivory"
+            ],
+            "styles": [],
+            "shape": null
+          },
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          },
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          },
+          "session_facts": [
+            "looking for blue and ivory rugs"
+          ],
+          "rug_reference_ambiguous": false,
+          "confidence": "high"
+        },
+        "normalized_parse_payload": {
+          "intent": "recommend",
+          "mode": "recommendation",
+          "followup_intent": "none",
+          "constraints": {
+            "size": null,
+            "colors": [
+              "blue",
+              "ivory"
+            ],
+            "styles": [],
+            "shape": null
+          },
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          },
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          },
+          "session_facts": [
+            "looking for blue and ivory rugs"
+          ],
+          "rug_reference_ambiguous": false,
+          "confidence": "high"
+        },
+        "response_status": 200,
+        "incomplete_detected": false,
+        "error": null
+      },
+      "policy": {
+        "intent": "recommend",
+        "compiled_policy": {
+          "intent": "recommend",
+          "mode": "recommendation",
+          "discovery_requested": false,
+          "followup_intent": "none",
+          "hard_constraints": {
+            "colors": [
+              "blue",
+              "ivory"
+            ],
+            "strictness": {
+              "size": "prefer",
+              "colors": "prefer",
+              "styles": "prefer",
+              "shape": "prefer"
+            }
+          },
+          "persisted_hard_constraints": {
+            "colors": [
+              "blue",
+              "ivory"
+            ],
+            "strictness": {
+              "size": "prefer",
+              "colors": "prefer",
+              "styles": "prefer",
+              "shape": "prefer"
+            }
+          },
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          },
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          },
+          "confidence": "high",
+          "policy_source": "parsed_turn",
+          "must_prefer_avoid": {
+            "must": [],
+            "prefer": [
+              "colors"
+            ],
+            "avoid": {
+              "colors": [],
+              "styles": [],
+              "shapes": []
+            }
+          }
+        },
+        "policy_source": "parsed_turn",
+        "must_prefer_avoid": {
+          "must": [],
+          "prefer": [
+            "colors"
+          ],
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          }
+        },
+        "must-prefer-avoid": {
+          "must": [],
+          "prefer": [
+            "colors"
+          ],
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          }
+        },
+        "constraint_modes": {
+          "size": "prefer",
+          "colors": "prefer",
+          "styles": "prefer",
+          "shape": "prefer",
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          }
+        }
+      },
+      "parser_trace": {
+        "called": true,
+        "model": "gpt-4.1-mini",
+        "status": "success",
+        "response_status": 200,
+        "fallback": null,
+        "fallback_reason": null,
+        "incomplete_detected": false,
+        "latency_ms": 1960,
+        "normalized_payload": {
+          "intent": "recommend",
+          "mode": "recommendation",
+          "followup_intent": "none",
+          "constraints": {
+            "size": null,
+            "colors": [
+              "blue",
+              "ivory"
+            ],
+            "styles": [],
+            "shape": null
+          },
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          },
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          },
+          "session_facts": [
+            "looking for blue and ivory rugs"
+          ],
+          "rug_reference_ambiguous": false,
+          "confidence": "high"
+        },
+        "parsed": {
+          "intent": "recommend",
+          "mode": "recommendation",
+          "followup_intent": "none",
+          "constraints": {
+            "size": null,
+            "colors": [
+              "blue",
+              "ivory"
+            ],
+            "styles": [],
+            "shape": null
+          },
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          },
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          },
+          "session_facts": [
+            "looking for blue and ivory rugs"
+          ],
+          "rug_reference_ambiguous": false,
+          "confidence": "high"
+        },
+        "error": null
+      },
+      "compiled_policy": {
+        "intent": "recommend",
+        "mode": "recommendation",
+        "discovery_requested": false,
+        "followup_intent": "none",
+        "hard_constraints": {
+          "colors": [
+            "blue",
+            "ivory"
+          ],
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          }
+        },
+        "persisted_hard_constraints": {
+          "colors": [
+            "blue",
+            "ivory"
+          ],
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          }
+        },
+        "strictness": {
+          "size": "prefer",
+          "colors": "prefer",
+          "styles": "prefer",
+          "shape": "prefer"
+        },
+        "avoid": {
+          "colors": [],
+          "styles": [],
+          "shapes": []
+        },
+        "confidence": "high",
+        "policy_source": "parsed_turn",
+        "must_prefer_avoid": {
+          "must": [],
+          "prefer": [
+            "colors"
+          ],
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          }
+        }
+      },
+      "policy_source": "parsed_turn",
+      "must_prefer_avoid": {
+        "must": [],
+        "prefer": [
+          "colors"
+        ],
+        "avoid": {
+          "colors": [],
+          "styles": [],
+          "shapes": []
+        }
+      },
+      "must-prefer-avoid": {
+        "must": [],
+        "prefer": [
+          "colors"
+        ],
+        "avoid": {
+          "colors": [],
+          "styles": [],
+          "shapes": []
+        }
+      },
+      "handler": "handleRecommendationTurn",
+      "prompt_layer_preview": [
+        "TASK_PROMPT_RECOMMENDATION",
+        "SYSTEM_PROMPT_BASE",
+        "TASK_PROMPT_RECOMMENDATION",
+        "TASK_PROMPT_RECOMMENDATION",
+        "STRUCTURED_OUTPUT_RECOMMENDATION",
+        "CHAT_MEMORY_CONTEXT",
+        "CHAT_MEMORY_CONTEXT",
+        "CHAT_MEMORY_CONTEXT",
+        "CHAT_MEMORY_CONTEXT",
+        "RECENT_TURNS_CONTEXT",
+        "INVENTORY_CONTEXT",
+        "LATEST_USER_MESSAGE_WITH_HARD_CONSTRAINTS"
+      ]
+    },
+    "reaction": {
+      "detected_reaction": null,
+      "referenced_rug_id": null,
+      "rug_reference_ambiguous": false,
+      "liked_attributes_before": {
+        "colors": [
+          "green",
+          "blue",
+          "ivory"
+        ],
+        "styles": [],
+        "origins": []
+      },
+      "liked_attributes_after": {
+        "colors": [
+          "green",
+          "blue",
+          "ivory"
+        ],
+        "styles": [],
+        "origins": []
+      },
+      "liked_rug_ids_before": [],
+      "liked_rug_ids_after": [],
+      "dismissed_rug_ids_before": [],
+      "dismissed_rug_ids_after": []
+    },
+    "state_snapshot": {
+      "recommendation_state": {
+        "hard_constraints": {
+          "colors": [
+            "blue",
+            "ivory"
+          ],
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          }
+        },
+        "soft_preferences": {},
+        "runtime": {
+          "last_result_mode": "recommendation",
+          "last_relaxed_size_tolerance_in": null,
+          "last_blockers": [],
+          "last_recommended_size_in": {
+            "width_in": 36,
+            "length_in": 144
+          },
+          "liked_rug_ids": [],
+          "dismissed_rug_ids": [],
+          "shown_rug_ids": [
+            "58eef202-954d-44b6-a990-4b635e03cdd5",
+            "08ca5e39-c162-4d88-9d7e-484e90489d85",
+            "0dd26ca3-10fb-418b-bb80-be02d2b331c7",
+            "bd644ffb-6bf8-47f2-a8ce-0eaa3a4aca28",
+            "98a58ad4-f1c6-4e05-8429-1fc366673706",
+            "0b1e217f-4b33-4bad-a38f-29ccf0729802",
+            "119b9d9a-fe0c-4f12-b2ac-a783bb7bc29b",
+            "ceadcc97-b695-44d8-a9fc-16f68b999d94",
+            "46245ee2-ac56-46e0-8cbf-b2eead74c24b",
+            "c7a2b2e4-1f37-4fc5-985e-ea28e577723a",
+            "1215a323-2031-402d-99a5-d6c2b7c9b677",
+            "80da791e-1ea4-47d6-91f4-83888a00e046"
+          ],
+          "liked_attributes": {
+            "colors": [
+              "green"
+            ],
+            "styles": [],
+            "origins": []
+          },
+          "recently_shown_rugs": [
+            {
+              "id": "119b9d9a-fe0c-4f12-b2ac-a783bb7bc29b",
+              "label": "Contemporary Runner",
+              "colors": [
+                "green"
+              ],
+              "style": "Minimal",
+              "origin": null
+            },
+            {
+              "id": "ceadcc97-b695-44d8-a9fc-16f68b999d94",
+              "label": "Contemporary Afghan Gabbeh",
+              "colors": [
+                "red",
+                "blue",
+                "gold",
+                "ivory"
+              ],
+              "style": "Gabbeh",
+              "origin": "Afghan"
+            },
+            {
+              "id": "46245ee2-ac56-46e0-8cbf-b2eead74c24b",
+              "label": "Contemporary Kilim",
+              "colors": [
+                "multi"
+              ],
+              "style": "Kilim",
+              "origin": "Other"
+            },
+            {
+              "id": "c7a2b2e4-1f37-4fc5-985e-ea28e577723a",
+              "label": "Contemporary Moroccan",
+              "colors": [
+                "purple",
+                "blue"
+              ],
+              "style": "Medallion",
+              "origin": "Moroccan"
+            },
+            {
+              "id": "1215a323-2031-402d-99a5-d6c2b7c9b677",
+              "label": "Contemporary Persian",
+              "colors": [
+                "gray"
+              ],
+              "style": "Medallion",
+              "origin": "Persian"
+            },
+            {
+              "id": "80da791e-1ea4-47d6-91f4-83888a00e046",
+              "label": "Contemporary Runner",
+              "colors": [
+                "teal",
+                "ivory"
+              ],
+              "style": "Minimal",
+              "origin": null
+            }
+          ],
+          "no_match_attempts": 0,
+          "updated_at": "2026-03-28T20:47:58.115Z"
+        }
+      },
+      "conversation_memory": {
+        "summary_text": "…Antique Persian Heriz in 8' x 10' stands out with its large medallion and floral motifs. Let me kn… || User: Do you have anything similar? | Assistant: I want to make sure I’m following correctly. Did you mean Antique Persian Heriz (Heriz, Persian, rust) or Antique Caucasian Karabagh or Antique Persian Heriz (Heriz, Persian, gold)? || User: I prefer something cleaner | Assistant: Here are cleaner green rugs that emphasize modern simplicity, perfect for a sleek, understated look. The Contemporary Runner stands out with its solid green color and plain design, ideal for a modern space. If you'd lik… || User: What's the difference between a Heriz and a Serapi? | Assistant: Heriz rugs originate from the Heriz region in northwest Iran and are known for their bold geometric patterns and large central medallions, often with a sturdy, durable weave. Serapi rugs are a refined subset of Heriz ru…",
+        "stable_facts": [
+          "has recent recommendations",
+          "interested in Heriz and Serapi differences",
+          "prefers cleaner style",
+          "user interested in rugs similar to recently shown",
+          "wants green rugs"
+        ],
+        "open_threads": [
+          "What's the difference between a Heriz and a Serapi?",
+          "If you'd like, should I show more in this same direction, or adjust color and size next?",
+          "Do you have anything similar?",
+          "Did you mean Antique Persian Heriz (Heriz, Persian, rust) or Antique Caucasian Karabagh or Antique Persian Heriz (Heriz…"
+        ],
+        "last_user_intent": "general_chat",
+        "no_match_attempts": 0,
+        "updated_at": "2026-03-28T20:47:58.115Z",
+        "version": "v1"
+      }
+    },
+    "memory_snapshot_before": {
+      "summary_text": "…Antique Persian Heriz in 8' x 10' stands out with its large medallion and floral motifs. Let me kn… || User: Do you have anything similar? | Assistant: I want to make sure I’m following correctly. Did you mean Antique Persian Heriz (Heriz, Persian, rust) or Antique Caucasian Karabagh or Antique Persian Heriz (Heriz, Persian, gold)? || User: I prefer something cleaner | Assistant: Here are cleaner green rugs that emphasize modern simplicity, perfect for a sleek, understated look. The Contemporary Runner stands out with its solid green color and plain design, ideal for a modern space. If you'd lik… || User: What's the difference between a Heriz and a Serapi? | Assistant: Heriz rugs originate from the Heriz region in northwest Iran and are known for their bold geometric patterns and large central medallions, often with a sturdy, durable weave. Serapi rugs are a refined subset of Heriz ru…",
+      "stable_facts": [
+        "has recent recommendations",
+        "interested in Heriz and Serapi differences",
+        "prefers cleaner style",
+        "user interested in rugs similar to recently shown",
+        "wants green rugs"
+      ],
+      "open_threads": [
+        "What's the difference between a Heriz and a Serapi?",
+        "If you'd like, should I show more in this same direction, or adjust color and size next?",
+        "Do you have anything similar?",
+        "Did you mean Antique Persian Heriz (Heriz, Persian, rust) or Antique Caucasian Karabagh or Antique Persian Heriz (Heriz…"
+      ],
+      "last_user_intent": "general_chat",
+      "no_match_attempts": 0,
+      "updated_at": "2026-03-28T20:47:58.115Z",
+      "version": "v1"
+    },
+    "memory_snapshot_after": {
+      "summary_text": "…casian Karabagh or Antique Persian Heriz (Heriz, Persian, gold)? || User: I prefer something cleaner | Assistant: Here are cleaner green rugs that emphasize modern simplicity, perfect for a sleek, understated look. The Contemporary Runner stands out with its solid green color and plain design, ideal for a modern space. If you'd lik… || User: What's the difference between a Heriz and a Serapi? | Assistant: Heriz rugs originate from the Heriz region in northwest Iran and are known for their bold geometric patterns and large central medallions, often with a sturdy, durable weave. Serapi rugs are a refined subset of Heriz ru… || User: Looking for blue and ivory rugs | Assistant: For a blue and ivory color scheme, these rugs showcase stunning traditional designs with elegant medallions and floral motifs. If you'd like, should I show more in this same direction, or adjust color and size next?",
+      "stable_facts": [
+        "looking for blue and ivory rugs",
+        "has recent recommendations",
+        "interested in Heriz and Serapi differences",
+        "prefers cleaner style",
+        "user interested in rugs similar to recently shown",
+        "wants green rugs"
+      ],
+      "open_threads": [
+        "If you'd like, should I show more in this same direction, or adjust color and size next?",
+        "What's the difference between a Heriz and a Serapi?",
+        "Do you have anything similar?",
+        "Did you mean Antique Persian Heriz (Heriz, Persian, rust) or Antique Caucasian Karabagh or Antique Persian Heriz (Heriz…"
+      ],
+      "last_user_intent": "recommendation",
+      "no_match_attempts": 0,
+      "updated_at": "2026-03-28T20:48:11.464Z",
+      "version": "v1"
+    },
+    "ai_context_packet_stats": {
+      "field_counts": {
+        "stable_facts": 5,
+        "open_threads": 4,
+        "customer_context": 5,
+        "recently_shown_rugs": 6,
+        "shown_rug_ids": 12,
+        "recent_turns": 4
+      },
+      "char_counts": {
+        "summary_text": 899,
+        "stable_facts_total": 154,
+        "open_threads_total": 288,
+        "customer_context_total": 154,
+        "recently_shown_total": 484,
+        "shown_rug_ids_total": 432,
+        "liked_attributes_total": 5,
+        "recent_turns_total": 636,
+        "latest_user_message": 31,
+        "total": 2651
+      }
+    },
+    "response": {
+      "session_id": "8848dc93-3a17-441c-bfdd-f6ffcf62c6aa",
+      "role": "retail_customer",
+      "mode": "recommendation",
+      "fine_mode": "recommendation",
+      "response_mode": "recommendation",
+      "notes": "If you'd like, I can show more options in sizes closer to 8' x 10' or explore other style variations within the blue and ivory palette."
+    },
+    "timing_ms": {
+      "total_ms": 12904
+    }
+  }
+}

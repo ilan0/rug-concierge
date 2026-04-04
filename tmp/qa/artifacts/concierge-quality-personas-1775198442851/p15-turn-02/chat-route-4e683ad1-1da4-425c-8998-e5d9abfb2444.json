@@ -1,0 +1,558 @@
+{
+  "trace_id": "4e683ad1-1da4-425c-8998-e5d9abfb2444",
+  "channel": "chat-route",
+  "created_at": "2026-04-03T06:50:10.918Z",
+  "payload": {
+    "flow_path": [
+      "/api/chat POST",
+      "getOrCreateSession",
+      "updateRecommendationStateForTurn",
+      "routeTurnMode",
+      "handlerDispatch",
+      "updateConversationMemory",
+      "saveSession"
+    ],
+    "request": {
+      "session_id": "f848f3cd-15e4-45c1-b86a-f20d73713e91",
+      "role": "retail_customer",
+      "tenant_id": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5",
+      "tenant_subdomain": "jjrugs",
+      "tenant_hostname": "jjrugs.rugdesk.app",
+      "message": "I like the rust one.",
+      "constraints": null
+    },
+    "routing": {
+      "mode": "recommendation",
+      "intent": "reaction",
+      "rule_id": "RECOMMENDATION_FOLLOWUP",
+      "confidence": "high",
+      "needs_clarification": false,
+      "parser": {
+        "model": "gpt-4.1-mini",
+        "latency_ms": 1720,
+        "status": "success",
+        "parse_status": "success",
+        "fallback": null,
+        "fallback_reason": null,
+        "normalized_payload": {
+          "intent": "reaction",
+          "mode": "recommendation_followup",
+          "followup_intent": "none",
+          "constraints": {
+            "size": null,
+            "colors": [
+              "rust"
+            ],
+            "styles": [],
+            "shape": null
+          },
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          },
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          },
+          "session_facts": [
+            "likes rust color"
+          ],
+          "rug_reference_ambiguous": false,
+          "confidence": "high"
+        },
+        "normalized_parse_payload": {
+          "intent": "reaction",
+          "mode": "recommendation_followup",
+          "followup_intent": "none",
+          "constraints": {
+            "size": null,
+            "colors": [
+              "rust"
+            ],
+            "styles": [],
+            "shape": null
+          },
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          },
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          },
+          "session_facts": [
+            "likes rust color"
+          ],
+          "rug_reference_ambiguous": false,
+          "confidence": "high"
+        },
+        "response_status": 200,
+        "incomplete_detected": false,
+        "error": null
+      },
+      "policy": {
+        "intent": "reaction",
+        "compiled_policy": {
+          "intent": "reaction",
+          "mode": "recommendation_followup",
+          "discovery_requested": false,
+          "followup_intent": "none",
+          "hard_constraints": {
+            "colors": [
+              "rust"
+            ],
+            "styles": [],
+            "strictness": {
+              "size": "prefer",
+              "colors": "prefer",
+              "styles": "prefer",
+              "shape": "prefer"
+            }
+          },
+          "persisted_hard_constraints": {
+            "colors": [
+              "rust"
+            ],
+            "styles": [],
+            "strictness": {
+              "size": "prefer",
+              "colors": "prefer",
+              "styles": "prefer",
+              "shape": "prefer"
+            }
+          },
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          },
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          },
+          "confidence": "high",
+          "policy_source": "parsed_turn",
+          "must_prefer_avoid": {
+            "must": [],
+            "prefer": [
+              "colors"
+            ],
+            "avoid": {
+              "colors": [],
+              "styles": [],
+              "shapes": []
+            }
+          }
+        },
+        "policy_source": "parsed_turn",
+        "must_prefer_avoid": {
+          "must": [],
+          "prefer": [
+            "colors"
+          ],
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          }
+        },
+        "must-prefer-avoid": {
+          "must": [],
+          "prefer": [
+            "colors"
+          ],
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          }
+        },
+        "constraint_modes": {
+          "size": "prefer",
+          "colors": "prefer",
+          "styles": "prefer",
+          "shape": "prefer",
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          }
+        }
+      },
+      "parser_trace": {
+        "called": true,
+        "model": "gpt-4.1-mini",
+        "status": "success",
+        "response_status": 200,
+        "fallback": null,
+        "fallback_reason": null,
+        "incomplete_detected": false,
+        "latency_ms": 1720,
+        "normalized_payload": {
+          "intent": "reaction",
+          "mode": "recommendation_followup",
+          "followup_intent": "none",
+          "constraints": {
+            "size": null,
+            "colors": [
+              "rust"
+            ],
+            "styles": [],
+            "shape": null
+          },
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          },
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          },
+          "session_facts": [
+            "likes rust color"
+          ],
+          "rug_reference_ambiguous": false,
+          "confidence": "high"
+        },
+        "parsed": {
+          "intent": "reaction",
+          "mode": "recommendation_followup",
+          "followup_intent": "none",
+          "constraints": {
+            "size": null,
+            "colors": [
+              "rust"
+            ],
+            "styles": [],
+            "shape": null
+          },
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          },
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          },
+          "session_facts": [
+            "likes rust color"
+          ],
+          "rug_reference_ambiguous": false,
+          "confidence": "high"
+        },
+        "error": null
+      },
+      "compiled_policy": {
+        "intent": "reaction",
+        "mode": "recommendation_followup",
+        "discovery_requested": false,
+        "followup_intent": "none",
+        "hard_constraints": {
+          "colors": [
+            "rust"
+          ],
+          "styles": [],
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          }
+        },
+        "persisted_hard_constraints": {
+          "colors": [
+            "rust"
+          ],
+          "styles": [],
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          }
+        },
+        "strictness": {
+          "size": "prefer",
+          "colors": "prefer",
+          "styles": "prefer",
+          "shape": "prefer"
+        },
+        "avoid": {
+          "colors": [],
+          "styles": [],
+          "shapes": []
+        },
+        "confidence": "high",
+        "policy_source": "parsed_turn",
+        "must_prefer_avoid": {
+          "must": [],
+          "prefer": [
+            "colors"
+          ],
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          }
+        }
+      },
+      "policy_source": "parsed_turn",
+      "must_prefer_avoid": {
+        "must": [],
+        "prefer": [
+          "colors"
+        ],
+        "avoid": {
+          "colors": [],
+          "styles": [],
+          "shapes": []
+        }
+      },
+      "must-prefer-avoid": {
+        "must": [],
+        "prefer": [
+          "colors"
+        ],
+        "avoid": {
+          "colors": [],
+          "styles": [],
+          "shapes": []
+        }
+      },
+      "handler": "handleRecommendationTurn",
+      "prompt_layer_preview": [
+        "TASK_PROMPT_RECOMMENDATION",
+        "SYSTEM_PROMPT_BASE",
+        "TASK_PROMPT_RECOMMENDATION",
+        "TASK_PROMPT_RECOMMENDATION",
+        "STRUCTURED_OUTPUT_RECOMMENDATION",
+        "CHAT_MEMORY_CONTEXT",
+        "CHAT_MEMORY_CONTEXT",
+        "RECENT_TURNS_CONTEXT",
+        "INVENTORY_CONTEXT",
+        "LATEST_USER_MESSAGE_WITH_HARD_CONSTRAINTS"
+      ]
+    },
+    "reaction": {
+      "detected_reaction": "like",
+      "referenced_rug_id": null,
+      "rug_reference_ambiguous": false,
+      "liked_attributes_before": {
+        "colors": [
+          "rust"
+        ],
+        "styles": [],
+        "origins": []
+      },
+      "liked_attributes_after": {
+        "colors": [
+          "rust"
+        ],
+        "styles": [],
+        "origins": []
+      },
+      "liked_rug_ids_before": [],
+      "liked_rug_ids_after": [],
+      "dismissed_rug_ids_before": [],
+      "dismissed_rug_ids_after": []
+    },
+    "state_snapshot": {
+      "recommendation_state": {
+        "hard_constraints": {
+          "colors": [
+            "rust"
+          ],
+          "styles": [],
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          }
+        },
+        "soft_preferences": {},
+        "runtime": {
+          "last_result_mode": "recommendation",
+          "last_relaxed_size_tolerance_in": null,
+          "last_blockers": [],
+          "last_recommended_size_in": {
+            "width_in": 72,
+            "length_in": 108
+          },
+          "liked_rug_ids": [],
+          "dismissed_rug_ids": [],
+          "shown_rug_ids": [
+            "b1b00766-b4bc-4d8b-ab4d-46be26589902",
+            "4c60b570-f26c-4dda-a1df-9626479843b0",
+            "119b9d9a-fe0c-4f12-b2ac-a783bb7bc29b",
+            "08ca5e39-c162-4d88-9d7e-484e90489d85",
+            "66ca8129-8843-4e42-bdf5-9e3ce23d4128",
+            "aea4955c-97f3-4e4a-a9b4-2db2fdf38a15"
+          ],
+          "liked_attributes": {
+            "colors": [],
+            "styles": [],
+            "origins": []
+          },
+          "recently_shown_rugs": [
+            {
+              "id": "b1b00766-b4bc-4d8b-ab4d-46be26589902",
+              "label": "Antique Persian Bakhtiari",
+              "colors": [
+                "blue",
+                "gold",
+                "red",
+                "brown"
+              ],
+              "style": "Bakhtiari",
+              "origin": "Persian"
+            },
+            {
+              "id": "4c60b570-f26c-4dda-a1df-9626479843b0",
+              "label": "Contemporary Afghan Gabbeh",
+              "colors": [
+                "red",
+                "blue",
+                "gold"
+              ],
+              "style": "Gabbeh",
+              "origin": "Afghan"
+            },
+            {
+              "id": "119b9d9a-fe0c-4f12-b2ac-a783bb7bc29b",
+              "label": "Contemporary Runner",
+              "colors": [
+                "green"
+              ],
+              "style": "Minimal",
+              "origin": null
+            },
+            {
+              "id": "08ca5e39-c162-4d88-9d7e-484e90489d85",
+              "label": "Antique Caucasian Karabagh",
+              "colors": [
+                "red",
+                "green",
+                "ivory",
+                "blue"
+              ],
+              "style": "Karabagh",
+              "origin": "Caucasian"
+            },
+            {
+              "id": "66ca8129-8843-4e42-bdf5-9e3ce23d4128",
+              "label": "Antique Caucasian Karabagh",
+              "colors": [
+                "blue",
+                "red",
+                "green"
+              ],
+              "style": "Karabagh",
+              "origin": "Caucasian"
+            },
+            {
+              "id": "aea4955c-97f3-4e4a-a9b4-2db2fdf38a15",
+              "label": "Antique Caucasian Karabagh",
+              "colors": [
+                "red",
+                "black",
+                "brown"
+              ],
+              "style": "Karabagh",
+              "origin": "Caucasian"
+            }
+          ],
+          "no_match_attempts": 0,
+          "updated_at": "2026-04-03T06:49:57.174Z"
+        }
+      },
+      "conversation_memory": {
+        "summary_text": "User: Show me what you've got. | Assistant: Happy to help you browse this clearly. You’re browsing — here’s a shortlist that covers a range of traditional, antique, and modern styles and moods. The antique Persian Bakhtiari in 6' x 9' stands out for its intricate…",
+        "stable_facts": [],
+        "open_threads": [
+          "Show me what you've got.",
+          "Which direction feels closest to your vision, or would you like to focus on a particular size or color next?"
+        ],
+        "last_user_intent": "recommendation",
+        "no_match_attempts": 0,
+        "updated_at": "2026-04-03T06:49:57.174Z",
+        "version": "v1"
+      }
+    },
+    "memory_snapshot_before": {
+      "summary_text": "User: Show me what you've got. | Assistant: Happy to help you browse this clearly. You’re browsing — here’s a shortlist that covers a range of traditional, antique, and modern styles and moods. The antique Persian Bakhtiari in 6' x 9' stands out for its intricate…",
+      "stable_facts": [],
+      "open_threads": [
+        "Show me what you've got.",
+        "Which direction feels closest to your vision, or would you like to focus on a particular size or color next?"
+      ],
+      "last_user_intent": "recommendation",
+      "no_match_attempts": 0,
+      "updated_at": "2026-04-03T06:49:57.174Z",
+      "version": "v1"
+    },
+    "memory_snapshot_after": {
+      "summary_text": "User: Show me what you've got. | Assistant: Happy to help you browse this clearly. You’re browsing — here’s a shortlist that covers a range of traditional, antique, and modern styles and moods. The antique Persian Bakhtiari in 6' x 9' stands out for its intricate… || User: I like the rust one. | Assistant: Great choice—rust brings a warm, inviting energy to a room. For standout character and a rich rust palette, the Antique Persian Kashan in 8' x 10' is especially memorable, thanks to its intricate floral pattern and lush…",
+      "stable_facts": [
+        "likes rust color",
+        "preference I like the rust one"
+      ],
+      "open_threads": [
+        "Ready to compare these side by side, or do you want to narrow by size or pattern?",
+        "Show me what you've got.",
+        "Which direction feels closest to your vision, or would you like to focus on a particular size or color next?"
+      ],
+      "last_user_intent": "recommendation",
+      "no_match_attempts": 0,
+      "updated_at": "2026-04-03T06:50:10.584Z",
+      "version": "v1"
+    },
+    "ai_context_packet_stats": {
+      "field_counts": {
+        "stable_facts": 0,
+        "open_threads": 2,
+        "customer_context": 0,
+        "recently_shown_rugs": 6,
+        "shown_rug_ids": 6,
+        "recent_turns": 2
+      },
+      "char_counts": {
+        "summary_text": 264,
+        "stable_facts_total": 0,
+        "open_threads_total": 132,
+        "customer_context_total": 0,
+        "recently_shown_total": 559,
+        "shown_rug_ids_total": 216,
+        "liked_attributes_total": 0,
+        "recent_turns_total": 304,
+        "latest_user_message": 20,
+        "total": 1279
+      }
+    },
+    "response": {
+      "session_id": "f848f3cd-15e4-45c1-b86a-f20d73713e91",
+      "role": "retail_customer",
+      "mode": "recommendation",
+      "fine_mode": "recommendation",
+      "response_mode": "recommendation",
+      "notes": null
+    },
+    "timing_ms": {
+      "total_ms": 11805
+    }
+  }
+}

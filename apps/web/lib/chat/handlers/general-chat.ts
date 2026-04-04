@@ -29,8 +29,8 @@ export async function handleGeneralChatTurn(
       mode: "general_chat",
       assistant_message:
         selectedLabel
-          ? `Great choice on ${selectedLabel}. I can help you finalize this with store staff for pricing and checkout. If you want, I can pull up that rug's details again.`
-          : "Great choice. I can help you finalize this with store staff for pricing and checkout. If you want, I can pull up that rug's details again.",
+          ? `Love that pick on ${selectedLabel}. A staff member can finalize pricing and checkout with you now, and I can pull that rug's details back up anytime.`
+          : "Love that pick. A staff member can finalize pricing and checkout with you now, and I can pull the selected rug details back up anytime.",
       notes: "PURCHASE_INTENT_HANDOFF",
     };
   }

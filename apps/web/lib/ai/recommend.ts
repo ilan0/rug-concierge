@@ -1,5 +1,6 @@
 import type { HardConstraints, InventoryRug } from "@/lib/types/recommendation";
 import { resolveEffectiveFields } from "@/lib/inventory/resolve-fields";
+import { shapeCandidatesForAI } from "@/lib/filters/candidate-shaping";
 import { getRecommendationPromptBundle } from "@/lib/ai/prompt-library";
 import {
   endsWithSentenceBoundary,
@@ -18,7 +19,7 @@ import {
 } from "@/lib/prompts/recommendation-stack";
 import {
   OPENAI_API_KEY,
-  OPENAI_CHAT_MODEL,
+  OPENAI_RECOMMENDATION_MODEL,
 } from "@/lib/config";
 
 // Flow overview
@@ -33,7 +34,7 @@ const OPENAI_RESPONSES_URL = "https://api.openai.com/v1/responses";
 const MAX_RECOMMENDATIONS = 10;
 const CONFIDENCE_MIN = 0.35;
 const CONFIDENCE_MAX = 0.95;
-const MAX_ASSISTANT_MESSAGE_CHARS = 420;
+const MAX_ASSISTANT_MESSAGE_CHARS = 700;
 const MAX_QUESTION_CHARS = 140;
 const MAX_TITLE_CHARS = 160;
 const MAX_SIZE_TEXT_CHARS = 64;
@@ -41,8 +42,10 @@ const MAX_REASON_CHARS = 180;
 const MAX_CAVEAT_CHARS = 160;
 const MAX_FACTOR_CHARS = 100;
 const MAX_NOTES_CHARS = 220;
+const MAX_REASONABLE_REQUEST_LONG_SIDE_IN = 240;
 const RETRY_SYSTEM_INSTRUCTION =
   "Retry and return one complete JSON object that matches the schema exactly. Keep answers concise and finish all sentences.";
+const RECOMMENDATION_MODEL = OPENAI_RECOMMENDATION_MODEL;
 type RecommendationPromptContext = {
   role?: "retail_customer" | "store_staff";
   discovery_mode?: boolean;
@@ -243,6 +246,75 @@ function formatSizePair(widthIn: number, lengthIn: number): string {
   return `${formatFeetAndInches(widthIn)} x ${formatFeetAndInches(lengthIn)}`;
 }
 
+function parseSizePartIn(sizePart: string): number | null {
+  const normalized = sizePart.trim();
+  if (!normalized) return null;
+
+  const feetMatch = normalized.match(/(\d+)\s*'/);
+  const inchMatch = normalized.match(/(\d+)\s*"/);
+  if (feetMatch || inchMatch) {
+    const feet = feetMatch ? Number(feetMatch[1]) : 0;
+    const inches = inchMatch ? Number(inchMatch[1]) : 0;
+    const total = feet * 12 + inches;
+    return Number.isFinite(total) ? total : null;
+  }
+
+  const numeric = Number(normalized.replace(/[^0-9.]/g, ""));
+  if (!Number.isFinite(numeric)) return null;
+  return Math.round(numeric);
+}
+
+function parseRecommendationSizePairIn(sizeTextValue: string | null): {
+  widthIn: number;
+  lengthIn: number;
+} | null {
+  if (!sizeTextValue) return null;
+  const parts = sizeTextValue.split(/x|×/i).map((part) => part.trim());
+  if (parts.length !== 2) return null;
+  const widthIn = parseSizePartIn(parts[0]);
+  const lengthIn = parseSizePartIn(parts[1]);
+  if (widthIn === null || lengthIn === null) return null;
+  return { widthIn, lengthIn };
+}
+
+function hasExactSizeRecommendation(
+  recommendations: RecommendationResponse["recommendations"],
+  constraints: HardConstraints
+): boolean {
+  if (!constraints.size) return false;
+  const tolerance = Math.max(0, constraints.size.toleranceIn ?? 0);
+  for (const rec of recommendations) {
+    const pair = parseRecommendationSizePairIn(rec.size_text);
+    if (!pair) continue;
+    const directMatch =
+      Math.abs(pair.widthIn - constraints.size.widthIn) <= tolerance &&
+      Math.abs(pair.lengthIn - constraints.size.lengthIn) <= tolerance;
+    const rotatedMatch =
+      Math.abs(pair.widthIn - constraints.size.lengthIn) <= tolerance &&
+      Math.abs(pair.lengthIn - constraints.size.widthIn) <= tolerance;
+    if (directMatch || rotatedMatch) return true;
+  }
+  return false;
+}
+
+function matchesExactRequestedSize(rug: InventoryRug, constraints: HardConstraints): boolean {
+  if (!constraints.size) return false;
+  if (
+    typeof rug.width_total_in !== "number" ||
+    typeof rug.length_total_in !== "number"
+  ) {
+    return false;
+  }
+  const requested = constraints.size;
+  const direct =
+    rug.width_total_in === requested.widthIn &&
+    rug.length_total_in === requested.lengthIn;
+  const rotated =
+    rug.width_total_in === requested.lengthIn &&
+    rug.length_total_in === requested.widthIn;
+  return direct || rotated;
+}
+
 function sizeText(rug: InventoryRug): string | null {
   const w = rug.width_total_in;
   const l = rug.length_total_in;
@@ -283,14 +355,6 @@ function toContextInventory(inventory: InventoryRug[]) {
       origin: fields.origin ?? null,
       style: fields.style ?? null,
       mood: fields.mood ?? null,
-      pattern: Array.isArray(fields.pattern) ? fields.pattern.slice(0, 4) : [],
-      colors: Array.isArray(fields.primary_colors)
-        ? fields.primary_colors.slice(0, 5)
-        : [],
-      desc:
-        rug.ai_description && rug.ai_description.trim().length > 0
-          ? rug.ai_description
-          : "New arrival — description pending",
     };
   });
 }
@@ -392,54 +456,36 @@ function clampAssistantMessage(message: string): string {
     return plain;
   }
 
-  const truncated = plain.slice(0, MAX_ASSISTANT_MESSAGE_CHARS).trim();
-  const preferredBoundary = truncated.match(/[\.\!\?](?!.*[\.\!\?])/);
-  if (preferredBoundary && preferredBoundary.index !== undefined) {
-    const boundaryIndex = preferredBoundary.index + preferredBoundary[0].length;
-    if (boundaryIndex >= Math.floor(MAX_ASSISTANT_MESSAGE_CHARS * 0.55)) {
-      return truncated.slice(0, boundaryIndex).trim();
+  const sentenceMatches =
+    plain.match(/[^.!?]+[.!?]+/g)?.map((part) => part.trim()).filter(Boolean) ?? [];
+  if (sentenceMatches.length > 0) {
+    let assembled = "";
+    for (const sentence of sentenceMatches) {
+      const next = assembled ? `${assembled} ${sentence}` : sentence;
+      if (next.length > MAX_ASSISTANT_MESSAGE_CHARS) break;
+      assembled = next;
     }
+    if (assembled.length >= Math.floor(MAX_ASSISTANT_MESSAGE_CHARS * 0.45)) {
+      return assembled.trim();
+    }
+  }
+
+  const truncated = plain.slice(0, MAX_ASSISTANT_MESSAGE_CHARS).trim();
+  const preferredBoundary = [...truncated.matchAll(/[.!?]/g)].at(-1);
+  if (
+    preferredBoundary &&
+    typeof preferredBoundary.index === "number" &&
+    preferredBoundary.index >= Math.floor(MAX_ASSISTANT_MESSAGE_CHARS * 0.45)
+  ) {
+    return truncated.slice(0, preferredBoundary.index + 1).trim();
   }
 
   const lastSpace = truncated.lastIndexOf(" ");
-  if (lastSpace > Math.floor(MAX_ASSISTANT_MESSAGE_CHARS * 0.45)) {
-    return `${truncated.slice(0, lastSpace).trim()}...`;
+  if (lastSpace > Math.floor(MAX_ASSISTANT_MESSAGE_CHARS * 0.4)) {
+    return `${truncated.slice(0, lastSpace).trim()}.`;
   }
 
-  return `${truncated.slice(0, MAX_ASSISTANT_MESSAGE_CHARS - 3).trim()}...`;
-}
-
-const GENERIC_RECOMMENDATION_LEAD_PATTERNS: RegExp[] = [
-  /^based on what you're looking for(?:[:,\-]\s*|\s*$)/i,
-  /^you asked for specific guidance(?:[:,\-]\s*|\s*$)/i,
-  /^here is a diverse sample from (?:our current )?collection(?:[:,\-]\s*|\s*$)/i,
-  /^from your request(?:[:,\-]\s*|\s*$)/i,
-  /^for your target around .+(?:[:,\-]\s*|\s*$)/i,
-  /^(here is|here are) (?:a )?varied set of options to compare(?:[:,\-]\s*|\s*$)/i,
-  /^for around .+closest available fits in stock(?:[:,\-]\s*|\s*$)/i,
-  /^here are the options with the strongest .+ presence(?:[:,\-]\s*|\s*$)/i,
-];
-
-function hasGenericRecommendationLeadIn(message: string): boolean {
-  const normalized = toPlainText(message).trim();
-  return GENERIC_RECOMMENDATION_LEAD_PATTERNS.some((pattern) =>
-    pattern.test(normalized)
-  );
-}
-
-function stripGenericRecommendationLeadIn(message: string): string {
-  let normalized = toPlainText(message).trim();
-  let changed = true;
-  while (changed && normalized.length > 0) {
-    changed = false;
-    for (const pattern of GENERIC_RECOMMENDATION_LEAD_PATTERNS) {
-      if (!pattern.test(normalized)) continue;
-      normalized = normalized.replace(pattern, "").trim();
-      changed = true;
-      break;
-    }
-  }
-  return normalized;
+  return `${truncated.slice(0, MAX_ASSISTANT_MESSAGE_CHARS - 1).trim()}.`;
 }
 
 function uniqueCompactList(items: string[], maxItems: number): string[] {
@@ -459,12 +505,9 @@ function uniqueCompactList(items: string[], maxItems: number): string[] {
 
 function applyTonePolish(response: RecommendationResponse): RecommendationResponse {
   if (response.mode === "clarifying_question") {
-    const cleanedAssistant = stripGenericRecommendationLeadIn(response.assistant_message);
     return {
       ...response,
-      assistant_message: clampAssistantMessage(
-        cleanedAssistant || toPlainText(response.assistant_message)
-      ),
+      assistant_message: clampAssistantMessage(toPlainText(response.assistant_message)),
       questions: uniqueCompactList(response.questions, 2),
     };
   }
@@ -482,23 +525,23 @@ function applyTonePolish(response: RecommendationResponse): RecommendationRespon
   }
 
   if (response.mode === "disambiguation") {
-    const cleanedAssistant = stripGenericRecommendationLeadIn(response.assistant_message);
+    const baseMessage = toPlainText(response.assistant_message);
+    const warmedMessage = /^(happy|glad|absolutely|of course|great question|thanks)/i.test(
+      baseMessage
+    )
+      ? baseMessage
+      : `Happy to narrow this down. ${baseMessage}`.trim();
     return {
       ...response,
-      assistant_message: clampAssistantMessage(
-        cleanedAssistant || toPlainText(response.assistant_message)
-      ),
+      assistant_message: clampAssistantMessage(warmedMessage),
       questions: [],
       recommendations: response.recommendations.slice(0, 3),
     };
   }
 
-  const cleanedAssistant = stripGenericRecommendationLeadIn(response.assistant_message);
   return {
     ...response,
-    assistant_message: clampAssistantMessage(
-      cleanedAssistant || toPlainText(response.assistant_message)
-    ),
+    assistant_message: clampAssistantMessage(toPlainText(response.assistant_message)),
     questions: [],
     recommendations: response.recommendations.map((rec) => ({
       ...rec,
@@ -509,75 +552,14 @@ function applyTonePolish(response: RecommendationResponse): RecommendationRespon
   };
 }
 
-function enforceRequestAnchoredOpening(input: {
-  response: RecommendationResponse;
-  constraints: HardConstraints;
-  userMessage: string;
-}): RecommendationResponse {
-  if (input.response.mode !== "recommendations") {
-    return input.response;
-  }
-  const assistant = toPlainText(input.response.assistant_message);
-  const genericLeadIn = hasGenericRecommendationLeadIn(assistant);
-  if (!genericLeadIn) {
-    return input.response;
-  }
-
-  const stripped = stripGenericRecommendationLeadIn(assistant);
-  const stillGenericAfterStrip =
-    /^(here (is|are)|these are|for around|for a|for your)\b/i.test(stripped);
-  const rewritten =
-    stripped.length > 0 && !stillGenericAfterStrip
-      ? stripped
-      : `${buildFallbackLeadIn(input.constraints, input.userMessage)} ${stripped}`.trim();
-  return {
-    ...input.response,
-    assistant_message: clampAssistantMessage(rewritten.trim()),
-  };
-}
-
 function enforceDiscoveryQuestion(
   response: RecommendationResponse,
   discoveryMode: boolean,
   customerContext?: string[],
   userMessage?: string,
-  constraints?: HardConstraints
+  constraints?: HardConstraints,
+  recentlyShownIds?: string[]
 ): RecommendationResponse {
-  const enforceRecommendationInvitation = (
-    value: RecommendationResponse
-  ): RecommendationResponse => {
-    if (!userMessage || discoveryMode || value.mode !== "recommendations") {
-      return value;
-    }
-    const assistant = toPlainText(value.assistant_message);
-    if (assistant.includes("?")) return value;
-    if (
-      /\b(would you like|want me to|if you'd like|if you want|should i show)\b/i.test(
-        assistant
-      )
-    ) {
-      return value;
-    }
-    const normalizedMessage = normalizeText(userMessage);
-    const language = detectResponseLanguage(userMessage);
-    const practicalSignal =
-      /\b(kid|kids|child|children|dog|dogs|pet|pets|high traffic|durable|easy to clean|low maintenance|beach house)\b/i.test(
-        normalizedMessage
-      );
-    const question =
-      language === "es"
-        ? practicalSignal
-          ? "Si quieres, priorizo facilidad de mantenimiento o un look mas llamativo?"
-          : "Si quieres, te muestro mas opciones en esta misma direccion o ajustamos color y tamano?"
-        : practicalSignal
-          ? "If you'd like, should I prioritize easiest-care options next, or a bolder look?"
-          : "If you'd like, should I show more in this same direction, or adjust color and size next?";
-    return {
-      ...value,
-      assistant_message: clampAssistantMessage(`${assistant} ${question}`.trim()),
-    };
-  };
-
   const ensureSingleQuestion = (text: string): string => {
     const normalized = toPlainText(text).replace(/\s+/g, " ").trim();
     const firstQuestionIndex = normalized.indexOf("?");
@@ -594,17 +576,21 @@ function enforceDiscoveryQuestion(
         assistant_message: clampAssistantMessage(next.assistant_message),
       };
     }
-    return enforceResponseLanguage(next, userMessage, constraints);
+    const polished = enforceRecommendationConversationalFinish({
+      response: {
+        ...next,
+        assistant_message: clampAssistantMessage(next.assistant_message),
+      },
+      userMessage,
+      constraints,
+      discoveryMode,
+      recentlyShownIds,
+      customerContext,
+    });
+    return enforceResponseLanguage(polished, userMessage, constraints);
   };
 
-  const anchoredResponse =
-    constraints && userMessage
-      ? enforceRequestAnchoredOpening({
-          response,
-          constraints,
-          userMessage,
-        })
-      : response;
+  const anchoredResponse = response;
 
   const implicitDiscoveryPrompt = Boolean(
     userMessage &&
@@ -617,10 +603,9 @@ function enforceDiscoveryQuestion(
     (!discoveryMode && !implicitDiscoveryPrompt) ||
     anchoredResponse.mode !== "recommendations"
   ) {
-    const invitedResponse = enforceRecommendationInvitation(anchoredResponse);
     return finalize({
-      ...invitedResponse,
-      assistant_message: clampAssistantMessage(invitedResponse.assistant_message),
+      ...anchoredResponse,
+      assistant_message: clampAssistantMessage(anchoredResponse.assistant_message),
     });
   }
 
@@ -639,6 +624,435 @@ function enforceDiscoveryQuestion(
     ...anchoredResponse,
     assistant_message: clampAssistantMessage(assistant),
   });
+}
+
+function buildRecommendationNextStepQuestion(input: {
+  constraints: HardConstraints;
+  userMessage: string;
+  discoveryMode: boolean;
+  language: "en" | "es";
+}): string {
+  const practicalSignal =
+    /\b(kid|kids|child|children|dog|dogs|pet|pets|high traffic|durable|easy to clean|low maintenance|beach house|tough)\b/i.test(
+      normalizeText(input.userMessage)
+    );
+
+  if (input.discoveryMode) {
+    return input.language === "es"
+      ? "¿Quieres que lo reduzcamos primero por tamano, color o estilo?"
+      : "Would you like to narrow first by size, color, or style?";
+  }
+  if (input.constraints.size) {
+    return input.language === "es"
+      ? "¿Quieres ver opciones mas grandes, mas pequenas o en otra direccion de estilo?"
+      : "Would you like to see larger, smaller, or a different style direction next?";
+  }
+  if ((input.constraints.colors?.length ?? 0) > 0) {
+    return input.language === "es"
+      ? "¿Quieres mantener esta direccion de color o comparar una paleta cercana?"
+      : "Would you like to keep this color direction or compare a nearby palette?";
+  }
+  if ((input.constraints.styles?.length ?? 0) > 0) {
+    return input.language === "es"
+      ? "¿Quieres mantener este estilo o comparar una direccion contrastante?"
+      : "Would you like to stay with this style or compare a contrasting direction?";
+  }
+  if (practicalSignal) {
+    return input.language === "es"
+      ? "¿Quieres que mantengamos el enfoque practico o prefieres abrirlo a mas estilos?"
+      : "Do you want to keep this practical direction, or open it up to more styles?";
+  }
+  return input.language === "es"
+    ? "¿Quieres que lo reduzca por tamano, color o estilo?"
+    : "Would you like me to narrow this by size, color, or style?";
+}
+
+function buildGroundedRecommendationNarrative(input: {
+  language: "en" | "es";
+  currentAssistant: string;
+  recommendations: RecommendationResponse["recommendations"];
+  userMessage: string;
+  constraints: HardConstraints;
+  discoveryMode: boolean;
+}): string {
+  const top = input.recommendations[0];
+  if (!top) return input.currentAssistant;
+
+  const disclosureMatch = input.currentAssistant.match(
+    /[^.!?]*(?:don't have|do not have|limited|closest available|exact match)[^.!?]*[.!?]/i
+  );
+  const disclosureLead = disclosureMatch?.[0]?.trim() ?? "";
+  const keepDisclosure = disclosureLead.length > 0;
+
+  const hasColorDirection = (input.constraints.colors?.length ?? 0) > 0;
+  const hasAvoidColorDirection =
+    (input.constraints.avoid_preferences?.colors?.length ?? 0) > 0;
+  const hasStyleDirection = (input.constraints.styles?.length ?? 0) > 0;
+  const hasSizeDirection = Boolean(input.constraints.size);
+  const opener =
+    input.language === "es"
+      ? input.discoveryMode
+        ? "Aqui tienes una seleccion variada para comparar."
+        : hasColorDirection || hasAvoidColorDirection
+          ? "Aqui tienes opciones en inventario siguiendo esa direccion de color."
+          : hasStyleDirection
+            ? "Aqui tienes opciones en inventario siguiendo esa direccion de estilo."
+            : hasSizeDirection
+              ? "Aqui tienes opciones en inventario en ese rango de tamano."
+              : "Aqui tienes opciones disponibles para comparar."
+      : input.discoveryMode
+        ? "Here is a varied set to compare."
+        : hasColorDirection || hasAvoidColorDirection
+          ? "Here are in-stock options aligned to that color direction."
+          : hasStyleDirection
+            ? "Here are in-stock options aligned to that style direction."
+            : hasSizeDirection
+              ? "Here are in-stock options in that size direction."
+              : "Here are in-stock options to compare.";
+
+  const topDetails = [
+    top.title,
+    top.size_text ? `(${top.size_text})` : "",
+    top.style ? `${input.language === "es" ? "estilo" : "style"} ${top.style}` : "",
+    top.origin ? `${input.language === "es" ? "origen" : "origin"} ${top.origin}` : "",
+  ]
+    .filter((part) => part.length > 0)
+    .join(" ");
+  const spotlight =
+    input.language === "es"
+      ? `Empezaria con ${topDetails}.`
+      : `I would start with ${topDetails}.`;
+  const compare =
+    input.recommendations.length > 1
+      ? input.language === "es"
+        ? `Tambien inclui ${input.recommendations.length - 1} opciones mas para comparar lado a lado.`
+        : `I also included ${input.recommendations.length - 1} more options so you can compare side by side.`
+      : input.language === "es"
+        ? "Esta es la opcion mas cercana disponible ahora mismo."
+        : "This is the closest in-stock option right now.";
+
+  const built = [keepDisclosure ? disclosureLead : "", opener, spotlight, compare]
+    .filter((part) => part.length > 0)
+    .join(" ")
+    .trim();
+  return built.length > 0 ? built : input.currentAssistant;
+}
+
+function enforceRecommendationConversationalFinish(input: {
+  response: RecommendationResponse;
+  userMessage: string;
+  constraints: HardConstraints;
+  discoveryMode: boolean;
+  recentlyShownIds?: string[];
+  customerContext?: string[];
+}): RecommendationResponse {
+  if (input.response.mode !== "recommendations") {
+    return input.response;
+  }
+
+  const language = detectResponseLanguage(input.userMessage);
+  let assistant = toPlainText(input.response.assistant_message);
+  const normalizedMessage = normalizeText(input.userMessage);
+  const normalizedCustomerContext = normalizeText(
+    (input.customerContext ?? []).join(" ")
+  );
+  if (
+    input.constraints.size &&
+    hasExactSizeRecommendation(input.response.recommendations, input.constraints)
+  ) {
+    const sentences =
+      assistant.match(/[^.!?]+[.!?]?/g)?.map((part) => part.trim()).filter(Boolean) ?? [];
+    const filtered = sentences.filter(
+      (sentence) =>
+        !/\b(if\s+exact|exact\s+isn'?t\s+available|exact\s+options?\s+aren'?t\s+present|no exact)\b/i.test(
+          normalizeText(sentence)
+        )
+    );
+    if (filtered.length > 0) {
+      assistant = filtered.join(" ").trim();
+    }
+  }
+
+  const directionalSignal =
+    /\b(larger|bigger|smaller|shorter|longer|size up|size down)\b/i.test(
+      normalizedMessage
+    );
+  const directionalNeeds =
+    /\b(larger|bigger|size up)\b/i.test(normalizedMessage)
+      ? "larger"
+      : /\b(smaller|shorter|size down)\b/i.test(normalizedMessage)
+        ? "smaller"
+        : null;
+  const requestedLongSideIn = input.constraints.size
+    ? Math.max(input.constraints.size.widthIn, input.constraints.size.lengthIn)
+    : null;
+  const hasDirectionalAlignedCard = (() => {
+    if (!directionalNeeds || requestedLongSideIn === null) return false;
+    for (const rec of input.response.recommendations) {
+      const pair = parseRecommendationSizePairIn(rec.size_text);
+      if (!pair) continue;
+      const longSide = Math.max(pair.widthIn, pair.lengthIn);
+      if (directionalNeeds === "larger" && longSide >= requestedLongSideIn) {
+        return true;
+      }
+      if (directionalNeeds === "smaller" && longSide <= requestedLongSideIn) {
+        return true;
+      }
+    }
+    return false;
+  })();
+  if (directionalSignal) {
+    const parts =
+      assistant.match(/[^.!?]+[.!?]?/g)?.map((part) => part.trim()).filter(Boolean) ?? [];
+    const filtered = parts.filter((sentence) => {
+      if (hasDirectionalAlignedCard) {
+        return !/\b(don't have|do not have|don't carry|no exact|exact match(?:es)? unavailable)\b/i.test(
+          sentence
+        );
+      }
+      if (!/\b(don't have|do not have|don't carry)\b/i.test(sentence)) return true;
+      return /\bexact\b/i.test(sentence);
+    });
+    if (filtered.length > 0) {
+      assistant = filtered.join(" ").trim();
+    }
+  }
+
+  assistant = assistant
+    .replace(
+      /\bhere are in-stock options aligned to that color direction\b\.?/gi,
+      "Here are in-stock options to compare."
+    )
+    .replace(
+      /\bhere are in-stock options aligned to that style direction\b\.?/gi,
+      "Here are in-stock options to compare."
+    )
+    .replace(
+      /\bhere are in-stock options in that size direction\b\.?/gi,
+      "Here are in-stock options to compare."
+    )
+    .replace(/\bthis is the closest in-stock option right now\b\.?/gi, "")
+    .replace(/\bi would start with\b/gi, "A strong place to start is")
+    .replace(/\s+/g, " ")
+    .trim();
+
+  const cardSizes = new Set(
+    input.response.recommendations
+      .map((rec) => normalizeText(rec.size_text ?? "").replace(/\s+/g, ""))
+      .filter((value) => value.length > 0)
+  );
+  if (cardSizes.size > 0) {
+    const sentences =
+      assistant.match(/[^.!?]+[.!?]?/g)?.map((part) => part.trim()).filter(Boolean) ?? [];
+    const cleaned = sentences.filter((sentence) => {
+      const rawMatches = sentence.match(/\d+\s*'?[\d"]*\s*[x×]\s*\d+\s*'?[\d"]*/gi) ?? [];
+      if (rawMatches.length === 0) return true;
+      const normalizedMatches = rawMatches
+        .map((value) => normalizeText(value).replace(/\s+/g, ""))
+        .filter((value) => value.length > 0);
+      if (normalizedMatches.length === 0) return true;
+      const hasSupported = normalizedMatches.some((value) => cardSizes.has(value));
+      return hasSupported;
+    });
+    if (cleaned.length > 0) {
+      assistant = cleaned.join(" ").trim();
+    }
+  }
+
+  const sentenceParts =
+    assistant.match(/[^.!?]+[.!?]?/g)?.map((part) => part.trim()).filter(Boolean) ?? [];
+  if (sentenceParts.length > 4) {
+    const firstThree = sentenceParts.slice(0, 3);
+    const trailingQuestion = sentenceParts.slice(3).find((part) => part.includes("?"));
+    if (trailingQuestion) {
+      assistant = [...firstThree, trailingQuestion].join(" ").trim();
+    } else {
+      assistant = sentenceParts.slice(0, 4).join(" ").trim();
+    }
+  }
+
+  assistant = assistant.replace(/\s+/g, " ").trim();
+  assistant = assistant
+    .replace(/\beverything in stock right now is traditional\b[^.!?]*[.!?]?/gi, "")
+    .replace(/\bi don['’]t have any traditional pieces\b[^.!?]*[.!?]?/gi, "")
+    .replace(/\bit avoids traditional ornate or floral details\b[^.!?]*[.!?]?/gi, "")
+    .replace(/\bnot strictly modern\b[^.!?]*[.!?]?/gi, "")
+    .replace(/\bclosest elegant options nearby\b[^.!?]*[.!?]?/gi, "")
+    .replace(/\s+/g, " ")
+    .trim();
+  {
+    const escapedUser = input.userMessage
+      .replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
+      .trim();
+    if (escapedUser.length > 0) {
+      assistant = assistant
+        .replace(new RegExp(`^${escapedUser}[\\s:,-]*`, "i"), "")
+        .trim();
+    }
+  }
+
+  const ordinalReferenceSignal =
+    /\b(i like|i liked)\s+the\s+(first|second|third|1st|2nd|3rd)\b/i.test(
+      normalizedMessage
+    );
+  if (ordinalReferenceSignal) {
+    const parts =
+      assistant.match(/[^.!?]+[.!?]?/g)?.map((part) => part.trim()).filter(Boolean) ?? [];
+    const filtered = parts.filter(
+      (sentence) =>
+        !/\b(you(?:'re|’re| are)? drawn to|you liked|since you liked)\b/i.test(sentence)
+    );
+    if (filtered.length > 0) {
+      assistant = filtered.join(" ").trim();
+    }
+  }
+  {
+    const parts =
+      assistant.match(/[^.!?]+[.!?]?/g)?.map((part) => part.trim()).filter(Boolean) ?? [];
+    const filtered = parts.filter(
+      (sentence) => !/\b(you(?:'re|’re| are)\s+drawn\s+to)\b/i.test(sentence)
+    );
+    if (filtered.length > 0) {
+      assistant = filtered.join(" ").trim();
+    }
+  }
+
+  const budgetSignal =
+    /\b(under|below|max|maximum|budget|\$\s*\d+|\d+\s*dollars?)\b/i.test(
+      normalizedMessage
+    ) ||
+    /\b(under|below|max|maximum|budget|\$\s*\d+|\d+\s*dollars?)\b/i.test(
+      normalizedCustomerContext
+    );
+  if (budgetSignal) {
+    const parts =
+      assistant.match(/[^.!?]+[.!?]?/g)?.map((part) => part.trim()).filter(Boolean) ?? [];
+    const filtered = parts.filter(
+      (sentence) =>
+        !/\b(under\s*\$?\d+|within\s+budget|fits?\s+your\s+budget|strong\s+fits?\s+for\s+.*budget|budget|below|max(?:imum)?\b)\b/i.test(
+          sentence
+        ) && !/\$\s*\d+/.test(sentence)
+    );
+    if (filtered.length > 0) {
+      assistant = filtered.join(" ").trim();
+    } else {
+      assistant = "";
+    }
+  }
+
+  const practicalSignal =
+    /\b(kid|kids|child|children|dog|dogs|pet|pets|high traffic|durable|easy to clean|low maintenance|beach house|tough|practical)\b/i.test(
+      normalizedMessage
+    ) ||
+    /\b(kid|kids|child|children|dog|dogs|pet|pets|high traffic|durable|easy to clean|low maintenance|beach house|tough|practical)\b/i.test(
+      normalizedCustomerContext
+    );
+  if (practicalSignal) {
+    const parts =
+      assistant.match(/[^.!?]+[.!?]?/g)?.map((part) => part.trim()).filter(Boolean) ?? [];
+    const filtered = parts.filter(
+      (sentence) =>
+        !/\b(hide stain|hides stains|mask wear|handle traffic|withstand traffic|easy to clean|durable|low maintenance)\b/i.test(
+          sentence
+        )
+    );
+    if (filtered.length > 0) {
+      assistant = filtered.join(" ").trim();
+    }
+  }
+
+  const colorDirectionSignal =
+    (input.constraints.colors?.length ?? 0) > 0 ||
+    (input.constraints.avoid_preferences?.colors?.length ?? 0) > 0 ||
+    /\b(red|rust|blue|teal|green|gold|pink|purple|black|white|ivory|gray|brown|neutral|beige|dark|light|color)\b/i.test(
+      normalizedMessage
+    );
+  if (colorDirectionSignal) {
+    const parts =
+      assistant.match(/[^.!?]+[.!?]?/g)?.map((part) => part.trim()).filter(Boolean) ?? [];
+    const filtered = parts.filter(
+      (sentence) => {
+        if (
+          /\b(definitely|exactly|guaranteed|confirmed)\b[^.!?]{0,24}\b(red|rust|blue|teal|green|gold|pink|purple|neutral|beige|dark|light)\b/i.test(
+            sentence
+          )
+        ) {
+          return false;
+        }
+        if (
+          /\b(avoid|no|not|without|leaning|direction|palette|tone)\b/i.test(sentence) &&
+          /\b(red|rust|blue|teal|green|gold|pink|purple|neutral|beige|dark|light|ivory|white|gray|brown)\b/i.test(
+            sentence
+          )
+        ) {
+          return false;
+        }
+        return true;
+      }
+    );
+    if (filtered.length > 0) {
+      assistant = filtered.join(" ").trim();
+    }
+
+    const unsupportedColorClaimPatterns = [
+      /\beverything in stock right now is traditional\b[^.!?]*[.!?]?/gi,
+      /\bwithin your preferred size range and avoiding\b[^.!?]*[.!?]?/gi,
+      /\bis modern style an absolute must\b[^.!?]*[.!?]?/gi,
+    ];
+    for (const pattern of unsupportedColorClaimPatterns) {
+      assistant = assistant.replace(pattern, "").trim();
+    }
+
+    const colorLead =
+      language === "es"
+        ? "No puedo confirmar el balance exacto de color solo con el resumen de la tarjeta, asi que te muestro las opciones mas cercanas para comparar."
+        : "I can’t confirm exact color balance from card summaries alone, so I’m showing the closest in-stock options to compare.";
+    const normalizedAssistant = normalizeText(assistant);
+    if (
+      !/\b(color balance|card summaries|closest in-stock options to compare|balance exacto de color)\b/i.test(
+        normalizedAssistant
+      )
+    ) {
+      assistant = `${colorLead} ${assistant}`.trim();
+    }
+  }
+
+  if (budgetSignal) {
+    const budgetLead =
+      language === "es"
+        ? "Para presupuesto exacto, el equipo de tienda confirma precio final en persona."
+        : "For exact budget confirmation, store staff confirms final pricing in person.";
+    assistant = `${budgetLead} ${assistant}`.trim();
+  }
+
+  let fallbackQuestion: string | null = null;
+  if (!assistant.includes("?")) {
+    fallbackQuestion = buildRecommendationNextStepQuestion({
+      constraints: input.constraints,
+      userMessage: input.userMessage,
+      discoveryMode: input.discoveryMode,
+      language,
+    });
+    assistant = `${assistant} ${fallbackQuestion}`.trim();
+  }
+
+  let clampedAssistant = clampAssistantMessage(assistant);
+  if (fallbackQuestion && !clampedAssistant.includes("?")) {
+    const maxBaseLength = Math.max(
+      0,
+      MAX_ASSISTANT_MESSAGE_CHARS - fallbackQuestion.length - 1
+    );
+    const base = toPlainText(clampedAssistant)
+      .slice(0, maxBaseLength)
+      .replace(/[,:;.\-\s]+$/g, "")
+      .trim();
+    clampedAssistant = `${base} ${fallbackQuestion}`.trim();
+  }
+
+  return {
+    ...input.response,
+    assistant_message: clampAssistantMessage(clampedAssistant),
+  };
 }
 
 function hasSpanishSignal(text: string): boolean {
@@ -703,187 +1117,44 @@ function buildFallbackLeadIn(
   userMessage: string
 ): string {
   const language = detectResponseLanguage(userMessage);
-  const prettify = (value: string) =>
-    value
-      .split(" ")
-      .filter(Boolean)
-      .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-      .join(" ");
-  const styles = (constraints.styles ?? []).map(prettify);
-  const colors = (constraints.colors ?? []).map(prettify);
   const trimmedMessage = normalizeText(userMessage).toLowerCase();
-  const hasSimpleFollowupAck =
-    /^(yes|yeah|yep|sure|please|ok|okay|show me|more|more please|sounds good)\b/.test(
-      trimmedMessage
-    );
-  const hasPracticalNeed =
-    /\b(kid|kids|child|children|dog|dogs|pet|pets|high traffic|durable|easy to clean|low maintenance|beach house)\b/i.test(
-      trimmedMessage
-    );
-  const hasMultiRoomSignal =
-    /\bbedroom\b/.test(trimmedMessage) &&
-    /\b(entryway|entry|hallway|living room|dining room|kitchen)\b/.test(
-      trimmedMessage
-    );
-  const isFirstTimer =
-    /\b(never bought|first time|don't know where to start|dont know where to start|overwhelmed)\b/i.test(
-      trimmedMessage
-    );
-  const hasNeutralDirection =
-    /\b(neutral|goes with everything|versatile|low risk|subtle)\b/i.test(
-      trimmedMessage
-    );
-  const wantsDifferentColorDirection =
-    /\b(not that color|different color|another color|new color direction|less light colors)\b/i.test(
-      trimmedMessage
-    );
-  const wantsLarger =
-    /\b(larger|bigger|size up|slightly larger|more oversized)\b/i.test(trimmedMessage);
-  const wantsSmaller =
-    /\b(smaller|shorter|size down|slightly shorter|a bit shorter)\b/i.test(
-      trimmedMessage
-    );
-  const asksClosestIfExactUnavailable =
-    /\b(if exact isn't available|if exact is not available|if exact isnt available|show closest)\b/i.test(
-      trimmedMessage
-    );
-
-  if (constraints.shape === "runner") {
-    return language === "es"
-      ? "Buscas un pasillero, asi que aqui tienes las piezas mas cercanas disponibles ahora:"
-      : "You asked for a runner, so these are the closest available pieces in stock right now:";
-  }
-  if (constraints.shape === "round_oval") {
-    return language === "es"
-      ? "Buscas una pieza redonda u ovalada, asi que aqui tienes las opciones mas cercanas disponibles:"
-      : "You asked for a round or oval piece, so these are the closest available options right now:";
-  }
-  if (constraints.size) {
-    if (hasMultiRoomSignal) {
-      return language === "es"
-        ? "Perfecto, empecemos con una base para el dormitorio y despues te muestro opciones mas pequenas para la entrada:"
-        : "I’ll start with bedroom-friendly anchor options first, then we can pivot to entryway-size pieces next:";
-    }
-    if (wantsLarger) {
-      return language === "es"
-        ? `Perfecto, pides opciones mas grandes que ${formatSizePair(
-            constraints.size.widthIn,
-            constraints.size.lengthIn
-          )}; te muestro las piezas mas grandes disponibles:`
-        : `You asked for larger than ${formatSizePair(
-            constraints.size.widthIn,
-            constraints.size.lengthIn
-          )}, so I focused on the next biggest options we have:`;
-    }
-    if (wantsSmaller) {
-      return language === "es"
-        ? `Perfecto, pides opciones mas pequenas que ${formatSizePair(
-            constraints.size.widthIn,
-            constraints.size.lengthIn
-          )}; te muestro las mas cercanas en ese rango:`
-        : `You asked for slightly smaller than ${formatSizePair(
-            constraints.size.widthIn,
-            constraints.size.lengthIn
-          )}, so I focused on the closest options in that direction:`;
-    }
-    if (asksClosestIfExactUnavailable) {
-      return language === "es"
-        ? `Perfecto, priorice la medida mas cercana a ${formatSizePair(
-            constraints.size.widthIn,
-            constraints.size.lengthIn
-          )} para que compares rapido:`
-        : `I prioritized the closest sizes around ${formatSizePair(
-            constraints.size.widthIn,
-            constraints.size.lengthIn
-          )} so you can compare quickly:`;
-    }
-    if (hasPracticalNeed) {
-      return language === "es"
-        ? `Para una opcion practica y resistente cerca de ${formatSizePair(
-            constraints.size.widthIn,
-            constraints.size.lengthIn
-          )}, estas son las mejores alternativas disponibles ahora:`
-        : `For practical daily use near ${formatSizePair(
-            constraints.size.widthIn,
-            constraints.size.lengthIn
-          )}, I pulled the strongest available options to compare:`;
-    }
-    return language === "es"
-      ? `Para una medida cercana a ${formatSizePair(
-          constraints.size.widthIn,
-          constraints.size.lengthIn
-        )}, te muestro las opciones disponibles mas cercanas para comparar rapido:`
-      : `I focused on the closest in-stock options around ${formatSizePair(
-          constraints.size.widthIn,
-          constraints.size.lengthIn
-        )} so you can compare quickly:`;
-  }
-  if (styles.length > 0 && colors.length > 0) {
-    return language === "es"
-      ? `Para ${styles.join(", ")} con tonos ${colors.join(
-          ", "
-        )}, estas son las mejores opciones disponibles ahora:`
-      : `For ${styles.join(", ")} with ${colors.join(
-          ", "
-        )} tones, these are the strongest available matches right now:`;
-  }
-  if (styles.length > 0) {
-    return language === "es"
-      ? `Aqui tienes nuestras piezas ${styles.join(", ")} disponibles ahora:`
-      : `I focused on ${styles.join(", ")} pieces currently in stock:`;
-  }
-  if (colors.length > 0) {
-    if (hasNeutralDirection) {
-      return language === "es"
-        ? "Perfecto, voy con una direccion neutra y versatil para que combine facilmente con distintos espacios:"
-        : "I’ll keep this in a neutral, versatile direction that can blend easily with different spaces:";
-    }
-    return language === "es"
-      ? `Aqui tienes opciones con presencia fuerte de ${colors.join(", ")}:`
-      : `You asked for ${colors.join(", ")} tones, so I prioritized the strongest matches in stock:`;
-  }
-
-  const looksLikeDiscoveryBrowse =
+  const hasDiscoverySignal =
     /\b(show me what you have|show me what you've got|just browsing|just looking|surprise me|open to anything|explore|range)\b/i.test(
       trimmedMessage
     );
-  if (looksLikeDiscoveryBrowse) {
-    return language === "es"
-      ? "Como estas explorando opciones, te prepare una seleccion variada para que comparemos direccion:"
-      : "You are browsing openly, so this set is intentionally varied to help you react to different directions:";
-  }
-  if (hasSimpleFollowupAck) {
-    return language === "es"
-      ? "Perfecto, aqui tienes las mejores opciones basadas en lo que me has contado:"
-      : "Here are the best options based on what you've told me:";
-  }
-  if (trimmedMessage.length > 0) {
-    if (isFirstTimer) {
-      return language === "es"
-        ? "Perfecto, empecemos facil: te muestro una seleccion clara para comparar sin complicarte."
-        : "Clear starting point: I’ll keep this simple with a clear set you can quickly compare.";
+  const hasFollowupSignal =
+    /\b(show me more|more like|another|larger|bigger|smaller|shorter|closest)\b/i.test(
+      trimmedMessage
+    );
+  const hasConstraintSignal = Boolean(
+    constraints.size ||
+      constraints.shape ||
+      (constraints.styles?.length ?? 0) > 0 ||
+      (constraints.colors?.length ?? 0) > 0
+  );
+
+  if (language === "es") {
+    if (hasDiscoverySignal) {
+      return "Aqui tienes una seleccion variada disponible ahora para comparar direcciones:";
     }
-    if (wantsDifferentColorDirection) {
-      return language === "es"
-        ? "Entendido, mantenemos la misma direccion general pero cambiando la paleta de color:"
-        : "Understood, we’ll keep a similar direction but shift the color palette:";
+    if (hasFollowupSignal || hasConstraintSignal) {
+      return "Aqui tienes las opciones disponibles mas cercanas para comparar ahora:";
     }
-    if (hasPracticalNeed) {
-      return language === "es"
-        ? "Con tus necesidades practicas en mente, aqui tienes opciones resistentes y versatiles para comparar:"
-        : "With your practical needs in mind, here are durable options worth comparing:";
-    }
-    return language === "es"
-      ? "Con lo que me compartiste, aqui tienes una seleccion variada para comparar estilos:"
-      : "I focused this set so you can compare direction quickly:";
+    return "Aqui tienes una seleccion de piezas disponibles para revisar:";
   }
-  return language === "es"
-    ? "Aqui tienes una seleccion solida de opciones disponibles:"
-    : "Here is a strong set of available options:";
+
+  if (hasDiscoverySignal) {
+    return "Here is a varied in-stock set so you can compare different directions:";
+  }
+  if (hasFollowupSignal || hasConstraintSignal) {
+    return "Here are in-stock options to compare now:";
+  }
+  return "Here is a set of in-stock options to review:";
 }
 
 function applyConstraintMismatchDisclosure(input: {
   response: RecommendationResponse;
+  constraints: HardConstraints;
   constraintMismatch?:
     | {
         expanded_from_zero_match: boolean;
@@ -900,13 +1171,39 @@ function applyConstraintMismatchDisclosure(input: {
     return input.response;
   }
 
+  const unmet = new Set(mismatch.unmet_constraints);
+  if (
+    unmet.has("size") &&
+    input.constraints.size &&
+    hasExactSizeRecommendation(input.response.recommendations, input.constraints)
+  ) {
+    unmet.delete("size");
+  }
+  if (unmet.size === 0) {
+    return input.response;
+  }
+
   const current = toPlainText(input.response.assistant_message);
-  const hint = toPlainText(
-    mismatch.disclosure_hint ??
-      "We do not have an exact match for that request right now."
-  );
+  let hint =
+    "I’m showing in-stock options to compare what is available now.";
+  if (
+    unmet.has("size") &&
+    input.constraints.size &&
+    Math.max(input.constraints.size.widthIn, input.constraints.size.lengthIn) >
+      MAX_REASONABLE_REQUEST_LONG_SIDE_IN
+  ) {
+    hint =
+      "That requested scale is beyond what we currently carry, so I’m showing the largest in-stock options available.";
+  } else if (unmet.has("practical")) {
+    hint =
+      "I know practical use is important. I don’t have enough in-stock options that clearly match every practical detail, so I’m showing the closest available set to compare.";
+  }
   if (!hint) {
     return input.response;
+  }
+  if (unmet.has("colors")) {
+    hint =
+      "I can’t verify exact color balance from card summaries alone, so I’m showing the closest in-stock options to compare side by side.";
   }
 
   const normalizedCurrent = current.toLowerCase();
@@ -930,146 +1227,6 @@ function applyConstraintMismatchDisclosure(input: {
   return {
     ...input.response,
     assistant_message: `${hint} ${current}`.trim(),
-  };
-}
-
-function isWeakRecommendationMessage(message: string): boolean {
-  const normalized = toPlainText(message).toLowerCase();
-  if (!normalized) return true;
-  if (normalized.length < 36) return true;
-  return (
-    normalized.startsWith("for around ") ||
-    normalized.startsWith("from your request") ||
-    normalized.startsWith("here are the best options based on what you've told me")
-  );
-}
-
-function buildRecommendationLeadFromConstraints(input: {
-  constraints: HardConstraints;
-  userMessage: string;
-  discoveryMode: boolean;
-  customerContext?: string[];
-}): string {
-  const language = detectResponseLanguage(input.userMessage);
-  const practicalSignal =
-    /\b(kid|kids|child|children|dog|dogs|pet|pets|high traffic|durable|easy to clean|beach house)\b/i.test(
-      normalizeText(input.userMessage)
-    ) ||
-    (input.customerContext ?? []).some((fact) =>
-      /\bpractical\b/i.test(normalizeText(fact))
-    );
-  const firstTimerSignal =
-    /\b(never bought|first time|don't know where to start|dont know where to start|overwhelmed)\b/i.test(
-      normalizeText(input.userMessage)
-    );
-  const multiRoomSignal =
-    /\bbedroom\b/i.test(normalizeText(input.userMessage)) &&
-    /\b(entryway|entry|hallway|living room|dining room|kitchen)\b/i.test(
-      normalizeText(input.userMessage)
-    );
-  const lessBusySignal =
-    /\b(less busy|not too busy|cleaner|understated|calmer)\b/i.test(
-      normalizeText(input.userMessage)
-    );
-  const style = (input.constraints.styles ?? [])[0];
-  const color = (input.constraints.colors ?? [])[0];
-  const size = input.constraints.size
-    ? formatSizePair(input.constraints.size.widthIn, input.constraints.size.lengthIn)
-    : null;
-
-  if (input.discoveryMode) {
-    return language === "es"
-      ? "Perfecto, aqui tienes una seleccion cuidada para comparar direcciones rapidamente."
-      : "This spread is intentionally varied so you can react to different directions quickly.";
-  }
-  if (firstTimerSignal) {
-    return language === "es"
-      ? "Perfecto, empecemos facil: te muestro pocas opciones claras para que sea sencillo comparar."
-      : "Perfect, let’s start simple with a small set of clear options so this is easy to compare.";
-  }
-  if (multiRoomSignal) {
-    return language === "es"
-      ? "Perfecto, empiezo con opciones para dormitorio y luego pasamos a alternativas mas pequenas para la entrada."
-      : "I’ll start with bedroom-friendly options first, then we can pivot to smaller entryway pieces.";
-  }
-  if (practicalSignal && size) {
-    return language === "es"
-      ? `Perfecto, para un uso diario cerca de ${size}, priorice opciones mas resistentes y faciles de mantener dentro de lo disponible.`
-      : `For practical daily use around ${size}, I prioritized the most durable, easier-care options available right now.`;
-  }
-  if (lessBusySignal) {
-    return language === "es"
-      ? "Perfecto, voy con una direccion mas limpia y menos cargada para que compares mejor."
-      : "I’m leaning cleaner and less busy so you can compare a calmer direction.";
-  }
-  if (style && size) {
-    return language === "es"
-      ? `Perfecto, para una direccion ${style} en torno a ${size}, estas son las mejores coincidencias disponibles ahora.`
-      : `For a ${style} look around ${size}, these are the best available matches right now.`;
-  }
-  if (style) {
-    return language === "es"
-      ? `Perfecto, para una direccion ${style}, estas son las mejores piezas disponibles ahora.`
-      : `For a ${style} look, these are the strongest pieces available right now.`;
-  }
-  if (color) {
-    return language === "es"
-      ? `Perfecto, para una direccion de color ${color}, estas piezas se alinean mejor con lo que pediste.`
-      : "These pieces align best with the color direction you asked for.";
-  }
-  if (size) {
-    return language === "es"
-      ? `Perfecto, el objetivo es un tamano cercano a ${size}; estas son las mejores opciones disponibles ahora.`
-      : `Your target is around ${size}, and these are the best options available right now.`;
-  }
-  return language === "es"
-    ? "Perfecto, estas son las opciones mas fuertes disponibles ahora segun lo que me compartiste."
-    : "These are the strongest available options based on what you shared.";
-}
-
-function rewriteWeakRecommendationMessage(input: {
-  response: RecommendationResponse;
-  constraints: HardConstraints;
-  userMessage: string;
-  discoveryMode: boolean;
-  customerContext?: string[];
-}): RecommendationResponse {
-  if (input.response.mode !== "recommendations") {
-    return input.response;
-  }
-  const currentAssistant = toPlainText(input.response.assistant_message).toLowerCase();
-  const hasExplicitMismatchDisclosure =
-    /\b(don't have|do not have|don't carry|do not carry|largest|exact match)\b/i.test(
-      currentAssistant
-    );
-  if (hasExplicitMismatchDisclosure) {
-    return input.response;
-  }
-  if (!isWeakRecommendationMessage(input.response.assistant_message)) {
-    return input.response;
-  }
-  const lead = buildRecommendationLeadFromConstraints({
-    constraints: input.constraints,
-    userMessage: input.userMessage,
-    discoveryMode: input.discoveryMode,
-    customerContext: input.customerContext,
-  });
-  const top = input.response.recommendations[0];
-  const topReason = top?.match_reasons?.[0] ? toPlainText(top.match_reasons[0]) : "";
-  const detail =
-    top && topReason
-      ? `Top pick: ${toPlainText(top.title)} — ${topReason}.`
-      : "";
-  const invite = input.discoveryMode
-    ? ""
-    : detectResponseLanguage(input.userMessage) === "es"
-      ? "Si algo te llama la atencion, te muestro mas opciones en esa misma direccion."
-      : "If one stands out, I can show more in that same direction.";
-  const rewritten = [lead, detail, invite].filter(Boolean).join(" ").trim();
-  if (!rewritten) return input.response;
-  return {
-    ...input.response,
-    assistant_message: clampAssistantMessage(rewritten),
   };
 }
 
@@ -1097,25 +1254,19 @@ function enforcePracticalTruthMessage(input: {
     /\b(limited|closest|exact match|don't have|do not have|available alternatives)\b/i.test(
       assistant
     );
-  if (alreadyHonestAboutLimits && hasPracticalLanguage) {
+  if (alreadyHonestAboutLimits || hasPracticalLanguage) {
     return input.response;
   }
 
   const language = detectResponseLanguage(input.userMessage);
   const lead =
     language === "es"
-      ? "Para uso diario intenso, las opciones realmente faciles de mantener son limitadas, asi que te muestro las alternativas mas practicas disponibles."
-      : "For heavy daily use, truly easy-care options are limited, so I’m showing the most practical alternatives currently available.";
-  const practicalAddOn =
-    language === "es"
-      ? "Priorizo piezas mas faciles de mantener y que disimulan mejor el uso diario."
-      : "I prioritized options that are easier to maintain and better at hiding day-to-day wear.";
+      ? "Si el uso diario es clave, puedo priorizar en la siguiente ronda opciones mas practicas y faciles de mantener."
+      : "If daily wear is the priority, I can prioritize more practical, lower-maintenance options in the next pass.";
 
   return {
     ...input.response,
-    assistant_message: clampAssistantMessage(
-      `${lead} ${assistant} ${hasPracticalLanguage ? "" : practicalAddOn}`.trim()
-    ),
+    assistant_message: clampAssistantMessage(`${lead} ${assistant}`.trim()),
   };
 }
 
@@ -1136,7 +1287,9 @@ function enforceImpossibleSizeDisclosure(input: {
 
   const assistant = toPlainText(input.response.assistant_message);
   const hasDisclosure =
-    /\b(don't have|do not have|largest|closest)\b/i.test(assistant);
+    /\b(don't have|do not have|don't carry|largest|closest|exact match)\b/i.test(
+      assistant
+    );
   if (hasDisclosure) {
     return input.response;
   }
@@ -1210,13 +1363,12 @@ function getSizeDistanceIn(rug: InventoryRug, constraints: HardConstraints): num
 
 function buildSpecificRugReasons(rug: InventoryRug): string[] {
   const reasons: string[] = [];
-  const description = normalizeText(rug.ai_description ?? "");
-
-  if (description) {
-    reasons.push(description);
-  } else {
-    reasons.push("New arrival — ask staff for details about this rug.");
-  }
+  const fields = effectiveFields(rug);
+  const cardSize = sizeText(rug);
+  if (cardSize) reasons.push(`Shown size: ${cardSize}.`);
+  if (fields.style) reasons.push(`Style direction: ${fields.style}.`);
+  if (fields.origin) reasons.push(`Origin: ${fields.origin}.`);
+  if (reasons.length === 0) reasons.push("In-stock option ready to review in detail.");
 
   return uniqueCompactList(reasons, 3);
 }
@@ -1245,13 +1397,11 @@ function buildGroundedMatchReasons(
     (token) => token && structuredText.includes(token)
   );
   if (matchedStructuredSignal) {
-    reasons.push(
-      `Strong match on your stated preference around "${matchedStructuredSignal}".`
-    );
+    reasons.push("Strong match for your stated direction.");
   } else {
     const matchedTextSignal = signals.find((token) => token && rugText.includes(token));
     if (matchedTextSignal) {
-      reasons.push(`Matches your stated preference around "${matchedTextSignal}".`);
+      reasons.push("Aligned with your stated direction.");
     }
   }
 
@@ -1366,30 +1516,58 @@ function fallbackRecommendations(
 ): RecommendationResponse {
   // If OpenAI fails, we still return a usable response so the API never
   // breaks the frontend flow.
-  const recommendations = inventory.slice(0, MAX_RECOMMENDATIONS).map((rug) => {
-    const confidence = buildConfidence(rug, constraints, userMessage);
-    const fields = effectiveFields(rug);
-    return {
-      rug_id: rug.id,
-      sku: null,
-      title: rugLabel(rug),
-      origin: fields.origin ?? null,
-      style: fields.style ?? null,
-      mood: fields.mood ?? null,
-      primary_image_url: toImageUrl(rug),
-      primary_image_caption: toImageCaption(),
-      size_text: sizeText(rug),
-      match_reasons: buildGroundedMatchReasons(
-        rug,
-        constraints,
-  userMessage
-      ),
-      confidence: confidence.score,
-      confidence_tier: confidence.tier,
-      confidence_factors: confidence.factors,
-      why_not: buildWhyNot(rug, constraints, userMessage),
-    };
+  const shouldPrioritizeLargestAlternatives = Boolean(
+    promptContext?.constraint_mismatch?.expanded_from_zero_match &&
+      promptContext.constraint_mismatch.unmet_constraints.includes("size") &&
+      constraints.size &&
+      Math.max(constraints.size.widthIn, constraints.size.lengthIn) >
+        MAX_REASONABLE_REQUEST_LONG_SIDE_IN
+  );
+
+  const inventoryForFallback = shouldPrioritizeLargestAlternatives
+    ? [...inventory].sort((a, b) => {
+        const areaA =
+          typeof a.width_total_in === "number" && typeof a.length_total_in === "number"
+            ? a.width_total_in * a.length_total_in
+            : 0;
+        const areaB =
+          typeof b.width_total_in === "number" && typeof b.length_total_in === "number"
+            ? b.width_total_in * b.length_total_in
+            : 0;
+        return areaB - areaA;
+      })
+    : inventory;
+
+  const shapedFallback = shapeCandidatesForAI(inventoryForFallback, {
+    maxCandidates: MAX_RECOMMENDATIONS,
+    constraints,
+    userMessage,
+    customerContext: promptContext?.chat_context?.customer_context ?? [],
+    discoveryMode: Boolean(promptContext?.discovery_mode),
   });
+
+  const recommendations = (shapedFallback.length > 0 ? shapedFallback : inventoryForFallback)
+    .slice(0, MAX_RECOMMENDATIONS)
+    .map((rug) => {
+      const confidence = buildConfidence(rug, constraints, userMessage);
+      const fields = effectiveFields(rug);
+      return {
+        rug_id: rug.id,
+        sku: null,
+        title: rugLabel(rug),
+        origin: fields.origin ?? null,
+        style: fields.style ?? null,
+        mood: fields.mood ?? null,
+        primary_image_url: toImageUrl(rug),
+        primary_image_caption: toImageCaption(),
+        size_text: sizeText(rug),
+        match_reasons: buildGroundedMatchReasons(rug, constraints, userMessage),
+        confidence: confidence.score,
+        confidence_tier: confidence.tier,
+        confidence_factors: confidence.factors,
+        why_not: buildWhyNot(rug, constraints, userMessage),
+      };
+    });
 
   const mismatchDisclosure = toPlainText(
     promptContext?.constraint_mismatch?.expanded_from_zero_match
@@ -1682,6 +1860,7 @@ function sanitizeResponse(
   input?: {
     discoveryMode?: boolean;
     customerContext?: string[];
+    recentlyShownIds?: string[];
     constraintMismatch?:
       | {
           expanded_from_zero_match: boolean;
@@ -1734,6 +1913,30 @@ function sanitizeResponse(
   let normalizedRecommendations =
     disambiguateDuplicateRecommendationTitles(recommendations);
 
+  const exactFallbackConditional =
+    /\bif exact(?:ly)? (?:isn'?t|is not) available\b/i.test(
+      normalizeText(userMessage)
+    ) &&
+    Boolean(constraints.size);
+  if (exactFallbackConditional && response.mode === "recommendations" && constraints.size) {
+    const exactInventory = inventory.filter((rug) =>
+      matchesExactRequestedSize(rug, constraints)
+    );
+    if (exactInventory.length > 0 && normalizedRecommendations.length < Math.min(3, exactInventory.length)) {
+      const exactFallback = fallbackRecommendations(
+        exactInventory,
+        constraints,
+        userMessage,
+        undefined
+      );
+      const seen = new Set(normalizedRecommendations.map((rec) => rec.rug_id));
+      const extras = exactFallback.recommendations.filter((rec) => !seen.has(rec.rug_id));
+      normalizedRecommendations = disambiguateDuplicateRecommendationTitles(
+        [...normalizedRecommendations, ...extras].slice(0, Math.min(3, exactInventory.length))
+      );
+    }
+  }
+
   if (input?.discoveryMode && response.mode === "recommendations") {
     const minimumDiscoveryCount =
       inventory.length >= 4 ? Math.min(6, inventory.length) : inventory.length;
@@ -1769,18 +1972,13 @@ function sanitizeResponse(
         constraints.strictness?.colors === "must"
     );
     const canBackfillWithoutSilentExpansion =
-      !hasStrictMustConstraint || Boolean(input?.discoveryMode);
-    const canBackfillStrictMismatch =
-      hasStrictMustConstraint &&
-      Boolean(input?.constraintMismatch?.expanded_from_zero_match);
-
-    const minimumRecommendationCount = canBackfillStrictMismatch
-      ? Math.min(3, inventory.length)
-      : inventory.length >= 4
-        ? Math.min(6, inventory.length)
-        : inventory.length;
+      (!hasStrictMustConstraint && !input?.constraintMismatch?.expanded_from_zero_match) ||
+      Boolean(input?.discoveryMode);
+    const minimumRecommendationCount = inventory.length >= 4
+      ? Math.min(6, inventory.length)
+      : inventory.length;
     if (
-      (canBackfillWithoutSilentExpansion || canBackfillStrictMismatch) &&
+      canBackfillWithoutSilentExpansion &&
       normalizedRecommendations.length < Math.min(4, minimumRecommendationCount) &&
       inventory.length > normalizedRecommendations.length
     ) {
@@ -1817,7 +2015,62 @@ function sanitizeResponse(
   if (response.mode === "no_match" && inventory.length > 0) {
     const repaired = enforceImpossibleSizeDisclosure({
       response: enforcePracticalTruthMessage({
-        response: rewriteWeakRecommendationMessage({
+        response: applyConstraintMismatchDisclosure({
+          response: applyTonePolish({
+            ...fallbackRecommendations(
+              inventory,
+              constraints,
+              userMessage,
+              undefined
+            ),
+            notes: "Adjusted invalid no_match from model output.",
+          }),
+          constraints,
+          constraintMismatch: input?.constraintMismatch,
+        }),
+        userMessage,
+      }),
+      userMessage,
+    });
+    return enforceDiscoveryQuestion(
+      repaired,
+      Boolean(input?.discoveryMode),
+      input?.customerContext,
+      userMessage,
+      constraints,
+      input?.recentlyShownIds
+    );
+  }
+
+  if (response.mode === "recommendations" && normalizedRecommendations.length === 0) {
+    const repaired = enforceImpossibleSizeDisclosure({
+      response: enforcePracticalTruthMessage({
+        response: applyConstraintMismatchDisclosure({
+          response: applyTonePolish(
+            fallbackRecommendations(inventory, constraints, userMessage, undefined)
+          ),
+          constraints,
+          constraintMismatch: input?.constraintMismatch,
+        }),
+        userMessage,
+      }),
+      userMessage,
+    });
+    return enforceDiscoveryQuestion(
+      repaired,
+      Boolean(input?.discoveryMode),
+      input?.customerContext,
+      userMessage,
+      constraints,
+      input?.recentlyShownIds
+    );
+  }
+
+  // Enforce mode-specific response contract for consistency with docs/schema intent.
+  if (response.mode === "clarifying_question") {
+    if (inventory.length > 0) {
+      const repaired = enforceImpossibleSizeDisclosure({
+        response: enforcePracticalTruthMessage({
           response: applyConstraintMismatchDisclosure({
             response: applyTonePolish({
               ...fallbackRecommendations(
@@ -1826,58 +2079,24 @@ function sanitizeResponse(
                 userMessage,
                 undefined
               ),
-              notes: "Adjusted invalid no_match from model output.",
+              notes: "Adjusted clarifying_question to recommendations.",
             }),
+            constraints,
             constraintMismatch: input?.constraintMismatch,
           }),
-          constraints,
           userMessage,
-          discoveryMode: Boolean(input?.discoveryMode),
-          customerContext: input?.customerContext,
         }),
         userMessage,
-      }),
-      userMessage,
-    });
-    return enforceDiscoveryQuestion(
-      repaired,
-      Boolean(input?.discoveryMode),
-      input?.customerContext,
-      userMessage,
-      constraints
-    );
-  }
-
-  if (response.mode === "recommendations" && normalizedRecommendations.length === 0) {
-    const repaired = enforceImpossibleSizeDisclosure({
-      response: enforcePracticalTruthMessage({
-        response: rewriteWeakRecommendationMessage({
-          response: applyConstraintMismatchDisclosure({
-            response: applyTonePolish(
-              fallbackRecommendations(inventory, constraints, userMessage, undefined)
-            ),
-            constraintMismatch: input?.constraintMismatch,
-          }),
-          constraints,
-          userMessage,
-          discoveryMode: Boolean(input?.discoveryMode),
-          customerContext: input?.customerContext,
-        }),
+      });
+      return enforceDiscoveryQuestion(
+        repaired,
+        Boolean(input?.discoveryMode),
+        input?.customerContext,
         userMessage,
-      }),
-      userMessage,
-    });
-    return enforceDiscoveryQuestion(
-      repaired,
-      Boolean(input?.discoveryMode),
-      input?.customerContext,
-      userMessage,
-      constraints
-    );
-  }
-
-  // Enforce mode-specific response contract for consistency with docs/schema intent.
-  if (response.mode === "clarifying_question") {
+        constraints,
+        input?.recentlyShownIds
+      );
+    }
     const normalizedQuestions = cappedQuestions.filter((q) => q.trim().length > 0);
     if (normalizedQuestions.length === 0) {
       return enforceDiscoveryQuestion(
@@ -1885,12 +2104,14 @@ function sanitizeResponse(
           response: applyTonePolish(
             fallbackRecommendations(inventory, constraints, userMessage, undefined)
           ),
+          constraints,
           constraintMismatch: input?.constraintMismatch,
         }),
         Boolean(input?.discoveryMode),
         input?.customerContext,
         userMessage,
-        constraints
+        constraints,
+        input?.recentlyShownIds
       );
     }
     return enforceDiscoveryQuestion(
@@ -1902,7 +2123,8 @@ function sanitizeResponse(
       Boolean(input?.discoveryMode),
       input?.customerContext,
       userMessage,
-      constraints
+      constraints,
+      input?.recentlyShownIds
     );
   }
 
@@ -1916,7 +2138,8 @@ function sanitizeResponse(
       Boolean(input?.discoveryMode),
       input?.customerContext,
       userMessage,
-      constraints
+      constraints,
+      input?.recentlyShownIds
     );
   }
 
@@ -1933,12 +2156,14 @@ function sanitizeResponse(
             ),
             notes: "Adjusted invalid disambiguation from model output.",
           }),
+          constraints,
           constraintMismatch: input?.constraintMismatch,
         }),
         Boolean(input?.discoveryMode),
         input?.customerContext,
         userMessage,
-        constraints
+        constraints,
+        input?.recentlyShownIds
       );
     }
     return enforceDiscoveryQuestion(
@@ -1950,25 +2175,21 @@ function sanitizeResponse(
       Boolean(input?.discoveryMode),
       input?.customerContext,
       userMessage,
-      constraints
+      constraints,
+      input?.recentlyShownIds
     );
   }
 
   const repaired = enforceImpossibleSizeDisclosure({
     response: enforcePracticalTruthMessage({
-      response: rewriteWeakRecommendationMessage({
-        response: applyConstraintMismatchDisclosure({
-          response: applyTonePolish({
-            ...response,
-            questions: [],
-            recommendations: normalizedRecommendations,
-          }),
-          constraintMismatch: input?.constraintMismatch,
+      response: applyConstraintMismatchDisclosure({
+        response: applyTonePolish({
+          ...response,
+          questions: [],
+          recommendations: normalizedRecommendations,
         }),
         constraints,
-        userMessage,
-        discoveryMode: Boolean(input?.discoveryMode),
-        customerContext: input?.customerContext,
+        constraintMismatch: input?.constraintMismatch,
       }),
       userMessage,
     }),
@@ -1979,7 +2200,8 @@ function sanitizeResponse(
     Boolean(input?.discoveryMode),
     input?.customerContext,
     userMessage,
-    constraints
+    constraints,
+    input?.recentlyShownIds
   );
 }
 
@@ -1999,7 +2221,7 @@ export async function rankAndExplain(
   if (inventory.length === 0) {
     if (trace) {
       trace.called = false;
-      trace.model = OPENAI_CHAT_MODEL;
+      trace.model = RECOMMENDATION_MODEL;
       trace.prompt_layers = [];
       trace.request_payload = null;
       trace.response_status = null;
@@ -2047,7 +2269,7 @@ export async function rankAndExplain(
   ) {
     if (trace) {
       trace.called = false;
-      trace.model = OPENAI_CHAT_MODEL;
+      trace.model = RECOMMENDATION_MODEL;
       trace.prompt_layers = [];
       trace.request_payload = null;
       trace.response_status = null;
@@ -2116,7 +2338,7 @@ export async function rankAndExplain(
   const requestInput = groupPromptSectionsByRole(promptSections);
 
   const requestPayload = {
-    model: OPENAI_CHAT_MODEL,
+    model: RECOMMENDATION_MODEL,
     input: requestInput,
     max_output_tokens: getMaxOutputTokens("recommendation"),
     text: {
@@ -2132,7 +2354,7 @@ export async function rankAndExplain(
 
   if (trace) {
     trace.called = true;
-    trace.model = OPENAI_CHAT_MODEL;
+    trace.model = RECOMMENDATION_MODEL;
     trace.prompt_layers = promptSections.map((section) => ({
       id: section.id,
       role: section.role,
@@ -2250,6 +2472,8 @@ export async function rankAndExplain(
     {
       discoveryMode: Boolean(promptContext?.discovery_mode),
       customerContext: promptContext?.chat_context?.customer_context,
+      recentlyShownIds:
+        promptContext?.chat_context?.recently_shown_rugs?.map((rug) => rug.id) ?? [],
       constraintMismatch: promptContext?.constraint_mismatch,
     }
   );

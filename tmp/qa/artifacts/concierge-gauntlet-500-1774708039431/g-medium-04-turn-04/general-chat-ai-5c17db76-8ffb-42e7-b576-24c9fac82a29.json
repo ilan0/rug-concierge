@@ -1,0 +1,119 @@
+{
+  "trace_id": "5c17db76-8ffb-42e7-b576-24c9fac82a29",
+  "channel": "general-chat-ai",
+  "created_at": "2026-03-28T15:04:51.991Z",
+  "payload": {
+    "mode": "general_chat",
+    "flow_path": [
+      "handleGeneralChatTurn",
+      "buildPromptLayers",
+      "generateGeneralChatResponse"
+    ],
+    "ai_trace": {
+      "called": true,
+      "model": "gpt-4.1-mini",
+      "prompt_layers": [
+        {
+          "id": "SYSTEM_PROMPT_BASE",
+          "role": "system",
+          "chars": 758,
+          "preview": "# AI System Prompt — Rug Concierge You are an experienced rug consultant helping retail customers in a showroom environ…"
+        },
+        {
+          "id": "TASK_PROMPT_GENERAL_CHAT",
+          "role": "system",
+          "chars": 962,
+          "preview": "# General Chat Prompt — Rug Concierge You are the retail concierge for an in-store rug showroom. Handle free-form custo…"
+        },
+        {
+          "id": "TASK_PROMPT_GENERAL_CHAT",
+          "role": "system",
+          "chars": 19,
+          "preview": "Respond in English."
+        },
+        {
+          "id": "ROLE_PROMPT_RETAIL_CUSTOMER",
+          "role": "system",
+          "chars": 107,
+          "preview": "Role: retail customer. Be approachable, warm, and concise, with practical guidance and a natural next step."
+        },
+        {
+          "id": "CHAT_MEMORY_CONTEXT",
+          "role": "system",
+          "chars": 851,
+          "preview": "CHAT MEMORY CONTEXT: { \"summary_text\": \"User: Show me green rugs | Assistant: Here are the options with the strongest G…"
+        },
+        {
+          "id": "RECENT_TURNS_CONTEXT",
+          "role": "system",
+          "chars": 813,
+          "preview": "RECENT TURNS CONTEXT: [ { \"role\": \"user\", \"content\": \"Do you have anything similar?\", \"created_at\": \"2026-03-28T15:04:2…"
+        },
+        {
+          "id": "LATEST_USER_MESSAGE",
+          "role": "user",
+          "chars": 51,
+          "preview": "What's the difference between a Heriz and a Serapi?"
+        }
+      ],
+      "request_payload_preview": {
+        "model": "gpt-4.1-mini",
+        "message_groups": 2,
+        "system_groups": 1,
+        "user_groups": 1,
+        "system_blocks": 6,
+        "user_blocks": 1,
+        "schema_name": "general_chat_response",
+        "schema_strict": true,
+        "max_output_tokens": 500
+      },
+      "response_status": 200,
+      "response_payload_preview": {
+        "has_output_text": false,
+        "output_items": 1,
+        "content_blocks": 1,
+        "has_error": false,
+        "error_type": null
+      },
+      "parsed_response": {
+        "assistant_message": "Heriz rugs are known for their durable construction and bold geometric patterns with a central medallion, often in rich, earthy tones. Serapi rugs, a subtype of Heriz, tend to have more finely detailed designs and a more refined palette, sometimes with a softer, more artistic feel. If you'd like, I can show examples from our current collection.",
+        "notes": "Serapi rugs are a subtype of Heriz, often with finer detail and more refined color.",
+        "memory_hints": [
+          "Heriz rugs geometric and durable",
+          "Serapi are a subtype of Heriz, more refined"
+        ]
+      },
+      "fallback_reason": null,
+      "error": null,
+      "incomplete_detected": false,
+      "retry_attempted": false,
+      "retry_succeeded": false,
+      "text_postprocess_applied": false
+    },
+    "context_packet_stats": {
+      "field_counts": {
+        "stable_facts": 2,
+        "open_threads": 2,
+        "customer_context": 2,
+        "recently_shown_rugs": 6,
+        "shown_rug_ids": 11,
+        "recent_turns": 4
+      },
+      "char_counts": {
+        "summary_text": 527,
+        "stable_facts_total": 50,
+        "open_threads_total": 92,
+        "customer_context_total": 50,
+        "recently_shown_total": 542,
+        "shown_rug_ids_total": 396,
+        "liked_attributes_total": 5,
+        "recent_turns_total": 407,
+        "latest_user_message": 51,
+        "total": 1724
+      }
+    },
+    "timing_ms": {
+      "generate_general_chat_ms": 3087
+    }
+  }
+}

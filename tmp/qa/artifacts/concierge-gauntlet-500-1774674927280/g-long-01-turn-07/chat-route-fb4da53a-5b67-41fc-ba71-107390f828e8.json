@@ -1,0 +1,562 @@
+{
+  "trace_id": "fb4da53a-5b67-41fc-ba71-107390f828e8",
+  "channel": "chat-route",
+  "created_at": "2026-03-28T05:16:40.865Z",
+  "payload": {
+    "flow_path": [
+      "/api/chat POST",
+      "getOrCreateSession",
+      "updateRecommendationStateForTurn",
+      "routeTurnMode",
+      "handlerDispatch",
+      "updateConversationMemory",
+      "saveSession"
+    ],
+    "request": {
+      "session_id": "e462ca1d-f49f-4c41-b314-df86f99cc147",
+      "role": "retail_customer",
+      "tenant_id": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5",
+      "tenant_subdomain": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5",
+      "tenant_hostname": "127.0.0.1",
+      "message": "How do I care for a wool rug?",
+      "constraints": null
+    },
+    "routing": {
+      "mode": "general_chat",
+      "intent": "educate",
+      "rule_id": "GENERAL_ADVICE_OR_EDUCATION",
+      "confidence": "low",
+      "needs_clarification": false,
+      "parser": {
+        "model": "gpt-4.1-mini",
+        "latency_ms": 115,
+        "status": "fallback",
+        "parse_status": "fallback",
+        "fallback": "OpenAI request failed",
+        "fallback_reason": "OpenAI request failed",
+        "normalized_payload": {
+          "intent": "educate",
+          "mode": "advice",
+          "followup_intent": "none",
+          "constraints": {
+            "size": null,
+            "colors": [],
+            "styles": [],
+            "shape": null
+          },
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          },
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          },
+          "session_facts": [
+            "practical maintenance"
+          ],
+          "rug_reference_ambiguous": false,
+          "confidence": "low"
+        },
+        "normalized_parse_payload": {
+          "intent": "educate",
+          "mode": "advice",
+          "followup_intent": "none",
+          "constraints": {
+            "size": null,
+            "colors": [],
+            "styles": [],
+            "shape": null
+          },
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          },
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          },
+          "session_facts": [
+            "practical maintenance"
+          ],
+          "rug_reference_ambiguous": false,
+          "confidence": "low"
+        },
+        "response_status": 400,
+        "incomplete_detected": false,
+        "error": "OpenAI request failed with status 400"
+      },
+      "policy": {
+        "intent": "educate",
+        "compiled_policy": {
+          "intent": "educate",
+          "mode": "advice",
+          "discovery_requested": false,
+          "followup_intent": "none",
+          "hard_constraints": {
+            "strictness": {
+              "size": "prefer",
+              "colors": "prefer",
+              "styles": "prefer",
+              "shape": "prefer"
+            }
+          },
+          "persisted_hard_constraints": {
+            "size": {
+              "widthIn": 96,
+              "lengthIn": 120,
+              "toleranceIn": 12
+            },
+            "colors": [
+              "gray"
+            ],
+            "styles": [],
+            "strictness": {
+              "size": "prefer",
+              "colors": "prefer",
+              "styles": "prefer",
+              "shape": "prefer"
+            }
+          },
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          },
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          },
+          "confidence": "low",
+          "policy_source": "none",
+          "must_prefer_avoid": {
+            "must": [],
+            "prefer": [],
+            "avoid": {
+              "colors": [],
+              "styles": [],
+              "shapes": []
+            }
+          }
+        },
+        "policy_source": "none",
+        "must_prefer_avoid": {
+          "must": [],
+          "prefer": [],
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          }
+        },
+        "must-prefer-avoid": {
+          "must": [],
+          "prefer": [],
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          }
+        },
+        "constraint_modes": {
+          "size": "prefer",
+          "colors": "prefer",
+          "styles": "prefer",
+          "shape": "prefer",
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          }
+        }
+      },
+      "parser_trace": {
+        "called": true,
+        "model": "gpt-4.1-mini",
+        "status": "fallback",
+        "response_status": 400,
+        "fallback": "OpenAI request failed",
+        "fallback_reason": "OpenAI request failed",
+        "incomplete_detected": false,
+        "latency_ms": 115,
+        "normalized_payload": {
+          "intent": "educate",
+          "mode": "advice",
+          "followup_intent": "none",
+          "constraints": {
+            "size": null,
+            "colors": [],
+            "styles": [],
+            "shape": null
+          },
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          },
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          },
+          "session_facts": [
+            "practical maintenance"
+          ],
+          "rug_reference_ambiguous": false,
+          "confidence": "low"
+        },
+        "parsed": {
+          "intent": "educate",
+          "mode": "advice",
+          "followup_intent": "none",
+          "constraints": {
+            "size": null,
+            "colors": [],
+            "styles": [],
+            "shape": null
+          },
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          },
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          },
+          "session_facts": [
+            "practical maintenance"
+          ],
+          "rug_reference_ambiguous": false,
+          "confidence": "low"
+        },
+        "error": "OpenAI request failed with status 400"
+      },
+      "compiled_policy": {
+        "intent": "educate",
+        "mode": "advice",
+        "discovery_requested": false,
+        "followup_intent": "none",
+        "hard_constraints": {
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          }
+        },
+        "persisted_hard_constraints": {
+          "size": {
+            "widthIn": 96,
+            "lengthIn": 120,
+            "toleranceIn": 12
+          },
+          "colors": [
+            "gray"
+          ],
+          "styles": [],
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          }
+        },
+        "strictness": {
+          "size": "prefer",
+          "colors": "prefer",
+          "styles": "prefer",
+          "shape": "prefer"
+        },
+        "avoid": {
+          "colors": [],
+          "styles": [],
+          "shapes": []
+        },
+        "confidence": "low",
+        "policy_source": "none",
+        "must_prefer_avoid": {
+          "must": [],
+          "prefer": [],
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          }
+        }
+      },
+      "policy_source": "none",
+      "must_prefer_avoid": {
+        "must": [],
+        "prefer": [],
+        "avoid": {
+          "colors": [],
+          "styles": [],
+          "shapes": []
+        }
+      },
+      "must-prefer-avoid": {
+        "must": [],
+        "prefer": [],
+        "avoid": {
+          "colors": [],
+          "styles": [],
+          "shapes": []
+        }
+      },
+      "handler": "handleGeneralChatTurn",
+      "prompt_layer_preview": [
+        "SYSTEM_PROMPT_BASE",
+        "TASK_PROMPT_GENERAL_CHAT",
+        "TASK_PROMPT_GENERAL_CHAT",
+        "ROLE_PROMPT_RETAIL_CUSTOMER",
+        "CHAT_MEMORY_CONTEXT",
+        "RECENT_TURNS_CONTEXT",
+        "LATEST_USER_MESSAGE"
+      ]
+    },
+    "reaction": {
+      "detected_reaction": null,
+      "referenced_rug_id": null,
+      "rug_reference_ambiguous": false,
+      "liked_attributes_before": {
+        "colors": [
+          "gray"
+        ],
+        "styles": [
+          "geometric"
+        ],
+        "origins": []
+      },
+      "liked_attributes_after": {
+        "colors": [
+          "gray"
+        ],
+        "styles": [
+          "geometric"
+        ],
+        "origins": []
+      },
+      "liked_rug_ids_before": [],
+      "liked_rug_ids_after": [],
+      "dismissed_rug_ids_before": [],
+      "dismissed_rug_ids_after": []
+    },
+    "state_snapshot": {
+      "recommendation_state": {
+        "hard_constraints": {
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          }
+        },
+        "soft_preferences": {},
+        "runtime": {
+          "last_result_mode": "recommendation",
+          "last_relaxed_size_tolerance_in": null,
+          "last_blockers": [],
+          "last_recommended_size_in": {
+            "width_in": 96,
+            "length_in": 120
+          },
+          "liked_rug_ids": [],
+          "dismissed_rug_ids": [],
+          "shown_rug_ids": [
+            "735c23cf-2f40-4b3f-a1fb-06e983dcc2f9",
+            "3e188674-4625-445b-be9a-3d2bc2752a50",
+            "4c60b570-f26c-4dda-a1df-9626479843b0",
+            "42e84b9d-fdeb-48be-99b2-90aa9b3b5c71",
+            "08ca5e39-c162-4d88-9d7e-484e90489d85",
+            "dbf2bf0c-8cb5-4ea7-9d6c-fa3439793b0b",
+            "b1b00766-b4bc-4d8b-ab4d-46be26589902",
+            "4bc59440-4d03-4698-8275-2a78247cd3b7",
+            "2679516c-6cfa-46e6-b94e-00095796ac73",
+            "a3181b27-19c9-45cd-ac2d-04b83368ca6f",
+            "a93b286f-4e3b-44f1-aec8-b2f43d6ba5dd",
+            "09ffdd96-6a94-40a4-9c59-c0e752e37b66"
+          ],
+          "liked_attributes": {
+            "colors": [
+              "gray"
+            ],
+            "styles": [
+              "geometric"
+            ],
+            "origins": []
+          },
+          "recently_shown_rugs": [
+            {
+              "id": "1c358b3a-215a-4592-9307-a0325a168af6",
+              "label": "Vintage Persian Mashad",
+              "colors": [
+                "black",
+                "gray"
+              ],
+              "style": "Mashad",
+              "origin": "Persian"
+            },
+            {
+              "id": "e34c39f6-6bd3-4073-8654-2ceea2da6740",
+              "label": "Vintage Persian",
+              "colors": [
+                "gray",
+                "black"
+              ],
+              "style": "Geometric Tribal",
+              "origin": "Persian"
+            },
+            {
+              "id": "0c83104b-d6bb-43ea-beaa-adafd1ee38dc",
+              "label": "Vintage Bokhara",
+              "colors": [
+                "black",
+                "gray",
+                "ivory"
+              ],
+              "style": "Bokhara",
+              "origin": "Central Asian"
+            },
+            {
+              "id": "dd62ad1e-3953-43f8-bdd1-d46154c3111b",
+              "label": "Persian Kashan carpet",
+              "colors": [
+                "ivory",
+                "black",
+                "red",
+                "brown"
+              ],
+              "style": "Kashan",
+              "origin": "Persian"
+            },
+            {
+              "id": "34a884c7-43c5-40c4-b1a8-600780538868",
+              "label": "Antique Persian Heriz",
+              "colors": [
+                "rust",
+                "ivory",
+                "red",
+                "brown"
+              ],
+              "style": "Heriz",
+              "origin": "Persian"
+            },
+            {
+              "id": "d496a74b-f23b-4a50-9384-84a4586d0699",
+              "label": "Antique Persian Hunting Scene",
+              "colors": [
+                "red",
+                "black",
+                "brown",
+                "ivory"
+              ],
+              "style": "Floral",
+              "origin": "Persian"
+            }
+          ],
+          "no_match_attempts": 0,
+          "updated_at": "2026-03-28T05:16:33.588Z"
+        }
+      },
+      "conversation_memory": {
+        "summary_text": "…lar options as exact matches were limited. || User: Show me something smaller | Assistant: We don't have an exact 6' × 9' match right now, so I'm showing the closest available alternatives. We don't have many geometric rugs smaller than 6x9 right now, but these options are the closest fits and still bring tha… || User: I like this direction | Assistant: Great to hear that you like this style direction. Would you like me to show you more geometric rugs in smaller sizes or perhaps explore different color palettes within this style? || User: Keep going | Assistant: For around 6' x 9', these are the closest available fits in stock: || User: I'm decorating a living room with a gray sectional and want warm contrast | Assistant: For your living room with a gray sectional seeking warm contrast, these rugs offer rich traditional patterns and subtle gray tones that complement while adding warmth.",
+        "stable_facts": [
+          "room living room",
+          "palette warm",
+          "preference I like this direction"
+        ],
+        "open_threads": [
+          "Would you like me to show you more geometric rugs in smaller sizes or perhaps explore different color palettes within t…",
+          "Show me what you have",
+          "What kind of space are you decorating so I can narrow these down for you?"
+        ],
+        "last_user_intent": "recommendation",
+        "no_match_attempts": 0,
+        "updated_at": "2026-03-28T05:16:33.587Z",
+        "version": "v1"
+      }
+    },
+    "memory_snapshot_before": {
+      "summary_text": "…lar options as exact matches were limited. || User: Show me something smaller | Assistant: We don't have an exact 6' × 9' match right now, so I'm showing the closest available alternatives. We don't have many geometric rugs smaller than 6x9 right now, but these options are the closest fits and still bring tha… || User: I like this direction | Assistant: Great to hear that you like this style direction. Would you like me to show you more geometric rugs in smaller sizes or perhaps explore different color palettes within this style? || User: Keep going | Assistant: For around 6' x 9', these are the closest available fits in stock: || User: I'm decorating a living room with a gray sectional and want warm contrast | Assistant: For your living room with a gray sectional seeking warm contrast, these rugs offer rich traditional patterns and subtle gray tones that complement while adding warmth.",
+      "stable_facts": [
+        "room living room",
+        "palette warm",
+        "preference I like this direction"
+      ],
+      "open_threads": [
+        "Would you like me to show you more geometric rugs in smaller sizes or perhaps explore different color palettes within t…",
+        "Show me what you have",
+        "What kind of space are you decorating so I can narrow these down for you?"
+      ],
+      "last_user_intent": "recommendation",
+      "no_match_attempts": 0,
+      "updated_at": "2026-03-28T05:16:33.587Z",
+      "version": "v1"
+    },
+    "memory_snapshot_after": {
+      "summary_text": "…the closest fits and still bring tha… || User: I like this direction | Assistant: Great to hear that you like this style direction. Would you like me to show you more geometric rugs in smaller sizes or perhaps explore different color palettes within this style? || User: Keep going | Assistant: For around 6' x 9', these are the closest available fits in stock: || User: I'm decorating a living room with a gray sectional and want warm contrast | Assistant: For your living room with a gray sectional seeking warm contrast, these rugs offer rich traditional patterns and subtle gray tones that complement while adding warmth. || User: How do I care for a wool rug? | Assistant: Wool rugs should be vacuumed regularly without a beater bar to avoid damaging fibers. Clean spills promptly by blotting with a clean cloth—never rub. Professional cleaning every 12-18 months is recommended to maintain t…",
+      "stable_facts": [
+        "practical maintenance",
+        "room living room",
+        "palette warm",
+        "preference I like this direction"
+      ],
+      "open_threads": [
+        "How do I care for a wool rug?",
+        "Would you like me to show you some wool rugs from our collection?",
+        "Would you like me to show you more geometric rugs in smaller sizes or perhaps explore different color palettes within t…",
+        "Show me what you have",
+        "What kind of space are you decorating so I can narrow these down for you?"
+      ],
+      "last_user_intent": "general_chat",
+      "no_match_attempts": 0,
+      "updated_at": "2026-03-28T05:16:40.320Z",
+      "version": "v1"
+    },
+    "ai_context_packet_stats": {
+      "field_counts": {
+        "stable_facts": 3,
+        "open_threads": 3,
+        "customer_context": 3,
+        "recently_shown_rugs": 6,
+        "shown_rug_ids": 12,
+        "recent_turns": 4
+      },
+      "char_counts": {
+        "summary_text": 900,
+        "stable_facts_total": 60,
+        "open_threads_total": 214,
+        "customer_context_total": 60,
+        "recently_shown_total": 555,
+        "shown_rug_ids_total": 432,
+        "liked_attributes_total": 13,
+        "recent_turns_total": 316,
+        "latest_user_message": 29,
+        "total": 2147
+      }
+    },
+    "response": {
+      "session_id": "e462ca1d-f49f-4c41-b314-df86f99cc147",
+      "role": "retail_customer",
+      "mode": "general_chat",
+      "fine_mode": "general_chat",
+      "response_mode": "general_chat",
+      "notes": "GENERAL_CHAT_AI_RUNTIME:real | Prompt layers assembled: SYSTEM_PROMPT_BASE -> TASK_PROMPT_GENERAL_CHAT -> TASK_PROMPT_GENERAL_CHAT -> ROLE_PROMPT_RETAIL_CUSTOMER -> CHAT_MEMORY_CONTEXT -> RECENT_TURNS_CONTEXT -> LATEST_USER_MESSAGE"
+    },
+    "timing_ms": {
+      "total_ms": 6896
+    }
+  }
+}

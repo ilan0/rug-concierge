@@ -1,0 +1,493 @@
+{
+  "trace_id": "f5d25fca-57a6-4865-a4a1-998f91981061",
+  "channel": "chat-route",
+  "created_at": "2026-03-26T23:04:51.311Z",
+  "payload": {
+    "flow_path": [
+      "/api/chat POST",
+      "getOrCreateSession",
+      "updateRecommendationStateForTurn",
+      "routeTurnMode",
+      "handlerDispatch",
+      "updateConversationMemory",
+      "saveSession"
+    ],
+    "request": {
+      "session_id": "d79dac4a-2c43-47c3-87e4-631e46ba0b82",
+      "role": "retail_customer",
+      "tenant_id": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5",
+      "tenant_subdomain": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5",
+      "tenant_hostname": "127.0.0.1",
+      "message": "How often should I rotate a rug?",
+      "constraints": null
+    },
+    "routing": {
+      "mode": "general_chat",
+      "intent": "general",
+      "rule_id": "DEFAULT_GENERAL_CHAT",
+      "confidence": "low",
+      "needs_clarification": false,
+      "parser": {
+        "model": "gpt-4.1-mini",
+        "latency_ms": 109,
+        "status": "fallback",
+        "parse_status": "fallback",
+        "fallback": "OpenAI request failed",
+        "fallback_reason": "OpenAI request failed",
+        "normalized_payload": {
+          "intent": "general",
+          "mode": "chat",
+          "followup_intent": "none",
+          "constraints": {
+            "size": null,
+            "colors": [],
+            "styles": [],
+            "shape": null
+          },
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          },
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          },
+          "session_facts": [],
+          "rug_reference_ambiguous": false,
+          "confidence": "low"
+        },
+        "normalized_parse_payload": {
+          "intent": "general",
+          "mode": "chat",
+          "followup_intent": "none",
+          "constraints": {
+            "size": null,
+            "colors": [],
+            "styles": [],
+            "shape": null
+          },
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          },
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          },
+          "session_facts": [],
+          "rug_reference_ambiguous": false,
+          "confidence": "low"
+        },
+        "response_status": 400,
+        "incomplete_detected": false,
+        "error": "OpenAI request failed with status 400"
+      },
+      "policy": {
+        "intent": "general",
+        "compiled_policy": {
+          "intent": "general",
+          "mode": "chat",
+          "discovery_requested": false,
+          "followup_intent": "none",
+          "hard_constraints": {
+            "strictness": {
+              "size": "prefer",
+              "colors": "prefer",
+              "styles": "prefer",
+              "shape": "prefer"
+            }
+          },
+          "persisted_hard_constraints": {
+            "size": {
+              "widthIn": 96,
+              "lengthIn": 120,
+              "toleranceIn": 10
+            },
+            "colors": [],
+            "styles": [
+              "modern"
+            ],
+            "strictness": {
+              "size": "prefer",
+              "colors": "prefer",
+              "styles": "prefer",
+              "shape": "prefer"
+            },
+            "avoid_preferences": {
+              "styles": [
+                "traditional",
+                "tribal",
+                "persian",
+                "heriz",
+                "serapi",
+                "kashan"
+              ]
+            }
+          },
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          },
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          },
+          "confidence": "low",
+          "policy_source": "none",
+          "must_prefer_avoid": {
+            "must": [],
+            "prefer": [],
+            "avoid": {
+              "colors": [],
+              "styles": [],
+              "shapes": []
+            }
+          }
+        },
+        "policy_source": "none",
+        "must_prefer_avoid": {
+          "must": [],
+          "prefer": [],
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          }
+        },
+        "must-prefer-avoid": {
+          "must": [],
+          "prefer": [],
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          }
+        },
+        "constraint_modes": {
+          "size": "prefer",
+          "colors": "prefer",
+          "styles": "prefer",
+          "shape": "prefer",
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          }
+        }
+      },
+      "parser_trace": {
+        "called": true,
+        "model": "gpt-4.1-mini",
+        "status": "fallback",
+        "response_status": 400,
+        "fallback": "OpenAI request failed",
+        "fallback_reason": "OpenAI request failed",
+        "incomplete_detected": false,
+        "latency_ms": 109,
+        "normalized_payload": {
+          "intent": "general",
+          "mode": "chat",
+          "followup_intent": "none",
+          "constraints": {
+            "size": null,
+            "colors": [],
+            "styles": [],
+            "shape": null
+          },
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          },
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          },
+          "session_facts": [],
+          "rug_reference_ambiguous": false,
+          "confidence": "low"
+        },
+        "parsed": {
+          "intent": "general",
+          "mode": "chat",
+          "followup_intent": "none",
+          "constraints": {
+            "size": null,
+            "colors": [],
+            "styles": [],
+            "shape": null
+          },
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          },
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          },
+          "session_facts": [],
+          "rug_reference_ambiguous": false,
+          "confidence": "low"
+        },
+        "error": "OpenAI request failed with status 400"
+      },
+      "compiled_policy": {
+        "intent": "general",
+        "mode": "chat",
+        "discovery_requested": false,
+        "followup_intent": "none",
+        "hard_constraints": {
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          }
+        },
+        "persisted_hard_constraints": {
+          "size": {
+            "widthIn": 96,
+            "lengthIn": 120,
+            "toleranceIn": 10
+          },
+          "colors": [],
+          "styles": [
+            "modern"
+          ],
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          },
+          "avoid_preferences": {
+            "styles": [
+              "traditional",
+              "tribal",
+              "persian",
+              "heriz",
+              "serapi",
+              "kashan"
+            ]
+          }
+        },
+        "strictness": {
+          "size": "prefer",
+          "colors": "prefer",
+          "styles": "prefer",
+          "shape": "prefer"
+        },
+        "avoid": {
+          "colors": [],
+          "styles": [],
+          "shapes": []
+        },
+        "confidence": "low",
+        "policy_source": "none",
+        "must_prefer_avoid": {
+          "must": [],
+          "prefer": [],
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          }
+        }
+      },
+      "policy_source": "none",
+      "must_prefer_avoid": {
+        "must": [],
+        "prefer": [],
+        "avoid": {
+          "colors": [],
+          "styles": [],
+          "shapes": []
+        }
+      },
+      "must-prefer-avoid": {
+        "must": [],
+        "prefer": [],
+        "avoid": {
+          "colors": [],
+          "styles": [],
+          "shapes": []
+        }
+      },
+      "handler": "handleGeneralChatTurn",
+      "prompt_layer_preview": [
+        "SYSTEM_PROMPT_BASE",
+        "TASK_PROMPT_GENERAL_CHAT",
+        "TASK_PROMPT_GENERAL_CHAT",
+        "ROLE_PROMPT_RETAIL_CUSTOMER",
+        "CHAT_MEMORY_CONTEXT",
+        "RECENT_TURNS_CONTEXT",
+        "LATEST_USER_MESSAGE"
+      ]
+    },
+    "reaction": {
+      "detected_reaction": null,
+      "referenced_rug_id": null,
+      "rug_reference_ambiguous": false,
+      "liked_attributes_before": {
+        "colors": [],
+        "styles": [
+          "modern"
+        ],
+        "origins": []
+      },
+      "liked_attributes_after": {
+        "colors": [],
+        "styles": [
+          "modern"
+        ],
+        "origins": []
+      },
+      "liked_rug_ids_before": [],
+      "liked_rug_ids_after": [],
+      "dismissed_rug_ids_before": [],
+      "dismissed_rug_ids_after": []
+    },
+    "state_snapshot": {
+      "recommendation_state": {
+        "hard_constraints": {
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          }
+        },
+        "soft_preferences": {},
+        "runtime": {
+          "last_result_mode": "recommendation",
+          "last_relaxed_size_tolerance_in": null,
+          "last_blockers": [],
+          "last_recommended_size_in": {
+            "width_in": 60,
+            "length_in": 96
+          },
+          "liked_rug_ids": [],
+          "dismissed_rug_ids": [],
+          "shown_rug_ids": [
+            "c7a2b2e4-1f37-4fc5-985e-ea28e577723a"
+          ],
+          "liked_attributes": {
+            "colors": [],
+            "styles": [
+              "modern"
+            ],
+            "origins": []
+          },
+          "recently_shown_rugs": [
+            {
+              "id": "c7a2b2e4-1f37-4fc5-985e-ea28e577723a",
+              "label": "Contemporary Moroccan",
+              "colors": [
+                "purple",
+                "blue"
+              ],
+              "style": "Medallion",
+              "origin": "Moroccan"
+            }
+          ],
+          "no_match_attempts": 0,
+          "updated_at": "2026-03-26T23:04:44.319Z"
+        }
+      },
+      "conversation_memory": {
+        "summary_text": "User: I need a modern 8x10 rug | Assistant: For an 8x10 modern style rug, the current strong inventory match is a contemporary piece with a modern mood. || User: Any closer matches? | Assistant: At this time, the contemporary piece remains the closest match for an 8x10 modern rug in our inventory. Would you like me to show you this rug or others that complement modern styles? || User: This feels too formal | Assistant: I understand you're looking for a modern rug with a less formal feel. We can explore options with more casual or eclectic modern designs if available. Would you like me to show you any rugs with those characteristics fr…",
+        "stable_facts": [
+          "style modern"
+        ],
+        "open_threads": [
+          "Would you like me to show you any rugs with those characteristics from our collection?",
+          "Any closer matches?",
+          "Would you like me to show you this rug or others that complement modern styles?"
+        ],
+        "last_user_intent": "general_chat",
+        "no_match_attempts": 0,
+        "updated_at": "2026-03-26T23:04:44.319Z",
+        "version": "v1"
+      }
+    },
+    "memory_snapshot_before": {
+      "summary_text": "User: I need a modern 8x10 rug | Assistant: For an 8x10 modern style rug, the current strong inventory match is a contemporary piece with a modern mood. || User: Any closer matches? | Assistant: At this time, the contemporary piece remains the closest match for an 8x10 modern rug in our inventory. Would you like me to show you this rug or others that complement modern styles? || User: This feels too formal | Assistant: I understand you're looking for a modern rug with a less formal feel. We can explore options with more casual or eclectic modern designs if available. Would you like me to show you any rugs with those characteristics fr…",
+      "stable_facts": [
+        "style modern"
+      ],
+      "open_threads": [
+        "Would you like me to show you any rugs with those characteristics from our collection?",
+        "Any closer matches?",
+        "Would you like me to show you this rug or others that complement modern styles?"
+      ],
+      "last_user_intent": "general_chat",
+      "no_match_attempts": 0,
+      "updated_at": "2026-03-26T23:04:44.319Z",
+      "version": "v1"
+    },
+    "memory_snapshot_after": {
+      "summary_text": "…n 8x10 rug | Assistant: For an 8x10 modern style rug, the current strong inventory match is a contemporary piece with a modern mood. || User: Any closer matches? | Assistant: At this time, the contemporary piece remains the closest match for an 8x10 modern rug in our inventory. Would you like me to show you this rug or others that complement modern styles? || User: This feels too formal | Assistant: I understand you're looking for a modern rug with a less formal feel. We can explore options with more casual or eclectic modern designs if available. Would you like me to show you any rugs with those characteristics fr… || User: How often should I rotate a rug? | Assistant: It's generally recommended to rotate your rug every 3 to 6 months to ensure even wear and fading. If the rug is in a high-traffic area or exposed to direct sunlight, more frequent rotation can help maintain its appearan…",
+      "stable_facts": [
+        "style modern"
+      ],
+      "open_threads": [
+        "How often should I rotate a rug?",
+        "Would you like tips on caring for specific rug types or to see maintenance-friendly rugs from our collection?",
+        "Would you like me to show you any rugs with those characteristics from our collection?",
+        "Any closer matches?",
+        "Would you like me to show you this rug or others that complement modern styles?"
+      ],
+      "last_user_intent": "general_chat",
+      "no_match_attempts": 0,
+      "updated_at": "2026-03-26T23:04:50.927Z",
+      "version": "v1"
+    },
+    "ai_context_packet_stats": {
+      "field_counts": {
+        "stable_facts": 1,
+        "open_threads": 3,
+        "customer_context": 1,
+        "recently_shown_rugs": 1,
+        "shown_rug_ids": 1,
+        "recent_turns": 4
+      },
+      "char_counts": {
+        "summary_text": 643,
+        "stable_facts_total": 12,
+        "open_threads_total": 184,
+        "customer_context_total": 12,
+        "recently_shown_total": 89,
+        "shown_rug_ids_total": 36,
+        "liked_attributes_total": 6,
+        "recent_turns_total": 460,
+        "latest_user_message": 32,
+        "total": 1438
+      }
+    },
+    "response": {
+      "session_id": "d79dac4a-2c43-47c3-87e4-631e46ba0b82",
+      "role": "retail_customer",
+      "mode": "general_chat",
+      "fine_mode": "general_chat",
+      "response_mode": "general_chat",
+      "notes": "GENERAL_CHAT_AI_RUNTIME:real | Prompt layers assembled: SYSTEM_PROMPT_BASE -> TASK_PROMPT_GENERAL_CHAT -> TASK_PROMPT_GENERAL_CHAT -> ROLE_PROMPT_RETAIL_CUSTOMER -> CHAT_MEMORY_CONTEXT -> RECENT_TURNS_CONTEXT -> LATEST_USER_MESSAGE"
+    },
+    "timing_ms": {
+      "total_ms": 6619
+    }
+  }
+}

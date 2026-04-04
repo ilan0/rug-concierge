@@ -1,0 +1,619 @@
+{
+  "trace_id": "0bc4e6b1-5414-4678-88a3-236be94efe09",
+  "channel": "chat-route",
+  "created_at": "2026-03-28T01:32:29.794Z",
+  "payload": {
+    "flow_path": [
+      "/api/chat POST",
+      "getOrCreateSession",
+      "updateRecommendationStateForTurn",
+      "routeTurnMode",
+      "handlerDispatch",
+      "updateConversationMemory",
+      "saveSession"
+    ],
+    "request": {
+      "session_id": "9b7245ab-1f4c-41c3-9898-a30356d70101",
+      "role": "retail_customer",
+      "tenant_id": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5",
+      "tenant_subdomain": "jjrugs",
+      "tenant_hostname": "jjrugs.rugdesk.app",
+      "message": "Leaning blue or teal now.",
+      "constraints": null
+    },
+    "routing": {
+      "mode": "recommendation",
+      "intent": "recommend",
+      "rule_id": "EXPLICIT_RECOMMENDATION_REQUEST",
+      "confidence": "medium",
+      "needs_clarification": false,
+      "parser": {
+        "model": "gpt-4.1-mini",
+        "latency_ms": 88,
+        "status": "fallback",
+        "parse_status": "fallback",
+        "fallback": "OpenAI request failed",
+        "fallback_reason": "OpenAI request failed",
+        "normalized_payload": {
+          "intent": "recommend",
+          "mode": "recommendation",
+          "followup_intent": "none",
+          "constraints": {
+            "size": null,
+            "colors": [
+              "blue",
+              "teal"
+            ],
+            "styles": [],
+            "shape": null
+          },
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          },
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          },
+          "session_facts": [
+            "palette blue"
+          ],
+          "rug_reference_ambiguous": false,
+          "confidence": "medium"
+        },
+        "normalized_parse_payload": {
+          "intent": "recommend",
+          "mode": "recommendation",
+          "followup_intent": "none",
+          "constraints": {
+            "size": null,
+            "colors": [
+              "blue",
+              "teal"
+            ],
+            "styles": [],
+            "shape": null
+          },
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          },
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          },
+          "session_facts": [
+            "palette blue"
+          ],
+          "rug_reference_ambiguous": false,
+          "confidence": "medium"
+        },
+        "response_status": 400,
+        "incomplete_detected": false,
+        "error": "OpenAI request failed with status 400"
+      },
+      "policy": {
+        "intent": "recommend",
+        "compiled_policy": {
+          "intent": "recommend",
+          "mode": "recommendation",
+          "discovery_requested": false,
+          "followup_intent": "none",
+          "hard_constraints": {
+            "colors": [
+              "blue",
+              "teal"
+            ],
+            "strictness": {
+              "size": "prefer",
+              "colors": "prefer",
+              "styles": "prefer",
+              "shape": "prefer"
+            }
+          },
+          "persisted_hard_constraints": {
+            "colors": [
+              "blue",
+              "teal"
+            ],
+            "strictness": {
+              "size": "prefer",
+              "colors": "prefer",
+              "styles": "prefer",
+              "shape": "prefer"
+            }
+          },
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          },
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          },
+          "confidence": "medium",
+          "policy_source": "parsed_turn",
+          "must_prefer_avoid": {
+            "must": [],
+            "prefer": [
+              "colors"
+            ],
+            "avoid": {
+              "colors": [],
+              "styles": [],
+              "shapes": []
+            }
+          }
+        },
+        "policy_source": "parsed_turn",
+        "must_prefer_avoid": {
+          "must": [],
+          "prefer": [
+            "colors"
+          ],
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          }
+        },
+        "must-prefer-avoid": {
+          "must": [],
+          "prefer": [
+            "colors"
+          ],
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          }
+        },
+        "constraint_modes": {
+          "size": "prefer",
+          "colors": "prefer",
+          "styles": "prefer",
+          "shape": "prefer",
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          }
+        }
+      },
+      "parser_trace": {
+        "called": true,
+        "model": "gpt-4.1-mini",
+        "status": "fallback",
+        "response_status": 400,
+        "fallback": "OpenAI request failed",
+        "fallback_reason": "OpenAI request failed",
+        "incomplete_detected": false,
+        "latency_ms": 88,
+        "normalized_payload": {
+          "intent": "recommend",
+          "mode": "recommendation",
+          "followup_intent": "none",
+          "constraints": {
+            "size": null,
+            "colors": [
+              "blue",
+              "teal"
+            ],
+            "styles": [],
+            "shape": null
+          },
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          },
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          },
+          "session_facts": [
+            "palette blue"
+          ],
+          "rug_reference_ambiguous": false,
+          "confidence": "medium"
+        },
+        "parsed": {
+          "intent": "recommend",
+          "mode": "recommendation",
+          "followup_intent": "none",
+          "constraints": {
+            "size": null,
+            "colors": [
+              "blue",
+              "teal"
+            ],
+            "styles": [],
+            "shape": null
+          },
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          },
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          },
+          "session_facts": [
+            "palette blue"
+          ],
+          "rug_reference_ambiguous": false,
+          "confidence": "medium"
+        },
+        "error": "OpenAI request failed with status 400"
+      },
+      "compiled_policy": {
+        "intent": "recommend",
+        "mode": "recommendation",
+        "discovery_requested": false,
+        "followup_intent": "none",
+        "hard_constraints": {
+          "colors": [
+            "blue",
+            "teal"
+          ],
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          }
+        },
+        "persisted_hard_constraints": {
+          "colors": [
+            "blue",
+            "teal"
+          ],
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          }
+        },
+        "strictness": {
+          "size": "prefer",
+          "colors": "prefer",
+          "styles": "prefer",
+          "shape": "prefer"
+        },
+        "avoid": {
+          "colors": [],
+          "styles": [],
+          "shapes": []
+        },
+        "confidence": "medium",
+        "policy_source": "parsed_turn",
+        "must_prefer_avoid": {
+          "must": [],
+          "prefer": [
+            "colors"
+          ],
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          }
+        }
+      },
+      "policy_source": "parsed_turn",
+      "must_prefer_avoid": {
+        "must": [],
+        "prefer": [
+          "colors"
+        ],
+        "avoid": {
+          "colors": [],
+          "styles": [],
+          "shapes": []
+        }
+      },
+      "must-prefer-avoid": {
+        "must": [],
+        "prefer": [
+          "colors"
+        ],
+        "avoid": {
+          "colors": [],
+          "styles": [],
+          "shapes": []
+        }
+      },
+      "handler": "handleRecommendationTurn",
+      "prompt_layer_preview": [
+        "TASK_PROMPT_RECOMMENDATION",
+        "SYSTEM_PROMPT_BASE",
+        "TASK_PROMPT_RECOMMENDATION",
+        "TASK_PROMPT_RECOMMENDATION",
+        "STRUCTURED_OUTPUT_RECOMMENDATION",
+        "CHAT_MEMORY_CONTEXT",
+        "CHAT_MEMORY_CONTEXT",
+        "CHAT_MEMORY_CONTEXT",
+        "CHAT_MEMORY_CONTEXT",
+        "RECENT_TURNS_CONTEXT",
+        "INVENTORY_CONTEXT",
+        "LATEST_USER_MESSAGE_WITH_HARD_CONSTRAINTS"
+      ]
+    },
+    "reaction": {
+      "detected_reaction": null,
+      "referenced_rug_id": null,
+      "rug_reference_ambiguous": false,
+      "liked_attributes_before": {
+        "colors": [
+          "ivory",
+          "blue",
+          "teal"
+        ],
+        "styles": [],
+        "origins": []
+      },
+      "liked_attributes_after": {
+        "colors": [
+          "ivory",
+          "blue",
+          "teal"
+        ],
+        "styles": [],
+        "origins": []
+      },
+      "liked_rug_ids_before": [],
+      "liked_rug_ids_after": [],
+      "dismissed_rug_ids_before": [],
+      "dismissed_rug_ids_after": []
+    },
+    "state_snapshot": {
+      "recommendation_state": {
+        "hard_constraints": {
+          "colors": [
+            "blue",
+            "teal"
+          ],
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          }
+        },
+        "soft_preferences": {},
+        "runtime": {
+          "last_result_mode": "recommendation",
+          "last_relaxed_size_tolerance_in": null,
+          "last_blockers": [],
+          "last_recommended_size_in": {
+            "width_in": 96,
+            "length_in": 120
+          },
+          "liked_rug_ids": [],
+          "dismissed_rug_ids": [],
+          "shown_rug_ids": [
+            "062e14c4-4f2e-4f96-84f0-dac51c92deee",
+            "3e188674-4625-445b-be9a-3d2bc2752a50",
+            "258fde89-ed87-4103-b1e8-224f267e0f3e",
+            "ecc885db-d25f-47a6-a276-113e56737d14",
+            "ed08a0ca-db1c-4d4b-bc3b-8f3a64eb9ed7",
+            "52da6f20-2991-4482-b63c-f203fab6164f",
+            "553b2b40-3d39-402d-b7c3-afe670484106",
+            "a03748ac-f3fb-4e70-bed3-d37981a9fe6a",
+            "dbf2bf0c-8cb5-4ea7-9d6c-fa3439793b0b",
+            "e15492cf-a32d-412a-b855-c0e02542aefe"
+          ],
+          "liked_attributes": {
+            "colors": [
+              "ivory"
+            ],
+            "styles": [],
+            "origins": []
+          },
+          "recently_shown_rugs": [
+            {
+              "id": "062e14c4-4f2e-4f96-84f0-dac51c92deee",
+              "label": "Vintage Persian Tabriz",
+              "colors": [
+                "ivory",
+                "blue",
+                "rust",
+                "gold"
+              ],
+              "style": "Tabriz",
+              "origin": "Persian"
+            },
+            {
+              "id": "3e188674-4625-445b-be9a-3d2bc2752a50",
+              "label": "Afghan Baluch Traditional",
+              "colors": [
+                "red",
+                "black",
+                "blue"
+              ],
+              "style": "Baluch",
+              "origin": "Afghan"
+            },
+            {
+              "id": "258fde89-ed87-4103-b1e8-224f267e0f3e",
+              "label": "Antique Caucasian",
+              "colors": [
+                "ivory",
+                "red",
+                "gold",
+                "blue"
+              ],
+              "style": "Geometric Tribal",
+              "origin": "Caucasian"
+            },
+            {
+              "id": "ecc885db-d25f-47a6-a276-113e56737d14",
+              "label": "Antique Caucasian Kazak",
+              "colors": [
+                "rust",
+                "brown",
+                "gold",
+                "green"
+              ],
+              "style": "Kazak",
+              "origin": "Caucasian"
+            },
+            {
+              "id": "ed08a0ca-db1c-4d4b-bc3b-8f3a64eb9ed7",
+              "label": "Antique Caucasian Kazak",
+              "colors": [
+                "red",
+                "brown",
+                "green"
+              ],
+              "style": "Kazak",
+              "origin": "Caucasian"
+            },
+            {
+              "id": "52da6f20-2991-4482-b63c-f203fab6164f",
+              "label": "Antique Persian",
+              "colors": [
+                "black",
+                "red",
+                "blue",
+                "gold"
+              ],
+              "style": "Floral",
+              "origin": "Persian"
+            },
+            {
+              "id": "553b2b40-3d39-402d-b7c3-afe670484106",
+              "label": "Antique Persian",
+              "colors": [
+                "ivory",
+                "red",
+                "blue"
+              ],
+              "style": "Floral",
+              "origin": "Persian"
+            },
+            {
+              "id": "a03748ac-f3fb-4e70-bed3-d37981a9fe6a",
+              "label": "Antique Persian",
+              "colors": [
+                "brown",
+                "rust",
+                "blue"
+              ],
+              "style": "Floral",
+              "origin": "Persian"
+            },
+            {
+              "id": "dbf2bf0c-8cb5-4ea7-9d6c-fa3439793b0b",
+              "label": "Antique Persian",
+              "colors": [
+                "blue",
+                "ivory",
+                "red"
+              ],
+              "style": "Geometric Tribal",
+              "origin": "Persian"
+            },
+            {
+              "id": "e15492cf-a32d-412a-b855-c0e02542aefe",
+              "label": "Antique Persian",
+              "colors": [
+                "blue",
+                "ivory",
+                "red"
+              ],
+              "style": "Geometric Tribal",
+              "origin": "Persian"
+            }
+          ],
+          "no_match_attempts": 0,
+          "updated_at": "2026-03-28T01:32:14.008Z"
+        }
+      },
+      "conversation_memory": {
+        "summary_text": "User: I want personality, not beige. Surprise me. | Assistant: with the strongest Ivory presence:",
+        "stable_facts": [
+          "palette beige",
+          "preference I want personality, not beige"
+        ],
+        "open_threads": [],
+        "last_user_intent": "recommendation",
+        "no_match_attempts": 0,
+        "updated_at": "2026-03-28T01:32:14.008Z",
+        "version": "v1"
+      }
+    },
+    "memory_snapshot_before": {
+      "summary_text": "User: I want personality, not beige. Surprise me. | Assistant: with the strongest Ivory presence:",
+      "stable_facts": [
+        "palette beige",
+        "preference I want personality, not beige"
+      ],
+      "open_threads": [],
+      "last_user_intent": "recommendation",
+      "no_match_attempts": 0,
+      "updated_at": "2026-03-28T01:32:14.008Z",
+      "version": "v1"
+    },
+    "memory_snapshot_after": {
+      "summary_text": "User: I want personality, not beige. Surprise me. | Assistant: with the strongest Ivory presence: || User: Leaning blue or teal now. | Assistant: with the strongest Blue, Teal presence:",
+      "stable_facts": [
+        "palette blue",
+        "palette beige",
+        "preference I want personality, not beige"
+      ],
+      "open_threads": [],
+      "last_user_intent": "recommendation",
+      "no_match_attempts": 0,
+      "updated_at": "2026-03-28T01:32:29.441Z",
+      "version": "v1"
+    },
+    "ai_context_packet_stats": {
+      "field_counts": {
+        "stable_facts": 2,
+        "open_threads": 0,
+        "customer_context": 2,
+        "recently_shown_rugs": 10,
+        "shown_rug_ids": 10,
+        "recent_turns": 2
+      },
+      "char_counts": {
+        "summary_text": 97,
+        "stable_facts_total": 53,
+        "open_threads_total": 0,
+        "customer_context_total": 53,
+        "recently_shown_total": 913,
+        "shown_rug_ids_total": 360,
+        "liked_attributes_total": 5,
+        "recent_turns_total": 77,
+        "latest_user_message": 25,
+        "total": 1223
+      }
+    },
+    "response": {
+      "session_id": "9b7245ab-1f4c-41c3-9898-a30356d70101",
+      "role": "retail_customer",
+      "mode": "recommendation",
+      "fine_mode": "recommendation",
+      "response_mode": "recommendation",
+      "notes": "OpenAI request failed. Returned local fallback."
+    },
+    "timing_ms": {
+      "total_ms": 13470
+    }
+  }
+}

@@ -1,0 +1,400 @@
+{
+  "trace_id": "6b4883e6-b784-4d0e-8c81-2b5dc5620134",
+  "channel": "chat-route",
+  "created_at": "2026-03-26T19:21:49.359Z",
+  "payload": {
+    "flow_path": [
+      "/api/chat POST",
+      "getOrCreateSession",
+      "updateRecommendationStateForTurn",
+      "routeTurnMode",
+      "handlerDispatch",
+      "updateConversationMemory",
+      "saveSession"
+    ],
+    "request": {
+      "session_id": "c4435fbe-6805-4891-9a2d-a256a37e9ddf",
+      "role": "retail_customer",
+      "tenant_id": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5",
+      "tenant_subdomain": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5",
+      "tenant_hostname": "127.0.0.1",
+      "message": "Surprise me with options",
+      "constraints": null
+    },
+    "routing": {
+      "mode": "recommendation",
+      "intent": "recommend",
+      "rule_id": "EXPLICIT_RECOMMENDATION_REQUEST",
+      "confidence": "low",
+      "needs_clarification": false,
+      "parser": {
+        "model": "gpt-4.1-mini",
+        "latency_ms": 94,
+        "status": "fallback",
+        "parse_status": "fallback",
+        "fallback": "OpenAI request failed",
+        "fallback_reason": "OpenAI request failed",
+        "normalized_payload": {
+          "intent": "recommend",
+          "mode": "discovery",
+          "followup_intent": "none",
+          "constraints": {
+            "size": null,
+            "colors": [],
+            "styles": [],
+            "shape": null
+          },
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          },
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          },
+          "session_facts": [],
+          "rug_reference_ambiguous": false,
+          "confidence": "low"
+        },
+        "normalized_parse_payload": {
+          "intent": "recommend",
+          "mode": "discovery",
+          "followup_intent": "none",
+          "constraints": {
+            "size": null,
+            "colors": [],
+            "styles": [],
+            "shape": null
+          },
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          },
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          },
+          "session_facts": [],
+          "rug_reference_ambiguous": false,
+          "confidence": "low"
+        },
+        "response_status": 400,
+        "incomplete_detected": false,
+        "error": "OpenAI request failed with status 400"
+      },
+      "policy": {
+        "intent": "recommend",
+        "compiled_policy": {
+          "intent": "recommend",
+          "mode": "discovery",
+          "discovery_requested": true,
+          "followup_intent": "none",
+          "hard_constraints": {
+            "strictness": {
+              "size": "prefer",
+              "colors": "prefer",
+              "styles": "prefer",
+              "shape": "prefer"
+            }
+          },
+          "persisted_hard_constraints": {
+            "strictness": {
+              "size": "prefer",
+              "colors": "prefer",
+              "styles": "prefer",
+              "shape": "prefer"
+            }
+          },
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          },
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          },
+          "confidence": "low",
+          "policy_source": "none",
+          "must_prefer_avoid": {
+            "must": [],
+            "prefer": [],
+            "avoid": {
+              "colors": [],
+              "styles": [],
+              "shapes": []
+            }
+          }
+        },
+        "policy_source": "none",
+        "must_prefer_avoid": {
+          "must": [],
+          "prefer": [],
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          }
+        },
+        "must-prefer-avoid": {
+          "must": [],
+          "prefer": [],
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          }
+        },
+        "constraint_modes": {
+          "size": "prefer",
+          "colors": "prefer",
+          "styles": "prefer",
+          "shape": "prefer",
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          }
+        }
+      },
+      "parser_trace": {
+        "called": true,
+        "model": "gpt-4.1-mini",
+        "status": "fallback",
+        "response_status": 400,
+        "fallback": "OpenAI request failed",
+        "fallback_reason": "OpenAI request failed",
+        "incomplete_detected": false,
+        "latency_ms": 94,
+        "normalized_payload": {
+          "intent": "recommend",
+          "mode": "discovery",
+          "followup_intent": "none",
+          "constraints": {
+            "size": null,
+            "colors": [],
+            "styles": [],
+            "shape": null
+          },
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          },
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          },
+          "session_facts": [],
+          "rug_reference_ambiguous": false,
+          "confidence": "low"
+        },
+        "parsed": {
+          "intent": "recommend",
+          "mode": "discovery",
+          "followup_intent": "none",
+          "constraints": {
+            "size": null,
+            "colors": [],
+            "styles": [],
+            "shape": null
+          },
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          },
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          },
+          "session_facts": [],
+          "rug_reference_ambiguous": false,
+          "confidence": "low"
+        },
+        "error": "OpenAI request failed with status 400"
+      },
+      "compiled_policy": {
+        "intent": "recommend",
+        "mode": "discovery",
+        "discovery_requested": true,
+        "followup_intent": "none",
+        "hard_constraints": {
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          }
+        },
+        "persisted_hard_constraints": {
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          }
+        },
+        "strictness": {
+          "size": "prefer",
+          "colors": "prefer",
+          "styles": "prefer",
+          "shape": "prefer"
+        },
+        "avoid": {
+          "colors": [],
+          "styles": [],
+          "shapes": []
+        },
+        "confidence": "low",
+        "policy_source": "none",
+        "must_prefer_avoid": {
+          "must": [],
+          "prefer": [],
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          }
+        }
+      },
+      "policy_source": "none",
+      "must_prefer_avoid": {
+        "must": [],
+        "prefer": [],
+        "avoid": {
+          "colors": [],
+          "styles": [],
+          "shapes": []
+        }
+      },
+      "must-prefer-avoid": {
+        "must": [],
+        "prefer": [],
+        "avoid": {
+          "colors": [],
+          "styles": [],
+          "shapes": []
+        }
+      },
+      "handler": "handleRecommendationTurn",
+      "prompt_layer_preview": [
+        "TASK_PROMPT_RECOMMENDATION",
+        "SYSTEM_PROMPT_BASE",
+        "TASK_PROMPT_RECOMMENDATION",
+        "TASK_PROMPT_RECOMMENDATION",
+        "STRUCTURED_OUTPUT_RECOMMENDATION",
+        "CHAT_MEMORY_CONTEXT",
+        "INVENTORY_CONTEXT",
+        "LATEST_USER_MESSAGE_WITH_HARD_CONSTRAINTS"
+      ]
+    },
+    "reaction": {
+      "detected_reaction": null,
+      "referenced_rug_id": null,
+      "rug_reference_ambiguous": false,
+      "liked_attributes_before": {
+        "colors": [],
+        "styles": [],
+        "origins": []
+      },
+      "liked_attributes_after": {
+        "colors": [],
+        "styles": [],
+        "origins": []
+      },
+      "liked_rug_ids_before": [],
+      "liked_rug_ids_after": [],
+      "dismissed_rug_ids_before": [],
+      "dismissed_rug_ids_after": []
+    },
+    "state_snapshot": {
+      "recommendation_state": {
+        "hard_constraints": {
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          }
+        },
+        "soft_preferences": {},
+        "runtime": {}
+      },
+      "conversation_memory": {
+        "summary_text": "",
+        "stable_facts": [],
+        "open_threads": [],
+        "last_user_intent": "unknown",
+        "no_match_attempts": 0,
+        "updated_at": "2026-03-26T19:21:39.764Z",
+        "version": "v1"
+      }
+    },
+    "memory_snapshot_before": {
+      "summary_text": "",
+      "stable_facts": [],
+      "open_threads": [],
+      "last_user_intent": "unknown",
+      "no_match_attempts": 0,
+      "updated_at": "2026-03-26T19:21:39.764Z",
+      "version": "v1"
+    },
+    "memory_snapshot_after": {
+      "summary_text": "User: Surprise me with options | Assistant: Here is a diverse sample from our current collection: What kind of space are you decorating so I can narrow these down for you?",
+      "stable_facts": [],
+      "open_threads": [
+        "Here is a diverse sample from our current collection: What kind of space are you decorating so I can narrow these down…"
+      ],
+      "last_user_intent": "recommendation",
+      "no_match_attempts": 0,
+      "updated_at": "2026-03-26T19:21:48.827Z",
+      "version": "v1"
+    },
+    "ai_context_packet_stats": {
+      "field_counts": {
+        "stable_facts": 0,
+        "open_threads": 0,
+        "customer_context": 0,
+        "recently_shown_rugs": 0,
+        "shown_rug_ids": 0,
+        "recent_turns": 0
+      },
+      "char_counts": {
+        "summary_text": 0,
+        "stable_facts_total": 0,
+        "open_threads_total": 0,
+        "customer_context_total": 0,
+        "recently_shown_total": 0,
+        "shown_rug_ids_total": 0,
+        "liked_attributes_total": 0,
+        "recent_turns_total": 0,
+        "latest_user_message": 24,
+        "total": 24
+      }
+    },
+    "response": {
+      "session_id": "c4435fbe-6805-4891-9a2d-a256a37e9ddf",
+      "role": "retail_customer",
+      "mode": "recommendation",
+      "fine_mode": "recommendation",
+      "response_mode": "recommendation",
+      "notes": "OpenAI request failed. Returned local fallback."
+    },
+    "timing_ms": {
+      "total_ms": 14164
+    }
+  }
+}

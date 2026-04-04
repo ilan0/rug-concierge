@@ -1,0 +1,900 @@
+{
+  "trace_id": "94643c0d-8d47-4464-a97f-a25dc0cc10f6",
+  "channel": "recommendation-pipeline",
+  "created_at": "2026-04-02T22:15:41.928Z",
+  "payload": {
+    "request_id": "94643c0d-8d47-4464-a97f-a25dc0cc10f6",
+    "flow_path": [
+      "runRecommendationPipeline",
+      "fetchInventoryCandidates",
+      "filterByHardConstraints",
+      "shapeCandidatesForAI",
+      "rankAndExplain",
+      "logRecommendationQaEvent"
+    ],
+    "source_route": "/api/chat",
+    "session_id": "3f7bd721-72dc-4194-9589-aab8aa06f8cb",
+    "role": "retail_customer",
+    "tenant_id": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5",
+    "user_message": "Show me more like the cleanest one.",
+    "constraints": {
+      "size": {
+        "widthIn": 96,
+        "lengthIn": 120,
+        "toleranceIn": 0
+      },
+      "colors": [],
+      "styles": [
+        "modern"
+      ],
+      "strictness": {
+        "size": "prefer",
+        "colors": "prefer",
+        "styles": "prefer",
+        "shape": "prefer"
+      },
+      "avoid_preferences": {
+        "styles": [
+          "traditional",
+          "tribal",
+          "floral",
+          "ornate"
+        ],
+        "shapes": []
+      }
+    },
+    "prompt_context": {
+      "role": "retail_customer",
+      "chat_context": {
+        "structured_state": {
+          "recommendation_state": {
+            "hard_constraints": {
+              "size": {
+                "widthIn": 96,
+                "lengthIn": 120,
+                "toleranceIn": 0
+              },
+              "colors": [],
+              "styles": [
+                "modern"
+              ],
+              "strictness": {
+                "size": "prefer",
+                "colors": "prefer",
+                "styles": "prefer",
+                "shape": "prefer"
+              },
+              "avoid_preferences": {
+                "styles": [
+                  "traditional",
+                  "tribal",
+                  "floral",
+                  "ornate"
+                ],
+                "shapes": []
+              }
+            },
+            "soft_preferences": {},
+            "runtime": {
+              "last_result_mode": "recommendation",
+              "last_relaxed_size_tolerance_in": null,
+              "last_blockers": [],
+              "last_recommended_size_in": {
+                "width_in": 96,
+                "length_in": 120
+              },
+              "liked_rug_ids": [],
+              "dismissed_rug_ids": [],
+              "shown_rug_ids": [
+                "46245ee2-ac56-46e0-8cbf-b2eead74c24b"
+              ],
+              "liked_attributes": {
+                "colors": [],
+                "styles": [
+                  "modern"
+                ],
+                "origins": []
+              },
+              "recently_shown_rugs": [
+                {
+                  "id": "46245ee2-ac56-46e0-8cbf-b2eead74c24b",
+                  "label": "Contemporary Kilim",
+                  "colors": [
+                    "multi"
+                  ],
+                  "style": "Kilim",
+                  "origin": "Other"
+                }
+              ],
+              "no_match_attempts": 0,
+              "updated_at": "2026-04-02T22:15:27.211Z"
+            }
+          }
+        },
+        "conversation_memory": {
+          "summary_text": "User: I want a modern 8x10, understated, nothing traditional. | Assistant: We don't have exact modern matches right now, so I'm showing the closest available alternatives. We don't have exact modern style rugs in the 8x10 size at the moment, but I can show you a contemporary kilim that fits th…",
+          "stable_facts": [
+            "wants modern style",
+            "wants size 8x10",
+            "wants understated look",
+            "rejects traditional style",
+            "style modern",
+            "style traditional",
+            "preference I want a modern 8x10, understated, nothing traditional"
+          ],
+          "open_threads": [],
+          "last_user_intent": "recommendation",
+          "version": "v1"
+        },
+        "customer_context": [
+          "wants modern style",
+          "wants size 8x10",
+          "wants understated look",
+          "rejects traditional style",
+          "style modern",
+          "style traditional",
+          "preference I want a modern 8x10, understated, nothing traditional"
+        ],
+        "recently_shown_rugs": [
+          {
+            "id": "46245ee2-ac56-46e0-8cbf-b2eead74c24b",
+            "label": "Contemporary Kilim",
+            "colors": [
+              "multi"
+            ],
+            "style": "Kilim",
+            "origin": "Other"
+          }
+        ],
+        "shown_rug_ids": [
+          "46245ee2-ac56-46e0-8cbf-b2eead74c24b"
+        ],
+        "liked_attributes": {
+          "colors": [],
+          "styles": [
+            "modern"
+          ],
+          "origins": []
+        },
+        "recent_turns": [
+          {
+            "role": "user",
+            "content": "I want a modern 8x10, understated, nothing traditional.",
+            "created_at": "2026-04-02T22:15:17.113Z"
+          },
+          {
+            "role": "assistant",
+            "content": "We don't have exact modern matches right now, so I'm showing the closest available alternatives. We don't have exact modern style rugs in the 8x10 size at the moment, but I can show you a contemporary kilim that fits the size and offers a modern geometric design with a diverse c…",
+            "created_at": "2026-04-02T22:15:27.210Z"
+          }
+        ]
+      },
+      "discovery_mode": false,
+      "expanded_due_to_thin_results": true,
+      "constraint_mismatch": {
+        "expanded_from_zero_match": true,
+        "unmet_constraints": [],
+        "disclosure_hint": "I only have a limited number of close matches in this direction right now, so I'm showing the strongest available options again with the best refinements possible."
+      }
+    },
+    "query_trace": [
+      {
+        "variant": "size_direct",
+        "query_variant_reason": "size_window_direct_dimensions_query",
+        "filters": {
+          "tenant_id": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5",
+          "status": "available",
+          "enrichment_status": "ready",
+          "limit": 235,
+          "size_bounds": {
+            "minWidthIn": 96,
+            "maxWidthIn": 96,
+            "minLengthIn": 120,
+            "maxLengthIn": 120,
+            "rotated": false
+          },
+          "color_prefilter_active": false,
+          "image_sql_filter_active": true,
+          "color_prefilter": "inactive",
+          "color_prefilter_state": "inactive",
+          "color_sql_prefilter_tokens": null
+        },
+        "row_count": 75,
+        "error": null
+      },
+      {
+        "variant": "size_rotated",
+        "query_variant_reason": "size_window_rotated_dimensions_query",
+        "filters": {
+          "tenant_id": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5",
+          "status": "available",
+          "enrichment_status": "ready",
+          "limit": 235,
+          "size_bounds": {
+            "minWidthIn": 96,
+            "maxWidthIn": 96,
+            "minLengthIn": 120,
+            "maxLengthIn": 120,
+            "rotated": true
+          },
+          "color_prefilter_active": false,
+          "image_sql_filter_active": true,
+          "color_prefilter": "inactive",
+          "color_prefilter_state": "inactive",
+          "color_sql_prefilter_tokens": null
+        },
+        "row_count": 0,
+        "error": null
+      }
+    ],
+    "dynamic_limit": 235,
+    "policy_sql_filters": {
+      "tenant_id": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5",
+      "status": "available",
+      "enrichment_status": "ready",
+      "size_window": {
+        "minWidthIn": 96,
+        "maxWidthIn": 96,
+        "minLengthIn": 120,
+        "maxLengthIn": 120
+      },
+      "hard_constraints": {
+        "size": true,
+        "styles": true,
+        "shape": false
+      },
+      "image_sql_filter_active": true,
+      "color_prefilter_active": false,
+      "color_prefilter": "inactive",
+      "color_prefilter_state": "inactive",
+      "color_prefilter_tokens": [],
+      "discovery_mode": false,
+      "confidence": "low"
+    },
+    "query_variant_reason": "size_window_active_query_direct_and_rotated",
+    "row_counts": {
+      "sql_rows_total": 75,
+      "sql_rows_by_variant": [
+        {
+          "variant": "size_direct",
+          "query_variant_reason": "size_window_direct_dimensions_query",
+          "row_count": 75,
+          "error": null
+        },
+        {
+          "variant": "size_rotated",
+          "query_variant_reason": "size_window_rotated_dimensions_query",
+          "row_count": 0,
+          "error": null
+        }
+      ]
+    },
+    "discovery_mode": false,
+    "color_sql_prefilter_tokens": [],
+    "broadening_applied": true,
+    "broadening_stage": "thin_results_style_relaxation",
+    "no_match": {
+      "fallback_tier": "none",
+      "reasonableness_gate": "passed",
+      "reasonableness_gate_result": "passed",
+      "terminal_reason_code": null
+    },
+    "candidate_counts": {
+      "sql_candidates": 75,
+      "hard_filtered_candidates": 1,
+      "ai_candidates": 1
+    },
+    "timing_ms": {
+      "count_rough_inventory_size_ms": 246,
+      "fetch_inventory_candidates_ms": 367,
+      "filter_hard_constraints_ms": 3,
+      "shape_candidates_ms": 2,
+      "rank_and_explain_ms": 4107,
+      "qa_log_ms": 2,
+      "total_ms": 4730
+    },
+    "ai_trace": {
+      "called": true,
+      "model": "gpt-4.1-mini",
+      "prompt_layers": [
+        {
+          "id": "TASK_PROMPT_RECOMMENDATION",
+          "role": "system",
+          "chars": 1408,
+          "preview": "Do not open with generic transition language. Start with a request-anchored line that names the customer's actual focus…"
+        },
+        {
+          "id": "SYSTEM_PROMPT_BASE",
+          "role": "system",
+          "chars": 758,
+          "preview": "# AI System Prompt — Rug Concierge You are an experienced rug consultant helping retail customers in a showroom environ…"
+        },
+        {
+          "id": "TASK_PROMPT_RECOMMENDATION",
+          "role": "system",
+          "chars": 19,
+          "preview": "Respond in English."
+        },
+        {
+          "id": "TASK_PROMPT_RECOMMENDATION",
+          "role": "system",
+          "chars": 3444,
+          "preview": "# Recommendation Prompt You are a retail rug concierge for in-store customers. Recommend only from provided inventory c…"
+        },
+        {
+          "id": "STRUCTURED_OUTPUT_RECOMMENDATION",
+          "role": "system",
+          "chars": 452,
+          "preview": "# Recommendation Structured Output Add-on Use this prompt layer only for recommendation mode. Runtime JSON schema valid…"
+        },
+        {
+          "id": "CHAT_MEMORY_CONTEXT",
+          "role": "system",
+          "chars": 1526,
+          "preview": "CHAT MEMORY CONTEXT: {\"structured_state\":{\"recommendation_state\":{\"hard_constraints\":{\"size\":{\"widthIn\":96,\"lengthIn\":1…"
+        },
+        {
+          "id": "CHAT_MEMORY_CONTEXT",
+          "role": "system",
+          "chars": 229,
+          "preview": "CUSTOMER CONTEXT (stable facts): [\"wants modern style\",\"wants size 8x10\",\"wants understated look\",\"rejects traditional…"
+        },
+        {
+          "id": "CHAT_MEMORY_CONTEXT",
+          "role": "system",
+          "chars": 192,
+          "preview": "RECENTLY SHOWN RUGS (avoid repeating unless clearly requested): [{\"id\":\"46245ee2-ac56-46e0-8cbf-b2eead74c24b\",\"label\":\"…"
+        },
+        {
+          "id": "CHAT_MEMORY_CONTEXT",
+          "role": "system",
+          "chars": 90,
+          "preview": "LIKED ATTRIBUTES (weight these positively): {\"colors\":[],\"styles\":[\"modern\"],\"origins\":[]}"
+        },
+        {
+          "id": "RECENT_TURNS_CONTEXT",
+          "role": "system",
+          "chars": 501,
+          "preview": "RECENT TURNS CONTEXT: [{\"role\":\"user\",\"content\":\"I want a modern 8x10, understated, nothing traditional.\",\"created_at\":…"
+        },
+        {
+          "id": "INVENTORY_CONTEXT",
+          "role": "system",
+          "chars": 458,
+          "preview": "AVAILABLE INVENTORY (authoritative). Each entry includes ID, Label, Size, and Description: [{\"id\":\"46245ee2-ac56-46e0-8…"
+        },
+        {
+          "id": "LATEST_USER_MESSAGE_WITH_HARD_CONSTRAINTS",
+          "role": "user",
+          "chars": 325,
+          "preview": "User request: Show me more like the cleanest one. Hard constraints: {\"size\":{\"widthIn\":96,\"lengthIn\":120,\"toleranceIn\":…"
+        },
+        {
+          "id": "TASK_PROMPT_RECOMMENDATION",
+          "role": "system",
+          "chars": 521,
+          "preview": "Constraint mismatch expansion is active: {\"expanded_from_zero_match\":true,\"unmet_constraints\":[],\"disclosure_hint\":\"I o…"
+        },
+        {
+          "id": "TASK_PROMPT_RECOMMENDATION",
+          "role": "system",
+          "chars": 148,
+          "preview": "Thin-results expansion is active. Include one concise disclosure that only a few exact matches were available and simil…"
+        }
+      ],
+      "request_payload": {
+        "model": "gpt-4.1-mini",
+        "input": [
+          {
+            "role": "system",
+            "content": [
+              {
+                "type": "input_text",
+                "text": "Do not open with generic transition language. Start with a request-anchored line that names the customer's actual focus (for example: size, style, color, room, or practical need).\nVoice: warm, confident, and tasteful. Sound like a helpful showroom consultant, not a search engine.\nKeep it concise: 1-3 short sentences in assistant_message. Avoid robotic filler.\nWhen recommending, highlight one standout reason the top piece is special.\nIf the customer states an avoid preference (for example: no red, not too busy), do not praise or foreground that avoided direction.\nIf the customer asks for larger/smaller and exact directional matches are unavailable, say that directly before presenting closest alternatives. Never claim the returned set satisfies a directional request when it does not.\nIf the customer mentions practical needs (kids, pets, high traffic, easy-clean), include one practical suitability note in the opening or first recommendation reason.\nEnd recommendations with one natural next-step invitation (for example: show more like this, larger, or different color).\nOpening behavior guidance:\n- Color-led request: acknowledge requested color direction first, then present strongest in-stock matches.\n- Style/origin request: acknowledge requested style/origin first, then present closest available pieces.\n- Discovery request: acknowledge open browsing intent and present a varied compare set."
+              },
+              {
+                "type": "input_text",
+                "text": "# AI System Prompt — Rug Concierge\n\nYou are an experienced rug consultant helping retail customers in a showroom environment.\n\nCore behavior:\n- Be accurate, practical, and calm.\n- Use only information provided in conversation and inventory context.\n- If data is missing, say what is unknown.\n- Never invent rug attributes, inventory availability, or IDs.\n\nTone:\n- Professional and approachable.\n- Concise and specific.\n- Not salesy or exaggerated. Genuine enthusiasm is appropriate when a piece genuinely stands out in quality, origin, condition, or rarity.\n- Detect the language of the user's message and respond in that same language.\n\nTrust rules:\n- When unsure, say so directly.\n- Prefer clear guidance over speculation.\n- Keep responses plain text only."
+              },
+              {
+                "type": "input_text",
+                "text": "Respond in English."
+              },
+              {
+                "type": "input_text",
+                "text": "# Recommendation Prompt\n\nYou are a retail rug concierge for in-store customers.\nRecommend only from provided inventory context.\n\n## Core Rules\n\n- Inventory only. Never invent rugs or IDs.\n- Use `ai_description` as primary narrative relevance signal.\n- Use structured fields (`origin`, `style`, `mood`, `pattern`, `primary_colors`) to refine fit.\n- Respect hard constraints from backend state: `size`, `styles`, `shape`.\n- Treat color as a strong ranking signal, not a hard exclusion.\n- Rank color fit by dominance order: dominant field color first, secondary/border color second, accent/detail color third.\n- Color tie-breakers: prefer rugs matching dominant color over secondary-only matches; then prefer rugs matching both dominant and secondary; then prefer stronger style/origin fit and richer listing detail.\n- Treat room/material as soft preferences unless backend marks them hard in context.\n- If `ai_description` is missing, the rug may still be suggested when hard constraints fit; clearly state detail is pending.\n- Every reason must be specific to that rug and connect the rug's attributes to the customer's stated context (room, decor, practical needs).\n- When `customer_context` is provided, treat it as a first-class input and connect recommendations to it explicitly.\n- In discovery mode, present an inspiring range. Add at most one natural narrowing question only when it helps refine the next turn.\n- Do not begin with stock transition filler. Open with a request-anchored line that reflects the customer's stated focus (size, style, color, room, or practical need).\n- Match the language of the customer's latest message.\n- Sound warm, confident, and tasteful. Write like an expert showroom consultant, not a product filter.\n- Keep `assistant_message` concise (1-3 short sentences), but include one specific standout detail for the top direction.\n- If the customer gives avoid preferences (for example: no red, not too busy), do not praise or foreground those avoided traits.\n- If the customer asks for larger/smaller and exact directional matches are unavailable, disclose that first and then show closest alternatives. Never claim the returned set satisfies the directional request when it does not.\n- If the customer mentions practical needs (kids, pets, high traffic, easy-clean), include one practical suitability note.\n- End recommendation responses with one natural next-step invitation (for example: show more like this, bigger, smaller, or another color direction).\n- When exact matches are unavailable, disclose clearly in the first sentence and pivot constructively to what is available.\n- Opening behavior guidance:\n- Size-driven request: acknowledge the requested size/use-case first, then position options as best available fits.\n- Color-driven request: acknowledge requested color direction first, then prioritize dominance-aligned matches.\n- Style/origin request: acknowledge requested style/origin first, then position options as closest in-stock direction.\n- Discovery/browse request: acknowledge open browsing intent first, then frame results as a varied compare set.\n\n## Formatting\n\n- Plain text only inside string fields.\n- No markdown formatting.\n- Keep responses concise and complete.\n\n## Selection Order\n\n1. Respect backend hard constraints.\n2. Rank by fit to user intent and available rug attributes.\n3. Prefer grounded explanations over broad claims.\n4. Return `no_match` only when inventory is empty."
+              },
+              {
+                "type": "input_text",
+                "text": "# Recommendation Structured Output Add-on\n\nUse this prompt layer only for recommendation mode.\n\nRuntime JSON schema validation in code is authoritative.\nThe model output must match that schema exactly.\n\nRules:\n- JSON only (no prose outside JSON)\n- no extra keys\n- no markdown\n- concise, complete string values\n- use null only where schema allows null\n\nAny mismatch should be treated as invalid output and handled by backend sanitization/fallback logic."
+              },
+              {
+                "type": "input_text",
+                "text": "CHAT MEMORY CONTEXT:\n{\"structured_state\":{\"recommendation_state\":{\"hard_constraints\":{\"size\":{\"widthIn\":96,\"lengthIn\":120,\"toleranceIn\":0},\"colors\":[],\"styles\":[\"modern\"],\"strictness\":{\"size\":\"prefer\",\"colors\":\"prefer\",\"styles\":\"prefer\",\"shape\":\"prefer\"},\"avoid_preferences\":{\"styles\":[\"traditional\",\"tribal\",\"floral\",\"ornate\"],\"shapes\":[]}},\"soft_preferences\":{},\"runtime\":{\"last_result_mode\":\"recommendation\",\"last_relaxed_size_tolerance_in\":null,\"last_blockers\":[],\"last_recommended_size_in\":{\"width_in\":96,\"length_in\":120},\"liked_rug_ids\":[],\"dismissed_rug_ids\":[],\"shown_rug_ids\":[\"46245ee2-ac56-46e0-8cbf-b2eead74c24b\"],\"liked_attributes\":{\"colors\":[],\"styles\":[\"modern\"],\"origins\":[]},\"recently_shown_rugs\":[{\"id\":\"46245ee2-ac56-46e0-8cbf-b2eead74c24b\",\"label\":\"Contemporary Kilim\",\"colors\":[\"multi\"],\"style\":\"Kilim\",\"origin\":\"Other\"}],\"no_match_attempts\":0,\"updated_at\":\"2026-04-02T22:15:27.211Z\"}}},\"conversation_memory\":{\"summary_text\":\"User: I want a modern 8x10, understated, nothing traditional. | Assistant: We don't have exact modern matches right now, so I'm showing the closest available alternatives. We don't have exact modern style rugs in the 8x10 size at the moment, but I can show you a contemporary kilim that fits th…\",\"stable_facts\":[\"wants modern style\",\"wants size 8x10\",\"wants understated look\",\"rejects traditional style\",\"style modern\",\"style traditional\",\"preference I want a modern 8x10, understated, nothing traditional\"],\"open_threads\":[],\"last_user_intent\":\"recommendation\",\"version\":\"v1\"}}"
+              },
+              {
+                "type": "input_text",
+                "text": "CUSTOMER CONTEXT (stable facts):\n[\"wants modern style\",\"wants size 8x10\",\"wants understated look\",\"rejects traditional style\",\"style modern\",\"style traditional\",\"preference I want a modern 8x10, understated, nothing traditional\"]"
+              },
+              {
+                "type": "input_text",
+                "text": "RECENTLY SHOWN RUGS (avoid repeating unless clearly requested):\n[{\"id\":\"46245ee2-ac56-46e0-8cbf-b2eead74c24b\",\"label\":\"Contemporary Kilim\",\"colors\":[\"multi\"],\"style\":\"Kilim\",\"origin\":\"Other\"}]"
+              },
+              {
+                "type": "input_text",
+                "text": "LIKED ATTRIBUTES (weight these positively):\n{\"colors\":[],\"styles\":[\"modern\"],\"origins\":[]}"
+              },
+              {
+                "type": "input_text",
+                "text": "RECENT TURNS CONTEXT:\n[{\"role\":\"user\",\"content\":\"I want a modern 8x10, understated, nothing traditional.\",\"created_at\":\"2026-04-02T22:15:17.113Z\"},{\"role\":\"assistant\",\"content\":\"We don't have exact modern matches right now, so I'm showing the closest available alternatives. We don't have exact modern style rugs in the 8x10 size at the moment, but I can show you a contemporary kilim that fits the size and offers a modern geometric design with a diverse c…\",\"created_at\":\"2026-04-02T22:15:27.210Z\"}]"
+              },
+              {
+                "type": "input_text",
+                "text": "AVAILABLE INVENTORY (authoritative). Each entry includes ID, Label, Size, and Description:\n[{\"id\":\"46245ee2-ac56-46e0-8cbf-b2eead74c24b\",\"label\":\"Contemporary Kilim\",\"size\":\"8' x 10'\",\"origin\":\"Other\",\"style\":\"Kilim\",\"mood\":\"modern\",\"pattern\":[\"geometric design\"],\"colors\":[\"multi\"],\"desc\":\"A contemporary flatweave rug with a bold, geometric design in rectangular blocks. The rug features a diverse palette of colors arranged in a simple, modern pattern.\"}]"
+              }
+            ]
+          },
+          {
+            "role": "user",
+            "content": [
+              {
+                "type": "input_text",
+                "text": "User request:\nShow me more like the cleanest one.\n\nHard constraints:\n{\"size\":{\"widthIn\":96,\"lengthIn\":120,\"toleranceIn\":0},\"colors\":[],\"styles\":[\"modern\"],\"strictness\":{\"size\":\"prefer\",\"colors\":\"prefer\",\"styles\":\"prefer\",\"shape\":\"prefer\"},\"avoid_preferences\":{\"styles\":[\"traditional\",\"tribal\",\"floral\",\"ornate\"],\"shapes\":[]}}"
+              }
+            ]
+          },
+          {
+            "role": "system",
+            "content": [
+              {
+                "type": "input_text",
+                "text": "Constraint mismatch expansion is active: {\"expanded_from_zero_match\":true,\"unmet_constraints\":[],\"disclosure_hint\":\"I only have a limited number of close matches in this direction right now, so I'm showing the strongest available options again with the best refinements possible.\"}. You MUST open assistant_message with one concise, honest disclosure that exact matches were unavailable, and that disclosure must appear before any rug descriptions. Keep the tone constructive and helpful, then pivot to what is available."
+              },
+              {
+                "type": "input_text",
+                "text": "Thin-results expansion is active. Include one concise disclosure that only a few exact matches were available and similar alternatives are included."
+              }
+            ]
+          }
+        ],
+        "max_output_tokens": 800,
+        "text": {
+          "format": {
+            "type": "json_schema",
+            "name": "recommendation_response",
+            "schema": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "mode",
+                "assistant_message",
+                "questions",
+                "recommendations",
+                "notes"
+              ],
+              "properties": {
+                "mode": {
+                  "type": "string",
+                  "enum": [
+                    "recommendations",
+                    "clarifying_question",
+                    "no_match",
+                    "disambiguation"
+                  ]
+                },
+                "assistant_message": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 420
+                },
+                "questions": {
+                  "type": "array",
+                  "minItems": 0,
+                  "maxItems": 2,
+                  "items": {
+                    "type": "string",
+                    "maxLength": 140
+                  }
+                },
+                "recommendations": {
+                  "type": "array",
+                  "minItems": 0,
+                  "maxItems": 10,
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                      "rug_id",
+                      "sku",
+                      "title",
+                      "origin",
+                      "style",
+                      "mood",
+                      "size_text",
+                      "match_reasons",
+                      "confidence",
+                      "confidence_tier",
+                      "confidence_factors",
+                      "why_not"
+                    ],
+                    "properties": {
+                      "rug_id": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 80
+                      },
+                      "sku": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "maxLength": 80
+                      },
+                      "title": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 160
+                      },
+                      "origin": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "maxLength": 60
+                      },
+                      "style": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "maxLength": 80
+                      },
+                      "mood": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "maxLength": 32
+                      },
+                      "size_text": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "maxLength": 64
+                      },
+                      "match_reasons": {
+                        "type": "array",
+                        "minItems": 1,
+                        "maxItems": 3,
+                        "items": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 180
+                        }
+                      },
+                      "confidence": {
+                        "type": "number"
+                      },
+                      "confidence_tier": {
+                        "type": "string",
+                        "enum": [
+                          "high",
+                          "medium",
+                          "low"
+                        ]
+                      },
+                      "confidence_factors": {
+                        "type": "array",
+                        "minItems": 0,
+                        "maxItems": 3,
+                        "items": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 100
+                        }
+                      },
+                      "why_not": {
+                        "type": "array",
+                        "minItems": 0,
+                        "maxItems": 2,
+                        "items": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 160
+                        }
+                      }
+                    }
+                  }
+                },
+                "notes": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "maxLength": 220
+                }
+              }
+            },
+            "strict": true
+          }
+        }
+      },
+      "response_status": 200,
+      "response_payload": {
+        "id": "resp_00a150992313a0240069ceea89e14081a3b00dad923cd2d872",
+        "object": "response",
+        "created_at": 1775168137,
+        "status": "completed",
+        "background": false,
+        "billing": {
+          "payer": "developer"
+        },
+        "completed_at": 1775168141,
+        "error": null,
+        "frequency_penalty": 0,
+        "incomplete_details": null,
+        "instructions": null,
+        "max_output_tokens": 800,
+        "max_tool_calls": null,
+        "model": "gpt-4.1-mini-2025-04-14",
+        "output": [
+          {
+            "id": "msg_00a150992313a0240069ceea8afb1881a3bffab2eb52e10b81",
+            "type": "message",
+            "status": "completed",
+            "content": [
+              {
+                "type": "output_text",
+                "annotations": [],
+                "logprobs": [],
+                "text": "{\"mode\":\"recommendations\",\"assistant_message\":\"We have very few modern 8x10 rugs in stock and none cleaner than the Contemporary Kilim previously shown. This sleek flatweave impresses with its bold geometric blocks and a versatile multi-color palette that suits understated modern spaces well. Let me know if you'd like to explore more options in other sizes or styles.\",\"questions\":[],\"recommendations\":[{\"rug_id\":\"46245ee2-ac56-46e0-8cbf-b2eead74c24b\",\"sku\":null,\"title\":\"Contemporary Kilim\",\"origin\":\"Other\",\"style\":\"Kilim\",\"mood\":\"modern\",\"size_text\":\"8' x 10'\",\"match_reasons\":[\"Fits the preferred 8x10 size exactly.\",\"Boasts a modern, geometric design that aligns with the understated look.\",\"Its flatweave construction is practical for daily use.\"],\"confidence\":0.9,\"confidence_tier\":\"high\",\"confidence_factors\":[\"Exact size match.\",\"Modern mood and geometric pattern.\",\"Shows in-stock availability.\"],\"why_not\":[]}] ,\"notes\":\"Only one strong modern 8x10 rug is currently available; consider adjusting size or style to expand options.\"}"
+              }
+            ],
+            "role": "assistant"
+          }
+        ],
+        "parallel_tool_calls": true,
+        "presence_penalty": 0,
+        "previous_response_id": null,
+        "prompt_cache_key": null,
+        "prompt_cache_retention": null,
+        "reasoning": {
+          "effort": null,
+          "summary": null
+        },
+        "safety_identifier": null,
+        "service_tier": "default",
+        "store": true,
+        "temperature": 1,
+        "text": {
+          "format": {
+            "type": "json_schema",
+            "description": null,
+            "name": "recommendation_response",
+            "schema": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "mode",
+                "assistant_message",
+                "questions",
+                "recommendations",
+                "notes"
+              ],
+              "properties": {
+                "mode": {
+                  "type": "string",
+                  "enum": [
+                    "recommendations",
+                    "clarifying_question",
+                    "no_match",
+                    "disambiguation"
+                  ]
+                },
+                "assistant_message": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 420
+                },
+                "questions": {
+                  "type": "array",
+                  "minItems": 0,
+                  "maxItems": 2,
+                  "items": {
+                    "type": "string",
+                    "maxLength": 140
+                  }
+                },
+                "recommendations": {
+                  "type": "array",
+                  "minItems": 0,
+                  "maxItems": 10,
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                      "rug_id",
+                      "sku",
+                      "title",
+                      "origin",
+                      "style",
+                      "mood",
+                      "size_text",
+                      "match_reasons",
+                      "confidence",
+                      "confidence_tier",
+                      "confidence_factors",
+                      "why_not"
+                    ],
+                    "properties": {
+                      "rug_id": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 80
+                      },
+                      "sku": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "maxLength": 80
+                      },
+                      "title": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 160
+                      },
+                      "origin": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "maxLength": 60
+                      },
+                      "style": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "maxLength": 80
+                      },
+                      "mood": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "maxLength": 32
+                      },
+                      "size_text": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "maxLength": 64
+                      },
+                      "match_reasons": {
+                        "type": "array",
+                        "minItems": 1,
+                        "maxItems": 3,
+                        "items": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 180
+                        }
+                      },
+                      "confidence": {
+                        "type": "number"
+                      },
+                      "confidence_tier": {
+                        "type": "string",
+                        "enum": [
+                          "high",
+                          "medium",
+                          "low"
+                        ]
+                      },
+                      "confidence_factors": {
+                        "type": "array",
+                        "minItems": 0,
+                        "maxItems": 3,
+                        "items": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 100
+                        }
+                      },
+                      "why_not": {
+                        "type": "array",
+                        "minItems": 0,
+                        "maxItems": 2,
+                        "items": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 160
+                        }
+                      }
+                    }
+                  }
+                },
+                "notes": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "maxLength": 220
+                }
+              }
+            },
+            "strict": true
+          },
+          "verbosity": "medium"
+        },
+        "tool_choice": "auto",
+        "tools": [],
+        "top_logprobs": 0,
+        "top_p": 1,
+        "truncation": "disabled",
+        "usage": {
+          "input_tokens": 2413,
+          "input_tokens_details": {
+            "cached_tokens": 0
+          },
+          "output_tokens": 244,
+          "output_tokens_details": {
+            "reasoning_tokens": 0
+          },
+          "total_tokens": 2657
+        },
+        "user": null,
+        "metadata": {}
+      },
+      "parsed_response": {
+        "mode": "recommendations",
+        "assistant_message": "I only have a limited number of close matches in this direction right now, so I'm showing the strongest available options again with the best refinements possible. We have very few modern 8x10 rugs in stock and none cleaner than the Contemporary Kilim previously shown. This sleek flatweave impresses with its bold geometric blocks and a versatile multi-color palette that suits understated modern spaces well.",
+        "questions": [],
+        "recommendations": [
+          {
+            "rug_id": "46245ee2-ac56-46e0-8cbf-b2eead74c24b",
+            "sku": null,
+            "title": "Contemporary Kilim",
+            "origin": "Other",
+            "style": "Kilim",
+            "mood": "modern",
+            "size_text": "8' x 10'",
+            "match_reasons": [
+              "A contemporary flatweave rug with a bold, geometric design in rectangular blocks. The rug features a diverse palette of colors arranged in a simple, modern pattern.",
+              "Size closely matches your requested dimensions."
+            ],
+            "confidence": 0.75,
+            "confidence_tier": "medium",
+            "confidence_factors": [
+              "Strong size alignment",
+              "Detailed listing context available"
+            ],
+            "why_not": [],
+            "primary_image_url": "https://nlypymygmysfgxekhudr.supabase.co/storage/v1/object/public/rug-images/1f3d032b-8411-48a9-8a44-1f3cb9df67a5/46245ee2-ac56-46e0-8cbf-b2eead74c24b/primary-1774655404573.webp",
+            "primary_image_caption": null
+          }
+        ],
+        "notes": "Only one strong modern 8x10 rug is currently available; consider adjusting size or style to expand options. | CONSTRAINT_MISMATCH_EXPANDED | THIN_RESULTS_STYLE_EXPANDED"
+      },
+      "fallback_reason": null,
+      "error": null,
+      "incomplete_detected": false,
+      "retry_attempted": false,
+      "retry_succeeded": false,
+      "text_postprocess_applied": false
+    },
+    "result": {
+      "mode": "recommendations",
+      "notes": "Only one strong modern 8x10 rug is currently available; consider adjusting size or style to expand options. | CONSTRAINT_MISMATCH_EXPANDED | THIN_RESULTS_STYLE_EXPANDED",
+      "recommendation_ids": [
+        "46245ee2-ac56-46e0-8cbf-b2eead74c24b"
+      ],
+      "recommendation_count": 1,
+      "relaxed_size_tolerance_in": null
+    },
+    "error": null
+  }
+}

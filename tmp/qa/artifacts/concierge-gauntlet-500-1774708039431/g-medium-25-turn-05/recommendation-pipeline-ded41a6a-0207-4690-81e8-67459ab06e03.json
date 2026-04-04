@@ -1,0 +1,822 @@
+{
+  "trace_id": "ded41a6a-0207-4690-81e8-67459ab06e03",
+  "channel": "recommendation-pipeline",
+  "created_at": "2026-03-28T15:22:04.212Z",
+  "payload": {
+    "request_id": "ded41a6a-0207-4690-81e8-67459ab06e03",
+    "flow_path": [
+      "runRecommendationPipeline",
+      "fetchInventoryCandidates",
+      "filterByHardConstraints",
+      "shapeCandidatesForAI",
+      "rankAndExplain",
+      "logRecommendationQaEvent"
+    ],
+    "source_route": "/api/chat",
+    "session_id": "fc9f5182-f315-4ccc-9aa6-f32ba79ae089",
+    "role": "retail_customer",
+    "tenant_id": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5",
+    "user_message": "Show me kilims in medium sizes",
+    "constraints": {
+      "styles": [
+        "kilim"
+      ],
+      "strictness": {
+        "size": "prefer",
+        "colors": "prefer",
+        "styles": "must",
+        "shape": "prefer"
+      }
+    },
+    "prompt_context": {
+      "role": "retail_customer",
+      "chat_context": {
+        "structured_state": {
+          "recommendation_state": {
+            "hard_constraints": {
+              "styles": [
+                "kilim"
+              ],
+              "strictness": {
+                "size": "prefer",
+                "colors": "prefer",
+                "styles": "must",
+                "shape": "prefer"
+              }
+            },
+            "soft_preferences": {},
+            "runtime": {
+              "last_result_mode": "recommendation",
+              "last_relaxed_size_tolerance_in": null,
+              "last_blockers": [],
+              "last_recommended_size_in": {
+                "width_in": 96,
+                "length_in": 120
+              },
+              "liked_rug_ids": [],
+              "dismissed_rug_ids": [],
+              "shown_rug_ids": [
+                "46245ee2-ac56-46e0-8cbf-b2eead74c24b"
+              ],
+              "liked_attributes": {
+                "colors": [],
+                "styles": [
+                  "modern"
+                ],
+                "origins": []
+              },
+              "recently_shown_rugs": [
+                {
+                  "id": "46245ee2-ac56-46e0-8cbf-b2eead74c24b",
+                  "label": "Contemporary Kilim",
+                  "colors": [
+                    "multi"
+                  ],
+                  "style": "Kilim",
+                  "origin": "Other"
+                }
+              ],
+              "no_match_attempts": 0,
+              "updated_at": "2026-03-28T15:21:52.496Z"
+            }
+          }
+        },
+        "conversation_memory": {
+          "summary_text": "…es right now, so I'm showing the closest available alternatives. We don't have exact modern style rugs in 8x10 size right now, but this contemporary Kilim piece is a great geometric and c… || User: Any closer matches? | Assistant: We currently don't have closer matches to a modern 8x10 rug in our inventory. Would you like me to show more contemporary style options in nearby sizes or styles? || User: This feels too formal | Assistant: Thanks for the feedback! I can keep things more casual and straightforward. Would you like me to show you more rugs that have a contemporary vibe but maybe in different sizes or styles? || User: How often should I rotate a rug? | Assistant: It's generally recommended to rotate your rug every 3 to 6 months to ensure even wear and fading. This helps maintain its appearance and prolong its life. Would you like me to share care tips tailored to specific rug ty…",
+          "stable_facts": [
+            "style modern"
+          ],
+          "open_threads": [
+            "How often should I rotate a rug?",
+            "Would you like me to share care tips tailored to specific rug types or show you rugs with easy-maintenance features?",
+            "Would you like me to show you more rugs that have a contemporary vibe but maybe in different sizes or styles?",
+            "Any closer matches?",
+            "Would you like me to show more contemporary style options in nearby sizes or styles?"
+          ],
+          "last_user_intent": "general_chat",
+          "version": "v1"
+        },
+        "customer_context": [
+          "style modern"
+        ],
+        "recently_shown_rugs": [
+          {
+            "id": "46245ee2-ac56-46e0-8cbf-b2eead74c24b",
+            "label": "Contemporary Kilim",
+            "colors": [
+              "multi"
+            ],
+            "style": "Kilim",
+            "origin": "Other"
+          }
+        ],
+        "shown_rug_ids": [
+          "46245ee2-ac56-46e0-8cbf-b2eead74c24b"
+        ],
+        "liked_attributes": {
+          "colors": [],
+          "styles": [
+            "modern"
+          ],
+          "origins": []
+        },
+        "recent_turns": [
+          {
+            "role": "user",
+            "content": "This feels too formal",
+            "created_at": "2026-03-28T15:21:42.889Z"
+          },
+          {
+            "role": "assistant",
+            "content": "Thanks for the feedback! I can keep things more casual and straightforward. Would you like me to show you more rugs that have a contemporary vibe but maybe in different sizes or styles?",
+            "created_at": "2026-03-28T15:21:44.489Z"
+          },
+          {
+            "role": "user",
+            "content": "How often should I rotate a rug?",
+            "created_at": "2026-03-28T15:21:49.225Z"
+          },
+          {
+            "role": "assistant",
+            "content": "It's generally recommended to rotate your rug every 3 to 6 months to ensure even wear and fading. This helps maintain its appearance and prolong its life. Would you like me to share care tips tailored to specific rug types or show you rugs with easy-maintenance features? If you'…",
+            "created_at": "2026-03-28T15:21:52.496Z"
+          }
+        ]
+      },
+      "discovery_mode": false,
+      "expanded_due_to_thin_results": false
+    },
+    "query_trace": [
+      {
+        "variant": "base",
+        "query_variant_reason": "no_size_window_base_query",
+        "filters": {
+          "tenant_id": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5",
+          "status": "available",
+          "enrichment_status": "ready",
+          "limit": 235,
+          "size_bounds": null,
+          "color_prefilter_active": false,
+          "image_sql_filter_active": true,
+          "color_prefilter": "inactive",
+          "color_prefilter_state": "inactive",
+          "color_sql_prefilter_tokens": null
+        },
+        "row_count": 235,
+        "error": null
+      }
+    ],
+    "dynamic_limit": 235,
+    "policy_sql_filters": {
+      "tenant_id": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5",
+      "status": "available",
+      "enrichment_status": "ready",
+      "size_window": null,
+      "hard_constraints": {
+        "size": false,
+        "styles": true,
+        "shape": false
+      },
+      "image_sql_filter_active": true,
+      "color_prefilter_active": false,
+      "color_prefilter": "inactive",
+      "color_prefilter_state": "inactive",
+      "color_prefilter_tokens": [],
+      "discovery_mode": false,
+      "confidence": "high"
+    },
+    "query_variant_reason": "no_size_window_base_query",
+    "row_counts": {
+      "sql_rows_total": 235,
+      "sql_rows_by_variant": [
+        {
+          "variant": "base",
+          "query_variant_reason": "no_size_window_base_query",
+          "row_count": 235,
+          "error": null
+        }
+      ]
+    },
+    "discovery_mode": false,
+    "color_sql_prefilter_tokens": [],
+    "broadening_applied": false,
+    "broadening_stage": "none",
+    "no_match": {
+      "fallback_tier": "none",
+      "reasonableness_gate": "not_applicable",
+      "reasonableness_gate_result": "not_applicable",
+      "terminal_reason_code": null
+    },
+    "candidate_counts": {
+      "sql_candidates": 235,
+      "hard_filtered_candidates": 4,
+      "ai_candidates": 4
+    },
+    "timing_ms": {
+      "count_rough_inventory_size_ms": 351,
+      "fetch_inventory_candidates_ms": 648,
+      "filter_hard_constraints_ms": 3,
+      "shape_candidates_ms": 2,
+      "rank_and_explain_ms": 5684,
+      "qa_log_ms": 3,
+      "total_ms": 6692
+    },
+    "ai_trace": {
+      "called": true,
+      "model": "gpt-4.1-mini",
+      "prompt_layers": [
+        {
+          "id": "TASK_PROMPT_RECOMMENDATION",
+          "role": "system",
+          "chars": 1408,
+          "preview": "Never begin a response with \"Based on what you're looking for\" or any equivalent generic transition. Open with a line t…"
+        },
+        {
+          "id": "SYSTEM_PROMPT_BASE",
+          "role": "system",
+          "chars": 758,
+          "preview": "# AI System Prompt — Rug Concierge You are an experienced rug consultant helping retail customers in a showroom environ…"
+        },
+        {
+          "id": "TASK_PROMPT_RECOMMENDATION",
+          "role": "system",
+          "chars": 19,
+          "preview": "Respond in English."
+        },
+        {
+          "id": "TASK_PROMPT_RECOMMENDATION",
+          "role": "system",
+          "chars": 3458,
+          "preview": "# Recommendation Prompt You are a retail rug concierge for in-store customers. Recommend only from provided inventory c…"
+        },
+        {
+          "id": "STRUCTURED_OUTPUT_RECOMMENDATION",
+          "role": "system",
+          "chars": 452,
+          "preview": "# Recommendation Structured Output Add-on Use this prompt layer only for recommendation mode. Runtime JSON schema valid…"
+        },
+        {
+          "id": "CHAT_MEMORY_CONTEXT",
+          "role": "system",
+          "chars": 2169,
+          "preview": "CHAT MEMORY CONTEXT: {\"structured_state\":{\"recommendation_state\":{\"hard_constraints\":{\"styles\":[\"kilim\"],\"strictness\":{…"
+        },
+        {
+          "id": "CHAT_MEMORY_CONTEXT",
+          "role": "system",
+          "chars": 49,
+          "preview": "CUSTOMER CONTEXT (stable facts): [\"style modern\"]"
+        },
+        {
+          "id": "CHAT_MEMORY_CONTEXT",
+          "role": "system",
+          "chars": 192,
+          "preview": "RECENTLY SHOWN RUGS (avoid repeating unless clearly requested): [{\"id\":\"46245ee2-ac56-46e0-8cbf-b2eead74c24b\",\"label\":\"…"
+        },
+        {
+          "id": "CHAT_MEMORY_CONTEXT",
+          "role": "system",
+          "chars": 90,
+          "preview": "LIKED ATTRIBUTES (weight these positively): {\"colors\":[],\"styles\":[\"modern\"],\"origins\":[]}"
+        },
+        {
+          "id": "RECENT_TURNS_CONTEXT",
+          "role": "system",
+          "chars": 827,
+          "preview": "RECENT TURNS CONTEXT: [{\"role\":\"user\",\"content\":\"This feels too formal\",\"created_at\":\"2026-03-28T15:21:42.889Z\"},{\"role…"
+        },
+        {
+          "id": "INVENTORY_CONTEXT",
+          "role": "system",
+          "chars": 1746,
+          "preview": "AVAILABLE INVENTORY (authoritative). Each entry includes ID, Label, Size, and Description: [{\"id\":\"58c73155-cb3e-44c1-b…"
+        },
+        {
+          "id": "LATEST_USER_MESSAGE_WITH_HARD_CONSTRAINTS",
+          "role": "user",
+          "chars": 166,
+          "preview": "User request: Show me kilims in medium sizes Hard constraints: {\"styles\":[\"kilim\"],\"strictness\":{\"size\":\"prefer\",\"color…"
+        }
+      ],
+      "request_payload": {
+        "model": "gpt-4.1-mini",
+        "input": [
+          {
+            "role": "system",
+            "content": [
+              {
+                "type": "input_text",
+                "text": "Never begin a response with \"Based on what you're looking for\" or any equivalent generic transition. Open with a line that directly references what the customer asked for.\nVoice: warm, confident, and tasteful. Sound like a helpful showroom consultant, not a search engine.\nKeep it concise: 1-3 short sentences in assistant_message. Avoid robotic filler.\nWhen recommending, highlight one standout reason the top piece is special.\nIf the customer states an avoid preference (for example: no red, not too busy), do not praise or foreground that avoided direction.\nIf the customer asks for larger/smaller and exact directional matches are unavailable, say that directly before presenting closest alternatives. Never claim the returned set satisfies a directional request when it does not.\nIf the customer mentions practical needs (kids, pets, high traffic, easy-clean), include one practical suitability note in the opening or first recommendation reason.\nEnd recommendations with one natural next-step invitation (for example: show more like this, larger, or different color).\nOpening pattern examples:\n- Color query: \"You asked for blue-forward pieces, so these are the strongest matches in stock right now.\"\n- Style query: \"For an Oushak direction, these are the closest pieces currently available.\"\n- Discovery query: \"If you are browsing openly, here is a curated range to react to across style and origin.\""
+              },
+              {
+                "type": "input_text",
+                "text": "# AI System Prompt — Rug Concierge\n\nYou are an experienced rug consultant helping retail customers in a showroom environment.\n\nCore behavior:\n- Be accurate, practical, and calm.\n- Use only information provided in conversation and inventory context.\n- If data is missing, say what is unknown.\n- Never invent rug attributes, inventory availability, or IDs.\n\nTone:\n- Professional and approachable.\n- Concise and specific.\n- Not salesy or exaggerated. Genuine enthusiasm is appropriate when a piece genuinely stands out in quality, origin, condition, or rarity.\n- Detect the language of the user's message and respond in that same language.\n\nTrust rules:\n- When unsure, say so directly.\n- Prefer clear guidance over speculation.\n- Keep responses plain text only."
+              },
+              {
+                "type": "input_text",
+                "text": "Respond in English."
+              },
+              {
+                "type": "input_text",
+                "text": "# Recommendation Prompt\n\nYou are a retail rug concierge for in-store customers.\nRecommend only from provided inventory context.\n\n## Core Rules\n\n- Inventory only. Never invent rugs or IDs.\n- Use `ai_description` as primary narrative relevance signal.\n- Use structured fields (`origin`, `style`, `mood`, `pattern`, `primary_colors`) to refine fit.\n- Respect hard constraints from backend state: `size`, `styles`, `shape`.\n- Treat color as a strong ranking signal, not a hard exclusion.\n- Rank color fit by dominance order: dominant field color first, secondary/border color second, accent/detail color third.\n- Color tie-breakers: prefer rugs matching dominant color over secondary-only matches; then prefer rugs matching both dominant and secondary; then prefer stronger style/origin fit and richer listing detail.\n- Treat room/material as soft preferences unless backend marks them hard in context.\n- If `ai_description` is missing, the rug may still be suggested when hard constraints fit; clearly state detail is pending.\n- Every reason must be specific to that rug and connect the rug's attributes to the customer's stated context (room, decor, practical needs).\n- When `customer_context` is provided, treat it as a first-class input and connect recommendations to it explicitly.\n- In discovery mode, present an inspiring range and MUST end with exactly one natural question about the customer's space while still returning recommendations.\n- Never begin a response with \"Based on what you're looking for\" or any equivalent generic transition. Open with a line that directly references what the customer asked for.\n- Match the language of the customer's latest message.\n- Sound warm, confident, and tasteful. Write like an expert showroom consultant, not a product filter.\n- Keep `assistant_message` concise (1-3 short sentences), but include one specific standout detail for the top direction.\n- If the customer gives avoid preferences (for example: no red, not too busy), do not praise or foreground those avoided traits.\n- If the customer asks for larger/smaller and exact directional matches are unavailable, disclose that first and then show closest alternatives. Never claim the returned set satisfies the directional request when it does not.\n- If the customer mentions practical needs (kids, pets, high traffic, easy-clean), include one practical suitability note.\n- End recommendation responses with one natural next-step invitation (for example: show more like this, bigger, smaller, or another color direction).\n- When exact matches are unavailable, disclose clearly in the first sentence and pivot constructively to what is available.\n- Opening pattern examples:\n- Size-driven request: `For your 8x10 living room request, these are the strongest fits in stock right now:`\n- Color-driven request: `Since you want dominant blue with softer accents, these options align best:`\n- Style/origin request: `For a traditional Persian direction, these current pieces are the closest matches:`\n- Discovery/browse request: `If you are open to discovery, here is a curated spread across mood and origin to compare:`\n\n## Formatting\n\n- Plain text only inside string fields.\n- No markdown formatting.\n- Keep responses concise and complete.\n\n## Selection Order\n\n1. Respect backend hard constraints.\n2. Rank by fit to user intent and available rug attributes.\n3. Prefer grounded explanations over broad claims.\n4. Return `no_match` only when inventory is empty."
+              },
+              {
+                "type": "input_text",
+                "text": "# Recommendation Structured Output Add-on\n\nUse this prompt layer only for recommendation mode.\n\nRuntime JSON schema validation in code is authoritative.\nThe model output must match that schema exactly.\n\nRules:\n- JSON only (no prose outside JSON)\n- no extra keys\n- no markdown\n- concise, complete string values\n- use null only where schema allows null\n\nAny mismatch should be treated as invalid output and handled by backend sanitization/fallback logic."
+              },
+              {
+                "type": "input_text",
+                "text": "CHAT MEMORY CONTEXT:\n{\"structured_state\":{\"recommendation_state\":{\"hard_constraints\":{\"styles\":[\"kilim\"],\"strictness\":{\"size\":\"prefer\",\"colors\":\"prefer\",\"styles\":\"must\",\"shape\":\"prefer\"}},\"soft_preferences\":{},\"runtime\":{\"last_result_mode\":\"recommendation\",\"last_relaxed_size_tolerance_in\":null,\"last_blockers\":[],\"last_recommended_size_in\":{\"width_in\":96,\"length_in\":120},\"liked_rug_ids\":[],\"dismissed_rug_ids\":[],\"shown_rug_ids\":[\"46245ee2-ac56-46e0-8cbf-b2eead74c24b\"],\"liked_attributes\":{\"colors\":[],\"styles\":[\"modern\"],\"origins\":[]},\"recently_shown_rugs\":[{\"id\":\"46245ee2-ac56-46e0-8cbf-b2eead74c24b\",\"label\":\"Contemporary Kilim\",\"colors\":[\"multi\"],\"style\":\"Kilim\",\"origin\":\"Other\"}],\"no_match_attempts\":0,\"updated_at\":\"2026-03-28T15:21:52.496Z\"}}},\"conversation_memory\":{\"summary_text\":\"…es right now, so I'm showing the closest available alternatives. We don't have exact modern style rugs in 8x10 size right now, but this contemporary Kilim piece is a great geometric and c… || User: Any closer matches? | Assistant: We currently don't have closer matches to a modern 8x10 rug in our inventory. Would you like me to show more contemporary style options in nearby sizes or styles? || User: This feels too formal | Assistant: Thanks for the feedback! I can keep things more casual and straightforward. Would you like me to show you more rugs that have a contemporary vibe but maybe in different sizes or styles? || User: How often should I rotate a rug? | Assistant: It's generally recommended to rotate your rug every 3 to 6 months to ensure even wear and fading. This helps maintain its appearance and prolong its life. Would you like me to share care tips tailored to specific rug ty…\",\"stable_facts\":[\"style modern\"],\"open_threads\":[\"How often should I rotate a rug?\",\"Would you like me to share care tips tailored to specific rug types or show you rugs with easy-maintenance features?\",\"Would you like me to show you more rugs that have a contemporary vibe but maybe in different sizes or styles?\",\"Any closer matches?\",\"Would you like me to show more contemporary style options in nearby sizes or styles?\"],\"last_user_intent\":\"general_chat\",\"version\":\"v1\"}}"
+              },
+              {
+                "type": "input_text",
+                "text": "CUSTOMER CONTEXT (stable facts):\n[\"style modern\"]"
+              },
+              {
+                "type": "input_text",
+                "text": "RECENTLY SHOWN RUGS (avoid repeating unless clearly requested):\n[{\"id\":\"46245ee2-ac56-46e0-8cbf-b2eead74c24b\",\"label\":\"Contemporary Kilim\",\"colors\":[\"multi\"],\"style\":\"Kilim\",\"origin\":\"Other\"}]"
+              },
+              {
+                "type": "input_text",
+                "text": "LIKED ATTRIBUTES (weight these positively):\n{\"colors\":[],\"styles\":[\"modern\"],\"origins\":[]}"
+              },
+              {
+                "type": "input_text",
+                "text": "RECENT TURNS CONTEXT:\n[{\"role\":\"user\",\"content\":\"This feels too formal\",\"created_at\":\"2026-03-28T15:21:42.889Z\"},{\"role\":\"assistant\",\"content\":\"Thanks for the feedback! I can keep things more casual and straightforward. Would you like me to show you more rugs that have a contemporary vibe but maybe in different sizes or styles?\",\"created_at\":\"2026-03-28T15:21:44.489Z\"},{\"role\":\"user\",\"content\":\"How often should I rotate a rug?\",\"created_at\":\"2026-03-28T15:21:49.225Z\"},{\"role\":\"assistant\",\"content\":\"It's generally recommended to rotate your rug every 3 to 6 months to ensure even wear and fading. This helps maintain its appearance and prolong its life. Would you like me to share care tips tailored to specific rug types or show you rugs with easy-maintenance features? If you'…\",\"created_at\":\"2026-03-28T15:21:52.496Z\"}]"
+              },
+              {
+                "type": "input_text",
+                "text": "AVAILABLE INVENTORY (authoritative). Each entry includes ID, Label, Size, and Description:\n[{\"id\":\"58c73155-cb3e-44c1-bba7-ec577f33dbec\",\"label\":\"Antique Turkish Kilim\",\"size\":\"9' x 12'\",\"origin\":\"Turkish\",\"style\":\"Kilim\",\"mood\":\"traditional\",\"pattern\":[\"geometric design\"],\"colors\":[\"brown\",\"red\",\"black\"],\"desc\":\"This is an antique flat-weave rug, likely a Turkish Kilim, featuring a simple geometric design with muted colors. The piece displays signs of wear and age, contributing to its character.\"},{\"id\":\"bd0fc556-9cc9-4baf-a03d-0a0fdd96dc1d\",\"label\":\"Caucasian Kilim\",\"size\":\"3' x 5'\",\"origin\":\"Caucasian\",\"style\":\"Kilim\",\"mood\":\"traditional\",\"pattern\":[\"geometric design\"],\"colors\":[\"red\",\"ivory\",\"brown\"],\"desc\":\"A collection of Caucasian kilim style rugs displayed in an exhibition setting, featuring geometric designs and vivid colors.\"},{\"id\":\"3653dd24-a5a1-457b-ba6d-443438157cfb\",\"label\":\"Caucasian Kilim Traditional\",\"size\":\"8' x 11'\",\"origin\":\"Caucasian\",\"style\":\"Kilim\",\"mood\":\"traditional\",\"pattern\":[\"geometric design\"],\"colors\":[\"red\",\"ivory\",\"blue\"],\"desc\":\"This is a traditional flatweave kilim featuring geometric designs and bold colors, displayed in an exhibition setting. The rug demonstrates a typical Caucasian style with intricate patterns.\"},{\"id\":\"df1157e4-8db4-4345-97a6-02fe0fe79fde\",\"label\":\"Traditional Caucasian Kilim\",\"size\":\"8' x 10'\",\"origin\":\"Caucasian\",\"style\":\"Kilim\",\"mood\":\"traditional\",\"pattern\":[\"geometric design\",\"tribal design\"],\"colors\":[\"red\",\"white\",\"black\",\"multi\"],\"desc\":\"Rectangular Kilim flatweave with geometric and tribal designs in broad panels of red, white, black, and multicolor accents. The rug features a repeating diamond motif and multicolored stripes with a tribal aesthetic.\"}]"
+              }
+            ]
+          },
+          {
+            "role": "user",
+            "content": [
+              {
+                "type": "input_text",
+                "text": "User request:\nShow me kilims in medium sizes\n\nHard constraints:\n{\"styles\":[\"kilim\"],\"strictness\":{\"size\":\"prefer\",\"colors\":\"prefer\",\"styles\":\"must\",\"shape\":\"prefer\"}}"
+              }
+            ]
+          }
+        ],
+        "max_output_tokens": 800,
+        "text": {
+          "format": {
+            "type": "json_schema",
+            "name": "recommendation_response",
+            "schema": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "mode",
+                "assistant_message",
+                "questions",
+                "recommendations",
+                "notes"
+              ],
+              "properties": {
+                "mode": {
+                  "type": "string",
+                  "enum": [
+                    "recommendations",
+                    "clarifying_question",
+                    "no_match",
+                    "disambiguation"
+                  ]
+                },
+                "assistant_message": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 420
+                },
+                "questions": {
+                  "type": "array",
+                  "minItems": 0,
+                  "maxItems": 2,
+                  "items": {
+                    "type": "string",
+                    "maxLength": 140
+                  }
+                },
+                "recommendations": {
+                  "type": "array",
+                  "minItems": 0,
+                  "maxItems": 10,
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                      "rug_id",
+                      "sku",
+                      "title",
+                      "origin",
+                      "style",
+                      "mood",
+                      "size_text",
+                      "match_reasons",
+                      "confidence",
+                      "confidence_tier",
+                      "confidence_factors",
+                      "why_not"
+                    ],
+                    "properties": {
+                      "rug_id": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 80
+                      },
+                      "sku": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "maxLength": 80
+                      },
+                      "title": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 160
+                      },
+                      "origin": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "maxLength": 60
+                      },
+                      "style": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "maxLength": 80
+                      },
+                      "mood": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "maxLength": 32
+                      },
+                      "size_text": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "maxLength": 64
+                      },
+                      "match_reasons": {
+                        "type": "array",
+                        "minItems": 1,
+                        "maxItems": 3,
+                        "items": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 180
+                        }
+                      },
+                      "confidence": {
+                        "type": "number"
+                      },
+                      "confidence_tier": {
+                        "type": "string",
+                        "enum": [
+                          "high",
+                          "medium",
+                          "low"
+                        ]
+                      },
+                      "confidence_factors": {
+                        "type": "array",
+                        "minItems": 0,
+                        "maxItems": 3,
+                        "items": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 100
+                        }
+                      },
+                      "why_not": {
+                        "type": "array",
+                        "minItems": 0,
+                        "maxItems": 2,
+                        "items": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 160
+                        }
+                      }
+                    }
+                  }
+                },
+                "notes": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "maxLength": 220
+                }
+              }
+            },
+            "strict": true
+          }
+        }
+      },
+      "response_status": 200,
+      "response_payload": {
+        "id": "resp_03adcd91068d03470069c7f21696f88195a2b314efa4a46c59",
+        "object": "response",
+        "created_at": 1774711318,
+        "status": "completed",
+        "background": false,
+        "billing": {
+          "payer": "developer"
+        },
+        "completed_at": 1774711323,
+        "error": null,
+        "frequency_penalty": 0,
+        "incomplete_details": null,
+        "instructions": null,
+        "max_output_tokens": 800,
+        "max_tool_calls": null,
+        "model": "gpt-4.1-mini-2025-04-14",
+        "output": [
+          {
+            "id": "msg_03adcd91068d03470069c7f217177481959b6b0be943816feb",
+            "type": "message",
+            "status": "completed",
+            "content": [
+              {
+                "type": "output_text",
+                "annotations": [],
+                "logprobs": [],
+                "text": "{\"mode\":\"recommendations\",\"assistant_message\":\"Here are kilims in medium sizes, each showcasing classic geometric designs ideal for a casual, stylish setting.\",\"questions\":[],\"recommendations\":[{\"rug_id\":\"df1157e4-8db4-4345-97a6-02fe0fe79fde\",\"sku\":null,\"title\":\"Traditional Caucasian Kilim\",\"origin\":\"Caucasian\",\"style\":\"Kilim\",\"mood\":\"traditional\",\"size_text\":\"8' x 10'\",\"match_reasons\":[\"Ideal medium size that fits your preference\",\"Features traditional geometric and tribal patterns\",\"Multicolor accents add visual interest without formality\"],\"confidence\":0.9,\"confidence_tier\":\"high\",\"confidence_factors\":[\"Exact style match to kilim\",\"Fit within preferred medium size range\",\"Detailed geometric and tribal design noted\"],\"why_not\":[\"Not modern style but fits kilim criterion\",\"Mood is traditional, not contemporary\"]},{\"rug_id\":\"3653dd24-a5a1-457b-ba6d-443438157cfb\",\"sku\":null,\"title\":\"Caucasian Kilim Traditional\",\"origin\":\"Caucasian\",\"style\":\"Kilim\",\"mood\":\"traditional\",\"size_text\":\"8' x 11'\",\"match_reasons\":[\"Slightly larger medium size near your preference\",\"Bold geometric patterns and rich colors\",\"Flatweave style suitable for casual areas\"],\"confidence\":0.85,\"confidence_tier\":\"high\",\"confidence_factors\":[\"Strong kilim style\",\"Size close to medium preference\",\"Traditional mood with bold pattern\"],\"why_not\":[\"Not modern style but matches kilim requirement\"]}],\"notes\":\"These options align closely with your style and size preferences. Would you like to see more casual or contemporary kilims in nearby sizes?\"}"
+              }
+            ],
+            "role": "assistant"
+          }
+        ],
+        "parallel_tool_calls": true,
+        "presence_penalty": 0,
+        "previous_response_id": null,
+        "prompt_cache_key": null,
+        "prompt_cache_retention": null,
+        "reasoning": {
+          "effort": null,
+          "summary": null
+        },
+        "safety_identifier": null,
+        "service_tier": "default",
+        "store": true,
+        "temperature": 1,
+        "text": {
+          "format": {
+            "type": "json_schema",
+            "description": null,
+            "name": "recommendation_response",
+            "schema": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "mode",
+                "assistant_message",
+                "questions",
+                "recommendations",
+                "notes"
+              ],
+              "properties": {
+                "mode": {
+                  "type": "string",
+                  "enum": [
+                    "recommendations",
+                    "clarifying_question",
+                    "no_match",
+                    "disambiguation"
+                  ]
+                },
+                "assistant_message": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 420
+                },
+                "questions": {
+                  "type": "array",
+                  "minItems": 0,
+                  "maxItems": 2,
+                  "items": {
+                    "type": "string",
+                    "maxLength": 140
+                  }
+                },
+                "recommendations": {
+                  "type": "array",
+                  "minItems": 0,
+                  "maxItems": 10,
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                      "rug_id",
+                      "sku",
+                      "title",
+                      "origin",
+                      "style",
+                      "mood",
+                      "size_text",
+                      "match_reasons",
+                      "confidence",
+                      "confidence_tier",
+                      "confidence_factors",
+                      "why_not"
+                    ],
+                    "properties": {
+                      "rug_id": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 80
+                      },
+                      "sku": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "maxLength": 80
+                      },
+                      "title": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 160
+                      },
+                      "origin": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "maxLength": 60
+                      },
+                      "style": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "maxLength": 80
+                      },
+                      "mood": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "maxLength": 32
+                      },
+                      "size_text": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "maxLength": 64
+                      },
+                      "match_reasons": {
+                        "type": "array",
+                        "minItems": 1,
+                        "maxItems": 3,
+                        "items": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 180
+                        }
+                      },
+                      "confidence": {
+                        "type": "number"
+                      },
+                      "confidence_tier": {
+                        "type": "string",
+                        "enum": [
+                          "high",
+                          "medium",
+                          "low"
+                        ]
+                      },
+                      "confidence_factors": {
+                        "type": "array",
+                        "minItems": 0,
+                        "maxItems": 3,
+                        "items": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 100
+                        }
+                      },
+                      "why_not": {
+                        "type": "array",
+                        "minItems": 0,
+                        "maxItems": 2,
+                        "items": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 160
+                        }
+                      }
+                    }
+                  }
+                },
+                "notes": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "maxLength": 220
+                }
+              }
+            },
+            "strict": true
+          },
+          "verbosity": "medium"
+        },
+        "tool_choice": "auto",
+        "tools": [],
+        "top_logprobs": 0,
+        "top_p": 1,
+        "truncation": "disabled",
+        "usage": {
+          "input_tokens": 2784,
+          "input_tokens_details": {
+            "cached_tokens": 0
+          },
+          "output_tokens": 362,
+          "output_tokens_details": {
+            "reasoning_tokens": 0
+          },
+          "total_tokens": 3146
+        },
+        "user": null,
+        "metadata": {}
+      },
+      "parsed_response": {
+        "mode": "recommendations",
+        "assistant_message": "Here are kilims in medium sizes, each showcasing classic geometric designs ideal for a casual, stylish setting.",
+        "questions": [],
+        "recommendations": [
+          {
+            "rug_id": "df1157e4-8db4-4345-97a6-02fe0fe79fde",
+            "sku": null,
+            "title": "Traditional Caucasian Kilim",
+            "origin": "Caucasian",
+            "style": "Kilim",
+            "mood": "traditional",
+            "size_text": "8' x 10'",
+            "match_reasons": [
+              "Rectangular Kilim flatweave with geometric and tribal designs in broad panels of red, white, black, and multicolor accents. The rug features a repeating diamond motif and multicolored stripes with a tribal aesthetic."
+            ],
+            "confidence": 0.55,
+            "confidence_tier": "low",
+            "confidence_factors": [
+              "Detailed listing context available"
+            ],
+            "why_not": [],
+            "primary_image_url": "https://nlypymygmysfgxekhudr.supabase.co/storage/v1/object/public/rug-images/1f3d032b-8411-48a9-8a44-1f3cb9df67a5/df1157e4-8db4-4345-97a6-02fe0fe79fde/primary-1773985436286.png",
+            "primary_image_caption": null
+          },
+          {
+            "rug_id": "3653dd24-a5a1-457b-ba6d-443438157cfb",
+            "sku": null,
+            "title": "Caucasian Kilim Traditional",
+            "origin": "Caucasian",
+            "style": "Kilim",
+            "mood": "traditional",
+            "size_text": "8' x 11'",
+            "match_reasons": [
+              "This is a traditional flatweave kilim featuring geometric designs and bold colors, displayed in an exhibition setting. The rug demonstrates a typical Caucasian style with intricate patterns."
+            ],
+            "confidence": 0.55,
+            "confidence_tier": "low",
+            "confidence_factors": [
+              "Detailed listing context available"
+            ],
+            "why_not": [],
+            "primary_image_url": "https://nlypymygmysfgxekhudr.supabase.co/storage/v1/object/public/rug-images/1f3d032b-8411-48a9-8a44-1f3cb9df67a5/3653dd24-a5a1-457b-ba6d-443438157cfb/primary-1774498378754.jpg",
+            "primary_image_caption": null
+          }
+        ],
+        "notes": "These options align closely with your style and size preferences. Would you like to see more casual or contemporary kilims in nearby sizes?"
+      },
+      "fallback_reason": null,
+      "error": null,
+      "incomplete_detected": false,
+      "retry_attempted": false,
+      "retry_succeeded": false,
+      "text_postprocess_applied": false
+    },
+    "result": {
+      "mode": "recommendations",
+      "notes": "These options align closely with your style and size preferences. Would you like to see more casual or contemporary kilims in nearby sizes?",
+      "recommendation_ids": [
+        "df1157e4-8db4-4345-97a6-02fe0fe79fde",
+        "3653dd24-a5a1-457b-ba6d-443438157cfb"
+      ],
+      "recommendation_count": 2,
+      "relaxed_size_tolerance_in": null
+    },
+    "error": null
+  }
+}

@@ -1,0 +1,121 @@
+{
+  "trace_id": "7cd9be75-e2ab-4e32-8772-bcb45f8b9eb4",
+  "channel": "general-chat-ai",
+  "created_at": "2026-03-28T07:56:31.362Z",
+  "payload": {
+    "mode": "general_chat",
+    "flow_path": [
+      "handleGeneralChatTurn",
+      "buildPromptLayers",
+      "generateGeneralChatResponse"
+    ],
+    "ai_trace": {
+      "called": true,
+      "model": "gpt-4.1-mini",
+      "prompt_layers": [
+        {
+          "id": "SYSTEM_PROMPT_BASE",
+          "role": "system",
+          "chars": 758,
+          "preview": "# AI System Prompt — Rug Concierge You are an experienced rug consultant helping retail customers in a showroom environ…"
+        },
+        {
+          "id": "TASK_PROMPT_GENERAL_CHAT",
+          "role": "system",
+          "chars": 962,
+          "preview": "# General Chat Prompt — Rug Concierge You are the retail concierge for an in-store rug showroom. Handle free-form custo…"
+        },
+        {
+          "id": "TASK_PROMPT_GENERAL_CHAT",
+          "role": "system",
+          "chars": 19,
+          "preview": "Respond in English."
+        },
+        {
+          "id": "ROLE_PROMPT_RETAIL_CUSTOMER",
+          "role": "system",
+          "chars": 107,
+          "preview": "Role: retail customer. Be approachable, warm, and concise, with practical guidance and a natural next step."
+        },
+        {
+          "id": "CHAT_MEMORY_CONTEXT",
+          "role": "system",
+          "chars": 834,
+          "preview": "CHAT MEMORY CONTEXT: { \"summary_text\": \"User: Need something calm and neutral | Assistant: For a calm and neutral selec…"
+        },
+        {
+          "id": "RECENT_TURNS_CONTEXT",
+          "role": "system",
+          "chars": 911,
+          "preview": "RECENT TURNS CONTEXT: [ { \"role\": \"user\", \"content\": \"Need something calm and neutral\", \"created_at\": \"2026-03-28T07:56…"
+        },
+        {
+          "id": "LATEST_USER_MESSAGE",
+          "role": "user",
+          "chars": 21,
+          "preview": "This feels too formal"
+        }
+      ],
+      "request_payload_preview": {
+        "model": "gpt-4.1-mini",
+        "message_groups": 2,
+        "system_groups": 1,
+        "user_groups": 1,
+        "system_blocks": 6,
+        "user_blocks": 1,
+        "schema_name": "general_chat_response",
+        "schema_strict": true,
+        "max_output_tokens": 500
+      },
+      "response_status": 200,
+      "response_payload_preview": {
+        "has_output_text": false,
+        "output_items": 1,
+        "content_blocks": 1,
+        "has_error": false,
+        "error_type": null
+      },
+      "parsed_response": {
+        "assistant_message": "Thanks for sharing that. For a calm but less formal vibe, we might look at rugs with softer textures and more casual, organic patterns. Would you like me to show you some options suitable for a living area or a bedroom?",
+        "notes": null,
+        "memory_hints": [
+          "User wants calm and neutral rugs",
+          "User finds current options too formal",
+          "Consider rugs with softer textures and casual patterns",
+          "Need to clarify placement: living area or bedroom"
+        ]
+      },
+      "fallback_reason": null,
+      "error": null,
+      "incomplete_detected": false,
+      "retry_attempted": false,
+      "retry_succeeded": false,
+      "text_postprocess_applied": false
+    },
+    "context_packet_stats": {
+      "field_counts": {
+        "stable_facts": 1,
+        "open_threads": 3,
+        "customer_context": 1,
+        "recently_shown_rugs": 6,
+        "shown_rug_ids": 6,
+        "recent_turns": 4
+      },
+      "char_counts": {
+        "summary_text": 494,
+        "stable_facts_total": 15,
+        "open_threads_total": 143,
+        "customer_context_total": 15,
+        "recently_shown_total": 501,
+        "shown_rug_ids_total": 216,
+        "liked_attributes_total": 0,
+        "recent_turns_total": 505,
+        "latest_user_message": 21,
+        "total": 1694
+      }
+    },
+    "timing_ms": {
+      "generate_general_chat_ms": 1410
+    }
+  }
+}

@@ -1,0 +1,865 @@
+{
+  "trace_id": "a0a6aafd-a191-4a5a-8f08-5d63cf36a3d0",
+  "channel": "recommendation-pipeline",
+  "created_at": "2026-03-28T21:03:59.575Z",
+  "payload": {
+    "request_id": "a0a6aafd-a191-4a5a-8f08-5d63cf36a3d0",
+    "flow_path": [
+      "runRecommendationPipeline",
+      "fetchInventoryCandidates",
+      "filterByHardConstraints",
+      "shapeCandidatesForAI",
+      "rankAndExplain",
+      "logRecommendationQaEvent"
+    ],
+    "source_route": "/api/chat",
+    "session_id": "b29b930b-c3fe-4ea4-91a1-8a16d699482a",
+    "role": "retail_customer",
+    "tenant_id": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5",
+    "user_message": "I want a calm bedroom setup",
+    "constraints": {
+      "size": {
+        "widthIn": 60,
+        "lengthIn": 96,
+        "toleranceIn": 10
+      },
+      "strictness": {
+        "size": "prefer",
+        "colors": "prefer",
+        "styles": "prefer",
+        "shape": "prefer"
+      }
+    },
+    "prompt_context": {
+      "role": "retail_customer",
+      "chat_context": {
+        "structured_state": {
+          "recommendation_state": {
+            "hard_constraints": {
+              "size": {
+                "widthIn": 60,
+                "lengthIn": 96,
+                "toleranceIn": 10
+              },
+              "strictness": {
+                "size": "prefer",
+                "colors": "prefer",
+                "styles": "prefer",
+                "shape": "prefer"
+              }
+            },
+            "soft_preferences": {},
+            "runtime": {
+              "liked_rug_ids": [],
+              "dismissed_rug_ids": [],
+              "liked_attributes": {
+                "colors": [],
+                "styles": [],
+                "origins": []
+              }
+            }
+          }
+        },
+        "conversation_memory": {
+          "summary_text": "",
+          "stable_facts": [],
+          "open_threads": [],
+          "last_user_intent": "unknown",
+          "version": "v1"
+        },
+        "customer_context": [],
+        "recently_shown_rugs": [],
+        "shown_rug_ids": [],
+        "liked_attributes": {
+          "colors": [],
+          "styles": [],
+          "origins": []
+        },
+        "recent_turns": []
+      },
+      "discovery_mode": false,
+      "expanded_due_to_thin_results": false
+    },
+    "query_trace": [
+      {
+        "variant": "size_rotated",
+        "query_variant_reason": "size_window_rotated_dimensions_query",
+        "filters": {
+          "tenant_id": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5",
+          "status": "available",
+          "enrichment_status": "ready",
+          "limit": 235,
+          "size_bounds": {
+            "minWidthIn": 50,
+            "maxWidthIn": 70,
+            "minLengthIn": 86,
+            "maxLengthIn": 106,
+            "rotated": true
+          },
+          "color_prefilter_active": false,
+          "image_sql_filter_active": true,
+          "color_prefilter": "inactive",
+          "color_prefilter_state": "inactive",
+          "color_sql_prefilter_tokens": null
+        },
+        "row_count": 0,
+        "error": null
+      },
+      {
+        "variant": "size_direct",
+        "query_variant_reason": "size_window_direct_dimensions_query",
+        "filters": {
+          "tenant_id": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5",
+          "status": "available",
+          "enrichment_status": "ready",
+          "limit": 235,
+          "size_bounds": {
+            "minWidthIn": 50,
+            "maxWidthIn": 70,
+            "minLengthIn": 86,
+            "maxLengthIn": 106,
+            "rotated": false
+          },
+          "color_prefilter_active": false,
+          "image_sql_filter_active": true,
+          "color_prefilter": "inactive",
+          "color_prefilter_state": "inactive",
+          "color_sql_prefilter_tokens": null
+        },
+        "row_count": 15,
+        "error": null
+      }
+    ],
+    "dynamic_limit": 235,
+    "policy_sql_filters": {
+      "tenant_id": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5",
+      "status": "available",
+      "enrichment_status": "ready",
+      "size_window": {
+        "minWidthIn": 50,
+        "maxWidthIn": 70,
+        "minLengthIn": 86,
+        "maxLengthIn": 106
+      },
+      "hard_constraints": {
+        "size": true,
+        "styles": false,
+        "shape": false
+      },
+      "image_sql_filter_active": true,
+      "color_prefilter_active": false,
+      "color_prefilter": "inactive",
+      "color_prefilter_state": "inactive",
+      "color_prefilter_tokens": [],
+      "discovery_mode": false,
+      "confidence": "low"
+    },
+    "query_variant_reason": "size_window_active_query_direct_and_rotated",
+    "row_counts": {
+      "sql_rows_total": 15,
+      "sql_rows_by_variant": [
+        {
+          "variant": "size_rotated",
+          "query_variant_reason": "size_window_rotated_dimensions_query",
+          "row_count": 0,
+          "error": null
+        },
+        {
+          "variant": "size_direct",
+          "query_variant_reason": "size_window_direct_dimensions_query",
+          "row_count": 15,
+          "error": null
+        }
+      ]
+    },
+    "discovery_mode": false,
+    "color_sql_prefilter_tokens": [],
+    "broadening_applied": false,
+    "broadening_stage": "none",
+    "no_match": {
+      "fallback_tier": "none",
+      "reasonableness_gate": "passed",
+      "reasonableness_gate_result": "passed",
+      "terminal_reason_code": null
+    },
+    "candidate_counts": {
+      "sql_candidates": 15,
+      "hard_filtered_candidates": 12,
+      "ai_candidates": 12
+    },
+    "timing_ms": {
+      "count_rough_inventory_size_ms": 128,
+      "fetch_inventory_candidates_ms": 343,
+      "filter_hard_constraints_ms": 0,
+      "shape_candidates_ms": 10,
+      "rank_and_explain_ms": 6401,
+      "qa_log_ms": 4,
+      "total_ms": 6887
+    },
+    "ai_trace": {
+      "called": true,
+      "model": "gpt-4.1-mini",
+      "prompt_layers": [
+        {
+          "id": "TASK_PROMPT_RECOMMENDATION",
+          "role": "system",
+          "chars": 1408,
+          "preview": "Never begin a response with \"Based on what you're looking for\" or any equivalent generic transition. Open with a line t…"
+        },
+        {
+          "id": "SYSTEM_PROMPT_BASE",
+          "role": "system",
+          "chars": 758,
+          "preview": "# AI System Prompt — Rug Concierge You are an experienced rug consultant helping retail customers in a showroom environ…"
+        },
+        {
+          "id": "TASK_PROMPT_RECOMMENDATION",
+          "role": "system",
+          "chars": 19,
+          "preview": "Respond in English."
+        },
+        {
+          "id": "TASK_PROMPT_RECOMMENDATION",
+          "role": "system",
+          "chars": 3458,
+          "preview": "# Recommendation Prompt You are a retail rug concierge for in-store customers. Recommend only from provided inventory c…"
+        },
+        {
+          "id": "STRUCTURED_OUTPUT_RECOMMENDATION",
+          "role": "system",
+          "chars": 452,
+          "preview": "# Recommendation Structured Output Add-on Use this prompt layer only for recommendation mode. Runtime JSON schema valid…"
+        },
+        {
+          "id": "CHAT_MEMORY_CONTEXT",
+          "role": "system",
+          "chars": 482,
+          "preview": "CHAT MEMORY CONTEXT: {\"structured_state\":{\"recommendation_state\":{\"hard_constraints\":{\"size\":{\"widthIn\":60,\"lengthIn\":9…"
+        },
+        {
+          "id": "INVENTORY_CONTEXT",
+          "role": "system",
+          "chars": 5173,
+          "preview": "AVAILABLE INVENTORY (authoritative). Each entry includes ID, Label, Size, and Description: [{\"id\":\"ecc885db-d25f-47a6-a…"
+        },
+        {
+          "id": "LATEST_USER_MESSAGE_WITH_HARD_CONSTRAINTS",
+          "role": "user",
+          "chars": 199,
+          "preview": "User request: I want a calm bedroom setup Hard constraints: {\"size\":{\"widthIn\":60,\"lengthIn\":96,\"toleranceIn\":10},\"stri…"
+        }
+      ],
+      "request_payload": {
+        "model": "gpt-4.1-mini",
+        "input": [
+          {
+            "role": "system",
+            "content": [
+              {
+                "type": "input_text",
+                "text": "Never begin a response with \"Based on what you're looking for\" or any equivalent generic transition. Open with a line that directly references what the customer asked for.\nVoice: warm, confident, and tasteful. Sound like a helpful showroom consultant, not a search engine.\nKeep it concise: 1-3 short sentences in assistant_message. Avoid robotic filler.\nWhen recommending, highlight one standout reason the top piece is special.\nIf the customer states an avoid preference (for example: no red, not too busy), do not praise or foreground that avoided direction.\nIf the customer asks for larger/smaller and exact directional matches are unavailable, say that directly before presenting closest alternatives. Never claim the returned set satisfies a directional request when it does not.\nIf the customer mentions practical needs (kids, pets, high traffic, easy-clean), include one practical suitability note in the opening or first recommendation reason.\nEnd recommendations with one natural next-step invitation (for example: show more like this, larger, or different color).\nOpening pattern examples:\n- Color query: \"You asked for blue-forward pieces, so these are the strongest matches in stock right now.\"\n- Style query: \"For an Oushak direction, these are the closest pieces currently available.\"\n- Discovery query: \"If you are browsing openly, here is a curated range to react to across style and origin.\""
+              },
+              {
+                "type": "input_text",
+                "text": "# AI System Prompt — Rug Concierge\n\nYou are an experienced rug consultant helping retail customers in a showroom environment.\n\nCore behavior:\n- Be accurate, practical, and calm.\n- Use only information provided in conversation and inventory context.\n- If data is missing, say what is unknown.\n- Never invent rug attributes, inventory availability, or IDs.\n\nTone:\n- Professional and approachable.\n- Concise and specific.\n- Not salesy or exaggerated. Genuine enthusiasm is appropriate when a piece genuinely stands out in quality, origin, condition, or rarity.\n- Detect the language of the user's message and respond in that same language.\n\nTrust rules:\n- When unsure, say so directly.\n- Prefer clear guidance over speculation.\n- Keep responses plain text only."
+              },
+              {
+                "type": "input_text",
+                "text": "Respond in English."
+              },
+              {
+                "type": "input_text",
+                "text": "# Recommendation Prompt\n\nYou are a retail rug concierge for in-store customers.\nRecommend only from provided inventory context.\n\n## Core Rules\n\n- Inventory only. Never invent rugs or IDs.\n- Use `ai_description` as primary narrative relevance signal.\n- Use structured fields (`origin`, `style`, `mood`, `pattern`, `primary_colors`) to refine fit.\n- Respect hard constraints from backend state: `size`, `styles`, `shape`.\n- Treat color as a strong ranking signal, not a hard exclusion.\n- Rank color fit by dominance order: dominant field color first, secondary/border color second, accent/detail color third.\n- Color tie-breakers: prefer rugs matching dominant color over secondary-only matches; then prefer rugs matching both dominant and secondary; then prefer stronger style/origin fit and richer listing detail.\n- Treat room/material as soft preferences unless backend marks them hard in context.\n- If `ai_description` is missing, the rug may still be suggested when hard constraints fit; clearly state detail is pending.\n- Every reason must be specific to that rug and connect the rug's attributes to the customer's stated context (room, decor, practical needs).\n- When `customer_context` is provided, treat it as a first-class input and connect recommendations to it explicitly.\n- In discovery mode, present an inspiring range and MUST end with exactly one natural question about the customer's space while still returning recommendations.\n- Never begin a response with \"Based on what you're looking for\" or any equivalent generic transition. Open with a line that directly references what the customer asked for.\n- Match the language of the customer's latest message.\n- Sound warm, confident, and tasteful. Write like an expert showroom consultant, not a product filter.\n- Keep `assistant_message` concise (1-3 short sentences), but include one specific standout detail for the top direction.\n- If the customer gives avoid preferences (for example: no red, not too busy), do not praise or foreground those avoided traits.\n- If the customer asks for larger/smaller and exact directional matches are unavailable, disclose that first and then show closest alternatives. Never claim the returned set satisfies the directional request when it does not.\n- If the customer mentions practical needs (kids, pets, high traffic, easy-clean), include one practical suitability note.\n- End recommendation responses with one natural next-step invitation (for example: show more like this, bigger, smaller, or another color direction).\n- When exact matches are unavailable, disclose clearly in the first sentence and pivot constructively to what is available.\n- Opening pattern examples:\n- Size-driven request: `For your 8x10 living room request, these are the strongest fits in stock right now:`\n- Color-driven request: `Since you want dominant blue with softer accents, these options align best:`\n- Style/origin request: `For a traditional Persian direction, these current pieces are the closest matches:`\n- Discovery/browse request: `If you are open to discovery, here is a curated spread across mood and origin to compare:`\n\n## Formatting\n\n- Plain text only inside string fields.\n- No markdown formatting.\n- Keep responses concise and complete.\n\n## Selection Order\n\n1. Respect backend hard constraints.\n2. Rank by fit to user intent and available rug attributes.\n3. Prefer grounded explanations over broad claims.\n4. Return `no_match` only when inventory is empty."
+              },
+              {
+                "type": "input_text",
+                "text": "# Recommendation Structured Output Add-on\n\nUse this prompt layer only for recommendation mode.\n\nRuntime JSON schema validation in code is authoritative.\nThe model output must match that schema exactly.\n\nRules:\n- JSON only (no prose outside JSON)\n- no extra keys\n- no markdown\n- concise, complete string values\n- use null only where schema allows null\n\nAny mismatch should be treated as invalid output and handled by backend sanitization/fallback logic."
+              },
+              {
+                "type": "input_text",
+                "text": "CHAT MEMORY CONTEXT:\n{\"structured_state\":{\"recommendation_state\":{\"hard_constraints\":{\"size\":{\"widthIn\":60,\"lengthIn\":96,\"toleranceIn\":10},\"strictness\":{\"size\":\"prefer\",\"colors\":\"prefer\",\"styles\":\"prefer\",\"shape\":\"prefer\"}},\"soft_preferences\":{},\"runtime\":{\"liked_rug_ids\":[],\"dismissed_rug_ids\":[],\"liked_attributes\":{\"colors\":[],\"styles\":[],\"origins\":[]}}}},\"conversation_memory\":{\"summary_text\":\"\",\"stable_facts\":[],\"open_threads\":[],\"last_user_intent\":\"unknown\",\"version\":\"v1\"}}"
+              },
+              {
+                "type": "input_text",
+                "text": "AVAILABLE INVENTORY (authoritative). Each entry includes ID, Label, Size, and Description:\n[{\"id\":\"ecc885db-d25f-47a6-a276-113e56737d14\",\"label\":\"Antique Caucasian Kazak\",\"size\":\"5' x 8'\",\"origin\":\"Caucasian\",\"style\":\"Kazak\",\"mood\":\"traditional\",\"pattern\":[\"geometric design\",\"medallion center\"],\"colors\":[\"rust\",\"brown\",\"gold\",\"green\"],\"desc\":\"This rug features a rich geometric design typical of antique Caucasian Kazak styles, with dominant rust and brown tones. Its intricate medallion patterns and color palette evoke a traditional mood.\"},{\"id\":\"dff6cdf7-6837-486e-9cab-8aa44d8291a1\",\"label\":\"Antique Persian\",\"size\":\"5' x 8'\",\"origin\":\"Persian\",\"style\":\"Floral\",\"mood\":\"traditional\",\"pattern\":[\"all-over pattern\",\"floral motif\"],\"colors\":[\"red\",\"gold\",\"green\"],\"desc\":\"This is an antique Persian rug featuring a rich red field with an intricate all-over pattern and a dark border with floral motifs. The rug exhibits a traditional design and aged character.\"},{\"id\":\"e15492cf-a32d-412a-b855-c0e02542aefe\",\"label\":\"Antique Persian\",\"size\":\"5' x 8'\",\"origin\":\"Persian\",\"style\":\"Geometric Tribal\",\"mood\":\"traditional\",\"pattern\":[\"medallion center\",\"floral motif\",\"geometric design\"],\"colors\":[\"blue\",\"ivory\",\"red\"],\"desc\":\"This is an antique Persian rug fragment featuring a central medallion and geometric patterns with floral motifs. The dominant colors are blue, ivory, and red, displaying a traditional aesthetic.\"},{\"id\":\"0dd26ca3-10fb-418b-bb80-be02d2b331c7\",\"label\":\"Antique Persian Heriz\",\"size\":\"5' x 8'\",\"origin\":\"Persian\",\"style\":\"Heriz\",\"mood\":\"traditional\",\"pattern\":[\"geometric design\"],\"colors\":[\"gold\",\"green\",\"blue\",\"rust\"],\"desc\":\"This is an antique Persian Heriz rug featuring a complex geometric design with multiple vibrant colors. The rug displays a traditional aesthetic, characterized by its intricate pattern and craftsmanship.\"},{\"id\":\"22f2daa3-9c69-4499-9ab2-ce0e6d6ad0b3\",\"label\":\"Antique Persian Kashan\",\"size\":\"5' x 8'\",\"origin\":\"Persian\",\"style\":\"Kashan\",\"mood\":\"traditional\",\"pattern\":[\"floral motif\",\"pictorial\",\"floral border\"],\"colors\":[\"red\",\"gold\",\"green\"],\"desc\":\"This antique Persian Kashan rug features intricate floral motifs and pictorial elements with a red field and dark borders. The detailed design showcases a traditional weaving style.\"},{\"id\":\"cc276442-2d5f-4285-9633-c41ca13489d0\",\"label\":\"Antique Persian Sultanabad\",\"size\":\"5' x 8'\",\"origin\":\"Persian\",\"style\":\"Sultanabad\",\"mood\":\"traditional\",\"pattern\":[\"floral motif\",\"floral border\"],\"colors\":[\"red\",\"gold\",\"black\"],\"desc\":\"This antique Persian Sultanabad rug features a complex floral motif with a prominent floral border, showcasing an elegant balance of red, gold, and black hues. Its vintage charm is evident in the traditional design and aged patina.\"},{\"id\":\"9dbfa2c4-a7eb-4e28-879f-325a02cb2138\",\"label\":\"Antique Persian Tabriz\",\"size\":\"5' x 8'\",\"origin\":\"Persian\",\"style\":\"Tabriz\",\"mood\":\"traditional\",\"pattern\":[\"medallion center\",\"floral motif\"],\"colors\":[\"red\",\"gold\",\"green\"],\"desc\":\"This is an antique Persian Tabriz rug featuring a central medallion design with intricate floral motifs. The dominant colors are red, gold, and dark green, giving it a classic and luxurious appearance.\"},{\"id\":\"de47a550-052a-433d-b39a-c8c8711f0901\",\"label\":\"Caucasian Kazak Traditional\",\"size\":\"5' x 8'\",\"origin\":\"Caucasian\",\"style\":\"Kazak\",\"mood\":\"traditional\",\"pattern\":[\"medallion center\",\"geometric design\",\"tribal design\"],\"colors\":[\"black\",\"red\",\"blue\",\"gold\"],\"desc\":\"A vibrant hand-knotted Caucasian rug featuring bold geometric designs and a rich color palette. It has a striking medallion center with traditional motifs.\"},{\"id\":\"c7a2b2e4-1f37-4fc5-985e-ea28e577723a\",\"label\":\"Contemporary Moroccan\",\"size\":\"5' x 8'\",\"origin\":\"Moroccan\",\"style\":\"Medallion\",\"mood\":\"modern\",\"pattern\":[\"medallion center\"],\"colors\":[\"purple\",\"blue\"],\"desc\":\"A contemporary rug with a bold circular motif and solid colors, exemplifying modern design influences.\"},{\"id\":\"b36ef32b-82a8-4389-a475-bc4ab406dff0\",\"label\":\"Vintage Persian Heriz\",\"size\":\"5' x 8'\",\"origin\":\"Persian\",\"style\":\"Heriz\",\"mood\":\"traditional\",\"pattern\":[\"all-over pattern\",\"floral border\"],\"colors\":[\"red\",\"brown\",\"green\"],\"desc\":\"This rug features an intricate all-over pattern set against a red field with a detailed floral border, representative of traditional Persian designs.\"},{\"id\":\"2c006efb-37d6-47ae-b4f1-93204293b913\",\"label\":\"Vintage Persian Kashan\",\"size\":\"5' x 8'\",\"origin\":\"Persian\",\"style\":\"Kashan\",\"mood\":\"traditional\",\"pattern\":[\"floral motif\",\"floral border\"],\"colors\":[\"red\",\"green\",\"ivory\",\"blue\"],\"desc\":\"This is a vintage Persian Kashan rug featuring a floral motif with a red field and ornate floral borders. The intricate design highlights traditional craftsmanship.\"},{\"id\":\"194c2685-275c-40c7-bd1e-86e3b58ff2b7\",\"label\":\"Vintage Persian Tabriz\",\"size\":\"5' x 8'\",\"origin\":\"Persian\",\"style\":\"Tabriz\",\"mood\":\"traditional\",\"pattern\":[\"medallion center\",\"floral motif\",\"floral border\"],\"colors\":[\"red\",\"gold\",\"blue\"],\"desc\":\"This is a vintage Persian Tabriz rug with a central medallion design. It features rich tones of red, gold, and touches of blue, with intricate floral borders.\"}]"
+              }
+            ]
+          },
+          {
+            "role": "user",
+            "content": [
+              {
+                "type": "input_text",
+                "text": "User request:\nI want a calm bedroom setup\n\nHard constraints:\n{\"size\":{\"widthIn\":60,\"lengthIn\":96,\"toleranceIn\":10},\"strictness\":{\"size\":\"prefer\",\"colors\":\"prefer\",\"styles\":\"prefer\",\"shape\":\"prefer\"}}"
+              }
+            ]
+          }
+        ],
+        "max_output_tokens": 800,
+        "text": {
+          "format": {
+            "type": "json_schema",
+            "name": "recommendation_response",
+            "schema": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "mode",
+                "assistant_message",
+                "questions",
+                "recommendations",
+                "notes"
+              ],
+              "properties": {
+                "mode": {
+                  "type": "string",
+                  "enum": [
+                    "recommendations",
+                    "clarifying_question",
+                    "no_match",
+                    "disambiguation"
+                  ]
+                },
+                "assistant_message": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 420
+                },
+                "questions": {
+                  "type": "array",
+                  "minItems": 0,
+                  "maxItems": 2,
+                  "items": {
+                    "type": "string",
+                    "maxLength": 140
+                  }
+                },
+                "recommendations": {
+                  "type": "array",
+                  "minItems": 0,
+                  "maxItems": 10,
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                      "rug_id",
+                      "sku",
+                      "title",
+                      "origin",
+                      "style",
+                      "mood",
+                      "size_text",
+                      "match_reasons",
+                      "confidence",
+                      "confidence_tier",
+                      "confidence_factors",
+                      "why_not"
+                    ],
+                    "properties": {
+                      "rug_id": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 80
+                      },
+                      "sku": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "maxLength": 80
+                      },
+                      "title": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 160
+                      },
+                      "origin": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "maxLength": 60
+                      },
+                      "style": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "maxLength": 80
+                      },
+                      "mood": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "maxLength": 32
+                      },
+                      "size_text": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "maxLength": 64
+                      },
+                      "match_reasons": {
+                        "type": "array",
+                        "minItems": 1,
+                        "maxItems": 3,
+                        "items": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 180
+                        }
+                      },
+                      "confidence": {
+                        "type": "number"
+                      },
+                      "confidence_tier": {
+                        "type": "string",
+                        "enum": [
+                          "high",
+                          "medium",
+                          "low"
+                        ]
+                      },
+                      "confidence_factors": {
+                        "type": "array",
+                        "minItems": 0,
+                        "maxItems": 3,
+                        "items": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 100
+                        }
+                      },
+                      "why_not": {
+                        "type": "array",
+                        "minItems": 0,
+                        "maxItems": 2,
+                        "items": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 160
+                        }
+                      }
+                    }
+                  }
+                },
+                "notes": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "maxLength": 220
+                }
+              }
+            },
+            "strict": true
+          }
+        }
+      },
+      "response_status": 200,
+      "response_payload": {
+        "id": "resp_04e0b8bf80a588710069c8423939d08195b603c92978321b91",
+        "object": "response",
+        "created_at": 1774731833,
+        "status": "completed",
+        "background": false,
+        "billing": {
+          "payer": "developer"
+        },
+        "completed_at": 1774731839,
+        "error": null,
+        "frequency_penalty": 0,
+        "incomplete_details": null,
+        "instructions": null,
+        "max_output_tokens": 800,
+        "max_tool_calls": null,
+        "model": "gpt-4.1-mini-2025-04-14",
+        "output": [
+          {
+            "id": "msg_04e0b8bf80a588710069c8423987a48195867bdc6243e33d3a",
+            "type": "message",
+            "status": "completed",
+            "content": [
+              {
+                "type": "output_text",
+                "annotations": [],
+                "logprobs": [],
+                "text": "{\"mode\":\"recommendations\",\"assistant_message\":\"For a calm bedroom setup, these rugs offer traditional styles with softer, balanced colors to create a peaceful ambiance. The Antique Persian Kashan stands out for its intricate floral motifs and warm reds that add subtle elegance without overwhelming the room.\",\"questions\":[\"What color palette are you envisioning for your bedroom?\",\"Do you have a preference for a specific rug origin or style?\"],\"recommendations\":[{\"rug_id\":\"22f2daa3-9c69-4499-9ab2-ce0e6d6ad0b3\",\"sku\":null,\"title\":\"Antique Persian Kashan\",\"origin\":\"Persian\",\"style\":\"Kashan\",\"mood\":\"traditional\",\"size_text\":\"5' x 8'\",\"match_reasons\":[\"Intricate floral motifs add subtle elegance suitable for a calm bedroom.\",\"Warm red and gold tones create a soothing yet rich atmosphere.\",\"Traditional style complements a peaceful, classic decor.\"],\"confidence\":0.9,\"confidence_tier\":\"high\",\"confidence_factors\":[\"Strong size match\",\"Preferred traditional style\",\"Color tones align with calm mood\"],\"why_not\":[\"Colors are on the warmer side; if cooler tones preferred, consider alternatives.\"]},{\"rug_id\":\"2c006efb-37d6-47ae-b4f1-93204293b913\",\"sku\":null,\"title\":\"Vintage Persian Kashan\",\"origin\":\"Persian\",\"style\":\"Kashan\",\"mood\":\"traditional\",\"size_text\":\"5' x 8'\",\"match_reasons\":[\"Features a classic floral motif suited to serene bedroom environments.\",\"Balanced red and blue accents offer warmth with a calming touch.\",\"The vintage nature adds character without feeling overwhelming.\"],\"confidence\":0.85,\"confidence_tier\":\"medium\",\"confidence_factors\":[\"Good size fit\",\"Traditional style matches preference\",\"Color palette supports calm ambiance\"],\"why_not\":[\"Slightly more patterned than the top choice, which may affect minimalistic taste.\"]},{\"rug_id\":\"194c2685-275c-40c7-bd1e-86e3b58ff2b7\",\"sku\":null,\"title\":\"Vintage Persian Tabriz\",\"origin\":\"Persian\",\"style\":\"Tabriz\",\"mood\":\"traditional\",\"size_text\":\"5' x 8'\",\"match_reasons\":[\"Central medallion and floral borders provide a balanced, calm focal point.\",\"Warm colors blended with blue accents help maintain a soothing atmosphere.\",\"Traditional style complements peaceful bedroom decor.\"],\"confidence\":0.8,\"confidence_tier\":\"medium\",\"confidence_factors\":[\"Size matches preference\",\"Style and mood align with calm bedroom setting\"],\"why_not\":[\"Color combination might feel a bit busy depending on room decor.\"]}],\"notes\":\"All recommended rugs are within your preferred size range and lean on traditional Persian styles conducive to calm bedroom settings. Please let me know if you'd like options with cooler or more neutral tones.\"}"
+              }
+            ],
+            "role": "assistant"
+          }
+        ],
+        "parallel_tool_calls": true,
+        "presence_penalty": 0,
+        "previous_response_id": null,
+        "prompt_cache_key": null,
+        "prompt_cache_retention": null,
+        "reasoning": {
+          "effort": null,
+          "summary": null
+        },
+        "safety_identifier": null,
+        "service_tier": "default",
+        "store": true,
+        "temperature": 1,
+        "text": {
+          "format": {
+            "type": "json_schema",
+            "description": null,
+            "name": "recommendation_response",
+            "schema": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "mode",
+                "assistant_message",
+                "questions",
+                "recommendations",
+                "notes"
+              ],
+              "properties": {
+                "mode": {
+                  "type": "string",
+                  "enum": [
+                    "recommendations",
+                    "clarifying_question",
+                    "no_match",
+                    "disambiguation"
+                  ]
+                },
+                "assistant_message": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 420
+                },
+                "questions": {
+                  "type": "array",
+                  "minItems": 0,
+                  "maxItems": 2,
+                  "items": {
+                    "type": "string",
+                    "maxLength": 140
+                  }
+                },
+                "recommendations": {
+                  "type": "array",
+                  "minItems": 0,
+                  "maxItems": 10,
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                      "rug_id",
+                      "sku",
+                      "title",
+                      "origin",
+                      "style",
+                      "mood",
+                      "size_text",
+                      "match_reasons",
+                      "confidence",
+                      "confidence_tier",
+                      "confidence_factors",
+                      "why_not"
+                    ],
+                    "properties": {
+                      "rug_id": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 80
+                      },
+                      "sku": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "maxLength": 80
+                      },
+                      "title": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 160
+                      },
+                      "origin": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "maxLength": 60
+                      },
+                      "style": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "maxLength": 80
+                      },
+                      "mood": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "maxLength": 32
+                      },
+                      "size_text": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "maxLength": 64
+                      },
+                      "match_reasons": {
+                        "type": "array",
+                        "minItems": 1,
+                        "maxItems": 3,
+                        "items": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 180
+                        }
+                      },
+                      "confidence": {
+                        "type": "number"
+                      },
+                      "confidence_tier": {
+                        "type": "string",
+                        "enum": [
+                          "high",
+                          "medium",
+                          "low"
+                        ]
+                      },
+                      "confidence_factors": {
+                        "type": "array",
+                        "minItems": 0,
+                        "maxItems": 3,
+                        "items": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 100
+                        }
+                      },
+                      "why_not": {
+                        "type": "array",
+                        "minItems": 0,
+                        "maxItems": 2,
+                        "items": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 160
+                        }
+                      }
+                    }
+                  }
+                },
+                "notes": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "maxLength": 220
+                }
+              }
+            },
+            "strict": true
+          },
+          "verbosity": "medium"
+        },
+        "tool_choice": "auto",
+        "tools": [],
+        "top_logprobs": 0,
+        "top_p": 1,
+        "truncation": "disabled",
+        "usage": {
+          "input_tokens": 2993,
+          "input_tokens_details": {
+            "cached_tokens": 0
+          },
+          "output_tokens": 594,
+          "output_tokens_details": {
+            "reasoning_tokens": 0
+          },
+          "total_tokens": 3587
+        },
+        "user": null,
+        "metadata": {}
+      },
+      "parsed_response": {
+        "mode": "recommendations",
+        "assistant_message": "For a calm bedroom setup, these rugs offer traditional styles with softer, balanced colors to create a peaceful ambiance. The Antique Persian Kashan stands out for its intricate floral motifs and warm reds that add subtle elegance without overwhelming the room. If you'd like, should I show more in this same direction, or adjust color and size next?",
+        "questions": [],
+        "recommendations": [
+          {
+            "rug_id": "22f2daa3-9c69-4499-9ab2-ce0e6d6ad0b3",
+            "sku": null,
+            "title": "Antique Persian Kashan",
+            "origin": "Persian",
+            "style": "Kashan",
+            "mood": "traditional",
+            "size_text": "5' x 8'",
+            "match_reasons": [
+              "This antique Persian Kashan rug features intricate floral motifs and pictorial elements with a red field and dark borders. The detailed design showcases a traditional weaving style.",
+              "Size closely matches your requested dimensions."
+            ],
+            "confidence": 0.75,
+            "confidence_tier": "medium",
+            "confidence_factors": [
+              "Strong size alignment",
+              "Detailed listing context available"
+            ],
+            "why_not": [
+              "May not fully align with your stated style direction."
+            ],
+            "primary_image_url": "https://nlypymygmysfgxekhudr.supabase.co/storage/v1/object/public/rug-images/1f3d032b-8411-48a9-8a44-1f3cb9df67a5/22f2daa3-9c69-4499-9ab2-ce0e6d6ad0b3/primary-1774501023155.jpg",
+            "primary_image_caption": null
+          },
+          {
+            "rug_id": "2c006efb-37d6-47ae-b4f1-93204293b913",
+            "sku": null,
+            "title": "Vintage Persian Kashan",
+            "origin": "Persian",
+            "style": "Kashan",
+            "mood": "traditional",
+            "size_text": "5' x 8'",
+            "match_reasons": [
+              "This is a vintage Persian Kashan rug featuring a floral motif with a red field and ornate floral borders. The intricate design highlights traditional craftsmanship.",
+              "Size closely matches your requested dimensions."
+            ],
+            "confidence": 0.75,
+            "confidence_tier": "medium",
+            "confidence_factors": [
+              "Strong size alignment",
+              "Detailed listing context available"
+            ],
+            "why_not": [
+              "May not fully align with your stated style direction."
+            ],
+            "primary_image_url": "https://nlypymygmysfgxekhudr.supabase.co/storage/v1/object/public/rug-images/1f3d032b-8411-48a9-8a44-1f3cb9df67a5/2c006efb-37d6-47ae-b4f1-93204293b913/primary-1774498983757.jpg",
+            "primary_image_caption": null
+          },
+          {
+            "rug_id": "194c2685-275c-40c7-bd1e-86e3b58ff2b7",
+            "sku": null,
+            "title": "Vintage Persian Tabriz",
+            "origin": "Persian",
+            "style": "Tabriz",
+            "mood": "traditional",
+            "size_text": "5' x 8'",
+            "match_reasons": [
+              "This is a vintage Persian Tabriz rug with a central medallion design. It features rich tones of red, gold, and touches of blue, with intricate floral borders.",
+              "Size closely matches your requested dimensions."
+            ],
+            "confidence": 0.75,
+            "confidence_tier": "medium",
+            "confidence_factors": [
+              "Strong size alignment",
+              "Detailed listing context available"
+            ],
+            "why_not": [
+              "May not fully align with your stated style direction."
+            ],
+            "primary_image_url": "https://nlypymygmysfgxekhudr.supabase.co/storage/v1/object/public/rug-images/1f3d032b-8411-48a9-8a44-1f3cb9df67a5/194c2685-275c-40c7-bd1e-86e3b58ff2b7/primary-1774497776069.jpg",
+            "primary_image_caption": null
+          },
+          {
+            "rug_id": "ecc885db-d25f-47a6-a276-113e56737d14",
+            "sku": null,
+            "title": "Antique Caucasian Kazak",
+            "origin": "Caucasian",
+            "style": "Kazak",
+            "mood": "traditional",
+            "primary_image_url": "https://nlypymygmysfgxekhudr.supabase.co/storage/v1/object/public/rug-images/1f3d032b-8411-48a9-8a44-1f3cb9df67a5/ecc885db-d25f-47a6-a276-113e56737d14/primary-1774501403471.jpg",
+            "primary_image_caption": null,
+            "size_text": "5' x 8'",
+            "match_reasons": [
+              "This rug features a rich geometric design typical of antique Caucasian Kazak styles, with dominant rust and brown tones. Its intricate medallion patterns and color palette evoke a traditional mood.",
+              "Size closely matches your requested dimensions."
+            ],
+            "confidence": 0.75,
+            "confidence_tier": "medium",
+            "confidence_factors": [
+              "Strong size alignment",
+              "Detailed listing context available"
+            ],
+            "why_not": [
+              "May not fully align with your stated style direction."
+            ]
+          },
+          {
+            "rug_id": "dff6cdf7-6837-486e-9cab-8aa44d8291a1",
+            "sku": null,
+            "title": "Antique Persian (Persian)",
+            "origin": "Persian",
+            "style": "Floral",
+            "mood": "traditional",
+            "primary_image_url": "https://nlypymygmysfgxekhudr.supabase.co/storage/v1/object/public/rug-images/1f3d032b-8411-48a9-8a44-1f3cb9df67a5/dff6cdf7-6837-486e-9cab-8aa44d8291a1/primary-1774500209347.jpg",
+            "primary_image_caption": null,
+            "size_text": "5' x 8'",
+            "match_reasons": [
+              "This is an antique Persian rug featuring a rich red field with an intricate all-over pattern and a dark border with floral motifs. The rug exhibits a traditional design and aged character.",
+              "Size closely matches your requested dimensions."
+            ],
+            "confidence": 0.75,
+            "confidence_tier": "medium",
+            "confidence_factors": [
+              "Strong size alignment",
+              "Detailed listing context available"
+            ],
+            "why_not": [
+              "May not fully align with your stated style direction."
+            ]
+          },
+          {
+            "rug_id": "e15492cf-a32d-412a-b855-c0e02542aefe",
+            "sku": null,
+            "title": "Antique Persian (Persian)",
+            "origin": "Persian",
+            "style": "Geometric Tribal",
+            "mood": "traditional",
+            "primary_image_url": "https://nlypymygmysfgxekhudr.supabase.co/storage/v1/object/public/rug-images/1f3d032b-8411-48a9-8a44-1f3cb9df67a5/e15492cf-a32d-412a-b855-c0e02542aefe/primary-1774499008671.jpg",
+            "primary_image_caption": null,
+            "size_text": "5' x 8'",
+            "match_reasons": [
+              "This is an antique Persian rug fragment featuring a central medallion and geometric patterns with floral motifs. The dominant colors are blue, ivory, and red, displaying a traditional aesthetic.",
+              "Size closely matches your requested dimensions."
+            ],
+            "confidence": 0.75,
+            "confidence_tier": "medium",
+            "confidence_factors": [
+              "Strong size alignment",
+              "Detailed listing context available"
+            ],
+            "why_not": [
+              "May not fully align with your stated style direction."
+            ]
+          }
+        ],
+        "notes": "All recommended rugs are within your preferred size range and lean on traditional Persian styles conducive to calm bedroom settings. Please let me know if you'd like options with cooler or more neutral tones."
+      },
+      "fallback_reason": null,
+      "error": null,
+      "incomplete_detected": false,
+      "retry_attempted": false,
+      "retry_succeeded": false,
+      "text_postprocess_applied": false
+    },
+    "result": {
+      "mode": "recommendations",
+      "notes": "All recommended rugs are within your preferred size range and lean on traditional Persian styles conducive to calm bedroom settings. Please let me know if you'd like options with cooler or more neutral tones.",
+      "recommendation_ids": [
+        "22f2daa3-9c69-4499-9ab2-ce0e6d6ad0b3",
+        "2c006efb-37d6-47ae-b4f1-93204293b913",
+        "194c2685-275c-40c7-bd1e-86e3b58ff2b7",
+        "ecc885db-d25f-47a6-a276-113e56737d14",
+        "dff6cdf7-6837-486e-9cab-8aa44d8291a1",
+        "e15492cf-a32d-412a-b855-c0e02542aefe"
+      ],
+      "recommendation_count": 6,
+      "relaxed_size_tolerance_in": null
+    },
+    "error": null
+  }
+}

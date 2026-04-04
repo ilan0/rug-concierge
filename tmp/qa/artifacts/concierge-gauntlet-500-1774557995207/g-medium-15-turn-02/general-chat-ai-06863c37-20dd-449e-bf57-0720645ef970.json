@@ -1,0 +1,119 @@
+{
+  "trace_id": "06863c37-20dd-449e-bf57-0720645ef970",
+  "channel": "general-chat-ai",
+  "created_at": "2026-03-26T21:35:50.066Z",
+  "payload": {
+    "mode": "general_chat",
+    "flow_path": [
+      "handleGeneralChatTurn",
+      "buildPromptLayers",
+      "generateGeneralChatResponse"
+    ],
+    "ai_trace": {
+      "called": true,
+      "model": "gpt-4.1-mini",
+      "prompt_layers": [
+        {
+          "id": "SYSTEM_PROMPT_BASE",
+          "role": "system",
+          "chars": 758,
+          "preview": "# AI System Prompt — Rug Concierge You are an experienced rug consultant helping retail customers in a showroom environ…"
+        },
+        {
+          "id": "TASK_PROMPT_GENERAL_CHAT",
+          "role": "system",
+          "chars": 820,
+          "preview": "# General Chat Prompt — Rug Concierge You are the retail concierge for an in-store rug showroom. Handle free-form custo…"
+        },
+        {
+          "id": "TASK_PROMPT_GENERAL_CHAT",
+          "role": "system",
+          "chars": 19,
+          "preview": "Respond in English."
+        },
+        {
+          "id": "ROLE_PROMPT_RETAIL_CUSTOMER",
+          "role": "system",
+          "chars": 89,
+          "preview": "Role: retail customer. Be approachable and clear, with practical guidance and next steps."
+        },
+        {
+          "id": "CHAT_MEMORY_CONTEXT",
+          "role": "system",
+          "chars": 480,
+          "preview": "CHAT MEMORY CONTEXT: { \"summary_text\": \"User: Need something calm and neutral | Assistant: Here is a diverse sample fro…"
+        },
+        {
+          "id": "RECENT_TURNS_CONTEXT",
+          "role": "system",
+          "chars": 373,
+          "preview": "RECENT TURNS CONTEXT: [ { \"role\": \"user\", \"content\": \"Need something calm and neutral\", \"created_at\": \"2026-03-26T21:35…"
+        },
+        {
+          "id": "LATEST_USER_MESSAGE",
+          "role": "user",
+          "chars": 19,
+          "preview": "Any closer matches?"
+        }
+      ],
+      "request_payload_preview": {
+        "model": "gpt-4.1-mini",
+        "message_groups": 2,
+        "system_groups": 1,
+        "user_groups": 1,
+        "system_blocks": 6,
+        "user_blocks": 1,
+        "schema_name": "general_chat_response",
+        "schema_strict": true,
+        "max_output_tokens": 500
+      },
+      "response_status": 200,
+      "response_payload_preview": {
+        "has_output_text": false,
+        "output_items": 1,
+        "content_blocks": 1,
+        "has_error": false,
+        "error_type": null
+      },
+      "parsed_response": {
+        "assistant_message": "Could you please specify the type of room or the size you're looking for to help me find closer matches that fit your calm and neutral palette?",
+        "notes": null,
+        "memory_hints": [
+          "User wants calm and neutral rugs",
+          "Need to narrow down options based on room type or size"
+        ]
+      },
+      "fallback_reason": null,
+      "error": null,
+      "incomplete_detected": false,
+      "retry_attempted": false,
+      "retry_succeeded": false,
+      "text_postprocess_applied": false
+    },
+    "context_packet_stats": {
+      "field_counts": {
+        "stable_facts": 1,
+        "open_threads": 1,
+        "customer_context": 1,
+        "recently_shown_rugs": 10,
+        "shown_rug_ids": 10,
+        "recent_turns": 2
+      },
+      "char_counts": {
+        "summary_text": 178,
+        "stable_facts_total": 15,
+        "open_threads_total": 119,
+        "customer_context_total": 15,
+        "recently_shown_total": 963,
+        "shown_rug_ids_total": 360,
+        "liked_attributes_total": 0,
+        "recent_turns_total": 158,
+        "latest_user_message": 19,
+        "total": 1467
+      }
+    },
+    "timing_ms": {
+      "generate_general_chat_ms": 1131
+    }
+  }
+}

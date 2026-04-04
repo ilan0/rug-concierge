@@ -1,0 +1,523 @@
+{
+  "trace_id": "109f4ee2-533e-4e44-ae73-66117e5bd8c3",
+  "channel": "chat-route",
+  "created_at": "2026-03-28T07:52:09.456Z",
+  "payload": {
+    "flow_path": [
+      "/api/chat POST",
+      "getOrCreateSession",
+      "updateRecommendationStateForTurn",
+      "routeTurnMode",
+      "handlerDispatch",
+      "updateConversationMemory",
+      "saveSession"
+    ],
+    "request": {
+      "session_id": "19a373da-4f47-45ef-9d70-4348980c049f",
+      "role": "retail_customer",
+      "tenant_id": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5",
+      "tenant_subdomain": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5",
+      "tenant_hostname": "127.0.0.1",
+      "message": "Show me kilims in medium sizes",
+      "constraints": null
+    },
+    "routing": {
+      "mode": "recommendation",
+      "intent": "recommend",
+      "rule_id": "EXPLICIT_RECOMMENDATION_REQUEST",
+      "confidence": "high",
+      "needs_clarification": false,
+      "parser": {
+        "model": "gpt-4.1-mini",
+        "latency_ms": 110,
+        "status": "fallback",
+        "parse_status": "fallback",
+        "fallback": "OpenAI request failed",
+        "fallback_reason": "OpenAI request failed",
+        "normalized_payload": {
+          "intent": "recommend",
+          "mode": "recommendation",
+          "followup_intent": "none",
+          "constraints": {
+            "size": null,
+            "colors": [],
+            "styles": [
+              "kilim"
+            ],
+            "shape": null
+          },
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          },
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          },
+          "session_facts": [],
+          "rug_reference_ambiguous": false,
+          "confidence": "high"
+        },
+        "normalized_parse_payload": {
+          "intent": "recommend",
+          "mode": "recommendation",
+          "followup_intent": "none",
+          "constraints": {
+            "size": null,
+            "colors": [],
+            "styles": [
+              "kilim"
+            ],
+            "shape": null
+          },
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          },
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          },
+          "session_facts": [],
+          "rug_reference_ambiguous": false,
+          "confidence": "high"
+        },
+        "response_status": 400,
+        "incomplete_detected": false,
+        "error": "OpenAI request failed with status 400"
+      },
+      "policy": {
+        "intent": "recommend",
+        "compiled_policy": {
+          "intent": "recommend",
+          "mode": "recommendation",
+          "discovery_requested": false,
+          "followup_intent": "none",
+          "hard_constraints": {
+            "styles": [
+              "kilim"
+            ],
+            "strictness": {
+              "size": "prefer",
+              "colors": "prefer",
+              "styles": "must",
+              "shape": "prefer"
+            }
+          },
+          "persisted_hard_constraints": {
+            "styles": [
+              "kilim"
+            ],
+            "strictness": {
+              "size": "prefer",
+              "colors": "prefer",
+              "styles": "must",
+              "shape": "prefer"
+            }
+          },
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          },
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          },
+          "confidence": "high",
+          "policy_source": "parsed_turn",
+          "must_prefer_avoid": {
+            "must": [
+              "styles"
+            ],
+            "prefer": [],
+            "avoid": {
+              "colors": [],
+              "styles": [],
+              "shapes": []
+            }
+          }
+        },
+        "policy_source": "parsed_turn",
+        "must_prefer_avoid": {
+          "must": [
+            "styles"
+          ],
+          "prefer": [],
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          }
+        },
+        "must-prefer-avoid": {
+          "must": [
+            "styles"
+          ],
+          "prefer": [],
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          }
+        },
+        "constraint_modes": {
+          "size": "prefer",
+          "colors": "prefer",
+          "styles": "prefer",
+          "shape": "prefer",
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          }
+        }
+      },
+      "parser_trace": {
+        "called": true,
+        "model": "gpt-4.1-mini",
+        "status": "fallback",
+        "response_status": 400,
+        "fallback": "OpenAI request failed",
+        "fallback_reason": "OpenAI request failed",
+        "incomplete_detected": false,
+        "latency_ms": 110,
+        "normalized_payload": {
+          "intent": "recommend",
+          "mode": "recommendation",
+          "followup_intent": "none",
+          "constraints": {
+            "size": null,
+            "colors": [],
+            "styles": [
+              "kilim"
+            ],
+            "shape": null
+          },
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          },
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          },
+          "session_facts": [],
+          "rug_reference_ambiguous": false,
+          "confidence": "high"
+        },
+        "parsed": {
+          "intent": "recommend",
+          "mode": "recommendation",
+          "followup_intent": "none",
+          "constraints": {
+            "size": null,
+            "colors": [],
+            "styles": [
+              "kilim"
+            ],
+            "shape": null
+          },
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          },
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          },
+          "session_facts": [],
+          "rug_reference_ambiguous": false,
+          "confidence": "high"
+        },
+        "error": "OpenAI request failed with status 400"
+      },
+      "compiled_policy": {
+        "intent": "recommend",
+        "mode": "recommendation",
+        "discovery_requested": false,
+        "followup_intent": "none",
+        "hard_constraints": {
+          "styles": [
+            "kilim"
+          ],
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "must",
+            "shape": "prefer"
+          }
+        },
+        "persisted_hard_constraints": {
+          "styles": [
+            "kilim"
+          ],
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "must",
+            "shape": "prefer"
+          }
+        },
+        "strictness": {
+          "size": "prefer",
+          "colors": "prefer",
+          "styles": "prefer",
+          "shape": "prefer"
+        },
+        "avoid": {
+          "colors": [],
+          "styles": [],
+          "shapes": []
+        },
+        "confidence": "high",
+        "policy_source": "parsed_turn",
+        "must_prefer_avoid": {
+          "must": [
+            "styles"
+          ],
+          "prefer": [],
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          }
+        }
+      },
+      "policy_source": "parsed_turn",
+      "must_prefer_avoid": {
+        "must": [
+          "styles"
+        ],
+        "prefer": [],
+        "avoid": {
+          "colors": [],
+          "styles": [],
+          "shapes": []
+        }
+      },
+      "must-prefer-avoid": {
+        "must": [
+          "styles"
+        ],
+        "prefer": [],
+        "avoid": {
+          "colors": [],
+          "styles": [],
+          "shapes": []
+        }
+      },
+      "handler": "handleRecommendationTurn",
+      "prompt_layer_preview": [
+        "TASK_PROMPT_RECOMMENDATION",
+        "SYSTEM_PROMPT_BASE",
+        "TASK_PROMPT_RECOMMENDATION",
+        "TASK_PROMPT_RECOMMENDATION",
+        "STRUCTURED_OUTPUT_RECOMMENDATION",
+        "CHAT_MEMORY_CONTEXT",
+        "CHAT_MEMORY_CONTEXT",
+        "CHAT_MEMORY_CONTEXT",
+        "CHAT_MEMORY_CONTEXT",
+        "RECENT_TURNS_CONTEXT",
+        "INVENTORY_CONTEXT",
+        "LATEST_USER_MESSAGE_WITH_HARD_CONSTRAINTS"
+      ]
+    },
+    "reaction": {
+      "detected_reaction": null,
+      "referenced_rug_id": null,
+      "rug_reference_ambiguous": false,
+      "liked_attributes_before": {
+        "colors": [],
+        "styles": [
+          "modern",
+          "kilim"
+        ],
+        "origins": []
+      },
+      "liked_attributes_after": {
+        "colors": [],
+        "styles": [
+          "modern",
+          "kilim"
+        ],
+        "origins": []
+      },
+      "liked_rug_ids_before": [],
+      "liked_rug_ids_after": [],
+      "dismissed_rug_ids_before": [],
+      "dismissed_rug_ids_after": []
+    },
+    "state_snapshot": {
+      "recommendation_state": {
+        "hard_constraints": {
+          "styles": [
+            "kilim"
+          ],
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "must",
+            "shape": "prefer"
+          }
+        },
+        "soft_preferences": {},
+        "runtime": {
+          "last_result_mode": "recommendation",
+          "last_relaxed_size_tolerance_in": null,
+          "last_blockers": [],
+          "last_recommended_size_in": {
+            "width_in": 96,
+            "length_in": 120
+          },
+          "liked_rug_ids": [],
+          "dismissed_rug_ids": [],
+          "shown_rug_ids": [
+            "46245ee2-ac56-46e0-8cbf-b2eead74c24b",
+            "b575199c-b518-4d7b-845f-0d2ff6f3cdc9",
+            "42e84b9d-fdeb-48be-99b2-90aa9b3b5c71"
+          ],
+          "liked_attributes": {
+            "colors": [],
+            "styles": [
+              "modern"
+            ],
+            "origins": []
+          },
+          "recently_shown_rugs": [
+            {
+              "id": "46245ee2-ac56-46e0-8cbf-b2eead74c24b",
+              "label": "Contemporary Kilim",
+              "colors": [
+                "multi"
+              ],
+              "style": "Kilim",
+              "origin": "Other"
+            },
+            {
+              "id": "b575199c-b518-4d7b-845f-0d2ff6f3cdc9",
+              "label": "Vintage Central Asian Tribal",
+              "colors": [
+                "red",
+                "blue",
+                "ivory",
+                "black"
+              ],
+              "style": "Tribal",
+              "origin": "Central Asian"
+            },
+            {
+              "id": "42e84b9d-fdeb-48be-99b2-90aa9b3b5c71",
+              "label": "Vintage Moroccan Rug",
+              "colors": [
+                "red",
+                "rust",
+                "black",
+                "brown"
+              ],
+              "style": "Geometric",
+              "origin": "Moroccan"
+            }
+          ],
+          "no_match_attempts": 0,
+          "updated_at": "2026-03-28T07:51:58.823Z"
+        }
+      },
+      "conversation_memory": {
+        "summary_text": "…ilable alternatives. We don't have many exact modern 8x10 rugs, so here are the closest options including some complementary styles. The stando… || User: Any closer matches? | Assistant: Currently, we don't have closer matches to an exact modern 8x10 rug beyond the alternatives I've already shared, like the Contemporary Kilim. If you'd like, I can keep monitoring our inventory for new arrivals or sugges… || User: This feels too formal | Assistant: Thanks for letting me know. I can keep it more casual and straightforward from here. Would you like me to focus on rugs with a more relaxed, modern vibe or something else? || User: How often should I rotate a rug? | Assistant: It's best to rotate a rug every 3 to 6 months to ensure even wear and prevent fading from sunlight. Regular rotation helps maintain the rug's appearance and longevity. Would you like me to show you some durable rugs fro…",
+        "stable_facts": [
+          "style modern"
+        ],
+        "open_threads": [
+          "How often should I rotate a rug?",
+          "Would you like me to show you some durable rugs from our current collection suited for high-traffic areas?",
+          "Would you like me to focus on rugs with a more relaxed, modern vibe or something else?",
+          "Any closer matches?"
+        ],
+        "last_user_intent": "general_chat",
+        "no_match_attempts": 0,
+        "updated_at": "2026-03-28T07:51:58.823Z",
+        "version": "v1"
+      }
+    },
+    "memory_snapshot_before": {
+      "summary_text": "…ilable alternatives. We don't have many exact modern 8x10 rugs, so here are the closest options including some complementary styles. The stando… || User: Any closer matches? | Assistant: Currently, we don't have closer matches to an exact modern 8x10 rug beyond the alternatives I've already shared, like the Contemporary Kilim. If you'd like, I can keep monitoring our inventory for new arrivals or sugges… || User: This feels too formal | Assistant: Thanks for letting me know. I can keep it more casual and straightforward from here. Would you like me to focus on rugs with a more relaxed, modern vibe or something else? || User: How often should I rotate a rug? | Assistant: It's best to rotate a rug every 3 to 6 months to ensure even wear and prevent fading from sunlight. Regular rotation helps maintain the rug's appearance and longevity. Would you like me to show you some durable rugs fro…",
+      "stable_facts": [
+        "style modern"
+      ],
+      "open_threads": [
+        "How often should I rotate a rug?",
+        "Would you like me to show you some durable rugs from our current collection suited for high-traffic areas?",
+        "Would you like me to focus on rugs with a more relaxed, modern vibe or something else?",
+        "Any closer matches?"
+      ],
+      "last_user_intent": "general_chat",
+      "no_match_attempts": 0,
+      "updated_at": "2026-03-28T07:51:58.823Z",
+      "version": "v1"
+    },
+    "memory_snapshot_after": {
+      "summary_text": "…tives I've already shared, like the Contemporary Kilim. If you'd like, I can keep monitoring our inventory for new arrivals or sugges… || User: This feels too formal | Assistant: Thanks for letting me know. I can keep it more casual and straightforward from here. Would you like me to focus on rugs with a more relaxed, modern vibe or something else? || User: How often should I rotate a rug? | Assistant: It's best to rotate a rug every 3 to 6 months to ensure even wear and prevent fading from sunlight. Regular rotation helps maintain the rug's appearance and longevity. Would you like me to show you some durable rugs fro… || User: Show me kilims in medium sizes | Assistant: Here are kilims in medium sizes that balance traditional style with practical dimensions for versatile spaces. The Traditional Caucasian Kilim stands out with its vibrant tribal patterns and multicolor accents, perfect…",
+      "stable_facts": [
+        "style modern"
+      ],
+      "open_threads": [
+        "How often should I rotate a rug?",
+        "Would you like me to show you some durable rugs from our current collection suited for high-traffic areas?",
+        "Would you like me to focus on rugs with a more relaxed, modern vibe or something else?",
+        "Any closer matches?"
+      ],
+      "last_user_intent": "recommendation",
+      "no_match_attempts": 0,
+      "updated_at": "2026-03-28T07:52:09.150Z",
+      "version": "v1"
+    },
+    "ai_context_packet_stats": {
+      "field_counts": {
+        "stable_facts": 1,
+        "open_threads": 4,
+        "customer_context": 1,
+        "recently_shown_rugs": 3,
+        "shown_rug_ids": 3,
+        "recent_turns": 4
+      },
+      "char_counts": {
+        "summary_text": 900,
+        "stable_facts_total": 12,
+        "open_threads_total": 243,
+        "customer_context_total": 12,
+        "recently_shown_total": 277,
+        "shown_rug_ids_total": 108,
+        "liked_attributes_total": 6,
+        "recent_turns_total": 498,
+        "latest_user_message": 30,
+        "total": 1978
+      }
+    },
+    "response": {
+      "session_id": "19a373da-4f47-45ef-9d70-4348980c049f",
+      "role": "retail_customer",
+      "mode": "recommendation",
+      "fine_mode": "recommendation",
+      "response_mode": "recommendation",
+      "notes": null
+    },
+    "timing_ms": {
+      "total_ms": 10285
+    }
+  }
+}

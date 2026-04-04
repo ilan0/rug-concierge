@@ -1,0 +1,601 @@
+{
+  "trace_id": "8eee2640-56d7-43e7-93fc-d9408be9c8b3",
+  "channel": "chat-route",
+  "created_at": "2026-03-28T19:33:57.837Z",
+  "payload": {
+    "flow_path": [
+      "/api/chat POST",
+      "getOrCreateSession",
+      "updateRecommendationStateForTurn",
+      "routeTurnMode",
+      "handlerDispatch",
+      "updateConversationMemory",
+      "saveSession"
+    ],
+    "request": {
+      "session_id": "7b52c0d3-a0f0-4b7b-a4a4-fef773a71f8b",
+      "role": "retail_customer",
+      "tenant_id": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5",
+      "tenant_subdomain": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5",
+      "tenant_hostname": "127.0.0.1",
+      "message": "How do I care for a wool rug?",
+      "constraints": null
+    },
+    "routing": {
+      "mode": "general_chat",
+      "intent": "educate",
+      "rule_id": "GENERAL_ADVICE_OR_EDUCATION",
+      "confidence": "low",
+      "needs_clarification": false,
+      "parser": {
+        "model": "gpt-4.1-mini",
+        "latency_ms": 2135,
+        "status": "success",
+        "parse_status": "success",
+        "fallback": null,
+        "fallback_reason": null,
+        "normalized_payload": {
+          "intent": "educate",
+          "mode": "advice",
+          "followup_intent": "none",
+          "constraints": {
+            "size": null,
+            "colors": [],
+            "styles": [],
+            "shape": null
+          },
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          },
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          },
+          "session_facts": [
+            "inquired about wool rug care"
+          ],
+          "rug_reference_ambiguous": false,
+          "confidence": "low"
+        },
+        "normalized_parse_payload": {
+          "intent": "educate",
+          "mode": "advice",
+          "followup_intent": "none",
+          "constraints": {
+            "size": null,
+            "colors": [],
+            "styles": [],
+            "shape": null
+          },
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          },
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          },
+          "session_facts": [
+            "inquired about wool rug care"
+          ],
+          "rug_reference_ambiguous": false,
+          "confidence": "low"
+        },
+        "response_status": 200,
+        "incomplete_detected": false,
+        "error": null
+      },
+      "policy": {
+        "intent": "educate",
+        "compiled_policy": {
+          "intent": "educate",
+          "mode": "advice",
+          "discovery_requested": false,
+          "followup_intent": "none",
+          "hard_constraints": {
+            "strictness": {
+              "size": "prefer",
+              "colors": "prefer",
+              "styles": "prefer",
+              "shape": "prefer"
+            }
+          },
+          "persisted_hard_constraints": {
+            "size": {
+              "widthIn": 96,
+              "lengthIn": 120,
+              "toleranceIn": 12
+            },
+            "colors": [
+              "red",
+              "gold",
+              "rust",
+              "brown"
+            ],
+            "styles": [],
+            "strictness": {
+              "size": "prefer",
+              "colors": "prefer",
+              "styles": "prefer",
+              "shape": "prefer"
+            }
+          },
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          },
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          },
+          "confidence": "low",
+          "policy_source": "none",
+          "must_prefer_avoid": {
+            "must": [],
+            "prefer": [],
+            "avoid": {
+              "colors": [],
+              "styles": [],
+              "shapes": []
+            }
+          }
+        },
+        "policy_source": "none",
+        "must_prefer_avoid": {
+          "must": [],
+          "prefer": [],
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          }
+        },
+        "must-prefer-avoid": {
+          "must": [],
+          "prefer": [],
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          }
+        },
+        "constraint_modes": {
+          "size": "prefer",
+          "colors": "prefer",
+          "styles": "prefer",
+          "shape": "prefer",
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          }
+        }
+      },
+      "parser_trace": {
+        "called": true,
+        "model": "gpt-4.1-mini",
+        "status": "success",
+        "response_status": 200,
+        "fallback": null,
+        "fallback_reason": null,
+        "incomplete_detected": false,
+        "latency_ms": 2135,
+        "normalized_payload": {
+          "intent": "educate",
+          "mode": "advice",
+          "followup_intent": "none",
+          "constraints": {
+            "size": null,
+            "colors": [],
+            "styles": [],
+            "shape": null
+          },
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          },
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          },
+          "session_facts": [
+            "inquired about wool rug care"
+          ],
+          "rug_reference_ambiguous": false,
+          "confidence": "low"
+        },
+        "parsed": {
+          "intent": "educate",
+          "mode": "advice",
+          "followup_intent": "none",
+          "constraints": {
+            "size": null,
+            "colors": [],
+            "styles": [],
+            "shape": null
+          },
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          },
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          },
+          "session_facts": [
+            "inquired about wool rug care"
+          ],
+          "rug_reference_ambiguous": false,
+          "confidence": "low"
+        },
+        "error": null
+      },
+      "compiled_policy": {
+        "intent": "educate",
+        "mode": "advice",
+        "discovery_requested": false,
+        "followup_intent": "none",
+        "hard_constraints": {
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          }
+        },
+        "persisted_hard_constraints": {
+          "size": {
+            "widthIn": 96,
+            "lengthIn": 120,
+            "toleranceIn": 12
+          },
+          "colors": [
+            "red",
+            "gold",
+            "rust",
+            "brown"
+          ],
+          "styles": [],
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          }
+        },
+        "strictness": {
+          "size": "prefer",
+          "colors": "prefer",
+          "styles": "prefer",
+          "shape": "prefer"
+        },
+        "avoid": {
+          "colors": [],
+          "styles": [],
+          "shapes": []
+        },
+        "confidence": "low",
+        "policy_source": "none",
+        "must_prefer_avoid": {
+          "must": [],
+          "prefer": [],
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          }
+        }
+      },
+      "policy_source": "none",
+      "must_prefer_avoid": {
+        "must": [],
+        "prefer": [],
+        "avoid": {
+          "colors": [],
+          "styles": [],
+          "shapes": []
+        }
+      },
+      "must-prefer-avoid": {
+        "must": [],
+        "prefer": [],
+        "avoid": {
+          "colors": [],
+          "styles": [],
+          "shapes": []
+        }
+      },
+      "handler": "handleGeneralChatTurn",
+      "prompt_layer_preview": [
+        "SYSTEM_PROMPT_BASE",
+        "TASK_PROMPT_GENERAL_CHAT",
+        "TASK_PROMPT_GENERAL_CHAT",
+        "ROLE_PROMPT_RETAIL_CUSTOMER",
+        "CHAT_MEMORY_CONTEXT",
+        "RECENT_TURNS_CONTEXT",
+        "LATEST_USER_MESSAGE"
+      ]
+    },
+    "reaction": {
+      "detected_reaction": null,
+      "referenced_rug_id": null,
+      "rug_reference_ambiguous": false,
+      "liked_attributes_before": {
+        "colors": [
+          "red",
+          "gold",
+          "rust",
+          "brown"
+        ],
+        "styles": [
+          "geometric"
+        ],
+        "origins": []
+      },
+      "liked_attributes_after": {
+        "colors": [
+          "red",
+          "gold",
+          "rust",
+          "brown"
+        ],
+        "styles": [
+          "geometric"
+        ],
+        "origins": []
+      },
+      "liked_rug_ids_before": [],
+      "liked_rug_ids_after": [],
+      "dismissed_rug_ids_before": [],
+      "dismissed_rug_ids_after": []
+    },
+    "state_snapshot": {
+      "recommendation_state": {
+        "hard_constraints": {
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          }
+        },
+        "soft_preferences": {},
+        "runtime": {
+          "last_result_mode": "recommendation",
+          "last_relaxed_size_tolerance_in": null,
+          "last_blockers": [],
+          "last_recommended_size_in": {
+            "width_in": 96,
+            "length_in": 120
+          },
+          "liked_rug_ids": [],
+          "dismissed_rug_ids": [],
+          "shown_rug_ids": [
+            "3e188674-4625-445b-be9a-3d2bc2752a50",
+            "258fde89-ed87-4103-b1e8-224f267e0f3e",
+            "40e91751-d4aa-4ce2-b226-bfd5f37bb50a",
+            "735c23cf-2f40-4b3f-a1fb-06e983dcc2f9",
+            "2ea970a2-9755-4e95-adb8-a5576444ece5",
+            "3846ef0a-86e2-45f8-9aba-291b85451b4a",
+            "58c73155-cb3e-44c1-bba7-ec577f33dbec",
+            "3b3a8dc9-427f-4a97-9786-e7c0215a022f",
+            "4c60b570-f26c-4dda-a1df-9626479843b0",
+            "46245ee2-ac56-46e0-8cbf-b2eead74c24b",
+            "08ca5e39-c162-4d88-9d7e-484e90489d85",
+            "dbf2bf0c-8cb5-4ea7-9d6c-fa3439793b0b"
+          ],
+          "liked_attributes": {
+            "colors": [
+              "red",
+              "gold",
+              "rust",
+              "brown"
+            ],
+            "styles": [
+              "geometric"
+            ],
+            "origins": []
+          },
+          "recently_shown_rugs": [
+            {
+              "id": "34a884c7-43c5-40c4-b1a8-600780538868",
+              "label": "Antique Persian Heriz",
+              "colors": [
+                "rust",
+                "ivory",
+                "red",
+                "brown"
+              ],
+              "style": "Heriz",
+              "origin": "Persian"
+            },
+            {
+              "id": "0b1e217f-4b33-4bad-a38f-29ccf0729802",
+              "label": "Antique Persian Kerman",
+              "colors": [
+                "red",
+                "green",
+                "gold"
+              ],
+              "style": "Kerman",
+              "origin": "Persian"
+            },
+            {
+              "id": "28faeb61-6454-4c52-8a14-7fa2992a0a30",
+              "label": "Antique Persian Qom",
+              "colors": [
+                "red",
+                "ivory",
+                "blue",
+                "green"
+              ],
+              "style": "Qom",
+              "origin": "Persian"
+            },
+            {
+              "id": "d496a74b-f23b-4a50-9384-84a4586d0699",
+              "label": "Antique Persian Hunting Scene",
+              "colors": [
+                "red",
+                "black",
+                "brown",
+                "ivory"
+              ],
+              "style": "Floral",
+              "origin": "Persian"
+            },
+            {
+              "id": "0805e27a-f004-4556-aa8f-a2181a72eed0",
+              "label": "Antique Persian Kashan",
+              "colors": [
+                "rust",
+                "ivory",
+                "gold",
+                "blue"
+              ],
+              "style": "Kashan",
+              "origin": "Persian"
+            },
+            {
+              "id": "6868a748-6fa2-4f6a-b3b7-1f8ea922c49a",
+              "label": "Antique Persian pictorial rug",
+              "colors": [
+                "ivory",
+                "red",
+                "brown",
+                "gold"
+              ],
+              "style": "Floral",
+              "origin": "Persian"
+            }
+          ],
+          "no_match_attempts": 0,
+          "updated_at": "2026-03-28T19:33:48.570Z"
+        }
+      },
+      "conversation_memory": {
+        "summary_text": "…ection: If you'd like, should I show more in this same direction, or adjust color and size next? || User: I like this direction | Assistant: These carefully selected rugs align with your geometric style preference and fit near the 6x9 size. Note that exact geometric matches are limited, so I included close alternatives to maintain your style direction. If yo… || User: Keep going | Assistant: Great direction - I pulled the closest in-stock options around 6' x 9' so you can compare quickly: If you'd like, should I show more in this same direction, or adjust color and size next? || User: I'm decorating a living room with a gray sectional and want warm contrast | Assistant: These rugs in red and warm tones offer a rich contrast that will warmly complement your gray sectional. The Antique Persian Heriz stands out for its distinctive rust and ivory medallion design that adds depth and tradit…",
+        "stable_facts": [
+          "room: living room",
+          "has gray sectional",
+          "wants warm contrast",
+          "interested in antique Persian and Caucasian styles",
+          "interested in Kazak and Persian style rugs",
+          "prefers antique and tribal styles",
+          "wants smaller size",
+          "wants geometric style",
+          "preferred size around 6x9"
+        ],
+        "open_threads": [
+          "If you'd like, should I show more in this same direction, or adjust color and size next?",
+          "Great direction - I pulled the closest in-stock options around 6' x 9' so you can compare quickly: If you'd like, shoul…",
+          "Great, you asked for slightly smaller than 6' x 9', so I pulled the closest options in that direction: If you'd like, s…",
+          "Since you're browsing openly, I curated a varied range so you can react to different directions: What kind of space are…"
+        ],
+        "last_user_intent": "recommendation",
+        "no_match_attempts": 0,
+        "updated_at": "2026-03-28T19:33:48.569Z",
+        "version": "v1"
+      }
+    },
+    "memory_snapshot_before": {
+      "summary_text": "…ection: If you'd like, should I show more in this same direction, or adjust color and size next? || User: I like this direction | Assistant: These carefully selected rugs align with your geometric style preference and fit near the 6x9 size. Note that exact geometric matches are limited, so I included close alternatives to maintain your style direction. If yo… || User: Keep going | Assistant: Great direction - I pulled the closest in-stock options around 6' x 9' so you can compare quickly: If you'd like, should I show more in this same direction, or adjust color and size next? || User: I'm decorating a living room with a gray sectional and want warm contrast | Assistant: These rugs in red and warm tones offer a rich contrast that will warmly complement your gray sectional. The Antique Persian Heriz stands out for its distinctive rust and ivory medallion design that adds depth and tradit…",
+      "stable_facts": [
+        "room: living room",
+        "has gray sectional",
+        "wants warm contrast",
+        "interested in antique Persian and Caucasian styles",
+        "interested in Kazak and Persian style rugs",
+        "prefers antique and tribal styles",
+        "wants smaller size",
+        "wants geometric style",
+        "preferred size around 6x9"
+      ],
+      "open_threads": [
+        "If you'd like, should I show more in this same direction, or adjust color and size next?",
+        "Great direction - I pulled the closest in-stock options around 6' x 9' so you can compare quickly: If you'd like, shoul…",
+        "Great, you asked for slightly smaller than 6' x 9', so I pulled the closest options in that direction: If you'd like, s…",
+        "Since you're browsing openly, I curated a varied range so you can react to different directions: What kind of space are…"
+      ],
+      "last_user_intent": "recommendation",
+      "no_match_attempts": 0,
+      "updated_at": "2026-03-28T19:33:48.569Z",
+      "version": "v1"
+    },
+    "memory_snapshot_after": {
+      "summary_text": "…s are limited, so I included close alternatives to maintain your style direction. If yo… || User: Keep going | Assistant: Great direction - I pulled the closest in-stock options around 6' x 9' so you can compare quickly: If you'd like, should I show more in this same direction, or adjust color and size next? || User: I'm decorating a living room with a gray sectional and want warm contrast | Assistant: These rugs in red and warm tones offer a rich contrast that will warmly complement your gray sectional. The Antique Persian Heriz stands out for its distinctive rust and ivory medallion design that adds depth and tradit… || User: How do I care for a wool rug? | Assistant: To care for a wool rug, vacuum regularly to remove dust and dirt, and rotate it periodically to ensure even wear. Avoid direct sunlight to prevent fading and clean spills promptly with a clean, absorbent cloth. For deep…",
+      "stable_facts": [
+        "inquired about wool rug care",
+        "room: living room",
+        "has gray sectional",
+        "wants warm contrast",
+        "interested in antique Persian and Caucasian styles",
+        "interested in Kazak and Persian style rugs",
+        "prefers antique and tribal styles",
+        "wants smaller size",
+        "wants geometric style",
+        "preferred size around 6x9"
+      ],
+      "open_threads": [
+        "How do I care for a wool rug?",
+        "If you'd like, should I show more in this same direction, or adjust color and size next?",
+        "Great direction - I pulled the closest in-stock options around 6' x 9' so you can compare quickly: If you'd like, shoul…",
+        "Great, you asked for slightly smaller than 6' x 9', so I pulled the closest options in that direction: If you'd like, s…",
+        "Since you're browsing openly, I curated a varied range so you can react to different directions: What kind of space are…"
+      ],
+      "last_user_intent": "general_chat",
+      "no_match_attempts": 0,
+      "updated_at": "2026-03-28T19:33:57.369Z",
+      "version": "v1"
+    },
+    "ai_context_packet_stats": {
+      "field_counts": {
+        "stable_facts": 9,
+        "open_threads": 4,
+        "customer_context": 9,
+        "recently_shown_rugs": 6,
+        "shown_rug_ids": 12,
+        "recent_turns": 4
+      },
+      "char_counts": {
+        "summary_text": 900,
+        "stable_facts_total": 243,
+        "open_threads_total": 448,
+        "customer_context_total": 243,
+        "recently_shown_total": 571,
+        "shown_rug_ids_total": 432,
+        "liked_attributes_total": 25,
+        "recent_turns_total": 549,
+        "latest_user_message": 29,
+        "total": 3008
+      }
+    },
+    "response": {
+      "session_id": "7b52c0d3-a0f0-4b7b-a4a4-fef773a71f8b",
+      "role": "retail_customer",
+      "mode": "general_chat",
+      "fine_mode": "general_chat",
+      "response_mode": "general_chat",
+      "notes": "GENERAL_CHAT_AI_RUNTIME:real | Prompt layers assembled: SYSTEM_PROMPT_BASE -> TASK_PROMPT_GENERAL_CHAT -> TASK_PROMPT_GENERAL_CHAT -> ROLE_PROMPT_RETAIL_CUSTOMER -> CHAT_MEMORY_CONTEXT -> RECENT_TURNS_CONTEXT -> LATEST_USER_MESSAGE"
+    },
+    "timing_ms": {
+      "total_ms": 8900
+    }
+  }
+}

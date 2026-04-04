@@ -1,0 +1,544 @@
+{
+  "trace_id": "83e6a338-1e05-4f09-8a44-01bf90a2d252",
+  "channel": "chat-route",
+  "created_at": "2026-03-28T06:26:20.318Z",
+  "payload": {
+    "flow_path": [
+      "/api/chat POST",
+      "getOrCreateSession",
+      "updateRecommendationStateForTurn",
+      "routeTurnMode",
+      "handlerDispatch",
+      "updateConversationMemory",
+      "saveSession"
+    ],
+    "request": {
+      "session_id": "61f43289-3757-47d9-8050-a566ab503136",
+      "role": "retail_customer",
+      "tenant_id": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5",
+      "tenant_subdomain": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5",
+      "tenant_hostname": "127.0.0.1",
+      "message": "Do you have anything similar?",
+      "constraints": null
+    },
+    "routing": {
+      "mode": "recommendation",
+      "intent": "followup",
+      "rule_id": "RECOMMENDATION_FOLLOWUP",
+      "confidence": "low",
+      "needs_clarification": false,
+      "parser": {
+        "model": "gpt-4.1-mini",
+        "latency_ms": 142,
+        "status": "fallback",
+        "parse_status": "fallback",
+        "fallback": "OpenAI request failed",
+        "fallback_reason": "OpenAI request failed",
+        "normalized_payload": {
+          "intent": "followup",
+          "mode": "recommendation_followup",
+          "followup_intent": "more_like_this",
+          "constraints": {
+            "size": null,
+            "colors": [],
+            "styles": [],
+            "shape": null
+          },
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          },
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          },
+          "session_facts": [],
+          "rug_reference_ambiguous": false,
+          "confidence": "low"
+        },
+        "normalized_parse_payload": {
+          "intent": "followup",
+          "mode": "recommendation_followup",
+          "followup_intent": "more_like_this",
+          "constraints": {
+            "size": null,
+            "colors": [],
+            "styles": [],
+            "shape": null
+          },
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          },
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          },
+          "session_facts": [],
+          "rug_reference_ambiguous": false,
+          "confidence": "low"
+        },
+        "response_status": 400,
+        "incomplete_detected": false,
+        "error": "OpenAI request failed with status 400"
+      },
+      "policy": {
+        "intent": "followup",
+        "compiled_policy": {
+          "intent": "followup",
+          "mode": "recommendation_followup",
+          "discovery_requested": false,
+          "followup_intent": "more_like_this",
+          "hard_constraints": {
+            "colors": [
+              "green"
+            ],
+            "styles": [],
+            "strictness": {
+              "size": "prefer",
+              "colors": "prefer",
+              "styles": "prefer",
+              "shape": "prefer"
+            }
+          },
+          "persisted_hard_constraints": {
+            "colors": [
+              "green"
+            ],
+            "styles": [],
+            "strictness": {
+              "size": "prefer",
+              "colors": "prefer",
+              "styles": "prefer",
+              "shape": "prefer"
+            }
+          },
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          },
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          },
+          "confidence": "low",
+          "policy_source": "none",
+          "must_prefer_avoid": {
+            "must": [],
+            "prefer": [
+              "colors"
+            ],
+            "avoid": {
+              "colors": [],
+              "styles": [],
+              "shapes": []
+            }
+          }
+        },
+        "policy_source": "none",
+        "must_prefer_avoid": {
+          "must": [],
+          "prefer": [
+            "colors"
+          ],
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          }
+        },
+        "must-prefer-avoid": {
+          "must": [],
+          "prefer": [
+            "colors"
+          ],
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          }
+        },
+        "constraint_modes": {
+          "size": "prefer",
+          "colors": "prefer",
+          "styles": "prefer",
+          "shape": "prefer",
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          }
+        }
+      },
+      "parser_trace": {
+        "called": true,
+        "model": "gpt-4.1-mini",
+        "status": "fallback",
+        "response_status": 400,
+        "fallback": "OpenAI request failed",
+        "fallback_reason": "OpenAI request failed",
+        "incomplete_detected": false,
+        "latency_ms": 142,
+        "normalized_payload": {
+          "intent": "followup",
+          "mode": "recommendation_followup",
+          "followup_intent": "more_like_this",
+          "constraints": {
+            "size": null,
+            "colors": [],
+            "styles": [],
+            "shape": null
+          },
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          },
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          },
+          "session_facts": [],
+          "rug_reference_ambiguous": false,
+          "confidence": "low"
+        },
+        "parsed": {
+          "intent": "followup",
+          "mode": "recommendation_followup",
+          "followup_intent": "more_like_this",
+          "constraints": {
+            "size": null,
+            "colors": [],
+            "styles": [],
+            "shape": null
+          },
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          },
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          },
+          "session_facts": [],
+          "rug_reference_ambiguous": false,
+          "confidence": "low"
+        },
+        "error": "OpenAI request failed with status 400"
+      },
+      "compiled_policy": {
+        "intent": "followup",
+        "mode": "recommendation_followup",
+        "discovery_requested": false,
+        "followup_intent": "more_like_this",
+        "hard_constraints": {
+          "colors": [
+            "green"
+          ],
+          "styles": [],
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          }
+        },
+        "persisted_hard_constraints": {
+          "colors": [
+            "green"
+          ],
+          "styles": [],
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          }
+        },
+        "strictness": {
+          "size": "prefer",
+          "colors": "prefer",
+          "styles": "prefer",
+          "shape": "prefer"
+        },
+        "avoid": {
+          "colors": [],
+          "styles": [],
+          "shapes": []
+        },
+        "confidence": "low",
+        "policy_source": "none",
+        "must_prefer_avoid": {
+          "must": [],
+          "prefer": [
+            "colors"
+          ],
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          }
+        }
+      },
+      "policy_source": "none",
+      "must_prefer_avoid": {
+        "must": [],
+        "prefer": [
+          "colors"
+        ],
+        "avoid": {
+          "colors": [],
+          "styles": [],
+          "shapes": []
+        }
+      },
+      "must-prefer-avoid": {
+        "must": [],
+        "prefer": [
+          "colors"
+        ],
+        "avoid": {
+          "colors": [],
+          "styles": [],
+          "shapes": []
+        }
+      },
+      "handler": "handleRecommendationTurn",
+      "prompt_layer_preview": [
+        "TASK_PROMPT_RECOMMENDATION",
+        "SYSTEM_PROMPT_BASE",
+        "TASK_PROMPT_RECOMMENDATION",
+        "TASK_PROMPT_RECOMMENDATION",
+        "STRUCTURED_OUTPUT_RECOMMENDATION",
+        "CHAT_MEMORY_CONTEXT",
+        "CHAT_MEMORY_CONTEXT",
+        "CHAT_MEMORY_CONTEXT",
+        "CHAT_MEMORY_CONTEXT",
+        "RECENT_TURNS_CONTEXT",
+        "INVENTORY_CONTEXT",
+        "LATEST_USER_MESSAGE_WITH_HARD_CONSTRAINTS"
+      ]
+    },
+    "reaction": {
+      "detected_reaction": null,
+      "referenced_rug_id": null,
+      "rug_reference_ambiguous": false,
+      "liked_attributes_before": {
+        "colors": [
+          "green"
+        ],
+        "styles": [],
+        "origins": []
+      },
+      "liked_attributes_after": {
+        "colors": [
+          "green"
+        ],
+        "styles": [],
+        "origins": []
+      },
+      "liked_rug_ids_before": [],
+      "liked_rug_ids_after": [],
+      "dismissed_rug_ids_before": [],
+      "dismissed_rug_ids_after": []
+    },
+    "state_snapshot": {
+      "recommendation_state": {
+        "hard_constraints": {
+          "colors": [
+            "green"
+          ],
+          "styles": [],
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          }
+        },
+        "soft_preferences": {},
+        "runtime": {
+          "last_result_mode": "recommendation",
+          "last_relaxed_size_tolerance_in": null,
+          "last_blockers": [],
+          "last_recommended_size_in": {
+            "width_in": 36,
+            "length_in": 144
+          },
+          "liked_rug_ids": [],
+          "dismissed_rug_ids": [],
+          "shown_rug_ids": [
+            "119b9d9a-fe0c-4f12-b2ac-a783bb7bc29b",
+            "0dd26ca3-10fb-418b-bb80-be02d2b331c7",
+            "58eef202-954d-44b6-a990-4b635e03cdd5",
+            "08ca5e39-c162-4d88-9d7e-484e90489d85",
+            "bd644ffb-6bf8-47f2-a8ce-0eaa3a4aca28",
+            "98a58ad4-f1c6-4e05-8429-1fc366673706"
+          ],
+          "liked_attributes": {
+            "colors": [
+              "green"
+            ],
+            "styles": [],
+            "origins": []
+          },
+          "recently_shown_rugs": [
+            {
+              "id": "119b9d9a-fe0c-4f12-b2ac-a783bb7bc29b",
+              "label": "Contemporary Runner",
+              "colors": [
+                "green"
+              ],
+              "style": "Minimal",
+              "origin": null
+            },
+            {
+              "id": "0dd26ca3-10fb-418b-bb80-be02d2b331c7",
+              "label": "Antique Persian Heriz",
+              "colors": [
+                "gold",
+                "green",
+                "blue",
+                "rust"
+              ],
+              "style": "Heriz",
+              "origin": "Persian"
+            },
+            {
+              "id": "58eef202-954d-44b6-a990-4b635e03cdd5",
+              "label": "Antique Persian Heriz",
+              "colors": [
+                "rust",
+                "green",
+                "blue",
+                "ivory"
+              ],
+              "style": "Heriz",
+              "origin": "Persian"
+            },
+            {
+              "id": "08ca5e39-c162-4d88-9d7e-484e90489d85",
+              "label": "Antique Caucasian Karabagh",
+              "colors": [
+                "red",
+                "green",
+                "ivory",
+                "blue"
+              ],
+              "style": "Karabagh",
+              "origin": "Caucasian"
+            },
+            {
+              "id": "bd644ffb-6bf8-47f2-a8ce-0eaa3a4aca28",
+              "label": "Antique Caucasian Kazak",
+              "colors": [
+                "red",
+                "green",
+                "blue",
+                "ivory"
+              ],
+              "style": "Kazak",
+              "origin": "Caucasian"
+            },
+            {
+              "id": "98a58ad4-f1c6-4e05-8429-1fc366673706",
+              "label": "Antique Persian Bakhtiari",
+              "colors": [
+                "red",
+                "green",
+                "ivory",
+                "black"
+              ],
+              "style": "Bakhtiari",
+              "origin": "Persian"
+            }
+          ],
+          "no_match_attempts": 0,
+          "updated_at": "2026-03-28T06:26:07.594Z"
+        }
+      },
+      "conversation_memory": {
+        "summary_text": "User: Show me green rugs | Assistant: You asked for green rugs, so these are the top picks that showcase green prominently in their design.",
+        "stable_facts": [
+          "palette green"
+        ],
+        "open_threads": [],
+        "last_user_intent": "recommendation",
+        "no_match_attempts": 0,
+        "updated_at": "2026-03-28T06:26:07.594Z",
+        "version": "v1"
+      }
+    },
+    "memory_snapshot_before": {
+      "summary_text": "User: Show me green rugs | Assistant: You asked for green rugs, so these are the top picks that showcase green prominently in their design.",
+      "stable_facts": [
+        "palette green"
+      ],
+      "open_threads": [],
+      "last_user_intent": "recommendation",
+      "no_match_attempts": 0,
+      "updated_at": "2026-03-28T06:26:07.594Z",
+      "version": "v1"
+    },
+    "memory_snapshot_after": {
+      "summary_text": "User: Show me green rugs | Assistant: You asked for green rugs, so these are the top picks that showcase green prominently in their design. || User: Do you have anything similar? | Assistant: Here are green rugs with traditional roots and rich patterns that echo the piece you might like, including a standout Persian Bakhtiari with garden motifs.",
+      "stable_facts": [
+        "palette green"
+      ],
+      "open_threads": [
+        "Do you have anything similar?"
+      ],
+      "last_user_intent": "recommendation",
+      "no_match_attempts": 0,
+      "updated_at": "2026-03-28T06:26:20.016Z",
+      "version": "v1"
+    },
+    "ai_context_packet_stats": {
+      "field_counts": {
+        "stable_facts": 1,
+        "open_threads": 0,
+        "customer_context": 1,
+        "recently_shown_rugs": 6,
+        "shown_rug_ids": 6,
+        "recent_turns": 2
+      },
+      "char_counts": {
+        "summary_text": 139,
+        "stable_facts_total": 13,
+        "open_threads_total": 0,
+        "customer_context_total": 13,
+        "recently_shown_total": 559,
+        "shown_rug_ids_total": 216,
+        "liked_attributes_total": 5,
+        "recent_turns_total": 119,
+        "latest_user_message": 29,
+        "total": 877
+      }
+    },
+    "response": {
+      "session_id": "61f43289-3757-47d9-8050-a566ab503136",
+      "role": "retail_customer",
+      "mode": "recommendation",
+      "fine_mode": "recommendation",
+      "response_mode": "recommendation",
+      "notes": "If you’d like, I can find more with specific sizes or styles to match your space."
+    },
+    "timing_ms": {
+      "total_ms": 12177
+    }
+  }
+}

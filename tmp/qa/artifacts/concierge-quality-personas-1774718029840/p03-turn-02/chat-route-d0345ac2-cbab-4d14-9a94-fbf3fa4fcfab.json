@@ -1,0 +1,770 @@
+{
+  "trace_id": "d0345ac2-cbab-4d14-9a94-fbf3fa4fcfab",
+  "channel": "chat-route",
+  "created_at": "2026-03-28T17:15:57.390Z",
+  "payload": {
+    "flow_path": [
+      "/api/chat POST",
+      "getOrCreateSession",
+      "updateRecommendationStateForTurn",
+      "routeTurnMode",
+      "handlerDispatch",
+      "updateConversationMemory",
+      "saveSession"
+    ],
+    "request": {
+      "session_id": "b4c5f58a-74a1-493c-b9e2-ce6e95506212",
+      "role": "retail_customer",
+      "tenant_id": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5",
+      "tenant_subdomain": "jjrugs",
+      "tenant_hostname": "jjrugs.rugdesk.app",
+      "message": "Show me more like the cleanest one.",
+      "constraints": null
+    },
+    "routing": {
+      "mode": "recommendation",
+      "intent": "followup",
+      "rule_id": "RECOMMENDATION_FOLLOWUP",
+      "confidence": "high",
+      "needs_clarification": false,
+      "parser": {
+        "model": "gpt-4.1-mini",
+        "latency_ms": 2459,
+        "status": "success",
+        "parse_status": "success",
+        "fallback": null,
+        "fallback_reason": null,
+        "normalized_payload": {
+          "intent": "followup",
+          "mode": "recommendation_followup",
+          "followup_intent": "more_like_this",
+          "constraints": {
+            "size": null,
+            "colors": [],
+            "styles": [
+              "Kilim"
+            ],
+            "shape": null
+          },
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          },
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          },
+          "session_facts": [
+            "recently_viewed_style: Kilim"
+          ],
+          "referenced_rug_id": "46245ee2-ac56-46e0-8cbf-b2eead74c24b",
+          "referenced_rug_label": "Contemporary Kilim",
+          "rug_reference_ambiguous": false,
+          "confidence": "high"
+        },
+        "normalized_parse_payload": {
+          "intent": "followup",
+          "mode": "recommendation_followup",
+          "followup_intent": "more_like_this",
+          "constraints": {
+            "size": null,
+            "colors": [],
+            "styles": [
+              "Kilim"
+            ],
+            "shape": null
+          },
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          },
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          },
+          "session_facts": [
+            "recently_viewed_style: Kilim"
+          ],
+          "referenced_rug_id": "46245ee2-ac56-46e0-8cbf-b2eead74c24b",
+          "referenced_rug_label": "Contemporary Kilim",
+          "rug_reference_ambiguous": false,
+          "confidence": "high"
+        },
+        "response_status": 200,
+        "incomplete_detected": false,
+        "error": null
+      },
+      "policy": {
+        "intent": "followup",
+        "compiled_policy": {
+          "intent": "followup",
+          "mode": "recommendation_followup",
+          "discovery_requested": false,
+          "followup_intent": "more_like_this",
+          "hard_constraints": {
+            "size": {
+              "widthIn": 96,
+              "lengthIn": 120,
+              "toleranceIn": 0
+            },
+            "colors": [],
+            "styles": [
+              "kilim"
+            ],
+            "strictness": {
+              "size": "prefer",
+              "colors": "prefer",
+              "styles": "prefer",
+              "shape": "prefer"
+            },
+            "avoid_preferences": {
+              "styles": [
+                "traditional",
+                "tribal",
+                "persian",
+                "heriz",
+                "serapi",
+                "kashan",
+                "tabriz",
+                "isfahan",
+                "sultanabad",
+                "bidjar",
+                "malayer",
+                "oushak",
+                "kazak",
+                "shirvan",
+                "karabagh",
+                "baluch",
+                "bokhara",
+                "turkmen"
+              ],
+              "shapes": []
+            }
+          },
+          "persisted_hard_constraints": {
+            "size": {
+              "widthIn": 96,
+              "lengthIn": 120,
+              "toleranceIn": 0
+            },
+            "colors": [],
+            "styles": [
+              "kilim"
+            ],
+            "strictness": {
+              "size": "prefer",
+              "colors": "prefer",
+              "styles": "prefer",
+              "shape": "prefer"
+            },
+            "avoid_preferences": {
+              "styles": [
+                "traditional",
+                "tribal",
+                "persian",
+                "heriz",
+                "serapi",
+                "kashan",
+                "tabriz",
+                "isfahan",
+                "sultanabad",
+                "bidjar",
+                "malayer",
+                "oushak",
+                "kazak",
+                "shirvan",
+                "karabagh",
+                "baluch",
+                "bokhara",
+                "turkmen"
+              ],
+              "shapes": []
+            }
+          },
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          },
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          },
+          "confidence": "high",
+          "policy_source": "parsed_turn",
+          "must_prefer_avoid": {
+            "must": [],
+            "prefer": [
+              "size",
+              "styles"
+            ],
+            "avoid": {
+              "colors": [],
+              "styles": [
+                "traditional",
+                "tribal",
+                "persian",
+                "heriz",
+                "serapi",
+                "kashan",
+                "tabriz",
+                "isfahan",
+                "sultanabad",
+                "bidjar",
+                "malayer",
+                "oushak",
+                "kazak",
+                "shirvan",
+                "karabagh",
+                "baluch",
+                "bokhara",
+                "turkmen"
+              ],
+              "shapes": []
+            }
+          }
+        },
+        "policy_source": "parsed_turn",
+        "must_prefer_avoid": {
+          "must": [],
+          "prefer": [
+            "size",
+            "styles"
+          ],
+          "avoid": {
+            "colors": [],
+            "styles": [
+              "traditional",
+              "tribal",
+              "persian",
+              "heriz",
+              "serapi",
+              "kashan",
+              "tabriz",
+              "isfahan",
+              "sultanabad",
+              "bidjar",
+              "malayer",
+              "oushak",
+              "kazak",
+              "shirvan",
+              "karabagh",
+              "baluch",
+              "bokhara",
+              "turkmen"
+            ],
+            "shapes": []
+          }
+        },
+        "must-prefer-avoid": {
+          "must": [],
+          "prefer": [
+            "size",
+            "styles"
+          ],
+          "avoid": {
+            "colors": [],
+            "styles": [
+              "traditional",
+              "tribal",
+              "persian",
+              "heriz",
+              "serapi",
+              "kashan",
+              "tabriz",
+              "isfahan",
+              "sultanabad",
+              "bidjar",
+              "malayer",
+              "oushak",
+              "kazak",
+              "shirvan",
+              "karabagh",
+              "baluch",
+              "bokhara",
+              "turkmen"
+            ],
+            "shapes": []
+          }
+        },
+        "constraint_modes": {
+          "size": "prefer",
+          "colors": "prefer",
+          "styles": "prefer",
+          "shape": "prefer",
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          }
+        }
+      },
+      "parser_trace": {
+        "called": true,
+        "model": "gpt-4.1-mini",
+        "status": "success",
+        "response_status": 200,
+        "fallback": null,
+        "fallback_reason": null,
+        "incomplete_detected": false,
+        "latency_ms": 2459,
+        "normalized_payload": {
+          "intent": "followup",
+          "mode": "recommendation_followup",
+          "followup_intent": "more_like_this",
+          "constraints": {
+            "size": null,
+            "colors": [],
+            "styles": [
+              "Kilim"
+            ],
+            "shape": null
+          },
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          },
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          },
+          "session_facts": [
+            "recently_viewed_style: Kilim"
+          ],
+          "referenced_rug_id": "46245ee2-ac56-46e0-8cbf-b2eead74c24b",
+          "referenced_rug_label": "Contemporary Kilim",
+          "rug_reference_ambiguous": false,
+          "confidence": "high"
+        },
+        "parsed": {
+          "intent": "followup",
+          "mode": "recommendation_followup",
+          "followup_intent": "more_like_this",
+          "constraints": {
+            "size": null,
+            "colors": [],
+            "styles": [
+              "Kilim"
+            ],
+            "shape": null
+          },
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          },
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          },
+          "session_facts": [
+            "recently_viewed_style: Kilim"
+          ],
+          "referenced_rug_id": "46245ee2-ac56-46e0-8cbf-b2eead74c24b",
+          "referenced_rug_label": "Contemporary Kilim",
+          "rug_reference_ambiguous": false,
+          "confidence": "high"
+        },
+        "error": null
+      },
+      "compiled_policy": {
+        "intent": "followup",
+        "mode": "recommendation_followup",
+        "discovery_requested": false,
+        "followup_intent": "more_like_this",
+        "hard_constraints": {
+          "size": {
+            "widthIn": 96,
+            "lengthIn": 120,
+            "toleranceIn": 0
+          },
+          "colors": [],
+          "styles": [
+            "kilim"
+          ],
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          },
+          "avoid_preferences": {
+            "styles": [
+              "traditional",
+              "tribal",
+              "persian",
+              "heriz",
+              "serapi",
+              "kashan",
+              "tabriz",
+              "isfahan",
+              "sultanabad",
+              "bidjar",
+              "malayer",
+              "oushak",
+              "kazak",
+              "shirvan",
+              "karabagh",
+              "baluch",
+              "bokhara",
+              "turkmen"
+            ],
+            "shapes": []
+          }
+        },
+        "persisted_hard_constraints": {
+          "size": {
+            "widthIn": 96,
+            "lengthIn": 120,
+            "toleranceIn": 0
+          },
+          "colors": [],
+          "styles": [
+            "kilim"
+          ],
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          },
+          "avoid_preferences": {
+            "styles": [
+              "traditional",
+              "tribal",
+              "persian",
+              "heriz",
+              "serapi",
+              "kashan",
+              "tabriz",
+              "isfahan",
+              "sultanabad",
+              "bidjar",
+              "malayer",
+              "oushak",
+              "kazak",
+              "shirvan",
+              "karabagh",
+              "baluch",
+              "bokhara",
+              "turkmen"
+            ],
+            "shapes": []
+          }
+        },
+        "strictness": {
+          "size": "prefer",
+          "colors": "prefer",
+          "styles": "prefer",
+          "shape": "prefer"
+        },
+        "avoid": {
+          "colors": [],
+          "styles": [],
+          "shapes": []
+        },
+        "confidence": "high",
+        "policy_source": "parsed_turn",
+        "must_prefer_avoid": {
+          "must": [],
+          "prefer": [
+            "size",
+            "styles"
+          ],
+          "avoid": {
+            "colors": [],
+            "styles": [
+              "traditional",
+              "tribal",
+              "persian",
+              "heriz",
+              "serapi",
+              "kashan",
+              "tabriz",
+              "isfahan",
+              "sultanabad",
+              "bidjar",
+              "malayer",
+              "oushak",
+              "kazak",
+              "shirvan",
+              "karabagh",
+              "baluch",
+              "bokhara",
+              "turkmen"
+            ],
+            "shapes": []
+          }
+        }
+      },
+      "policy_source": "parsed_turn",
+      "must_prefer_avoid": {
+        "must": [],
+        "prefer": [
+          "size",
+          "styles"
+        ],
+        "avoid": {
+          "colors": [],
+          "styles": [
+            "traditional",
+            "tribal",
+            "persian",
+            "heriz",
+            "serapi",
+            "kashan",
+            "tabriz",
+            "isfahan",
+            "sultanabad",
+            "bidjar",
+            "malayer",
+            "oushak",
+            "kazak",
+            "shirvan",
+            "karabagh",
+            "baluch",
+            "bokhara",
+            "turkmen"
+          ],
+          "shapes": []
+        }
+      },
+      "must-prefer-avoid": {
+        "must": [],
+        "prefer": [
+          "size",
+          "styles"
+        ],
+        "avoid": {
+          "colors": [],
+          "styles": [
+            "traditional",
+            "tribal",
+            "persian",
+            "heriz",
+            "serapi",
+            "kashan",
+            "tabriz",
+            "isfahan",
+            "sultanabad",
+            "bidjar",
+            "malayer",
+            "oushak",
+            "kazak",
+            "shirvan",
+            "karabagh",
+            "baluch",
+            "bokhara",
+            "turkmen"
+          ],
+          "shapes": []
+        }
+      },
+      "handler": "handleRecommendationTurn",
+      "prompt_layer_preview": [
+        "TASK_PROMPT_RECOMMENDATION",
+        "SYSTEM_PROMPT_BASE",
+        "TASK_PROMPT_RECOMMENDATION",
+        "TASK_PROMPT_RECOMMENDATION",
+        "STRUCTURED_OUTPUT_RECOMMENDATION",
+        "CHAT_MEMORY_CONTEXT",
+        "CHAT_MEMORY_CONTEXT",
+        "CHAT_MEMORY_CONTEXT",
+        "CHAT_MEMORY_CONTEXT",
+        "RECENT_TURNS_CONTEXT",
+        "INVENTORY_CONTEXT",
+        "LATEST_USER_MESSAGE_WITH_HARD_CONSTRAINTS"
+      ]
+    },
+    "reaction": {
+      "detected_reaction": null,
+      "referenced_rug_id": "46245ee2-ac56-46e0-8cbf-b2eead74c24b",
+      "rug_reference_ambiguous": false,
+      "liked_attributes_before": {
+        "colors": [],
+        "styles": [
+          "modern",
+          "kilim"
+        ],
+        "origins": []
+      },
+      "liked_attributes_after": {
+        "colors": [],
+        "styles": [
+          "modern",
+          "kilim"
+        ],
+        "origins": []
+      },
+      "liked_rug_ids_before": [],
+      "liked_rug_ids_after": [],
+      "dismissed_rug_ids_before": [],
+      "dismissed_rug_ids_after": []
+    },
+    "state_snapshot": {
+      "recommendation_state": {
+        "hard_constraints": {
+          "size": {
+            "widthIn": 96,
+            "lengthIn": 120,
+            "toleranceIn": 0
+          },
+          "colors": [],
+          "styles": [
+            "kilim"
+          ],
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          },
+          "avoid_preferences": {
+            "styles": [
+              "traditional",
+              "tribal",
+              "persian",
+              "heriz",
+              "serapi",
+              "kashan",
+              "tabriz",
+              "isfahan",
+              "sultanabad",
+              "bidjar",
+              "malayer",
+              "oushak",
+              "kazak",
+              "shirvan",
+              "karabagh",
+              "baluch",
+              "bokhara",
+              "turkmen"
+            ],
+            "shapes": []
+          }
+        },
+        "soft_preferences": {},
+        "runtime": {
+          "last_result_mode": "recommendation",
+          "last_relaxed_size_tolerance_in": null,
+          "last_blockers": [],
+          "last_recommended_size_in": {
+            "width_in": 96,
+            "length_in": 120
+          },
+          "liked_rug_ids": [],
+          "dismissed_rug_ids": [],
+          "shown_rug_ids": [
+            "46245ee2-ac56-46e0-8cbf-b2eead74c24b"
+          ],
+          "liked_attributes": {
+            "colors": [],
+            "styles": [
+              "modern"
+            ],
+            "origins": []
+          },
+          "recently_shown_rugs": [
+            {
+              "id": "46245ee2-ac56-46e0-8cbf-b2eead74c24b",
+              "label": "Contemporary Kilim",
+              "colors": [
+                "multi"
+              ],
+              "style": "Kilim",
+              "origin": "Other"
+            }
+          ],
+          "no_match_attempts": 0,
+          "updated_at": "2026-03-28T17:15:44.683Z"
+        }
+      },
+      "conversation_memory": {
+        "summary_text": "User: I want a modern 8x10, understated, nothing traditional. | Assistant: We don't have exact modern 8x10 rugs available, so here is a closest alternative with an understated, contemporary feel.",
+        "stable_facts": [
+          "wants modern style",
+          "wants size 8x10",
+          "avoids traditional style"
+        ],
+        "open_threads": [],
+        "last_user_intent": "recommendation",
+        "no_match_attempts": 0,
+        "updated_at": "2026-03-28T17:15:44.682Z",
+        "version": "v1"
+      }
+    },
+    "memory_snapshot_before": {
+      "summary_text": "User: I want a modern 8x10, understated, nothing traditional. | Assistant: We don't have exact modern 8x10 rugs available, so here is a closest alternative with an understated, contemporary feel.",
+      "stable_facts": [
+        "wants modern style",
+        "wants size 8x10",
+        "avoids traditional style"
+      ],
+      "open_threads": [],
+      "last_user_intent": "recommendation",
+      "no_match_attempts": 0,
+      "updated_at": "2026-03-28T17:15:44.682Z",
+      "version": "v1"
+    },
+    "memory_snapshot_after": {
+      "summary_text": "User: I want a modern 8x10, understated, nothing traditional. | Assistant: We don't have exact modern 8x10 rugs available, so here is a closest alternative with an understated, contemporary feel. || User: Show me more like the cleanest one. | Assistant: Here are more kilim rugs in the 8x10 size range, including similar contemporary patterns since exact matches are limited.",
+      "stable_facts": [
+        "recently_viewed_style: Kilim",
+        "wants modern style",
+        "wants size 8x10",
+        "avoids traditional style"
+      ],
+      "open_threads": [],
+      "last_user_intent": "recommendation",
+      "no_match_attempts": 0,
+      "updated_at": "2026-03-28T17:15:57.080Z",
+      "version": "v1"
+    },
+    "ai_context_packet_stats": {
+      "field_counts": {
+        "stable_facts": 3,
+        "open_threads": 0,
+        "customer_context": 3,
+        "recently_shown_rugs": 1,
+        "shown_rug_ids": 1,
+        "recent_turns": 2
+      },
+      "char_counts": {
+        "summary_text": 195,
+        "stable_facts_total": 57,
+        "open_threads_total": 0,
+        "customer_context_total": 57,
+        "recently_shown_total": 73,
+        "shown_rug_ids_total": 36,
+        "liked_attributes_total": 6,
+        "recent_turns_total": 175,
+        "latest_user_message": 35,
+        "total": 598
+      }
+    },
+    "response": {
+      "session_id": "b4c5f58a-74a1-493c-b9e2-ce6e95506212",
+      "role": "retail_customer",
+      "mode": "recommendation",
+      "fine_mode": "recommendation",
+      "response_mode": "recommendation",
+      "notes": "Only one exact 8x10 modern kilim is currently in stock; this is the cleanest we have that fits your criteria. | THIN_RESULTS_STYLE_EXPANDED"
+    },
+    "timing_ms": {
+      "total_ms": 10811
+    }
+  }
+}

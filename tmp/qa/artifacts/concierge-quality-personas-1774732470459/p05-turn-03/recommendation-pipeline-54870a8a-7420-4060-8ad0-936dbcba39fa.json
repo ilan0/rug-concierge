@@ -1,0 +1,1176 @@
+{
+  "trace_id": "54870a8a-7420-4060-8ad0-936dbcba39fa",
+  "channel": "recommendation-pipeline",
+  "created_at": "2026-03-28T21:18:31.885Z",
+  "payload": {
+    "request_id": "54870a8a-7420-4060-8ad0-936dbcba39fa",
+    "flow_path": [
+      "runRecommendationPipeline",
+      "fetchInventoryCandidates",
+      "filterByHardConstraints",
+      "shapeCandidatesForAI",
+      "rankAndExplain",
+      "logRecommendationQaEvent"
+    ],
+    "source_route": "/api/chat",
+    "session_id": "b802c25d-f51e-4a50-9ab2-841015c0941c",
+    "role": "retail_customer",
+    "tenant_id": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5",
+    "user_message": "I like the pattern but not that color direction.",
+    "constraints": {
+      "size": {
+        "widthIn": 96,
+        "lengthIn": 120,
+        "toleranceIn": 12
+      },
+      "colors": [
+        "ivory"
+      ],
+      "styles": [],
+      "strictness": {
+        "size": "prefer",
+        "colors": "prefer",
+        "styles": "prefer",
+        "shape": "prefer"
+      },
+      "avoid_preferences": {
+        "colors": [
+          "red",
+          "brown",
+          "black",
+          "rust",
+          "blue",
+          "gold",
+          "green"
+        ],
+        "shapes": []
+      }
+    },
+    "prompt_context": {
+      "role": "retail_customer",
+      "chat_context": {
+        "structured_state": {
+          "recommendation_state": {
+            "hard_constraints": {
+              "size": {
+                "widthIn": 96,
+                "lengthIn": 120,
+                "toleranceIn": 12
+              },
+              "colors": [
+                "ivory"
+              ],
+              "styles": [],
+              "strictness": {
+                "size": "prefer",
+                "colors": "prefer",
+                "styles": "prefer",
+                "shape": "prefer"
+              },
+              "avoid_preferences": {
+                "colors": [
+                  "red",
+                  "brown",
+                  "black",
+                  "rust",
+                  "blue",
+                  "gold",
+                  "green"
+                ],
+                "shapes": []
+              }
+            },
+            "soft_preferences": {},
+            "runtime": {
+              "last_result_mode": "recommendation",
+              "last_relaxed_size_tolerance_in": null,
+              "last_blockers": [],
+              "last_recommended_size_in": {
+                "width_in": 120,
+                "length_in": 168
+              },
+              "liked_rug_ids": [],
+              "dismissed_rug_ids": [],
+              "shown_rug_ids": [
+                "34a884c7-43c5-40c4-b1a8-600780538868",
+                "d496a74b-f23b-4a50-9384-84a4586d0699",
+                "0805e27a-f004-4556-aa8f-a2181a72eed0",
+                "ffd59b7d-5a06-4a2d-8afa-a5d1b15ebbd8",
+                "6868a748-6fa2-4f6a-b3b7-1f8ea922c49a",
+                "28faeb61-6454-4c52-8a14-7fa2992a0a30",
+                "d66b342c-75b8-4c1a-b5da-1d9b53250f9e",
+                "dd62ad1e-3953-43f8-bdd1-d46154c3111b",
+                "df1157e4-8db4-4345-97a6-02fe0fe79fde",
+                "b9fa610b-c9e7-4bbb-9f5b-3492dd3cf695",
+                "aea4955c-97f3-4e4a-a9b4-2db2fdf38a15",
+                "ed08a0ca-db1c-4d4b-bc3b-8f3a64eb9ed7"
+              ],
+              "liked_attributes": {
+                "colors": [
+                  "rust",
+                  "ivory"
+                ],
+                "styles": [],
+                "origins": []
+              },
+              "recently_shown_rugs": [
+                {
+                  "id": "aea4955c-97f3-4e4a-a9b4-2db2fdf38a15",
+                  "label": "Antique Caucasian Karabagh",
+                  "colors": [
+                    "red",
+                    "black",
+                    "brown"
+                  ],
+                  "style": "Karabagh",
+                  "origin": "Caucasian"
+                },
+                {
+                  "id": "ed08a0ca-db1c-4d4b-bc3b-8f3a64eb9ed7",
+                  "label": "Antique Caucasian Kazak",
+                  "colors": [
+                    "red",
+                    "brown",
+                    "green"
+                  ],
+                  "style": "Kazak",
+                  "origin": "Caucasian"
+                },
+                {
+                  "id": "4c07b1f6-ec49-4385-98a9-8c7e00ac3c74",
+                  "label": "Antique Persian Heriz",
+                  "colors": [
+                    "rust",
+                    "brown",
+                    "blue"
+                  ],
+                  "style": "Heriz",
+                  "origin": "Persian"
+                },
+                {
+                  "id": "38ed22c1-6294-4b0c-8f32-ca996c677164",
+                  "label": "Antique Persian Sultanabad",
+                  "colors": [
+                    "brown",
+                    "red",
+                    "blue"
+                  ],
+                  "style": "Sultanabad",
+                  "origin": "Persian"
+                },
+                {
+                  "id": "c7debad1-529e-49f4-9314-0233792e5a9b",
+                  "label": "Antique Persian Tabriz",
+                  "colors": [
+                    "red",
+                    "black",
+                    "gold"
+                  ],
+                  "style": "Tabriz",
+                  "origin": "Persian"
+                },
+                {
+                  "id": "58c73155-cb3e-44c1-bba7-ec577f33dbec",
+                  "label": "Antique Turkish Kilim",
+                  "colors": [
+                    "brown",
+                    "red",
+                    "black"
+                  ],
+                  "style": "Kilim",
+                  "origin": "Turkish"
+                },
+                {
+                  "id": "3b3a8dc9-427f-4a97-9786-e7c0215a022f",
+                  "label": "Bokhara Traditional",
+                  "colors": [
+                    "red",
+                    "black",
+                    "ivory"
+                  ],
+                  "style": "Bokhara",
+                  "origin": "Central Asian"
+                },
+                {
+                  "id": "581623da-8585-4d13-b4be-29188b1e80bf",
+                  "label": "Caucasian Kazak",
+                  "colors": [
+                    "black",
+                    "white",
+                    "ivory",
+                    "gray"
+                  ],
+                  "style": "Kazak",
+                  "origin": "Caucasian"
+                },
+                {
+                  "id": "9e907acc-59b6-46a0-9233-65f83e6e983f",
+                  "label": "Persian Traditional",
+                  "colors": [
+                    "black",
+                    "gray"
+                  ],
+                  "style": "Floral",
+                  "origin": "Persian"
+                },
+                {
+                  "id": "c3588e3b-437d-4ade-9014-0f391aa394ca",
+                  "label": "Vintage Persian Isfahan",
+                  "colors": [
+                    "ivory",
+                    "red",
+                    "blue",
+                    "teal"
+                  ],
+                  "style": "Isfahan",
+                  "origin": "Persian"
+                }
+              ],
+              "no_match_attempts": 0,
+              "updated_at": "2026-03-28T21:18:16.291Z"
+            }
+          }
+        },
+        "conversation_memory": {
+          "summary_text": "User: I'm redesigning a room with terracotta and cream. Need an anchor rug. | Assistant: Great direction - I pulled the closest in-stock options around 8' x 10' so you can compare quickly: If you'd like, should I show more in this same direction, or adjust color and size next? || User: Show me larger options. | Assistant: Great, you asked for larger than 8' x 10', so I pulled the next biggest options we have: If you'd like, should I show more in this same direction, or adjust color and size next?",
+          "stable_facts": [
+            "room redesign with terracotta and cream colors",
+            "looking for an anchor rug"
+          ],
+          "open_threads": [
+            "Great, you asked for larger than 8' x 10', so I pulled the next biggest options we have: If you'd like, should I show m…",
+            "Great direction - I pulled the closest in-stock options around 8' x 10' so you can compare quickly: If you'd like, shou…"
+          ],
+          "last_user_intent": "recommendation",
+          "version": "v1"
+        },
+        "customer_context": [
+          "room redesign with terracotta and cream colors",
+          "looking for an anchor rug"
+        ],
+        "recently_shown_rugs": [
+          {
+            "id": "aea4955c-97f3-4e4a-a9b4-2db2fdf38a15",
+            "label": "Antique Caucasian Karabagh",
+            "colors": [
+              "red",
+              "black",
+              "brown"
+            ],
+            "style": "Karabagh",
+            "origin": "Caucasian"
+          },
+          {
+            "id": "ed08a0ca-db1c-4d4b-bc3b-8f3a64eb9ed7",
+            "label": "Antique Caucasian Kazak",
+            "colors": [
+              "red",
+              "brown",
+              "green"
+            ],
+            "style": "Kazak",
+            "origin": "Caucasian"
+          },
+          {
+            "id": "4c07b1f6-ec49-4385-98a9-8c7e00ac3c74",
+            "label": "Antique Persian Heriz",
+            "colors": [
+              "rust",
+              "brown",
+              "blue"
+            ],
+            "style": "Heriz",
+            "origin": "Persian"
+          },
+          {
+            "id": "38ed22c1-6294-4b0c-8f32-ca996c677164",
+            "label": "Antique Persian Sultanabad",
+            "colors": [
+              "brown",
+              "red",
+              "blue"
+            ],
+            "style": "Sultanabad",
+            "origin": "Persian"
+          },
+          {
+            "id": "c7debad1-529e-49f4-9314-0233792e5a9b",
+            "label": "Antique Persian Tabriz",
+            "colors": [
+              "red",
+              "black",
+              "gold"
+            ],
+            "style": "Tabriz",
+            "origin": "Persian"
+          },
+          {
+            "id": "58c73155-cb3e-44c1-bba7-ec577f33dbec",
+            "label": "Antique Turkish Kilim",
+            "colors": [
+              "brown",
+              "red",
+              "black"
+            ],
+            "style": "Kilim",
+            "origin": "Turkish"
+          },
+          {
+            "id": "3b3a8dc9-427f-4a97-9786-e7c0215a022f",
+            "label": "Bokhara Traditional",
+            "colors": [
+              "red",
+              "black",
+              "ivory"
+            ],
+            "style": "Bokhara",
+            "origin": "Central Asian"
+          },
+          {
+            "id": "581623da-8585-4d13-b4be-29188b1e80bf",
+            "label": "Caucasian Kazak",
+            "colors": [
+              "black",
+              "white",
+              "ivory",
+              "gray"
+            ],
+            "style": "Kazak",
+            "origin": "Caucasian"
+          },
+          {
+            "id": "9e907acc-59b6-46a0-9233-65f83e6e983f",
+            "label": "Persian Traditional",
+            "colors": [
+              "black",
+              "gray"
+            ],
+            "style": "Floral",
+            "origin": "Persian"
+          },
+          {
+            "id": "c3588e3b-437d-4ade-9014-0f391aa394ca",
+            "label": "Vintage Persian Isfahan",
+            "colors": [
+              "ivory",
+              "red",
+              "blue",
+              "teal"
+            ],
+            "style": "Isfahan",
+            "origin": "Persian"
+          }
+        ],
+        "shown_rug_ids": [
+          "34a884c7-43c5-40c4-b1a8-600780538868",
+          "d496a74b-f23b-4a50-9384-84a4586d0699",
+          "0805e27a-f004-4556-aa8f-a2181a72eed0",
+          "ffd59b7d-5a06-4a2d-8afa-a5d1b15ebbd8",
+          "6868a748-6fa2-4f6a-b3b7-1f8ea922c49a",
+          "28faeb61-6454-4c52-8a14-7fa2992a0a30",
+          "d66b342c-75b8-4c1a-b5da-1d9b53250f9e",
+          "dd62ad1e-3953-43f8-bdd1-d46154c3111b",
+          "df1157e4-8db4-4345-97a6-02fe0fe79fde",
+          "b9fa610b-c9e7-4bbb-9f5b-3492dd3cf695",
+          "aea4955c-97f3-4e4a-a9b4-2db2fdf38a15",
+          "ed08a0ca-db1c-4d4b-bc3b-8f3a64eb9ed7"
+        ],
+        "liked_attributes": {
+          "colors": [
+            "rust",
+            "ivory"
+          ],
+          "styles": [],
+          "origins": []
+        },
+        "recent_turns": [
+          {
+            "role": "user",
+            "content": "I'm redesigning a room with terracotta and cream. Need an anchor rug.",
+            "created_at": "2026-03-28T21:17:47.732Z"
+          },
+          {
+            "role": "assistant",
+            "content": "Great direction - I pulled the closest in-stock options around 8' x 10' so you can compare quickly: If you'd like, should I show more in this same direction, or adjust color and size next?",
+            "created_at": "2026-03-28T21:17:58.746Z"
+          },
+          {
+            "role": "user",
+            "content": "Show me larger options.",
+            "created_at": "2026-03-28T21:18:05.509Z"
+          },
+          {
+            "role": "assistant",
+            "content": "Great, you asked for larger than 8' x 10', so I pulled the next biggest options we have: If you'd like, should I show more in this same direction, or adjust color and size next?",
+            "created_at": "2026-03-28T21:18:16.290Z"
+          }
+        ]
+      },
+      "discovery_mode": false,
+      "expanded_due_to_thin_results": false
+    },
+    "query_trace": [
+      {
+        "variant": "size_rotated",
+        "query_variant_reason": "size_window_rotated_dimensions_query",
+        "filters": {
+          "tenant_id": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5",
+          "status": "available",
+          "enrichment_status": "ready",
+          "limit": 235,
+          "size_bounds": {
+            "minWidthIn": 84,
+            "maxWidthIn": 108,
+            "minLengthIn": 108,
+            "maxLengthIn": 132,
+            "rotated": true
+          },
+          "color_prefilter_active": false,
+          "image_sql_filter_active": true,
+          "color_prefilter": "inactive",
+          "color_prefilter_state": "inactive",
+          "color_sql_prefilter_tokens": null
+        },
+        "row_count": 1,
+        "error": null
+      },
+      {
+        "variant": "size_direct",
+        "query_variant_reason": "size_window_direct_dimensions_query",
+        "filters": {
+          "tenant_id": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5",
+          "status": "available",
+          "enrichment_status": "ready",
+          "limit": 235,
+          "size_bounds": {
+            "minWidthIn": 84,
+            "maxWidthIn": 108,
+            "minLengthIn": 108,
+            "maxLengthIn": 132,
+            "rotated": false
+          },
+          "color_prefilter_active": false,
+          "image_sql_filter_active": true,
+          "color_prefilter": "inactive",
+          "color_prefilter_state": "inactive",
+          "color_sql_prefilter_tokens": null
+        },
+        "row_count": 99,
+        "error": null
+      }
+    ],
+    "dynamic_limit": 235,
+    "policy_sql_filters": {
+      "tenant_id": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5",
+      "status": "available",
+      "enrichment_status": "ready",
+      "size_window": {
+        "minWidthIn": 84,
+        "maxWidthIn": 108,
+        "minLengthIn": 108,
+        "maxLengthIn": 132
+      },
+      "hard_constraints": {
+        "size": true,
+        "styles": false,
+        "shape": false
+      },
+      "image_sql_filter_active": true,
+      "color_prefilter_active": false,
+      "color_prefilter": "inactive",
+      "color_prefilter_state": "inactive",
+      "color_prefilter_tokens": [],
+      "discovery_mode": false,
+      "confidence": "low"
+    },
+    "query_variant_reason": "size_window_active_query_direct_and_rotated",
+    "row_counts": {
+      "sql_rows_total": 100,
+      "sql_rows_by_variant": [
+        {
+          "variant": "size_rotated",
+          "query_variant_reason": "size_window_rotated_dimensions_query",
+          "row_count": 1,
+          "error": null
+        },
+        {
+          "variant": "size_direct",
+          "query_variant_reason": "size_window_direct_dimensions_query",
+          "row_count": 99,
+          "error": null
+        }
+      ]
+    },
+    "discovery_mode": false,
+    "color_sql_prefilter_tokens": [],
+    "broadening_applied": false,
+    "broadening_stage": "none",
+    "no_match": {
+      "fallback_tier": "none",
+      "reasonableness_gate": "passed",
+      "reasonableness_gate_result": "passed",
+      "terminal_reason_code": null
+    },
+    "candidate_counts": {
+      "sql_candidates": 99,
+      "hard_filtered_candidates": 4,
+      "ai_candidates": 4
+    },
+    "timing_ms": {
+      "count_rough_inventory_size_ms": 499,
+      "fetch_inventory_candidates_ms": 1450,
+      "filter_hard_constraints_ms": 0,
+      "shape_candidates_ms": 4,
+      "rank_and_explain_ms": 5147,
+      "qa_log_ms": 2,
+      "total_ms": 7105
+    },
+    "ai_trace": {
+      "called": true,
+      "model": "gpt-4.1-mini",
+      "prompt_layers": [
+        {
+          "id": "TASK_PROMPT_RECOMMENDATION",
+          "role": "system",
+          "chars": 1408,
+          "preview": "Never begin a response with \"Based on what you're looking for\" or any equivalent generic transition. Open with a line t…"
+        },
+        {
+          "id": "SYSTEM_PROMPT_BASE",
+          "role": "system",
+          "chars": 758,
+          "preview": "# AI System Prompt — Rug Concierge You are an experienced rug consultant helping retail customers in a showroom environ…"
+        },
+        {
+          "id": "TASK_PROMPT_RECOMMENDATION",
+          "role": "system",
+          "chars": 19,
+          "preview": "Respond in English."
+        },
+        {
+          "id": "TASK_PROMPT_RECOMMENDATION",
+          "role": "system",
+          "chars": 3458,
+          "preview": "# Recommendation Prompt You are a retail rug concierge for in-store customers. Recommend only from provided inventory c…"
+        },
+        {
+          "id": "STRUCTURED_OUTPUT_RECOMMENDATION",
+          "role": "system",
+          "chars": 452,
+          "preview": "# Recommendation Structured Output Add-on Use this prompt layer only for recommendation mode. Runtime JSON schema valid…"
+        },
+        {
+          "id": "CHAT_MEMORY_CONTEXT",
+          "role": "system",
+          "chars": 3675,
+          "preview": "CHAT MEMORY CONTEXT: {\"structured_state\":{\"recommendation_state\":{\"hard_constraints\":{\"size\":{\"widthIn\":96,\"lengthIn\":1…"
+        },
+        {
+          "id": "CHAT_MEMORY_CONTEXT",
+          "role": "system",
+          "chars": 111,
+          "preview": "CUSTOMER CONTEXT (stable facts): [\"room redesign with terracotta and cream colors\",\"looking for an anchor rug\"]"
+        },
+        {
+          "id": "CHAT_MEMORY_CONTEXT",
+          "role": "system",
+          "chars": 1562,
+          "preview": "RECENTLY SHOWN RUGS (avoid repeating unless clearly requested): [{\"id\":\"aea4955c-97f3-4e4a-a9b4-2db2fdf38a15\",\"label\":\"…"
+        },
+        {
+          "id": "CHAT_MEMORY_CONTEXT",
+          "role": "system",
+          "chars": 96,
+          "preview": "LIKED ATTRIBUTES (weight these positively): {\"colors\":[\"rust\",\"ivory\"],\"styles\":[],\"origins\":[]}"
+        },
+        {
+          "id": "RECENT_TURNS_CONTEXT",
+          "role": "system",
+          "chars": 766,
+          "preview": "RECENT TURNS CONTEXT: [{\"role\":\"user\",\"content\":\"I'm redesigning a room with terracotta and cream. Need an anchor rug.\"…"
+        },
+        {
+          "id": "INVENTORY_CONTEXT",
+          "role": "system",
+          "chars": 1616,
+          "preview": "AVAILABLE INVENTORY (authoritative). Each entry includes ID, Label, Size, and Description: [{\"id\":\"8ce81c0e-b654-450e-b…"
+        },
+        {
+          "id": "LATEST_USER_MESSAGE_WITH_HARD_CONSTRAINTS",
+          "role": "user",
+          "chars": 348,
+          "preview": "User request: I like the pattern but not that color direction. Hard constraints: {\"size\":{\"widthIn\":96,\"lengthIn\":120,\"…"
+        }
+      ],
+      "request_payload": {
+        "model": "gpt-4.1-mini",
+        "input": [
+          {
+            "role": "system",
+            "content": [
+              {
+                "type": "input_text",
+                "text": "Never begin a response with \"Based on what you're looking for\" or any equivalent generic transition. Open with a line that directly references what the customer asked for.\nVoice: warm, confident, and tasteful. Sound like a helpful showroom consultant, not a search engine.\nKeep it concise: 1-3 short sentences in assistant_message. Avoid robotic filler.\nWhen recommending, highlight one standout reason the top piece is special.\nIf the customer states an avoid preference (for example: no red, not too busy), do not praise or foreground that avoided direction.\nIf the customer asks for larger/smaller and exact directional matches are unavailable, say that directly before presenting closest alternatives. Never claim the returned set satisfies a directional request when it does not.\nIf the customer mentions practical needs (kids, pets, high traffic, easy-clean), include one practical suitability note in the opening or first recommendation reason.\nEnd recommendations with one natural next-step invitation (for example: show more like this, larger, or different color).\nOpening pattern examples:\n- Color query: \"You asked for blue-forward pieces, so these are the strongest matches in stock right now.\"\n- Style query: \"For an Oushak direction, these are the closest pieces currently available.\"\n- Discovery query: \"If you are browsing openly, here is a curated range to react to across style and origin.\""
+              },
+              {
+                "type": "input_text",
+                "text": "# AI System Prompt — Rug Concierge\n\nYou are an experienced rug consultant helping retail customers in a showroom environment.\n\nCore behavior:\n- Be accurate, practical, and calm.\n- Use only information provided in conversation and inventory context.\n- If data is missing, say what is unknown.\n- Never invent rug attributes, inventory availability, or IDs.\n\nTone:\n- Professional and approachable.\n- Concise and specific.\n- Not salesy or exaggerated. Genuine enthusiasm is appropriate when a piece genuinely stands out in quality, origin, condition, or rarity.\n- Detect the language of the user's message and respond in that same language.\n\nTrust rules:\n- When unsure, say so directly.\n- Prefer clear guidance over speculation.\n- Keep responses plain text only."
+              },
+              {
+                "type": "input_text",
+                "text": "Respond in English."
+              },
+              {
+                "type": "input_text",
+                "text": "# Recommendation Prompt\n\nYou are a retail rug concierge for in-store customers.\nRecommend only from provided inventory context.\n\n## Core Rules\n\n- Inventory only. Never invent rugs or IDs.\n- Use `ai_description` as primary narrative relevance signal.\n- Use structured fields (`origin`, `style`, `mood`, `pattern`, `primary_colors`) to refine fit.\n- Respect hard constraints from backend state: `size`, `styles`, `shape`.\n- Treat color as a strong ranking signal, not a hard exclusion.\n- Rank color fit by dominance order: dominant field color first, secondary/border color second, accent/detail color third.\n- Color tie-breakers: prefer rugs matching dominant color over secondary-only matches; then prefer rugs matching both dominant and secondary; then prefer stronger style/origin fit and richer listing detail.\n- Treat room/material as soft preferences unless backend marks them hard in context.\n- If `ai_description` is missing, the rug may still be suggested when hard constraints fit; clearly state detail is pending.\n- Every reason must be specific to that rug and connect the rug's attributes to the customer's stated context (room, decor, practical needs).\n- When `customer_context` is provided, treat it as a first-class input and connect recommendations to it explicitly.\n- In discovery mode, present an inspiring range and MUST end with exactly one natural question about the customer's space while still returning recommendations.\n- Never begin a response with \"Based on what you're looking for\" or any equivalent generic transition. Open with a line that directly references what the customer asked for.\n- Match the language of the customer's latest message.\n- Sound warm, confident, and tasteful. Write like an expert showroom consultant, not a product filter.\n- Keep `assistant_message` concise (1-3 short sentences), but include one specific standout detail for the top direction.\n- If the customer gives avoid preferences (for example: no red, not too busy), do not praise or foreground those avoided traits.\n- If the customer asks for larger/smaller and exact directional matches are unavailable, disclose that first and then show closest alternatives. Never claim the returned set satisfies the directional request when it does not.\n- If the customer mentions practical needs (kids, pets, high traffic, easy-clean), include one practical suitability note.\n- End recommendation responses with one natural next-step invitation (for example: show more like this, bigger, smaller, or another color direction).\n- When exact matches are unavailable, disclose clearly in the first sentence and pivot constructively to what is available.\n- Opening pattern examples:\n- Size-driven request: `For your 8x10 living room request, these are the strongest fits in stock right now:`\n- Color-driven request: `Since you want dominant blue with softer accents, these options align best:`\n- Style/origin request: `For a traditional Persian direction, these current pieces are the closest matches:`\n- Discovery/browse request: `If you are open to discovery, here is a curated spread across mood and origin to compare:`\n\n## Formatting\n\n- Plain text only inside string fields.\n- No markdown formatting.\n- Keep responses concise and complete.\n\n## Selection Order\n\n1. Respect backend hard constraints.\n2. Rank by fit to user intent and available rug attributes.\n3. Prefer grounded explanations over broad claims.\n4. Return `no_match` only when inventory is empty."
+              },
+              {
+                "type": "input_text",
+                "text": "# Recommendation Structured Output Add-on\n\nUse this prompt layer only for recommendation mode.\n\nRuntime JSON schema validation in code is authoritative.\nThe model output must match that schema exactly.\n\nRules:\n- JSON only (no prose outside JSON)\n- no extra keys\n- no markdown\n- concise, complete string values\n- use null only where schema allows null\n\nAny mismatch should be treated as invalid output and handled by backend sanitization/fallback logic."
+              },
+              {
+                "type": "input_text",
+                "text": "CHAT MEMORY CONTEXT:\n{\"structured_state\":{\"recommendation_state\":{\"hard_constraints\":{\"size\":{\"widthIn\":96,\"lengthIn\":120,\"toleranceIn\":12},\"colors\":[\"ivory\"],\"styles\":[],\"strictness\":{\"size\":\"prefer\",\"colors\":\"prefer\",\"styles\":\"prefer\",\"shape\":\"prefer\"},\"avoid_preferences\":{\"colors\":[\"red\",\"brown\",\"black\",\"rust\",\"blue\",\"gold\",\"green\"],\"shapes\":[]}},\"soft_preferences\":{},\"runtime\":{\"last_result_mode\":\"recommendation\",\"last_relaxed_size_tolerance_in\":null,\"last_blockers\":[],\"last_recommended_size_in\":{\"width_in\":120,\"length_in\":168},\"liked_rug_ids\":[],\"dismissed_rug_ids\":[],\"shown_rug_ids\":[\"34a884c7-43c5-40c4-b1a8-600780538868\",\"d496a74b-f23b-4a50-9384-84a4586d0699\",\"0805e27a-f004-4556-aa8f-a2181a72eed0\",\"ffd59b7d-5a06-4a2d-8afa-a5d1b15ebbd8\",\"6868a748-6fa2-4f6a-b3b7-1f8ea922c49a\",\"28faeb61-6454-4c52-8a14-7fa2992a0a30\",\"d66b342c-75b8-4c1a-b5da-1d9b53250f9e\",\"dd62ad1e-3953-43f8-bdd1-d46154c3111b\",\"df1157e4-8db4-4345-97a6-02fe0fe79fde\",\"b9fa610b-c9e7-4bbb-9f5b-3492dd3cf695\",\"aea4955c-97f3-4e4a-a9b4-2db2fdf38a15\",\"ed08a0ca-db1c-4d4b-bc3b-8f3a64eb9ed7\"],\"liked_attributes\":{\"colors\":[\"rust\",\"ivory\"],\"styles\":[],\"origins\":[]},\"recently_shown_rugs\":[{\"id\":\"aea4955c-97f3-4e4a-a9b4-2db2fdf38a15\",\"label\":\"Antique Caucasian Karabagh\",\"colors\":[\"red\",\"black\",\"brown\"],\"style\":\"Karabagh\",\"origin\":\"Caucasian\"},{\"id\":\"ed08a0ca-db1c-4d4b-bc3b-8f3a64eb9ed7\",\"label\":\"Antique Caucasian Kazak\",\"colors\":[\"red\",\"brown\",\"green\"],\"style\":\"Kazak\",\"origin\":\"Caucasian\"},{\"id\":\"4c07b1f6-ec49-4385-98a9-8c7e00ac3c74\",\"label\":\"Antique Persian Heriz\",\"colors\":[\"rust\",\"brown\",\"blue\"],\"style\":\"Heriz\",\"origin\":\"Persian\"},{\"id\":\"38ed22c1-6294-4b0c-8f32-ca996c677164\",\"label\":\"Antique Persian Sultanabad\",\"colors\":[\"brown\",\"red\",\"blue\"],\"style\":\"Sultanabad\",\"origin\":\"Persian\"},{\"id\":\"c7debad1-529e-49f4-9314-0233792e5a9b\",\"label\":\"Antique Persian Tabriz\",\"colors\":[\"red\",\"black\",\"gold\"],\"style\":\"Tabriz\",\"origin\":\"Persian\"},{\"id\":\"58c73155-cb3e-44c1-bba7-ec577f33dbec\",\"label\":\"Antique Turkish Kilim\",\"colors\":[\"brown\",\"red\",\"black\"],\"style\":\"Kilim\",\"origin\":\"Turkish\"},{\"id\":\"3b3a8dc9-427f-4a97-9786-e7c0215a022f\",\"label\":\"Bokhara Traditional\",\"colors\":[\"red\",\"black\",\"ivory\"],\"style\":\"Bokhara\",\"origin\":\"Central Asian\"},{\"id\":\"581623da-8585-4d13-b4be-29188b1e80bf\",\"label\":\"Caucasian Kazak\",\"colors\":[\"black\",\"white\",\"ivory\",\"gray\"],\"style\":\"Kazak\",\"origin\":\"Caucasian\"},{\"id\":\"9e907acc-59b6-46a0-9233-65f83e6e983f\",\"label\":\"Persian Traditional\",\"colors\":[\"black\",\"gray\"],\"style\":\"Floral\",\"origin\":\"Persian\"},{\"id\":\"c3588e3b-437d-4ade-9014-0f391aa394ca\",\"label\":\"Vintage Persian Isfahan\",\"colors\":[\"ivory\",\"red\",\"blue\",\"teal\"],\"style\":\"Isfahan\",\"origin\":\"Persian\"}],\"no_match_attempts\":0,\"updated_at\":\"2026-03-28T21:18:16.291Z\"}}},\"conversation_memory\":{\"summary_text\":\"User: I'm redesigning a room with terracotta and cream. Need an anchor rug. | Assistant: Great direction - I pulled the closest in-stock options around 8' x 10' so you can compare quickly: If you'd like, should I show more in this same direction, or adjust color and size next? || User: Show me larger options. | Assistant: Great, you asked for larger than 8' x 10', so I pulled the next biggest options we have: If you'd like, should I show more in this same direction, or adjust color and size next?\",\"stable_facts\":[\"room redesign with terracotta and cream colors\",\"looking for an anchor rug\"],\"open_threads\":[\"Great, you asked for larger than 8' x 10', so I pulled the next biggest options we have: If you'd like, should I show m…\",\"Great direction - I pulled the closest in-stock options around 8' x 10' so you can compare quickly: If you'd like, shou…\"],\"last_user_intent\":\"recommendation\",\"version\":\"v1\"}}"
+              },
+              {
+                "type": "input_text",
+                "text": "CUSTOMER CONTEXT (stable facts):\n[\"room redesign with terracotta and cream colors\",\"looking for an anchor rug\"]"
+              },
+              {
+                "type": "input_text",
+                "text": "RECENTLY SHOWN RUGS (avoid repeating unless clearly requested):\n[{\"id\":\"aea4955c-97f3-4e4a-a9b4-2db2fdf38a15\",\"label\":\"Antique Caucasian Karabagh\",\"colors\":[\"red\",\"black\",\"brown\"],\"style\":\"Karabagh\",\"origin\":\"Caucasian\"},{\"id\":\"ed08a0ca-db1c-4d4b-bc3b-8f3a64eb9ed7\",\"label\":\"Antique Caucasian Kazak\",\"colors\":[\"red\",\"brown\",\"green\"],\"style\":\"Kazak\",\"origin\":\"Caucasian\"},{\"id\":\"4c07b1f6-ec49-4385-98a9-8c7e00ac3c74\",\"label\":\"Antique Persian Heriz\",\"colors\":[\"rust\",\"brown\",\"blue\"],\"style\":\"Heriz\",\"origin\":\"Persian\"},{\"id\":\"38ed22c1-6294-4b0c-8f32-ca996c677164\",\"label\":\"Antique Persian Sultanabad\",\"colors\":[\"brown\",\"red\",\"blue\"],\"style\":\"Sultanabad\",\"origin\":\"Persian\"},{\"id\":\"c7debad1-529e-49f4-9314-0233792e5a9b\",\"label\":\"Antique Persian Tabriz\",\"colors\":[\"red\",\"black\",\"gold\"],\"style\":\"Tabriz\",\"origin\":\"Persian\"},{\"id\":\"58c73155-cb3e-44c1-bba7-ec577f33dbec\",\"label\":\"Antique Turkish Kilim\",\"colors\":[\"brown\",\"red\",\"black\"],\"style\":\"Kilim\",\"origin\":\"Turkish\"},{\"id\":\"3b3a8dc9-427f-4a97-9786-e7c0215a022f\",\"label\":\"Bokhara Traditional\",\"colors\":[\"red\",\"black\",\"ivory\"],\"style\":\"Bokhara\",\"origin\":\"Central Asian\"},{\"id\":\"581623da-8585-4d13-b4be-29188b1e80bf\",\"label\":\"Caucasian Kazak\",\"colors\":[\"black\",\"white\",\"ivory\",\"gray\"],\"style\":\"Kazak\",\"origin\":\"Caucasian\"},{\"id\":\"9e907acc-59b6-46a0-9233-65f83e6e983f\",\"label\":\"Persian Traditional\",\"colors\":[\"black\",\"gray\"],\"style\":\"Floral\",\"origin\":\"Persian\"},{\"id\":\"c3588e3b-437d-4ade-9014-0f391aa394ca\",\"label\":\"Vintage Persian Isfahan\",\"colors\":[\"ivory\",\"red\",\"blue\",\"teal\"],\"style\":\"Isfahan\",\"origin\":\"Persian\"}]"
+              },
+              {
+                "type": "input_text",
+                "text": "LIKED ATTRIBUTES (weight these positively):\n{\"colors\":[\"rust\",\"ivory\"],\"styles\":[],\"origins\":[]}"
+              },
+              {
+                "type": "input_text",
+                "text": "RECENT TURNS CONTEXT:\n[{\"role\":\"user\",\"content\":\"I'm redesigning a room with terracotta and cream. Need an anchor rug.\",\"created_at\":\"2026-03-28T21:17:47.732Z\"},{\"role\":\"assistant\",\"content\":\"Great direction - I pulled the closest in-stock options around 8' x 10' so you can compare quickly: If you'd like, should I show more in this same direction, or adjust color and size next?\",\"created_at\":\"2026-03-28T21:17:58.746Z\"},{\"role\":\"user\",\"content\":\"Show me larger options.\",\"created_at\":\"2026-03-28T21:18:05.509Z\"},{\"role\":\"assistant\",\"content\":\"Great, you asked for larger than 8' x 10', so I pulled the next biggest options we have: If you'd like, should I show more in this same direction, or adjust color and size next?\",\"created_at\":\"2026-03-28T21:18:16.290Z\"}]"
+              },
+              {
+                "type": "input_text",
+                "text": "AVAILABLE INVENTORY (authoritative). Each entry includes ID, Label, Size, and Description:\n[{\"id\":\"8ce81c0e-b654-450e-bb50-41895597982f\",\"label\":\"Caucasian Kazak\",\"size\":\"8' x 10'\",\"origin\":\"Caucasian\",\"style\":\"Kazak\",\"mood\":\"eclectic\",\"pattern\":[\"geometric design\"],\"colors\":[\"multi\"],\"desc\":\"This is a rectangular Caucasian Kazak rug featuring a bold geometric design with diamond medallions and intricate border details. Its design suggests a traditional and eclectic mood.\"},{\"id\":\"46245ee2-ac56-46e0-8cbf-b2eead74c24b\",\"label\":\"Contemporary Kilim\",\"size\":\"8' x 10'\",\"origin\":\"Other\",\"style\":\"Kilim\",\"mood\":\"modern\",\"pattern\":[\"geometric design\"],\"colors\":[\"multi\"],\"desc\":\"A contemporary flatweave rug with a bold, geometric design in rectangular blocks. The rug features a diverse palette of colors arranged in a simple, modern pattern.\"},{\"id\":\"24fed895-db93-4ff2-8a43-01aed5f732cf\",\"label\":\"Vintage Caucasian\",\"size\":\"8' x 10'\",\"origin\":\"Caucasian\",\"style\":\"Geometric Tribal\",\"mood\":\"traditional\",\"pattern\":[\"geometric design\"],\"colors\":[],\"desc\":\"A vintage Caucasian runner featuring a complex geometric design with multiple borders. The elongated form suggests suitability for hallways or narrow spaces.\"},{\"id\":\"6cc59e20-2833-4a10-b640-6affd812f3d8\",\"label\":\"Caucasian Kazak\",\"size\":\"8' x 11'\",\"origin\":\"Caucasian\",\"style\":\"Kazak\",\"mood\":\"traditional\",\"pattern\":[\"geometric design\",\"medallion center\"],\"colors\":[\"multi\"],\"desc\":\"A rectangular Caucasian Kazak rug featuring bold geometric patterns with multiple medallions. The design includes a prominent use of traditional motifs and a defined border.\"}]"
+              }
+            ]
+          },
+          {
+            "role": "user",
+            "content": [
+              {
+                "type": "input_text",
+                "text": "User request:\nI like the pattern but not that color direction.\n\nHard constraints:\n{\"size\":{\"widthIn\":96,\"lengthIn\":120,\"toleranceIn\":12},\"colors\":[\"ivory\"],\"styles\":[],\"strictness\":{\"size\":\"prefer\",\"colors\":\"prefer\",\"styles\":\"prefer\",\"shape\":\"prefer\"},\"avoid_preferences\":{\"colors\":[\"red\",\"brown\",\"black\",\"rust\",\"blue\",\"gold\",\"green\"],\"shapes\":[]}}"
+              }
+            ]
+          }
+        ],
+        "max_output_tokens": 800,
+        "text": {
+          "format": {
+            "type": "json_schema",
+            "name": "recommendation_response",
+            "schema": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "mode",
+                "assistant_message",
+                "questions",
+                "recommendations",
+                "notes"
+              ],
+              "properties": {
+                "mode": {
+                  "type": "string",
+                  "enum": [
+                    "recommendations",
+                    "clarifying_question",
+                    "no_match",
+                    "disambiguation"
+                  ]
+                },
+                "assistant_message": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 420
+                },
+                "questions": {
+                  "type": "array",
+                  "minItems": 0,
+                  "maxItems": 2,
+                  "items": {
+                    "type": "string",
+                    "maxLength": 140
+                  }
+                },
+                "recommendations": {
+                  "type": "array",
+                  "minItems": 0,
+                  "maxItems": 10,
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                      "rug_id",
+                      "sku",
+                      "title",
+                      "origin",
+                      "style",
+                      "mood",
+                      "size_text",
+                      "match_reasons",
+                      "confidence",
+                      "confidence_tier",
+                      "confidence_factors",
+                      "why_not"
+                    ],
+                    "properties": {
+                      "rug_id": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 80
+                      },
+                      "sku": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "maxLength": 80
+                      },
+                      "title": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 160
+                      },
+                      "origin": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "maxLength": 60
+                      },
+                      "style": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "maxLength": 80
+                      },
+                      "mood": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "maxLength": 32
+                      },
+                      "size_text": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "maxLength": 64
+                      },
+                      "match_reasons": {
+                        "type": "array",
+                        "minItems": 1,
+                        "maxItems": 3,
+                        "items": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 180
+                        }
+                      },
+                      "confidence": {
+                        "type": "number"
+                      },
+                      "confidence_tier": {
+                        "type": "string",
+                        "enum": [
+                          "high",
+                          "medium",
+                          "low"
+                        ]
+                      },
+                      "confidence_factors": {
+                        "type": "array",
+                        "minItems": 0,
+                        "maxItems": 3,
+                        "items": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 100
+                        }
+                      },
+                      "why_not": {
+                        "type": "array",
+                        "minItems": 0,
+                        "maxItems": 2,
+                        "items": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 160
+                        }
+                      }
+                    }
+                  }
+                },
+                "notes": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "maxLength": 220
+                }
+              }
+            },
+            "strict": true
+          }
+        }
+      },
+      "response_status": 200,
+      "response_payload": {
+        "id": "resp_042e867f00a2abe90069c845a2cdc081969d65bf4de14a9965",
+        "object": "response",
+        "created_at": 1774732706,
+        "status": "completed",
+        "background": false,
+        "billing": {
+          "payer": "developer"
+        },
+        "completed_at": 1774732711,
+        "error": null,
+        "frequency_penalty": 0,
+        "incomplete_details": null,
+        "instructions": null,
+        "max_output_tokens": 800,
+        "max_tool_calls": null,
+        "model": "gpt-4.1-mini-2025-04-14",
+        "output": [
+          {
+            "id": "msg_042e867f00a2abe90069c845a335348196991929880ea83c3f",
+            "type": "message",
+            "status": "completed",
+            "content": [
+              {
+                "type": "output_text",
+                "annotations": [],
+                "logprobs": [],
+                "text": "{\"mode\":\"recommendations\",\"assistant_message\":\"You prefer the geometric pattern but with an ivory color direction, so these matches align best while avoiding the colors you want to skip.\",\"questions\":[],\"recommendations\":[{\"rug_id\":\"8ce81c0e-b654-450e-bb50-41895597982f\",\"sku\":null,\"title\":\"Caucasian Kazak\",\"origin\":\"Caucasian\",\"style\":\"Kazak\",\"mood\":\"eclectic\",\"size_text\":\"8' x 10'\",\"match_reasons\":[\"Shares the bold geometric pattern you like\",\"Fits your size preference around 8x10\",\"Traditional Caucasian origin offers rich design character\"],\"confidence\":0.7,\"confidence_tier\":\"medium\",\"confidence_factors\":[\"Strong pattern match\",\"Size within tolerance\",\"Mixed colors less ivory dominant\"],\"why_not\":[\"Colors are multi rather than ivory dominant, which is only a partial color match\"]},{\"rug_id\":\"6cc59e20-2833-4a10-b640-6affd812f3d8\",\"sku\":null,\"title\":\"Caucasian Kazak\",\"origin\":\"Caucasian\",\"style\":\"Kazak\",\"mood\":\"traditional\",\"size_text\":\"8' x 11'\",\"match_reasons\":[\"Features the geometric medallion pattern you prefer\",\"Close to your requested size with slight length above preferred\",\"Origin and style align with your interest\"],\"confidence\":0.65,\"confidence_tier\":\"medium\",\"confidence_factors\":[\"Strong pattern match\",\"Size slightly over preferred limit\",\"Color is multi, so ivory not dominant\"],\"why_not\":[\"Color palette includes multiple hues rather than primarily ivory\"]}],\"notes\":\"Exact ivory-dominant geometric rugs in your size and color constraints are limited; these multi-colored Kazak pieces offer the closest pattern style. Let me know if you'd like to explore more strictly ivory-toned options\"}"
+              }
+            ],
+            "role": "assistant"
+          }
+        ],
+        "parallel_tool_calls": true,
+        "presence_penalty": 0,
+        "previous_response_id": null,
+        "prompt_cache_key": null,
+        "prompt_cache_retention": null,
+        "reasoning": {
+          "effort": null,
+          "summary": null
+        },
+        "safety_identifier": null,
+        "service_tier": "default",
+        "store": true,
+        "temperature": 1,
+        "text": {
+          "format": {
+            "type": "json_schema",
+            "description": null,
+            "name": "recommendation_response",
+            "schema": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "mode",
+                "assistant_message",
+                "questions",
+                "recommendations",
+                "notes"
+              ],
+              "properties": {
+                "mode": {
+                  "type": "string",
+                  "enum": [
+                    "recommendations",
+                    "clarifying_question",
+                    "no_match",
+                    "disambiguation"
+                  ]
+                },
+                "assistant_message": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 420
+                },
+                "questions": {
+                  "type": "array",
+                  "minItems": 0,
+                  "maxItems": 2,
+                  "items": {
+                    "type": "string",
+                    "maxLength": 140
+                  }
+                },
+                "recommendations": {
+                  "type": "array",
+                  "minItems": 0,
+                  "maxItems": 10,
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                      "rug_id",
+                      "sku",
+                      "title",
+                      "origin",
+                      "style",
+                      "mood",
+                      "size_text",
+                      "match_reasons",
+                      "confidence",
+                      "confidence_tier",
+                      "confidence_factors",
+                      "why_not"
+                    ],
+                    "properties": {
+                      "rug_id": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 80
+                      },
+                      "sku": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "maxLength": 80
+                      },
+                      "title": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 160
+                      },
+                      "origin": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "maxLength": 60
+                      },
+                      "style": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "maxLength": 80
+                      },
+                      "mood": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "maxLength": 32
+                      },
+                      "size_text": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "maxLength": 64
+                      },
+                      "match_reasons": {
+                        "type": "array",
+                        "minItems": 1,
+                        "maxItems": 3,
+                        "items": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 180
+                        }
+                      },
+                      "confidence": {
+                        "type": "number"
+                      },
+                      "confidence_tier": {
+                        "type": "string",
+                        "enum": [
+                          "high",
+                          "medium",
+                          "low"
+                        ]
+                      },
+                      "confidence_factors": {
+                        "type": "array",
+                        "minItems": 0,
+                        "maxItems": 3,
+                        "items": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 100
+                        }
+                      },
+                      "why_not": {
+                        "type": "array",
+                        "minItems": 0,
+                        "maxItems": 2,
+                        "items": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 160
+                        }
+                      }
+                    }
+                  }
+                },
+                "notes": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "maxLength": 220
+                }
+              }
+            },
+            "strict": true
+          },
+          "verbosity": "medium"
+        },
+        "tool_choice": "auto",
+        "tools": [],
+        "top_logprobs": 0,
+        "top_p": 1,
+        "truncation": "disabled",
+        "usage": {
+          "input_tokens": 4077,
+          "input_tokens_details": {
+            "cached_tokens": 0
+          },
+          "output_tokens": 384,
+          "output_tokens_details": {
+            "reasoning_tokens": 0
+          },
+          "total_tokens": 4461
+        },
+        "user": null,
+        "metadata": {}
+      },
+      "parsed_response": {
+        "mode": "recommendations",
+        "assistant_message": "You prefer the geometric pattern but with an ivory color direction, so these matches align best while avoiding the colors you want to skip. If you'd like, should I show more in this same direction, or adjust color and size next?",
+        "questions": [],
+        "recommendations": [
+          {
+            "rug_id": "8ce81c0e-b654-450e-bb50-41895597982f",
+            "sku": null,
+            "title": "Caucasian Kazak",
+            "origin": "Caucasian",
+            "style": "Kazak",
+            "mood": "eclectic",
+            "size_text": "8' x 10'",
+            "match_reasons": [
+              "This is a rectangular Caucasian Kazak rug featuring a bold geometric design with diamond medallions and intricate border details. Its design suggests a traditional and eclectic mood.",
+              "Size closely matches your requested dimensions."
+            ],
+            "confidence": 0.75,
+            "confidence_tier": "medium",
+            "confidence_factors": [
+              "Strong size alignment",
+              "Detailed listing context available"
+            ],
+            "why_not": [],
+            "primary_image_url": "https://nlypymygmysfgxekhudr.supabase.co/storage/v1/object/public/rug-images/1f3d032b-8411-48a9-8a44-1f3cb9df67a5/8ce81c0e-b654-450e-bb50-41895597982f/primary-1774499836350.jpg",
+            "primary_image_caption": null
+          },
+          {
+            "rug_id": "6cc59e20-2833-4a10-b640-6affd812f3d8",
+            "sku": null,
+            "title": "Caucasian Kazak",
+            "origin": "Caucasian",
+            "style": "Kazak",
+            "mood": "traditional",
+            "size_text": "8' x 11'",
+            "match_reasons": [
+              "A rectangular Caucasian Kazak rug featuring bold geometric patterns with multiple medallions. The design includes a prominent use of traditional motifs and a defined border.",
+              "Closest currently available size to your request."
+            ],
+            "confidence": 0.6,
+            "confidence_tier": "medium",
+            "confidence_factors": [
+              "Loose size alignment",
+              "Detailed listing context available"
+            ],
+            "why_not": [],
+            "primary_image_url": "https://nlypymygmysfgxekhudr.supabase.co/storage/v1/object/public/rug-images/1f3d032b-8411-48a9-8a44-1f3cb9df67a5/6cc59e20-2833-4a10-b640-6affd812f3d8/primary-1774497788832.jpg",
+            "primary_image_caption": null
+          },
+          {
+            "rug_id": "46245ee2-ac56-46e0-8cbf-b2eead74c24b",
+            "sku": null,
+            "title": "Contemporary Kilim",
+            "origin": "Other",
+            "style": "Kilim",
+            "mood": "modern",
+            "primary_image_url": "https://nlypymygmysfgxekhudr.supabase.co/storage/v1/object/public/rug-images/1f3d032b-8411-48a9-8a44-1f3cb9df67a5/46245ee2-ac56-46e0-8cbf-b2eead74c24b/primary-1774655404573.webp",
+            "primary_image_caption": null,
+            "size_text": "8' x 10'",
+            "match_reasons": [
+              "A contemporary flatweave rug with a bold, geometric design in rectangular blocks. The rug features a diverse palette of colors arranged in a simple, modern pattern.",
+              "Size closely matches your requested dimensions."
+            ],
+            "confidence": 0.75,
+            "confidence_tier": "medium",
+            "confidence_factors": [
+              "Strong size alignment",
+              "Detailed listing context available"
+            ],
+            "why_not": []
+          },
+          {
+            "rug_id": "24fed895-db93-4ff2-8a43-01aed5f732cf",
+            "sku": null,
+            "title": "Vintage Caucasian",
+            "origin": "Caucasian",
+            "style": "Geometric Tribal",
+            "mood": "traditional",
+            "primary_image_url": "https://nlypymygmysfgxekhudr.supabase.co/storage/v1/object/public/rug-images/1f3d032b-8411-48a9-8a44-1f3cb9df67a5/24fed895-db93-4ff2-8a43-01aed5f732cf/primary-1774498390602.jpg",
+            "primary_image_caption": null,
+            "size_text": "8' x 10'",
+            "match_reasons": [
+              "A vintage Caucasian runner featuring a complex geometric design with multiple borders. The elongated form suggests suitability for hallways or narrow spaces.",
+              "Size closely matches your requested dimensions."
+            ],
+            "confidence": 0.75,
+            "confidence_tier": "medium",
+            "confidence_factors": [
+              "Strong size alignment",
+              "Detailed listing context available"
+            ],
+            "why_not": []
+          }
+        ],
+        "notes": "Exact ivory-dominant geometric rugs in your size and color constraints are limited; these multi-colored Kazak pieces offer the closest pattern style. Let me know if you'd like to explore more strictly ivory-toned options"
+      },
+      "fallback_reason": null,
+      "error": null,
+      "incomplete_detected": false,
+      "retry_attempted": false,
+      "retry_succeeded": false,
+      "text_postprocess_applied": false
+    },
+    "result": {
+      "mode": "recommendations",
+      "notes": "Exact ivory-dominant geometric rugs in your size and color constraints are limited; these multi-colored Kazak pieces offer the closest pattern style. Let me know if you'd like to explore more strictly ivory-toned options",
+      "recommendation_ids": [
+        "8ce81c0e-b654-450e-bb50-41895597982f",
+        "6cc59e20-2833-4a10-b640-6affd812f3d8",
+        "46245ee2-ac56-46e0-8cbf-b2eead74c24b",
+        "24fed895-db93-4ff2-8a43-01aed5f732cf"
+      ],
+      "recommendation_count": 4,
+      "relaxed_size_tolerance_in": null
+    },
+    "error": null
+  }
+}

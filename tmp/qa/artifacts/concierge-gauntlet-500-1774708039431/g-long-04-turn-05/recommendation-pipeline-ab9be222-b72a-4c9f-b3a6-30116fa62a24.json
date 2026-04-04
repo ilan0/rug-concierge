@@ -1,0 +1,424 @@
+{
+  "trace_id": "ab9be222-b72a-4c9f-b3a6-30116fa62a24",
+  "channel": "recommendation-pipeline",
+  "created_at": "2026-03-28T14:38:39.217Z",
+  "payload": {
+    "request_id": "ab9be222-b72a-4c9f-b3a6-30116fa62a24",
+    "flow_path": [
+      "runRecommendationPipeline",
+      "fetchInventoryCandidates",
+      "filterByHardConstraints",
+      "shapeCandidatesForAI",
+      "rankAndExplain",
+      "logRecommendationQaEvent"
+    ],
+    "source_route": "/api/chat",
+    "session_id": "56d1de4c-2a3f-4046-9408-5e5ad1ad0cf1",
+    "role": "retail_customer",
+    "tenant_id": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5",
+    "user_message": "Keep going",
+    "constraints": {
+      "size": {
+        "widthIn": 72,
+        "lengthIn": 108,
+        "toleranceIn": 10
+      },
+      "colors": [],
+      "styles": [
+        "geometric"
+      ],
+      "strictness": {
+        "size": "prefer",
+        "colors": "prefer",
+        "styles": "prefer",
+        "shape": "prefer"
+      }
+    },
+    "prompt_context": {
+      "role": "retail_customer",
+      "chat_context": {
+        "structured_state": {
+          "recommendation_state": {
+            "hard_constraints": {
+              "size": {
+                "widthIn": 72,
+                "lengthIn": 108,
+                "toleranceIn": 10
+              },
+              "colors": [],
+              "styles": [
+                "geometric"
+              ],
+              "strictness": {
+                "size": "prefer",
+                "colors": "prefer",
+                "styles": "prefer",
+                "shape": "prefer"
+              }
+            },
+            "soft_preferences": {},
+            "runtime": {
+              "last_result_mode": "recommendation",
+              "last_relaxed_size_tolerance_in": null,
+              "last_blockers": [],
+              "last_recommended_size_in": {
+                "width_in": 72,
+                "length_in": 108
+              },
+              "liked_rug_ids": [],
+              "dismissed_rug_ids": [],
+              "shown_rug_ids": [
+                "3e188674-4625-445b-be9a-3d2bc2752a50",
+                "258fde89-ed87-4103-b1e8-224f267e0f3e",
+                "40e91751-d4aa-4ce2-b226-bfd5f37bb50a",
+                "735c23cf-2f40-4b3f-a1fb-06e983dcc2f9",
+                "2ea970a2-9755-4e95-adb8-a5576444ece5",
+                "3846ef0a-86e2-45f8-9aba-291b85451b4a",
+                "58c73155-cb3e-44c1-bba7-ec577f33dbec",
+                "3b3a8dc9-427f-4a97-9786-e7c0215a022f",
+                "4c60b570-f26c-4dda-a1df-9626479843b0",
+                "46245ee2-ac56-46e0-8cbf-b2eead74c24b",
+                "08ca5e39-c162-4d88-9d7e-484e90489d85",
+                "dbf2bf0c-8cb5-4ea7-9d6c-fa3439793b0b"
+              ],
+              "liked_attributes": {
+                "colors": [],
+                "styles": [
+                  "geometric"
+                ],
+                "origins": []
+              },
+              "recently_shown_rugs": [
+                {
+                  "id": "08ca5e39-c162-4d88-9d7e-484e90489d85",
+                  "label": "Antique Caucasian Karabagh",
+                  "colors": [
+                    "red",
+                    "green",
+                    "ivory",
+                    "blue"
+                  ],
+                  "style": "Karabagh",
+                  "origin": "Caucasian"
+                },
+                {
+                  "id": "dbf2bf0c-8cb5-4ea7-9d6c-fa3439793b0b",
+                  "label": "Antique Persian",
+                  "colors": [
+                    "blue",
+                    "ivory",
+                    "red"
+                  ],
+                  "style": "Geometric Tribal",
+                  "origin": "Persian"
+                },
+                {
+                  "id": "b1b00766-b4bc-4d8b-ab4d-46be26589902",
+                  "label": "Antique Persian Bakhtiari",
+                  "colors": [
+                    "blue",
+                    "gold",
+                    "red",
+                    "brown"
+                  ],
+                  "style": "Bakhtiari",
+                  "origin": "Persian"
+                },
+                {
+                  "id": "4bc59440-4d03-4698-8275-2a78247cd3b7",
+                  "label": "Antique Persian Heriz",
+                  "colors": [
+                    "red",
+                    "black",
+                    "gold",
+                    "green"
+                  ],
+                  "style": "Heriz",
+                  "origin": "Persian"
+                },
+                {
+                  "id": "2679516c-6cfa-46e6-b94e-00095796ac73",
+                  "label": "Antique Persian Kerman",
+                  "colors": [
+                    "red",
+                    "blue",
+                    "ivory"
+                  ],
+                  "style": "Kerman",
+                  "origin": "Persian"
+                },
+                {
+                  "id": "a3181b27-19c9-45cd-ac2d-04b83368ca6f",
+                  "label": "Antique Persian Qom",
+                  "colors": [
+                    "rust",
+                    "blue",
+                    "ivory"
+                  ],
+                  "style": "Qom",
+                  "origin": "Persian"
+                }
+              ],
+              "no_match_attempts": 0,
+              "updated_at": "2026-03-28T14:38:33.912Z"
+            }
+          }
+        },
+        "conversation_memory": {
+          "summary_text": "User: Show me what you have | Assistant: Since you're browsing openly, I curated a varied range so you can react to different directions: What kind of space are you decorating so I can narrow these down for you? || User: Find me a geometric rug around 6x9 | Assistant: We don't have exact geometric matches right now, so I'm showing the closest available alternatives. For around 6' x 9', these are the closest available fits in stock: || User: Show me something smaller | Assistant: We don't have an exact 6' × 9' match right now, so I'm showing the closest available alternatives. We don't have smaller geometric rugs than about 6' x 9', but here are the closest fits currently available all with geom… || User: I like this direction | Assistant: I'm glad that style resonates with you. Would you like to explore more rugs with geometric and traditional elements similar to the ones I've shown?",
+          "stable_facts": [
+            "preference I like this direction"
+          ],
+          "open_threads": [
+            "Would you like to explore more rugs with geometric and traditional elements similar to the ones I've shown?",
+            "Show me what you have",
+            "Since you're browsing openly, I curated a varied range so you can react to different directions: What kind of space are…"
+          ],
+          "last_user_intent": "general_chat",
+          "version": "v1"
+        },
+        "customer_context": [
+          "preference I like this direction"
+        ],
+        "recently_shown_rugs": [
+          {
+            "id": "08ca5e39-c162-4d88-9d7e-484e90489d85",
+            "label": "Antique Caucasian Karabagh",
+            "colors": [
+              "red",
+              "green",
+              "ivory",
+              "blue"
+            ],
+            "style": "Karabagh",
+            "origin": "Caucasian"
+          },
+          {
+            "id": "dbf2bf0c-8cb5-4ea7-9d6c-fa3439793b0b",
+            "label": "Antique Persian",
+            "colors": [
+              "blue",
+              "ivory",
+              "red"
+            ],
+            "style": "Geometric Tribal",
+            "origin": "Persian"
+          },
+          {
+            "id": "b1b00766-b4bc-4d8b-ab4d-46be26589902",
+            "label": "Antique Persian Bakhtiari",
+            "colors": [
+              "blue",
+              "gold",
+              "red",
+              "brown"
+            ],
+            "style": "Bakhtiari",
+            "origin": "Persian"
+          },
+          {
+            "id": "4bc59440-4d03-4698-8275-2a78247cd3b7",
+            "label": "Antique Persian Heriz",
+            "colors": [
+              "red",
+              "black",
+              "gold",
+              "green"
+            ],
+            "style": "Heriz",
+            "origin": "Persian"
+          },
+          {
+            "id": "2679516c-6cfa-46e6-b94e-00095796ac73",
+            "label": "Antique Persian Kerman",
+            "colors": [
+              "red",
+              "blue",
+              "ivory"
+            ],
+            "style": "Kerman",
+            "origin": "Persian"
+          },
+          {
+            "id": "a3181b27-19c9-45cd-ac2d-04b83368ca6f",
+            "label": "Antique Persian Qom",
+            "colors": [
+              "rust",
+              "blue",
+              "ivory"
+            ],
+            "style": "Qom",
+            "origin": "Persian"
+          }
+        ],
+        "shown_rug_ids": [
+          "3e188674-4625-445b-be9a-3d2bc2752a50",
+          "258fde89-ed87-4103-b1e8-224f267e0f3e",
+          "40e91751-d4aa-4ce2-b226-bfd5f37bb50a",
+          "735c23cf-2f40-4b3f-a1fb-06e983dcc2f9",
+          "2ea970a2-9755-4e95-adb8-a5576444ece5",
+          "3846ef0a-86e2-45f8-9aba-291b85451b4a",
+          "58c73155-cb3e-44c1-bba7-ec577f33dbec",
+          "3b3a8dc9-427f-4a97-9786-e7c0215a022f",
+          "4c60b570-f26c-4dda-a1df-9626479843b0",
+          "46245ee2-ac56-46e0-8cbf-b2eead74c24b",
+          "08ca5e39-c162-4d88-9d7e-484e90489d85",
+          "dbf2bf0c-8cb5-4ea7-9d6c-fa3439793b0b"
+        ],
+        "liked_attributes": {
+          "colors": [],
+          "styles": [
+            "geometric"
+          ],
+          "origins": []
+        },
+        "recent_turns": [
+          {
+            "role": "user",
+            "content": "Show me something smaller",
+            "created_at": "2026-03-28T14:38:18.917Z"
+          },
+          {
+            "role": "assistant",
+            "content": "We don't have an exact 6' × 9' match right now, so I'm showing the closest available alternatives. We don't have smaller geometric rugs than about 6' x 9', but here are the closest fits currently available all with geometric elements and a traditional feel.",
+            "created_at": "2026-03-28T14:38:27.117Z"
+          },
+          {
+            "role": "user",
+            "content": "I like this direction",
+            "created_at": "2026-03-28T14:38:31.826Z"
+          },
+          {
+            "role": "assistant",
+            "content": "I'm glad that style resonates with you. Would you like to explore more rugs with geometric and traditional elements similar to the ones I've shown?",
+            "created_at": "2026-03-28T14:38:33.911Z"
+          }
+        ]
+      }
+    },
+    "query_trace": [
+      {
+        "variant": "size_rotated",
+        "query_variant_reason": "size_window_rotated_dimensions_query",
+        "filters": {
+          "tenant_id": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5",
+          "status": "available",
+          "enrichment_status": "ready",
+          "limit": 235,
+          "size_bounds": {
+            "minWidthIn": 62,
+            "maxWidthIn": 82,
+            "minLengthIn": 98,
+            "maxLengthIn": 118,
+            "rotated": true
+          },
+          "color_prefilter_active": false,
+          "image_sql_filter_active": true,
+          "color_prefilter": "inactive",
+          "color_prefilter_state": "inactive",
+          "color_sql_prefilter_tokens": null
+        },
+        "row_count": 0,
+        "error": "TypeError: fetch failed"
+      },
+      {
+        "variant": "size_direct",
+        "query_variant_reason": "size_window_direct_dimensions_query",
+        "filters": {
+          "tenant_id": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5",
+          "status": "available",
+          "enrichment_status": "ready",
+          "limit": 235,
+          "size_bounds": {
+            "minWidthIn": 62,
+            "maxWidthIn": 82,
+            "minLengthIn": 98,
+            "maxLengthIn": 118,
+            "rotated": false
+          },
+          "color_prefilter_active": false,
+          "image_sql_filter_active": true,
+          "color_prefilter": "inactive",
+          "color_prefilter_state": "inactive",
+          "color_sql_prefilter_tokens": null
+        },
+        "row_count": 14,
+        "error": null
+      }
+    ],
+    "dynamic_limit": 235,
+    "policy_sql_filters": {
+      "tenant_id": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5",
+      "status": "available",
+      "enrichment_status": "ready",
+      "size_window": {
+        "minWidthIn": 62,
+        "maxWidthIn": 82,
+        "minLengthIn": 98,
+        "maxLengthIn": 118
+      },
+      "hard_constraints": {
+        "size": true,
+        "styles": true,
+        "shape": false
+      },
+      "image_sql_filter_active": true,
+      "color_prefilter_active": false,
+      "color_prefilter": "inactive",
+      "color_prefilter_state": "inactive",
+      "color_prefilter_tokens": [],
+      "discovery_mode": false,
+      "confidence": "low"
+    },
+    "query_variant_reason": "size_window_active_query_direct_and_rotated",
+    "row_counts": {
+      "sql_rows_total": 14,
+      "sql_rows_by_variant": [
+        {
+          "variant": "size_rotated",
+          "query_variant_reason": "size_window_rotated_dimensions_query",
+          "row_count": 0,
+          "error": "TypeError: fetch failed"
+        },
+        {
+          "variant": "size_direct",
+          "query_variant_reason": "size_window_direct_dimensions_query",
+          "row_count": 14,
+          "error": null
+        }
+      ]
+    },
+    "discovery_mode": false,
+    "color_sql_prefilter_tokens": [],
+    "broadening_applied": false,
+    "broadening_stage": "none",
+    "no_match": {
+      "fallback_tier": "none",
+      "reasonableness_gate": "not_applicable",
+      "reasonableness_gate_result": "not_applicable",
+      "terminal_reason_code": null
+    },
+    "timing_ms": {
+      "count_rough_inventory_size_ms": 148,
+      "fetch_inventory_candidates_ms": 210,
+      "total_ms": 360
+    },
+    "ai_trace": {
+      "called": false,
+      "model": "gpt-4.1-mini",
+      "prompt_layers": [],
+      "request_payload": null,
+      "response_status": null,
+      "response_payload": null,
+      "parsed_response": null,
+      "fallback_reason": null,
+      "error": null,
+      "incomplete_detected": false,
+      "retry_attempted": false,
+      "retry_succeeded": false,
+      "text_postprocess_applied": false
+    },
+    "result": null,
+    "error": "Unable to query inventory source"
+  }
+}

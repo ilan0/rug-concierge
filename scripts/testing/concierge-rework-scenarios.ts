@@ -133,29 +133,58 @@ function buildServerEnv(input: {
   fallbackOpenAi?: boolean;
 }): Record<string, string> {
   const localEnv = loadEnvFile(path.resolve(APP_DIR, ".env.local"));
-  const chatModel =
-    process.env.OPENAI_CHAT_MODEL ??
-    localEnv.OPENAI_CHAT_MODEL ??
-    localEnv.OPENAI_MODEL ??
-    "gpt-4.1-mini";
+  const chatModel = process.env.OPENAI_CHAT_MODEL ?? localEnv.OPENAI_CHAT_MODEL;
+  const recommendationModel =
+    process.env.OPENAI_RECOMMENDATION_MODEL ?? localEnv.OPENAI_RECOMMENDATION_MODEL;
+  const visionModel =
+    process.env.OPENAI_VISION_MODEL ?? localEnv.OPENAI_VISION_MODEL;
+  const enableGeneralChatAi =
+    process.env.ENABLE_GENERAL_CHAT_AI ?? localEnv.ENABLE_GENERAL_CHAT_AI;
+  const upstashUrl =
+    process.env.UPSTASH_REDIS_REST_URL ?? localEnv.UPSTASH_REDIS_REST_URL;
+  const upstashToken =
+    process.env.UPSTASH_REDIS_REST_TOKEN ?? localEnv.UPSTASH_REDIS_REST_TOKEN;
+  if (!chatModel) {
+    throw new Error(
+      "OPENAI_CHAT_MODEL is required for concierge rework scenario harness."
+    );
+  }
+  if (!recommendationModel) {
+    throw new Error(
+      "OPENAI_RECOMMENDATION_MODEL is required for concierge rework scenario harness."
+    );
+  }
+  if (!visionModel) {
+    throw new Error(
+      "OPENAI_VISION_MODEL is required for concierge rework scenario harness."
+    );
+  }
+  if (!enableGeneralChatAi) {
+    throw new Error(
+      "ENABLE_GENERAL_CHAT_AI is required for concierge rework scenario harness."
+    );
+  }
+  if (!upstashUrl) {
+    throw new Error(
+      "UPSTASH_REDIS_REST_URL is required for concierge rework scenario harness."
+    );
+  }
+  if (!upstashToken) {
+    throw new Error(
+      "UPSTASH_REDIS_REST_TOKEN is required for concierge rework scenario harness."
+    );
+  }
 
   const env: Record<string, string> = {
     ...process.env,
     ...localEnv,
     NODE_ENV: "development",
     OPENAI_CHAT_MODEL: chatModel,
-    OPENAI_VISION_MODEL:
-      process.env.OPENAI_VISION_MODEL ?? localEnv.OPENAI_VISION_MODEL ?? chatModel,
-    ENABLE_GENERAL_CHAT_AI:
-      process.env.ENABLE_GENERAL_CHAT_AI ?? localEnv.ENABLE_GENERAL_CHAT_AI ?? "true",
-    UPSTASH_REDIS_REST_URL:
-      process.env.UPSTASH_REDIS_REST_URL ??
-      localEnv.UPSTASH_REDIS_REST_URL ??
-      "https://example.upstash.io",
-    UPSTASH_REDIS_REST_TOKEN:
-      process.env.UPSTASH_REDIS_REST_TOKEN ??
-      localEnv.UPSTASH_REDIS_REST_TOKEN ??
-      "dummy",
+    OPENAI_RECOMMENDATION_MODEL: recommendationModel,
+    OPENAI_VISION_MODEL: visionModel,
+    ENABLE_GENERAL_CHAT_AI: enableGeneralChatAi,
+    UPSTASH_REDIS_REST_URL: upstashUrl,
+    UPSTASH_REDIS_REST_TOKEN: upstashToken,
   };
 
   if (input.fallbackOpenAi) {

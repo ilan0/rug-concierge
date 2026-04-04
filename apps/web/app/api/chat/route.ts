@@ -18,6 +18,7 @@ import {
 } from "@/lib/chat/context-packet";
 import {
   buildInitialConversationMemory,
+  extractStableFactsFromUserMessage,
   mergeConversationMemory,
   trimChatHistory,
 } from "@/lib/chat/memory";
@@ -126,22 +127,28 @@ export async function POST(req: Request) {
   ];
 
   try {
+    const requestedTraceMeta = parseE2eTraceMeta(req);
+    const requestedTraceRunHeader =
+      req.headers.get("x-e2e-trace-run")?.trim() ?? "";
+    const isLocalE2eTraceRun =
+      process.env.E2E_TRACE_BYPASS_RATE_LIMIT === "1" &&
+      requestedTraceRunHeader.length > 0;
     const ip =
       req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
       req.headers.get("x-real-ip") ??
       "unknown";
-    const chatRateLimitResult = await checkRateLimit(chatRateLimit, `chat:${ip}`);
-    if (!chatRateLimitResult.allowed) {
-      return NextResponse.json(
-        {
-          error:
-            "You've sent a lot of messages. Please wait a moment before continuing.",
-        },
-        { status: 429 }
-      );
+    if (!isLocalE2eTraceRun) {
+      const chatRateLimitResult = await checkRateLimit(chatRateLimit, `chat:${ip}`);
+      if (!chatRateLimitResult.allowed) {
+        return NextResponse.json(
+          {
+            error:
+              "You've sent a lot of messages. Please wait a moment before continuing.",
+          },
+          { status: 429 }
+        );
+      }
     }
-
-    const requestedTraceMeta = parseE2eTraceMeta(req);
     const parsedBody = await parseJsonBodyWithSchema(
       req,
       CHAT_BODY_SCHEMA,
@@ -234,7 +241,7 @@ export async function POST(req: Request) {
       ...session,
       recommendation_state: {
         ...session.recommendation_state,
-        hard_constraints: compiledPolicy.hard_constraints,
+        hard_constraints: compiledPolicy.persisted_hard_constraints,
       },
       conversation_memory:
         session.conversation_memory ??
@@ -427,7 +434,12 @@ export async function POST(req: Request) {
                 ? startingNoMatchAttempts + 1
                 : 0
               : currentNoMatchAttempts,
-          sessionFacts: parsedTurn.session_facts ?? [],
+          sessionFacts: Array.from(
+            new Set([
+              ...(parsedTurn.session_facts ?? []),
+              ...extractStableFactsFromUserMessage(userTurn.content),
+            ])
+          ),
         })
       : nextSession.conversation_memory;
 

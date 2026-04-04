@@ -1,0 +1,120 @@
+{
+  "trace_id": "04acf5d1-e364-4a4a-9ff7-7b458f380a9a",
+  "channel": "general-chat-ai",
+  "created_at": "2026-03-28T20:29:01.787Z",
+  "payload": {
+    "mode": "general_chat",
+    "flow_path": [
+      "handleGeneralChatTurn",
+      "buildPromptLayers",
+      "generateGeneralChatResponse"
+    ],
+    "ai_trace": {
+      "called": true,
+      "model": "gpt-4.1-mini",
+      "prompt_layers": [
+        {
+          "id": "SYSTEM_PROMPT_BASE",
+          "role": "system",
+          "chars": 758,
+          "preview": "# AI System Prompt — Rug Concierge You are an experienced rug consultant helping retail customers in a showroom environ…"
+        },
+        {
+          "id": "TASK_PROMPT_GENERAL_CHAT",
+          "role": "system",
+          "chars": 962,
+          "preview": "# General Chat Prompt — Rug Concierge You are the retail concierge for an in-store rug showroom. Handle free-form custo…"
+        },
+        {
+          "id": "TASK_PROMPT_GENERAL_CHAT",
+          "role": "system",
+          "chars": 19,
+          "preview": "Respond in English."
+        },
+        {
+          "id": "ROLE_PROMPT_RETAIL_CUSTOMER",
+          "role": "system",
+          "chars": 107,
+          "preview": "Role: retail customer. Be approachable, warm, and concise, with practical guidance and a natural next step."
+        },
+        {
+          "id": "CHAT_MEMORY_CONTEXT",
+          "role": "system",
+          "chars": 1192,
+          "preview": "CHAT MEMORY CONTEXT: { \"summary_text\": \"User: I need a modern 8x10 rug | Assistant: We don't have exact modern matches…"
+        },
+        {
+          "id": "RECENT_TURNS_CONTEXT",
+          "role": "system",
+          "chars": 1006,
+          "preview": "RECENT TURNS CONTEXT: [ { \"role\": \"user\", \"content\": \"Any closer matches?\", \"created_at\": \"2026-03-28T20:28:37.431Z\" },…"
+        },
+        {
+          "id": "LATEST_USER_MESSAGE",
+          "role": "user",
+          "chars": 32,
+          "preview": "How often should I rotate a rug?"
+        }
+      ],
+      "request_payload_preview": {
+        "model": "gpt-4.1-mini",
+        "message_groups": 2,
+        "system_groups": 1,
+        "user_groups": 1,
+        "system_blocks": 6,
+        "user_blocks": 1,
+        "schema_name": "general_chat_response",
+        "schema_strict": true,
+        "max_output_tokens": 500
+      },
+      "response_status": 200,
+      "response_payload_preview": {
+        "has_output_text": false,
+        "output_items": 1,
+        "content_blocks": 1,
+        "has_error": false,
+        "error_type": null
+      },
+      "parsed_response": {
+        "assistant_message": "It's best to rotate your rug every 3 to 6 months to ensure even wear and fading, especially if it's in a high-traffic or sun-exposed area. This helps maintain its appearance and longevity. Would you like advice on caring for specific rug types or to see some easy-care options from our collection? If you'd like, I can show examples from our current collection.",
+        "notes": null,
+        "memory_hints": [
+          "rug care advice",
+          "rotate every 3 to 6 months",
+          "offer care tips or related products"
+        ]
+      },
+      "fallback_reason": null,
+      "error": null,
+      "incomplete_detected": false,
+      "retry_attempted": false,
+      "retry_succeeded": false,
+      "text_postprocess_applied": false
+    },
+    "context_packet_stats": {
+      "field_counts": {
+        "stable_facts": 4,
+        "open_threads": 2,
+        "customer_context": 4,
+        "recently_shown_rugs": 1,
+        "shown_rug_ids": 1,
+        "recent_turns": 4
+      },
+      "char_counts": {
+        "summary_text": 792,
+        "stable_facts_total": 93,
+        "open_threads_total": 107,
+        "customer_context_total": 93,
+        "recently_shown_total": 73,
+        "shown_rug_ids_total": 36,
+        "liked_attributes_total": 6,
+        "recent_turns_total": 600,
+        "latest_user_message": 32,
+        "total": 1796
+      }
+    },
+    "timing_ms": {
+      "generate_general_chat_ms": 1523
+    }
+  }
+}

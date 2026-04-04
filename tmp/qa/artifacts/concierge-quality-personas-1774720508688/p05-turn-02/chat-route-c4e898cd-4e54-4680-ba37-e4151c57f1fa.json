@@ -1,0 +1,654 @@
+{
+  "trace_id": "c4e898cd-4e54-4680-ba37-e4151c57f1fa",
+  "channel": "chat-route",
+  "created_at": "2026-03-28T17:58:49.569Z",
+  "payload": {
+    "flow_path": [
+      "/api/chat POST",
+      "getOrCreateSession",
+      "updateRecommendationStateForTurn",
+      "routeTurnMode",
+      "handlerDispatch",
+      "updateConversationMemory",
+      "saveSession"
+    ],
+    "request": {
+      "session_id": "c9d45588-3726-43ea-a565-b6cd46ccc752",
+      "role": "retail_customer",
+      "tenant_id": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5",
+      "tenant_subdomain": "jjrugs",
+      "tenant_hostname": "jjrugs.rugdesk.app",
+      "message": "Show me larger options.",
+      "constraints": null
+    },
+    "routing": {
+      "mode": "recommendation",
+      "intent": "followup",
+      "rule_id": "RECOMMENDATION_FOLLOWUP",
+      "confidence": "low",
+      "needs_clarification": false,
+      "parser": {
+        "model": "gpt-4.1-mini",
+        "latency_ms": 2630,
+        "status": "success",
+        "parse_status": "success",
+        "fallback": null,
+        "fallback_reason": null,
+        "normalized_payload": {
+          "intent": "followup",
+          "mode": "recommendation_followup",
+          "followup_intent": "larger",
+          "constraints": {
+            "size": null,
+            "colors": [],
+            "styles": [],
+            "shape": null
+          },
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          },
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          },
+          "session_facts": [
+            "interested in larger size options"
+          ],
+          "rug_reference_ambiguous": false,
+          "confidence": "low"
+        },
+        "normalized_parse_payload": {
+          "intent": "followup",
+          "mode": "recommendation_followup",
+          "followup_intent": "larger",
+          "constraints": {
+            "size": null,
+            "colors": [],
+            "styles": [],
+            "shape": null
+          },
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          },
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          },
+          "session_facts": [
+            "interested in larger size options"
+          ],
+          "rug_reference_ambiguous": false,
+          "confidence": "low"
+        },
+        "response_status": 200,
+        "incomplete_detected": false,
+        "error": null
+      },
+      "policy": {
+        "intent": "followup",
+        "compiled_policy": {
+          "intent": "followup",
+          "mode": "recommendation_followup",
+          "discovery_requested": false,
+          "followup_intent": "larger",
+          "hard_constraints": {
+            "size": {
+              "widthIn": 96,
+              "lengthIn": 120,
+              "toleranceIn": 12
+            },
+            "colors": [
+              "rust",
+              "ivory"
+            ],
+            "styles": [],
+            "strictness": {
+              "size": "prefer",
+              "colors": "prefer",
+              "styles": "prefer",
+              "shape": "prefer"
+            }
+          },
+          "persisted_hard_constraints": {
+            "size": {
+              "widthIn": 96,
+              "lengthIn": 120,
+              "toleranceIn": 12
+            },
+            "colors": [
+              "rust",
+              "ivory"
+            ],
+            "styles": [],
+            "strictness": {
+              "size": "prefer",
+              "colors": "prefer",
+              "styles": "prefer",
+              "shape": "prefer"
+            }
+          },
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          },
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          },
+          "confidence": "low",
+          "policy_source": "none",
+          "must_prefer_avoid": {
+            "must": [],
+            "prefer": [
+              "size",
+              "colors"
+            ],
+            "avoid": {
+              "colors": [],
+              "styles": [],
+              "shapes": []
+            }
+          }
+        },
+        "policy_source": "none",
+        "must_prefer_avoid": {
+          "must": [],
+          "prefer": [
+            "size",
+            "colors"
+          ],
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          }
+        },
+        "must-prefer-avoid": {
+          "must": [],
+          "prefer": [
+            "size",
+            "colors"
+          ],
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          }
+        },
+        "constraint_modes": {
+          "size": "prefer",
+          "colors": "prefer",
+          "styles": "prefer",
+          "shape": "prefer",
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          }
+        }
+      },
+      "parser_trace": {
+        "called": true,
+        "model": "gpt-4.1-mini",
+        "status": "success",
+        "response_status": 200,
+        "fallback": null,
+        "fallback_reason": null,
+        "incomplete_detected": false,
+        "latency_ms": 2630,
+        "normalized_payload": {
+          "intent": "followup",
+          "mode": "recommendation_followup",
+          "followup_intent": "larger",
+          "constraints": {
+            "size": null,
+            "colors": [],
+            "styles": [],
+            "shape": null
+          },
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          },
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          },
+          "session_facts": [
+            "interested in larger size options"
+          ],
+          "rug_reference_ambiguous": false,
+          "confidence": "low"
+        },
+        "parsed": {
+          "intent": "followup",
+          "mode": "recommendation_followup",
+          "followup_intent": "larger",
+          "constraints": {
+            "size": null,
+            "colors": [],
+            "styles": [],
+            "shape": null
+          },
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          },
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          },
+          "session_facts": [
+            "interested in larger size options"
+          ],
+          "rug_reference_ambiguous": false,
+          "confidence": "low"
+        },
+        "error": null
+      },
+      "compiled_policy": {
+        "intent": "followup",
+        "mode": "recommendation_followup",
+        "discovery_requested": false,
+        "followup_intent": "larger",
+        "hard_constraints": {
+          "size": {
+            "widthIn": 96,
+            "lengthIn": 120,
+            "toleranceIn": 12
+          },
+          "colors": [
+            "rust",
+            "ivory"
+          ],
+          "styles": [],
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          }
+        },
+        "persisted_hard_constraints": {
+          "size": {
+            "widthIn": 96,
+            "lengthIn": 120,
+            "toleranceIn": 12
+          },
+          "colors": [
+            "rust",
+            "ivory"
+          ],
+          "styles": [],
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          }
+        },
+        "strictness": {
+          "size": "prefer",
+          "colors": "prefer",
+          "styles": "prefer",
+          "shape": "prefer"
+        },
+        "avoid": {
+          "colors": [],
+          "styles": [],
+          "shapes": []
+        },
+        "confidence": "low",
+        "policy_source": "none",
+        "must_prefer_avoid": {
+          "must": [],
+          "prefer": [
+            "size",
+            "colors"
+          ],
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          }
+        }
+      },
+      "policy_source": "none",
+      "must_prefer_avoid": {
+        "must": [],
+        "prefer": [
+          "size",
+          "colors"
+        ],
+        "avoid": {
+          "colors": [],
+          "styles": [],
+          "shapes": []
+        }
+      },
+      "must-prefer-avoid": {
+        "must": [],
+        "prefer": [
+          "size",
+          "colors"
+        ],
+        "avoid": {
+          "colors": [],
+          "styles": [],
+          "shapes": []
+        }
+      },
+      "handler": "handleRecommendationTurn",
+      "prompt_layer_preview": [
+        "TASK_PROMPT_RECOMMENDATION",
+        "SYSTEM_PROMPT_BASE",
+        "TASK_PROMPT_RECOMMENDATION",
+        "TASK_PROMPT_RECOMMENDATION",
+        "STRUCTURED_OUTPUT_RECOMMENDATION",
+        "CHAT_MEMORY_CONTEXT",
+        "CHAT_MEMORY_CONTEXT",
+        "CHAT_MEMORY_CONTEXT",
+        "CHAT_MEMORY_CONTEXT",
+        "RECENT_TURNS_CONTEXT",
+        "INVENTORY_CONTEXT",
+        "LATEST_USER_MESSAGE_WITH_HARD_CONSTRAINTS"
+      ]
+    },
+    "reaction": {
+      "detected_reaction": null,
+      "referenced_rug_id": null,
+      "rug_reference_ambiguous": false,
+      "liked_attributes_before": {
+        "colors": [
+          "rust",
+          "ivory"
+        ],
+        "styles": [],
+        "origins": []
+      },
+      "liked_attributes_after": {
+        "colors": [
+          "rust",
+          "ivory"
+        ],
+        "styles": [],
+        "origins": []
+      },
+      "liked_rug_ids_before": [],
+      "liked_rug_ids_after": [],
+      "dismissed_rug_ids_before": [],
+      "dismissed_rug_ids_after": []
+    },
+    "state_snapshot": {
+      "recommendation_state": {
+        "hard_constraints": {
+          "size": {
+            "widthIn": 96,
+            "lengthIn": 120,
+            "toleranceIn": 12
+          },
+          "colors": [
+            "rust",
+            "ivory"
+          ],
+          "styles": [],
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          }
+        },
+        "soft_preferences": {},
+        "runtime": {
+          "last_result_mode": "recommendation",
+          "last_relaxed_size_tolerance_in": null,
+          "last_blockers": [],
+          "last_recommended_size_in": {
+            "width_in": 96,
+            "length_in": 120
+          },
+          "liked_rug_ids": [],
+          "dismissed_rug_ids": [],
+          "shown_rug_ids": [
+            "34a884c7-43c5-40c4-b1a8-600780538868",
+            "d496a74b-f23b-4a50-9384-84a4586d0699",
+            "0805e27a-f004-4556-aa8f-a2181a72eed0",
+            "ffd59b7d-5a06-4a2d-8afa-a5d1b15ebbd8",
+            "6868a748-6fa2-4f6a-b3b7-1f8ea922c49a",
+            "28faeb61-6454-4c52-8a14-7fa2992a0a30",
+            "d66b342c-75b8-4c1a-b5da-1d9b53250f9e",
+            "dd62ad1e-3953-43f8-bdd1-d46154c3111b",
+            "df1157e4-8db4-4345-97a6-02fe0fe79fde",
+            "b9fa610b-c9e7-4bbb-9f5b-3492dd3cf695"
+          ],
+          "liked_attributes": {
+            "colors": [
+              "rust",
+              "ivory"
+            ],
+            "styles": [],
+            "origins": []
+          },
+          "recently_shown_rugs": [
+            {
+              "id": "34a884c7-43c5-40c4-b1a8-600780538868",
+              "label": "Antique Persian Heriz",
+              "colors": [
+                "rust",
+                "ivory",
+                "red",
+                "brown"
+              ],
+              "style": "Heriz",
+              "origin": "Persian"
+            },
+            {
+              "id": "d496a74b-f23b-4a50-9384-84a4586d0699",
+              "label": "Antique Persian Hunting Scene",
+              "colors": [
+                "red",
+                "black",
+                "brown",
+                "ivory"
+              ],
+              "style": "Floral",
+              "origin": "Persian"
+            },
+            {
+              "id": "0805e27a-f004-4556-aa8f-a2181a72eed0",
+              "label": "Antique Persian Kashan",
+              "colors": [
+                "rust",
+                "ivory",
+                "gold",
+                "blue"
+              ],
+              "style": "Kashan",
+              "origin": "Persian"
+            },
+            {
+              "id": "ffd59b7d-5a06-4a2d-8afa-a5d1b15ebbd8",
+              "label": "Antique Persian Mahal",
+              "colors": [
+                "ivory",
+                "blue",
+                "red",
+                "brown"
+              ],
+              "style": "Mahal",
+              "origin": "Persian"
+            },
+            {
+              "id": "6868a748-6fa2-4f6a-b3b7-1f8ea922c49a",
+              "label": "Antique Persian pictorial rug",
+              "colors": [
+                "ivory",
+                "red",
+                "brown",
+                "gold"
+              ],
+              "style": "Floral",
+              "origin": "Persian"
+            },
+            {
+              "id": "28faeb61-6454-4c52-8a14-7fa2992a0a30",
+              "label": "Antique Persian Qom",
+              "colors": [
+                "red",
+                "ivory",
+                "blue",
+                "green"
+              ],
+              "style": "Qom",
+              "origin": "Persian"
+            },
+            {
+              "id": "d66b342c-75b8-4c1a-b5da-1d9b53250f9e",
+              "label": "New Persian floral rug",
+              "colors": [
+                "ivory",
+                "red",
+                "blue",
+                "brown"
+              ],
+              "style": "Floral",
+              "origin": "Persian"
+            },
+            {
+              "id": "dd62ad1e-3953-43f8-bdd1-d46154c3111b",
+              "label": "Persian Kashan carpet",
+              "colors": [
+                "ivory",
+                "black",
+                "red",
+                "brown"
+              ],
+              "style": "Kashan",
+              "origin": "Persian"
+            },
+            {
+              "id": "df1157e4-8db4-4345-97a6-02fe0fe79fde",
+              "label": "Traditional Caucasian Kilim",
+              "colors": [
+                "red",
+                "white",
+                "black",
+                "multi"
+              ],
+              "style": "Kilim",
+              "origin": "Caucasian"
+            },
+            {
+              "id": "b9fa610b-c9e7-4bbb-9f5b-3492dd3cf695",
+              "label": "Traditional Caucasian rug",
+              "colors": [
+                "red",
+                "ivory",
+                "black",
+                "rust"
+              ],
+              "style": "Geometric Tribal",
+              "origin": "Caucasian"
+            }
+          ],
+          "no_match_attempts": 0,
+          "updated_at": "2026-03-28T17:58:31.038Z"
+        }
+      },
+      "conversation_memory": {
+        "summary_text": "User: I'm redesigning a room with terracotta and cream. Need an anchor rug. | Assistant: I pulled the closest in-stock options around 8' x 10' so you can compare quickly: Want me to show more in this same direction, or adjust color and size next?",
+        "stable_facts": [
+          "wants anchor rug",
+          "color scheme terracotta and cream"
+        ],
+        "open_threads": [
+          "I pulled the closest in-stock options around 8' x 10' so you can compare quickly: Want me to show more in this same dir…"
+        ],
+        "last_user_intent": "recommendation",
+        "no_match_attempts": 0,
+        "updated_at": "2026-03-28T17:58:31.037Z",
+        "version": "v1"
+      }
+    },
+    "memory_snapshot_before": {
+      "summary_text": "User: I'm redesigning a room with terracotta and cream. Need an anchor rug. | Assistant: I pulled the closest in-stock options around 8' x 10' so you can compare quickly: Want me to show more in this same direction, or adjust color and size next?",
+      "stable_facts": [
+        "wants anchor rug",
+        "color scheme terracotta and cream"
+      ],
+      "open_threads": [
+        "I pulled the closest in-stock options around 8' x 10' so you can compare quickly: Want me to show more in this same dir…"
+      ],
+      "last_user_intent": "recommendation",
+      "no_match_attempts": 0,
+      "updated_at": "2026-03-28T17:58:31.037Z",
+      "version": "v1"
+    },
+    "memory_snapshot_after": {
+      "summary_text": "User: I'm redesigning a room with terracotta and cream. Need an anchor rug. | Assistant: I pulled the closest in-stock options around 8' x 10' so you can compare quickly: Want me to show more in this same direction, or adjust color and size next? || User: Show me larger options. | Assistant: I pulled the closest in-stock options around 8' x 10' so you can compare quickly: Want me to show more in this same direction, or adjust color and size next?",
+      "stable_facts": [
+        "interested in larger size options",
+        "wants anchor rug",
+        "color scheme terracotta and cream"
+      ],
+      "open_threads": [
+        "I pulled the closest in-stock options around 8' x 10' so you can compare quickly: Want me to show more in this same dir…"
+      ],
+      "last_user_intent": "recommendation",
+      "no_match_attempts": 0,
+      "updated_at": "2026-03-28T17:58:49.219Z",
+      "version": "v1"
+    },
+    "ai_context_packet_stats": {
+      "field_counts": {
+        "stable_facts": 2,
+        "open_threads": 1,
+        "customer_context": 2,
+        "recently_shown_rugs": 10,
+        "shown_rug_ids": 10,
+        "recent_turns": 2
+      },
+      "char_counts": {
+        "summary_text": 246,
+        "stable_facts_total": 49,
+        "open_threads_total": 120,
+        "customer_context_total": 49,
+        "recently_shown_total": 977,
+        "shown_rug_ids_total": 360,
+        "liked_attributes_total": 9,
+        "recent_turns_total": 226,
+        "latest_user_message": 23,
+        "total": 1699
+      }
+    },
+    "response": {
+      "session_id": "c9d45588-3726-43ea-a565-b6cd46ccc752",
+      "role": "retail_customer",
+      "mode": "recommendation",
+      "fine_mode": "recommendation",
+      "response_mode": "recommendation",
+      "notes": "OpenAI request failed. Returned local fallback."
+    },
+    "timing_ms": {
+      "total_ms": 16483
+    }
+  }
+}

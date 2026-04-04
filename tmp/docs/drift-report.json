@@ -1,0 +1,231 @@
+{
+  "generated_at": "2026-04-04T15:16:44.502Z",
+  "passed": true,
+  "checks": [
+    {
+      "name": "docs directory exists",
+      "passed": true,
+      "details": "ok"
+    },
+    {
+      "name": "allowed doc exists: docs/master.md",
+      "passed": true,
+      "details": "ok"
+    },
+    {
+      "name": "allowed doc exists: docs/prompts/system.md",
+      "passed": true,
+      "details": "ok"
+    },
+    {
+      "name": "allowed doc exists: docs/prompts/general-chat.md",
+      "passed": true,
+      "details": "ok"
+    },
+    {
+      "name": "allowed doc exists: docs/prompts/recommendation.md",
+      "passed": true,
+      "details": "ok"
+    },
+    {
+      "name": "allowed doc exists: docs/prompts/recommendation-structured-output.md",
+      "passed": true,
+      "details": "ok"
+    },
+    {
+      "name": "allowed doc exists: docs/prompts/turn-parser.md",
+      "passed": true,
+      "details": "ok"
+    },
+    {
+      "name": "no unexpected markdown docs remain",
+      "passed": true,
+      "details": "ok"
+    },
+    {
+      "name": "master doc contains section: # Rug Concierge Master Reference",
+      "passed": true,
+      "details": "ok"
+    },
+    {
+      "name": "master doc contains section: ## Intake And Durable Enrichment",
+      "passed": true,
+      "details": "ok"
+    },
+    {
+      "name": "master doc contains section: ## Deterministic Title Construction",
+      "passed": true,
+      "details": "ok"
+    },
+    {
+      "name": "master doc contains section: ## Core APIs",
+      "passed": true,
+      "details": "ok"
+    },
+    {
+      "name": "master doc contains section: ## Runtime Prompt Files",
+      "passed": true,
+      "details": "ok"
+    },
+    {
+      "name": "forbidden token absent: contextual_blurb",
+      "passed": true,
+      "details": "ok"
+    },
+    {
+      "name": "forbidden token absent: /api/ui-access",
+      "passed": true,
+      "details": "ok"
+    },
+    {
+      "name": "forbidden token absent: trade_client",
+      "passed": true,
+      "details": "ok"
+    },
+    {
+      "name": "forbidden token absent: needs_retake",
+      "passed": true,
+      "details": "ok"
+    },
+    {
+      "name": "referenced path exists: apps/web",
+      "passed": true,
+      "details": "ok"
+    },
+    {
+      "name": "referenced path exists: packages/db",
+      "passed": true,
+      "details": "ok"
+    },
+    {
+      "name": "referenced path exists: apps/web/lib/ai/turn-parser.ts",
+      "passed": true,
+      "details": "ok"
+    },
+    {
+      "name": "referenced path exists: apps/web/lib/chat/policy-compiler.ts",
+      "passed": true,
+      "details": "ok"
+    },
+    {
+      "name": "referenced path exists: apps/web/lib/chat/router.ts",
+      "passed": true,
+      "details": "ok"
+    },
+    {
+      "name": "referenced path exists: docs/prompts/turn-parser.md",
+      "passed": true,
+      "details": "ok"
+    },
+    {
+      "name": "referenced path exists: apps/web/lib/recommend/pipeline.ts",
+      "passed": true,
+      "details": "ok"
+    },
+    {
+      "name": "referenced path exists: apps/web/lib/inventory/title-builder.ts",
+      "passed": true,
+      "details": "ok"
+    },
+    {
+      "name": "referenced path exists: apps/web/lib/http/guards.ts",
+      "passed": true,
+      "details": "ok"
+    },
+    {
+      "name": "referenced path exists: apps/web/lib/auth/tenant.ts",
+      "passed": true,
+      "details": "ok"
+    },
+    {
+      "name": "referenced path exists: apps/web/lib/chat/memory.ts",
+      "passed": true,
+      "details": "ok"
+    },
+    {
+      "name": "referenced path exists: apps/web/lib/inventory/rug-record.ts",
+      "passed": true,
+      "details": "ok"
+    },
+    {
+      "name": "referenced path exists: apps/web/lib/inventory/enrichment-jobs.ts",
+      "passed": true,
+      "details": "ok"
+    },
+    {
+      "name": "referenced path exists: apps/web/lib/inventory/vision-enrichment.ts",
+      "passed": true,
+      "details": "ok"
+    },
+    {
+      "name": "referenced path exists: apps/web/lib/config.ts",
+      "passed": true,
+      "details": "ok"
+    },
+    {
+      "name": "referenced path exists: scripts/seed-demo-rugs.ts",
+      "passed": true,
+      "details": "ok"
+    },
+    {
+      "name": "referenced path exists: scripts/re-enrich-rugs.ts",
+      "passed": true,
+      "details": "ok"
+    },
+    {
+      "name": "referenced path exists: scripts/purge-tenant-inventory.ts",
+      "passed": true,
+      "details": "ok"
+    },
+    {
+      "name": "referenced path exists: scripts/testing/color-audit.ts",
+      "passed": true,
+      "details": "ok"
+    },
+    {
+      "name": "referenced path exists: scripts/testing/concierge-rework-scenarios.ts",
+      "passed": true,
+      "details": "ok"
+    },
+    {
+      "name": "referenced path exists: scripts/check-docs-drift.mjs",
+      "passed": true,
+      "details": "ok"
+    },
+    {
+      "name": "referenced path exists: scripts/check-migrations.mjs",
+      "passed": true,
+      "details": "ok"
+    },
+    {
+      "name": "referenced path exists: docs/prompts/",
+      "passed": true,
+      "details": "ok"
+    },
+    {
+      "name": "referenced path exists: docs/prompts/system.md",
+      "passed": true,
+      "details": "ok"
+    },
+    {
+      "name": "referenced path exists: docs/prompts/general-chat.md",
+      "passed": true,
+      "details": "ok"
+    },
+    {
+      "name": "referenced path exists: docs/prompts/recommendation.md",
+      "passed": true,
+      "details": "ok"
+    },
+    {
+      "name": "referenced path exists: docs/prompts/recommendation-structured-output.md",
+      "passed": true,
+      "details": "ok"
+    },
+    {
+      "name": "referenced path exists: apps/web/lib/ai/prompt-library.ts",
+      "passed": true,
+      "details": "ok"
+    }
+  ]
+}

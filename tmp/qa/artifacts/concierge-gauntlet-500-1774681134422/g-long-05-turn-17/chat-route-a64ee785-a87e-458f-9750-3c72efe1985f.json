@@ -1,0 +1,567 @@
+{
+  "trace_id": "a64ee785-a87e-458f-9750-3c72efe1985f",
+  "channel": "chat-route",
+  "created_at": "2026-03-28T07:15:28.359Z",
+  "payload": {
+    "flow_path": [
+      "/api/chat POST",
+      "getOrCreateSession",
+      "updateRecommendationStateForTurn",
+      "routeTurnMode",
+      "handlerDispatch",
+      "updateConversationMemory",
+      "saveSession"
+    ],
+    "request": {
+      "session_id": "8d992c7b-e3ee-46ac-8d25-f117db21ed02",
+      "role": "retail_customer",
+      "tenant_id": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5",
+      "tenant_subdomain": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5",
+      "tenant_hostname": "127.0.0.1",
+      "message": "Any closer matches?",
+      "constraints": null
+    },
+    "routing": {
+      "mode": "general_chat",
+      "intent": "general",
+      "rule_id": "DEFAULT_GENERAL_CHAT",
+      "confidence": "low",
+      "needs_clarification": false,
+      "parser": {
+        "model": "gpt-4.1-mini",
+        "latency_ms": 120,
+        "status": "fallback",
+        "parse_status": "fallback",
+        "fallback": "OpenAI request failed",
+        "fallback_reason": "OpenAI request failed",
+        "normalized_payload": {
+          "intent": "general",
+          "mode": "chat",
+          "followup_intent": "none",
+          "constraints": {
+            "size": null,
+            "colors": [],
+            "styles": [],
+            "shape": null
+          },
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          },
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          },
+          "session_facts": [],
+          "rug_reference_ambiguous": false,
+          "confidence": "low"
+        },
+        "normalized_parse_payload": {
+          "intent": "general",
+          "mode": "chat",
+          "followup_intent": "none",
+          "constraints": {
+            "size": null,
+            "colors": [],
+            "styles": [],
+            "shape": null
+          },
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          },
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          },
+          "session_facts": [],
+          "rug_reference_ambiguous": false,
+          "confidence": "low"
+        },
+        "response_status": 400,
+        "incomplete_detected": false,
+        "error": "OpenAI request failed with status 400"
+      },
+      "policy": {
+        "intent": "general",
+        "compiled_policy": {
+          "intent": "general",
+          "mode": "chat",
+          "discovery_requested": false,
+          "followup_intent": "none",
+          "hard_constraints": {
+            "strictness": {
+              "size": "prefer",
+              "colors": "prefer",
+              "styles": "prefer",
+              "shape": "prefer"
+            }
+          },
+          "persisted_hard_constraints": {
+            "size": {
+              "widthIn": 96,
+              "lengthIn": 120,
+              "toleranceIn": 10
+            },
+            "colors": [],
+            "styles": [],
+            "strictness": {
+              "size": "prefer",
+              "colors": "prefer",
+              "styles": "prefer",
+              "shape": "prefer"
+            }
+          },
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          },
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          },
+          "confidence": "low",
+          "policy_source": "none",
+          "must_prefer_avoid": {
+            "must": [],
+            "prefer": [],
+            "avoid": {
+              "colors": [],
+              "styles": [],
+              "shapes": []
+            }
+          }
+        },
+        "policy_source": "none",
+        "must_prefer_avoid": {
+          "must": [],
+          "prefer": [],
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          }
+        },
+        "must-prefer-avoid": {
+          "must": [],
+          "prefer": [],
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          }
+        },
+        "constraint_modes": {
+          "size": "prefer",
+          "colors": "prefer",
+          "styles": "prefer",
+          "shape": "prefer",
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          }
+        }
+      },
+      "parser_trace": {
+        "called": true,
+        "model": "gpt-4.1-mini",
+        "status": "fallback",
+        "response_status": 400,
+        "fallback": "OpenAI request failed",
+        "fallback_reason": "OpenAI request failed",
+        "incomplete_detected": false,
+        "latency_ms": 120,
+        "normalized_payload": {
+          "intent": "general",
+          "mode": "chat",
+          "followup_intent": "none",
+          "constraints": {
+            "size": null,
+            "colors": [],
+            "styles": [],
+            "shape": null
+          },
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          },
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          },
+          "session_facts": [],
+          "rug_reference_ambiguous": false,
+          "confidence": "low"
+        },
+        "parsed": {
+          "intent": "general",
+          "mode": "chat",
+          "followup_intent": "none",
+          "constraints": {
+            "size": null,
+            "colors": [],
+            "styles": [],
+            "shape": null
+          },
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          },
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          },
+          "session_facts": [],
+          "rug_reference_ambiguous": false,
+          "confidence": "low"
+        },
+        "error": "OpenAI request failed with status 400"
+      },
+      "compiled_policy": {
+        "intent": "general",
+        "mode": "chat",
+        "discovery_requested": false,
+        "followup_intent": "none",
+        "hard_constraints": {
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          }
+        },
+        "persisted_hard_constraints": {
+          "size": {
+            "widthIn": 96,
+            "lengthIn": 120,
+            "toleranceIn": 10
+          },
+          "colors": [],
+          "styles": [],
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          }
+        },
+        "strictness": {
+          "size": "prefer",
+          "colors": "prefer",
+          "styles": "prefer",
+          "shape": "prefer"
+        },
+        "avoid": {
+          "colors": [],
+          "styles": [],
+          "shapes": []
+        },
+        "confidence": "low",
+        "policy_source": "none",
+        "must_prefer_avoid": {
+          "must": [],
+          "prefer": [],
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          }
+        }
+      },
+      "policy_source": "none",
+      "must_prefer_avoid": {
+        "must": [],
+        "prefer": [],
+        "avoid": {
+          "colors": [],
+          "styles": [],
+          "shapes": []
+        }
+      },
+      "must-prefer-avoid": {
+        "must": [],
+        "prefer": [],
+        "avoid": {
+          "colors": [],
+          "styles": [],
+          "shapes": []
+        }
+      },
+      "handler": "handleGeneralChatTurn",
+      "prompt_layer_preview": [
+        "SYSTEM_PROMPT_BASE",
+        "TASK_PROMPT_GENERAL_CHAT",
+        "TASK_PROMPT_GENERAL_CHAT",
+        "ROLE_PROMPT_RETAIL_CUSTOMER",
+        "CHAT_MEMORY_CONTEXT",
+        "RECENT_TURNS_CONTEXT",
+        "LATEST_USER_MESSAGE"
+      ]
+    },
+    "reaction": {
+      "detected_reaction": null,
+      "referenced_rug_id": null,
+      "rug_reference_ambiguous": false,
+      "liked_attributes_before": {
+        "colors": [
+          "gray"
+        ],
+        "styles": [
+          "geometric",
+          "traditional"
+        ],
+        "origins": []
+      },
+      "liked_attributes_after": {
+        "colors": [
+          "gray"
+        ],
+        "styles": [
+          "geometric",
+          "traditional"
+        ],
+        "origins": []
+      },
+      "liked_rug_ids_before": [],
+      "liked_rug_ids_after": [],
+      "dismissed_rug_ids_before": [],
+      "dismissed_rug_ids_after": []
+    },
+    "state_snapshot": {
+      "recommendation_state": {
+        "hard_constraints": {
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          }
+        },
+        "soft_preferences": {},
+        "runtime": {
+          "last_result_mode": "recommendation",
+          "last_relaxed_size_tolerance_in": null,
+          "last_blockers": [],
+          "last_recommended_size_in": {
+            "width_in": 96,
+            "length_in": 120
+          },
+          "liked_rug_ids": [],
+          "dismissed_rug_ids": [],
+          "shown_rug_ids": [
+            "3e188674-4625-445b-be9a-3d2bc2752a50",
+            "258fde89-ed87-4103-b1e8-224f267e0f3e",
+            "40e91751-d4aa-4ce2-b226-bfd5f37bb50a",
+            "735c23cf-2f40-4b3f-a1fb-06e983dcc2f9",
+            "2ea970a2-9755-4e95-adb8-a5576444ece5",
+            "3846ef0a-86e2-45f8-9aba-291b85451b4a",
+            "58c73155-cb3e-44c1-bba7-ec577f33dbec",
+            "3b3a8dc9-427f-4a97-9786-e7c0215a022f",
+            "4c60b570-f26c-4dda-a1df-9626479843b0",
+            "46245ee2-ac56-46e0-8cbf-b2eead74c24b",
+            "08ca5e39-c162-4d88-9d7e-484e90489d85",
+            "dbf2bf0c-8cb5-4ea7-9d6c-fa3439793b0b"
+          ],
+          "liked_attributes": {
+            "colors": [
+              "gray"
+            ],
+            "styles": [
+              "geometric",
+              "traditional"
+            ],
+            "origins": []
+          },
+          "recently_shown_rugs": [
+            {
+              "id": "8ce81c0e-b654-450e-bb50-41895597982f",
+              "label": "Caucasian Kazak",
+              "colors": [
+                "multi"
+              ],
+              "style": "Kazak",
+              "origin": "Caucasian"
+            },
+            {
+              "id": "42e84b9d-fdeb-48be-99b2-90aa9b3b5c71",
+              "label": "Vintage Moroccan Rug",
+              "colors": [
+                "red",
+                "rust",
+                "black",
+                "brown"
+              ],
+              "style": "Geometric",
+              "origin": "Moroccan"
+            },
+            {
+              "id": "98a58ad4-f1c6-4e05-8429-1fc366673706",
+              "label": "Antique Persian Bakhtiari",
+              "colors": [
+                "red",
+                "green",
+                "ivory",
+                "black"
+              ],
+              "style": "Bakhtiari",
+              "origin": "Persian"
+            },
+            {
+              "id": "34a884c7-43c5-40c4-b1a8-600780538868",
+              "label": "Antique Persian Heriz",
+              "colors": [
+                "rust",
+                "ivory",
+                "red",
+                "brown"
+              ],
+              "style": "Heriz",
+              "origin": "Persian"
+            },
+            {
+              "id": "d496a74b-f23b-4a50-9384-84a4586d0699",
+              "label": "Antique Persian Hunting Scene",
+              "colors": [
+                "red",
+                "black",
+                "brown",
+                "ivory"
+              ],
+              "style": "Floral",
+              "origin": "Persian"
+            },
+            {
+              "id": "0805e27a-f004-4556-aa8f-a2181a72eed0",
+              "label": "Antique Persian Kashan",
+              "colors": [
+                "rust",
+                "ivory",
+                "gold",
+                "blue"
+              ],
+              "style": "Kashan",
+              "origin": "Persian"
+            }
+          ],
+          "no_match_attempts": 0,
+          "updated_at": "2026-03-28T07:15:21.947Z"
+        }
+      },
+      "conversation_memory": {
+        "summary_text": "…x50 inches in stock, but I can check if any upcoming inventory might include that size or show you the closest slightly smaller or larger options available now. Would you like me to do… || User: ¿Qué es un kilim? | Assistant: Un kilim es una alfombra plana tejida sin pelo, tradicionalmente hecha a mano en regiones como Turquía, Irán y los Balcanes. Se caracteriza por sus diseños geométricos y colores vivos, y es más delgada y ligera que una… || User: Show me a broad spread | Assistant: Here are the best options based on what you've told me: Do you want me to lean more traditional or more modern for that space? || User: Too traditional for me | Assistant: Here are our Traditional rugs currently in stock: || User: need modrn 8 x10 not too bzzy | Assistant: For your preference of a modern 8x10 rug that isn't too busy, here are the best options we have that balance pattern and style gently.",
+        "stable_facts": [
+          "style traditional",
+          "practical maintenance",
+          "room living room",
+          "palette warm",
+          "preference I like this direction"
+        ],
+        "open_threads": [
+          "Here are the best options based on what you've told me: Do you want me to lean more traditional or more modern for that…",
+          "¿Qué es un kilim?",
+          "¿Le gustaría que le muestre algunos kilims de nuestra colección actual?",
+          "Any closer matches?",
+          "Would you like me to do that?",
+          "Did you mean Contemporary Moroccan or Contemporary Round?"
+        ],
+        "last_user_intent": "recommendation",
+        "no_match_attempts": 0,
+        "updated_at": "2026-03-28T07:15:21.947Z",
+        "version": "v1"
+      }
+    },
+    "memory_snapshot_before": {
+      "summary_text": "…x50 inches in stock, but I can check if any upcoming inventory might include that size or show you the closest slightly smaller or larger options available now. Would you like me to do… || User: ¿Qué es un kilim? | Assistant: Un kilim es una alfombra plana tejida sin pelo, tradicionalmente hecha a mano en regiones como Turquía, Irán y los Balcanes. Se caracteriza por sus diseños geométricos y colores vivos, y es más delgada y ligera que una… || User: Show me a broad spread | Assistant: Here are the best options based on what you've told me: Do you want me to lean more traditional or more modern for that space? || User: Too traditional for me | Assistant: Here are our Traditional rugs currently in stock: || User: need modrn 8 x10 not too bzzy | Assistant: For your preference of a modern 8x10 rug that isn't too busy, here are the best options we have that balance pattern and style gently.",
+      "stable_facts": [
+        "style traditional",
+        "practical maintenance",
+        "room living room",
+        "palette warm",
+        "preference I like this direction"
+      ],
+      "open_threads": [
+        "Here are the best options based on what you've told me: Do you want me to lean more traditional or more modern for that…",
+        "¿Qué es un kilim?",
+        "¿Le gustaría que le muestre algunos kilims de nuestra colección actual?",
+        "Any closer matches?",
+        "Would you like me to do that?",
+        "Did you mean Contemporary Moroccan or Contemporary Round?"
+      ],
+      "last_user_intent": "recommendation",
+      "no_match_attempts": 0,
+      "updated_at": "2026-03-28T07:15:21.947Z",
+      "version": "v1"
+    },
+    "memory_snapshot_after": {
+      "summary_text": "…sistant: Un kilim es una alfombra plana tejida sin pelo, tradicionalmente hecha a mano en regiones como Turquía, Irán y los Balcanes. Se caracteriza por sus diseños geométricos y colores vivos, y es más delgada y ligera que una… || User: Show me a broad spread | Assistant: Here are the best options based on what you've told me: Do you want me to lean more traditional or more modern for that space? || User: Too traditional for me | Assistant: Here are our Traditional rugs currently in stock: || User: need modrn 8 x10 not too bzzy | Assistant: For your preference of a modern 8x10 rug that isn't too busy, here are the best options we have that balance pattern and style gently. || User: Any closer matches? | Assistant: I can look for modern 8x10 rugs with subtle patterns and soft colors that might be closer to what you want. Would you like me to focus on certain color palettes or materials?",
+      "stable_facts": [
+        "style traditional",
+        "practical maintenance",
+        "room living room",
+        "palette warm",
+        "preference I like this direction"
+      ],
+      "open_threads": [
+        "Any closer matches?",
+        "Would you like me to focus on certain color palettes or materials?",
+        "Here are the best options based on what you've told me: Do you want me to lean more traditional or more modern for that…",
+        "¿Qué es un kilim?",
+        "¿Le gustaría que le muestre algunos kilims de nuestra colección actual?",
+        "Would you like me to do that?"
+      ],
+      "last_user_intent": "general_chat",
+      "no_match_attempts": 0,
+      "updated_at": "2026-03-28T07:15:28.031Z",
+      "version": "v1"
+    },
+    "ai_context_packet_stats": {
+      "field_counts": {
+        "stable_facts": 5,
+        "open_threads": 6,
+        "customer_context": 5,
+        "recently_shown_rugs": 6,
+        "shown_rug_ids": 12,
+        "recent_turns": 4
+      },
+      "char_counts": {
+        "summary_text": 900,
+        "stable_facts_total": 98,
+        "open_threads_total": 313,
+        "customer_context_total": 98,
+        "recently_shown_total": 564,
+        "shown_rug_ids_total": 432,
+        "liked_attributes_total": 24,
+        "recent_turns_total": 234,
+        "latest_user_message": 19,
+        "total": 2250
+      }
+    },
+    "response": {
+      "session_id": "8d992c7b-e3ee-46ac-8d25-f117db21ed02",
+      "role": "retail_customer",
+      "mode": "general_chat",
+      "fine_mode": "general_chat",
+      "response_mode": "general_chat",
+      "notes": "GENERAL_CHAT_AI_RUNTIME:real | Prompt layers assembled: SYSTEM_PROMPT_BASE -> TASK_PROMPT_GENERAL_CHAT -> TASK_PROMPT_GENERAL_CHAT -> ROLE_PROMPT_RETAIL_CUSTOMER -> CHAT_MEMORY_CONTEXT -> RECENT_TURNS_CONTEXT -> LATEST_USER_MESSAGE"
+    },
+    "timing_ms": {
+      "total_ms": 5988
+    }
+  }
+}

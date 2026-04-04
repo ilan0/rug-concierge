@@ -1,0 +1,603 @@
+{
+  "trace_id": "9e2805b2-615d-4ea5-b132-580916fcffcf",
+  "channel": "chat-route",
+  "created_at": "2026-03-28T18:49:27.164Z",
+  "payload": {
+    "flow_path": [
+      "/api/chat POST",
+      "getOrCreateSession",
+      "updateRecommendationStateForTurn",
+      "routeTurnMode",
+      "handlerDispatch",
+      "updateConversationMemory",
+      "saveSession"
+    ],
+    "request": {
+      "session_id": "3188c2dc-a26f-4e96-92e5-0e86417f533a",
+      "role": "retail_customer",
+      "tenant_id": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5",
+      "tenant_subdomain": "jjrugs",
+      "tenant_hostname": "jjrugs.rugdesk.app",
+      "message": "Start with bedroom anchor options.",
+      "constraints": null
+    },
+    "routing": {
+      "mode": "recommendation",
+      "intent": "recommend",
+      "rule_id": "EXPLICIT_RECOMMENDATION_REQUEST",
+      "confidence": "low",
+      "needs_clarification": false,
+      "parser": {
+        "model": "gpt-4.1-mini",
+        "latency_ms": 2155,
+        "status": "success",
+        "parse_status": "success",
+        "fallback": null,
+        "fallback_reason": null,
+        "normalized_payload": {
+          "intent": "recommend",
+          "mode": "recommendation",
+          "followup_intent": "none",
+          "constraints": {
+            "size": null,
+            "colors": [],
+            "styles": [],
+            "shape": null
+          },
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          },
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          },
+          "session_facts": [
+            "room: bedroom anchor"
+          ],
+          "rug_reference_ambiguous": false,
+          "confidence": "low"
+        },
+        "normalized_parse_payload": {
+          "intent": "recommend",
+          "mode": "recommendation",
+          "followup_intent": "none",
+          "constraints": {
+            "size": null,
+            "colors": [],
+            "styles": [],
+            "shape": null
+          },
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          },
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          },
+          "session_facts": [
+            "room: bedroom anchor"
+          ],
+          "rug_reference_ambiguous": false,
+          "confidence": "low"
+        },
+        "response_status": 200,
+        "incomplete_detected": false,
+        "error": null
+      },
+      "policy": {
+        "intent": "recommend",
+        "compiled_policy": {
+          "intent": "recommend",
+          "mode": "recommendation",
+          "discovery_requested": false,
+          "followup_intent": "none",
+          "hard_constraints": {
+            "size": {
+              "widthIn": 96,
+              "lengthIn": 120,
+              "toleranceIn": 12
+            },
+            "strictness": {
+              "size": "must",
+              "colors": "prefer",
+              "styles": "prefer",
+              "shape": "prefer"
+            }
+          },
+          "persisted_hard_constraints": {
+            "size": {
+              "widthIn": 96,
+              "lengthIn": 120,
+              "toleranceIn": 12
+            },
+            "strictness": {
+              "size": "must",
+              "colors": "prefer",
+              "styles": "prefer",
+              "shape": "prefer"
+            }
+          },
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          },
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          },
+          "confidence": "low",
+          "policy_source": "none",
+          "must_prefer_avoid": {
+            "must": [
+              "size"
+            ],
+            "prefer": [],
+            "avoid": {
+              "colors": [],
+              "styles": [],
+              "shapes": []
+            }
+          }
+        },
+        "policy_source": "none",
+        "must_prefer_avoid": {
+          "must": [
+            "size"
+          ],
+          "prefer": [],
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          }
+        },
+        "must-prefer-avoid": {
+          "must": [
+            "size"
+          ],
+          "prefer": [],
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          }
+        },
+        "constraint_modes": {
+          "size": "prefer",
+          "colors": "prefer",
+          "styles": "prefer",
+          "shape": "prefer",
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          }
+        }
+      },
+      "parser_trace": {
+        "called": true,
+        "model": "gpt-4.1-mini",
+        "status": "success",
+        "response_status": 200,
+        "fallback": null,
+        "fallback_reason": null,
+        "incomplete_detected": false,
+        "latency_ms": 2155,
+        "normalized_payload": {
+          "intent": "recommend",
+          "mode": "recommendation",
+          "followup_intent": "none",
+          "constraints": {
+            "size": null,
+            "colors": [],
+            "styles": [],
+            "shape": null
+          },
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          },
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          },
+          "session_facts": [
+            "room: bedroom anchor"
+          ],
+          "rug_reference_ambiguous": false,
+          "confidence": "low"
+        },
+        "parsed": {
+          "intent": "recommend",
+          "mode": "recommendation",
+          "followup_intent": "none",
+          "constraints": {
+            "size": null,
+            "colors": [],
+            "styles": [],
+            "shape": null
+          },
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          },
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          },
+          "session_facts": [
+            "room: bedroom anchor"
+          ],
+          "rug_reference_ambiguous": false,
+          "confidence": "low"
+        },
+        "error": null
+      },
+      "compiled_policy": {
+        "intent": "recommend",
+        "mode": "recommendation",
+        "discovery_requested": false,
+        "followup_intent": "none",
+        "hard_constraints": {
+          "size": {
+            "widthIn": 96,
+            "lengthIn": 120,
+            "toleranceIn": 12
+          },
+          "strictness": {
+            "size": "must",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          }
+        },
+        "persisted_hard_constraints": {
+          "size": {
+            "widthIn": 96,
+            "lengthIn": 120,
+            "toleranceIn": 12
+          },
+          "strictness": {
+            "size": "must",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          }
+        },
+        "strictness": {
+          "size": "prefer",
+          "colors": "prefer",
+          "styles": "prefer",
+          "shape": "prefer"
+        },
+        "avoid": {
+          "colors": [],
+          "styles": [],
+          "shapes": []
+        },
+        "confidence": "low",
+        "policy_source": "none",
+        "must_prefer_avoid": {
+          "must": [
+            "size"
+          ],
+          "prefer": [],
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          }
+        }
+      },
+      "policy_source": "none",
+      "must_prefer_avoid": {
+        "must": [
+          "size"
+        ],
+        "prefer": [],
+        "avoid": {
+          "colors": [],
+          "styles": [],
+          "shapes": []
+        }
+      },
+      "must-prefer-avoid": {
+        "must": [
+          "size"
+        ],
+        "prefer": [],
+        "avoid": {
+          "colors": [],
+          "styles": [],
+          "shapes": []
+        }
+      },
+      "handler": "handleRecommendationTurn",
+      "prompt_layer_preview": [
+        "TASK_PROMPT_RECOMMENDATION",
+        "SYSTEM_PROMPT_BASE",
+        "TASK_PROMPT_RECOMMENDATION",
+        "TASK_PROMPT_RECOMMENDATION",
+        "STRUCTURED_OUTPUT_RECOMMENDATION",
+        "CHAT_MEMORY_CONTEXT",
+        "CHAT_MEMORY_CONTEXT",
+        "CHAT_MEMORY_CONTEXT",
+        "RECENT_TURNS_CONTEXT",
+        "INVENTORY_CONTEXT",
+        "LATEST_USER_MESSAGE_WITH_HARD_CONSTRAINTS"
+      ]
+    },
+    "reaction": {
+      "detected_reaction": null,
+      "referenced_rug_id": null,
+      "rug_reference_ambiguous": false,
+      "liked_attributes_before": {
+        "colors": [],
+        "styles": [],
+        "origins": []
+      },
+      "liked_attributes_after": {
+        "colors": [],
+        "styles": [],
+        "origins": []
+      },
+      "liked_rug_ids_before": [],
+      "liked_rug_ids_after": [],
+      "dismissed_rug_ids_before": [],
+      "dismissed_rug_ids_after": []
+    },
+    "state_snapshot": {
+      "recommendation_state": {
+        "hard_constraints": {
+          "size": {
+            "widthIn": 96,
+            "lengthIn": 120,
+            "toleranceIn": 12
+          },
+          "strictness": {
+            "size": "must",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          }
+        },
+        "soft_preferences": {},
+        "runtime": {
+          "last_result_mode": "recommendation",
+          "last_relaxed_size_tolerance_in": null,
+          "last_blockers": [],
+          "last_recommended_size_in": {
+            "width_in": 60,
+            "length_in": 96
+          },
+          "liked_rug_ids": [],
+          "dismissed_rug_ids": [],
+          "shown_rug_ids": [
+            "ecc885db-d25f-47a6-a276-113e56737d14",
+            "dff6cdf7-6837-486e-9cab-8aa44d8291a1",
+            "e15492cf-a32d-412a-b855-c0e02542aefe",
+            "0dd26ca3-10fb-418b-bb80-be02d2b331c7",
+            "22f2daa3-9c69-4499-9ab2-ce0e6d6ad0b3",
+            "cc276442-2d5f-4285-9633-c41ca13489d0",
+            "9dbfa2c4-a7eb-4e28-879f-325a02cb2138",
+            "de47a550-052a-433d-b39a-c8c8711f0901",
+            "c7a2b2e4-1f37-4fc5-985e-ea28e577723a",
+            "b36ef32b-82a8-4389-a475-bc4ab406dff0"
+          ],
+          "liked_attributes": {
+            "colors": [],
+            "styles": [],
+            "origins": []
+          },
+          "recently_shown_rugs": [
+            {
+              "id": "ecc885db-d25f-47a6-a276-113e56737d14",
+              "label": "Antique Caucasian Kazak",
+              "colors": [
+                "rust",
+                "brown",
+                "gold",
+                "green"
+              ],
+              "style": "Kazak",
+              "origin": "Caucasian"
+            },
+            {
+              "id": "dff6cdf7-6837-486e-9cab-8aa44d8291a1",
+              "label": "Antique Persian",
+              "colors": [
+                "red",
+                "gold",
+                "green"
+              ],
+              "style": "Floral",
+              "origin": "Persian"
+            },
+            {
+              "id": "e15492cf-a32d-412a-b855-c0e02542aefe",
+              "label": "Antique Persian",
+              "colors": [
+                "blue",
+                "ivory",
+                "red"
+              ],
+              "style": "Geometric Tribal",
+              "origin": "Persian"
+            },
+            {
+              "id": "0dd26ca3-10fb-418b-bb80-be02d2b331c7",
+              "label": "Antique Persian Heriz",
+              "colors": [
+                "gold",
+                "green",
+                "blue",
+                "rust"
+              ],
+              "style": "Heriz",
+              "origin": "Persian"
+            },
+            {
+              "id": "22f2daa3-9c69-4499-9ab2-ce0e6d6ad0b3",
+              "label": "Antique Persian Kashan",
+              "colors": [
+                "red",
+                "gold",
+                "green"
+              ],
+              "style": "Kashan",
+              "origin": "Persian"
+            },
+            {
+              "id": "cc276442-2d5f-4285-9633-c41ca13489d0",
+              "label": "Antique Persian Sultanabad",
+              "colors": [
+                "red",
+                "gold",
+                "black"
+              ],
+              "style": "Sultanabad",
+              "origin": "Persian"
+            },
+            {
+              "id": "9dbfa2c4-a7eb-4e28-879f-325a02cb2138",
+              "label": "Antique Persian Tabriz",
+              "colors": [
+                "red",
+                "gold",
+                "green"
+              ],
+              "style": "Tabriz",
+              "origin": "Persian"
+            },
+            {
+              "id": "de47a550-052a-433d-b39a-c8c8711f0901",
+              "label": "Caucasian Kazak Traditional",
+              "colors": [
+                "black",
+                "red",
+                "blue",
+                "gold"
+              ],
+              "style": "Kazak",
+              "origin": "Caucasian"
+            },
+            {
+              "id": "c7a2b2e4-1f37-4fc5-985e-ea28e577723a",
+              "label": "Contemporary Moroccan",
+              "colors": [
+                "purple",
+                "blue"
+              ],
+              "style": "Medallion",
+              "origin": "Moroccan"
+            },
+            {
+              "id": "b36ef32b-82a8-4389-a475-bc4ab406dff0",
+              "label": "Vintage Persian Heriz",
+              "colors": [
+                "red",
+                "brown",
+                "green"
+              ],
+              "style": "Heriz",
+              "origin": "Persian"
+            }
+          ],
+          "no_match_attempts": 0,
+          "updated_at": "2026-03-28T18:49:09.621Z"
+        }
+      },
+      "conversation_memory": {
+        "summary_text": "User: I need something for my bedroom and also an entryway rug. | Assistant: Great, I’ll start with bedroom-friendly anchor options first, then we can pivot to entryway-size pieces next: If you'd like, should I show more in this same direction, or adjust color and size next?",
+        "stable_facts": [
+          "needs rugs for bedroom and entryway"
+        ],
+        "open_threads": [
+          "Great, I’ll start with bedroom-friendly anchor options first, then we can pivot to entryway-size pieces next: If you'd…"
+        ],
+        "last_user_intent": "recommendation",
+        "no_match_attempts": 0,
+        "updated_at": "2026-03-28T18:49:09.621Z",
+        "version": "v1"
+      }
+    },
+    "memory_snapshot_before": {
+      "summary_text": "User: I need something for my bedroom and also an entryway rug. | Assistant: Great, I’ll start with bedroom-friendly anchor options first, then we can pivot to entryway-size pieces next: If you'd like, should I show more in this same direction, or adjust color and size next?",
+      "stable_facts": [
+        "needs rugs for bedroom and entryway"
+      ],
+      "open_threads": [
+        "Great, I’ll start with bedroom-friendly anchor options first, then we can pivot to entryway-size pieces next: If you'd…"
+      ],
+      "last_user_intent": "recommendation",
+      "no_match_attempts": 0,
+      "updated_at": "2026-03-28T18:49:09.621Z",
+      "version": "v1"
+    },
+    "memory_snapshot_after": {
+      "summary_text": "User: I need something for my bedroom and also an entryway rug. | Assistant: Great, I’ll start with bedroom-friendly anchor options first, then we can pivot to entryway-size pieces next: If you'd like, should I show more in this same direction, or adjust color and size next? || User: Start with bedroom anchor options. | Assistant: For bedroom anchor rugs sized around 8x10 feet, these antique Persian and Caucasian options offer rich traditional designs that can anchor the room beautifully. The top pick features a stunning central medallion and flo…",
+      "stable_facts": [
+        "room: bedroom anchor",
+        "needs rugs for bedroom and entryway"
+      ],
+      "open_threads": [
+        "Would you like to see similar styles or explore different color palettes next?",
+        "Great, I’ll start with bedroom-friendly anchor options first, then we can pivot to entryway-size pieces next: If you'd…"
+      ],
+      "last_user_intent": "recommendation",
+      "no_match_attempts": 0,
+      "updated_at": "2026-03-28T18:49:26.821Z",
+      "version": "v1"
+    },
+    "ai_context_packet_stats": {
+      "field_counts": {
+        "stable_facts": 1,
+        "open_threads": 1,
+        "customer_context": 1,
+        "recently_shown_rugs": 10,
+        "shown_rug_ids": 10,
+        "recent_turns": 2
+      },
+      "char_counts": {
+        "summary_text": 275,
+        "stable_facts_total": 35,
+        "open_threads_total": 119,
+        "customer_context_total": 35,
+        "recently_shown_total": 917,
+        "shown_rug_ids_total": 360,
+        "liked_attributes_total": 0,
+        "recent_turns_total": 255,
+        "latest_user_message": 34,
+        "total": 1670
+      }
+    },
+    "response": {
+      "session_id": "3188c2dc-a26f-4e96-92e5-0e86417f533a",
+      "role": "retail_customer",
+      "mode": "recommendation",
+      "fine_mode": "recommendation",
+      "response_mode": "recommendation",
+      "notes": null
+    },
+    "timing_ms": {
+      "total_ms": 14574
+    }
+  }
+}

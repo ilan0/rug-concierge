@@ -1,0 +1,515 @@
+{
+  "trace_id": "76c22fd5-025b-44b5-b9d5-2a0c1011c03c",
+  "channel": "chat-route",
+  "created_at": "2026-04-03T10:35:34.989Z",
+  "payload": {
+    "flow_path": [
+      "/api/chat POST",
+      "getOrCreateSession",
+      "updateRecommendationStateForTurn",
+      "routeTurnMode",
+      "handlerDispatch",
+      "updateConversationMemory",
+      "saveSession"
+    ],
+    "request": {
+      "session_id": "e7539872-9082-476e-9115-caae9acd2c2b",
+      "role": "retail_customer",
+      "tenant_id": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5",
+      "tenant_subdomain": "jjrugs",
+      "tenant_hostname": "jjrugs.rugdesk.app",
+      "message": "If exact isn't available, show closest.",
+      "constraints": null
+    },
+    "routing": {
+      "mode": "recommendation",
+      "intent": "followup",
+      "rule_id": "RECOMMENDATION_FOLLOWUP",
+      "confidence": "low",
+      "needs_clarification": false,
+      "parser": {
+        "model": "gpt-4.1-mini",
+        "latency_ms": 2710,
+        "status": "success",
+        "parse_status": "success",
+        "fallback": null,
+        "fallback_reason": null,
+        "normalized_payload": {
+          "intent": "followup",
+          "mode": "recommendation_followup",
+          "followup_intent": "closest",
+          "constraints": {
+            "size": null,
+            "colors": [],
+            "styles": [],
+            "shape": null
+          },
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          },
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          },
+          "session_facts": [
+            "user wants exact match if possible, otherwise closest"
+          ],
+          "rug_reference_ambiguous": false,
+          "confidence": "low"
+        },
+        "normalized_parse_payload": {
+          "intent": "followup",
+          "mode": "recommendation_followup",
+          "followup_intent": "closest",
+          "constraints": {
+            "size": null,
+            "colors": [],
+            "styles": [],
+            "shape": null
+          },
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          },
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          },
+          "session_facts": [
+            "user wants exact match if possible, otherwise closest"
+          ],
+          "rug_reference_ambiguous": false,
+          "confidence": "low"
+        },
+        "response_status": 200,
+        "incomplete_detected": false,
+        "error": null
+      },
+      "policy": {
+        "intent": "followup",
+        "compiled_policy": {
+          "intent": "followup",
+          "mode": "recommendation_followup",
+          "discovery_requested": false,
+          "followup_intent": "closest",
+          "hard_constraints": {
+            "size": {
+              "widthIn": 72,
+              "lengthIn": 108,
+              "toleranceIn": 0
+            },
+            "colors": [],
+            "styles": [],
+            "strictness": {
+              "size": "prefer",
+              "colors": "prefer",
+              "styles": "prefer",
+              "shape": "prefer"
+            }
+          },
+          "persisted_hard_constraints": {
+            "size": {
+              "widthIn": 72,
+              "lengthIn": 108,
+              "toleranceIn": 0
+            },
+            "colors": [],
+            "styles": [],
+            "strictness": {
+              "size": "prefer",
+              "colors": "prefer",
+              "styles": "prefer",
+              "shape": "prefer"
+            }
+          },
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          },
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          },
+          "confidence": "low",
+          "policy_source": "none",
+          "must_prefer_avoid": {
+            "must": [],
+            "prefer": [
+              "size"
+            ],
+            "avoid": {
+              "colors": [],
+              "styles": [],
+              "shapes": []
+            }
+          }
+        },
+        "policy_source": "none",
+        "must_prefer_avoid": {
+          "must": [],
+          "prefer": [
+            "size"
+          ],
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          }
+        },
+        "must-prefer-avoid": {
+          "must": [],
+          "prefer": [
+            "size"
+          ],
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          }
+        },
+        "constraint_modes": {
+          "size": "prefer",
+          "colors": "prefer",
+          "styles": "prefer",
+          "shape": "prefer",
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          }
+        }
+      },
+      "parser_trace": {
+        "called": true,
+        "model": "gpt-4.1-mini",
+        "status": "success",
+        "response_status": 200,
+        "fallback": null,
+        "fallback_reason": null,
+        "incomplete_detected": false,
+        "latency_ms": 2710,
+        "normalized_payload": {
+          "intent": "followup",
+          "mode": "recommendation_followup",
+          "followup_intent": "closest",
+          "constraints": {
+            "size": null,
+            "colors": [],
+            "styles": [],
+            "shape": null
+          },
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          },
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          },
+          "session_facts": [
+            "user wants exact match if possible, otherwise closest"
+          ],
+          "rug_reference_ambiguous": false,
+          "confidence": "low"
+        },
+        "parsed": {
+          "intent": "followup",
+          "mode": "recommendation_followup",
+          "followup_intent": "closest",
+          "constraints": {
+            "size": null,
+            "colors": [],
+            "styles": [],
+            "shape": null
+          },
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          },
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          },
+          "session_facts": [
+            "user wants exact match if possible, otherwise closest"
+          ],
+          "rug_reference_ambiguous": false,
+          "confidence": "low"
+        },
+        "error": null
+      },
+      "compiled_policy": {
+        "intent": "followup",
+        "mode": "recommendation_followup",
+        "discovery_requested": false,
+        "followup_intent": "closest",
+        "hard_constraints": {
+          "size": {
+            "widthIn": 72,
+            "lengthIn": 108,
+            "toleranceIn": 0
+          },
+          "colors": [],
+          "styles": [],
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          }
+        },
+        "persisted_hard_constraints": {
+          "size": {
+            "widthIn": 72,
+            "lengthIn": 108,
+            "toleranceIn": 0
+          },
+          "colors": [],
+          "styles": [],
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          }
+        },
+        "strictness": {
+          "size": "prefer",
+          "colors": "prefer",
+          "styles": "prefer",
+          "shape": "prefer"
+        },
+        "avoid": {
+          "colors": [],
+          "styles": [],
+          "shapes": []
+        },
+        "confidence": "low",
+        "policy_source": "none",
+        "must_prefer_avoid": {
+          "must": [],
+          "prefer": [
+            "size"
+          ],
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          }
+        }
+      },
+      "policy_source": "none",
+      "must_prefer_avoid": {
+        "must": [],
+        "prefer": [
+          "size"
+        ],
+        "avoid": {
+          "colors": [],
+          "styles": [],
+          "shapes": []
+        }
+      },
+      "must-prefer-avoid": {
+        "must": [],
+        "prefer": [
+          "size"
+        ],
+        "avoid": {
+          "colors": [],
+          "styles": [],
+          "shapes": []
+        }
+      },
+      "handler": "handleRecommendationTurn",
+      "prompt_layer_preview": [
+        "TASK_PROMPT_RECOMMENDATION",
+        "SYSTEM_PROMPT_BASE",
+        "TASK_PROMPT_RECOMMENDATION",
+        "TASK_PROMPT_RECOMMENDATION",
+        "STRUCTURED_OUTPUT_RECOMMENDATION",
+        "CHAT_MEMORY_CONTEXT",
+        "CHAT_MEMORY_CONTEXT",
+        "CHAT_MEMORY_CONTEXT",
+        "RECENT_TURNS_CONTEXT",
+        "INVENTORY_CONTEXT",
+        "LATEST_USER_MESSAGE_WITH_HARD_CONSTRAINTS"
+      ]
+    },
+    "reaction": {
+      "detected_reaction": null,
+      "referenced_rug_id": null,
+      "rug_reference_ambiguous": false,
+      "liked_attributes_before": {
+        "colors": [],
+        "styles": [],
+        "origins": []
+      },
+      "liked_attributes_after": {
+        "colors": [],
+        "styles": [],
+        "origins": []
+      },
+      "liked_rug_ids_before": [],
+      "liked_rug_ids_after": [],
+      "dismissed_rug_ids_before": [],
+      "dismissed_rug_ids_after": []
+    },
+    "state_snapshot": {
+      "recommendation_state": {
+        "hard_constraints": {
+          "size": {
+            "widthIn": 72,
+            "lengthIn": 108,
+            "toleranceIn": 0
+          },
+          "colors": [],
+          "styles": [],
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          }
+        },
+        "soft_preferences": {},
+        "runtime": {
+          "last_result_mode": "recommendation",
+          "last_relaxed_size_tolerance_in": null,
+          "last_blockers": [],
+          "last_recommended_size_in": {
+            "width_in": 72,
+            "length_in": 108
+          },
+          "liked_rug_ids": [],
+          "dismissed_rug_ids": [],
+          "shown_rug_ids": [
+            "b5b08191-958b-4792-8935-a1344a5e3ac3",
+            "09ffdd96-6a94-40a4-9c59-c0e752e37b66"
+          ],
+          "liked_attributes": {
+            "colors": [],
+            "styles": [],
+            "origins": []
+          },
+          "recently_shown_rugs": [
+            {
+              "id": "b5b08191-958b-4792-8935-a1344a5e3ac3",
+              "label": "Antique Persian Tabriz",
+              "colors": [
+                "red",
+                "gold",
+                "teal"
+              ],
+              "style": "Tabriz",
+              "origin": "Persian"
+            },
+            {
+              "id": "09ffdd96-6a94-40a4-9c59-c0e752e37b66",
+              "label": "Antique Persian Sultanabad",
+              "colors": [
+                "ivory",
+                "blue",
+                "rust"
+              ],
+              "style": "Sultanabad",
+              "origin": "Persian"
+            }
+          ],
+          "no_match_attempts": 0,
+          "updated_at": "2026-04-03T10:35:17.593Z"
+        }
+      },
+      "conversation_memory": {
+        "summary_text": "User: It has to be exactly 6x9. Very precise space. | Assistant: Got it, when the fit needs to be exact we can narrow this down precisely. You need a rug that's precisely 6x9, so I've narrowed it down to pieces that fit those exact measurements—no size fudging here. The Antique Persi…",
+        "stable_facts": [
+          "size exactly 6x9"
+        ],
+        "open_threads": [
+          "Would you like more details on a specific style or see photos of these rugs?"
+        ],
+        "last_user_intent": "recommendation",
+        "no_match_attempts": 0,
+        "updated_at": "2026-04-03T10:35:17.593Z",
+        "version": "v1"
+      }
+    },
+    "memory_snapshot_before": {
+      "summary_text": "User: It has to be exactly 6x9. Very precise space. | Assistant: Got it, when the fit needs to be exact we can narrow this down precisely. You need a rug that's precisely 6x9, so I've narrowed it down to pieces that fit those exact measurements—no size fudging here. The Antique Persi…",
+      "stable_facts": [
+        "size exactly 6x9"
+      ],
+      "open_threads": [
+        "Would you like more details on a specific style or see photos of these rugs?"
+      ],
+      "last_user_intent": "recommendation",
+      "no_match_attempts": 0,
+      "updated_at": "2026-04-03T10:35:17.593Z",
+      "version": "v1"
+    },
+    "memory_snapshot_after": {
+      "summary_text": "User: It has to be exactly 6x9. Very precise space. | Assistant: Got it, when the fit needs to be exact we can narrow this down precisely. You need a rug that's precisely 6x9, so I've narrowed it down to pieces that fit those exact measurements—no size fudging here. The Antique Persi… || User: If exact isn't available, show closest. | Assistant: Got it, when the fit needs to be exact we can narrow this down precisely. Good news: we do have exact 6' x 9' options, so I kept this set exact. Every rug shown here is exactly 6x9, so you’re in luck—no need to settle f…",
+      "stable_facts": [
+        "user wants exact match if possible, otherwise closest",
+        "size exactly 6x9"
+      ],
+      "open_threads": [
+        "Would you like details on how these might look in your specific space, or see any of them in person?",
+        "Would you like more details on a specific style or see photos of these rugs?"
+      ],
+      "last_user_intent": "recommendation",
+      "no_match_attempts": 0,
+      "updated_at": "2026-04-03T10:35:34.654Z",
+      "version": "v1"
+    },
+    "ai_context_packet_stats": {
+      "field_counts": {
+        "stable_facts": 1,
+        "open_threads": 1,
+        "customer_context": 1,
+        "recently_shown_rugs": 2,
+        "shown_rug_ids": 2,
+        "recent_turns": 2
+      },
+      "char_counts": {
+        "summary_text": 285,
+        "stable_facts_total": 16,
+        "open_threads_total": 76,
+        "customer_context_total": 16,
+        "recently_shown_total": 186,
+        "shown_rug_ids_total": 72,
+        "liked_attributes_total": 0,
+        "recent_turns_total": 324,
+        "latest_user_message": 39,
+        "total": 942
+      }
+    },
+    "response": {
+      "session_id": "e7539872-9082-476e-9115-caae9acd2c2b",
+      "role": "retail_customer",
+      "mode": "recommendation",
+      "fine_mode": "recommendation",
+      "response_mode": "recommendation",
+      "notes": null
+    },
+    "timing_ms": {
+      "total_ms": 14877
+    }
+  }
+}

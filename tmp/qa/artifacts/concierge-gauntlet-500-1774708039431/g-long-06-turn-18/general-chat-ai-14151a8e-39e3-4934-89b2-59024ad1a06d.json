@@ -1,0 +1,119 @@
+{
+  "trace_id": "14151a8e-39e3-4934-89b2-59024ad1a06d",
+  "channel": "general-chat-ai",
+  "created_at": "2026-03-28T14:47:54.887Z",
+  "payload": {
+    "mode": "general_chat",
+    "flow_path": [
+      "handleGeneralChatTurn",
+      "buildPromptLayers",
+      "generateGeneralChatResponse"
+    ],
+    "ai_trace": {
+      "called": true,
+      "model": "gpt-4.1-mini",
+      "prompt_layers": [
+        {
+          "id": "SYSTEM_PROMPT_BASE",
+          "role": "system",
+          "chars": 758,
+          "preview": "# AI System Prompt — Rug Concierge You are an experienced rug consultant helping retail customers in a showroom environ…"
+        },
+        {
+          "id": "TASK_PROMPT_GENERAL_CHAT",
+          "role": "system",
+          "chars": 962,
+          "preview": "# General Chat Prompt — Rug Concierge You are the retail concierge for an in-store rug showroom. Handle free-form custo…"
+        },
+        {
+          "id": "TASK_PROMPT_GENERAL_CHAT",
+          "role": "system",
+          "chars": 19,
+          "preview": "Respond in English."
+        },
+        {
+          "id": "ROLE_PROMPT_RETAIL_CUSTOMER",
+          "role": "system",
+          "chars": 107,
+          "preview": "Role: retail customer. Be approachable, warm, and concise, with practical guidance and a natural next step."
+        },
+        {
+          "id": "CHAT_MEMORY_CONTEXT",
+          "role": "system",
+          "chars": 1554,
+          "preview": "CHAT MEMORY CONTEXT: { \"summary_text\": \"…teriza por sus patrones geométricos y colores vivos, y se produce mediante una…"
+        },
+        {
+          "id": "RECENT_TURNS_CONTEXT",
+          "role": "system",
+          "chars": 694,
+          "preview": "RECENT TURNS CONTEXT: [ { \"role\": \"user\", \"content\": \"need modrn 8 x10 not too bzzy\", \"created_at\": \"2026-03-28T14:47:3…"
+        },
+        {
+          "id": "LATEST_USER_MESSAGE",
+          "role": "user",
+          "chars": 40,
+          "preview": "How can I tell if a rug is hand-knotted?"
+        }
+      ],
+      "request_payload_preview": {
+        "model": "gpt-4.1-mini",
+        "message_groups": 2,
+        "system_groups": 1,
+        "user_groups": 1,
+        "system_blocks": 6,
+        "user_blocks": 1,
+        "schema_name": "general_chat_response",
+        "schema_strict": true,
+        "max_output_tokens": 500
+      },
+      "response_status": 200,
+      "response_payload_preview": {
+        "has_output_text": false,
+        "output_items": 1,
+        "content_blocks": 1,
+        "has_error": false,
+        "error_type": null
+      },
+      "parsed_response": {
+        "assistant_message": "You can tell a rug is hand-knotted by inspecting the back: the knots will be individually tied and visible, with slight irregularities and a clear pattern that mirrors the front. Machine-made rugs often have a uniform, grid-like backing and may have a synthetic mesh. If you'd like, I can show you some hand-knotted examples from our current collection.",
+        "notes": null,
+        "memory_hints": [
+          "hand-knotted rug identification",
+          "offer examples of hand-knotted rugs in collection"
+        ]
+      },
+      "fallback_reason": null,
+      "error": null,
+      "incomplete_detected": false,
+      "retry_attempted": false,
+      "retry_succeeded": false,
+      "text_postprocess_applied": false
+    },
+    "context_packet_stats": {
+      "field_counts": {
+        "stable_facts": 5,
+        "open_threads": 6,
+        "customer_context": 5,
+        "recently_shown_rugs": 3,
+        "shown_rug_ids": 12,
+        "recent_turns": 4
+      },
+      "char_counts": {
+        "summary_text": 900,
+        "stable_facts_total": 98,
+        "open_threads_total": 318,
+        "customer_context_total": 98,
+        "recently_shown_total": 277,
+        "shown_rug_ids_total": 432,
+        "liked_attributes_total": 24,
+        "recent_turns_total": 288,
+        "latest_user_message": 40,
+        "total": 2043
+      }
+    },
+    "timing_ms": {
+      "generate_general_chat_ms": 2101
+    }
+  }
+}

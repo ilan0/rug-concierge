@@ -1,0 +1,627 @@
+{
+  "trace_id": "82a981f5-5a45-4987-8a5b-ff03ef302e0e",
+  "channel": "chat-route",
+  "created_at": "2026-04-03T08:49:54.301Z",
+  "payload": {
+    "flow_path": [
+      "/api/chat POST",
+      "getOrCreateSession",
+      "updateRecommendationStateForTurn",
+      "routeTurnMode",
+      "handlerDispatch",
+      "updateConversationMemory",
+      "saveSession"
+    ],
+    "request": {
+      "session_id": "0eb631b4-3c0d-4a88-b757-12fe204bcdfb",
+      "role": "retail_customer",
+      "tenant_id": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5",
+      "tenant_subdomain": "jjrugs",
+      "tenant_hostname": "jjrugs.rugdesk.app",
+      "message": "Prefer mid-size around 6x9.",
+      "constraints": null
+    },
+    "routing": {
+      "mode": "recommendation",
+      "intent": "followup",
+      "rule_id": "RECOMMENDATION_FOLLOWUP",
+      "confidence": "high",
+      "needs_clarification": false,
+      "parser": {
+        "model": "gpt-4.1-mini",
+        "latency_ms": 2507,
+        "status": "success",
+        "parse_status": "success",
+        "fallback": null,
+        "fallback_reason": null,
+        "normalized_payload": {
+          "intent": "followup",
+          "mode": "recommendation_followup",
+          "followup_intent": "closest",
+          "constraints": {
+            "size": {
+              "widthIn": 72,
+              "lengthIn": 108
+            },
+            "colors": [],
+            "styles": [],
+            "shape": null
+          },
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          },
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          },
+          "session_facts": [
+            "prefers mid-size rugs about 6x9"
+          ],
+          "rug_reference_ambiguous": false,
+          "confidence": "high"
+        },
+        "normalized_parse_payload": {
+          "intent": "followup",
+          "mode": "recommendation_followup",
+          "followup_intent": "closest",
+          "constraints": {
+            "size": {
+              "widthIn": 72,
+              "lengthIn": 108
+            },
+            "colors": [],
+            "styles": [],
+            "shape": null
+          },
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          },
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          },
+          "session_facts": [
+            "prefers mid-size rugs about 6x9"
+          ],
+          "rug_reference_ambiguous": false,
+          "confidence": "high"
+        },
+        "response_status": 200,
+        "incomplete_detected": false,
+        "error": null
+      },
+      "policy": {
+        "intent": "followup",
+        "compiled_policy": {
+          "intent": "followup",
+          "mode": "recommendation_followup",
+          "discovery_requested": false,
+          "followup_intent": "closest",
+          "hard_constraints": {
+            "size": {
+              "widthIn": 72,
+              "lengthIn": 108,
+              "toleranceIn": 10
+            },
+            "colors": [],
+            "styles": [],
+            "strictness": {
+              "size": "prefer",
+              "colors": "prefer",
+              "styles": "prefer",
+              "shape": "prefer"
+            },
+            "avoid_preferences": {
+              "styles": [
+                "antique",
+                "semi-antique",
+                "silk",
+                "delicate",
+                "ornate"
+              ],
+              "shapes": []
+            }
+          },
+          "persisted_hard_constraints": {
+            "size": {
+              "widthIn": 72,
+              "lengthIn": 108,
+              "toleranceIn": 10
+            },
+            "colors": [],
+            "styles": [],
+            "strictness": {
+              "size": "prefer",
+              "colors": "prefer",
+              "styles": "prefer",
+              "shape": "prefer"
+            },
+            "avoid_preferences": {
+              "styles": [
+                "antique",
+                "semi-antique",
+                "silk",
+                "delicate",
+                "ornate"
+              ],
+              "shapes": []
+            }
+          },
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          },
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          },
+          "confidence": "high",
+          "policy_source": "parsed_turn",
+          "must_prefer_avoid": {
+            "must": [],
+            "prefer": [
+              "size"
+            ],
+            "avoid": {
+              "colors": [],
+              "styles": [
+                "antique",
+                "semi-antique",
+                "silk",
+                "delicate",
+                "ornate"
+              ],
+              "shapes": []
+            }
+          }
+        },
+        "policy_source": "parsed_turn",
+        "must_prefer_avoid": {
+          "must": [],
+          "prefer": [
+            "size"
+          ],
+          "avoid": {
+            "colors": [],
+            "styles": [
+              "antique",
+              "semi-antique",
+              "silk",
+              "delicate",
+              "ornate"
+            ],
+            "shapes": []
+          }
+        },
+        "must-prefer-avoid": {
+          "must": [],
+          "prefer": [
+            "size"
+          ],
+          "avoid": {
+            "colors": [],
+            "styles": [
+              "antique",
+              "semi-antique",
+              "silk",
+              "delicate",
+              "ornate"
+            ],
+            "shapes": []
+          }
+        },
+        "constraint_modes": {
+          "size": "prefer",
+          "colors": "prefer",
+          "styles": "prefer",
+          "shape": "prefer",
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          }
+        }
+      },
+      "parser_trace": {
+        "called": true,
+        "model": "gpt-4.1-mini",
+        "status": "success",
+        "response_status": 200,
+        "fallback": null,
+        "fallback_reason": null,
+        "incomplete_detected": false,
+        "latency_ms": 2507,
+        "normalized_payload": {
+          "intent": "followup",
+          "mode": "recommendation_followup",
+          "followup_intent": "closest",
+          "constraints": {
+            "size": {
+              "widthIn": 72,
+              "lengthIn": 108
+            },
+            "colors": [],
+            "styles": [],
+            "shape": null
+          },
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          },
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          },
+          "session_facts": [
+            "prefers mid-size rugs about 6x9"
+          ],
+          "rug_reference_ambiguous": false,
+          "confidence": "high"
+        },
+        "parsed": {
+          "intent": "followup",
+          "mode": "recommendation_followup",
+          "followup_intent": "closest",
+          "constraints": {
+            "size": {
+              "widthIn": 72,
+              "lengthIn": 108
+            },
+            "colors": [],
+            "styles": [],
+            "shape": null
+          },
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          },
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          },
+          "session_facts": [
+            "prefers mid-size rugs about 6x9"
+          ],
+          "rug_reference_ambiguous": false,
+          "confidence": "high"
+        },
+        "error": null
+      },
+      "compiled_policy": {
+        "intent": "followup",
+        "mode": "recommendation_followup",
+        "discovery_requested": false,
+        "followup_intent": "closest",
+        "hard_constraints": {
+          "size": {
+            "widthIn": 72,
+            "lengthIn": 108,
+            "toleranceIn": 10
+          },
+          "colors": [],
+          "styles": [],
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          },
+          "avoid_preferences": {
+            "styles": [
+              "antique",
+              "semi-antique",
+              "silk",
+              "delicate",
+              "ornate"
+            ],
+            "shapes": []
+          }
+        },
+        "persisted_hard_constraints": {
+          "size": {
+            "widthIn": 72,
+            "lengthIn": 108,
+            "toleranceIn": 10
+          },
+          "colors": [],
+          "styles": [],
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          },
+          "avoid_preferences": {
+            "styles": [
+              "antique",
+              "semi-antique",
+              "silk",
+              "delicate",
+              "ornate"
+            ],
+            "shapes": []
+          }
+        },
+        "strictness": {
+          "size": "prefer",
+          "colors": "prefer",
+          "styles": "prefer",
+          "shape": "prefer"
+        },
+        "avoid": {
+          "colors": [],
+          "styles": [],
+          "shapes": []
+        },
+        "confidence": "high",
+        "policy_source": "parsed_turn",
+        "must_prefer_avoid": {
+          "must": [],
+          "prefer": [
+            "size"
+          ],
+          "avoid": {
+            "colors": [],
+            "styles": [
+              "antique",
+              "semi-antique",
+              "silk",
+              "delicate",
+              "ornate"
+            ],
+            "shapes": []
+          }
+        }
+      },
+      "policy_source": "parsed_turn",
+      "must_prefer_avoid": {
+        "must": [],
+        "prefer": [
+          "size"
+        ],
+        "avoid": {
+          "colors": [],
+          "styles": [
+            "antique",
+            "semi-antique",
+            "silk",
+            "delicate",
+            "ornate"
+          ],
+          "shapes": []
+        }
+      },
+      "must-prefer-avoid": {
+        "must": [],
+        "prefer": [
+          "size"
+        ],
+        "avoid": {
+          "colors": [],
+          "styles": [
+            "antique",
+            "semi-antique",
+            "silk",
+            "delicate",
+            "ornate"
+          ],
+          "shapes": []
+        }
+      },
+      "handler": "handleRecommendationTurn",
+      "prompt_layer_preview": [
+        "TASK_PROMPT_RECOMMENDATION",
+        "SYSTEM_PROMPT_BASE",
+        "TASK_PROMPT_RECOMMENDATION",
+        "TASK_PROMPT_RECOMMENDATION",
+        "STRUCTURED_OUTPUT_RECOMMENDATION",
+        "CHAT_MEMORY_CONTEXT",
+        "CHAT_MEMORY_CONTEXT",
+        "CHAT_MEMORY_CONTEXT",
+        "RECENT_TURNS_CONTEXT",
+        "INVENTORY_CONTEXT",
+        "LATEST_USER_MESSAGE_WITH_HARD_CONSTRAINTS"
+      ]
+    },
+    "reaction": {
+      "detected_reaction": null,
+      "referenced_rug_id": null,
+      "rug_reference_ambiguous": false,
+      "liked_attributes_before": {
+        "colors": [],
+        "styles": [],
+        "origins": []
+      },
+      "liked_attributes_after": {
+        "colors": [],
+        "styles": [],
+        "origins": []
+      },
+      "liked_rug_ids_before": [],
+      "liked_rug_ids_after": [],
+      "dismissed_rug_ids_before": [],
+      "dismissed_rug_ids_after": []
+    },
+    "state_snapshot": {
+      "recommendation_state": {
+        "hard_constraints": {
+          "size": {
+            "widthIn": 72,
+            "lengthIn": 108,
+            "toleranceIn": 10
+          },
+          "colors": [],
+          "styles": [],
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          },
+          "avoid_preferences": {
+            "styles": [
+              "antique",
+              "semi-antique",
+              "silk",
+              "delicate",
+              "ornate"
+            ],
+            "shapes": []
+          }
+        },
+        "soft_preferences": {},
+        "runtime": {
+          "last_result_mode": "recommendation",
+          "last_relaxed_size_tolerance_in": null,
+          "last_blockers": [],
+          "last_recommended_size_in": {
+            "width_in": 96,
+            "length_in": 120
+          },
+          "liked_rug_ids": [],
+          "dismissed_rug_ids": [],
+          "shown_rug_ids": [
+            "46245ee2-ac56-46e0-8cbf-b2eead74c24b",
+            "7e2a3934-cc4d-44e6-840f-7614952917c5"
+          ],
+          "liked_attributes": {
+            "colors": [],
+            "styles": [],
+            "origins": []
+          },
+          "recently_shown_rugs": [
+            {
+              "id": "46245ee2-ac56-46e0-8cbf-b2eead74c24b",
+              "label": "Contemporary Kilim",
+              "colors": [
+                "multi"
+              ],
+              "style": "Kilim",
+              "origin": "Other"
+            },
+            {
+              "id": "7e2a3934-cc4d-44e6-840f-7614952917c5",
+              "label": "Contemporary Round",
+              "colors": [
+                "black"
+              ],
+              "style": "Modern",
+              "origin": null
+            }
+          ],
+          "no_match_attempts": 0,
+          "updated_at": "2026-04-03T08:49:39.770Z"
+        }
+      },
+      "conversation_memory": {
+        "summary_text": "User: We have two kids and a dog. Need something easy to clean for the living room. | Assistant: Absolutely, we can keep this practical and easy to live with. I know that's not ideal, so I pulled the closest options worth considering. For heavy daily use, truly easy-care options are limited, so I’m showing the most…",
+        "stable_facts": [
+          "needs easy to clean rug",
+          "room: living room",
+          "has two kids",
+          "has a dog",
+          "room living room",
+          "practical kids",
+          "practical easy to clean"
+        ],
+        "open_threads": [
+          "Would you like details on care or want to see a different color or shape?"
+        ],
+        "last_user_intent": "recommendation",
+        "no_match_attempts": 0,
+        "updated_at": "2026-04-03T08:49:39.769Z",
+        "version": "v1"
+      }
+    },
+    "memory_snapshot_before": {
+      "summary_text": "User: We have two kids and a dog. Need something easy to clean for the living room. | Assistant: Absolutely, we can keep this practical and easy to live with. I know that's not ideal, so I pulled the closest options worth considering. For heavy daily use, truly easy-care options are limited, so I’m showing the most…",
+      "stable_facts": [
+        "needs easy to clean rug",
+        "room: living room",
+        "has two kids",
+        "has a dog",
+        "room living room",
+        "practical kids",
+        "practical easy to clean"
+      ],
+      "open_threads": [
+        "Would you like details on care or want to see a different color or shape?"
+      ],
+      "last_user_intent": "recommendation",
+      "no_match_attempts": 0,
+      "updated_at": "2026-04-03T08:49:39.769Z",
+      "version": "v1"
+    },
+    "memory_snapshot_after": {
+      "summary_text": "User: We have two kids and a dog. Need something easy to clean for the living room. | Assistant: Absolutely, we can keep this practical and easy to live with. I know that's not ideal, so I pulled the closest options worth considering. For heavy daily use, truly easy-care options are limited, so I’m showing the most… || User: Prefer mid-size around 6x9. | Assistant: Great, that size target helps us narrow quickly. I know that's not ideal, so I pulled the closest options worth considering. I don't have enough true easy-care options that fully match this request, so I'm showing the m…",
+      "stable_facts": [
+        "prefers mid-size rugs about 6x9",
+        "needs easy to clean rug",
+        "room: living room",
+        "has two kids",
+        "has a dog",
+        "room living room",
+        "practical kids",
+        "practical easy to clean"
+      ],
+      "open_threads": [
+        "Would you like to know more about this option or see smaller, runner-style rugs that might suit high-traffic areas?",
+        "Would you like details on care or want to see a different color or shape?"
+      ],
+      "last_user_intent": "recommendation",
+      "no_match_attempts": 0,
+      "updated_at": "2026-04-03T08:49:54.006Z",
+      "version": "v1"
+    },
+    "ai_context_packet_stats": {
+      "field_counts": {
+        "stable_facts": 7,
+        "open_threads": 1,
+        "customer_context": 7,
+        "recently_shown_rugs": 2,
+        "shown_rug_ids": 2,
+        "recent_turns": 2
+      },
+      "char_counts": {
+        "summary_text": 317,
+        "stable_facts_total": 114,
+        "open_threads_total": 73,
+        "customer_context_total": 114,
+        "recently_shown_total": 141,
+        "shown_rug_ids_total": 72,
+        "liked_attributes_total": 0,
+        "recent_turns_total": 357,
+        "latest_user_message": 27,
+        "total": 1143
+      }
+    },
+    "response": {
+      "session_id": "0eb631b4-3c0d-4a88-b757-12fe204bcdfb",
+      "role": "retail_customer",
+      "mode": "recommendation",
+      "fine_mode": "recommendation",
+      "response_mode": "recommendation",
+      "notes": "CONSTRAINT_MISMATCH_EXPANDED"
+    },
+    "timing_ms": {
+      "total_ms": 11559
+    }
+  }
+}

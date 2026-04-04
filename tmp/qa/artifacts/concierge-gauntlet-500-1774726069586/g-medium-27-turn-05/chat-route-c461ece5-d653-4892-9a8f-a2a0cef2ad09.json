@@ -1,0 +1,561 @@
+{
+  "trace_id": "c461ece5-d653-4892-9a8f-a2a0cef2ad09",
+  "channel": "chat-route",
+  "created_at": "2026-03-28T20:39:32.189Z",
+  "payload": {
+    "flow_path": [
+      "/api/chat POST",
+      "getOrCreateSession",
+      "updateRecommendationStateForTurn",
+      "routeTurnMode",
+      "handlerDispatch",
+      "updateConversationMemory",
+      "saveSession"
+    ],
+    "request": {
+      "session_id": "89504998-9a32-40e8-a66b-fd8251e76a95",
+      "role": "retail_customer",
+      "tenant_id": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5",
+      "tenant_subdomain": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5",
+      "tenant_hostname": "127.0.0.1",
+      "message": "Show me Afghan rugs",
+      "constraints": null
+    },
+    "routing": {
+      "mode": "recommendation",
+      "intent": "recommend",
+      "rule_id": "EXPLICIT_RECOMMENDATION_REQUEST",
+      "confidence": "low",
+      "needs_clarification": false,
+      "parser": {
+        "model": "gpt-4.1-mini",
+        "latency_ms": 1761,
+        "status": "success",
+        "parse_status": "success",
+        "fallback": null,
+        "fallback_reason": null,
+        "normalized_payload": {
+          "intent": "recommend",
+          "mode": "recommendation",
+          "followup_intent": "none",
+          "constraints": {
+            "size": null,
+            "colors": [],
+            "styles": [],
+            "shape": null
+          },
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          },
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          },
+          "session_facts": [
+            "interested in Afghan style rugs"
+          ],
+          "rug_reference_ambiguous": false,
+          "confidence": "low"
+        },
+        "normalized_parse_payload": {
+          "intent": "recommend",
+          "mode": "recommendation",
+          "followup_intent": "none",
+          "constraints": {
+            "size": null,
+            "colors": [],
+            "styles": [],
+            "shape": null
+          },
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          },
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          },
+          "session_facts": [
+            "interested in Afghan style rugs"
+          ],
+          "rug_reference_ambiguous": false,
+          "confidence": "low"
+        },
+        "response_status": 200,
+        "incomplete_detected": false,
+        "error": null
+      },
+      "policy": {
+        "intent": "recommend",
+        "compiled_policy": {
+          "intent": "recommend",
+          "mode": "recommendation",
+          "discovery_requested": true,
+          "followup_intent": "none",
+          "hard_constraints": {
+            "strictness": {
+              "size": "prefer",
+              "colors": "prefer",
+              "styles": "prefer",
+              "shape": "prefer"
+            }
+          },
+          "persisted_hard_constraints": {
+            "strictness": {
+              "size": "prefer",
+              "colors": "prefer",
+              "styles": "prefer",
+              "shape": "prefer"
+            }
+          },
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          },
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          },
+          "confidence": "low",
+          "policy_source": "none",
+          "must_prefer_avoid": {
+            "must": [],
+            "prefer": [],
+            "avoid": {
+              "colors": [],
+              "styles": [],
+              "shapes": []
+            }
+          }
+        },
+        "policy_source": "none",
+        "must_prefer_avoid": {
+          "must": [],
+          "prefer": [],
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          }
+        },
+        "must-prefer-avoid": {
+          "must": [],
+          "prefer": [],
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          }
+        },
+        "constraint_modes": {
+          "size": "prefer",
+          "colors": "prefer",
+          "styles": "prefer",
+          "shape": "prefer",
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          }
+        }
+      },
+      "parser_trace": {
+        "called": true,
+        "model": "gpt-4.1-mini",
+        "status": "success",
+        "response_status": 200,
+        "fallback": null,
+        "fallback_reason": null,
+        "incomplete_detected": false,
+        "latency_ms": 1761,
+        "normalized_payload": {
+          "intent": "recommend",
+          "mode": "recommendation",
+          "followup_intent": "none",
+          "constraints": {
+            "size": null,
+            "colors": [],
+            "styles": [],
+            "shape": null
+          },
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          },
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          },
+          "session_facts": [
+            "interested in Afghan style rugs"
+          ],
+          "rug_reference_ambiguous": false,
+          "confidence": "low"
+        },
+        "parsed": {
+          "intent": "recommend",
+          "mode": "recommendation",
+          "followup_intent": "none",
+          "constraints": {
+            "size": null,
+            "colors": [],
+            "styles": [],
+            "shape": null
+          },
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          },
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          },
+          "session_facts": [
+            "interested in Afghan style rugs"
+          ],
+          "rug_reference_ambiguous": false,
+          "confidence": "low"
+        },
+        "error": null
+      },
+      "compiled_policy": {
+        "intent": "recommend",
+        "mode": "recommendation",
+        "discovery_requested": true,
+        "followup_intent": "none",
+        "hard_constraints": {
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          }
+        },
+        "persisted_hard_constraints": {
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          }
+        },
+        "strictness": {
+          "size": "prefer",
+          "colors": "prefer",
+          "styles": "prefer",
+          "shape": "prefer"
+        },
+        "avoid": {
+          "colors": [],
+          "styles": [],
+          "shapes": []
+        },
+        "confidence": "low",
+        "policy_source": "none",
+        "must_prefer_avoid": {
+          "must": [],
+          "prefer": [],
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          }
+        }
+      },
+      "policy_source": "none",
+      "must_prefer_avoid": {
+        "must": [],
+        "prefer": [],
+        "avoid": {
+          "colors": [],
+          "styles": [],
+          "shapes": []
+        }
+      },
+      "must-prefer-avoid": {
+        "must": [],
+        "prefer": [],
+        "avoid": {
+          "colors": [],
+          "styles": [],
+          "shapes": []
+        }
+      },
+      "handler": "handleRecommendationTurn",
+      "prompt_layer_preview": [
+        "TASK_PROMPT_RECOMMENDATION",
+        "SYSTEM_PROMPT_BASE",
+        "TASK_PROMPT_RECOMMENDATION",
+        "TASK_PROMPT_RECOMMENDATION",
+        "STRUCTURED_OUTPUT_RECOMMENDATION",
+        "CHAT_MEMORY_CONTEXT",
+        "CHAT_MEMORY_CONTEXT",
+        "CHAT_MEMORY_CONTEXT",
+        "CHAT_MEMORY_CONTEXT",
+        "RECENT_TURNS_CONTEXT",
+        "INVENTORY_CONTEXT",
+        "LATEST_USER_MESSAGE_WITH_HARD_CONSTRAINTS"
+      ]
+    },
+    "reaction": {
+      "detected_reaction": null,
+      "referenced_rug_id": null,
+      "rug_reference_ambiguous": false,
+      "liked_attributes_before": {
+        "colors": [
+          "ivory",
+          "gray",
+          "brown"
+        ],
+        "styles": [],
+        "origins": []
+      },
+      "liked_attributes_after": {
+        "colors": [
+          "ivory",
+          "gray",
+          "brown"
+        ],
+        "styles": [],
+        "origins": []
+      },
+      "liked_rug_ids_before": [],
+      "liked_rug_ids_after": [],
+      "dismissed_rug_ids_before": [],
+      "dismissed_rug_ids_after": []
+    },
+    "state_snapshot": {
+      "recommendation_state": {
+        "hard_constraints": {
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          }
+        },
+        "soft_preferences": {},
+        "runtime": {
+          "last_result_mode": "recommendation",
+          "last_relaxed_size_tolerance_in": null,
+          "last_blockers": [],
+          "last_recommended_size_in": {
+            "width_in": 96,
+            "length_in": 132
+          },
+          "liked_rug_ids": [],
+          "dismissed_rug_ids": [],
+          "shown_rug_ids": [
+            "581623da-8585-4d13-b4be-29188b1e80bf",
+            "0c83104b-d6bb-43ea-beaa-adafd1ee38dc",
+            "9e907acc-59b6-46a0-9233-65f83e6e983f",
+            "762595b3-5e5f-4faf-ac01-91d4d044580d",
+            "4ead301b-bfe2-4b4b-8303-573ac2726125",
+            "a9b8dc20-00d4-48c4-8cc4-7042f148b432",
+            "3d028dce-a64a-40c9-92de-caf3e9a4487d",
+            "5b8254f3-182f-4245-aada-84250db3df92",
+            "e34c39f6-6bd3-4073-8654-2ceea2da6740"
+          ],
+          "liked_attributes": {
+            "colors": [
+              "ivory",
+              "gray",
+              "brown"
+            ],
+            "styles": [],
+            "origins": []
+          },
+          "recently_shown_rugs": [
+            {
+              "id": "0c83104b-d6bb-43ea-beaa-adafd1ee38dc",
+              "label": "Vintage Bokhara",
+              "colors": [
+                "black",
+                "gray",
+                "ivory"
+              ],
+              "style": "Bokhara",
+              "origin": "Central Asian"
+            },
+            {
+              "id": "9e907acc-59b6-46a0-9233-65f83e6e983f",
+              "label": "Persian Traditional",
+              "colors": [
+                "black",
+                "gray"
+              ],
+              "style": "Floral",
+              "origin": "Persian"
+            },
+            {
+              "id": "581623da-8585-4d13-b4be-29188b1e80bf",
+              "label": "Caucasian Kazak",
+              "colors": [
+                "black",
+                "white",
+                "ivory",
+                "gray"
+              ],
+              "style": "Kazak",
+              "origin": "Caucasian"
+            },
+            {
+              "id": "3d028dce-a64a-40c9-92de-caf3e9a4487d",
+              "label": "Caucasian Shirvan Traditional",
+              "colors": [
+                "black",
+                "white"
+              ],
+              "style": "Shirvan",
+              "origin": "Caucasian"
+            },
+            {
+              "id": "5b8254f3-182f-4245-aada-84250db3df92",
+              "label": "Vintage Caucasian",
+              "colors": [
+                "ivory",
+                "black",
+                "gold",
+                "teal"
+              ],
+              "style": "Geometric Tribal",
+              "origin": "Caucasian"
+            },
+            {
+              "id": "e34c39f6-6bd3-4073-8654-2ceea2da6740",
+              "label": "Vintage Persian",
+              "colors": [
+                "gray",
+                "black"
+              ],
+              "style": "Geometric Tribal",
+              "origin": "Persian"
+            }
+          ],
+          "no_match_attempts": 0,
+          "updated_at": "2026-03-28T20:39:19.962Z"
+        }
+      },
+      "conversation_memory": {
+        "summary_text": "…charm. If you'd like, should I show more in this same direction, or adjust color and size next? || User: Any closer matches? | Assistant: These options closely align with your preference for calm, neutral colors and a 9' x 12' size, featuring elegant traditional designs in ivory and gray tones. If you'd like, should I show more in this same direction, or… || User: This feels too formal | Assistant: For a less formal feel in your preferred calm neutral palette, these ivory and gray rugs offer a softer, more approachable traditional look. The Vintage Bokhara stands out for its subtle pattern and easy style versatili… || User: How often should I rotate a rug? | Assistant: Rugs should generally be rotated every 6 to 12 months to ensure even wear and exposure to light, which helps maintain their appearance and durability. If you have high-traffic areas or significant sunlight, more frequen…",
+        "stable_facts": [
+          "user asked about rug rotation frequency",
+          "dislikes formal style",
+          "recently_shown_rugs: Caucasian Kazak",
+          "recently_shown_rugs: Vintage Bokhara",
+          "recently_shown_rugs: Persian Traditional",
+          "wants calm style",
+          "wants neutral colors"
+        ],
+        "open_threads": [
+          "How often should I rotate a rug?",
+          "Would you like me to show some low-maintenance rug options from our collection?",
+          "Would you like to explore more options like these or adjust size preferences next?",
+          "Any closer matches?",
+          "If you'd like, should I show more in this same direction, or adjust color and size next?"
+        ],
+        "last_user_intent": "general_chat",
+        "no_match_attempts": 0,
+        "updated_at": "2026-03-28T20:39:19.961Z",
+        "version": "v1"
+      }
+    },
+    "memory_snapshot_before": {
+      "summary_text": "…charm. If you'd like, should I show more in this same direction, or adjust color and size next? || User: Any closer matches? | Assistant: These options closely align with your preference for calm, neutral colors and a 9' x 12' size, featuring elegant traditional designs in ivory and gray tones. If you'd like, should I show more in this same direction, or… || User: This feels too formal | Assistant: For a less formal feel in your preferred calm neutral palette, these ivory and gray rugs offer a softer, more approachable traditional look. The Vintage Bokhara stands out for its subtle pattern and easy style versatili… || User: How often should I rotate a rug? | Assistant: Rugs should generally be rotated every 6 to 12 months to ensure even wear and exposure to light, which helps maintain their appearance and durability. If you have high-traffic areas or significant sunlight, more frequen…",
+      "stable_facts": [
+        "user asked about rug rotation frequency",
+        "dislikes formal style",
+        "recently_shown_rugs: Caucasian Kazak",
+        "recently_shown_rugs: Vintage Bokhara",
+        "recently_shown_rugs: Persian Traditional",
+        "wants calm style",
+        "wants neutral colors"
+      ],
+      "open_threads": [
+        "How often should I rotate a rug?",
+        "Would you like me to show some low-maintenance rug options from our collection?",
+        "Would you like to explore more options like these or adjust size preferences next?",
+        "Any closer matches?",
+        "If you'd like, should I show more in this same direction, or adjust color and size next?"
+      ],
+      "last_user_intent": "general_chat",
+      "no_match_attempts": 0,
+      "updated_at": "2026-03-28T20:39:19.961Z",
+      "version": "v1"
+    },
+    "memory_snapshot_after": {
+      "summary_text": "…designs in ivory and gray tones. If you'd like, should I show more in this same direction, or… || User: This feels too formal | Assistant: For a less formal feel in your preferred calm neutral palette, these ivory and gray rugs offer a softer, more approachable traditional look. The Vintage Bokhara stands out for its subtle pattern and easy style versatili… || User: How often should I rotate a rug? | Assistant: Rugs should generally be rotated every 6 to 12 months to ensure even wear and exposure to light, which helps maintain their appearance and durability. If you have high-traffic areas or significant sunlight, more frequen… || User: Show me Afghan rugs | Assistant: These Afghan rugs offer traditional and eclectic moods with rich colors and distinctive tribal patterns. The Afghan Baluch Traditional is notable for its striking red and black geometric design that brings warmth and ch…",
+      "stable_facts": [
+        "interested in Afghan style rugs",
+        "user asked about rug rotation frequency",
+        "dislikes formal style",
+        "recently_shown_rugs: Caucasian Kazak",
+        "recently_shown_rugs: Vintage Bokhara",
+        "recently_shown_rugs: Persian Traditional",
+        "wants calm style",
+        "wants neutral colors"
+      ],
+      "open_threads": [
+        "What kind of space are you decorating so I can narrow these down for you?",
+        "How often should I rotate a rug?",
+        "Would you like me to show some low-maintenance rug options from our collection?",
+        "Would you like to explore more options like these or adjust size preferences next?",
+        "Any closer matches?",
+        "If you'd like, should I show more in this same direction, or adjust color and size next?"
+      ],
+      "last_user_intent": "recommendation",
+      "no_match_attempts": 0,
+      "updated_at": "2026-03-28T20:39:31.775Z",
+      "version": "v1"
+    },
+    "ai_context_packet_stats": {
+      "field_counts": {
+        "stable_facts": 7,
+        "open_threads": 5,
+        "customer_context": 7,
+        "recently_shown_rugs": 6,
+        "shown_rug_ids": 9,
+        "recent_turns": 4
+      },
+      "char_counts": {
+        "summary_text": 899,
+        "stable_facts_total": 208,
+        "open_threads_total": 300,
+        "customer_context_total": 208,
+        "recently_shown_total": 551,
+        "shown_rug_ids_total": 324,
+        "liked_attributes_total": 14,
+        "recent_turns_total": 613,
+        "latest_user_message": 19,
+        "total": 2812
+      }
+    },
+    "response": {
+      "session_id": "89504998-9a32-40e8-a66b-fd8251e76a95",
+      "role": "retail_customer",
+      "mode": "recommendation",
+      "fine_mode": "recommendation",
+      "response_mode": "recommendation",
+      "notes": null
+    },
+    "timing_ms": {
+      "total_ms": 11858
+    }
+  }
+}

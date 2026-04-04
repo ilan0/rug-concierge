@@ -135,7 +135,7 @@ function inferAvoidStylesFromMessage(message: string): string[] {
   const normalized = normalizeText(message);
   const avoided = STYLE_SIGNAL_TERMS.filter((token) => {
     const pattern = new RegExp(
-      `\\b(?:no|not|without|avoid|exclude|skip|less|nothing)\\b[^.!?]{0,30}\\b${token}\\b`,
+      `\\b(?:no|not|without|avoid|exclude|skip|less|nothing|forget|drop)\\b[^.!?]{0,30}\\b${token}\\b`,
       "i"
     );
     return pattern.test(normalized);
@@ -171,10 +171,12 @@ function inferSemanticSignals(input: {
     return {};
   }
 
+  const softSignals = extractSoftPreferencesFromUserMessage(input.message);
+  const hasRoomDrivenRescope = Boolean(softSignals.room);
   const hasExplicitSize = Boolean(
     input.explicit.size ||
       input.parsedTurn.constraints.size ||
-      (input.useInheritedBase && input.previous.size)
+      (input.useInheritedBase && input.previous.size && !hasRoomDrivenRescope)
   );
   const hasExplicitShape = Boolean(
     input.explicit.shape ||
@@ -190,17 +192,32 @@ function inferSemanticSignals(input: {
     [
       ...(input.explicit.styles ?? []),
       ...(input.parsedTurn.constraints.styles ?? []),
-      ...(input.useInheritedBase ? input.previous.styles ?? [] : []),
     ].map((value) => normalizeText(value))
   );
-  const hasModernSignal =
+  const hasModernMention =
     includesAny(message, MODERN_STYLE_TERMS) || styleTokens.has("modern");
-  const hasTraditionalSignal =
+  const hasTraditionalMention =
     includesAny(message, TRADITIONAL_STYLE_TERMS) ||
     styleTokens.has("traditional") ||
     styleTokens.has("persian");
-  const softSignals = extractSoftPreferencesFromUserMessage(input.message);
+  const modernNegated = /\b(no|not|without|avoid|exclude|skip|forget|drop)\b[^.!?]{0,24}\b(modern|contemporary|minimal|minimalist|abstract)\b/i.test(
+    message
+  );
+  const traditionalNegated = /\b(no|not|without|avoid|exclude|skip|forget|drop)\b[^.!?]{0,24}\b(traditional|persian|tribal|heriz|serapi|kashan|tabriz|isfahan)\b/i.test(
+    message
+  );
+  const hasModernSignal = hasModernMention && !modernNegated;
+  const hasTraditionalSignal = hasTraditionalMention && !traditionalNegated;
+  const hasPersianMention = /\bpersian\b/i.test(message);
   const hasAnchorSignal = /\b(anchor|anchor rug|main rug|room anchor)\b/i.test(message);
+  const hasCalmerSignal =
+    /\b(less busy|not too busy|cleaner|cleanest|understated|simpler|calmer)\b/i.test(
+      message
+    );
+  const hasBoldSignal =
+    /\b(bold|bolder|vibrant|statement|dramatic|eye-?catching|more personality|more color)\b/i.test(
+      message
+    );
   const hasPracticalSignal =
     /\b(kid|kids|child|children|dog|dogs|pet|pets|high traffic|durable|easy to clean|low maintenance|beach house)\b/i.test(
       message
@@ -209,29 +226,60 @@ function inferSemanticSignals(input: {
     /\b(neutral|goes with everything|versatile|calm palette|subtle palette)\b/i.test(
       message
     );
+  const hasElegantSignal =
+    /\b(elegant|refined|formal|dressy|sophisticated)\b/i.test(message);
 
   let inferredSize: NonNullable<HardConstraints["size"]> | undefined;
   let inferredColors: string[] | undefined;
   let inferredShape: HardConstraints["shape"] | undefined;
   let inferredStyles: string[] | undefined;
   let inferredAvoidColors: string[] | undefined;
+  let inferredAvoidStyles: string[] | undefined;
+  const suppressRoomSizeInferenceForPractical =
+    hasPracticalSignal && !hasAnchorSignal;
+  const mentionedRooms = [
+    /\bliving room\b/i.test(message) ? "living_room" : null,
+    /\bdining room\b/i.test(message) ? "dining_room" : null,
+    /\bbedroom\b/i.test(message) ? "bedroom" : null,
+    /\bentryway|entry\b/i.test(message) ? "entryway" : null,
+    /\bhallway\b/i.test(message) ? "hallway" : null,
+    /\bkitchen\b/i.test(message) ? "kitchen" : null,
+  ].filter((value): value is string => Boolean(value));
+  const hasMultiRoomSignal = new Set(mentionedRooms).size > 1;
 
   if (!hasExplicitSize) {
-    if (hasAnchorSignal || softSignals.room === "living_room") {
-      inferredSize = { widthIn: 96, lengthIn: 120, toleranceIn: 12 };
+    if (hasMultiRoomSignal) {
+      inferredSize = undefined;
+    } else if (hasAnchorSignal || softSignals.room === "living_room") {
+      if (!suppressRoomSizeInferenceForPractical) {
+        inferredSize = { widthIn: 96, lengthIn: 120, toleranceIn: 12 };
+      }
     } else if (softSignals.room === "dining_room") {
-      inferredSize = { widthIn: 96, lengthIn: 120, toleranceIn: 12 };
+      if (!suppressRoomSizeInferenceForPractical) {
+        inferredSize = { widthIn: 96, lengthIn: 120, toleranceIn: 12 };
+      }
     } else if (softSignals.room === "bedroom") {
-      inferredSize = { widthIn: 60, lengthIn: 96, toleranceIn: 10 };
+      if (!suppressRoomSizeInferenceForPractical) {
+        inferredSize = { widthIn: 60, lengthIn: 96, toleranceIn: 10 };
+      }
     } else if (softSignals.room === "office") {
-      inferredSize = { widthIn: 60, lengthIn: 96, toleranceIn: 10 };
+      if (!suppressRoomSizeInferenceForPractical) {
+        inferredSize = { widthIn: 60, lengthIn: 96, toleranceIn: 10 };
+      }
     } else if (softSignals.room === "entryway") {
       inferredSize = { widthIn: 36, lengthIn: 60, toleranceIn: 8 };
     } else if (softSignals.room === "kitchen") {
-      inferredSize = { widthIn: 24, lengthIn: 72, toleranceIn: 8 };
+      inferredSize = { widthIn: 24, lengthIn: 96, toleranceIn: 10 };
     } else if (softSignals.room === "hallway") {
       inferredSize = { widthIn: 30, lengthIn: 120, toleranceIn: 8 };
     }
+  }
+
+  if (hasPracticalSignal && inferredSize) {
+    inferredSize = {
+      ...inferredSize,
+      toleranceIn: Math.max(inferredSize.toleranceIn ?? 0, 24),
+    };
   }
 
   if (!hasExplicitShape && softSignals.room === "hallway") {
@@ -241,17 +289,60 @@ function inferSemanticSignals(input: {
   if (styleTokens.size === 0) {
     if (hasModernSignal && !hasTraditionalSignal) {
       inferredStyles = ["modern"];
-    } else if (hasTraditionalSignal && !hasModernSignal) {
+    } else if (hasBoldSignal && !hasTraditionalSignal) {
+      inferredStyles = ["eclectic", "modern", "contemporary"];
+    } else if (hasCalmerSignal && !hasTraditionalSignal) {
+      inferredStyles = ["modern", "transitional"];
+    } else if (hasElegantSignal && !hasModernSignal) {
       inferredStyles = ["traditional"];
+    } else if (hasTraditionalSignal && !hasModernSignal) {
+      inferredStyles = hasPersianMention ? ["traditional", "persian"] : ["traditional"];
     }
+  } else if (hasPersianMention && !styleTokens.has("persian")) {
+    inferredStyles = ["persian"];
   }
 
   if (!hasExplicitColors && hasNeutralSignal) {
     inferredColors = ["ivory", "gray", "brown"];
     inferredAvoidColors = ["red", "rust", "pink", "purple"];
+    inferredAvoidStyles = Array.from(
+      new Set([
+        ...(inferredAvoidStyles ?? []),
+        "tribal",
+        "kazak",
+        "ornate",
+        "traditional",
+        "bokhara",
+        "kashan",
+        "heriz",
+        "serapi",
+      ])
+    );
+  }
+  if (styleTokens.size === 0 && /\b(no|not|without)\s+(bold\s+)?reds?\b/i.test(message)) {
+    inferredStyles = mergeStringTokens(inferredStyles, ["modern", "transitional"]);
+    inferredAvoidStyles = Array.from(
+      new Set([
+        ...(inferredAvoidStyles ?? []),
+        "traditional",
+        "persian",
+        "tribal",
+        "kazak",
+        "medallion",
+        "ornate",
+        "heriz",
+        "serapi",
+      ])
+    );
+  }
+  if (
+    !hasExplicitColors &&
+    /\b(terracotta|rust|clay|cinnamon)\b/i.test(message) &&
+    /\b(cream|ivory)\b/i.test(message)
+  ) {
+    inferredColors = mergeStringTokens(inferredColors, ["rust", "ivory"]);
   }
 
-  let inferredAvoidStyles: string[] | undefined;
   if (hasModernSignal && !hasTraditionalSignal) {
     inferredAvoidStyles = [
       "traditional",
@@ -266,6 +357,9 @@ function inferSemanticSignals(input: {
       "bidjar",
       "malayer",
       "oushak",
+      "medallion",
+      "floral",
+      "ornate",
       "kazak",
       "shirvan",
       "karabagh",
@@ -275,6 +369,46 @@ function inferSemanticSignals(input: {
     ];
   } else if (hasTraditionalSignal && !hasModernSignal) {
     inferredAvoidStyles = ["modern", "contemporary", "minimalist", "abstract"];
+  }
+  if (hasBoldSignal && !hasTraditionalSignal) {
+    inferredAvoidStyles = Array.from(
+      new Set([
+        ...(inferredAvoidStyles ?? []),
+        "traditional",
+        "persian",
+        "heriz",
+        "serapi",
+        "kashan",
+        "tabriz",
+        "isfahan",
+        "sultanabad",
+        "medallion",
+      ])
+    );
+  }
+  if (hasPracticalSignal) {
+    inferredAvoidStyles = Array.from(
+      new Set([
+        ...(inferredAvoidStyles ?? []),
+        "silk",
+        "delicate",
+        "antique",
+        "vintage",
+        "traditional",
+        "tribal",
+        "ornate",
+      ])
+    );
+  }
+  if (hasElegantSignal) {
+    inferredAvoidStyles = Array.from(
+      new Set([
+        ...(inferredAvoidStyles ?? []),
+        "kilim",
+        "baluch",
+        "bokhara",
+      ])
+    );
   }
   const messageAvoidColors = inferAvoidColorsFromMessage(input.message);
   const messageAvoidStyles = inferAvoidStylesFromMessage(input.message);
@@ -336,12 +470,38 @@ function mergeHardConstraints(input: {
 }): HardConstraints {
   const explicit = input.explicit;
   const parsed = input.parsed;
+  const refinementSignal =
+    /\b(prefer|more|less|around|closer|bigger|larger|smaller|shorter|longer|same|like that|like this)\b/i.test(
+      normalizeText(input.message)
+    );
   const useInheritedBase =
     input.intent === "followup" ||
     input.intent === "reaction" ||
     input.mode === "recommendation_followup" ||
-    input.followupIntent !== "none";
+      input.followupIntent !== "none" ||
+      refinementSignal;
   const base = useInheritedBase ? input.previous : {};
+  const normalizedMessage = normalizeText(input.message);
+  const baseStylesNormalized = (base.styles ?? []).map((value) => normalizeText(value));
+  const baseHasModernDirection = baseStylesNormalized.some((value) =>
+    MODERN_STYLE_TERMS.includes(value as (typeof MODERN_STYLE_TERMS)[number])
+  );
+  const styleResetByExplicitNegation = /\b(forget|instead|rather|actually|not|no|without|avoid)\b[^.!?]{0,32}\b(modern|contemporary|minimal|minimalist|traditional|persian|tribal|heriz|serapi|kashan|tabriz|isfahan)\b/i.test(
+    normalizedMessage
+  );
+  const styleResetByCalmerPivot =
+    /\b(less busy|not too busy|cleaner|cleanest|calmer|simpler|more minimal|more modern)\b/i.test(
+      normalizedMessage
+    ) && !baseHasModernDirection;
+  const hasStyleResetSignal = styleResetByExplicitNegation || styleResetByCalmerPivot;
+  const inheritedStyles = hasStyleResetSignal ? undefined : base.styles;
+  const avoidColorsFromMessage = inferAvoidColorsFromMessage(input.message);
+  const parsedColorsNormalized = normalizeColorList(parsed.colors ?? [], 8);
+  const parsedColorsLookLikeAvoid =
+    avoidColorsFromMessage.length > 0 &&
+    parsedColorsNormalized.length > 0 &&
+    parsedColorsNormalized.every((token) => avoidColorsFromMessage.includes(token));
+  const effectiveParsedColors = parsedColorsLookLikeAvoid ? [] : parsed.colors;
   const semantic = inferSemanticSignals({
     message: input.message,
     parsedTurn: {
@@ -359,11 +519,29 @@ function mergeHardConstraints(input: {
     previous: input.previous,
     useInheritedBase,
   });
+  const hasCurrentStyleDirective =
+    (explicit.styles?.length ?? 0) > 0 || parsed.styles.length > 0;
+  const hasCurrentColorDirective =
+    (explicit.colors?.length ?? 0) > 0 || effectiveParsedColors.length > 0;
+  const hasCurrentSizeDirective = Boolean(explicit.size || parsed.size);
+  const hasCurrentShapeDirective = Boolean(explicit.shape || parsed.shape);
+  const hasRoomRescopeSignal =
+    /\b(living room|dining room|bedroom|entryway|entry|hallway|kitchen)\b/i.test(
+      normalizeText(input.message)
+    );
   const mergedStrictness = {
-    size: explicit.strictness?.size ?? input.strictness.size,
-    colors: explicit.strictness?.colors ?? input.strictness.colors,
-    styles: explicit.strictness?.styles ?? input.strictness.styles,
-    shape: explicit.strictness?.shape ?? input.strictness.shape,
+    size:
+      explicit.strictness?.size ??
+      (hasCurrentSizeDirective ? input.strictness.size : undefined),
+    colors:
+      explicit.strictness?.colors ??
+      (hasCurrentColorDirective ? input.strictness.colors : undefined),
+    styles:
+      explicit.strictness?.styles ??
+      (hasCurrentStyleDirective ? input.strictness.styles : undefined),
+    shape:
+      explicit.strictness?.shape ??
+      (hasCurrentShapeDirective ? input.strictness.shape : undefined),
   };
 
   const size = explicit.size
@@ -380,18 +558,38 @@ function mergeHardConstraints(input: {
                   lengthIn: parsed.size.lengthIn,
                 }),
         }
-      : base.size ?? semantic.inferred_size ?? undefined;
+      : hasRoomRescopeSignal && semantic.inferred_size
+        ? semantic.inferred_size
+        : base.size ?? semantic.inferred_size ?? undefined;
 
-  let colors =
-    explicit.colors ??
-    (parsed.colors.length > 0
-      ? parsed.colors
-      : base.colors ?? semantic.inferred_colors ?? undefined);
-  let styles =
-    explicit.styles ??
-    (parsed.styles.length > 0
-      ? parsed.styles
-      : base.styles ?? semantic.inferred_styles ?? undefined);
+  let colors = explicit.colors
+    ? explicit.colors
+    : mergeStringTokens(
+        effectiveParsedColors.length > 0 ? effectiveParsedColors : undefined,
+        base.colors,
+        semantic.inferred_colors
+      );
+  const explicitNoBoldRedSignal = /\b(no|not|without)\s+(bold\s+)?reds?\b/i.test(
+    normalizedMessage
+  );
+  if (explicitNoBoldRedSignal && !hasCurrentColorDirective) {
+    colors = undefined;
+  }
+  let styles = explicit.styles
+    ? explicit.styles
+    : mergeStringTokens(
+        parsed.styles.length > 0 ? parsed.styles : undefined,
+        inheritedStyles,
+        semantic.inferred_styles
+      );
+  const hasPersianMention = /\bpersian\b/i.test(normalizeText(input.message));
+  const hasPersianAvoidSignal =
+    /\b(no|not|without|avoid|exclude|skip|forget|drop)\b[^.!?]{0,24}\bpersian\b/i.test(
+      normalizeText(input.message)
+    );
+  if (hasPersianMention && !hasPersianAvoidSignal) {
+    styles = mergeStringTokens(styles, ["persian"]);
+  }
   const shape =
     explicit.shape ??
     parsed.shape ??
@@ -406,10 +604,6 @@ function mergeHardConstraints(input: {
     shapes:
       input.parsedAvoid.shapes.length > 0 ? input.parsedAvoid.shapes : undefined,
   };
-  const hasCurrentStyleDirective =
-    (explicit.styles?.length ?? 0) > 0 || parsed.styles.length > 0;
-  const hasCurrentColorDirective =
-    (explicit.colors?.length ?? 0) > 0 || parsed.colors.length > 0;
   const avoidPreferences =
     explicit.avoid_preferences ||
     parsedAvoid.colors ||
@@ -422,6 +616,7 @@ function mergeHardConstraints(input: {
           colors: mergeStringTokens(
             hasCurrentColorDirective ? undefined : base.avoid_preferences?.colors,
             semantic.inferred_avoid_colors,
+            avoidColorsFromMessage,
             parsedAvoid.colors,
             explicit.avoid_preferences?.colors
           ),
@@ -468,6 +663,21 @@ function mergeHardConstraints(input: {
     styles: mergedStrictness.styles ?? base.strictness?.styles ?? "prefer",
     shape: mergedStrictness.shape ?? base.strictness?.shape ?? "prefer",
   };
+  const carryingModernDirection =
+    (input.intent === "followup" || input.intent === "reaction") &&
+    !hasStyleResetSignal &&
+    !hasCurrentStyleDirective &&
+    baseStylesNormalized.some((value) =>
+      MODERN_STYLE_TERMS.includes(value as (typeof MODERN_STYLE_TERMS)[number])
+    );
+  const carryingPersianDirection =
+    (input.intent === "followup" || input.intent === "reaction") &&
+    !hasStyleResetSignal &&
+    !hasCurrentStyleDirective &&
+    baseStylesNormalized.includes("persian");
+  if (carryingModernDirection || carryingPersianDirection) {
+    strictness.styles = "must";
+  }
 
   if (
     input.intent === "recommend" &&
@@ -495,6 +705,9 @@ function mergeHardConstraints(input: {
   ) {
     strictness.colors = "must";
   }
+  if (explicitNoBoldRedSignal) {
+    strictness.colors = "prefer";
+  }
 
   if (
     (input.intent === "recommend" ||
@@ -503,6 +716,15 @@ function mergeHardConstraints(input: {
     Boolean(explicit.shape || parsed.shape)
   ) {
     strictness.shape = "must";
+  }
+  if (
+    /\b(same size|same dimensions|exact same size|exact dimensions)\b/i.test(
+      normalizeText(input.message)
+    ) &&
+    !hasCurrentSizeDirective &&
+    Boolean(base.size)
+  ) {
+    strictness.size = "must";
   }
 
   return {
@@ -599,7 +821,11 @@ function shouldRequestDiscoveryMode(input: {
   parsedTurn: ParsedTurn;
   compiledConstraints: HardConstraints;
 }): boolean {
-  if (input.parsedTurn.intent !== "recommend") return false;
+  const supportsDiscoveryIntent =
+    input.parsedTurn.intent === "recommend" ||
+    input.parsedTurn.intent === "followup" ||
+    input.parsedTurn.intent === "reaction";
+  if (!supportsDiscoveryIntent) return false;
   if (input.parsedTurn.followup_intent !== "none") return false;
   if (input.parsedTurn.mode === "discovery") return true;
   return !hasAnyHardConstraintSignals(input.compiledConstraints);

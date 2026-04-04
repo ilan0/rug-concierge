@@ -1,0 +1,521 @@
+{
+  "trace_id": "dd98af06-4813-4456-8f76-347abde288c2",
+  "channel": "chat-route",
+  "created_at": "2026-03-28T14:43:16.133Z",
+  "payload": {
+    "flow_path": [
+      "/api/chat POST",
+      "getOrCreateSession",
+      "updateRecommendationStateForTurn",
+      "routeTurnMode",
+      "handlerDispatch",
+      "updateConversationMemory",
+      "saveSession"
+    ],
+    "request": {
+      "session_id": "94d364a6-4d62-43ae-b462-4c01fbcf81d5",
+      "role": "retail_customer",
+      "tenant_id": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5",
+      "tenant_subdomain": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5",
+      "tenant_hostname": "127.0.0.1",
+      "message": "¿Qué es un kilim?",
+      "constraints": null
+    },
+    "routing": {
+      "mode": "general_chat",
+      "intent": "educate",
+      "rule_id": "GENERAL_ADVICE_OR_EDUCATION",
+      "confidence": "medium",
+      "needs_clarification": false,
+      "parser": {
+        "model": "gpt-4.1-mini",
+        "latency_ms": 115,
+        "status": "fallback",
+        "parse_status": "fallback",
+        "fallback": "OpenAI request failed",
+        "fallback_reason": "OpenAI request failed",
+        "normalized_payload": {
+          "intent": "educate",
+          "mode": "advice",
+          "followup_intent": "none",
+          "constraints": {
+            "size": null,
+            "colors": [],
+            "styles": [],
+            "shape": null
+          },
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          },
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          },
+          "session_facts": [],
+          "rug_reference_ambiguous": false,
+          "confidence": "medium"
+        },
+        "normalized_parse_payload": {
+          "intent": "educate",
+          "mode": "advice",
+          "followup_intent": "none",
+          "constraints": {
+            "size": null,
+            "colors": [],
+            "styles": [],
+            "shape": null
+          },
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          },
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          },
+          "session_facts": [],
+          "rug_reference_ambiguous": false,
+          "confidence": "medium"
+        },
+        "response_status": 400,
+        "incomplete_detected": false,
+        "error": "OpenAI request failed with status 400"
+      },
+      "policy": {
+        "intent": "educate",
+        "compiled_policy": {
+          "intent": "educate",
+          "mode": "advice",
+          "discovery_requested": false,
+          "followup_intent": "none",
+          "hard_constraints": {
+            "strictness": {
+              "size": "prefer",
+              "colors": "prefer",
+              "styles": "prefer",
+              "shape": "prefer"
+            }
+          },
+          "persisted_hard_constraints": {
+            "size": {
+              "widthIn": 50,
+              "lengthIn": 50,
+              "toleranceIn": 0
+            },
+            "colors": [],
+            "styles": [],
+            "strictness": {
+              "size": "must",
+              "colors": "prefer",
+              "styles": "prefer",
+              "shape": "prefer"
+            }
+          },
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          },
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          },
+          "confidence": "medium",
+          "policy_source": "none",
+          "must_prefer_avoid": {
+            "must": [],
+            "prefer": [],
+            "avoid": {
+              "colors": [],
+              "styles": [],
+              "shapes": []
+            }
+          }
+        },
+        "policy_source": "none",
+        "must_prefer_avoid": {
+          "must": [],
+          "prefer": [],
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          }
+        },
+        "must-prefer-avoid": {
+          "must": [],
+          "prefer": [],
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          }
+        },
+        "constraint_modes": {
+          "size": "prefer",
+          "colors": "prefer",
+          "styles": "prefer",
+          "shape": "prefer",
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          }
+        }
+      },
+      "parser_trace": {
+        "called": true,
+        "model": "gpt-4.1-mini",
+        "status": "fallback",
+        "response_status": 400,
+        "fallback": "OpenAI request failed",
+        "fallback_reason": "OpenAI request failed",
+        "incomplete_detected": false,
+        "latency_ms": 115,
+        "normalized_payload": {
+          "intent": "educate",
+          "mode": "advice",
+          "followup_intent": "none",
+          "constraints": {
+            "size": null,
+            "colors": [],
+            "styles": [],
+            "shape": null
+          },
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          },
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          },
+          "session_facts": [],
+          "rug_reference_ambiguous": false,
+          "confidence": "medium"
+        },
+        "parsed": {
+          "intent": "educate",
+          "mode": "advice",
+          "followup_intent": "none",
+          "constraints": {
+            "size": null,
+            "colors": [],
+            "styles": [],
+            "shape": null
+          },
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          },
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          },
+          "session_facts": [],
+          "rug_reference_ambiguous": false,
+          "confidence": "medium"
+        },
+        "error": "OpenAI request failed with status 400"
+      },
+      "compiled_policy": {
+        "intent": "educate",
+        "mode": "advice",
+        "discovery_requested": false,
+        "followup_intent": "none",
+        "hard_constraints": {
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          }
+        },
+        "persisted_hard_constraints": {
+          "size": {
+            "widthIn": 50,
+            "lengthIn": 50,
+            "toleranceIn": 0
+          },
+          "colors": [],
+          "styles": [],
+          "strictness": {
+            "size": "must",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          }
+        },
+        "strictness": {
+          "size": "prefer",
+          "colors": "prefer",
+          "styles": "prefer",
+          "shape": "prefer"
+        },
+        "avoid": {
+          "colors": [],
+          "styles": [],
+          "shapes": []
+        },
+        "confidence": "medium",
+        "policy_source": "none",
+        "must_prefer_avoid": {
+          "must": [],
+          "prefer": [],
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          }
+        }
+      },
+      "policy_source": "none",
+      "must_prefer_avoid": {
+        "must": [],
+        "prefer": [],
+        "avoid": {
+          "colors": [],
+          "styles": [],
+          "shapes": []
+        }
+      },
+      "must-prefer-avoid": {
+        "must": [],
+        "prefer": [],
+        "avoid": {
+          "colors": [],
+          "styles": [],
+          "shapes": []
+        }
+      },
+      "handler": "handleGeneralChatTurn",
+      "prompt_layer_preview": [
+        "SYSTEM_PROMPT_BASE",
+        "TASK_PROMPT_GENERAL_CHAT",
+        "TASK_PROMPT_GENERAL_CHAT",
+        "ROLE_PROMPT_RETAIL_CUSTOMER",
+        "CHAT_MEMORY_CONTEXT",
+        "RECENT_TURNS_CONTEXT",
+        "LATEST_USER_MESSAGE"
+      ]
+    },
+    "reaction": {
+      "detected_reaction": null,
+      "referenced_rug_id": null,
+      "rug_reference_ambiguous": false,
+      "liked_attributes_before": {
+        "colors": [
+          "gray"
+        ],
+        "styles": [
+          "geometric"
+        ],
+        "origins": []
+      },
+      "liked_attributes_after": {
+        "colors": [
+          "gray"
+        ],
+        "styles": [
+          "geometric"
+        ],
+        "origins": []
+      },
+      "liked_rug_ids_before": [],
+      "liked_rug_ids_after": [],
+      "dismissed_rug_ids_before": [],
+      "dismissed_rug_ids_after": []
+    },
+    "state_snapshot": {
+      "recommendation_state": {
+        "hard_constraints": {
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          }
+        },
+        "soft_preferences": {},
+        "runtime": {
+          "last_result_mode": "recommendation",
+          "last_relaxed_size_tolerance_in": null,
+          "last_blockers": [],
+          "last_recommended_size_in": {
+            "width_in": 96,
+            "length_in": 120
+          },
+          "liked_rug_ids": [],
+          "dismissed_rug_ids": [],
+          "shown_rug_ids": [
+            "a9565492-db27-4a50-aaff-7810f66c282a",
+            "7e2a3934-cc4d-44e6-840f-7614952917c5",
+            "3e188674-4625-445b-be9a-3d2bc2752a50",
+            "258fde89-ed87-4103-b1e8-224f267e0f3e",
+            "40e91751-d4aa-4ce2-b226-bfd5f37bb50a",
+            "735c23cf-2f40-4b3f-a1fb-06e983dcc2f9",
+            "08ca5e39-c162-4d88-9d7e-484e90489d85",
+            "dbf2bf0c-8cb5-4ea7-9d6c-fa3439793b0b",
+            "b1b00766-b4bc-4d8b-ab4d-46be26589902",
+            "4bc59440-4d03-4698-8275-2a78247cd3b7",
+            "2679516c-6cfa-46e6-b94e-00095796ac73",
+            "a3181b27-19c9-45cd-ac2d-04b83368ca6f"
+          ],
+          "liked_attributes": {
+            "colors": [
+              "gray"
+            ],
+            "styles": [
+              "geometric"
+            ],
+            "origins": []
+          },
+          "recently_shown_rugs": [
+            {
+              "id": "46245ee2-ac56-46e0-8cbf-b2eead74c24b",
+              "label": "Contemporary Kilim",
+              "colors": [
+                "multi"
+              ],
+              "style": "Kilim",
+              "origin": "Other"
+            },
+            {
+              "id": "90102377-5f43-4fb5-ab61-64b000076996",
+              "label": "Contemporary Runner",
+              "colors": [
+                "brown"
+              ],
+              "style": "Geometric",
+              "origin": null
+            },
+            {
+              "id": "4c60b570-f26c-4dda-a1df-9626479843b0",
+              "label": "Contemporary Afghan Gabbeh",
+              "colors": [
+                "red",
+                "blue",
+                "gold"
+              ],
+              "style": "Gabbeh",
+              "origin": "Afghan"
+            }
+          ],
+          "no_match_attempts": 0,
+          "updated_at": "2026-03-28T14:43:08.988Z"
+        }
+      },
+      "conversation_memory": {
+        "summary_text": "…at fit your shape and size preference. || User: Tell me more about that one | Assistant: I want to make sure I’m following correctly. Did you mean Contemporary Round or Contemporary Moroccan? || User: Keep going | Assistant: Continuing with round and oval rugs close to your size preference, here are more options that balance modern and geometric styles with warm accents: || User: I need exactly a 50x50 rug | Assistant: We don't have an exact 4'2\" × 4'2\" match right now, so I'm showing the closest available alternatives. We don't have an exact 50x50-inch rug in stock, so here are the closest available options that balance your preferen… || User: Any closer matches? | Assistant: Currently, we don't have rugs exactly 50x50 inches, but I can check if any new arrivals are closer to that size. Would you prefer to see slightly larger or smaller options within a specific style or color palette?",
+        "stable_facts": [
+          "practical maintenance",
+          "room living room",
+          "palette warm",
+          "preference I like this direction"
+        ],
+        "open_threads": [
+          "Any closer matches?",
+          "Would you prefer to see slightly larger or smaller options within a specific style or color palette?",
+          "Did you mean Contemporary Round or Contemporary Moroccan?",
+          "How do I care for a wool rug?",
+          "Would you like to see some wool rugs from our current collection?",
+          "Could you tell me what kind of space you’re planning to decorate with this rug?"
+        ],
+        "last_user_intent": "general_chat",
+        "no_match_attempts": 0,
+        "updated_at": "2026-03-28T14:43:08.988Z",
+        "version": "v1"
+      }
+    },
+    "memory_snapshot_before": {
+      "summary_text": "…at fit your shape and size preference. || User: Tell me more about that one | Assistant: I want to make sure I’m following correctly. Did you mean Contemporary Round or Contemporary Moroccan? || User: Keep going | Assistant: Continuing with round and oval rugs close to your size preference, here are more options that balance modern and geometric styles with warm accents: || User: I need exactly a 50x50 rug | Assistant: We don't have an exact 4'2\" × 4'2\" match right now, so I'm showing the closest available alternatives. We don't have an exact 50x50-inch rug in stock, so here are the closest available options that balance your preferen… || User: Any closer matches? | Assistant: Currently, we don't have rugs exactly 50x50 inches, but I can check if any new arrivals are closer to that size. Would you prefer to see slightly larger or smaller options within a specific style or color palette?",
+      "stable_facts": [
+        "practical maintenance",
+        "room living room",
+        "palette warm",
+        "preference I like this direction"
+      ],
+      "open_threads": [
+        "Any closer matches?",
+        "Would you prefer to see slightly larger or smaller options within a specific style or color palette?",
+        "Did you mean Contemporary Round or Contemporary Moroccan?",
+        "How do I care for a wool rug?",
+        "Would you like to see some wool rugs from our current collection?",
+        "Could you tell me what kind of space you’re planning to decorate with this rug?"
+      ],
+      "last_user_intent": "general_chat",
+      "no_match_attempts": 0,
+      "updated_at": "2026-03-28T14:43:08.988Z",
+      "version": "v1"
+    },
+    "memory_snapshot_after": {
+      "summary_text": "…close to your size preference, here are more options that balance modern and geometric styles with warm accents: || User: I need exactly a 50x50 rug | Assistant: We don't have an exact 4'2\" × 4'2\" match right now, so I'm showing the closest available alternatives. We don't have an exact 50x50-inch rug in stock, so here are the closest available options that balance your preferen… || User: Any closer matches? | Assistant: Currently, we don't have rugs exactly 50x50 inches, but I can check if any new arrivals are closer to that size. Would you prefer to see slightly larger or smaller options within a specific style or color palette? || User: ¿Qué es un kilim? | Assistant: Un kilim es una alfombra o tapiz tejido a mano, típico de regiones como Turquía, Irán y el Cáucaso, que se caracteriza por su técnica de tejido plano y ausencia de pelo. Suelen presentar diseños geométricos y colores vi…",
+      "stable_facts": [
+        "practical maintenance",
+        "room living room",
+        "palette warm",
+        "preference I like this direction"
+      ],
+      "open_threads": [
+        "¿Qué es un kilim?",
+        "¿Te gustaría que te muestre algunos kilims en nuestra colección actual?",
+        "Any closer matches?",
+        "Would you prefer to see slightly larger or smaller options within a specific style or color palette?",
+        "Did you mean Contemporary Round or Contemporary Moroccan?",
+        "How do I care for a wool rug?"
+      ],
+      "last_user_intent": "general_chat",
+      "no_match_attempts": 0,
+      "updated_at": "2026-03-28T14:43:15.772Z",
+      "version": "v1"
+    },
+    "ai_context_packet_stats": {
+      "field_counts": {
+        "stable_facts": 4,
+        "open_threads": 6,
+        "customer_context": 4,
+        "recently_shown_rugs": 3,
+        "shown_rug_ids": 12,
+        "recent_turns": 4
+      },
+      "char_counts": {
+        "summary_text": 900,
+        "stable_facts_total": 81,
+        "open_threads_total": 349,
+        "customer_context_total": 81,
+        "recently_shown_total": 236,
+        "shown_rug_ids_total": 432,
+        "liked_attributes_total": 13,
+        "recent_turns_total": 533,
+        "latest_user_message": 17,
+        "total": 2210
+      }
+    },
+    "response": {
+      "session_id": "94d364a6-4d62-43ae-b462-4c01fbcf81d5",
+      "role": "retail_customer",
+      "mode": "general_chat",
+      "fine_mode": "general_chat",
+      "response_mode": "general_chat",
+      "notes": "GENERAL_CHAT_AI_RUNTIME:real | Prompt layers assembled: SYSTEM_PROMPT_BASE -> TASK_PROMPT_GENERAL_CHAT -> TASK_PROMPT_GENERAL_CHAT -> ROLE_PROMPT_RETAIL_CUSTOMER -> CHAT_MEMORY_CONTEXT -> RECENT_TURNS_CONTEXT -> LATEST_USER_MESSAGE"
+    },
+    "timing_ms": {
+      "total_ms": 6762
+    }
+  }
+}

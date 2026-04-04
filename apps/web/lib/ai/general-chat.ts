@@ -24,7 +24,7 @@ import {
 import type { PromptLayerId } from "@/lib/prompts/layer-ids";
 
 const OPENAI_RESPONSES_URL = "https://api.openai.com/v1/responses";
-const MAX_ASSISTANT_MESSAGE_CHARS = 420;
+const MAX_ASSISTANT_MESSAGE_CHARS = 700;
 const MAX_NOTE_CHARS = 220;
 const MAX_HINTS = 6;
 const MAX_HINT_CHARS = 90;
@@ -348,10 +348,18 @@ function withCollectionBridge(assistantMessage: string, latestUserMessage: strin
     );
   if (alreadyBridges) return clampAssistantMessage(assistant);
 
+  const compareMatch = /\bdifference between\s+([a-z0-9\s-]+?)\s+and\s+([a-z0-9\s-]+)\??$/i.exec(
+    normalizeText(latestUserMessage)
+  );
+  const language = detectResponseLanguage(latestUserMessage);
   const bridge =
-    detectResponseLanguage(latestUserMessage) === "es"
-      ? "Si quieres, puedo mostrar ejemplos de nuestra coleccion actual."
-      : "If you'd like, I can show examples from our current collection.";
+    compareMatch && compareMatch[1] && compareMatch[2]
+      ? language === "es"
+        ? `Si quieres, puedo mostrar ejemplos lado a lado de ${compareMatch[1].trim()} y ${compareMatch[2].trim()} de nuestra coleccion ahora.`
+        : `If you'd like, I can show side-by-side ${compareMatch[1].trim()} and ${compareMatch[2].trim()} examples from our collection now.`
+      : language === "es"
+        ? "Si quieres, puedo mostrar ejemplos de nuestra coleccion actual ahora."
+        : "If you'd like, I can show examples from our current collection now.";
   const availableForAssistant = MAX_ASSISTANT_MESSAGE_CHARS - bridge.length - 1;
   if (availableForAssistant <= 0) {
     return clampAssistantMessage(bridge);
@@ -360,12 +368,41 @@ function withCollectionBridge(assistantMessage: string, latestUserMessage: strin
   return `${base} ${bridge}`.trim();
 }
 
+function ensureWarmGeneralChatOpening(
+  assistantMessage: string,
+  latestUserMessage: string
+): string {
+  const assistant = toPlainText(assistantMessage);
+  const lower = assistant.toLowerCase();
+  if (
+    /^(great question|glad|happy to|absolutely|of course|love that|thanks for)/i.test(
+      lower
+    )
+  ) {
+    return assistant;
+  }
+  const isQuestion = /\?/.test(latestUserMessage.trim());
+  const warmLead =
+    detectResponseLanguage(latestUserMessage) === "es"
+      ? isQuestion
+        ? "Buena pregunta, encantado de ayudarte."
+        : "Con gusto te ayudo con eso."
+      : isQuestion
+        ? "Great question, happy to break this down."
+        : "Happy to help with this.";
+  return `${warmLead} ${assistant}`.trim();
+}
+
 function sanitizeResponse(
   response: GeneralChatModelResponse,
   latestUserMessage: string
 ): GeneralChatModelResponse {
-  const assistantMessage = withCollectionBridge(
+  const bridgedAssistant = withCollectionBridge(
     response.assistant_message,
+    latestUserMessage
+  );
+  const assistantMessage = ensureWarmGeneralChatOpening(
+    bridgedAssistant,
     latestUserMessage
   );
   return {

@@ -84,7 +84,9 @@ const PRACTICAL_SIGNAL_PATTERN =
   /\b(kid|kids|child|children|dog|dogs|pet|pets|high traffic|durable|easy to clean|low maintenance|beach house|practical)\b/i;
 
 const MINIMAL_SIGNAL_PATTERN =
-  /\b(minimal|minimalist|understated|clean|not too busy|less busy|simple|nothing traditional)\b/i;
+  /\b(minimal|minimalist|understated|clean|cleanest|not too busy|less busy|simple|nothing traditional)\b/i;
+const ELEGANT_SIGNAL_PATTERN =
+  /\b(elegant|refined|formal|dressy|sophisticated)\b/i;
 
 function normalizeText(value: string): string {
   return value.toLowerCase().replace(/\s+/g, " ").trim();
@@ -482,6 +484,43 @@ function scoreMinimalDirectionSuitability(rug: InventoryRug, userMessage: string
   return score;
 }
 
+function scoreElegantDirectionSuitability(rug: InventoryRug, userMessage: string): number {
+  if (!ELEGANT_SIGNAL_PATTERN.test(userMessage)) return 0;
+
+  const fields = rug.effective_fields
+    ? rug.effective_fields
+    : resolveEffectiveFields(
+        rug.intake_label ?? null,
+        rug.ai_structured_fields ?? null,
+        rug.staff_overrides ?? null,
+        rug.ai_description ?? null
+      );
+  const haystack = normalizeText(
+    [
+      fields.label ?? "",
+      fields.style ?? "",
+      fields.origin ?? "",
+      fields.mood ?? "",
+      ...(fields.pattern ?? []),
+      rug.ai_description ?? "",
+      rug.intake_label ?? "",
+    ].join(" ")
+  );
+
+  let score = 0;
+  if (
+    /\b(traditional|persian|tabriz|kashan|isfahan|sultanabad|oushak|formal|refined|elegant)\b/.test(
+      haystack
+    )
+  ) {
+    score += 14;
+  }
+  if (/\b(tribal|kilim|baluch|bokhara|rustic)\b/.test(haystack)) {
+    score -= 16;
+  }
+  return score;
+}
+
 function toCandidateColorTokens(rug: InventoryRug): Set<string> {
   const fields = rug.effective_fields
     ? rug.effective_fields
@@ -642,6 +681,17 @@ function scoreDiscoveryRange(rug: InventoryRug): number {
   if (fields.mood) score += 3;
   if ((fields.pattern ?? []).length > 0) score += 3;
   if ((fields.primary_colors ?? []).length > 0) score += 4;
+  if (
+    typeof rug.width_total_in === "number" &&
+    typeof rug.length_total_in === "number"
+  ) {
+    const longSide = Math.max(rug.width_total_in, rug.length_total_in);
+    if (longSide >= 108) score += 6;
+    else if (longSide >= 84) score += 5;
+    else if (longSide >= 72) score += 4;
+    else if (longSide >= 60) score += 2;
+    else if (longSide < 48) score -= 4;
+  }
   return score;
 }
 
@@ -669,6 +719,7 @@ export function shapeCandidatesForAI(
         scoreShapeSuitability(rug, constraints) +
         scorePracticalSuitability(rug, practicalSignalText) +
         scoreMinimalDirectionSuitability(rug, userMessage) +
+        scoreElegantDirectionSuitability(rug, userMessage) +
         scoreAvoidPenalty(rug, userMessage, constraints) +
         scoreMetadataCompleteness(rug) +
         followupBias(rug, constraints, followupIntent);

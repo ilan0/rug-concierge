@@ -1,0 +1,535 @@
+{
+  "trace_id": "735d0363-8565-4cc0-a69b-9a47a8f18d80",
+  "channel": "chat-route",
+  "created_at": "2026-03-28T20:41:22.284Z",
+  "payload": {
+    "flow_path": [
+      "/api/chat POST",
+      "getOrCreateSession",
+      "updateRecommendationStateForTurn",
+      "routeTurnMode",
+      "handlerDispatch",
+      "updateConversationMemory",
+      "saveSession"
+    ],
+    "request": {
+      "session_id": "83d2bb95-6396-4412-acb2-99301ed6600a",
+      "role": "retail_customer",
+      "tenant_id": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5",
+      "tenant_subdomain": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5",
+      "tenant_hostname": "127.0.0.1",
+      "message": "Show me kilims in medium sizes",
+      "constraints": null
+    },
+    "routing": {
+      "mode": "recommendation",
+      "intent": "recommend",
+      "rule_id": "EXPLICIT_RECOMMENDATION_REQUEST",
+      "confidence": "high",
+      "needs_clarification": false,
+      "parser": {
+        "model": "gpt-4.1-mini",
+        "latency_ms": 2357,
+        "status": "success",
+        "parse_status": "success",
+        "fallback": null,
+        "fallback_reason": null,
+        "normalized_payload": {
+          "intent": "recommend",
+          "mode": "recommendation",
+          "followup_intent": "none",
+          "constraints": {
+            "size": {
+              "widthIn": 12,
+              "lengthIn": 96
+            },
+            "colors": [],
+            "styles": [],
+            "shape": null
+          },
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          },
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          },
+          "session_facts": [
+            "wants Kilim style",
+            "wants medium size"
+          ],
+          "rug_reference_ambiguous": false,
+          "confidence": "high"
+        },
+        "normalized_parse_payload": {
+          "intent": "recommend",
+          "mode": "recommendation",
+          "followup_intent": "none",
+          "constraints": {
+            "size": {
+              "widthIn": 12,
+              "lengthIn": 96
+            },
+            "colors": [],
+            "styles": [],
+            "shape": null
+          },
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          },
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          },
+          "session_facts": [
+            "wants Kilim style",
+            "wants medium size"
+          ],
+          "rug_reference_ambiguous": false,
+          "confidence": "high"
+        },
+        "response_status": 200,
+        "incomplete_detected": false,
+        "error": null
+      },
+      "policy": {
+        "intent": "recommend",
+        "compiled_policy": {
+          "intent": "recommend",
+          "mode": "recommendation",
+          "discovery_requested": false,
+          "followup_intent": "none",
+          "hard_constraints": {
+            "size": {
+              "widthIn": 12,
+              "lengthIn": 96,
+              "toleranceIn": 10
+            },
+            "strictness": {
+              "size": "prefer",
+              "colors": "prefer",
+              "styles": "prefer",
+              "shape": "prefer"
+            }
+          },
+          "persisted_hard_constraints": {
+            "size": {
+              "widthIn": 12,
+              "lengthIn": 96,
+              "toleranceIn": 10
+            },
+            "strictness": {
+              "size": "prefer",
+              "colors": "prefer",
+              "styles": "prefer",
+              "shape": "prefer"
+            }
+          },
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          },
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          },
+          "confidence": "high",
+          "policy_source": "parsed_turn",
+          "must_prefer_avoid": {
+            "must": [],
+            "prefer": [
+              "size"
+            ],
+            "avoid": {
+              "colors": [],
+              "styles": [],
+              "shapes": []
+            }
+          }
+        },
+        "policy_source": "parsed_turn",
+        "must_prefer_avoid": {
+          "must": [],
+          "prefer": [
+            "size"
+          ],
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          }
+        },
+        "must-prefer-avoid": {
+          "must": [],
+          "prefer": [
+            "size"
+          ],
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          }
+        },
+        "constraint_modes": {
+          "size": "prefer",
+          "colors": "prefer",
+          "styles": "prefer",
+          "shape": "prefer",
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          }
+        }
+      },
+      "parser_trace": {
+        "called": true,
+        "model": "gpt-4.1-mini",
+        "status": "success",
+        "response_status": 200,
+        "fallback": null,
+        "fallback_reason": null,
+        "incomplete_detected": false,
+        "latency_ms": 2357,
+        "normalized_payload": {
+          "intent": "recommend",
+          "mode": "recommendation",
+          "followup_intent": "none",
+          "constraints": {
+            "size": {
+              "widthIn": 12,
+              "lengthIn": 96
+            },
+            "colors": [],
+            "styles": [],
+            "shape": null
+          },
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          },
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          },
+          "session_facts": [
+            "wants Kilim style",
+            "wants medium size"
+          ],
+          "rug_reference_ambiguous": false,
+          "confidence": "high"
+        },
+        "parsed": {
+          "intent": "recommend",
+          "mode": "recommendation",
+          "followup_intent": "none",
+          "constraints": {
+            "size": {
+              "widthIn": 12,
+              "lengthIn": 96
+            },
+            "colors": [],
+            "styles": [],
+            "shape": null
+          },
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          },
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          },
+          "session_facts": [
+            "wants Kilim style",
+            "wants medium size"
+          ],
+          "rug_reference_ambiguous": false,
+          "confidence": "high"
+        },
+        "error": null
+      },
+      "compiled_policy": {
+        "intent": "recommend",
+        "mode": "recommendation",
+        "discovery_requested": false,
+        "followup_intent": "none",
+        "hard_constraints": {
+          "size": {
+            "widthIn": 12,
+            "lengthIn": 96,
+            "toleranceIn": 10
+          },
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          }
+        },
+        "persisted_hard_constraints": {
+          "size": {
+            "widthIn": 12,
+            "lengthIn": 96,
+            "toleranceIn": 10
+          },
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          }
+        },
+        "strictness": {
+          "size": "prefer",
+          "colors": "prefer",
+          "styles": "prefer",
+          "shape": "prefer"
+        },
+        "avoid": {
+          "colors": [],
+          "styles": [],
+          "shapes": []
+        },
+        "confidence": "high",
+        "policy_source": "parsed_turn",
+        "must_prefer_avoid": {
+          "must": [],
+          "prefer": [
+            "size"
+          ],
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          }
+        }
+      },
+      "policy_source": "parsed_turn",
+      "must_prefer_avoid": {
+        "must": [],
+        "prefer": [
+          "size"
+        ],
+        "avoid": {
+          "colors": [],
+          "styles": [],
+          "shapes": []
+        }
+      },
+      "must-prefer-avoid": {
+        "must": [],
+        "prefer": [
+          "size"
+        ],
+        "avoid": {
+          "colors": [],
+          "styles": [],
+          "shapes": []
+        }
+      },
+      "handler": "handleRecommendationTurn",
+      "prompt_layer_preview": [
+        "TASK_PROMPT_RECOMMENDATION",
+        "SYSTEM_PROMPT_BASE",
+        "TASK_PROMPT_RECOMMENDATION",
+        "TASK_PROMPT_RECOMMENDATION",
+        "STRUCTURED_OUTPUT_RECOMMENDATION",
+        "CHAT_MEMORY_CONTEXT",
+        "CHAT_MEMORY_CONTEXT",
+        "CHAT_MEMORY_CONTEXT",
+        "CHAT_MEMORY_CONTEXT",
+        "RECENT_TURNS_CONTEXT",
+        "INVENTORY_CONTEXT",
+        "LATEST_USER_MESSAGE_WITH_HARD_CONSTRAINTS"
+      ]
+    },
+    "reaction": {
+      "detected_reaction": null,
+      "referenced_rug_id": null,
+      "rug_reference_ambiguous": false,
+      "liked_attributes_before": {
+        "colors": [],
+        "styles": [
+          "modern"
+        ],
+        "origins": []
+      },
+      "liked_attributes_after": {
+        "colors": [],
+        "styles": [
+          "modern"
+        ],
+        "origins": []
+      },
+      "liked_rug_ids_before": [],
+      "liked_rug_ids_after": [],
+      "dismissed_rug_ids_before": [],
+      "dismissed_rug_ids_after": []
+    },
+    "state_snapshot": {
+      "recommendation_state": {
+        "hard_constraints": {
+          "size": {
+            "widthIn": 12,
+            "lengthIn": 96,
+            "toleranceIn": 10
+          },
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          }
+        },
+        "soft_preferences": {},
+        "runtime": {
+          "last_result_mode": "recommendation",
+          "last_relaxed_size_tolerance_in": null,
+          "last_blockers": [],
+          "last_recommended_size_in": {
+            "width_in": 96,
+            "length_in": 120
+          },
+          "liked_rug_ids": [],
+          "dismissed_rug_ids": [],
+          "shown_rug_ids": [
+            "46245ee2-ac56-46e0-8cbf-b2eead74c24b"
+          ],
+          "liked_attributes": {
+            "colors": [],
+            "styles": [
+              "modern"
+            ],
+            "origins": []
+          },
+          "recently_shown_rugs": [
+            {
+              "id": "46245ee2-ac56-46e0-8cbf-b2eead74c24b",
+              "label": "Contemporary Kilim",
+              "colors": [
+                "multi"
+              ],
+              "style": "Kilim",
+              "origin": "Other"
+            }
+          ],
+          "no_match_attempts": 0,
+          "updated_at": "2026-03-28T20:41:10.402Z"
+        }
+      },
+      "conversation_memory": {
+        "summary_text": "…ctly labeled as modern in the exact 8x10 size, but this contemporary Kilim flatweave is a close… || User: Any closer matches? | Assistant: We have only one exact modern 8x10 rug in stock: a contemporary Kilim with a bold geometric pattern that suits modern decor. It’s a standout for its vibrant, multi-color blocks and flatweave style, great for a clean, mo… || User: This feels too formal | Assistant: This bold contemporary Kilim in 8x10 carries a playful and modern energy with its bright, geometric blocks that soften any formal feel. Its flatweave is practical for busy spaces offering easy maintenance. Since exact m… || User: How often should I rotate a rug? | Assistant: It's best to rotate a rug every 3 to 6 months to ensure even wear and fading, especially in areas with sunlight exposure or heavy foot traffic. Regular rotation helps maintain the rug's appearance and durability. Would…",
+        "stable_facts": [
+          "disliked formal style",
+          "recently recommended Contemporary Kilim",
+          "wants modern style",
+          "wants size 8x10 (96x120 inches)"
+        ],
+        "open_threads": [
+          "How often should I rotate a rug?",
+          "Would you like tips on care for specific rug materials or examples from our collection?",
+          "If you'd like, should I show more in this same direction, or adjust color and size next?",
+          "Any closer matches?",
+          "Would you like to see more options in a larger size or different color palette?"
+        ],
+        "last_user_intent": "general_chat",
+        "no_match_attempts": 0,
+        "updated_at": "2026-03-28T20:41:10.402Z",
+        "version": "v1"
+      }
+    },
+    "memory_snapshot_before": {
+      "summary_text": "…ctly labeled as modern in the exact 8x10 size, but this contemporary Kilim flatweave is a close… || User: Any closer matches? | Assistant: We have only one exact modern 8x10 rug in stock: a contemporary Kilim with a bold geometric pattern that suits modern decor. It’s a standout for its vibrant, multi-color blocks and flatweave style, great for a clean, mo… || User: This feels too formal | Assistant: This bold contemporary Kilim in 8x10 carries a playful and modern energy with its bright, geometric blocks that soften any formal feel. Its flatweave is practical for busy spaces offering easy maintenance. Since exact m… || User: How often should I rotate a rug? | Assistant: It's best to rotate a rug every 3 to 6 months to ensure even wear and fading, especially in areas with sunlight exposure or heavy foot traffic. Regular rotation helps maintain the rug's appearance and durability. Would…",
+      "stable_facts": [
+        "disliked formal style",
+        "recently recommended Contemporary Kilim",
+        "wants modern style",
+        "wants size 8x10 (96x120 inches)"
+      ],
+      "open_threads": [
+        "How often should I rotate a rug?",
+        "Would you like tips on care for specific rug materials or examples from our collection?",
+        "If you'd like, should I show more in this same direction, or adjust color and size next?",
+        "Any closer matches?",
+        "Would you like to see more options in a larger size or different color palette?"
+      ],
+      "last_user_intent": "general_chat",
+      "no_match_attempts": 0,
+      "updated_at": "2026-03-28T20:41:10.402Z",
+      "version": "v1"
+    },
+    "memory_snapshot_after": {
+      "summary_text": "…ndout for its vibrant, multi-color blocks and flatweave style, great for a clean, mo… || User: This feels too formal | Assistant: This bold contemporary Kilim in 8x10 carries a playful and modern energy with its bright, geometric blocks that soften any formal feel. Its flatweave is practical for busy spaces offering easy maintenance. Since exact m… || User: How often should I rotate a rug? | Assistant: It's best to rotate a rug every 3 to 6 months to ensure even wear and fading, especially in areas with sunlight exposure or heavy foot traffic. Regular rotation helps maintain the rug's appearance and durability. Would… || User: Show me kilims in medium sizes | Assistant: We don't have an exact 1' × 8' match right now, so I'm showing the closest available alternatives. We don't have kilims in exact 1' × 8' sizes, but here are some medium-sized options that come close. This contemporary K…",
+      "stable_facts": [
+        "wants Kilim style",
+        "wants medium size",
+        "disliked formal style",
+        "recently recommended Contemporary Kilim",
+        "wants modern style",
+        "wants size 8x10 (96x120 inches)"
+      ],
+      "open_threads": [
+        "How often should I rotate a rug?",
+        "Would you like tips on care for specific rug materials or examples from our collection?",
+        "If you'd like, should I show more in this same direction, or adjust color and size next?",
+        "Any closer matches?",
+        "Would you like to see more options in a larger size or different color palette?"
+      ],
+      "last_user_intent": "recommendation",
+      "no_match_attempts": 0,
+      "updated_at": "2026-03-28T20:41:21.926Z",
+      "version": "v1"
+    },
+    "ai_context_packet_stats": {
+      "field_counts": {
+        "stable_facts": 4,
+        "open_threads": 5,
+        "customer_context": 4,
+        "recently_shown_rugs": 1,
+        "shown_rug_ids": 1,
+        "recent_turns": 4
+      },
+      "char_counts": {
+        "summary_text": 900,
+        "stable_facts_total": 109,
+        "open_threads_total": 305,
+        "customer_context_total": 109,
+        "recently_shown_total": 73,
+        "shown_rug_ids_total": 36,
+        "liked_attributes_total": 6,
+        "recent_turns_total": 613,
+        "latest_user_message": 30,
+        "total": 2145
+      }
+    },
+    "response": {
+      "session_id": "83d2bb95-6396-4412-acb2-99301ed6600a",
+      "role": "retail_customer",
+      "mode": "recommendation",
+      "fine_mode": "recommendation",
+      "response_mode": "recommendation",
+      "notes": "CONSTRAINT_MISMATCH_EXPANDED"
+    },
+    "timing_ms": {
+      "total_ms": 11569
+    }
+  }
+}

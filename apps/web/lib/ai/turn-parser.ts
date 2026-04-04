@@ -168,6 +168,21 @@ function normalizeParsedTurn(input: ParsedTurn): ParsedTurn {
     normalizeText(input.referenced_rug_label).length > 0
       ? normalizeText(input.referenced_rug_label).slice(0, 160)
       : undefined;
+  const strictness = {
+    ...input.strictness,
+  };
+  if (colors.length === 0) {
+    strictness.colors = "prefer";
+  }
+  if (styles.length === 0) {
+    strictness.styles = "prefer";
+  }
+  if (!input.constraints.size) {
+    strictness.size = "prefer";
+  }
+  if (!input.constraints.shape) {
+    strictness.shape = "prefer";
+  }
 
   return {
     ...input,
@@ -176,6 +191,7 @@ function normalizeParsedTurn(input: ParsedTurn): ParsedTurn {
       colors,
       styles,
     },
+    strictness,
     avoid: {
       colors: normalizeColorList(input.avoid.colors ?? [], 8),
       styles: avoidStyles,
@@ -321,6 +337,24 @@ function applyIntentGuards(input: {
     };
   }
 
+  const anchorSignal = /\b(anchor|anchor rug|anchor sizes?|main rug|room anchor)\b/i.test(
+    messageLower
+  );
+  const runnerSignal = /\b(runner|hallway|corridor|entry runner)\b/i.test(messageLower);
+  if (next.constraints.shape === "runner" && anchorSignal && !runnerSignal) {
+    next = {
+      ...next,
+      constraints: {
+        ...next.constraints,
+        shape: null,
+      },
+      strictness: {
+        ...next.strictness,
+        shape: "prefer",
+      },
+    };
+  }
+
   if (next.intent === "educate") {
     next = {
       ...next,
@@ -416,6 +450,71 @@ function applyIntentGuards(input: {
   };
 }
 
+function refineReactionColorAvoids(input: {
+  message: string;
+  parsed: ParsedTurn;
+  recentlyShown: ParseTurnInput["context"]["recently_shown_rugs"];
+}): ParsedTurn {
+  const message = normalizeText(input.message).toLowerCase();
+  const isColorDirectionReaction =
+    /\b(not that color|not this color|different color|different palette|different color direction|new color direction|another color)\b/i.test(
+      message
+    );
+  if (!isColorDirectionReaction) {
+    return input.parsed;
+  }
+
+  const currentAvoid = normalizeColorList(input.parsed.avoid.colors ?? [], 8);
+  if (currentAvoid.length <= 3) {
+    return input.parsed;
+  }
+
+  const recentlyShown = normalizeRugReferenceInput(input.recentlyShown);
+  const referencedColors =
+    input.parsed.referenced_rug_id && recentlyShown.length > 0
+      ? recentlyShown.find((rug) => rug.id === input.parsed.referenced_rug_id)?.colors ?? []
+      : [];
+  const recentDominantColors =
+    recentlyShown.length > 0
+      ? normalizeColorList(
+          recentlyShown
+            .flatMap((rug) => rug.colors.slice(0, 1))
+            .filter((color) => color.length > 0),
+          4
+        )
+      : [];
+  const narrowedAvoid = normalizeColorList(
+    referencedColors.length > 0
+      ? referencedColors
+      : currentAvoid.length > 0
+        ? currentAvoid
+        : recentDominantColors,
+    2
+  );
+
+  const hasNegationLanguage = /\b(not|no|without|different|another|less)\b/i.test(message);
+  const constrainedColors =
+    hasNegationLanguage && (input.parsed.constraints.colors?.length ?? 0) > 0
+      ? []
+      : input.parsed.constraints.colors;
+
+  return {
+    ...input.parsed,
+    constraints: {
+      ...input.parsed.constraints,
+      colors: constrainedColors,
+    },
+    strictness: {
+      ...input.parsed.strictness,
+      colors: constrainedColors.length > 0 ? input.parsed.strictness.colors : "prefer",
+    },
+    avoid: {
+      ...input.parsed.avoid,
+      colors: narrowedAvoid,
+    },
+  };
+}
+
 function applyConfidenceHeuristic(input: {
   message: string;
   parsed: ParsedTurn;
@@ -468,6 +567,11 @@ function shouldPreferInferredSize(input: {
 
   const ratio = inferredLong / parsedLong;
   const hasExplicitFeetUnits = /\b(ft|feet)\b|'/i.test(input.message);
+  const hasExplicitSizePair = /(\d{1,3}(?:\.\d+)?)\s*(?:ft|feet|'|in|inch|inches|")?\s*(?:[x×]|\bby\b)\s*(\d{1,3}(?:\.\d+)?)/i.test(
+    input.message
+  );
+  const longSideGap = Math.abs(inferredLong - parsedLong);
+  if (hasExplicitSizePair && longSideGap >= 8) return true;
   if (hasExplicitFeetUnits && inferredLong > parsedLong * 2) return true;
   return ratio >= 2.5 || ratio <= 0.4;
 }
@@ -857,10 +961,15 @@ export async function parseTurn(input: ParseTurnInput): Promise<ParsedTurn> {
         },
       };
     }
-    const normalized = applyIntentGuards({
+    let normalized = applyIntentGuards({
       parsed: normalizedBase,
       message: input.message,
       hasRecentRecommendations: Boolean(input.context.has_recent_recommendations),
+    });
+    normalized = refineReactionColorAvoids({
+      message: input.message,
+      parsed: normalized,
+      recentlyShown: input.context.recently_shown_rugs,
     });
     if (trace) trace.parsed = normalized;
     return normalized;

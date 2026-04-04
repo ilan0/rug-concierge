@@ -1,0 +1,108 @@
+{
+  "trace_id": "3b77bf1f-9e68-4ae3-adb1-5eb99e57943b",
+  "channel": "general-chat-ai",
+  "created_at": "2026-04-03T07:46:43.064Z",
+  "payload": {
+    "mode": "general_chat",
+    "flow_path": [
+      "handleGeneralChatTurn",
+      "buildPromptLayers",
+      "generateGeneralChatResponse"
+    ],
+    "ai_trace": {
+      "called": true,
+      "model": "gpt-4.1-mini",
+      "prompt_layers": [
+        {
+          "id": "SYSTEM_PROMPT_BASE",
+          "role": "system",
+          "chars": 758,
+          "preview": "# AI System Prompt — Rug Concierge You are an experienced rug consultant helping retail customers in a showroom environ…"
+        },
+        {
+          "id": "TASK_PROMPT_GENERAL_CHAT",
+          "role": "system",
+          "chars": 962,
+          "preview": "# General Chat Prompt — Rug Concierge You are the retail concierge for an in-store rug showroom. Handle free-form custo…"
+        },
+        {
+          "id": "TASK_PROMPT_GENERAL_CHAT",
+          "role": "system",
+          "chars": 19,
+          "preview": "Respond in English."
+        },
+        {
+          "id": "ROLE_PROMPT_RETAIL_CUSTOMER",
+          "role": "system",
+          "chars": 107,
+          "preview": "Role: retail customer. Be approachable, warm, and concise, with practical guidance and a natural next step."
+        },
+        {
+          "id": "LATEST_USER_MESSAGE",
+          "role": "user",
+          "chars": 51,
+          "preview": "What's the difference between a Heriz and a Serapi?"
+        }
+      ],
+      "request_payload_preview": {
+        "model": "gpt-4.1-mini",
+        "message_groups": 2,
+        "system_groups": 1,
+        "user_groups": 1,
+        "system_blocks": 4,
+        "user_blocks": 1,
+        "schema_name": "general_chat_response",
+        "schema_strict": true,
+        "max_output_tokens": 500
+      },
+      "response_status": 200,
+      "response_payload_preview": {
+        "has_output_text": false,
+        "output_items": 1,
+        "content_blocks": 1,
+        "has_error": false,
+        "error_type": null
+      },
+      "parsed_response": {
+        "assistant_message": "Heriz rugs come from the Heriz region in northwest Iran and are known for their geometric, bold patterns with a prominent medallion, made with durable wool and a coarser weave. Serapi rugs are a finer, more refined subcategory of Heriz rugs, typically featuring softer colors and more intricate designs while still maintaining the sturdy construction. I can show you examples of both styles from our current collection,,",
+        "notes": null,
+        "memory_hints": [
+          "difference between Heriz and Serapi rugs",
+          "Heriz rugs: geometric, bold designs, durable wool",
+          "Serapi rugs: subcategory of Heriz, finer weave, softer colors"
+        ]
+      },
+      "fallback_reason": null,
+      "error": null,
+      "incomplete_detected": false,
+      "retry_attempted": false,
+      "retry_succeeded": false,
+      "text_postprocess_applied": false
+    },
+    "context_packet_stats": {
+      "field_counts": {
+        "stable_facts": 0,
+        "open_threads": 0,
+        "customer_context": 0,
+        "recently_shown_rugs": 0,
+        "shown_rug_ids": 0,
+        "recent_turns": 0
+      },
+      "char_counts": {
+        "summary_text": 0,
+        "stable_facts_total": 0,
+        "open_threads_total": 0,
+        "customer_context_total": 0,
+        "recently_shown_total": 0,
+        "shown_rug_ids_total": 0,
+        "liked_attributes_total": 0,
+        "recent_turns_total": 0,
+        "latest_user_message": 51,
+        "total": 51
+      }
+    },
+    "timing_ms": {
+      "generate_general_chat_ms": 2157
+    }
+  }
+}

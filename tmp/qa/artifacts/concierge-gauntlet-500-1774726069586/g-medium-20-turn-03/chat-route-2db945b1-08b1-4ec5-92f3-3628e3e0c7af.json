@@ -1,0 +1,631 @@
+{
+  "trace_id": "2db945b1-08b1-4ec5-92f3-3628e3e0c7af",
+  "channel": "chat-route",
+  "created_at": "2026-03-28T20:31:52.934Z",
+  "payload": {
+    "flow_path": [
+      "/api/chat POST",
+      "getOrCreateSession",
+      "updateRecommendationStateForTurn",
+      "routeTurnMode",
+      "handlerDispatch",
+      "updateConversationMemory",
+      "saveSession"
+    ],
+    "request": {
+      "session_id": "8240dbee-40ef-4dec-94c3-f1728f1e008c",
+      "role": "retail_customer",
+      "tenant_id": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5",
+      "tenant_subdomain": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5",
+      "tenant_hostname": "127.0.0.1",
+      "message": "I prefer something cleaner",
+      "constraints": null
+    },
+    "routing": {
+      "mode": "recommendation",
+      "intent": "reaction",
+      "rule_id": "RECOMMENDATION_FOLLOWUP",
+      "confidence": "high",
+      "needs_clarification": false,
+      "parser": {
+        "model": "gpt-4.1-mini",
+        "latency_ms": 1704,
+        "status": "success",
+        "parse_status": "success",
+        "fallback": null,
+        "fallback_reason": null,
+        "normalized_payload": {
+          "intent": "reaction",
+          "mode": "recommendation_followup",
+          "followup_intent": "tighten",
+          "constraints": {
+            "size": null,
+            "colors": [],
+            "styles": [
+              "minimal"
+            ],
+            "shape": null
+          },
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          },
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          },
+          "session_facts": [
+            "wants cleaner style"
+          ],
+          "rug_reference_ambiguous": false,
+          "confidence": "high"
+        },
+        "normalized_parse_payload": {
+          "intent": "reaction",
+          "mode": "recommendation_followup",
+          "followup_intent": "tighten",
+          "constraints": {
+            "size": null,
+            "colors": [],
+            "styles": [
+              "minimal"
+            ],
+            "shape": null
+          },
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          },
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          },
+          "session_facts": [
+            "wants cleaner style"
+          ],
+          "rug_reference_ambiguous": false,
+          "confidence": "high"
+        },
+        "response_status": 200,
+        "incomplete_detected": false,
+        "error": null
+      },
+      "policy": {
+        "intent": "reaction",
+        "compiled_policy": {
+          "intent": "reaction",
+          "mode": "recommendation_followup",
+          "discovery_requested": false,
+          "followup_intent": "tighten",
+          "hard_constraints": {
+            "colors": [
+              "green"
+            ],
+            "styles": [
+              "minimal"
+            ],
+            "strictness": {
+              "size": "prefer",
+              "colors": "prefer",
+              "styles": "prefer",
+              "shape": "prefer"
+            },
+            "avoid_preferences": {
+              "styles": [
+                "traditional",
+                "tribal",
+                "floral",
+                "ornate"
+              ],
+              "shapes": []
+            }
+          },
+          "persisted_hard_constraints": {
+            "colors": [
+              "green"
+            ],
+            "styles": [
+              "minimal"
+            ],
+            "strictness": {
+              "size": "prefer",
+              "colors": "prefer",
+              "styles": "prefer",
+              "shape": "prefer"
+            },
+            "avoid_preferences": {
+              "styles": [
+                "traditional",
+                "tribal",
+                "floral",
+                "ornate"
+              ],
+              "shapes": []
+            }
+          },
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          },
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          },
+          "confidence": "high",
+          "policy_source": "parsed_turn",
+          "must_prefer_avoid": {
+            "must": [],
+            "prefer": [
+              "colors",
+              "styles"
+            ],
+            "avoid": {
+              "colors": [],
+              "styles": [
+                "traditional",
+                "tribal",
+                "floral",
+                "ornate"
+              ],
+              "shapes": []
+            }
+          }
+        },
+        "policy_source": "parsed_turn",
+        "must_prefer_avoid": {
+          "must": [],
+          "prefer": [
+            "colors",
+            "styles"
+          ],
+          "avoid": {
+            "colors": [],
+            "styles": [
+              "traditional",
+              "tribal",
+              "floral",
+              "ornate"
+            ],
+            "shapes": []
+          }
+        },
+        "must-prefer-avoid": {
+          "must": [],
+          "prefer": [
+            "colors",
+            "styles"
+          ],
+          "avoid": {
+            "colors": [],
+            "styles": [
+              "traditional",
+              "tribal",
+              "floral",
+              "ornate"
+            ],
+            "shapes": []
+          }
+        },
+        "constraint_modes": {
+          "size": "prefer",
+          "colors": "prefer",
+          "styles": "prefer",
+          "shape": "prefer",
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          }
+        }
+      },
+      "parser_trace": {
+        "called": true,
+        "model": "gpt-4.1-mini",
+        "status": "success",
+        "response_status": 200,
+        "fallback": null,
+        "fallback_reason": null,
+        "incomplete_detected": false,
+        "latency_ms": 1704,
+        "normalized_payload": {
+          "intent": "reaction",
+          "mode": "recommendation_followup",
+          "followup_intent": "tighten",
+          "constraints": {
+            "size": null,
+            "colors": [],
+            "styles": [
+              "minimal"
+            ],
+            "shape": null
+          },
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          },
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          },
+          "session_facts": [
+            "wants cleaner style"
+          ],
+          "rug_reference_ambiguous": false,
+          "confidence": "high"
+        },
+        "parsed": {
+          "intent": "reaction",
+          "mode": "recommendation_followup",
+          "followup_intent": "tighten",
+          "constraints": {
+            "size": null,
+            "colors": [],
+            "styles": [
+              "minimal"
+            ],
+            "shape": null
+          },
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          },
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          },
+          "session_facts": [
+            "wants cleaner style"
+          ],
+          "rug_reference_ambiguous": false,
+          "confidence": "high"
+        },
+        "error": null
+      },
+      "compiled_policy": {
+        "intent": "reaction",
+        "mode": "recommendation_followup",
+        "discovery_requested": false,
+        "followup_intent": "tighten",
+        "hard_constraints": {
+          "colors": [
+            "green"
+          ],
+          "styles": [
+            "minimal"
+          ],
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          },
+          "avoid_preferences": {
+            "styles": [
+              "traditional",
+              "tribal",
+              "floral",
+              "ornate"
+            ],
+            "shapes": []
+          }
+        },
+        "persisted_hard_constraints": {
+          "colors": [
+            "green"
+          ],
+          "styles": [
+            "minimal"
+          ],
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          },
+          "avoid_preferences": {
+            "styles": [
+              "traditional",
+              "tribal",
+              "floral",
+              "ornate"
+            ],
+            "shapes": []
+          }
+        },
+        "strictness": {
+          "size": "prefer",
+          "colors": "prefer",
+          "styles": "prefer",
+          "shape": "prefer"
+        },
+        "avoid": {
+          "colors": [],
+          "styles": [],
+          "shapes": []
+        },
+        "confidence": "high",
+        "policy_source": "parsed_turn",
+        "must_prefer_avoid": {
+          "must": [],
+          "prefer": [
+            "colors",
+            "styles"
+          ],
+          "avoid": {
+            "colors": [],
+            "styles": [
+              "traditional",
+              "tribal",
+              "floral",
+              "ornate"
+            ],
+            "shapes": []
+          }
+        }
+      },
+      "policy_source": "parsed_turn",
+      "must_prefer_avoid": {
+        "must": [],
+        "prefer": [
+          "colors",
+          "styles"
+        ],
+        "avoid": {
+          "colors": [],
+          "styles": [
+            "traditional",
+            "tribal",
+            "floral",
+            "ornate"
+          ],
+          "shapes": []
+        }
+      },
+      "must-prefer-avoid": {
+        "must": [],
+        "prefer": [
+          "colors",
+          "styles"
+        ],
+        "avoid": {
+          "colors": [],
+          "styles": [
+            "traditional",
+            "tribal",
+            "floral",
+            "ornate"
+          ],
+          "shapes": []
+        }
+      },
+      "handler": "handleRecommendationTurn",
+      "prompt_layer_preview": [
+        "TASK_PROMPT_RECOMMENDATION",
+        "SYSTEM_PROMPT_BASE",
+        "TASK_PROMPT_RECOMMENDATION",
+        "TASK_PROMPT_RECOMMENDATION",
+        "STRUCTURED_OUTPUT_RECOMMENDATION",
+        "CHAT_MEMORY_CONTEXT",
+        "CHAT_MEMORY_CONTEXT",
+        "CHAT_MEMORY_CONTEXT",
+        "CHAT_MEMORY_CONTEXT",
+        "RECENT_TURNS_CONTEXT",
+        "INVENTORY_CONTEXT",
+        "LATEST_USER_MESSAGE_WITH_HARD_CONSTRAINTS"
+      ]
+    },
+    "reaction": {
+      "detected_reaction": null,
+      "referenced_rug_id": null,
+      "rug_reference_ambiguous": false,
+      "liked_attributes_before": {
+        "colors": [
+          "green"
+        ],
+        "styles": [
+          "minimal"
+        ],
+        "origins": []
+      },
+      "liked_attributes_after": {
+        "colors": [
+          "green"
+        ],
+        "styles": [
+          "minimal"
+        ],
+        "origins": []
+      },
+      "liked_rug_ids_before": [],
+      "liked_rug_ids_after": [],
+      "dismissed_rug_ids_before": [],
+      "dismissed_rug_ids_after": []
+    },
+    "state_snapshot": {
+      "recommendation_state": {
+        "hard_constraints": {
+          "colors": [
+            "green"
+          ],
+          "styles": [
+            "minimal"
+          ],
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          },
+          "avoid_preferences": {
+            "styles": [
+              "traditional",
+              "tribal",
+              "floral",
+              "ornate"
+            ],
+            "shapes": []
+          }
+        },
+        "soft_preferences": {},
+        "runtime": {
+          "last_result_mode": "disambiguation",
+          "last_relaxed_size_tolerance_in": null,
+          "last_blockers": [],
+          "last_recommended_size_in": {
+            "width_in": 36,
+            "length_in": 144
+          },
+          "liked_rug_ids": [],
+          "dismissed_rug_ids": [],
+          "shown_rug_ids": [
+            "119b9d9a-fe0c-4f12-b2ac-a783bb7bc29b",
+            "08ca5e39-c162-4d88-9d7e-484e90489d85",
+            "bd644ffb-6bf8-47f2-a8ce-0eaa3a4aca28",
+            "0dd26ca3-10fb-418b-bb80-be02d2b331c7"
+          ],
+          "liked_attributes": {
+            "colors": [
+              "green"
+            ],
+            "styles": [],
+            "origins": []
+          },
+          "recently_shown_rugs": [
+            {
+              "id": "119b9d9a-fe0c-4f12-b2ac-a783bb7bc29b",
+              "label": "Contemporary Runner",
+              "colors": [
+                "green"
+              ],
+              "style": "Minimal",
+              "origin": null
+            },
+            {
+              "id": "08ca5e39-c162-4d88-9d7e-484e90489d85",
+              "label": "Antique Caucasian Karabagh",
+              "colors": [
+                "red",
+                "green",
+                "ivory",
+                "blue"
+              ],
+              "style": "Karabagh",
+              "origin": "Caucasian"
+            },
+            {
+              "id": "bd644ffb-6bf8-47f2-a8ce-0eaa3a4aca28",
+              "label": "Antique Caucasian Kazak",
+              "colors": [
+                "red",
+                "green",
+                "blue",
+                "ivory"
+              ],
+              "style": "Kazak",
+              "origin": "Caucasian"
+            }
+          ],
+          "no_match_attempts": 0,
+          "updated_at": "2026-03-28T20:31:41.672Z"
+        }
+      },
+      "conversation_memory": {
+        "summary_text": "User: Show me green rugs | Assistant: You requested green rugs; here are our top picks featuring green prominently, including a standout contemporary runner perfect for modern spaces. If you'd like, should I show more in this same direction, or adjust color… || User: Do you have anything similar? | Assistant: I want to make sure I’m following correctly. Did you mean Contemporary Runner or Antique Caucasian Karabagh or Antique Caucasian Kazak?",
+        "stable_facts": [
+          "recently interested in contemporary runner and antique Caucasian and Persian rugs",
+          "wants green color"
+        ],
+        "open_threads": [
+          "Do you have anything similar?",
+          "Did you mean Contemporary Runner or Antique Caucasian Karabagh or Antique Caucasian Kazak?",
+          "If you'd like, should I show more in this same direction, or adjust color and size next?"
+        ],
+        "last_user_intent": "recommendation",
+        "no_match_attempts": 0,
+        "updated_at": "2026-03-28T20:31:41.672Z",
+        "version": "v1"
+      }
+    },
+    "memory_snapshot_before": {
+      "summary_text": "User: Show me green rugs | Assistant: You requested green rugs; here are our top picks featuring green prominently, including a standout contemporary runner perfect for modern spaces. If you'd like, should I show more in this same direction, or adjust color… || User: Do you have anything similar? | Assistant: I want to make sure I’m following correctly. Did you mean Contemporary Runner or Antique Caucasian Karabagh or Antique Caucasian Kazak?",
+      "stable_facts": [
+        "recently interested in contemporary runner and antique Caucasian and Persian rugs",
+        "wants green color"
+      ],
+      "open_threads": [
+        "Do you have anything similar?",
+        "Did you mean Contemporary Runner or Antique Caucasian Karabagh or Antique Caucasian Kazak?",
+        "If you'd like, should I show more in this same direction, or adjust color and size next?"
+      ],
+      "last_user_intent": "recommendation",
+      "no_match_attempts": 0,
+      "updated_at": "2026-03-28T20:31:41.672Z",
+      "version": "v1"
+    },
+    "memory_snapshot_after": {
+      "summary_text": "User: Show me green rugs | Assistant: You requested green rugs; here are our top picks featuring green prominently, including a standout contemporary runner perfect for modern spaces. If you'd like, should I show more in this same direction, or adjust color… || User: Do you have anything similar? | Assistant: I want to make sure I’m following correctly. Did you mean Contemporary Runner or Antique Caucasian Karabagh or Antique Caucasian Kazak? || User: I prefer something cleaner | Assistant: For a cleaner minimal style in green, this contemporary runner stands out with its solid green plain field and modern simplicity. Exact matches are limited, so this piece is a top choice for a refined look. If you'd lik…",
+      "stable_facts": [
+        "wants cleaner style",
+        "recently interested in contemporary runner and antique Caucasian and Persian rugs",
+        "wants green color"
+      ],
+      "open_threads": [
+        "If you'd like, should I show more in this same direction, or adjust color and size next?",
+        "Do you have anything similar?",
+        "Did you mean Contemporary Runner or Antique Caucasian Karabagh or Antique Caucasian Kazak?"
+      ],
+      "last_user_intent": "recommendation",
+      "no_match_attempts": 0,
+      "updated_at": "2026-03-28T20:31:52.600Z",
+      "version": "v1"
+    },
+    "ai_context_packet_stats": {
+      "field_counts": {
+        "stable_facts": 2,
+        "open_threads": 3,
+        "customer_context": 2,
+        "recently_shown_rugs": 3,
+        "shown_rug_ids": 4,
+        "recent_turns": 4
+      },
+      "char_counts": {
+        "summary_text": 446,
+        "stable_facts_total": 98,
+        "open_threads_total": 207,
+        "customer_context_total": 98,
+        "recently_shown_total": 270,
+        "shown_rug_ids_total": 144,
+        "liked_attributes_total": 5,
+        "recent_turns_total": 416,
+        "latest_user_message": 26,
+        "total": 1566
+      }
+    },
+    "response": {
+      "session_id": "8240dbee-40ef-4dec-94c3-f1728f1e008c",
+      "role": "retail_customer",
+      "mode": "recommendation",
+      "fine_mode": "recommendation",
+      "response_mode": "recommendation",
+      "notes": "Only a few exact matching minimal green rugs are available; this runner best embodies your preferences. | THIN_RESULTS_STYLE_EXPANDED"
+    },
+    "timing_ms": {
+      "total_ms": 10888
+    }
+  }
+}

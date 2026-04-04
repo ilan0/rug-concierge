@@ -1,0 +1,526 @@
+{
+  "trace_id": "9fa9eea3-f773-4cfc-8379-e5278492688b",
+  "channel": "chat-route",
+  "created_at": "2026-04-03T04:21:01.208Z",
+  "payload": {
+    "flow_path": [
+      "/api/chat POST",
+      "getOrCreateSession",
+      "updateRecommendationStateForTurn",
+      "routeTurnMode",
+      "handlerDispatch",
+      "updateConversationMemory",
+      "saveSession"
+    ],
+    "request": {
+      "session_id": "4ece82c8-c541-4d36-8d59-e0b588d9a615",
+      "role": "retail_customer",
+      "tenant_id": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5",
+      "tenant_subdomain": "jjrugs",
+      "tenant_hostname": "jjrugs.rugdesk.app",
+      "message": "Now show entryway sized options.",
+      "constraints": null
+    },
+    "routing": {
+      "mode": "recommendation",
+      "intent": "followup",
+      "rule_id": "RECOMMENDATION_FOLLOWUP",
+      "confidence": "high",
+      "needs_clarification": false,
+      "parser": {
+        "model": "gpt-4.1-mini",
+        "latency_ms": 1671,
+        "status": "success",
+        "parse_status": "success",
+        "fallback": null,
+        "fallback_reason": null,
+        "normalized_payload": {
+          "intent": "followup",
+          "mode": "recommendation_followup",
+          "followup_intent": "none",
+          "constraints": {
+            "size": {
+              "widthIn": 36,
+              "lengthIn": 60
+            },
+            "colors": [],
+            "styles": [],
+            "shape": null
+          },
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          },
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          },
+          "session_facts": [
+            "wants entryway sized rugs"
+          ],
+          "rug_reference_ambiguous": false,
+          "confidence": "high"
+        },
+        "normalized_parse_payload": {
+          "intent": "followup",
+          "mode": "recommendation_followup",
+          "followup_intent": "none",
+          "constraints": {
+            "size": {
+              "widthIn": 36,
+              "lengthIn": 60
+            },
+            "colors": [],
+            "styles": [],
+            "shape": null
+          },
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          },
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          },
+          "session_facts": [
+            "wants entryway sized rugs"
+          ],
+          "rug_reference_ambiguous": false,
+          "confidence": "high"
+        },
+        "response_status": 200,
+        "incomplete_detected": false,
+        "error": null
+      },
+      "policy": {
+        "intent": "followup",
+        "compiled_policy": {
+          "intent": "followup",
+          "mode": "recommendation_followup",
+          "discovery_requested": false,
+          "followup_intent": "none",
+          "hard_constraints": {
+            "size": {
+              "widthIn": 36,
+              "lengthIn": 60,
+              "toleranceIn": 6
+            },
+            "colors": [],
+            "styles": [],
+            "strictness": {
+              "size": "prefer",
+              "colors": "prefer",
+              "styles": "prefer",
+              "shape": "prefer"
+            }
+          },
+          "persisted_hard_constraints": {
+            "size": {
+              "widthIn": 36,
+              "lengthIn": 60,
+              "toleranceIn": 6
+            },
+            "colors": [],
+            "styles": [],
+            "strictness": {
+              "size": "prefer",
+              "colors": "prefer",
+              "styles": "prefer",
+              "shape": "prefer"
+            }
+          },
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          },
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          },
+          "confidence": "high",
+          "policy_source": "parsed_turn",
+          "must_prefer_avoid": {
+            "must": [],
+            "prefer": [
+              "size"
+            ],
+            "avoid": {
+              "colors": [],
+              "styles": [],
+              "shapes": []
+            }
+          }
+        },
+        "policy_source": "parsed_turn",
+        "must_prefer_avoid": {
+          "must": [],
+          "prefer": [
+            "size"
+          ],
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          }
+        },
+        "must-prefer-avoid": {
+          "must": [],
+          "prefer": [
+            "size"
+          ],
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          }
+        },
+        "constraint_modes": {
+          "size": "prefer",
+          "colors": "prefer",
+          "styles": "prefer",
+          "shape": "prefer",
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          }
+        }
+      },
+      "parser_trace": {
+        "called": true,
+        "model": "gpt-4.1-mini",
+        "status": "success",
+        "response_status": 200,
+        "fallback": null,
+        "fallback_reason": null,
+        "incomplete_detected": false,
+        "latency_ms": 1671,
+        "normalized_payload": {
+          "intent": "followup",
+          "mode": "recommendation_followup",
+          "followup_intent": "none",
+          "constraints": {
+            "size": {
+              "widthIn": 36,
+              "lengthIn": 60
+            },
+            "colors": [],
+            "styles": [],
+            "shape": null
+          },
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          },
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          },
+          "session_facts": [
+            "wants entryway sized rugs"
+          ],
+          "rug_reference_ambiguous": false,
+          "confidence": "high"
+        },
+        "parsed": {
+          "intent": "followup",
+          "mode": "recommendation_followup",
+          "followup_intent": "none",
+          "constraints": {
+            "size": {
+              "widthIn": 36,
+              "lengthIn": 60
+            },
+            "colors": [],
+            "styles": [],
+            "shape": null
+          },
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          },
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          },
+          "session_facts": [
+            "wants entryway sized rugs"
+          ],
+          "rug_reference_ambiguous": false,
+          "confidence": "high"
+        },
+        "error": null
+      },
+      "compiled_policy": {
+        "intent": "followup",
+        "mode": "recommendation_followup",
+        "discovery_requested": false,
+        "followup_intent": "none",
+        "hard_constraints": {
+          "size": {
+            "widthIn": 36,
+            "lengthIn": 60,
+            "toleranceIn": 6
+          },
+          "colors": [],
+          "styles": [],
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          }
+        },
+        "persisted_hard_constraints": {
+          "size": {
+            "widthIn": 36,
+            "lengthIn": 60,
+            "toleranceIn": 6
+          },
+          "colors": [],
+          "styles": [],
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          }
+        },
+        "strictness": {
+          "size": "prefer",
+          "colors": "prefer",
+          "styles": "prefer",
+          "shape": "prefer"
+        },
+        "avoid": {
+          "colors": [],
+          "styles": [],
+          "shapes": []
+        },
+        "confidence": "high",
+        "policy_source": "parsed_turn",
+        "must_prefer_avoid": {
+          "must": [],
+          "prefer": [
+            "size"
+          ],
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          }
+        }
+      },
+      "policy_source": "parsed_turn",
+      "must_prefer_avoid": {
+        "must": [],
+        "prefer": [
+          "size"
+        ],
+        "avoid": {
+          "colors": [],
+          "styles": [],
+          "shapes": []
+        }
+      },
+      "must-prefer-avoid": {
+        "must": [],
+        "prefer": [
+          "size"
+        ],
+        "avoid": {
+          "colors": [],
+          "styles": [],
+          "shapes": []
+        }
+      },
+      "handler": "handleRecommendationTurn",
+      "prompt_layer_preview": [
+        "TASK_PROMPT_RECOMMENDATION",
+        "SYSTEM_PROMPT_BASE",
+        "TASK_PROMPT_RECOMMENDATION",
+        "TASK_PROMPT_RECOMMENDATION",
+        "STRUCTURED_OUTPUT_RECOMMENDATION",
+        "CHAT_MEMORY_CONTEXT",
+        "CHAT_MEMORY_CONTEXT",
+        "CHAT_MEMORY_CONTEXT",
+        "RECENT_TURNS_CONTEXT",
+        "INVENTORY_CONTEXT",
+        "LATEST_USER_MESSAGE_WITH_HARD_CONSTRAINTS"
+      ]
+    },
+    "reaction": {
+      "detected_reaction": null,
+      "referenced_rug_id": null,
+      "rug_reference_ambiguous": false,
+      "liked_attributes_before": {
+        "colors": [],
+        "styles": [],
+        "origins": []
+      },
+      "liked_attributes_after": {
+        "colors": [],
+        "styles": [],
+        "origins": []
+      },
+      "liked_rug_ids_before": [],
+      "liked_rug_ids_after": [],
+      "dismissed_rug_ids_before": [],
+      "dismissed_rug_ids_after": []
+    },
+    "state_snapshot": {
+      "recommendation_state": {
+        "hard_constraints": {
+          "size": {
+            "widthIn": 36,
+            "lengthIn": 60,
+            "toleranceIn": 6
+          },
+          "colors": [],
+          "styles": [],
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          }
+        },
+        "soft_preferences": {},
+        "runtime": {
+          "last_result_mode": "recommendation",
+          "last_relaxed_size_tolerance_in": null,
+          "last_blockers": [],
+          "last_recommended_size_in": {
+            "width_in": 96,
+            "length_in": 120
+          },
+          "liked_rug_ids": [],
+          "dismissed_rug_ids": [],
+          "shown_rug_ids": [
+            "ecc885db-d25f-47a6-a276-113e56737d14",
+            "de47a550-052a-433d-b39a-c8c8711f0901",
+            "dff6cdf7-6837-486e-9cab-8aa44d8291a1",
+            "e15492cf-a32d-412a-b855-c0e02542aefe",
+            "0dd26ca3-10fb-418b-bb80-be02d2b331c7",
+            "22f2daa3-9c69-4499-9ab2-ce0e6d6ad0b3",
+            "21520501-b868-489c-bb06-55c638ddf3d4"
+          ],
+          "liked_attributes": {
+            "colors": [],
+            "styles": [],
+            "origins": []
+          },
+          "recently_shown_rugs": [
+            {
+              "id": "21520501-b868-489c-bb06-55c638ddf3d4",
+              "label": "Antique Caucasian Shirvan",
+              "colors": [
+                "red",
+                "blue",
+                "ivory"
+              ],
+              "style": "Shirvan",
+              "origin": "Caucasian"
+            }
+          ],
+          "no_match_attempts": 0,
+          "updated_at": "2026-04-03T04:20:46.472Z"
+        }
+      },
+      "conversation_memory": {
+        "summary_text": "User: I need something for my bedroom and also an entryway rug. | Assistant: For your bedroom and entryway, a versatile 5' x 8' rug works well as it fits comfortably in both spaces. The Antique Caucasian Kazak rug stands out with its warm rust and brown tones, featuring a bold geometric medallio… || User: Start with bedroom anchor options. | Assistant: For your bedroom, an 8' x 10' rug fits your size preference nicely. The Antique Caucasian Shirvan rug stands out with its rich geometric design and bold red and navy colors, bringing a traditional and vibrant touch to t…",
+        "stable_facts": [
+          "wants bedroom anchor rugs",
+          "room bedroom",
+          "room: bedroom",
+          "room: entryway",
+          "room entryway"
+        ],
+        "open_threads": [],
+        "last_user_intent": "recommendation",
+        "no_match_attempts": 0,
+        "updated_at": "2026-04-03T04:20:46.472Z",
+        "version": "v1"
+      }
+    },
+    "memory_snapshot_before": {
+      "summary_text": "User: I need something for my bedroom and also an entryway rug. | Assistant: For your bedroom and entryway, a versatile 5' x 8' rug works well as it fits comfortably in both spaces. The Antique Caucasian Kazak rug stands out with its warm rust and brown tones, featuring a bold geometric medallio… || User: Start with bedroom anchor options. | Assistant: For your bedroom, an 8' x 10' rug fits your size preference nicely. The Antique Caucasian Shirvan rug stands out with its rich geometric design and bold red and navy colors, bringing a traditional and vibrant touch to t…",
+      "stable_facts": [
+        "wants bedroom anchor rugs",
+        "room bedroom",
+        "room: bedroom",
+        "room: entryway",
+        "room entryway"
+      ],
+      "open_threads": [],
+      "last_user_intent": "recommendation",
+      "no_match_attempts": 0,
+      "updated_at": "2026-04-03T04:20:46.472Z",
+      "version": "v1"
+    },
+    "memory_snapshot_after": {
+      "summary_text": "User: I need something for my bedroom and also an entryway rug. | Assistant: For your bedroom and entryway, a versatile 5' x 8' rug works well as it fits comfortably in both spaces. The Antique Caucasian Kazak rug stands out with its warm rust and brown tones, featuring a bold geometric medallio… || User: Start with bedroom anchor options. | Assistant: For your bedroom, an 8' x 10' rug fits your size preference nicely. The Antique Caucasian Shirvan rug stands out with its rich geometric design and bold red and navy colors, bringing a traditional and vibrant touch to t… || User: Now show entryway sized options. | Assistant: Focusing on entryway-sized rugs around 3' x 5', here are some traditional options that fit well in compact spaces. The Antique Persian Tabriz stands out with its rich medallion and floral design, bringing classic charac…",
+      "stable_facts": [
+        "wants entryway sized rugs",
+        "room entryway",
+        "wants bedroom anchor rugs",
+        "room bedroom",
+        "room: bedroom",
+        "room: entryway"
+      ],
+      "open_threads": [],
+      "last_user_intent": "recommendation",
+      "no_match_attempts": 0,
+      "updated_at": "2026-04-03T04:21:00.872Z",
+      "version": "v1"
+    },
+    "ai_context_packet_stats": {
+      "field_counts": {
+        "stable_facts": 5,
+        "open_threads": 0,
+        "customer_context": 5,
+        "recently_shown_rugs": 1,
+        "shown_rug_ids": 7,
+        "recent_turns": 4
+      },
+      "char_counts": {
+        "summary_text": 575,
+        "stable_facts_total": 77,
+        "open_threads_total": 0,
+        "customer_context_total": 77,
+        "recently_shown_total": 95,
+        "shown_rug_ids_total": 252,
+        "liked_attributes_total": 0,
+        "recent_turns_total": 651,
+        "latest_user_message": 32,
+        "total": 1507
+      }
+    },
+    "response": {
+      "session_id": "4ece82c8-c541-4d36-8d59-e0b588d9a615",
+      "role": "retail_customer",
+      "mode": "recommendation",
+      "fine_mode": "recommendation",
+      "response_mode": "recommendation",
+      "notes": null
+    },
+    "timing_ms": {
+      "total_ms": 11871
+    }
+  }
+}

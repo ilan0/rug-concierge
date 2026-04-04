@@ -3,7 +3,8 @@
 import { randomUUID } from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
-import { spawn } from "node:child_process";
+import { spawn, spawnSync } from "node:child_process";
+import http from "node:http";
 
 type Role = "retail_customer";
 
@@ -13,14 +14,7 @@ type ChatApiPayload = {
   fine_mode: string;
   response: {
     assistant_message: string;
-    recommendations?: Array<{
-      rug_id: string;
-      title: string;
-      style: string | null;
-      origin: string | null;
-      size_text: string | null;
-      match_reasons: string[];
-    }>;
+    recommendations?: Array<Record<string, unknown>>;
     notes?: string | null;
   };
 };
@@ -41,12 +35,33 @@ type Persona = {
 };
 
 type JudgeScore = {
+  overall: number;
+  overall_reason: string;
   warmth: number;
   engagement: number;
-  grounded: number;
-  graceful_no_match: number;
+  recommendation_fit: number;
+  honest_disclosure: number;
+  no_repeat: number;
+  practical_signal: number | null;
+  graceful_no_match: number | null;
   taste: number;
+  contradiction_detected: boolean;
+  contradiction_quote: string | null;
   notes: string;
+};
+
+type JudgeVisibleCard = {
+  title: string;
+  size_text: string;
+  origin: string | null;
+  style: string | null;
+};
+
+type JudgeHistoryTurn = {
+  turn: number;
+  user_message: string;
+  assistant_message: string;
+  cards: JudgeVisibleCard[];
 };
 
 type TurnScore = {
@@ -55,36 +70,28 @@ type TurnScore = {
   message: string;
   assistant: string;
   mode: string;
+  card_ids: string[];
   score: JudgeScore;
 };
 
-type AssertionFailure = {
-  persona: string;
-  turn: number;
-  message: string;
-  reason: string;
-};
+const DIAGNOSTIC_SCORE_DIMENSIONS = [
+  "warmth",
+  "engagement",
+  "recommendation_fit",
+  "honest_disclosure",
+  "no_repeat",
+  "taste",
+] as const;
+
+const CONDITIONAL_SCORE_DIMENSIONS = ["practical_signal", "graceful_no_match"] as const;
 
 const REPO_ROOT = path.resolve(__dirname, "..", "..");
 const APP_DIR = path.resolve(REPO_ROOT, "apps", "web");
 const PORT = 4114;
 const RUN_ID = `concierge-quality-personas-${Date.now()}`;
 const OPENAI_RESPONSES_URL = "https://api.openai.com/v1/responses";
-
-const TRADITIONAL_TOKENS = [
-  "traditional",
-  "persian",
-  "heriz",
-  "serapi",
-  "kashan",
-  "tabriz",
-  "isfahan",
-  "tribal",
-  "kazak",
-  "shirvan",
-  "baluch",
-  "oushak",
-];
+let SERVER_OUTPUT_TAIL = "";
+let SERVER_EXITED = false;
 
 const PERSONAS: Persona[] = [
   {
@@ -176,10 +183,10 @@ const PERSONAS: Persona[] = [
   },
   {
     id: "p10",
-    name: "Budget Constrained",
-    profile: "Budget-conscious, still wants style.",
+    name: "Kitchen Shopper",
+    profile: "Needs practical kitchen sizing and easy upkeep.",
     turns: [
-      { message: "I can only spend 400 max. Need something for my kitchen.", expect: { mode: "recommendation" } },
+      { message: "Need something practical for my kitchen.", expect: { mode: "recommendation" } },
       { message: "Show runner options around 2x8.", expect: { mode: "recommendation" } },
     ],
   },
@@ -301,30 +308,78 @@ function loadEnvFile(filePath: string): Record<string, string> {
 
 function buildServerEnv(): Record<string, string> {
   const localEnv = loadEnvFile(path.resolve(APP_DIR, ".env.local"));
-  const chatModel =
-    process.env.OPENAI_CHAT_MODEL ??
-    localEnv.OPENAI_CHAT_MODEL ??
-    localEnv.OPENAI_MODEL ??
-    "gpt-4.1-mini";
+  const chatModel = process.env.OPENAI_CHAT_MODEL ?? localEnv.OPENAI_CHAT_MODEL;
+  const recommendationModel =
+    process.env.OPENAI_RECOMMENDATION_MODEL ?? localEnv.OPENAI_RECOMMENDATION_MODEL;
+  const visionModel =
+    process.env.OPENAI_VISION_MODEL ?? localEnv.OPENAI_VISION_MODEL;
+  const enableGeneralChatAi =
+    process.env.ENABLE_GENERAL_CHAT_AI ?? localEnv.ENABLE_GENERAL_CHAT_AI;
+  const upstashUrl =
+    process.env.UPSTASH_REDIS_REST_URL ?? localEnv.UPSTASH_REDIS_REST_URL;
+  const upstashToken =
+    process.env.UPSTASH_REDIS_REST_TOKEN ?? localEnv.UPSTASH_REDIS_REST_TOKEN;
+  if (!chatModel) {
+    throw new Error(
+      "OPENAI_CHAT_MODEL is required for concierge quality harness server env."
+    );
+  }
+  if (!recommendationModel) {
+    throw new Error(
+      "OPENAI_RECOMMENDATION_MODEL is required for concierge quality harness server env."
+    );
+  }
+  if (!visionModel) {
+    throw new Error(
+      "OPENAI_VISION_MODEL is required for concierge quality harness server env."
+    );
+  }
+  if (!enableGeneralChatAi) {
+    throw new Error(
+      "ENABLE_GENERAL_CHAT_AI is required for concierge quality harness server env."
+    );
+  }
+  if (!upstashUrl) {
+    throw new Error(
+      "UPSTASH_REDIS_REST_URL is required for concierge quality harness server env."
+    );
+  }
+  if (!upstashToken) {
+    throw new Error(
+      "UPSTASH_REDIS_REST_TOKEN is required for concierge quality harness server env."
+    );
+  }
 
   return {
     ...process.env,
     ...localEnv,
-    NODE_ENV: "development",
+    NODE_ENV: "production",
+    E2E_TRACE_BYPASS_RATE_LIMIT: "1",
     OPENAI_CHAT_MODEL: chatModel,
-    OPENAI_VISION_MODEL:
-      process.env.OPENAI_VISION_MODEL ?? localEnv.OPENAI_VISION_MODEL ?? chatModel,
-    ENABLE_GENERAL_CHAT_AI:
-      process.env.ENABLE_GENERAL_CHAT_AI ?? localEnv.ENABLE_GENERAL_CHAT_AI ?? "true",
-    UPSTASH_REDIS_REST_URL:
-      process.env.UPSTASH_REDIS_REST_URL ??
-      localEnv.UPSTASH_REDIS_REST_URL ??
-      "https://example.upstash.io",
-    UPSTASH_REDIS_REST_TOKEN:
-      process.env.UPSTASH_REDIS_REST_TOKEN ??
-      localEnv.UPSTASH_REDIS_REST_TOKEN ??
-      "dummy",
+    OPENAI_RECOMMENDATION_MODEL: recommendationModel,
+    OPENAI_VISION_MODEL: visionModel,
+    ENABLE_GENERAL_CHAT_AI: enableGeneralChatAi,
+    UPSTASH_REDIS_REST_URL: upstashUrl,
+    UPSTASH_REDIS_REST_TOKEN: upstashToken,
   };
+}
+
+function ensureBuiltApp(): void {
+  const result = spawnSync(
+    "npm",
+    ["--workspace", "apps/web", "run", "build"],
+    {
+      cwd: REPO_ROOT,
+      env: buildServerEnv(),
+      stdio: "pipe",
+      encoding: "utf8",
+    }
+  );
+  if (result.status !== 0) {
+    throw new Error(
+      `Failed to build apps/web before persona harness.\n${result.stderr || result.stdout || ""}`
+    );
+  }
 }
 
 async function waitForServerReady(baseUrl: string, timeoutMs = 180000): Promise<void> {
@@ -344,26 +399,52 @@ async function waitForServerReady(baseUrl: string, timeoutMs = 180000): Promise<
 async function startServer(): Promise<{ baseUrl: string; stop: () => Promise<void> }> {
   const baseUrl = `http://127.0.0.1:${PORT}`;
   const env = buildServerEnv();
+  SERVER_OUTPUT_TAIL = "";
+  SERVER_EXITED = false;
 
   const child = spawn(
     "npm",
-    ["--workspace", "apps/web", "run", "dev", "--", "--port", String(PORT)],
+    ["--workspace", "apps/web", "run", "start", "--", "--port", String(PORT)],
     {
       cwd: REPO_ROOT,
       env,
-      stdio: ["ignore", "ignore", "pipe"],
+      stdio: ["ignore", "pipe", "pipe"],
     }
   );
 
-  let stderrTail = "";
-  child.stderr?.on("data", (chunk) => {
-    stderrTail = `${stderrTail}${chunk.toString()}`.slice(-4000);
+  const appendTail = (chunk: unknown): void => {
+    SERVER_OUTPUT_TAIL = `${SERVER_OUTPUT_TAIL}${String(chunk)}`.slice(-12000);
+  };
+  child.stdout?.on("data", appendTail);
+  child.stderr?.on("data", appendTail);
+  child.on("exit", () => {
+    SERVER_EXITED = true;
   });
 
   await waitForServerReady(baseUrl).catch((error) => {
     child.kill("SIGTERM");
-    throw new Error(`${String(error)}\nServer stderr tail:\n${stderrTail}`);
+    throw new Error(`${String(error)}\nServer output tail:\n${SERVER_OUTPUT_TAIL}`);
   });
+
+  try {
+    await postLocalJson({
+      baseUrl,
+      path: "/api/chat",
+      headers: {
+        "x-e2e-trace-run": RUN_ID,
+        "x-e2e-trace-case": "warmup",
+        "x-forwarded-host": "jjrugs.rugdesk.app",
+      },
+      body: {
+        session_id: randomUUID(),
+        message: "hello",
+        role: "retail_customer",
+      },
+      timeoutMs: 240000,
+    }).catch(() => null);
+  } catch {
+    // Warmup is best-effort only.
+  }
 
   return {
     baseUrl,
@@ -380,8 +461,56 @@ async function startServer(): Promise<{ baseUrl: string; stop: () => Promise<voi
           resolve();
         });
       });
+      SERVER_EXITED = true;
     },
   };
+}
+
+async function postLocalJson(input: {
+  baseUrl: string;
+  path: string;
+  headers?: Record<string, string>;
+  body: Record<string, unknown>;
+  timeoutMs: number;
+}): Promise<{ status: number; text: string }> {
+  const target = new URL(input.path, input.baseUrl);
+  const payload = JSON.stringify(input.body);
+
+  return new Promise((resolve, reject) => {
+    const request = http.request(
+      {
+        protocol: target.protocol,
+        hostname: target.hostname,
+        port: target.port,
+        path: `${target.pathname}${target.search}`,
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          "content-length": Buffer.byteLength(payload),
+          ...(input.headers ?? {}),
+        },
+      },
+      (response) => {
+        const chunks: Buffer[] = [];
+        response.on("data", (chunk) => {
+          chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(String(chunk)));
+        });
+        response.on("end", () => {
+          resolve({
+            status: response.statusCode ?? 0,
+            text: Buffer.concat(chunks).toString("utf8"),
+          });
+        });
+      }
+    );
+
+    request.setTimeout(input.timeoutMs, () => {
+      request.destroy(new Error(`HTTP timeout after ${input.timeoutMs}ms`));
+    });
+    request.on("error", reject);
+    request.write(payload);
+    request.end();
+  });
 }
 
 async function sendChatTurn(input: {
@@ -391,245 +520,117 @@ async function sendChatTurn(input: {
   message: string;
   role?: Role;
 }): Promise<ChatApiPayload> {
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 120000);
-  let response: Response;
-  try {
-    response = await fetch(`${input.baseUrl}/api/chat`, {
-      method: "POST",
-      headers: {
-        "content-type": "application/json",
-        "x-e2e-trace-run": RUN_ID,
-        "x-e2e-trace-case": input.caseId,
-        "x-forwarded-host": "jjrugs.rugdesk.app",
-      },
-      body: JSON.stringify({
-        session_id: input.sessionId,
-        message: input.message,
-        role: input.role ?? "retail_customer",
-      }),
-      signal: controller.signal,
-    });
-  } finally {
-    clearTimeout(timeout);
-  }
-
-  const text = await response.text();
-  if (!response.ok) {
-    throw new Error(`Chat failed ${response.status} (${input.caseId}): ${text}`);
-  }
-
-  const payload = JSON.parse(text) as ChatApiPayload;
-  return payload;
-}
-
-function normalizeText(value: string): string {
-  return value.toLowerCase().replace(/\s+/g, " ").trim();
-}
-
-function parseRequestedSizeLongSideIn(message: string): number | null {
-  const match = message
-    .toLowerCase()
-    .match(/(\d{1,3}(?:\.\d+)?)\s*(?:ft|feet|')?\s*(?:x|×|by)\s*(\d{1,3}(?:\.\d+)?)\s*(?:ft|feet|')?/i);
-  if (!match) return null;
-  const width = Number(match[1]);
-  const length = Number(match[2]);
-  if (!Number.isFinite(width) || !Number.isFinite(length)) return null;
-  const hasFeet = /\b(ft|feet)\b|'/i.test(message);
-  const widthIn = hasFeet ? Math.round(width * 12) : Math.round(width);
-  const lengthIn = hasFeet ? Math.round(length * 12) : Math.round(length);
-  return Math.max(widthIn, lengthIn);
-}
-
-function parseSizeTextLongSideIn(sizeText: string | null | undefined): number | null {
-  if (!sizeText) return null;
-  const parseDimensionIn = (part: string): number | null => {
-    const feetMatch = part.match(/(\d+)\s*'/);
-    const inchMatch = part.match(/'(\d+)\"/);
-    if (feetMatch || inchMatch) {
-      const feet = feetMatch ? Number(feetMatch[1]) : 0;
-      const inches = inchMatch ? Number(inchMatch[1]) : 0;
-      const total = feet * 12 + inches;
-      return Number.isFinite(total) ? total : null;
-    }
-    const asNum = Number(part.replace(/[^0-9.]/g, ""));
-    return Number.isFinite(asNum) ? asNum : null;
-  };
-  const parts = sizeText.split(/x|×/i).map((p) => p.trim());
-  if (parts.length !== 2) return null;
-  const a = parseDimensionIn(parts[0]);
-  const b = parseDimensionIn(parts[1]);
-  if (a === null || b === null) return null;
-  return Math.max(a, b);
-}
-
-function hasDisclosure(text: string): boolean {
-  return /don't have|do not have|closest|exact match|not available|unavailable|showing alternatives/i.test(
-    text
-  );
-}
-
-function extractRoom(message: string): string | null {
-  const text = normalizeText(message);
-  if (/living room/.test(text)) return "living room";
-  if (/dining room/.test(text)) return "dining room";
-  if (/bedroom/.test(text)) return "bedroom";
-  if (/hallway|hall/.test(text)) return "hallway";
-  if (/entryway|entry/.test(text)) return "entryway";
-  if (/kitchen/.test(text)) return "kitchen";
-  if (/office/.test(text)) return "office";
-  return null;
-}
-
-function runDeterministicChecks(input: {
-  persona: Persona;
-  turnIndex: number;
-  turn: PersonaTurn;
-  payload: ChatApiPayload;
-  knownRoom: string | null;
-  hadPriorRecommendations: boolean;
-}): AssertionFailure[] {
-  const failures: AssertionFailure[] = [];
-  const { persona, turnIndex, turn, payload } = input;
-  const assistant = payload.response.assistant_message ?? "";
-  const recs = payload.response.recommendations ?? [];
-  const normalizedMessage = normalizeText(turn.message);
-  const disclosure = hasDisclosure(assistant);
-
-  if (turn.expect.mode && payload.mode !== turn.expect.mode) {
-    failures.push({
-      persona: persona.name,
-      turn: turnIndex + 1,
-      message: turn.message,
-      reason: `Expected mode=${turn.expect.mode}, got mode=${payload.mode}`,
-    });
-  }
-
-  if (turn.expect.fineMode && payload.fine_mode !== turn.expect.fineMode) {
-    failures.push({
-      persona: persona.name,
-      turn: turnIndex + 1,
-      message: turn.message,
-      reason: `Expected fine_mode=${turn.expect.fineMode}, got ${payload.fine_mode}`,
-    });
-  }
-
-  const modernPositiveSignal =
-    /\bmodern|contemporary|minimal|minimalist\b/.test(normalizedMessage) &&
-    !/\b(forget modern|not modern|more traditional|instead traditional)\b/.test(
-      normalizedMessage
-    );
-  if (modernPositiveSignal && recs.length > 0 && !disclosure) {
-    const hasTraditional = recs.some((rec) => {
-      const hay = normalizeText(`${rec.title} ${rec.style ?? ""} ${rec.origin ?? ""}`);
-      return TRADITIONAL_TOKENS.some((token) => hay.includes(token));
-    });
-    if (hasTraditional) {
-      failures.push({
-        persona: persona.name,
-        turn: turnIndex + 1,
-        message: turn.message,
-        reason: "Modern request returned traditional cards without disclosure.",
+  let lastError: unknown = null;
+  const maxAttempts = 4;
+  for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+    try {
+      const response = await postLocalJson({
+        baseUrl: input.baseUrl,
+        path: "/api/chat",
+        headers: {
+          "x-e2e-trace-run": RUN_ID,
+          "x-e2e-trace-case": input.caseId,
+          "x-forwarded-host": "jjrugs.rugdesk.app",
+        },
+        body: {
+          session_id: input.sessionId,
+          message: input.message,
+          role: input.role ?? "retail_customer",
+        },
+        timeoutMs: 45000,
       });
-    }
-  }
-
-  const requestedLongSide = parseRequestedSizeLongSideIn(turn.message);
-  if (requestedLongSide && recs.length > 0 && !disclosure) {
-    const hasTooSmall = recs.some((rec) => {
-      const cardLong = parseSizeTextLongSideIn(rec.size_text);
-      return cardLong !== null && cardLong < requestedLongSide - 24;
-    });
-    if (hasTooSmall) {
-      failures.push({
-        persona: persona.name,
-        turn: turnIndex + 1,
-        message: turn.message,
-        reason: "Returned cards are >24in smaller than requested without disclosure.",
-      });
-    }
-  }
-
-  if (/\brunner\b/.test(normalizedMessage) && recs.length > 0 && !disclosure) {
-    const parseDimensionIn = (part: string): number | null => {
-      const feetMatch = part.match(/(\d+)\s*'/);
-      const inchMatch = part.match(/'(\d+)\"/);
-      if (feetMatch || inchMatch) {
-        const feet = feetMatch ? Number(feetMatch[1]) : 0;
-        const inches = inchMatch ? Number(inchMatch[1]) : 0;
-        const total = feet * 12 + inches;
-        return Number.isFinite(total) ? total : null;
+      if (response.status < 200 || response.status >= 300) {
+        if ((response.status === 429 || response.status >= 500) && attempt < maxAttempts) {
+          const delayMs =
+            response.status === 429
+              ? Math.min(45_000, 8_000 * attempt)
+              : 2_000 * attempt;
+          await new Promise((resolve) =>
+            setTimeout(resolve, delayMs)
+          );
+          continue;
+        }
+        throw new Error(`Chat failed ${response.status} (${input.caseId}): ${response.text}`);
       }
-      const asNum = Number(part.replace(/[^0-9.]/g, ""));
-      return Number.isFinite(asNum) ? asNum : null;
-    };
-    const hasNonRunner = recs.some((rec) => {
-      const longSide = parseSizeTextLongSideIn(rec.size_text);
-      if (!longSide) return false;
-      const size = rec.size_text ?? "";
-      const parts = size.split(/x|×/i).map((p) => p.trim());
-      if (parts.length !== 2) return true;
-      const a = parseDimensionIn(parts[0]);
-      const b = parseDimensionIn(parts[1]);
-      if (a === null || b === null) return true;
-      const short = Math.min(a, b);
-      const long = Math.max(a, b);
-      return !(short <= 42 && long >= 84 && long / short >= 2.2);
-    });
-    if (hasNonRunner) {
-      failures.push({
-        persona: persona.name,
-        turn: turnIndex + 1,
-        message: turn.message,
-        reason: "Runner request returned non-runner cards without disclosure.",
-      });
+      return JSON.parse(response.text) as ChatApiPayload;
+    } catch (error) {
+      lastError = error;
+      const isRetryable =
+        error instanceof Error &&
+        /timeout|socket|fetch failed|econnreset|econnrefused|headers timeout|und_err/i.test(
+          error.message.toLowerCase()
+        );
+      if (!isRetryable || attempt === maxAttempts) {
+        if (SERVER_EXITED) {
+          throw new Error(
+            `${error instanceof Error ? error.message : String(error)}\nServer exited during run.\nServer output tail:\n${SERVER_OUTPUT_TAIL}`
+          );
+        }
+        throw error;
+      }
+      await new Promise((resolve) => setTimeout(resolve, 1500 * attempt));
     }
   }
-
-  if (input.knownRoom && /what kind of space are you decorating/i.test(assistant)) {
-    failures.push({
-      persona: persona.name,
-      turn: turnIndex + 1,
-      message: turn.message,
-      reason: "Asked for room type even though room context was already known.",
-    });
-  }
-
-  const isReferenceTurn = /\b(first|second|third|that one|this one|that rug)\b/i.test(
-    turn.message
-  );
-  const isPurchaseTurn = /\b(i'll take|i will take|buy|checkout|check out|go with that)\b/i.test(
-    normalizedMessage
-  );
-  if (isReferenceTurn && input.hadPriorRecommendations) {
-    const hasReferenceAwareness = /you liked|you asked|that one|similar|larger|smaller|closest/i.test(
-      assistant
-    );
-    if (!hasReferenceAwareness && !isPurchaseTurn) {
-      failures.push({
-        persona: persona.name,
-        turn: turnIndex + 1,
-        message: turn.message,
-        reason: "Followup reference did not show context awareness.",
-      });
-    }
-  }
-
-  if ((payload.response.notes ?? "").includes("SIZE_RELAX_STRONG") && !disclosure) {
-    failures.push({
-      persona: persona.name,
-      turn: turnIndex + 1,
-      message: turn.message,
-      reason: "Strong size relaxation occurred without front disclosure.",
-    });
-  }
-
-  return failures;
+  throw lastError instanceof Error ? lastError : new Error("Chat call failed after retries.");
 }
+
+function asString(value: unknown): string {
+  return typeof value === "string" ? value : "";
+}
+
+function recommendationId(rec: Record<string, unknown>, index: number): string {
+  const candidates = [rec.id, rec.rug_id, rec.inventory_id, rec.slug];
+  for (const value of candidates) {
+    if (typeof value === "string" && value.trim().length > 0) return value.trim();
+    if (typeof value === "number" && Number.isFinite(value)) return String(value);
+  }
+  return `card-${index + 1}`;
+}
+
+function recommendationSizeText(rec: Record<string, unknown>): string {
+  const sizeText = rec.size_text;
+  if (typeof sizeText === "string" && sizeText.trim().length > 0) return sizeText;
+  const width = typeof rec.width_in === "number" ? rec.width_in : null;
+  const length = typeof rec.length_in === "number" ? rec.length_in : null;
+  if (width && length) {
+    const toFeet = (value: number): string => `${Math.round(value / 12)}'`;
+    return `${toFeet(width)} x ${toFeet(length)}`;
+  }
+  return "";
+}
+
+function toNullableText(value: unknown): string | null {
+  if (typeof value !== "string") return null;
+  const trimmed = value.trim();
+  return trimmed.length > 0 ? trimmed : null;
+}
+
+function toJudgeVisibleCard(rec: Record<string, unknown>): JudgeVisibleCard {
+  return {
+    title: asString(rec.title) || "Untitled",
+    size_text: recommendationSizeText(rec) || "-",
+    origin: toNullableText(rec.origin),
+    style: toNullableText(rec.style),
+  };
+}
+
+function toJudgeVisibleCards(
+  recs: Array<Record<string, unknown>> | undefined
+): JudgeVisibleCard[] {
+  return (recs ?? []).map((rec) => toJudgeVisibleCard(rec));
+}
+
+function sameCardIdSet(a: string[], b: string[]): boolean {
+  if (a.length === 0 || b.length === 0 || a.length !== b.length) return false;
+  const sa = [...a].sort();
+  const sb = [...b].sort();
+  return sa.every((value, index) => value === sb[index]);
+}
+
 
 async function judgeTurnQuality(input: {
   persona: Persona;
-  history: Array<{ role: "user" | "assistant"; text: string }>;
+  history: JudgeHistoryTurn[];
   userMessage: string;
   payload: ChatApiPayload;
   model: string;
@@ -664,26 +665,45 @@ async function judgeTurnQuality(input: {
     type: "object",
     additionalProperties: false,
     required: [
+      "overall",
+      "overall_reason",
       "warmth",
       "engagement",
-      "grounded",
+      "recommendation_fit",
+      "honest_disclosure",
+      "no_repeat",
+      "practical_signal",
       "graceful_no_match",
       "taste",
+      "contradiction_detected",
+      "contradiction_quote",
       "notes",
     ],
     properties: {
+      overall: { type: "integer", minimum: 1, maximum: 5 },
+      overall_reason: { type: "string", maxLength: 220 },
       warmth: { type: "integer", minimum: 1, maximum: 5 },
       engagement: { type: "integer", minimum: 1, maximum: 5 },
-      grounded: { type: "integer", minimum: 1, maximum: 5 },
-      graceful_no_match: { type: "integer", minimum: 1, maximum: 5 },
+      recommendation_fit: { type: "integer", minimum: 1, maximum: 5 },
+      honest_disclosure: { type: "integer", minimum: 1, maximum: 5 },
+      no_repeat: { type: "integer", minimum: 1, maximum: 5 },
+      practical_signal: {
+        anyOf: [{ type: "integer", minimum: 1, maximum: 5 }, { type: "null" }],
+      },
+      graceful_no_match: {
+        anyOf: [{ type: "integer", minimum: 1, maximum: 5 }, { type: "null" }],
+      },
       taste: { type: "integer", minimum: 1, maximum: 5 },
-      notes: { type: "string", maxLength: 280 },
+      contradiction_detected: { type: "boolean" },
+      contradiction_quote: { anyOf: [{ type: "string", maxLength: 260 }, { type: "null" }] },
+      notes: { type: "string", maxLength: 500 },
     },
   } as const;
 
   const requestPayload = {
     model: input.model,
-    max_output_tokens: 220,
+    max_output_tokens: 1200,
+    temperature: 0,
     input: [
       {
         role: "system",
@@ -691,7 +711,35 @@ async function judgeTurnQuality(input: {
           {
             type: "input_text",
             text:
-              "You are a strict evaluator for a retail rug concierge response. Score only what is provided. Do not be generous.",
+              [
+                "You are a real customer who has just walked into a rug gallery.",
+                "A staff member handed you an iPad and said this AI will help you find rugs currently in the store.",
+                "You have never used this tool before.",
+                "You do not know how it works internally.",
+                "You do not know what 'discovery mode' is or what the backend is doing.",
+                "You just see a message and some rug cards on screen and you either feel helped or you don't.",
+                "Evaluate each concierge response exactly as that customer would experience it.",
+                "Read the assistant message and the rug cards together as one complete response — the same way they appear on screen.",
+                "Do not decompose them.",
+                "Do not evaluate the text separately from the cards.",
+                "Do not apply technical criteria.",
+                "Ask: did this response help me find a rug I might actually want? Does this concierge feel like someone worth talking to?",
+                "Watch closely for contradictions between what the concierge says and what the cards actually show.",
+                "Example contradiction types: calling options modern when shown cards are traditional Persian, or saying options are larger when shown cards are smaller.",
+                "Confident and wrong is worse than uncertain and honest.",
+                "If the assistant explicitly discloses that exact color balance cannot be verified from card summaries, do not treat missing visible color proof as a contradiction by itself.",
+                "Educational answers without cards can still score high when they are clear, useful, and naturally bridge to showing examples next.",
+                "A single-card recommendation can still score high if the assistant is transparent about limited inventory and gives a concrete next step.",
+                "When inventory is clearly limited and the assistant is honest about limits while offering closest viable options, overall can still be 4-5 unless the response is misleading.",
+                "Scoring instructions:",
+                "1) Overall (primary gate): as this customer, did this help? score 1-5. 1 means I'd put the tablet down. 5 means I feel genuinely helped and want to continue.",
+                "2) Diagnostic subscores (1-5): warmth, engagement, recommendation_fit, honest_disclosure, no_repeat, taste.",
+                "Set practical_signal to 1-5 only if the customer asked for practical needs (kids, pets, durable, easy clean, soft underfoot); otherwise null.",
+                "Set graceful_no_match to 1-5 only if no good match existed and the assistant had to handle mismatch/no-match; otherwise null.",
+                "For recommendation_fit, compare the request directly against visible card fields, not assistant claims.",
+                "If the assistant text contradicts visible cards, set contradiction_detected=true, include a direct contradiction_quote, and score overall/recommendation_fit harshly.",
+                "Output strict JSON only.",
+              ].join(" "),
           },
         ],
       },
@@ -706,17 +754,10 @@ async function judgeTurnQuality(input: {
                   name: input.persona.name,
                   profile: input.persona.profile,
                 },
-                conversation_history: input.history.slice(-8),
+                conversation_history_full_session: input.history,
                 user_message: input.userMessage,
                 assistant_message: input.payload.response.assistant_message,
-                response_mode: input.payload.fine_mode,
-                recommendations: (input.payload.response.recommendations ?? []).map((rec) => ({
-                  title: rec.title,
-                  style: rec.style,
-                  origin: rec.origin,
-                  size_text: rec.size_text,
-                  reasons: rec.match_reasons,
-                })),
+                visible_cards: toJudgeVisibleCards(input.payload.response.recommendations),
               },
               null,
               2
@@ -735,26 +776,64 @@ async function judgeTurnQuality(input: {
     },
   };
 
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 60000);
-  let response: Response;
-  try {
-    response = await fetch(OPENAI_RESPONSES_URL, {
-      method: "POST",
-      headers: {
-        "content-type": "application/json",
-        authorization: `Bearer ${input.apiKey}`,
-      },
-      body: JSON.stringify(requestPayload),
-      signal: controller.signal,
-    });
-  } finally {
-    clearTimeout(timeout);
+  let payload: Record<string, unknown> | null = null;
+  let lastError: unknown = null;
+  const maxAttempts = 8;
+
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 25000);
+    try {
+      const response = await fetch(OPENAI_RESPONSES_URL, {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          authorization: `Bearer ${input.apiKey}`,
+        },
+        body: JSON.stringify(requestPayload),
+        signal: controller.signal,
+      });
+      const parsedPayload = (await response.json()) as Record<string, unknown>;
+      const status = Number(response.status);
+
+      if (response.ok) {
+        payload = parsedPayload;
+        break;
+      }
+
+      const retryableStatus = status === 429 || status >= 500;
+      if (retryableStatus && attempt < maxAttempts - 1) {
+        process.stderr.write(
+          `[judge-retry] status=${status} attempt=${attempt + 1}/${maxAttempts}\n`
+        );
+        const jitterMs = Math.floor(Math.random() * 500);
+        const backoffMs = Math.min(60000, 3000 * Math.pow(2, attempt)) + jitterMs;
+        await new Promise((resolve) => setTimeout(resolve, backoffMs));
+        continue;
+      }
+
+      throw new Error(`Judge API failed (${status})`);
+    } catch (error) {
+      lastError = error;
+      const retryableError =
+        error instanceof Error &&
+        (error.name === "AbortError" ||
+          /aborted|timeout|network|429|rate/i.test(error.message));
+      if (!retryableError || attempt >= maxAttempts - 1) {
+        throw error;
+      }
+      const jitterMs = Math.floor(Math.random() * 500);
+      const backoffMs = Math.min(60000, 3000 * Math.pow(2, attempt)) + jitterMs;
+      await new Promise((resolve) => setTimeout(resolve, backoffMs));
+    } finally {
+      clearTimeout(timeout);
+    }
   }
 
-  const payload = (await response.json()) as Record<string, unknown>;
-  if (!response.ok) {
-    throw new Error(`Judge API failed (${response.status})`);
+  if (!payload) {
+    throw lastError instanceof Error
+      ? lastError
+      : new Error("Judge API request failed before receiving a usable response.");
   }
 
   const outputText = parseOutputText(payload);
@@ -786,11 +865,20 @@ async function judgeTurnQuality(input: {
       return Number.isFinite(value) ? value : null;
     };
     parsed = {
+      overall: pickScore("overall") ?? 3,
+      overall_reason: "Judge returned non-JSON output; fallback parser used.",
       warmth: pickScore("warmth") ?? 3,
       engagement: pickScore("engagement") ?? 3,
-      grounded: pickScore("grounded") ?? 3,
-      graceful_no_match: pickScore("graceful") ?? 3,
+      recommendation_fit: pickScore("recommendation[_ ]?fit") ?? 3,
+      honest_disclosure: pickScore("honest[_ ]?disclosure") ?? 3,
+      no_repeat: pickScore("no[_ ]?repeat") ?? 3,
+      practical_signal: pickScore("practical[_ ]?signal"),
+      graceful_no_match: pickScore("graceful[_ ]?no[_ ]?match"),
       taste: pickScore("taste") ?? 3,
+      contradiction_detected:
+        /contradiction[_ ]?detected[^a-z0-9]{0,8}(true|1)/i.test(outputText) ||
+        /"contradiction[_ ]?detected"\s*:\s*true/i.test(outputText),
+      contradiction_quote: null,
       notes: "Judge returned non-JSON output; used fallback parse.",
     };
   }
@@ -800,33 +888,29 @@ async function judgeTurnQuality(input: {
 async function main(): Promise<void> {
   const localEnv = loadEnvFile(path.resolve(APP_DIR, ".env.local"));
   const apiKey = process.env.OPENAI_API_KEY ?? localEnv.OPENAI_API_KEY;
-  const model =
-    process.env.OPENAI_CHAT_MODEL ??
-    localEnv.OPENAI_CHAT_MODEL ??
-    localEnv.OPENAI_MODEL ??
-    "gpt-4.1-mini";
+  const model = "gpt-4.1";
 
   if (!apiKey) {
     throw new Error("OPENAI_API_KEY is required for judge scoring.");
   }
 
+  ensureBuiltApp();
   const server = await startServer();
-  const failures: AssertionFailure[] = [];
   const judgeScores: JudgeScore[] = [];
   const turnScores: TurnScore[] = [];
+  const personaBuckets = new Map<string, TurnScore[]>();
 
   try {
     const totalTurns = PERSONAS.reduce((sum, persona) => sum + persona.turns.length, 0);
     let completedTurns = 0;
     for (const persona of PERSONAS) {
       const sessionId = randomUUID();
-      let knownRoom: string | null = null;
-      let hadRecommendations = false;
-      const history: Array<{ role: "user" | "assistant"; text: string }> = [];
+      const history: JudgeHistoryTurn[] = [];
 
       for (let i = 0; i < persona.turns.length; i += 1) {
         const turn = persona.turns[i];
         const caseId = `${persona.id}-turn-${String(i + 1).padStart(2, "0")}`;
+        process.stdout.write(`\n[run] ${caseId} :: sending turn\n`);
         const payload = await sendChatTurn({
           baseUrl: server.baseUrl,
           caseId,
@@ -834,17 +918,7 @@ async function main(): Promise<void> {
           message: turn.message,
         });
 
-        failures.push(
-          ...runDeterministicChecks({
-            persona,
-            turnIndex: i,
-            turn,
-            payload,
-            knownRoom,
-            hadPriorRecommendations: hadRecommendations,
-          })
-        );
-
+        process.stdout.write(`[run] ${caseId} :: judging turn\n`);
         const score = await judgeTurnQuality({
           persona,
           history,
@@ -854,26 +928,33 @@ async function main(): Promise<void> {
           apiKey,
         });
         judgeScores.push(score);
+        const cardIds = (payload.response.recommendations ?? []).map((rec, index) =>
+          recommendationId(rec, index)
+        );
         turnScores.push({
           persona: persona.name,
           turn: i + 1,
           message: turn.message,
           assistant: payload.response.assistant_message ?? "",
           mode: payload.fine_mode,
+          card_ids: cardIds,
           score,
         });
+        const existing = personaBuckets.get(persona.name) ?? [];
+        existing.push(turnScores[turnScores.length - 1]);
+        personaBuckets.set(persona.name, existing);
 
-        history.push({ role: "user", text: turn.message });
-        history.push({ role: "assistant", text: payload.response.assistant_message ?? "" });
-
-        const roomFromTurn = extractRoom(turn.message);
-        if (roomFromTurn) knownRoom = roomFromTurn;
-        hadRecommendations =
-          payload.fine_mode === "recommendation" || payload.fine_mode === "disambiguation";
+        history.push({
+          turn: i + 1,
+          user_message: turn.message,
+          assistant_message: payload.response.assistant_message ?? "",
+          cards: toJudgeVisibleCards(payload.response.recommendations),
+        });
         completedTurns += 1;
         process.stdout.write(
           `\rPersona quality progress: ${completedTurns}/${totalTurns} turns`
         );
+        await new Promise((resolve) => setTimeout(resolve, 15000));
       }
     }
     process.stdout.write("\n");
@@ -881,85 +962,135 @@ async function main(): Promise<void> {
     await server.stop();
   }
 
-  const aggregate = judgeScores.reduce(
-    (acc, score) => {
-      acc.warmth += score.warmth;
-      acc.engagement += score.engagement;
-      acc.grounded += score.grounded;
-      acc.graceful_no_match += score.graceful_no_match;
-      acc.taste += score.taste;
-      return acc;
-    },
-    { warmth: 0, engagement: 0, grounded: 0, graceful_no_match: 0, taste: 0 }
+  const average = (values: number[]): number =>
+    values.length === 0
+      ? 0
+      : Number((values.reduce((sum, value) => sum + value, 0) / values.length).toFixed(2));
+
+  const globalAverages: Record<string, number> = {};
+  globalAverages.overall = average(judgeScores.map((score) => score.overall));
+  for (const dim of DIAGNOSTIC_SCORE_DIMENSIONS) {
+    globalAverages[dim] = average(judgeScores.map((score) => score[dim]));
+  }
+  for (const dim of CONDITIONAL_SCORE_DIMENSIONS) {
+    const values = judgeScores
+      .map((score) => score[dim])
+      .filter((value): value is number => value !== null);
+    globalAverages[dim] = average(values);
+  }
+
+  const personaAverages = [...personaBuckets.entries()].map(([personaName, scores]) => {
+    const values = scores.map((item) => item.score.overall);
+    const worstTurn = scores.reduce((worst, candidate) =>
+      candidate.score.overall < worst.score.overall ? candidate : worst
+    );
+    return {
+      persona: personaName,
+      turns: scores.length,
+      average: average(values),
+      worstTurn,
+    };
+  });
+
+  const hardFailures: Array<{
+    persona: string;
+    turn: number;
+    message: string;
+    reason: string;
+    cardIds?: string[];
+  }> = [];
+  for (const item of turnScores) {
+    if (item.score.overall < 4) {
+      hardFailures.push({
+        persona: item.persona,
+        turn: item.turn,
+        message: item.message,
+        reason: `Per-turn overall floor violated: overall=${item.score.overall} (<4.0)`,
+        cardIds: item.card_ids,
+      });
+    }
+    if (item.score.contradiction_detected) {
+      hardFailures.push({
+        persona: item.persona,
+        turn: item.turn,
+        message: item.message,
+        reason: `Contradicting claim detected: ${item.score.contradiction_quote ?? "quote not provided"}`,
+        cardIds: item.card_ids,
+      });
+    }
+  }
+
+  console.log("\nPer-turn Scores");
+  console.log(
+    "| Persona | Turn | Overall | Why | Warmth | Engagement | Fit | Disclosure | No Repeat | Practical | No-Match | Taste | Contradiction | Mode | Card IDs | Message | Notes |"
+  );
+  console.log(
+    "|---|---:|---:|---|---:|---:|---:|---:|---:|---:|---:|---:|---|---|---|---|---|"
+  );
+  for (const item of turnScores) {
+    const message = item.message.replace(/\|/g, "\\|");
+    const notes = item.score.notes.replace(/\|/g, "\\|");
+    const reason = item.score.overall_reason.replace(/\|/g, "\\|");
+    const ids = item.card_ids.join(", ");
+    const contradiction = item.score.contradiction_detected
+      ? `YES: ${(item.score.contradiction_quote ?? "quote missing").replace(/\|/g, "\\|")}`
+      : "no";
+    console.log(
+      `| ${item.persona} | ${item.turn} | ${item.score.overall} | ${reason} | ${item.score.warmth} | ${item.score.engagement} | ${item.score.recommendation_fit} | ${item.score.honest_disclosure} | ${item.score.no_repeat} | ${item.score.practical_signal ?? "N/A"} | ${item.score.graceful_no_match ?? "N/A"} | ${item.score.taste} | ${contradiction} | ${item.mode} | ${ids || "-"} | ${message} | ${notes || "-"} |`
+    );
+  }
+
+  console.log("\nPer-persona Averages");
+  console.log("| Persona | Turns | Average Overall | Worst Turn | Worst-Turn Why |");
+  console.log("|---|---:|---:|---:|---|");
+  for (const row of personaAverages) {
+    const why = row.worstTurn.score.overall_reason.replace(/\|/g, "\\|");
+    console.log(
+      `| ${row.persona} | ${row.turns} | ${row.average.toFixed(2)} | ${row.worstTurn.turn} | ${why} |`
+    );
+  }
+
+  console.log("\nGlobal Averages");
+  console.log("| Dimension | Average |");
+  console.log("|---|---:|");
+  for (const dim of ["overall", ...DIAGNOSTIC_SCORE_DIMENSIONS, ...CONDITIONAL_SCORE_DIMENSIONS]) {
+    const label = String(dim);
+    const value = globalAverages[label];
+    console.log(`| ${label} | ${Number.isFinite(value) ? value.toFixed(2) : "N/A"} |`);
+  }
+
+  if (hardFailures.length > 0) {
+    console.log("\nHard Failure Details");
+    for (const failure of hardFailures) {
+      const ids = failure.cardIds?.length ? ` cards=[${failure.cardIds.join(", ")}]` : "";
+      console.log(
+        `[FAIL] ${failure.persona} turn ${failure.turn}: ${failure.reason}${ids}\n  user: ${failure.message}`
+      );
+    }
+  }
+
+  const globalOverallPass = globalAverages.overall >= 4.0;
+  const perPersonaPass = personaAverages.every((row) => row.average >= 3.8);
+
+  console.log("\nPass Gate Check");
+  console.log(
+    `- Global average overall >= 4.0: ${globalOverallPass ? "PASS" : `FAIL (${globalAverages.overall.toFixed(2)})`}`
+  );
+  console.log(
+    `- Per-persona average overall >= 3.8: ${perPersonaPass ? "PASS" : "FAIL"}`
+  );
+  const belowFloorCount = turnScores.filter((item) => item.score.overall < 4).length;
+  console.log(
+    `- Zero turns with overall < 4.0: ${belowFloorCount === 0 ? "PASS" : `FAIL (${belowFloorCount})`}`
+  );
+  const contradictionCount = turnScores.filter(
+    (item) => item.score.contradiction_detected
+  ).length;
+  console.log(
+    `- Zero contradiction turns: ${contradictionCount === 0 ? "PASS" : `FAIL (${contradictionCount})`}`
   );
 
-  const count = Math.max(judgeScores.length, 1);
-  const averages = {
-    warmth: Number((aggregate.warmth / count).toFixed(2)),
-    engagement: Number((aggregate.engagement / count).toFixed(2)),
-    grounded: Number((aggregate.grounded / count).toFixed(2)),
-    graceful_no_match: Number((aggregate.graceful_no_match / count).toFixed(2)),
-    taste: Number((aggregate.taste / count).toFixed(2)),
-  };
-
-  console.log(`Persona turns evaluated: ${judgeScores.length}`);
-  console.log(`Deterministic failures: ${failures.length}`);
-  if (failures.length > 0) {
-    for (const failure of failures.slice(0, 30)) {
-      console.log(
-        `[FAIL] ${failure.persona} turn ${failure.turn}: ${failure.reason} :: ${failure.message}`
-      );
-    }
-  }
-  console.log("AI judge averages:", averages);
-  const lowestTurns = [...turnScores]
-    .sort((a, b) => {
-      const aMean =
-        (a.score.warmth +
-          a.score.engagement +
-          a.score.grounded +
-          a.score.graceful_no_match +
-          a.score.taste) /
-        5;
-      const bMean =
-        (b.score.warmth +
-          b.score.engagement +
-          b.score.grounded +
-          b.score.graceful_no_match +
-          b.score.taste) /
-        5;
-      return aMean - bMean;
-    })
-    .slice(0, 12);
-  if (lowestTurns.length > 0) {
-    console.log("Lowest-scored turns:");
-    for (const item of lowestTurns) {
-      const mean = (
-        (item.score.warmth +
-          item.score.engagement +
-          item.score.grounded +
-          item.score.graceful_no_match +
-          item.score.taste) /
-        5
-      ).toFixed(2);
-      console.log(
-        `- ${item.persona} turn ${item.turn} [${item.mode}] mean=${mean} ` +
-          `w=${item.score.warmth} e=${item.score.engagement} g=${item.score.grounded} ` +
-          `n=${item.score.graceful_no_match} t=${item.score.taste} :: ${item.score.notes}`
-      );
-      console.log(`  user: ${item.message}`);
-      console.log(`  assistant: ${item.assistant}`);
-    }
-  }
-
-  const meetsThreshold =
-    averages.warmth >= 4 &&
-    averages.engagement >= 4 &&
-    averages.grounded >= 4 &&
-    averages.graceful_no_match >= 4 &&
-    averages.taste >= 4;
-
-  if (failures.length > 0 || !meetsThreshold) {
+  if (!globalOverallPass || !perPersonaPass || hardFailures.length > 0) {
     process.exitCode = 1;
     return;
   }

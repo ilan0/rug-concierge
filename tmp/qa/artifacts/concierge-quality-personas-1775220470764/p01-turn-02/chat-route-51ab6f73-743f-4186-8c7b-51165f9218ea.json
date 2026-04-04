@@ -1,0 +1,704 @@
+{
+  "trace_id": "51ab6f73-743f-4186-8c7b-51165f9218ea",
+  "channel": "chat-route",
+  "created_at": "2026-04-03T12:48:34.186Z",
+  "payload": {
+    "flow_path": [
+      "/api/chat POST",
+      "getOrCreateSession",
+      "updateRecommendationStateForTurn",
+      "routeTurnMode",
+      "handlerDispatch",
+      "updateConversationMemory",
+      "saveSession"
+    ],
+    "request": {
+      "session_id": "4c5a20aa-fae7-45e1-acd9-a3964be27959",
+      "role": "retail_customer",
+      "tenant_id": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5",
+      "tenant_subdomain": "jjrugs",
+      "tenant_hostname": "jjrugs.rugdesk.app",
+      "message": "Show me more with richer reds.",
+      "constraints": null
+    },
+    "routing": {
+      "mode": "recommendation",
+      "intent": "followup",
+      "rule_id": "RECOMMENDATION_FOLLOWUP",
+      "confidence": "high",
+      "needs_clarification": false,
+      "parser": {
+        "model": "gpt-4.1-mini",
+        "latency_ms": 1766,
+        "status": "success",
+        "parse_status": "success",
+        "fallback": null,
+        "fallback_reason": null,
+        "normalized_payload": {
+          "intent": "followup",
+          "mode": "recommendation_followup",
+          "followup_intent": "more_like_this",
+          "constraints": {
+            "size": null,
+            "colors": [
+              "red"
+            ],
+            "styles": [],
+            "shape": null
+          },
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          },
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          },
+          "session_facts": [
+            "wants richer reds"
+          ],
+          "rug_reference_ambiguous": false,
+          "confidence": "high"
+        },
+        "normalized_parse_payload": {
+          "intent": "followup",
+          "mode": "recommendation_followup",
+          "followup_intent": "more_like_this",
+          "constraints": {
+            "size": null,
+            "colors": [
+              "red"
+            ],
+            "styles": [],
+            "shape": null
+          },
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          },
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          },
+          "session_facts": [
+            "wants richer reds"
+          ],
+          "rug_reference_ambiguous": false,
+          "confidence": "high"
+        },
+        "response_status": 200,
+        "incomplete_detected": false,
+        "error": null
+      },
+      "policy": {
+        "intent": "followup",
+        "compiled_policy": {
+          "intent": "followup",
+          "mode": "recommendation_followup",
+          "discovery_requested": false,
+          "followup_intent": "more_like_this",
+          "hard_constraints": {
+            "size": {
+              "widthIn": 108,
+              "lengthIn": 144,
+              "toleranceIn": 0
+            },
+            "colors": [
+              "red"
+            ],
+            "styles": [
+              "traditional"
+            ],
+            "strictness": {
+              "size": "prefer",
+              "colors": "prefer",
+              "styles": "prefer",
+              "shape": "prefer"
+            },
+            "avoid_preferences": {
+              "styles": [
+                "modern",
+                "contemporary",
+                "minimalist",
+                "abstract",
+                "kilim",
+                "baluch"
+              ],
+              "shapes": []
+            }
+          },
+          "persisted_hard_constraints": {
+            "size": {
+              "widthIn": 108,
+              "lengthIn": 144,
+              "toleranceIn": 0
+            },
+            "colors": [
+              "red"
+            ],
+            "styles": [
+              "traditional"
+            ],
+            "strictness": {
+              "size": "prefer",
+              "colors": "prefer",
+              "styles": "prefer",
+              "shape": "prefer"
+            },
+            "avoid_preferences": {
+              "styles": [
+                "modern",
+                "contemporary",
+                "minimalist",
+                "abstract",
+                "kilim",
+                "baluch"
+              ],
+              "shapes": []
+            }
+          },
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          },
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          },
+          "confidence": "high",
+          "policy_source": "parsed_turn",
+          "must_prefer_avoid": {
+            "must": [],
+            "prefer": [
+              "size",
+              "colors",
+              "styles"
+            ],
+            "avoid": {
+              "colors": [],
+              "styles": [
+                "modern",
+                "contemporary",
+                "minimalist",
+                "abstract",
+                "kilim",
+                "baluch"
+              ],
+              "shapes": []
+            }
+          }
+        },
+        "policy_source": "parsed_turn",
+        "must_prefer_avoid": {
+          "must": [],
+          "prefer": [
+            "size",
+            "colors",
+            "styles"
+          ],
+          "avoid": {
+            "colors": [],
+            "styles": [
+              "modern",
+              "contemporary",
+              "minimalist",
+              "abstract",
+              "kilim",
+              "baluch"
+            ],
+            "shapes": []
+          }
+        },
+        "must-prefer-avoid": {
+          "must": [],
+          "prefer": [
+            "size",
+            "colors",
+            "styles"
+          ],
+          "avoid": {
+            "colors": [],
+            "styles": [
+              "modern",
+              "contemporary",
+              "minimalist",
+              "abstract",
+              "kilim",
+              "baluch"
+            ],
+            "shapes": []
+          }
+        },
+        "constraint_modes": {
+          "size": "prefer",
+          "colors": "prefer",
+          "styles": "prefer",
+          "shape": "prefer",
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          }
+        }
+      },
+      "parser_trace": {
+        "called": true,
+        "model": "gpt-4.1-mini",
+        "status": "success",
+        "response_status": 200,
+        "fallback": null,
+        "fallback_reason": null,
+        "incomplete_detected": false,
+        "latency_ms": 1766,
+        "normalized_payload": {
+          "intent": "followup",
+          "mode": "recommendation_followup",
+          "followup_intent": "more_like_this",
+          "constraints": {
+            "size": null,
+            "colors": [
+              "red"
+            ],
+            "styles": [],
+            "shape": null
+          },
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          },
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          },
+          "session_facts": [
+            "wants richer reds"
+          ],
+          "rug_reference_ambiguous": false,
+          "confidence": "high"
+        },
+        "parsed": {
+          "intent": "followup",
+          "mode": "recommendation_followup",
+          "followup_intent": "more_like_this",
+          "constraints": {
+            "size": null,
+            "colors": [
+              "red"
+            ],
+            "styles": [],
+            "shape": null
+          },
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          },
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          },
+          "session_facts": [
+            "wants richer reds"
+          ],
+          "rug_reference_ambiguous": false,
+          "confidence": "high"
+        },
+        "error": null
+      },
+      "compiled_policy": {
+        "intent": "followup",
+        "mode": "recommendation_followup",
+        "discovery_requested": false,
+        "followup_intent": "more_like_this",
+        "hard_constraints": {
+          "size": {
+            "widthIn": 108,
+            "lengthIn": 144,
+            "toleranceIn": 0
+          },
+          "colors": [
+            "red"
+          ],
+          "styles": [
+            "traditional"
+          ],
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          },
+          "avoid_preferences": {
+            "styles": [
+              "modern",
+              "contemporary",
+              "minimalist",
+              "abstract",
+              "kilim",
+              "baluch"
+            ],
+            "shapes": []
+          }
+        },
+        "persisted_hard_constraints": {
+          "size": {
+            "widthIn": 108,
+            "lengthIn": 144,
+            "toleranceIn": 0
+          },
+          "colors": [
+            "red"
+          ],
+          "styles": [
+            "traditional"
+          ],
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          },
+          "avoid_preferences": {
+            "styles": [
+              "modern",
+              "contemporary",
+              "minimalist",
+              "abstract",
+              "kilim",
+              "baluch"
+            ],
+            "shapes": []
+          }
+        },
+        "strictness": {
+          "size": "prefer",
+          "colors": "prefer",
+          "styles": "prefer",
+          "shape": "prefer"
+        },
+        "avoid": {
+          "colors": [],
+          "styles": [],
+          "shapes": []
+        },
+        "confidence": "high",
+        "policy_source": "parsed_turn",
+        "must_prefer_avoid": {
+          "must": [],
+          "prefer": [
+            "size",
+            "colors",
+            "styles"
+          ],
+          "avoid": {
+            "colors": [],
+            "styles": [
+              "modern",
+              "contemporary",
+              "minimalist",
+              "abstract",
+              "kilim",
+              "baluch"
+            ],
+            "shapes": []
+          }
+        }
+      },
+      "policy_source": "parsed_turn",
+      "must_prefer_avoid": {
+        "must": [],
+        "prefer": [
+          "size",
+          "colors",
+          "styles"
+        ],
+        "avoid": {
+          "colors": [],
+          "styles": [
+            "modern",
+            "contemporary",
+            "minimalist",
+            "abstract",
+            "kilim",
+            "baluch"
+          ],
+          "shapes": []
+        }
+      },
+      "must-prefer-avoid": {
+        "must": [],
+        "prefer": [
+          "size",
+          "colors",
+          "styles"
+        ],
+        "avoid": {
+          "colors": [],
+          "styles": [
+            "modern",
+            "contemporary",
+            "minimalist",
+            "abstract",
+            "kilim",
+            "baluch"
+          ],
+          "shapes": []
+        }
+      },
+      "handler": "handleRecommendationTurn",
+      "prompt_layer_preview": [
+        "TASK_PROMPT_RECOMMENDATION",
+        "SYSTEM_PROMPT_BASE",
+        "TASK_PROMPT_RECOMMENDATION",
+        "TASK_PROMPT_RECOMMENDATION",
+        "STRUCTURED_OUTPUT_RECOMMENDATION",
+        "CHAT_MEMORY_CONTEXT",
+        "CHAT_MEMORY_CONTEXT",
+        "CHAT_MEMORY_CONTEXT",
+        "CHAT_MEMORY_CONTEXT",
+        "RECENT_TURNS_CONTEXT",
+        "INVENTORY_CONTEXT",
+        "LATEST_USER_MESSAGE_WITH_HARD_CONSTRAINTS"
+      ]
+    },
+    "reaction": {
+      "detected_reaction": null,
+      "referenced_rug_id": null,
+      "rug_reference_ambiguous": false,
+      "liked_attributes_before": {
+        "colors": [
+          "red"
+        ],
+        "styles": [
+          "traditional"
+        ],
+        "origins": []
+      },
+      "liked_attributes_after": {
+        "colors": [
+          "red"
+        ],
+        "styles": [
+          "traditional"
+        ],
+        "origins": []
+      },
+      "liked_rug_ids_before": [],
+      "liked_rug_ids_after": [],
+      "dismissed_rug_ids_before": [],
+      "dismissed_rug_ids_after": []
+    },
+    "state_snapshot": {
+      "recommendation_state": {
+        "hard_constraints": {
+          "size": {
+            "widthIn": 108,
+            "lengthIn": 144,
+            "toleranceIn": 0
+          },
+          "colors": [
+            "red"
+          ],
+          "styles": [
+            "traditional"
+          ],
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          },
+          "avoid_preferences": {
+            "styles": [
+              "modern",
+              "contemporary",
+              "minimalist",
+              "abstract",
+              "kilim",
+              "baluch"
+            ],
+            "shapes": []
+          }
+        },
+        "soft_preferences": {},
+        "runtime": {
+          "last_result_mode": "recommendation",
+          "last_relaxed_size_tolerance_in": null,
+          "last_blockers": [],
+          "last_recommended_size_in": {
+            "width_in": 108,
+            "length_in": 144
+          },
+          "liked_rug_ids": [],
+          "dismissed_rug_ids": [],
+          "shown_rug_ids": [
+            "fd2514b9-7464-4a8c-be9a-5aa47f88d180",
+            "35ac4b28-92a7-48ac-ab7f-7ef10be779e9",
+            "4c07b1f6-ec49-4385-98a9-8c7e00ac3c74",
+            "38ed22c1-6294-4b0c-8f32-ca996c677164"
+          ],
+          "liked_attributes": {
+            "colors": [],
+            "styles": [
+              "traditional"
+            ],
+            "origins": []
+          },
+          "recently_shown_rugs": [
+            {
+              "id": "fd2514b9-7464-4a8c-be9a-5aa47f88d180",
+              "label": "Antique Persian Bidjar",
+              "colors": [
+                "red",
+                "blue",
+                "gold",
+                "green"
+              ],
+              "style": "Bidjar",
+              "origin": "Persian"
+            },
+            {
+              "id": "35ac4b28-92a7-48ac-ab7f-7ef10be779e9",
+              "label": "Antique Persian Tabriz",
+              "colors": [
+                "red",
+                "gold",
+                "blue"
+              ],
+              "style": "Tabriz",
+              "origin": "Persian"
+            },
+            {
+              "id": "4c07b1f6-ec49-4385-98a9-8c7e00ac3c74",
+              "label": "Antique Persian Heriz",
+              "colors": [
+                "rust",
+                "brown",
+                "blue"
+              ],
+              "style": "Heriz",
+              "origin": "Persian"
+            },
+            {
+              "id": "38ed22c1-6294-4b0c-8f32-ca996c677164",
+              "label": "Antique Persian Sultanabad",
+              "colors": [
+                "brown",
+                "red",
+                "blue"
+              ],
+              "style": "Sultanabad",
+              "origin": "Persian"
+            }
+          ],
+          "no_match_attempts": 0,
+          "updated_at": "2026-04-03T12:48:17.916Z"
+        }
+      },
+      "conversation_memory": {
+        "summary_text": "User: I need a 9x12 traditional Persian for my formal dining room. | Assistant: Great style call. For your formal dining room, a 9x12 traditional Persian is an excellent choice for classic elegance and sophistication. The Antique Persian Bidjar stands out as a refined option, celebrated for its dur…",
+        "stable_facts": [
+          "wants size 9x12",
+          "likes traditional style",
+          "likes Persian style",
+          "room: formal dining room",
+          "room dining room",
+          "style traditional"
+        ],
+        "open_threads": [
+          "Would you like to compare the Bidjar with other classic Persian styles like Tabriz, Heriz, or Sultanabad?"
+        ],
+        "last_user_intent": "recommendation",
+        "no_match_attempts": 0,
+        "updated_at": "2026-04-03T12:48:17.915Z",
+        "version": "v1"
+      }
+    },
+    "memory_snapshot_before": {
+      "summary_text": "User: I need a 9x12 traditional Persian for my formal dining room. | Assistant: Great style call. For your formal dining room, a 9x12 traditional Persian is an excellent choice for classic elegance and sophistication. The Antique Persian Bidjar stands out as a refined option, celebrated for its dur…",
+      "stable_facts": [
+        "wants size 9x12",
+        "likes traditional style",
+        "likes Persian style",
+        "room: formal dining room",
+        "room dining room",
+        "style traditional"
+      ],
+      "open_threads": [
+        "Would you like to compare the Bidjar with other classic Persian styles like Tabriz, Heriz, or Sultanabad?"
+      ],
+      "last_user_intent": "recommendation",
+      "no_match_attempts": 0,
+      "updated_at": "2026-04-03T12:48:17.915Z",
+      "version": "v1"
+    },
+    "memory_snapshot_after": {
+      "summary_text": "User: I need a 9x12 traditional Persian for my formal dining room. | Assistant: Great style call. For your formal dining room, a 9x12 traditional Persian is an excellent choice for classic elegance and sophistication. The Antique Persian Bidjar stands out as a refined option, celebrated for its dur… || User: Show me more with richer reds. | Assistant: Great, let's refine it together. You’re looking for more options with particularly rich reds in a traditional style for your dining room. The Antique Persian Qom brings a vibrant red field and expressive pictorial and a…",
+      "stable_facts": [
+        "wants richer reds",
+        "palette red",
+        "wants size 9x12",
+        "likes traditional style",
+        "likes Persian style",
+        "room: formal dining room",
+        "room dining room",
+        "style traditional"
+      ],
+      "open_threads": [
+        "Would you like to see larger, smaller, or a different style direction next?",
+        "Would you like to compare the Bidjar with other classic Persian styles like Tabriz, Heriz, or Sultanabad?"
+      ],
+      "last_user_intent": "recommendation",
+      "no_match_attempts": 0,
+      "updated_at": "2026-04-03T12:48:33.851Z",
+      "version": "v1"
+    },
+    "ai_context_packet_stats": {
+      "field_counts": {
+        "stable_facts": 6,
+        "open_threads": 1,
+        "customer_context": 6,
+        "recently_shown_rugs": 4,
+        "shown_rug_ids": 4,
+        "recent_turns": 2
+      },
+      "char_counts": {
+        "summary_text": 300,
+        "stable_facts_total": 114,
+        "open_threads_total": 105,
+        "customer_context_total": 114,
+        "recently_shown_total": 367,
+        "shown_rug_ids_total": 144,
+        "liked_attributes_total": 11,
+        "recent_turns_total": 340,
+        "latest_user_message": 30,
+        "total": 1381
+      }
+    },
+    "response": {
+      "session_id": "4c5a20aa-fae7-45e1-acd9-a3964be27959",
+      "role": "retail_customer",
+      "mode": "recommendation",
+      "fine_mode": "recommendation",
+      "response_mode": "recommendation",
+      "notes": null
+    },
+    "timing_ms": {
+      "total_ms": 13736
+    }
+  }
+}

@@ -1,0 +1,707 @@
+{
+  "trace_id": "871f5c3d-a024-4048-bcaf-d1ecba7ac240",
+  "channel": "chat-route",
+  "created_at": "2026-04-03T09:59:05.243Z",
+  "payload": {
+    "flow_path": [
+      "/api/chat POST",
+      "getOrCreateSession",
+      "updateRecommendationStateForTurn",
+      "routeTurnMode",
+      "handlerDispatch",
+      "updateConversationMemory",
+      "saveSession"
+    ],
+    "request": {
+      "session_id": "243df82a-f3c6-45ce-bd68-fb70fccd1d39",
+      "role": "retail_customer",
+      "tenant_id": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5",
+      "tenant_subdomain": "jjrugs",
+      "tenant_hostname": "jjrugs.rugdesk.app",
+      "message": "Show me more with richer reds.",
+      "constraints": null
+    },
+    "routing": {
+      "mode": "recommendation",
+      "intent": "followup",
+      "rule_id": "RECOMMENDATION_FOLLOWUP",
+      "confidence": "high",
+      "needs_clarification": false,
+      "parser": {
+        "model": "gpt-4.1-mini",
+        "latency_ms": 2903,
+        "status": "success",
+        "parse_status": "success",
+        "fallback": null,
+        "fallback_reason": null,
+        "normalized_payload": {
+          "intent": "followup",
+          "mode": "recommendation_followup",
+          "followup_intent": "more_like_this",
+          "constraints": {
+            "size": null,
+            "colors": [
+              "red"
+            ],
+            "styles": [],
+            "shape": null
+          },
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          },
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          },
+          "session_facts": [
+            "interested in Persian style rugs",
+            "prefers rugs with red color"
+          ],
+          "rug_reference_ambiguous": false,
+          "confidence": "high"
+        },
+        "normalized_parse_payload": {
+          "intent": "followup",
+          "mode": "recommendation_followup",
+          "followup_intent": "more_like_this",
+          "constraints": {
+            "size": null,
+            "colors": [
+              "red"
+            ],
+            "styles": [],
+            "shape": null
+          },
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          },
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          },
+          "session_facts": [
+            "interested in Persian style rugs",
+            "prefers rugs with red color"
+          ],
+          "rug_reference_ambiguous": false,
+          "confidence": "high"
+        },
+        "response_status": 200,
+        "incomplete_detected": false,
+        "error": null
+      },
+      "policy": {
+        "intent": "followup",
+        "compiled_policy": {
+          "intent": "followup",
+          "mode": "recommendation_followup",
+          "discovery_requested": false,
+          "followup_intent": "more_like_this",
+          "hard_constraints": {
+            "size": {
+              "widthIn": 108,
+              "lengthIn": 144,
+              "toleranceIn": 0
+            },
+            "colors": [
+              "red"
+            ],
+            "styles": [
+              "traditional"
+            ],
+            "strictness": {
+              "size": "prefer",
+              "colors": "prefer",
+              "styles": "prefer",
+              "shape": "prefer"
+            },
+            "avoid_preferences": {
+              "styles": [
+                "modern",
+                "contemporary",
+                "minimalist",
+                "abstract",
+                "kilim",
+                "baluch"
+              ],
+              "shapes": []
+            }
+          },
+          "persisted_hard_constraints": {
+            "size": {
+              "widthIn": 108,
+              "lengthIn": 144,
+              "toleranceIn": 0
+            },
+            "colors": [
+              "red"
+            ],
+            "styles": [
+              "traditional"
+            ],
+            "strictness": {
+              "size": "prefer",
+              "colors": "prefer",
+              "styles": "prefer",
+              "shape": "prefer"
+            },
+            "avoid_preferences": {
+              "styles": [
+                "modern",
+                "contemporary",
+                "minimalist",
+                "abstract",
+                "kilim",
+                "baluch"
+              ],
+              "shapes": []
+            }
+          },
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          },
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          },
+          "confidence": "high",
+          "policy_source": "parsed_turn",
+          "must_prefer_avoid": {
+            "must": [],
+            "prefer": [
+              "size",
+              "colors",
+              "styles"
+            ],
+            "avoid": {
+              "colors": [],
+              "styles": [
+                "modern",
+                "contemporary",
+                "minimalist",
+                "abstract",
+                "kilim",
+                "baluch"
+              ],
+              "shapes": []
+            }
+          }
+        },
+        "policy_source": "parsed_turn",
+        "must_prefer_avoid": {
+          "must": [],
+          "prefer": [
+            "size",
+            "colors",
+            "styles"
+          ],
+          "avoid": {
+            "colors": [],
+            "styles": [
+              "modern",
+              "contemporary",
+              "minimalist",
+              "abstract",
+              "kilim",
+              "baluch"
+            ],
+            "shapes": []
+          }
+        },
+        "must-prefer-avoid": {
+          "must": [],
+          "prefer": [
+            "size",
+            "colors",
+            "styles"
+          ],
+          "avoid": {
+            "colors": [],
+            "styles": [
+              "modern",
+              "contemporary",
+              "minimalist",
+              "abstract",
+              "kilim",
+              "baluch"
+            ],
+            "shapes": []
+          }
+        },
+        "constraint_modes": {
+          "size": "prefer",
+          "colors": "prefer",
+          "styles": "prefer",
+          "shape": "prefer",
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          }
+        }
+      },
+      "parser_trace": {
+        "called": true,
+        "model": "gpt-4.1-mini",
+        "status": "success",
+        "response_status": 200,
+        "fallback": null,
+        "fallback_reason": null,
+        "incomplete_detected": false,
+        "latency_ms": 2903,
+        "normalized_payload": {
+          "intent": "followup",
+          "mode": "recommendation_followup",
+          "followup_intent": "more_like_this",
+          "constraints": {
+            "size": null,
+            "colors": [
+              "red"
+            ],
+            "styles": [],
+            "shape": null
+          },
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          },
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          },
+          "session_facts": [
+            "interested in Persian style rugs",
+            "prefers rugs with red color"
+          ],
+          "rug_reference_ambiguous": false,
+          "confidence": "high"
+        },
+        "parsed": {
+          "intent": "followup",
+          "mode": "recommendation_followup",
+          "followup_intent": "more_like_this",
+          "constraints": {
+            "size": null,
+            "colors": [
+              "red"
+            ],
+            "styles": [],
+            "shape": null
+          },
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          },
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          },
+          "session_facts": [
+            "interested in Persian style rugs",
+            "prefers rugs with red color"
+          ],
+          "rug_reference_ambiguous": false,
+          "confidence": "high"
+        },
+        "error": null
+      },
+      "compiled_policy": {
+        "intent": "followup",
+        "mode": "recommendation_followup",
+        "discovery_requested": false,
+        "followup_intent": "more_like_this",
+        "hard_constraints": {
+          "size": {
+            "widthIn": 108,
+            "lengthIn": 144,
+            "toleranceIn": 0
+          },
+          "colors": [
+            "red"
+          ],
+          "styles": [
+            "traditional"
+          ],
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          },
+          "avoid_preferences": {
+            "styles": [
+              "modern",
+              "contemporary",
+              "minimalist",
+              "abstract",
+              "kilim",
+              "baluch"
+            ],
+            "shapes": []
+          }
+        },
+        "persisted_hard_constraints": {
+          "size": {
+            "widthIn": 108,
+            "lengthIn": 144,
+            "toleranceIn": 0
+          },
+          "colors": [
+            "red"
+          ],
+          "styles": [
+            "traditional"
+          ],
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          },
+          "avoid_preferences": {
+            "styles": [
+              "modern",
+              "contemporary",
+              "minimalist",
+              "abstract",
+              "kilim",
+              "baluch"
+            ],
+            "shapes": []
+          }
+        },
+        "strictness": {
+          "size": "prefer",
+          "colors": "prefer",
+          "styles": "prefer",
+          "shape": "prefer"
+        },
+        "avoid": {
+          "colors": [],
+          "styles": [],
+          "shapes": []
+        },
+        "confidence": "high",
+        "policy_source": "parsed_turn",
+        "must_prefer_avoid": {
+          "must": [],
+          "prefer": [
+            "size",
+            "colors",
+            "styles"
+          ],
+          "avoid": {
+            "colors": [],
+            "styles": [
+              "modern",
+              "contemporary",
+              "minimalist",
+              "abstract",
+              "kilim",
+              "baluch"
+            ],
+            "shapes": []
+          }
+        }
+      },
+      "policy_source": "parsed_turn",
+      "must_prefer_avoid": {
+        "must": [],
+        "prefer": [
+          "size",
+          "colors",
+          "styles"
+        ],
+        "avoid": {
+          "colors": [],
+          "styles": [
+            "modern",
+            "contemporary",
+            "minimalist",
+            "abstract",
+            "kilim",
+            "baluch"
+          ],
+          "shapes": []
+        }
+      },
+      "must-prefer-avoid": {
+        "must": [],
+        "prefer": [
+          "size",
+          "colors",
+          "styles"
+        ],
+        "avoid": {
+          "colors": [],
+          "styles": [
+            "modern",
+            "contemporary",
+            "minimalist",
+            "abstract",
+            "kilim",
+            "baluch"
+          ],
+          "shapes": []
+        }
+      },
+      "handler": "handleRecommendationTurn",
+      "prompt_layer_preview": [
+        "TASK_PROMPT_RECOMMENDATION",
+        "SYSTEM_PROMPT_BASE",
+        "TASK_PROMPT_RECOMMENDATION",
+        "TASK_PROMPT_RECOMMENDATION",
+        "STRUCTURED_OUTPUT_RECOMMENDATION",
+        "CHAT_MEMORY_CONTEXT",
+        "CHAT_MEMORY_CONTEXT",
+        "CHAT_MEMORY_CONTEXT",
+        "CHAT_MEMORY_CONTEXT",
+        "RECENT_TURNS_CONTEXT",
+        "INVENTORY_CONTEXT",
+        "LATEST_USER_MESSAGE_WITH_HARD_CONSTRAINTS"
+      ]
+    },
+    "reaction": {
+      "detected_reaction": null,
+      "referenced_rug_id": null,
+      "rug_reference_ambiguous": false,
+      "liked_attributes_before": {
+        "colors": [
+          "red"
+        ],
+        "styles": [
+          "traditional"
+        ],
+        "origins": []
+      },
+      "liked_attributes_after": {
+        "colors": [
+          "red"
+        ],
+        "styles": [
+          "traditional"
+        ],
+        "origins": []
+      },
+      "liked_rug_ids_before": [],
+      "liked_rug_ids_after": [],
+      "dismissed_rug_ids_before": [],
+      "dismissed_rug_ids_after": []
+    },
+    "state_snapshot": {
+      "recommendation_state": {
+        "hard_constraints": {
+          "size": {
+            "widthIn": 108,
+            "lengthIn": 144,
+            "toleranceIn": 0
+          },
+          "colors": [
+            "red"
+          ],
+          "styles": [
+            "traditional"
+          ],
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          },
+          "avoid_preferences": {
+            "styles": [
+              "modern",
+              "contemporary",
+              "minimalist",
+              "abstract",
+              "kilim",
+              "baluch"
+            ],
+            "shapes": []
+          }
+        },
+        "soft_preferences": {},
+        "runtime": {
+          "last_result_mode": "recommendation",
+          "last_relaxed_size_tolerance_in": null,
+          "last_blockers": [],
+          "last_recommended_size_in": {
+            "width_in": 108,
+            "length_in": 144
+          },
+          "liked_rug_ids": [],
+          "dismissed_rug_ids": [],
+          "shown_rug_ids": [
+            "fd2514b9-7464-4a8c-be9a-5aa47f88d180",
+            "38ed22c1-6294-4b0c-8f32-ca996c677164",
+            "35ac4b28-92a7-48ac-ab7f-7ef10be779e9",
+            "5d945909-a211-419e-a2a3-9e380392513e"
+          ],
+          "liked_attributes": {
+            "colors": [],
+            "styles": [
+              "traditional"
+            ],
+            "origins": []
+          },
+          "recently_shown_rugs": [
+            {
+              "id": "fd2514b9-7464-4a8c-be9a-5aa47f88d180",
+              "label": "Antique Persian Bidjar",
+              "colors": [
+                "red",
+                "blue",
+                "gold",
+                "green"
+              ],
+              "style": "Bidjar",
+              "origin": "Persian"
+            },
+            {
+              "id": "38ed22c1-6294-4b0c-8f32-ca996c677164",
+              "label": "Antique Persian Sultanabad",
+              "colors": [
+                "brown",
+                "red",
+                "blue"
+              ],
+              "style": "Sultanabad",
+              "origin": "Persian"
+            },
+            {
+              "id": "35ac4b28-92a7-48ac-ab7f-7ef10be779e9",
+              "label": "Antique Persian Tabriz",
+              "colors": [
+                "red",
+                "gold",
+                "blue"
+              ],
+              "style": "Tabriz",
+              "origin": "Persian"
+            },
+            {
+              "id": "5d945909-a211-419e-a2a3-9e380392513e",
+              "label": "Persian Heriz Traditional",
+              "colors": [
+                "red",
+                "blue",
+                "ivory",
+                "black"
+              ],
+              "style": "Heriz",
+              "origin": "Persian"
+            }
+          ],
+          "no_match_attempts": 0,
+          "updated_at": "2026-04-03T09:58:49.553Z"
+        }
+      },
+      "conversation_memory": {
+        "summary_text": "User: I need a 9x12 traditional Persian for my formal dining room. | Assistant: Great, that size target gives us a clear direction. For a formal dining room with a classic look, you have several excellent 9x12 traditional Persian options here. The Antique Persian Bidjar stands out for its rich deta…",
+        "stable_facts": [
+          "needs 9x12 size",
+          "style traditional",
+          "style Persian",
+          "room formal dining room",
+          "room dining room"
+        ],
+        "open_threads": [
+          "Do you lean more toward bold statement pieces like the Bidjar, or would you like to see options in other traditional Pe…"
+        ],
+        "last_user_intent": "recommendation",
+        "no_match_attempts": 0,
+        "updated_at": "2026-04-03T09:58:49.553Z",
+        "version": "v1"
+      }
+    },
+    "memory_snapshot_before": {
+      "summary_text": "User: I need a 9x12 traditional Persian for my formal dining room. | Assistant: Great, that size target gives us a clear direction. For a formal dining room with a classic look, you have several excellent 9x12 traditional Persian options here. The Antique Persian Bidjar stands out for its rich deta…",
+      "stable_facts": [
+        "needs 9x12 size",
+        "style traditional",
+        "style Persian",
+        "room formal dining room",
+        "room dining room"
+      ],
+      "open_threads": [
+        "Do you lean more toward bold statement pieces like the Bidjar, or would you like to see options in other traditional Pe…"
+      ],
+      "last_user_intent": "recommendation",
+      "no_match_attempts": 0,
+      "updated_at": "2026-04-03T09:58:49.553Z",
+      "version": "v1"
+    },
+    "memory_snapshot_after": {
+      "summary_text": "User: I need a 9x12 traditional Persian for my formal dining room. | Assistant: Great, that size target gives us a clear direction. For a formal dining room with a classic look, you have several excellent 9x12 traditional Persian options here. The Antique Persian Bidjar stands out for its rich deta… || User: Show me more with richer reds. | Assistant: Got it, let's refine from there. You’re focusing in on rich reds for your 9x12 formal dining room—a classic and dramatic statement. These pieces truly highlight red as a dominant tone, each bringing a different traditio…",
+      "stable_facts": [
+        "interested in Persian style rugs",
+        "prefers rugs with red color",
+        "palette red",
+        "needs 9x12 size",
+        "style traditional",
+        "style Persian",
+        "room formal dining room",
+        "room dining room"
+      ],
+      "open_threads": [
+        "Would you like to hear more about the Qom’s details, or compare the texture differences between these options?",
+        "Do you lean more toward bold statement pieces like the Bidjar, or would you like to see options in other traditional Pe…"
+      ],
+      "last_user_intent": "recommendation",
+      "no_match_attempts": 0,
+      "updated_at": "2026-04-03T09:59:04.887Z",
+      "version": "v1"
+    },
+    "ai_context_packet_stats": {
+      "field_counts": {
+        "stable_facts": 5,
+        "open_threads": 1,
+        "customer_context": 5,
+        "recently_shown_rugs": 4,
+        "shown_rug_ids": 4,
+        "recent_turns": 2
+      },
+      "char_counts": {
+        "summary_text": 300,
+        "stable_facts_total": 84,
+        "open_threads_total": 120,
+        "customer_context_total": 84,
+        "recently_shown_total": 376,
+        "shown_rug_ids_total": 144,
+        "liked_attributes_total": 11,
+        "recent_turns_total": 340,
+        "latest_user_message": 30,
+        "total": 1345
+      }
+    },
+    "response": {
+      "session_id": "243df82a-f3c6-45ce-bd68-fb70fccd1d39",
+      "role": "retail_customer",
+      "mode": "recommendation",
+      "fine_mode": "recommendation",
+      "response_mode": "recommendation",
+      "notes": null
+    },
+    "timing_ms": {
+      "total_ms": 12842
+    }
+  }
+}

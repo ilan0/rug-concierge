@@ -1,0 +1,1025 @@
+{
+  "trace_id": "6ec1d2db-16c5-4436-93ac-7b5e64dcfcb6",
+  "channel": "recommendation-pipeline",
+  "created_at": "2026-04-02T20:16:19.852Z",
+  "payload": {
+    "request_id": "6ec1d2db-16c5-4436-93ac-7b5e64dcfcb6",
+    "flow_path": [
+      "runRecommendationPipeline",
+      "fetchInventoryCandidates",
+      "filterByHardConstraints",
+      "shapeCandidatesForAI",
+      "rankAndExplain",
+      "logRecommendationQaEvent"
+    ],
+    "source_route": "/api/chat",
+    "session_id": "7fe8fe2c-7662-490f-94d9-ef418c8c8d5e",
+    "role": "retail_customer",
+    "tenant_id": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5",
+    "user_message": "Show slightly shorter options too.",
+    "constraints": {
+      "size": {
+        "widthIn": 36,
+        "lengthIn": 144,
+        "toleranceIn": 12
+      },
+      "colors": [],
+      "styles": [],
+      "shape": "runner",
+      "strictness": {
+        "size": "prefer",
+        "colors": "prefer",
+        "styles": "prefer",
+        "shape": "prefer"
+      }
+    },
+    "prompt_context": {
+      "role": "retail_customer",
+      "chat_context": {
+        "structured_state": {
+          "recommendation_state": {
+            "hard_constraints": {
+              "size": {
+                "widthIn": 36,
+                "lengthIn": 144,
+                "toleranceIn": 12
+              },
+              "colors": [],
+              "styles": [],
+              "shape": "runner",
+              "strictness": {
+                "size": "prefer",
+                "colors": "prefer",
+                "styles": "prefer",
+                "shape": "prefer"
+              }
+            },
+            "soft_preferences": {},
+            "runtime": {
+              "last_result_mode": "recommendation",
+              "last_relaxed_size_tolerance_in": null,
+              "last_blockers": [],
+              "last_recommended_size_in": {
+                "width_in": 36,
+                "length_in": 144
+              },
+              "liked_rug_ids": [],
+              "dismissed_rug_ids": [],
+              "shown_rug_ids": [
+                "01917402-8054-431a-83d3-16f1291f7e5e",
+                "a3456867-6251-4504-a62d-0476087b2687",
+                "71090f52-53d0-4a1d-a06b-17288fe8d38c",
+                "119b9d9a-fe0c-4f12-b2ac-a783bb7bc29b"
+              ],
+              "liked_attributes": {
+                "colors": [],
+                "styles": [],
+                "origins": []
+              },
+              "recently_shown_rugs": [
+                {
+                  "id": "01917402-8054-431a-83d3-16f1291f7e5e",
+                  "label": "Antique Persian Heriz Runner",
+                  "colors": [
+                    "rust",
+                    "blue",
+                    "ivory"
+                  ],
+                  "style": "Heriz",
+                  "origin": "Persian"
+                },
+                {
+                  "id": "a3456867-6251-4504-a62d-0476087b2687",
+                  "label": "Antique Persian Runner",
+                  "colors": [
+                    "brown",
+                    "blue",
+                    "green"
+                  ],
+                  "style": "Medallion",
+                  "origin": "Persian"
+                },
+                {
+                  "id": "71090f52-53d0-4a1d-a06b-17288fe8d38c",
+                  "label": "Antique Persian Sultanabad Runner",
+                  "colors": [
+                    "rust",
+                    "brown",
+                    "blue",
+                    "gold"
+                  ],
+                  "style": "Sultanabad",
+                  "origin": "Persian"
+                },
+                {
+                  "id": "119b9d9a-fe0c-4f12-b2ac-a783bb7bc29b",
+                  "label": "Contemporary Runner",
+                  "colors": [
+                    "green"
+                  ],
+                  "style": "Minimal",
+                  "origin": null
+                }
+              ],
+              "no_match_attempts": 0,
+              "updated_at": "2026-04-02T20:16:02.877Z"
+            }
+          }
+        },
+        "conversation_memory": {
+          "summary_text": "User: I need a hallway runner about 3 by 12. | Assistant: You're looking for a hallway runner approximately 3 by 12 feet. Here are several authentic Persian runners with traditional designs that fit this size, including an antique Heriz with a striking medallion centerpiece. I…",
+          "stable_facts": [
+            "wants runner",
+            "wants size around 3 by 12",
+            "room hallway"
+          ],
+          "open_threads": [
+            "If you'd like, should I show more in this same direction, or adjust color and size next?"
+          ],
+          "last_user_intent": "recommendation",
+          "version": "v1"
+        },
+        "customer_context": [
+          "wants runner",
+          "wants size around 3 by 12",
+          "room hallway"
+        ],
+        "recently_shown_rugs": [
+          {
+            "id": "01917402-8054-431a-83d3-16f1291f7e5e",
+            "label": "Antique Persian Heriz Runner",
+            "colors": [
+              "rust",
+              "blue",
+              "ivory"
+            ],
+            "style": "Heriz",
+            "origin": "Persian"
+          },
+          {
+            "id": "a3456867-6251-4504-a62d-0476087b2687",
+            "label": "Antique Persian Runner",
+            "colors": [
+              "brown",
+              "blue",
+              "green"
+            ],
+            "style": "Medallion",
+            "origin": "Persian"
+          },
+          {
+            "id": "71090f52-53d0-4a1d-a06b-17288fe8d38c",
+            "label": "Antique Persian Sultanabad Runner",
+            "colors": [
+              "rust",
+              "brown",
+              "blue",
+              "gold"
+            ],
+            "style": "Sultanabad",
+            "origin": "Persian"
+          },
+          {
+            "id": "119b9d9a-fe0c-4f12-b2ac-a783bb7bc29b",
+            "label": "Contemporary Runner",
+            "colors": [
+              "green"
+            ],
+            "style": "Minimal",
+            "origin": null
+          }
+        ],
+        "shown_rug_ids": [
+          "01917402-8054-431a-83d3-16f1291f7e5e",
+          "a3456867-6251-4504-a62d-0476087b2687",
+          "71090f52-53d0-4a1d-a06b-17288fe8d38c",
+          "119b9d9a-fe0c-4f12-b2ac-a783bb7bc29b"
+        ],
+        "liked_attributes": {
+          "colors": [],
+          "styles": [],
+          "origins": []
+        },
+        "recent_turns": [
+          {
+            "role": "user",
+            "content": "I need a hallway runner about 3 by 12.",
+            "created_at": "2026-04-02T20:15:46.393Z"
+          },
+          {
+            "role": "assistant",
+            "content": "You're looking for a hallway runner approximately 3 by 12 feet. Here are several authentic Persian runners with traditional designs that fit this size, including an antique Heriz with a striking medallion centerpiece. If you'd like, should I show more in this same direction, or…",
+            "created_at": "2026-04-02T20:16:02.877Z"
+          }
+        ]
+      },
+      "discovery_mode": false,
+      "expanded_due_to_thin_results": false
+    },
+    "query_trace": [
+      {
+        "variant": "size_direct",
+        "query_variant_reason": "size_window_direct_dimensions_query",
+        "filters": {
+          "tenant_id": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5",
+          "status": "available",
+          "enrichment_status": "ready",
+          "limit": 235,
+          "size_bounds": {
+            "maxWidthIn": 35,
+            "maxLengthIn": 143,
+            "rotated": false
+          },
+          "color_prefilter_active": false,
+          "image_sql_filter_active": true,
+          "color_prefilter": "inactive",
+          "color_prefilter_state": "inactive",
+          "color_sql_prefilter_tokens": null
+        },
+        "row_count": 18,
+        "error": null
+      },
+      {
+        "variant": "size_rotated",
+        "query_variant_reason": "size_window_rotated_dimensions_query",
+        "filters": {
+          "tenant_id": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5",
+          "status": "available",
+          "enrichment_status": "ready",
+          "limit": 235,
+          "size_bounds": {
+            "maxWidthIn": 35,
+            "maxLengthIn": 143,
+            "rotated": true
+          },
+          "color_prefilter_active": false,
+          "image_sql_filter_active": true,
+          "color_prefilter": "inactive",
+          "color_prefilter_state": "inactive",
+          "color_sql_prefilter_tokens": null
+        },
+        "row_count": 0,
+        "error": null
+      }
+    ],
+    "dynamic_limit": 235,
+    "policy_sql_filters": {
+      "tenant_id": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5",
+      "status": "available",
+      "enrichment_status": "ready",
+      "size_window": {
+        "maxWidthIn": 35,
+        "maxLengthIn": 143
+      },
+      "hard_constraints": {
+        "size": true,
+        "styles": false,
+        "shape": true
+      },
+      "image_sql_filter_active": true,
+      "color_prefilter_active": false,
+      "color_prefilter": "inactive",
+      "color_prefilter_state": "inactive",
+      "color_prefilter_tokens": [],
+      "discovery_mode": false,
+      "confidence": "low"
+    },
+    "query_variant_reason": "size_window_active_query_direct_and_rotated",
+    "row_counts": {
+      "sql_rows_total": 18,
+      "sql_rows_by_variant": [
+        {
+          "variant": "size_direct",
+          "query_variant_reason": "size_window_direct_dimensions_query",
+          "row_count": 18,
+          "error": null
+        },
+        {
+          "variant": "size_rotated",
+          "query_variant_reason": "size_window_rotated_dimensions_query",
+          "row_count": 0,
+          "error": null
+        }
+      ]
+    },
+    "discovery_mode": false,
+    "color_sql_prefilter_tokens": [],
+    "broadening_applied": false,
+    "broadening_stage": "none",
+    "no_match": {
+      "fallback_tier": "none",
+      "reasonableness_gate": "passed",
+      "reasonableness_gate_result": "passed",
+      "terminal_reason_code": null
+    },
+    "candidate_counts": {
+      "sql_candidates": 18,
+      "hard_filtered_candidates": 9,
+      "ai_candidates": 9
+    },
+    "timing_ms": {
+      "count_rough_inventory_size_ms": 243,
+      "fetch_inventory_candidates_ms": 346,
+      "filter_hard_constraints_ms": 0,
+      "shape_candidates_ms": 5,
+      "rank_and_explain_ms": 6871,
+      "qa_log_ms": 4,
+      "total_ms": 7470
+    },
+    "ai_trace": {
+      "called": true,
+      "model": "gpt-4.1-mini",
+      "prompt_layers": [
+        {
+          "id": "TASK_PROMPT_RECOMMENDATION",
+          "role": "system",
+          "chars": 1408,
+          "preview": "Do not open with generic transition language. Start with a request-anchored line that names the customer's actual focus…"
+        },
+        {
+          "id": "SYSTEM_PROMPT_BASE",
+          "role": "system",
+          "chars": 758,
+          "preview": "# AI System Prompt — Rug Concierge You are an experienced rug consultant helping retail customers in a showroom environ…"
+        },
+        {
+          "id": "TASK_PROMPT_RECOMMENDATION",
+          "role": "system",
+          "chars": 19,
+          "preview": "Respond in English."
+        },
+        {
+          "id": "TASK_PROMPT_RECOMMENDATION",
+          "role": "system",
+          "chars": 3444,
+          "preview": "# Recommendation Prompt You are a retail rug concierge for in-store customers. Recommend only from provided inventory c…"
+        },
+        {
+          "id": "STRUCTURED_OUTPUT_RECOMMENDATION",
+          "role": "system",
+          "chars": 452,
+          "preview": "# Recommendation Structured Output Add-on Use this prompt layer only for recommendation mode. Runtime JSON schema valid…"
+        },
+        {
+          "id": "CHAT_MEMORY_CONTEXT",
+          "role": "system",
+          "chars": 1970,
+          "preview": "CHAT MEMORY CONTEXT: {\"structured_state\":{\"recommendation_state\":{\"hard_constraints\":{\"size\":{\"widthIn\":36,\"lengthIn\":1…"
+        },
+        {
+          "id": "CHAT_MEMORY_CONTEXT",
+          "role": "system",
+          "chars": 92,
+          "preview": "CUSTOMER CONTEXT (stable facts): [\"wants runner\",\"wants size around 3 by 12\",\"room hallway\"]"
+        },
+        {
+          "id": "CHAT_MEMORY_CONTEXT",
+          "role": "system",
+          "chars": 667,
+          "preview": "RECENTLY SHOWN RUGS (avoid repeating unless clearly requested): [{\"id\":\"01917402-8054-431a-83d3-16f1291f7e5e\",\"label\":\"…"
+        },
+        {
+          "id": "RECENT_TURNS_CONTEXT",
+          "role": "system",
+          "chars": 483,
+          "preview": "RECENT TURNS CONTEXT: [{\"role\":\"user\",\"content\":\"I need a hallway runner about 3 by 12.\",\"created_at\":\"2026-04-02T20:15…"
+        },
+        {
+          "id": "INVENTORY_CONTEXT",
+          "role": "system",
+          "chars": 3965,
+          "preview": "AVAILABLE INVENTORY (authoritative). Each entry includes ID, Label, Size, and Description: [{\"id\":\"c4d685af-993b-4431-9…"
+        },
+        {
+          "id": "LATEST_USER_MESSAGE_WITH_HARD_CONSTRAINTS",
+          "role": "user",
+          "chars": 248,
+          "preview": "User request: Show slightly shorter options too. Hard constraints: {\"size\":{\"widthIn\":36,\"lengthIn\":144,\"toleranceIn\":1…"
+        }
+      ],
+      "request_payload": {
+        "model": "gpt-4.1-mini",
+        "input": [
+          {
+            "role": "system",
+            "content": [
+              {
+                "type": "input_text",
+                "text": "Do not open with generic transition language. Start with a request-anchored line that names the customer's actual focus (for example: size, style, color, room, or practical need).\nVoice: warm, confident, and tasteful. Sound like a helpful showroom consultant, not a search engine.\nKeep it concise: 1-3 short sentences in assistant_message. Avoid robotic filler.\nWhen recommending, highlight one standout reason the top piece is special.\nIf the customer states an avoid preference (for example: no red, not too busy), do not praise or foreground that avoided direction.\nIf the customer asks for larger/smaller and exact directional matches are unavailable, say that directly before presenting closest alternatives. Never claim the returned set satisfies a directional request when it does not.\nIf the customer mentions practical needs (kids, pets, high traffic, easy-clean), include one practical suitability note in the opening or first recommendation reason.\nEnd recommendations with one natural next-step invitation (for example: show more like this, larger, or different color).\nOpening behavior guidance:\n- Color-led request: acknowledge requested color direction first, then present strongest in-stock matches.\n- Style/origin request: acknowledge requested style/origin first, then present closest available pieces.\n- Discovery request: acknowledge open browsing intent and present a varied compare set."
+              },
+              {
+                "type": "input_text",
+                "text": "# AI System Prompt — Rug Concierge\n\nYou are an experienced rug consultant helping retail customers in a showroom environment.\n\nCore behavior:\n- Be accurate, practical, and calm.\n- Use only information provided in conversation and inventory context.\n- If data is missing, say what is unknown.\n- Never invent rug attributes, inventory availability, or IDs.\n\nTone:\n- Professional and approachable.\n- Concise and specific.\n- Not salesy or exaggerated. Genuine enthusiasm is appropriate when a piece genuinely stands out in quality, origin, condition, or rarity.\n- Detect the language of the user's message and respond in that same language.\n\nTrust rules:\n- When unsure, say so directly.\n- Prefer clear guidance over speculation.\n- Keep responses plain text only."
+              },
+              {
+                "type": "input_text",
+                "text": "Respond in English."
+              },
+              {
+                "type": "input_text",
+                "text": "# Recommendation Prompt\n\nYou are a retail rug concierge for in-store customers.\nRecommend only from provided inventory context.\n\n## Core Rules\n\n- Inventory only. Never invent rugs or IDs.\n- Use `ai_description` as primary narrative relevance signal.\n- Use structured fields (`origin`, `style`, `mood`, `pattern`, `primary_colors`) to refine fit.\n- Respect hard constraints from backend state: `size`, `styles`, `shape`.\n- Treat color as a strong ranking signal, not a hard exclusion.\n- Rank color fit by dominance order: dominant field color first, secondary/border color second, accent/detail color third.\n- Color tie-breakers: prefer rugs matching dominant color over secondary-only matches; then prefer rugs matching both dominant and secondary; then prefer stronger style/origin fit and richer listing detail.\n- Treat room/material as soft preferences unless backend marks them hard in context.\n- If `ai_description` is missing, the rug may still be suggested when hard constraints fit; clearly state detail is pending.\n- Every reason must be specific to that rug and connect the rug's attributes to the customer's stated context (room, decor, practical needs).\n- When `customer_context` is provided, treat it as a first-class input and connect recommendations to it explicitly.\n- In discovery mode, present an inspiring range. Add at most one natural narrowing question only when it helps refine the next turn.\n- Do not begin with stock transition filler. Open with a request-anchored line that reflects the customer's stated focus (size, style, color, room, or practical need).\n- Match the language of the customer's latest message.\n- Sound warm, confident, and tasteful. Write like an expert showroom consultant, not a product filter.\n- Keep `assistant_message` concise (1-3 short sentences), but include one specific standout detail for the top direction.\n- If the customer gives avoid preferences (for example: no red, not too busy), do not praise or foreground those avoided traits.\n- If the customer asks for larger/smaller and exact directional matches are unavailable, disclose that first and then show closest alternatives. Never claim the returned set satisfies the directional request when it does not.\n- If the customer mentions practical needs (kids, pets, high traffic, easy-clean), include one practical suitability note.\n- End recommendation responses with one natural next-step invitation (for example: show more like this, bigger, smaller, or another color direction).\n- When exact matches are unavailable, disclose clearly in the first sentence and pivot constructively to what is available.\n- Opening behavior guidance:\n- Size-driven request: acknowledge the requested size/use-case first, then position options as best available fits.\n- Color-driven request: acknowledge requested color direction first, then prioritize dominance-aligned matches.\n- Style/origin request: acknowledge requested style/origin first, then position options as closest in-stock direction.\n- Discovery/browse request: acknowledge open browsing intent first, then frame results as a varied compare set.\n\n## Formatting\n\n- Plain text only inside string fields.\n- No markdown formatting.\n- Keep responses concise and complete.\n\n## Selection Order\n\n1. Respect backend hard constraints.\n2. Rank by fit to user intent and available rug attributes.\n3. Prefer grounded explanations over broad claims.\n4. Return `no_match` only when inventory is empty."
+              },
+              {
+                "type": "input_text",
+                "text": "# Recommendation Structured Output Add-on\n\nUse this prompt layer only for recommendation mode.\n\nRuntime JSON schema validation in code is authoritative.\nThe model output must match that schema exactly.\n\nRules:\n- JSON only (no prose outside JSON)\n- no extra keys\n- no markdown\n- concise, complete string values\n- use null only where schema allows null\n\nAny mismatch should be treated as invalid output and handled by backend sanitization/fallback logic."
+              },
+              {
+                "type": "input_text",
+                "text": "CHAT MEMORY CONTEXT:\n{\"structured_state\":{\"recommendation_state\":{\"hard_constraints\":{\"size\":{\"widthIn\":36,\"lengthIn\":144,\"toleranceIn\":12},\"colors\":[],\"styles\":[],\"shape\":\"runner\",\"strictness\":{\"size\":\"prefer\",\"colors\":\"prefer\",\"styles\":\"prefer\",\"shape\":\"prefer\"}},\"soft_preferences\":{},\"runtime\":{\"last_result_mode\":\"recommendation\",\"last_relaxed_size_tolerance_in\":null,\"last_blockers\":[],\"last_recommended_size_in\":{\"width_in\":36,\"length_in\":144},\"liked_rug_ids\":[],\"dismissed_rug_ids\":[],\"shown_rug_ids\":[\"01917402-8054-431a-83d3-16f1291f7e5e\",\"a3456867-6251-4504-a62d-0476087b2687\",\"71090f52-53d0-4a1d-a06b-17288fe8d38c\",\"119b9d9a-fe0c-4f12-b2ac-a783bb7bc29b\"],\"liked_attributes\":{\"colors\":[],\"styles\":[],\"origins\":[]},\"recently_shown_rugs\":[{\"id\":\"01917402-8054-431a-83d3-16f1291f7e5e\",\"label\":\"Antique Persian Heriz Runner\",\"colors\":[\"rust\",\"blue\",\"ivory\"],\"style\":\"Heriz\",\"origin\":\"Persian\"},{\"id\":\"a3456867-6251-4504-a62d-0476087b2687\",\"label\":\"Antique Persian Runner\",\"colors\":[\"brown\",\"blue\",\"green\"],\"style\":\"Medallion\",\"origin\":\"Persian\"},{\"id\":\"71090f52-53d0-4a1d-a06b-17288fe8d38c\",\"label\":\"Antique Persian Sultanabad Runner\",\"colors\":[\"rust\",\"brown\",\"blue\",\"gold\"],\"style\":\"Sultanabad\",\"origin\":\"Persian\"},{\"id\":\"119b9d9a-fe0c-4f12-b2ac-a783bb7bc29b\",\"label\":\"Contemporary Runner\",\"colors\":[\"green\"],\"style\":\"Minimal\",\"origin\":null}],\"no_match_attempts\":0,\"updated_at\":\"2026-04-02T20:16:02.877Z\"}}},\"conversation_memory\":{\"summary_text\":\"User: I need a hallway runner about 3 by 12. | Assistant: You're looking for a hallway runner approximately 3 by 12 feet. Here are several authentic Persian runners with traditional designs that fit this size, including an antique Heriz with a striking medallion centerpiece. I…\",\"stable_facts\":[\"wants runner\",\"wants size around 3 by 12\",\"room hallway\"],\"open_threads\":[\"If you'd like, should I show more in this same direction, or adjust color and size next?\"],\"last_user_intent\":\"recommendation\",\"version\":\"v1\"}}"
+              },
+              {
+                "type": "input_text",
+                "text": "CUSTOMER CONTEXT (stable facts):\n[\"wants runner\",\"wants size around 3 by 12\",\"room hallway\"]"
+              },
+              {
+                "type": "input_text",
+                "text": "RECENTLY SHOWN RUGS (avoid repeating unless clearly requested):\n[{\"id\":\"01917402-8054-431a-83d3-16f1291f7e5e\",\"label\":\"Antique Persian Heriz Runner\",\"colors\":[\"rust\",\"blue\",\"ivory\"],\"style\":\"Heriz\",\"origin\":\"Persian\"},{\"id\":\"a3456867-6251-4504-a62d-0476087b2687\",\"label\":\"Antique Persian Runner\",\"colors\":[\"brown\",\"blue\",\"green\"],\"style\":\"Medallion\",\"origin\":\"Persian\"},{\"id\":\"71090f52-53d0-4a1d-a06b-17288fe8d38c\",\"label\":\"Antique Persian Sultanabad Runner\",\"colors\":[\"rust\",\"brown\",\"blue\",\"gold\"],\"style\":\"Sultanabad\",\"origin\":\"Persian\"},{\"id\":\"119b9d9a-fe0c-4f12-b2ac-a783bb7bc29b\",\"label\":\"Contemporary Runner\",\"colors\":[\"green\"],\"style\":\"Minimal\",\"origin\":null}]"
+              },
+              {
+                "type": "input_text",
+                "text": "RECENT TURNS CONTEXT:\n[{\"role\":\"user\",\"content\":\"I need a hallway runner about 3 by 12.\",\"created_at\":\"2026-04-02T20:15:46.393Z\"},{\"role\":\"assistant\",\"content\":\"You're looking for a hallway runner approximately 3 by 12 feet. Here are several authentic Persian runners with traditional designs that fit this size, including an antique Heriz with a striking medallion centerpiece. If you'd like, should I show more in this same direction, or…\",\"created_at\":\"2026-04-02T20:16:02.877Z\"}]"
+              },
+              {
+                "type": "input_text",
+                "text": "AVAILABLE INVENTORY (authoritative). Each entry includes ID, Label, Size, and Description:\n[{\"id\":\"c4d685af-993b-4431-9390-dd7225cc024b\",\"label\":\"Antique Caucasian Kazak Runner\",\"size\":\"2'6\\\" x 10'\",\"origin\":\"Caucasian\",\"style\":\"Kazak\",\"mood\":\"traditional\",\"pattern\":[\"medallion center\",\"geometric design\",\"floral border\"],\"colors\":[\"rust\",\"teal\",\"ivory\"],\"desc\":\"This is an antique Caucasian Kazak runner featuring a bold geometric medallion pattern. The rug's palette includes rust, teal, and ivory with intricate borders, suitable for traditional and eclectic spaces.\"},{\"id\":\"682ec405-4ffc-4248-b227-bd3415a91e8f\",\"label\":\"Antique Persian Kerman Runner\",\"size\":\"2' x 8'\",\"origin\":\"Persian\",\"style\":\"Kerman\",\"mood\":\"traditional\",\"pattern\":[\"all-over pattern\",\"floral motif\"],\"colors\":[\"red\",\"blue\",\"gold\"],\"desc\":\"This is an antique Persian Kerman rug featuring intricate floral motifs and a series of medallions. The primary colors are red, blue, and gold, enhancing its traditional aesthetic.\"},{\"id\":\"ca0f4242-5768-480e-a139-774ff6fe9a82\",\"label\":\"Antique Persian Runner\",\"size\":\"2'6\\\" x 10'\",\"origin\":\"Persian\",\"style\":\"Medallion\",\"mood\":\"traditional\",\"pattern\":[\"floral motif\",\"medallion center\",\"floral border\"],\"colors\":[\"brown\",\"blue\",\"red\"],\"desc\":\"An antique Persian rug featuring a floral motif with a central medallion and a rich, decorative border. The rug has a worn patina, indicative of its age.\"},{\"id\":\"1368e9b9-274c-4775-ad76-54c2cf94adc6\",\"label\":\"Antique Persian Tabriz Runner\",\"size\":\"2'6\\\" x 10'\",\"origin\":\"Persian\",\"style\":\"Tabriz\",\"mood\":\"traditional\",\"pattern\":[\"medallion center\",\"floral motif\",\"floral border\"],\"colors\":[\"red\",\"blue\",\"gold\"],\"desc\":\"This is an antique Persian Tabriz rug featuring a central medallion surrounded by intricate floral motifs and a prominent floral border. The rug combines rich reds, blues, and golds, offering a traditional and elegant appearance.\"},{\"id\":\"be794810-f497-4c81-ad06-825240962b35\",\"label\":\"Persian Traditional Runner\",\"size\":\"2' x 8'\",\"origin\":\"Persian\",\"style\":\"Medallion\",\"mood\":\"traditional\",\"pattern\":[\"medallion center\",\"floral motif\",\"floral border\"],\"colors\":[\"red\",\"gold\",\"blue\"],\"desc\":\"This is a Persian runner rug featuring a rich red backdrop with a complex medallion center design and intricate floral motifs. The border is decorated with detailed floral patterns, enhancing its traditional appearance.\"},{\"id\":\"bd9a37eb-1c7d-4e2c-a629-b96375f6ff56\",\"label\":\"Vintage Caucasian Kazak Runner\",\"size\":\"2' x 8'\",\"origin\":\"Caucasian\",\"style\":\"Kazak\",\"mood\":\"traditional\",\"pattern\":[\"geometric design\"],\"colors\":[\"red\",\"green\",\"ivory\",\"black\"],\"desc\":\"This is a vintage Caucasian Kazak rug featuring a geometric design with a rich mix of colors. The runner shape showcases traditional patterns in a bold and striking arrangement.\"},{\"id\":\"c53dc770-5972-4f44-a305-3db97f69ea25\",\"label\":\"Vintage Persian Sarouk Runner\",\"size\":\"2'6\\\" x 10'\",\"origin\":\"Persian\",\"style\":\"Sarouk\",\"mood\":\"traditional\",\"pattern\":[\"medallion center\",\"floral motif\"],\"colors\":[\"ivory\",\"red\",\"blue\"],\"desc\":\"A vintage Persian Sarouk runner featuring a central medallion design with a floral motif and ornate borders. It showcases dominant tones of ivory, red, and blue.\"},{\"id\":\"80da791e-1ea4-47d6-91f4-83888a00e046\",\"label\":\"Contemporary Runner\",\"size\":\"2'6\\\" x 10'\",\"origin\":null,\"style\":\"Minimal\",\"mood\":\"modern\",\"pattern\":[\"plain field\"],\"colors\":[\"teal\",\"ivory\"],\"desc\":\"This is a contemporary runner rug with a subtle gradient design in teal and ivory. It's modern and ideal for adding a touch of color to narrow spaces.\"},{\"id\":\"90102377-5f43-4fb5-ab61-64b000076996\",\"label\":\"Contemporary Runner\",\"size\":\"2'6\\\" x 10'\",\"origin\":null,\"style\":\"Geometric\",\"mood\":\"modern\",\"pattern\":[\"geometric design\"],\"colors\":[\"brown\"],\"desc\":\"A contemporary runner rug featuring a bold geometric design with overlapping circles and rectangles in various shades of brown. The pattern creates a modern, abstract look.\"}]"
+              }
+            ]
+          },
+          {
+            "role": "user",
+            "content": [
+              {
+                "type": "input_text",
+                "text": "User request:\nShow slightly shorter options too.\n\nHard constraints:\n{\"size\":{\"widthIn\":36,\"lengthIn\":144,\"toleranceIn\":12},\"colors\":[],\"styles\":[],\"shape\":\"runner\",\"strictness\":{\"size\":\"prefer\",\"colors\":\"prefer\",\"styles\":\"prefer\",\"shape\":\"prefer\"}}"
+              }
+            ]
+          }
+        ],
+        "max_output_tokens": 800,
+        "text": {
+          "format": {
+            "type": "json_schema",
+            "name": "recommendation_response",
+            "schema": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "mode",
+                "assistant_message",
+                "questions",
+                "recommendations",
+                "notes"
+              ],
+              "properties": {
+                "mode": {
+                  "type": "string",
+                  "enum": [
+                    "recommendations",
+                    "clarifying_question",
+                    "no_match",
+                    "disambiguation"
+                  ]
+                },
+                "assistant_message": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 420
+                },
+                "questions": {
+                  "type": "array",
+                  "minItems": 0,
+                  "maxItems": 2,
+                  "items": {
+                    "type": "string",
+                    "maxLength": 140
+                  }
+                },
+                "recommendations": {
+                  "type": "array",
+                  "minItems": 0,
+                  "maxItems": 10,
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                      "rug_id",
+                      "sku",
+                      "title",
+                      "origin",
+                      "style",
+                      "mood",
+                      "size_text",
+                      "match_reasons",
+                      "confidence",
+                      "confidence_tier",
+                      "confidence_factors",
+                      "why_not"
+                    ],
+                    "properties": {
+                      "rug_id": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 80
+                      },
+                      "sku": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "maxLength": 80
+                      },
+                      "title": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 160
+                      },
+                      "origin": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "maxLength": 60
+                      },
+                      "style": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "maxLength": 80
+                      },
+                      "mood": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "maxLength": 32
+                      },
+                      "size_text": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "maxLength": 64
+                      },
+                      "match_reasons": {
+                        "type": "array",
+                        "minItems": 1,
+                        "maxItems": 3,
+                        "items": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 180
+                        }
+                      },
+                      "confidence": {
+                        "type": "number"
+                      },
+                      "confidence_tier": {
+                        "type": "string",
+                        "enum": [
+                          "high",
+                          "medium",
+                          "low"
+                        ]
+                      },
+                      "confidence_factors": {
+                        "type": "array",
+                        "minItems": 0,
+                        "maxItems": 3,
+                        "items": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 100
+                        }
+                      },
+                      "why_not": {
+                        "type": "array",
+                        "minItems": 0,
+                        "maxItems": 2,
+                        "items": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 160
+                        }
+                      }
+                    }
+                  }
+                },
+                "notes": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "maxLength": 220
+                }
+              }
+            },
+            "strict": true
+          }
+        }
+      },
+      "response_status": 200,
+      "response_payload": {
+        "id": "resp_09fc05c85c4c28d40069cece8d0d4081949c3f4c558c72e04a",
+        "object": "response",
+        "created_at": 1775160973,
+        "status": "completed",
+        "background": false,
+        "billing": {
+          "payer": "openai"
+        },
+        "completed_at": 1775160979,
+        "error": null,
+        "frequency_penalty": 0,
+        "incomplete_details": null,
+        "instructions": null,
+        "max_output_tokens": 800,
+        "max_tool_calls": null,
+        "model": "gpt-4.1-mini-2025-04-14",
+        "output": [
+          {
+            "id": "msg_09fc05c85c4c28d40069cece8e038c8194a3780ec2d53ecbc0",
+            "type": "message",
+            "status": "completed",
+            "content": [
+              {
+                "type": "output_text",
+                "annotations": [],
+                "logprobs": [],
+                "text": "{\"mode\":\"recommendations\",\"assistant_message\":\"Considering slightly shorter runners around 2.5 by 10 feet, these authentic and vintage Persian and Caucasian pieces offer rich traditional patterns that fit well in a hallway. The Antique Persian Tabriz Runner stands out with its elegant floral medallion design and vibrant red and blue hues. Would you like to see more options in this size range or explore different styles?\",\"questions\":[],\"recommendations\":[{\"rug_id\":\"1368e9b9-274c-4775-ad76-54c2cf94adc6\",\"sku\":null,\"title\":\"Antique Persian Tabriz Runner\",\"origin\":\"Persian\",\"style\":\"Tabriz\",\"mood\":\"traditional\",\"size_text\":\"2'6\\\" x 10'\",\"match_reasons\":[\"Fits slightly shorter size preference around 2.5 by 10 feet, suitable for hallway use\",\"Features a striking central floral medallion pattern, adding elegant traditional character\",\"Deep reds, blues, and golds make it vibrant yet classic\"],\"confidence\":0.9,\"confidence_tier\":\"high\",\"confidence_factors\":[\"Exact runner shape and close size fit\",\"Strong style and origin match for traditional hallway runners\",\"Detailed description and color alignment\"],\"why_not\":[\"Smaller than the original requested length of about 12 feet\"]},{\"rug_id\":\"ca0f4242-5768-480e-a139-774ff6fe9a82\",\"sku\":null,\"title\":\"Antique Persian Runner\",\"origin\":\"Persian\",\"style\":\"Medallion\",\"mood\":\"traditional\",\"size_text\":\"2'6\\\" x 10'\",\"match_reasons\":[\"Close size to slightly shorter 2.5 by 10 feet runner\",\"Classic floral medallion with worn patina adds historical charm\",\"Warm brown, blue, and red colors to complement traditional interiors\"],\"confidence\":0.85,\"confidence_tier\":\"medium\",\"confidence_factors\":[\"Good size and shape match\",\"Strong traditional Persian style\"],\"why_not\":[\"Shorter length than original 3 by 12 request\"]},{\"rug_id\":\"c4d685af-993b-4431-9390-dd7225cc024b\",\"sku\":null,\"title\":\"Antique Caucasian Kazak Runner\",\"origin\":\"Caucasian\",\"style\":\"Kazak\",\"mood\":\"traditional\",\"size_text\":\"2'6\\\" x 10'\",\"match_reasons\":[\"Fits the slightly shorter runner size preference\",\"Bold geometric medallion and floral border provide strong pattern interest\",\"Rust, teal, and ivory colors offer a rich yet varied palette\"],\"confidence\":0.8,\"confidence_tier\":\"medium\",\"confidence_factors\":[\"Accurate size and runner shape\",\"Distinctive Caucasian style for variety\"],\"why_not\":[\"Shorter length than ideal 3 by 12 runner\"]}],\"notes\":null}"
+              }
+            ],
+            "role": "assistant"
+          }
+        ],
+        "parallel_tool_calls": true,
+        "presence_penalty": 0,
+        "previous_response_id": null,
+        "prompt_cache_key": null,
+        "prompt_cache_retention": null,
+        "reasoning": {
+          "effort": null,
+          "summary": null
+        },
+        "safety_identifier": null,
+        "service_tier": "default",
+        "store": true,
+        "temperature": 1,
+        "text": {
+          "format": {
+            "type": "json_schema",
+            "description": null,
+            "name": "recommendation_response",
+            "schema": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "mode",
+                "assistant_message",
+                "questions",
+                "recommendations",
+                "notes"
+              ],
+              "properties": {
+                "mode": {
+                  "type": "string",
+                  "enum": [
+                    "recommendations",
+                    "clarifying_question",
+                    "no_match",
+                    "disambiguation"
+                  ]
+                },
+                "assistant_message": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 420
+                },
+                "questions": {
+                  "type": "array",
+                  "minItems": 0,
+                  "maxItems": 2,
+                  "items": {
+                    "type": "string",
+                    "maxLength": 140
+                  }
+                },
+                "recommendations": {
+                  "type": "array",
+                  "minItems": 0,
+                  "maxItems": 10,
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                      "rug_id",
+                      "sku",
+                      "title",
+                      "origin",
+                      "style",
+                      "mood",
+                      "size_text",
+                      "match_reasons",
+                      "confidence",
+                      "confidence_tier",
+                      "confidence_factors",
+                      "why_not"
+                    ],
+                    "properties": {
+                      "rug_id": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 80
+                      },
+                      "sku": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "maxLength": 80
+                      },
+                      "title": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 160
+                      },
+                      "origin": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "maxLength": 60
+                      },
+                      "style": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "maxLength": 80
+                      },
+                      "mood": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "maxLength": 32
+                      },
+                      "size_text": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "maxLength": 64
+                      },
+                      "match_reasons": {
+                        "type": "array",
+                        "minItems": 1,
+                        "maxItems": 3,
+                        "items": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 180
+                        }
+                      },
+                      "confidence": {
+                        "type": "number"
+                      },
+                      "confidence_tier": {
+                        "type": "string",
+                        "enum": [
+                          "high",
+                          "medium",
+                          "low"
+                        ]
+                      },
+                      "confidence_factors": {
+                        "type": "array",
+                        "minItems": 0,
+                        "maxItems": 3,
+                        "items": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 100
+                        }
+                      },
+                      "why_not": {
+                        "type": "array",
+                        "minItems": 0,
+                        "maxItems": 2,
+                        "items": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 160
+                        }
+                      }
+                    }
+                  }
+                },
+                "notes": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "maxLength": 220
+                }
+              }
+            },
+            "strict": true
+          },
+          "verbosity": "medium"
+        },
+        "tool_choice": "auto",
+        "tools": [],
+        "top_logprobs": 0,
+        "top_p": 1,
+        "truncation": "disabled",
+        "usage": {
+          "input_tokens": 3517,
+          "input_tokens_details": {
+            "cached_tokens": 0
+          },
+          "output_tokens": 584,
+          "output_tokens_details": {
+            "reasoning_tokens": 0
+          },
+          "total_tokens": 4101
+        },
+        "user": null,
+        "metadata": {}
+      },
+      "parsed_response": {
+        "mode": "recommendations",
+        "assistant_message": "Considering slightly shorter runners around 2.5 by 10 feet, these authentic and vintage Persian and Caucasian pieces offer rich traditional patterns that fit well in a hallway. The Antique Persian Tabriz Runner stands out with its elegant floral medallion design and vibrant red and blue hues. Would you like to see more options in this size range or explore different styles?",
+        "questions": [],
+        "recommendations": [
+          {
+            "rug_id": "1368e9b9-274c-4775-ad76-54c2cf94adc6",
+            "sku": null,
+            "title": "Antique Persian Tabriz Runner",
+            "origin": "Persian",
+            "style": "Tabriz",
+            "mood": "traditional",
+            "size_text": "2'6\" x 10'",
+            "match_reasons": [
+              "This is an antique Persian Tabriz rug featuring a central medallion surrounded by intricate floral motifs and a prominent floral border. The rug combines rich reds, blues, and golds, offering a traditional and elegant appearance.",
+              "Closest currently available size to your request."
+            ],
+            "confidence": 0.6,
+            "confidence_tier": "medium",
+            "confidence_factors": [
+              "Loose size alignment",
+              "Detailed listing context available"
+            ],
+            "why_not": [
+              "Dimensions are not an exact match and may require compromise."
+            ],
+            "primary_image_url": "https://nlypymygmysfgxekhudr.supabase.co/storage/v1/object/public/rug-images/1f3d032b-8411-48a9-8a44-1f3cb9df67a5/1368e9b9-274c-4775-ad76-54c2cf94adc6/primary-1774498393042.jpg",
+            "primary_image_caption": null
+          },
+          {
+            "rug_id": "ca0f4242-5768-480e-a139-774ff6fe9a82",
+            "sku": null,
+            "title": "Antique Persian Runner",
+            "origin": "Persian",
+            "style": "Medallion",
+            "mood": "traditional",
+            "size_text": "2'6\" x 10'",
+            "match_reasons": [
+              "An antique Persian rug featuring a floral motif with a central medallion and a rich, decorative border. The rug has a worn patina, indicative of its age.",
+              "Closest currently available size to your request."
+            ],
+            "confidence": 0.6,
+            "confidence_tier": "medium",
+            "confidence_factors": [
+              "Loose size alignment",
+              "Detailed listing context available"
+            ],
+            "why_not": [
+              "Dimensions are not an exact match and may require compromise."
+            ],
+            "primary_image_url": "https://nlypymygmysfgxekhudr.supabase.co/storage/v1/object/public/rug-images/1f3d032b-8411-48a9-8a44-1f3cb9df67a5/ca0f4242-5768-480e-a139-774ff6fe9a82/primary-1774497795232.jpg",
+            "primary_image_caption": null
+          },
+          {
+            "rug_id": "c4d685af-993b-4431-9390-dd7225cc024b",
+            "sku": null,
+            "title": "Antique Caucasian Kazak Runner",
+            "origin": "Caucasian",
+            "style": "Kazak",
+            "mood": "traditional",
+            "size_text": "2'6\" x 10'",
+            "match_reasons": [
+              "This is an antique Caucasian Kazak runner featuring a bold geometric medallion pattern. The rug's palette includes rust, teal, and ivory with intricate borders, suitable for traditional and eclectic spaces.",
+              "Closest currently available size to your request."
+            ],
+            "confidence": 0.6,
+            "confidence_tier": "medium",
+            "confidence_factors": [
+              "Loose size alignment",
+              "Detailed listing context available"
+            ],
+            "why_not": [
+              "Dimensions are not an exact match and may require compromise."
+            ],
+            "primary_image_url": "https://nlypymygmysfgxekhudr.supabase.co/storage/v1/object/public/rug-images/1f3d032b-8411-48a9-8a44-1f3cb9df67a5/c4d685af-993b-4431-9390-dd7225cc024b/primary-1774500790424.jpg",
+            "primary_image_caption": null
+          },
+          {
+            "rug_id": "682ec405-4ffc-4248-b227-bd3415a91e8f",
+            "sku": null,
+            "title": "Antique Persian Kerman Runner",
+            "origin": "Persian",
+            "style": "Kerman",
+            "mood": "traditional",
+            "primary_image_url": "https://nlypymygmysfgxekhudr.supabase.co/storage/v1/object/public/rug-images/1f3d032b-8411-48a9-8a44-1f3cb9df67a5/682ec405-4ffc-4248-b227-bd3415a91e8f/primary-1774497782861.jpg",
+            "primary_image_caption": null,
+            "size_text": "2' x 8'",
+            "match_reasons": [
+              "This is an antique Persian Kerman rug featuring intricate floral motifs and a series of medallions. The primary colors are red, blue, and gold, enhancing its traditional aesthetic.",
+              "Closest currently available size to your request."
+            ],
+            "confidence": 0.6,
+            "confidence_tier": "medium",
+            "confidence_factors": [
+              "Loose size alignment",
+              "Detailed listing context available"
+            ],
+            "why_not": [
+              "Dimensions are not an exact match and may require compromise."
+            ]
+          },
+          {
+            "rug_id": "be794810-f497-4c81-ad06-825240962b35",
+            "sku": null,
+            "title": "Persian Traditional Runner",
+            "origin": "Persian",
+            "style": "Medallion",
+            "mood": "traditional",
+            "primary_image_url": "https://nlypymygmysfgxekhudr.supabase.co/storage/v1/object/public/rug-images/1f3d032b-8411-48a9-8a44-1f3cb9df67a5/be794810-f497-4c81-ad06-825240962b35/primary-1774501396184.jpg",
+            "primary_image_caption": null,
+            "size_text": "2' x 8'",
+            "match_reasons": [
+              "This is a Persian runner rug featuring a rich red backdrop with a complex medallion center design and intricate floral motifs. The border is decorated with detailed floral patterns, enhancing its traditional appearance.",
+              "Closest currently available size to your request."
+            ],
+            "confidence": 0.6,
+            "confidence_tier": "medium",
+            "confidence_factors": [
+              "Loose size alignment",
+              "Detailed listing context available"
+            ],
+            "why_not": [
+              "Dimensions are not an exact match and may require compromise."
+            ]
+          },
+          {
+            "rug_id": "bd9a37eb-1c7d-4e2c-a629-b96375f6ff56",
+            "sku": null,
+            "title": "Vintage Caucasian Kazak Runner",
+            "origin": "Caucasian",
+            "style": "Kazak",
+            "mood": "traditional",
+            "primary_image_url": "https://nlypymygmysfgxekhudr.supabase.co/storage/v1/object/public/rug-images/1f3d032b-8411-48a9-8a44-1f3cb9df67a5/bd9a37eb-1c7d-4e2c-a629-b96375f6ff56/primary-1774502007175.jpg",
+            "primary_image_caption": null,
+            "size_text": "2' x 8'",
+            "match_reasons": [
+              "This is a vintage Caucasian Kazak rug featuring a geometric design with a rich mix of colors. The runner shape showcases traditional patterns in a bold and striking arrangement.",
+              "Closest currently available size to your request."
+            ],
+            "confidence": 0.6,
+            "confidence_tier": "medium",
+            "confidence_factors": [
+              "Loose size alignment",
+              "Detailed listing context available"
+            ],
+            "why_not": [
+              "Dimensions are not an exact match and may require compromise."
+            ]
+          }
+        ],
+        "notes": null
+      },
+      "fallback_reason": null,
+      "error": null,
+      "incomplete_detected": false,
+      "retry_attempted": false,
+      "retry_succeeded": false,
+      "text_postprocess_applied": false
+    },
+    "result": {
+      "mode": "recommendations",
+      "notes": null,
+      "recommendation_ids": [
+        "1368e9b9-274c-4775-ad76-54c2cf94adc6",
+        "ca0f4242-5768-480e-a139-774ff6fe9a82",
+        "c4d685af-993b-4431-9390-dd7225cc024b",
+        "682ec405-4ffc-4248-b227-bd3415a91e8f",
+        "be794810-f497-4c81-ad06-825240962b35",
+        "bd9a37eb-1c7d-4e2c-a629-b96375f6ff56"
+      ],
+      "recommendation_count": 6,
+      "relaxed_size_tolerance_in": null
+    },
+    "error": null
+  }
+}

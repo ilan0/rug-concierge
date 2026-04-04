@@ -250,7 +250,14 @@ function parseSizeFromMessage(userMessage: string): HardConstraints["size"] | un
   const mentionsInches = hasInchUnit || /\b(?:inch|inches)\b|"/i.test(text);
   const explicitFeet = hasFeetUnit && !hasInchUnit;
   const explicitInches = hasInchUnit && !hasFeetUnit;
-  const probablyFeet = !mentionsInches && left <= 30 && right <= 30;
+  const maxSide = Math.max(left, right);
+  const probablyFeet =
+    !mentionsInches &&
+    ((left <= 30 && right <= 30) ||
+      maxSide >= 36 ||
+      /\b(?:rug|rugs|runner|hallway|living room|bedroom|dining room|entryway)\b/i.test(
+        text
+      ));
   const multiplier = explicitFeet ? 12 : explicitInches ? 1 : probablyFeet ? 12 : 1;
 
   const exactRequested = /\b(?:exact|exactly|no tolerance)\b/i.test(text);

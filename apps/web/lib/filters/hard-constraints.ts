@@ -78,7 +78,19 @@ const STYLE_FAMILY_OVERRIDES: Record<
     exclude: [...MODERN_STYLE_MARKERS],
   },
   persian: {
-    include: [...TRADITIONAL_STYLE_MARKERS],
+    include: [
+      "persian",
+      "heriz",
+      "serapi",
+      "kashan",
+      "tabriz",
+      "isfahan",
+      "sultanabad",
+      "bidjar",
+      "malayer",
+      "sarouk",
+      "qom",
+    ],
     exclude: [...MODERN_STYLE_MARKERS],
   },
   tribal: {
@@ -121,10 +133,17 @@ function toStyles(rug: InventoryRug): string[] {
         rug.ai_description ?? null
       );
 
-  const styleTokens = [fields.style ?? "", ...(fields.pattern ?? [])];
-  return styleTokens
+  const styleTokens = [
+    fields.style ?? "",
+    fields.origin ?? "",
+    ...(fields.pattern ?? []),
+  ];
+  const expanded = styleTokens
     .map((value) => normalizeText(value))
-    .filter((value) => value.length > 0);
+    .filter((value) => value.length > 0)
+    .flatMap((value) => [value, ...value.split(" ").filter(Boolean)]);
+
+  return Array.from(new Set(expanded));
 }
 
 function isRunnerByDimensions(
@@ -183,6 +202,10 @@ function matchesStyles(rug: InventoryRug, constraints: HardConstraints): boolean
   const wanted = constraints.styles.map((value) => normalizeText(value));
   const styleTokens = new Set(toStyles(rug));
   const searchText = toSearchText(rug);
+  const strictTerms = new Set<string>([
+    ...MODERN_STYLE_MARKERS,
+    ...TRADITIONAL_STYLE_MARKERS,
+  ]);
 
   const matchesAnyRequested = wanted.some((token) => {
     const family = STYLE_FAMILY_OVERRIDES[token];
@@ -191,15 +214,31 @@ function matchesStyles(rug: InventoryRug, constraints: HardConstraints): boolean
       ...(STYLE_ALIASES[token] ?? []),
       ...(family?.include ?? []),
     ];
-    return candidateTerms.some(
-      (term) => styleTokens.has(term) || searchText.includes(term)
-    );
+    return candidateTerms.some((term) => {
+      if (strictTerms.has(term)) {
+        return styleTokens.has(term);
+      }
+      return styleTokens.has(term) || searchText.includes(term);
+    });
   });
   if (!matchesAnyRequested) return false;
 
   const hasTraditionalCandidate = TRADITIONAL_STYLE_MARKERS.some(
     (token) => styleTokens.has(token) || searchText.includes(token)
   );
+  const hasPersianCandidate = [
+    "persian",
+    "heriz",
+    "serapi",
+    "kashan",
+    "tabriz",
+    "isfahan",
+    "sultanabad",
+    "bidjar",
+    "malayer",
+    "sarouk",
+    "qom",
+  ].some((token) => styleTokens.has(token) || searchText.includes(token));
   const hasModernCandidate = MODERN_STYLE_MARKERS.some(
     (token) => styleTokens.has(token) || searchText.includes(token)
   );
@@ -212,10 +251,13 @@ function matchesStyles(rug: InventoryRug, constraints: HardConstraints): boolean
     )
   );
 
-  if (requestedModern && hasTraditionalCandidate && !hasModernCandidate) {
+  if (requestedModern && hasTraditionalCandidate) {
     return false;
   }
-  if (requestedTraditional && hasModernCandidate && !hasTraditionalCandidate) {
+  if (requestedTraditional && hasModernCandidate) {
+    return false;
+  }
+  if (wanted.includes("persian") && !hasPersianCandidate) {
     return false;
   }
 

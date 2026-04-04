@@ -1,0 +1,112 @@
+{
+  "trace_id": "422b2523-3ab0-4d29-9ed8-cbee6360792d",
+  "channel": "general-chat-ai",
+  "created_at": "2026-03-26T21:33:51.343Z",
+  "payload": {
+    "mode": "general_chat",
+    "flow_path": [
+      "handleGeneralChatTurn",
+      "buildPromptLayers",
+      "generateGeneralChatResponse"
+    ],
+    "ai_trace": {
+      "called": true,
+      "model": "gpt-4.1-mini",
+      "prompt_layers": [
+        {
+          "id": "SYSTEM_PROMPT_BASE",
+          "role": "system",
+          "chars": 758,
+          "preview": "# AI System Prompt — Rug Concierge You are an experienced rug consultant helping retail customers in a showroom environ…"
+        },
+        {
+          "id": "TASK_PROMPT_GENERAL_CHAT",
+          "role": "system",
+          "chars": 820,
+          "preview": "# General Chat Prompt — Rug Concierge You are the retail concierge for an in-store rug showroom. Handle free-form custo…"
+        },
+        {
+          "id": "TASK_PROMPT_GENERAL_CHAT",
+          "role": "system",
+          "chars": 19,
+          "preview": "Respond in English."
+        },
+        {
+          "id": "ROLE_PROMPT_RETAIL_CUSTOMER",
+          "role": "system",
+          "chars": 89,
+          "preview": "Role: retail customer. Be approachable and clear, with practical guidance and next steps."
+        },
+        {
+          "id": "CHAT_MEMORY_CONTEXT",
+          "role": "system",
+          "chars": 1036,
+          "preview": "CHAT MEMORY CONTEXT: { \"summary_text\": \"User: I need a modern 8x10 rug | Assistant: For a modern style rug close to 8x1…"
+        },
+        {
+          "id": "RECENT_TURNS_CONTEXT",
+          "role": "system",
+          "chars": 888,
+          "preview": "RECENT TURNS CONTEXT: [ { \"role\": \"user\", \"content\": \"Any closer matches?\", \"created_at\": \"2026-03-26T21:33:28.125Z\" },…"
+        },
+        {
+          "id": "LATEST_USER_MESSAGE",
+          "role": "user",
+          "chars": 32,
+          "preview": "How often should I rotate a rug?"
+        }
+      ],
+      "request_payload_preview": {
+        "model": "gpt-4.1-mini",
+        "message_groups": 2,
+        "system_groups": 1,
+        "user_groups": 1,
+        "system_blocks": 6,
+        "user_blocks": 1,
+        "schema_name": "general_chat_response",
+        "schema_strict": true,
+        "max_output_tokens": 500
+      },
+      "response_status": 500,
+      "response_payload_preview": {
+        "has_output_text": false,
+        "output_items": 0,
+        "content_blocks": 0,
+        "has_error": true,
+        "error_type": "server_error"
+      },
+      "parsed_response": null,
+      "fallback_reason": "OpenAI request failed",
+      "error": "OpenAI request failed with status 500",
+      "incomplete_detected": false,
+      "retry_attempted": false,
+      "retry_succeeded": false,
+      "text_postprocess_applied": false
+    },
+    "context_packet_stats": {
+      "field_counts": {
+        "stable_facts": 1,
+        "open_threads": 3,
+        "customer_context": 1,
+        "recently_shown_rugs": 1,
+        "shown_rug_ids": 1,
+        "recent_turns": 4
+      },
+      "char_counts": {
+        "summary_text": 642,
+        "stable_facts_total": 12,
+        "open_threads_total": 200,
+        "customer_context_total": 12,
+        "recently_shown_total": 89,
+        "shown_rug_ids_total": 36,
+        "liked_attributes_total": 6,
+        "recent_turns_total": 482,
+        "latest_user_message": 32,
+        "total": 1475
+      }
+    },
+    "timing_ms": {
+      "generate_general_chat_ms": 4972
+    }
+  }
+}

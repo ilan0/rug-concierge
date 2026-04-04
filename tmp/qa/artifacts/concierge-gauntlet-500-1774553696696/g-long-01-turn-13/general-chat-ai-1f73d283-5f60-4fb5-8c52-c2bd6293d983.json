@@ -1,0 +1,119 @@
+{
+  "trace_id": "1f73d283-5f60-4fb5-8c52-c2bd6293d983",
+  "channel": "general-chat-ai",
+  "created_at": "2026-03-26T19:37:10.095Z",
+  "payload": {
+    "mode": "general_chat",
+    "flow_path": [
+      "handleGeneralChatTurn",
+      "buildPromptLayers",
+      "generateGeneralChatResponse"
+    ],
+    "ai_trace": {
+      "called": true,
+      "model": "gpt-4.1-mini",
+      "prompt_layers": [
+        {
+          "id": "SYSTEM_PROMPT_BASE",
+          "role": "system",
+          "chars": 758,
+          "preview": "# AI System Prompt — Rug Concierge You are an experienced rug consultant helping retail customers in a showroom environ…"
+        },
+        {
+          "id": "TASK_PROMPT_GENERAL_CHAT",
+          "role": "system",
+          "chars": 820,
+          "preview": "# General Chat Prompt — Rug Concierge You are the retail concierge for an in-store rug showroom. Handle free-form custo…"
+        },
+        {
+          "id": "TASK_PROMPT_GENERAL_CHAT",
+          "role": "system",
+          "chars": 19,
+          "preview": "Respond in Spanish."
+        },
+        {
+          "id": "ROLE_PROMPT_RETAIL_CUSTOMER",
+          "role": "system",
+          "chars": 89,
+          "preview": "Role: retail customer. Be approachable and clear, with practical guidance and next steps."
+        },
+        {
+          "id": "CHAT_MEMORY_CONTEXT",
+          "role": "system",
+          "chars": 1639,
+          "preview": "CHAT MEMORY CONTEXT: { \"summary_text\": \"…d 6 feet | Assistant: You asked for a round or oval piece, so these are the cl…"
+        },
+        {
+          "id": "RECENT_TURNS_CONTEXT",
+          "role": "system",
+          "chars": 872,
+          "preview": "RECENT TURNS CONTEXT: [ { \"role\": \"user\", \"content\": \"I need exactly a 50x50 rug\", \"created_at\": \"2026-03-26T19:36:45.8…"
+        },
+        {
+          "id": "LATEST_USER_MESSAGE",
+          "role": "user",
+          "chars": 17,
+          "preview": "¿Qué es un kilim?"
+        }
+      ],
+      "request_payload_preview": {
+        "model": "gpt-4.1-mini",
+        "message_groups": 2,
+        "system_groups": 1,
+        "user_groups": 1,
+        "system_blocks": 6,
+        "user_blocks": 1,
+        "schema_name": "general_chat_response",
+        "schema_strict": true,
+        "max_output_tokens": 500
+      },
+      "response_status": 200,
+      "response_payload_preview": {
+        "has_output_text": false,
+        "output_items": 1,
+        "content_blocks": 1,
+        "has_error": false,
+        "error_type": null
+      },
+      "parsed_response": {
+        "assistant_message": "Un kilim es un tipo de alfombra o tapiz plano tejido sin pelo, típicamente hecho a mano en regiones como Turquía, Irán y los Balcanes. Su característica principal es el tejido plano y diseños geométricos, además de ser reversible. ¿Le gustaría que le muestre algunos kilims disponibles en nuestra colección actual?",
+        "notes": null,
+        "memory_hints": [
+          "definición de kilim",
+          "mostrar kilims de la colección"
+        ]
+      },
+      "fallback_reason": null,
+      "error": null,
+      "incomplete_detected": false,
+      "retry_attempted": false,
+      "retry_succeeded": false,
+      "text_postprocess_applied": false
+    },
+    "context_packet_stats": {
+      "field_counts": {
+        "stable_facts": 4,
+        "open_threads": 6,
+        "customer_context": 4,
+        "recently_shown_rugs": 2,
+        "shown_rug_ids": 12,
+        "recent_turns": 4
+      },
+      "char_counts": {
+        "summary_text": 900,
+        "stable_facts_total": 81,
+        "open_threads_total": 426,
+        "customer_context_total": 81,
+        "recently_shown_total": 180,
+        "shown_rug_ids_total": 432,
+        "liked_attributes_total": 13,
+        "recent_turns_total": 464,
+        "latest_user_message": 17,
+        "total": 2162
+      }
+    },
+    "timing_ms": {
+      "generate_general_chat_ms": 1786
+    }
+  }
+}

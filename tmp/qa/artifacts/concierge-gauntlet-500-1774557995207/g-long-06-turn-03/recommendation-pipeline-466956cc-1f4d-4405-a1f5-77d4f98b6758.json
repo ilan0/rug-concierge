@@ -1,0 +1,527 @@
+{
+  "trace_id": "466956cc-1f4d-4405-a1f5-77d4f98b6758",
+  "channel": "recommendation-pipeline",
+  "created_at": "2026-03-26T21:04:49.128Z",
+  "payload": {
+    "request_id": "466956cc-1f4d-4405-a1f5-77d4f98b6758",
+    "flow_path": [
+      "runRecommendationPipeline",
+      "fetchInventoryCandidates",
+      "filterByHardConstraints",
+      "shapeCandidatesForAI",
+      "rankAndExplain",
+      "logRecommendationQaEvent"
+    ],
+    "source_route": "/api/chat",
+    "session_id": "0a2323fb-dfc6-4483-a12c-a2317de5b58b",
+    "role": "retail_customer",
+    "tenant_id": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5",
+    "user_message": "Show me something smaller",
+    "constraints": {
+      "size": {
+        "widthIn": 72,
+        "lengthIn": 108,
+        "toleranceIn": 10
+      },
+      "colors": [],
+      "styles": [
+        "geometric"
+      ],
+      "strictness": {
+        "size": "prefer",
+        "colors": "prefer",
+        "styles": "prefer",
+        "shape": "prefer"
+      }
+    },
+    "prompt_context": {
+      "role": "retail_customer",
+      "chat_context": {
+        "structured_state": {
+          "recommendation_state": {
+            "hard_constraints": {
+              "size": {
+                "widthIn": 72,
+                "lengthIn": 108,
+                "toleranceIn": 10
+              },
+              "colors": [],
+              "styles": [
+                "geometric"
+              ],
+              "strictness": {
+                "size": "prefer",
+                "colors": "prefer",
+                "styles": "prefer",
+                "shape": "prefer"
+              }
+            },
+            "soft_preferences": {},
+            "runtime": {
+              "last_result_mode": "recommendation",
+              "last_relaxed_size_tolerance_in": null,
+              "last_blockers": [],
+              "last_recommended_size_in": {
+                "width_in": 72,
+                "length_in": 108
+              },
+              "liked_rug_ids": [],
+              "dismissed_rug_ids": [],
+              "shown_rug_ids": [
+                "3e188674-4625-445b-be9a-3d2bc2752a50",
+                "258fde89-ed87-4103-b1e8-224f267e0f3e",
+                "40e91751-d4aa-4ce2-b226-bfd5f37bb50a",
+                "08ca5e39-c162-4d88-9d7e-484e90489d85",
+                "66ca8129-8843-4e42-bdf5-9e3ce23d4128",
+                "83a1b270-c6b7-48e6-94a0-9bc99d85736b",
+                "aea4955c-97f3-4e4a-a9b4-2db2fdf38a15",
+                "903d2865-527a-4e12-9721-7e540ced0445",
+                "94df714b-5e7a-41e4-b775-9f7a7ac615d4",
+                "21520501-b868-489c-bb06-55c638ddf3d4",
+                "dbf2bf0c-8cb5-4ea7-9d6c-fa3439793b0b",
+                "b1b00766-b4bc-4d8b-ab4d-46be26589902"
+              ],
+              "liked_attributes": {
+                "colors": [],
+                "styles": [
+                  "geometric"
+                ],
+                "origins": []
+              },
+              "recently_shown_rugs": [
+                {
+                  "id": "dbf2bf0c-8cb5-4ea7-9d6c-fa3439793b0b",
+                  "label": "Antique Persian",
+                  "colors": [
+                    "blue",
+                    "ivory",
+                    "red"
+                  ],
+                  "style": "Geometric Tribal",
+                  "origin": "Persian"
+                },
+                {
+                  "id": "b1b00766-b4bc-4d8b-ab4d-46be26589902",
+                  "label": "Antique Persian Bakhtiari",
+                  "colors": [
+                    "blue",
+                    "gold",
+                    "red",
+                    "brown"
+                  ],
+                  "style": "Bakhtiari",
+                  "origin": "Persian"
+                },
+                {
+                  "id": "ce5219c0-653f-411a-a5a8-1ad9935e1a0d",
+                  "label": "Antique Caucasian Karabagh",
+                  "colors": [
+                    "red",
+                    "gold",
+                    "blue"
+                  ],
+                  "style": "Karabagh",
+                  "origin": "Caucasian"
+                },
+                {
+                  "id": "4bc59440-4d03-4698-8275-2a78247cd3b7",
+                  "label": "Antique Persian Heriz",
+                  "colors": [
+                    "red",
+                    "black",
+                    "gold",
+                    "green"
+                  ],
+                  "style": "Heriz",
+                  "origin": "Persian"
+                },
+                {
+                  "id": "2679516c-6cfa-46e6-b94e-00095796ac73",
+                  "label": "Antique Persian Kerman",
+                  "colors": [
+                    "red",
+                    "blue",
+                    "ivory"
+                  ],
+                  "style": "Kerman",
+                  "origin": "Persian"
+                },
+                {
+                  "id": "a3181b27-19c9-45cd-ac2d-04b83368ca6f",
+                  "label": "Antique Persian Qom",
+                  "colors": [
+                    "rust",
+                    "blue",
+                    "ivory"
+                  ],
+                  "style": "Qom",
+                  "origin": "Persian"
+                },
+                {
+                  "id": "a93b286f-4e3b-44f1-aec8-b2f43d6ba5dd",
+                  "label": "Antique Persian Sarouk",
+                  "colors": [
+                    "red",
+                    "blue",
+                    "gold"
+                  ],
+                  "style": "Sarouk",
+                  "origin": "Persian"
+                },
+                {
+                  "id": "09ffdd96-6a94-40a4-9c59-c0e752e37b66",
+                  "label": "Antique Persian Sultanabad",
+                  "colors": [
+                    "ivory",
+                    "blue",
+                    "rust"
+                  ],
+                  "style": "Sultanabad",
+                  "origin": "Persian"
+                },
+                {
+                  "id": "60baaf09-68fd-4825-b357-066d5a672188",
+                  "label": "Antique Persian Sultanabad",
+                  "colors": [
+                    "rust",
+                    "ivory",
+                    "red",
+                    "green"
+                  ],
+                  "style": "Sultanabad",
+                  "origin": "Persian"
+                },
+                {
+                  "id": "a7b5dec1-3502-4147-810b-2cf991e80b4a",
+                  "label": "Antique Persian Sultanabad",
+                  "colors": [
+                    "brown",
+                    "red",
+                    "blue"
+                  ],
+                  "style": "Sultanabad",
+                  "origin": "Persian"
+                }
+              ],
+              "no_match_attempts": 0,
+              "updated_at": "2026-03-26T21:04:39.752Z"
+            }
+          }
+        },
+        "conversation_memory": {
+          "summary_text": "User: Show me a broad spread | Assistant: Here are the best options based on what you've told me: What kind of space are you decorating so I can narrow these down for you? || User: Find me a geometric rug around 6x9 | Assistant: For around 6' x 9', these are the closest available fits in stock:",
+          "stable_facts": [],
+          "open_threads": [
+            "Here are the best options based on what you've told me: What kind of space are you decorating so I can narrow these dow…"
+          ],
+          "last_user_intent": "recommendation",
+          "version": "v1"
+        },
+        "customer_context": [],
+        "recently_shown_rugs": [
+          {
+            "id": "dbf2bf0c-8cb5-4ea7-9d6c-fa3439793b0b",
+            "label": "Antique Persian",
+            "colors": [
+              "blue",
+              "ivory",
+              "red"
+            ],
+            "style": "Geometric Tribal",
+            "origin": "Persian"
+          },
+          {
+            "id": "b1b00766-b4bc-4d8b-ab4d-46be26589902",
+            "label": "Antique Persian Bakhtiari",
+            "colors": [
+              "blue",
+              "gold",
+              "red",
+              "brown"
+            ],
+            "style": "Bakhtiari",
+            "origin": "Persian"
+          },
+          {
+            "id": "ce5219c0-653f-411a-a5a8-1ad9935e1a0d",
+            "label": "Antique Caucasian Karabagh",
+            "colors": [
+              "red",
+              "gold",
+              "blue"
+            ],
+            "style": "Karabagh",
+            "origin": "Caucasian"
+          },
+          {
+            "id": "4bc59440-4d03-4698-8275-2a78247cd3b7",
+            "label": "Antique Persian Heriz",
+            "colors": [
+              "red",
+              "black",
+              "gold",
+              "green"
+            ],
+            "style": "Heriz",
+            "origin": "Persian"
+          },
+          {
+            "id": "2679516c-6cfa-46e6-b94e-00095796ac73",
+            "label": "Antique Persian Kerman",
+            "colors": [
+              "red",
+              "blue",
+              "ivory"
+            ],
+            "style": "Kerman",
+            "origin": "Persian"
+          },
+          {
+            "id": "a3181b27-19c9-45cd-ac2d-04b83368ca6f",
+            "label": "Antique Persian Qom",
+            "colors": [
+              "rust",
+              "blue",
+              "ivory"
+            ],
+            "style": "Qom",
+            "origin": "Persian"
+          },
+          {
+            "id": "a93b286f-4e3b-44f1-aec8-b2f43d6ba5dd",
+            "label": "Antique Persian Sarouk",
+            "colors": [
+              "red",
+              "blue",
+              "gold"
+            ],
+            "style": "Sarouk",
+            "origin": "Persian"
+          },
+          {
+            "id": "09ffdd96-6a94-40a4-9c59-c0e752e37b66",
+            "label": "Antique Persian Sultanabad",
+            "colors": [
+              "ivory",
+              "blue",
+              "rust"
+            ],
+            "style": "Sultanabad",
+            "origin": "Persian"
+          },
+          {
+            "id": "60baaf09-68fd-4825-b357-066d5a672188",
+            "label": "Antique Persian Sultanabad",
+            "colors": [
+              "rust",
+              "ivory",
+              "red",
+              "green"
+            ],
+            "style": "Sultanabad",
+            "origin": "Persian"
+          },
+          {
+            "id": "a7b5dec1-3502-4147-810b-2cf991e80b4a",
+            "label": "Antique Persian Sultanabad",
+            "colors": [
+              "brown",
+              "red",
+              "blue"
+            ],
+            "style": "Sultanabad",
+            "origin": "Persian"
+          }
+        ],
+        "shown_rug_ids": [
+          "3e188674-4625-445b-be9a-3d2bc2752a50",
+          "258fde89-ed87-4103-b1e8-224f267e0f3e",
+          "40e91751-d4aa-4ce2-b226-bfd5f37bb50a",
+          "08ca5e39-c162-4d88-9d7e-484e90489d85",
+          "66ca8129-8843-4e42-bdf5-9e3ce23d4128",
+          "83a1b270-c6b7-48e6-94a0-9bc99d85736b",
+          "aea4955c-97f3-4e4a-a9b4-2db2fdf38a15",
+          "903d2865-527a-4e12-9721-7e540ced0445",
+          "94df714b-5e7a-41e4-b775-9f7a7ac615d4",
+          "21520501-b868-489c-bb06-55c638ddf3d4",
+          "dbf2bf0c-8cb5-4ea7-9d6c-fa3439793b0b",
+          "b1b00766-b4bc-4d8b-ab4d-46be26589902"
+        ],
+        "liked_attributes": {
+          "colors": [],
+          "styles": [
+            "geometric"
+          ],
+          "origins": []
+        },
+        "recent_turns": [
+          {
+            "role": "user",
+            "content": "Show me a broad spread",
+            "created_at": "2026-03-26T21:04:16.922Z"
+          },
+          {
+            "role": "assistant",
+            "content": "Here are the best options based on what you've told me: What kind of space are you decorating so I can narrow these down for you?",
+            "created_at": "2026-03-26T21:04:25.775Z"
+          },
+          {
+            "role": "user",
+            "content": "Find me a geometric rug around 6x9",
+            "created_at": "2026-03-26T21:04:30.624Z"
+          },
+          {
+            "role": "assistant",
+            "content": "For around 6' x 9', these are the closest available fits in stock:",
+            "created_at": "2026-03-26T21:04:39.751Z"
+          }
+        ]
+      },
+      "discovery_mode": false,
+      "expanded_due_to_thin_results": false
+    },
+    "query_trace": [
+      {
+        "variant": "size_rotated",
+        "query_variant_reason": "size_window_rotated_dimensions_query",
+        "filters": {
+          "tenant_id": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5",
+          "status": "available",
+          "enrichment_status": "ready",
+          "limit": 220,
+          "size_bounds": {
+            "minWidthIn": 62,
+            "maxWidthIn": 82,
+            "minLengthIn": 98,
+            "maxLengthIn": 118,
+            "rotated": true
+          },
+          "color_prefilter_active": false,
+          "image_sql_filter_active": true,
+          "color_prefilter": "inactive",
+          "color_prefilter_state": "inactive",
+          "color_sql_prefilter_tokens": null
+        },
+        "row_count": 0,
+        "error": null
+      },
+      {
+        "variant": "size_direct",
+        "query_variant_reason": "size_window_direct_dimensions_query",
+        "filters": {
+          "tenant_id": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5",
+          "status": "available",
+          "enrichment_status": "ready",
+          "limit": 220,
+          "size_bounds": {
+            "minWidthIn": 62,
+            "maxWidthIn": 82,
+            "minLengthIn": 98,
+            "maxLengthIn": 118,
+            "rotated": false
+          },
+          "color_prefilter_active": false,
+          "image_sql_filter_active": true,
+          "color_prefilter": "inactive",
+          "color_prefilter_state": "inactive",
+          "color_sql_prefilter_tokens": null
+        },
+        "row_count": 14,
+        "error": null
+      }
+    ],
+    "dynamic_limit": 220,
+    "policy_sql_filters": {
+      "tenant_id": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5",
+      "status": "available",
+      "enrichment_status": "ready",
+      "size_window": {
+        "minWidthIn": 62,
+        "maxWidthIn": 82,
+        "minLengthIn": 98,
+        "maxLengthIn": 118
+      },
+      "hard_constraints": {
+        "size": true,
+        "styles": false,
+        "shape": false
+      },
+      "image_sql_filter_active": true,
+      "color_prefilter_active": false,
+      "color_prefilter": "inactive",
+      "color_prefilter_state": "inactive",
+      "color_prefilter_tokens": [],
+      "discovery_mode": false,
+      "confidence": "low"
+    },
+    "query_variant_reason": "size_window_active_query_direct_and_rotated",
+    "row_counts": {
+      "sql_rows_total": 14,
+      "sql_rows_by_variant": [
+        {
+          "variant": "size_rotated",
+          "query_variant_reason": "size_window_rotated_dimensions_query",
+          "row_count": 0,
+          "error": null
+        },
+        {
+          "variant": "size_direct",
+          "query_variant_reason": "size_window_direct_dimensions_query",
+          "row_count": 14,
+          "error": null
+        }
+      ]
+    },
+    "discovery_mode": false,
+    "color_sql_prefilter_tokens": [],
+    "broadening_applied": false,
+    "broadening_stage": "none",
+    "no_match": {
+      "fallback_tier": "none",
+      "reasonableness_gate": "passed",
+      "reasonableness_gate_result": "passed",
+      "terminal_reason_code": null
+    },
+    "candidate_counts": {
+      "sql_candidates": 14,
+      "hard_filtered_candidates": 3,
+      "ai_candidates": 3
+    },
+    "timing_ms": {
+      "count_rough_inventory_size_ms": 189,
+      "fetch_inventory_candidates_ms": 3347,
+      "filter_hard_constraints_ms": 0,
+      "shape_candidates_ms": 2,
+      "rank_and_explain_ms": 1,
+      "qa_log_ms": 2,
+      "total_ms": 3542
+    },
+    "ai_trace": {
+      "called": false,
+      "model": "gpt-4.1-mini",
+      "prompt_layers": [],
+      "request_payload": null,
+      "response_status": null,
+      "response_payload": null,
+      "parsed_response": null,
+      "fallback_reason": "Deterministic fast path",
+      "error": null,
+      "incomplete_detected": false,
+      "retry_attempted": false,
+      "retry_succeeded": false,
+      "text_postprocess_applied": false
+    },
+    "result": {
+      "mode": "recommendations",
+      "notes": "Deterministic fast-path response.",
+      "recommendation_ids": [
+        "b5b08191-958b-4792-8935-a1344a5e3ac3",
+        "6071a29b-9cd6-49f5-93d6-d3f09dce1af9",
+        "2095c78c-88dc-4dc0-8389-1b31ca0249f0"
+      ],
+      "recommendation_count": 3,
+      "relaxed_size_tolerance_in": null
+    },
+    "error": null
+  }
+}

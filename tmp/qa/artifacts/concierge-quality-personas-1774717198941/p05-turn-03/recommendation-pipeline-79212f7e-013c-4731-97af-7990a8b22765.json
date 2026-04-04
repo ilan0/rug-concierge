@@ -1,0 +1,1183 @@
+{
+  "trace_id": "79212f7e-013c-4731-97af-7990a8b22765",
+  "channel": "recommendation-pipeline",
+  "created_at": "2026-03-28T17:04:10.844Z",
+  "payload": {
+    "request_id": "79212f7e-013c-4731-97af-7990a8b22765",
+    "flow_path": [
+      "runRecommendationPipeline",
+      "fetchInventoryCandidates",
+      "filterByHardConstraints",
+      "shapeCandidatesForAI",
+      "rankAndExplain",
+      "logRecommendationQaEvent"
+    ],
+    "source_route": "/api/chat",
+    "session_id": "913f5a1d-0a74-4a5a-bbf0-29afbc3447d6",
+    "role": "retail_customer",
+    "tenant_id": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5",
+    "user_message": "I like the pattern but not that color direction.",
+    "constraints": {
+      "size": {
+        "widthIn": 96,
+        "lengthIn": 120,
+        "toleranceIn": 12
+      },
+      "colors": [
+        "ivory"
+      ],
+      "styles": [
+        "heriz",
+        "kazak",
+        "kilim",
+        "bokhara",
+        "geometric tribal"
+      ],
+      "strictness": {
+        "size": "prefer",
+        "colors": "prefer",
+        "styles": "prefer",
+        "shape": "prefer"
+      },
+      "avoid_preferences": {
+        "colors": [
+          "teal",
+          "rust",
+          "blue",
+          "black",
+          "gray",
+          "gold"
+        ],
+        "shapes": []
+      }
+    },
+    "prompt_context": {
+      "role": "retail_customer",
+      "chat_context": {
+        "structured_state": {
+          "recommendation_state": {
+            "hard_constraints": {
+              "size": {
+                "widthIn": 96,
+                "lengthIn": 120,
+                "toleranceIn": 12
+              },
+              "colors": [
+                "ivory"
+              ],
+              "styles": [
+                "heriz",
+                "kazak",
+                "kilim",
+                "bokhara",
+                "geometric tribal"
+              ],
+              "strictness": {
+                "size": "prefer",
+                "colors": "prefer",
+                "styles": "prefer",
+                "shape": "prefer"
+              },
+              "avoid_preferences": {
+                "colors": [
+                  "teal",
+                  "rust",
+                  "blue",
+                  "black",
+                  "gray",
+                  "gold"
+                ],
+                "shapes": []
+              }
+            },
+            "soft_preferences": {},
+            "runtime": {
+              "last_result_mode": "recommendation",
+              "last_relaxed_size_tolerance_in": null,
+              "last_blockers": [],
+              "last_recommended_size_in": {
+                "width_in": 96,
+                "length_in": 132
+              },
+              "liked_rug_ids": [],
+              "dismissed_rug_ids": [],
+              "shown_rug_ids": [
+                "0805e27a-f004-4556-aa8f-a2181a72eed0",
+                "34a884c7-43c5-40c4-b1a8-600780538868",
+                "712d5106-7f54-4ecc-844f-712128065048",
+                "cfada3b8-86da-4b8b-bc16-26cd619f54ed",
+                "94df714b-5e7a-41e4-b775-9f7a7ac615d4",
+                "3653dd24-a5a1-457b-ba6d-443438157cfb",
+                "d3645d19-d29a-4395-9711-aa60fa81c5eb",
+                "0c83104b-d6bb-43ea-beaa-adafd1ee38dc",
+                "5b8254f3-182f-4245-aada-84250db3df92"
+              ],
+              "liked_attributes": {
+                "colors": [
+                  "rust",
+                  "ivory"
+                ],
+                "styles": [],
+                "origins": []
+              },
+              "recently_shown_rugs": [
+                {
+                  "id": "cfada3b8-86da-4b8b-bc16-26cd619f54ed",
+                  "label": "Antique Persian Heriz",
+                  "colors": [
+                    "red",
+                    "brown",
+                    "teal"
+                  ],
+                  "style": "Heriz",
+                  "origin": "Persian"
+                },
+                {
+                  "id": "94df714b-5e7a-41e4-b775-9f7a7ac615d4",
+                  "label": "Antique Caucasian Kazak",
+                  "colors": [
+                    "rust",
+                    "blue",
+                    "ivory"
+                  ],
+                  "style": "Kazak",
+                  "origin": "Caucasian"
+                },
+                {
+                  "id": "3653dd24-a5a1-457b-ba6d-443438157cfb",
+                  "label": "Caucasian Kilim Traditional",
+                  "colors": [
+                    "red",
+                    "ivory",
+                    "blue"
+                  ],
+                  "style": "Kilim",
+                  "origin": "Caucasian"
+                },
+                {
+                  "id": "d3645d19-d29a-4395-9711-aa60fa81c5eb",
+                  "label": "Vintage Afghan Bokhara",
+                  "colors": [
+                    "red",
+                    "black",
+                    "ivory"
+                  ],
+                  "style": "Bokhara",
+                  "origin": "Afghan"
+                },
+                {
+                  "id": "0c83104b-d6bb-43ea-beaa-adafd1ee38dc",
+                  "label": "Vintage Bokhara",
+                  "colors": [
+                    "black",
+                    "gray",
+                    "ivory"
+                  ],
+                  "style": "Bokhara",
+                  "origin": "Central Asian"
+                },
+                {
+                  "id": "5b8254f3-182f-4245-aada-84250db3df92",
+                  "label": "Vintage Caucasian",
+                  "colors": [
+                    "ivory",
+                    "black",
+                    "gold",
+                    "teal"
+                  ],
+                  "style": "Geometric Tribal",
+                  "origin": "Caucasian"
+                }
+              ],
+              "no_match_attempts": 0,
+              "updated_at": "2026-03-28T17:03:53.675Z"
+            }
+          }
+        },
+        "conversation_memory": {
+          "summary_text": "User: I'm redesigning a room with terracotta and cream. Need an anchor rug. | Assistant: For your 8x10 space with terracotta and cream tones, these antique Persian options harmonize beautifully, especially the Kashan with its rich rust and ivory floral design. These are strong color and size matches to anch… || User: Show me larger options. | Assistant: Larger options with warm rust and ivory hues are limited, but here are the closest matches slightly exceeding your size preference that still harmonize well.",
+          "stable_facts": [
+            "has_recent_recommendations",
+            "wants anchor rug",
+            "room colors terracotta and cream"
+          ],
+          "open_threads": [],
+          "last_user_intent": "recommendation",
+          "version": "v1"
+        },
+        "customer_context": [
+          "has_recent_recommendations",
+          "wants anchor rug",
+          "room colors terracotta and cream"
+        ],
+        "recently_shown_rugs": [
+          {
+            "id": "cfada3b8-86da-4b8b-bc16-26cd619f54ed",
+            "label": "Antique Persian Heriz",
+            "colors": [
+              "red",
+              "brown",
+              "teal"
+            ],
+            "style": "Heriz",
+            "origin": "Persian"
+          },
+          {
+            "id": "94df714b-5e7a-41e4-b775-9f7a7ac615d4",
+            "label": "Antique Caucasian Kazak",
+            "colors": [
+              "rust",
+              "blue",
+              "ivory"
+            ],
+            "style": "Kazak",
+            "origin": "Caucasian"
+          },
+          {
+            "id": "3653dd24-a5a1-457b-ba6d-443438157cfb",
+            "label": "Caucasian Kilim Traditional",
+            "colors": [
+              "red",
+              "ivory",
+              "blue"
+            ],
+            "style": "Kilim",
+            "origin": "Caucasian"
+          },
+          {
+            "id": "d3645d19-d29a-4395-9711-aa60fa81c5eb",
+            "label": "Vintage Afghan Bokhara",
+            "colors": [
+              "red",
+              "black",
+              "ivory"
+            ],
+            "style": "Bokhara",
+            "origin": "Afghan"
+          },
+          {
+            "id": "0c83104b-d6bb-43ea-beaa-adafd1ee38dc",
+            "label": "Vintage Bokhara",
+            "colors": [
+              "black",
+              "gray",
+              "ivory"
+            ],
+            "style": "Bokhara",
+            "origin": "Central Asian"
+          },
+          {
+            "id": "5b8254f3-182f-4245-aada-84250db3df92",
+            "label": "Vintage Caucasian",
+            "colors": [
+              "ivory",
+              "black",
+              "gold",
+              "teal"
+            ],
+            "style": "Geometric Tribal",
+            "origin": "Caucasian"
+          }
+        ],
+        "shown_rug_ids": [
+          "0805e27a-f004-4556-aa8f-a2181a72eed0",
+          "34a884c7-43c5-40c4-b1a8-600780538868",
+          "712d5106-7f54-4ecc-844f-712128065048",
+          "cfada3b8-86da-4b8b-bc16-26cd619f54ed",
+          "94df714b-5e7a-41e4-b775-9f7a7ac615d4",
+          "3653dd24-a5a1-457b-ba6d-443438157cfb",
+          "d3645d19-d29a-4395-9711-aa60fa81c5eb",
+          "0c83104b-d6bb-43ea-beaa-adafd1ee38dc",
+          "5b8254f3-182f-4245-aada-84250db3df92"
+        ],
+        "liked_attributes": {
+          "colors": [
+            "rust",
+            "ivory"
+          ],
+          "styles": [],
+          "origins": []
+        },
+        "recent_turns": [
+          {
+            "role": "user",
+            "content": "I'm redesigning a room with terracotta and cream. Need an anchor rug.",
+            "created_at": "2026-03-28T17:03:28.507Z"
+          },
+          {
+            "role": "assistant",
+            "content": "For your 8x10 space with terracotta and cream tones, these antique Persian options harmonize beautifully, especially the Kashan with its rich rust and ivory floral design. These are strong color and size matches to anchor your room.",
+            "created_at": "2026-03-28T17:03:38.618Z"
+          },
+          {
+            "role": "user",
+            "content": "Show me larger options.",
+            "created_at": "2026-03-28T17:03:45.003Z"
+          },
+          {
+            "role": "assistant",
+            "content": "Larger options with warm rust and ivory hues are limited, but here are the closest matches slightly exceeding your size preference that still harmonize well.",
+            "created_at": "2026-03-28T17:03:53.674Z"
+          }
+        ]
+      },
+      "discovery_mode": false,
+      "expanded_due_to_thin_results": false,
+      "constraint_mismatch": {
+        "expanded_from_zero_match": true,
+        "unmet_constraints": [
+          "colors"
+        ],
+        "disclosure_hint": "We don't have exact ivory color matches right now, so I'm showing the closest available alternatives."
+      }
+    },
+    "query_trace": [
+      {
+        "variant": "size_rotated",
+        "query_variant_reason": "size_window_rotated_dimensions_query",
+        "filters": {
+          "tenant_id": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5",
+          "status": "available",
+          "enrichment_status": "ready",
+          "limit": 235,
+          "size_bounds": {
+            "minWidthIn": 84,
+            "maxWidthIn": 108,
+            "minLengthIn": 108,
+            "maxLengthIn": 132,
+            "rotated": true
+          },
+          "color_prefilter_active": true,
+          "image_sql_filter_active": true,
+          "color_prefilter": "active",
+          "color_prefilter_state": "active",
+          "color_sql_prefilter_tokens": [
+            "ivory",
+            "white",
+            "gray",
+            "black",
+            "brown"
+          ]
+        },
+        "row_count": 1,
+        "error": null
+      },
+      {
+        "variant": "size_direct",
+        "query_variant_reason": "size_window_direct_dimensions_query",
+        "filters": {
+          "tenant_id": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5",
+          "status": "available",
+          "enrichment_status": "ready",
+          "limit": 235,
+          "size_bounds": {
+            "minWidthIn": 84,
+            "maxWidthIn": 108,
+            "minLengthIn": 108,
+            "maxLengthIn": 132,
+            "rotated": false
+          },
+          "color_prefilter_active": true,
+          "image_sql_filter_active": true,
+          "color_prefilter": "active",
+          "color_prefilter_state": "active",
+          "color_sql_prefilter_tokens": [
+            "ivory",
+            "white",
+            "gray",
+            "black",
+            "brown"
+          ]
+        },
+        "row_count": 80,
+        "error": null
+      }
+    ],
+    "dynamic_limit": 235,
+    "policy_sql_filters": {
+      "tenant_id": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5",
+      "status": "available",
+      "enrichment_status": "ready",
+      "size_window": {
+        "minWidthIn": 84,
+        "maxWidthIn": 108,
+        "minLengthIn": 108,
+        "maxLengthIn": 132
+      },
+      "hard_constraints": {
+        "size": true,
+        "styles": true,
+        "shape": false
+      },
+      "image_sql_filter_active": true,
+      "color_prefilter_active": true,
+      "color_prefilter": "active",
+      "color_prefilter_state": "active",
+      "color_prefilter_tokens": [
+        "ivory",
+        "white",
+        "gray",
+        "black",
+        "brown"
+      ],
+      "discovery_mode": false,
+      "confidence": "high"
+    },
+    "query_variant_reason": "size_window_active_query_direct_and_rotated",
+    "row_counts": {
+      "sql_rows_total": 81,
+      "sql_rows_by_variant": [
+        {
+          "variant": "size_rotated",
+          "query_variant_reason": "size_window_rotated_dimensions_query",
+          "row_count": 1,
+          "error": null
+        },
+        {
+          "variant": "size_direct",
+          "query_variant_reason": "size_window_direct_dimensions_query",
+          "row_count": 80,
+          "error": null
+        }
+      ]
+    },
+    "discovery_mode": false,
+    "color_sql_prefilter_tokens": [
+      "ivory",
+      "white",
+      "gray",
+      "black",
+      "brown"
+    ],
+    "broadening_applied": false,
+    "broadening_stage": "none",
+    "no_match": {
+      "fallback_tier": "none",
+      "reasonableness_gate": "passed",
+      "reasonableness_gate_result": "passed",
+      "terminal_reason_code": null
+    },
+    "candidate_counts": {
+      "sql_candidates": 80,
+      "hard_filtered_candidates": 16,
+      "ai_candidates": 16
+    },
+    "timing_ms": {
+      "count_rough_inventory_size_ms": 190,
+      "fetch_inventory_candidates_ms": 419,
+      "filter_hard_constraints_ms": 3,
+      "shape_candidates_ms": 13,
+      "rank_and_explain_ms": 7005,
+      "qa_log_ms": 2,
+      "total_ms": 7632
+    },
+    "ai_trace": {
+      "called": true,
+      "model": "gpt-4.1-mini",
+      "prompt_layers": [
+        {
+          "id": "TASK_PROMPT_RECOMMENDATION",
+          "role": "system",
+          "chars": 1408,
+          "preview": "Never begin a response with \"Based on what you're looking for\" or any equivalent generic transition. Open with a line t…"
+        },
+        {
+          "id": "SYSTEM_PROMPT_BASE",
+          "role": "system",
+          "chars": 758,
+          "preview": "# AI System Prompt — Rug Concierge You are an experienced rug consultant helping retail customers in a showroom environ…"
+        },
+        {
+          "id": "TASK_PROMPT_RECOMMENDATION",
+          "role": "system",
+          "chars": 19,
+          "preview": "Respond in English."
+        },
+        {
+          "id": "TASK_PROMPT_RECOMMENDATION",
+          "role": "system",
+          "chars": 3458,
+          "preview": "# Recommendation Prompt You are a retail rug concierge for in-store customers. Recommend only from provided inventory c…"
+        },
+        {
+          "id": "STRUCTURED_OUTPUT_RECOMMENDATION",
+          "role": "system",
+          "chars": 452,
+          "preview": "# Recommendation Structured Output Add-on Use this prompt layer only for recommendation mode. Runtime JSON schema valid…"
+        },
+        {
+          "id": "CHAT_MEMORY_CONTEXT",
+          "role": "system",
+          "chars": 2785,
+          "preview": "CHAT MEMORY CONTEXT: {\"structured_state\":{\"recommendation_state\":{\"hard_constraints\":{\"size\":{\"widthIn\":96,\"lengthIn\":1…"
+        },
+        {
+          "id": "CHAT_MEMORY_CONTEXT",
+          "role": "system",
+          "chars": 117,
+          "preview": "CUSTOMER CONTEXT (stable facts): [\"has_recent_recommendations\",\"wants anchor rug\",\"room colors terracotta and cream\"]"
+        },
+        {
+          "id": "CHAT_MEMORY_CONTEXT",
+          "role": "system",
+          "chars": 973,
+          "preview": "RECENTLY SHOWN RUGS (avoid repeating unless clearly requested): [{\"id\":\"cfada3b8-86da-4b8b-bc16-26cd619f54ed\",\"label\":\"…"
+        },
+        {
+          "id": "CHAT_MEMORY_CONTEXT",
+          "role": "system",
+          "chars": 96,
+          "preview": "LIKED ATTRIBUTES (weight these positively): {\"colors\":[\"rust\",\"ivory\"],\"styles\":[],\"origins\":[]}"
+        },
+        {
+          "id": "RECENT_TURNS_CONTEXT",
+          "role": "system",
+          "chars": 790,
+          "preview": "RECENT TURNS CONTEXT: [{\"role\":\"user\",\"content\":\"I'm redesigning a room with terracotta and cream. Need an anchor rug.\"…"
+        },
+        {
+          "id": "INVENTORY_CONTEXT",
+          "role": "system",
+          "chars": 7543,
+          "preview": "AVAILABLE INVENTORY (authoritative). Each entry includes ID, Label, Size, and Description: [{\"id\":\"34a884c7-43c5-40c4-b…"
+        },
+        {
+          "id": "LATEST_USER_MESSAGE_WITH_HARD_CONSTRAINTS",
+          "role": "user",
+          "chars": 392,
+          "preview": "User request: I like the pattern but not that color direction. Hard constraints: {\"size\":{\"widthIn\":96,\"lengthIn\":120,\"…"
+        },
+        {
+          "id": "TASK_PROMPT_RECOMMENDATION",
+          "role": "system",
+          "chars": 467,
+          "preview": "Constraint mismatch expansion is active: {\"expanded_from_zero_match\":true,\"unmet_constraints\":[\"colors\"],\"disclosure_hi…"
+        }
+      ],
+      "request_payload": {
+        "model": "gpt-4.1-mini",
+        "input": [
+          {
+            "role": "system",
+            "content": [
+              {
+                "type": "input_text",
+                "text": "Never begin a response with \"Based on what you're looking for\" or any equivalent generic transition. Open with a line that directly references what the customer asked for.\nVoice: warm, confident, and tasteful. Sound like a helpful showroom consultant, not a search engine.\nKeep it concise: 1-3 short sentences in assistant_message. Avoid robotic filler.\nWhen recommending, highlight one standout reason the top piece is special.\nIf the customer states an avoid preference (for example: no red, not too busy), do not praise or foreground that avoided direction.\nIf the customer asks for larger/smaller and exact directional matches are unavailable, say that directly before presenting closest alternatives. Never claim the returned set satisfies a directional request when it does not.\nIf the customer mentions practical needs (kids, pets, high traffic, easy-clean), include one practical suitability note in the opening or first recommendation reason.\nEnd recommendations with one natural next-step invitation (for example: show more like this, larger, or different color).\nOpening pattern examples:\n- Color query: \"You asked for blue-forward pieces, so these are the strongest matches in stock right now.\"\n- Style query: \"For an Oushak direction, these are the closest pieces currently available.\"\n- Discovery query: \"If you are browsing openly, here is a curated range to react to across style and origin.\""
+              },
+              {
+                "type": "input_text",
+                "text": "# AI System Prompt — Rug Concierge\n\nYou are an experienced rug consultant helping retail customers in a showroom environment.\n\nCore behavior:\n- Be accurate, practical, and calm.\n- Use only information provided in conversation and inventory context.\n- If data is missing, say what is unknown.\n- Never invent rug attributes, inventory availability, or IDs.\n\nTone:\n- Professional and approachable.\n- Concise and specific.\n- Not salesy or exaggerated. Genuine enthusiasm is appropriate when a piece genuinely stands out in quality, origin, condition, or rarity.\n- Detect the language of the user's message and respond in that same language.\n\nTrust rules:\n- When unsure, say so directly.\n- Prefer clear guidance over speculation.\n- Keep responses plain text only."
+              },
+              {
+                "type": "input_text",
+                "text": "Respond in English."
+              },
+              {
+                "type": "input_text",
+                "text": "# Recommendation Prompt\n\nYou are a retail rug concierge for in-store customers.\nRecommend only from provided inventory context.\n\n## Core Rules\n\n- Inventory only. Never invent rugs or IDs.\n- Use `ai_description` as primary narrative relevance signal.\n- Use structured fields (`origin`, `style`, `mood`, `pattern`, `primary_colors`) to refine fit.\n- Respect hard constraints from backend state: `size`, `styles`, `shape`.\n- Treat color as a strong ranking signal, not a hard exclusion.\n- Rank color fit by dominance order: dominant field color first, secondary/border color second, accent/detail color third.\n- Color tie-breakers: prefer rugs matching dominant color over secondary-only matches; then prefer rugs matching both dominant and secondary; then prefer stronger style/origin fit and richer listing detail.\n- Treat room/material as soft preferences unless backend marks them hard in context.\n- If `ai_description` is missing, the rug may still be suggested when hard constraints fit; clearly state detail is pending.\n- Every reason must be specific to that rug and connect the rug's attributes to the customer's stated context (room, decor, practical needs).\n- When `customer_context` is provided, treat it as a first-class input and connect recommendations to it explicitly.\n- In discovery mode, present an inspiring range and MUST end with exactly one natural question about the customer's space while still returning recommendations.\n- Never begin a response with \"Based on what you're looking for\" or any equivalent generic transition. Open with a line that directly references what the customer asked for.\n- Match the language of the customer's latest message.\n- Sound warm, confident, and tasteful. Write like an expert showroom consultant, not a product filter.\n- Keep `assistant_message` concise (1-3 short sentences), but include one specific standout detail for the top direction.\n- If the customer gives avoid preferences (for example: no red, not too busy), do not praise or foreground those avoided traits.\n- If the customer asks for larger/smaller and exact directional matches are unavailable, disclose that first and then show closest alternatives. Never claim the returned set satisfies the directional request when it does not.\n- If the customer mentions practical needs (kids, pets, high traffic, easy-clean), include one practical suitability note.\n- End recommendation responses with one natural next-step invitation (for example: show more like this, bigger, smaller, or another color direction).\n- When exact matches are unavailable, disclose clearly in the first sentence and pivot constructively to what is available.\n- Opening pattern examples:\n- Size-driven request: `For your 8x10 living room request, these are the strongest fits in stock right now:`\n- Color-driven request: `Since you want dominant blue with softer accents, these options align best:`\n- Style/origin request: `For a traditional Persian direction, these current pieces are the closest matches:`\n- Discovery/browse request: `If you are open to discovery, here is a curated spread across mood and origin to compare:`\n\n## Formatting\n\n- Plain text only inside string fields.\n- No markdown formatting.\n- Keep responses concise and complete.\n\n## Selection Order\n\n1. Respect backend hard constraints.\n2. Rank by fit to user intent and available rug attributes.\n3. Prefer grounded explanations over broad claims.\n4. Return `no_match` only when inventory is empty."
+              },
+              {
+                "type": "input_text",
+                "text": "# Recommendation Structured Output Add-on\n\nUse this prompt layer only for recommendation mode.\n\nRuntime JSON schema validation in code is authoritative.\nThe model output must match that schema exactly.\n\nRules:\n- JSON only (no prose outside JSON)\n- no extra keys\n- no markdown\n- concise, complete string values\n- use null only where schema allows null\n\nAny mismatch should be treated as invalid output and handled by backend sanitization/fallback logic."
+              },
+              {
+                "type": "input_text",
+                "text": "CHAT MEMORY CONTEXT:\n{\"structured_state\":{\"recommendation_state\":{\"hard_constraints\":{\"size\":{\"widthIn\":96,\"lengthIn\":120,\"toleranceIn\":12},\"colors\":[\"ivory\"],\"styles\":[\"heriz\",\"kazak\",\"kilim\",\"bokhara\",\"geometric tribal\"],\"strictness\":{\"size\":\"prefer\",\"colors\":\"prefer\",\"styles\":\"prefer\",\"shape\":\"prefer\"},\"avoid_preferences\":{\"colors\":[\"teal\",\"rust\",\"blue\",\"black\",\"gray\",\"gold\"],\"shapes\":[]}},\"soft_preferences\":{},\"runtime\":{\"last_result_mode\":\"recommendation\",\"last_relaxed_size_tolerance_in\":null,\"last_blockers\":[],\"last_recommended_size_in\":{\"width_in\":96,\"length_in\":132},\"liked_rug_ids\":[],\"dismissed_rug_ids\":[],\"shown_rug_ids\":[\"0805e27a-f004-4556-aa8f-a2181a72eed0\",\"34a884c7-43c5-40c4-b1a8-600780538868\",\"712d5106-7f54-4ecc-844f-712128065048\",\"cfada3b8-86da-4b8b-bc16-26cd619f54ed\",\"94df714b-5e7a-41e4-b775-9f7a7ac615d4\",\"3653dd24-a5a1-457b-ba6d-443438157cfb\",\"d3645d19-d29a-4395-9711-aa60fa81c5eb\",\"0c83104b-d6bb-43ea-beaa-adafd1ee38dc\",\"5b8254f3-182f-4245-aada-84250db3df92\"],\"liked_attributes\":{\"colors\":[\"rust\",\"ivory\"],\"styles\":[],\"origins\":[]},\"recently_shown_rugs\":[{\"id\":\"cfada3b8-86da-4b8b-bc16-26cd619f54ed\",\"label\":\"Antique Persian Heriz\",\"colors\":[\"red\",\"brown\",\"teal\"],\"style\":\"Heriz\",\"origin\":\"Persian\"},{\"id\":\"94df714b-5e7a-41e4-b775-9f7a7ac615d4\",\"label\":\"Antique Caucasian Kazak\",\"colors\":[\"rust\",\"blue\",\"ivory\"],\"style\":\"Kazak\",\"origin\":\"Caucasian\"},{\"id\":\"3653dd24-a5a1-457b-ba6d-443438157cfb\",\"label\":\"Caucasian Kilim Traditional\",\"colors\":[\"red\",\"ivory\",\"blue\"],\"style\":\"Kilim\",\"origin\":\"Caucasian\"},{\"id\":\"d3645d19-d29a-4395-9711-aa60fa81c5eb\",\"label\":\"Vintage Afghan Bokhara\",\"colors\":[\"red\",\"black\",\"ivory\"],\"style\":\"Bokhara\",\"origin\":\"Afghan\"},{\"id\":\"0c83104b-d6bb-43ea-beaa-adafd1ee38dc\",\"label\":\"Vintage Bokhara\",\"colors\":[\"black\",\"gray\",\"ivory\"],\"style\":\"Bokhara\",\"origin\":\"Central Asian\"},{\"id\":\"5b8254f3-182f-4245-aada-84250db3df92\",\"label\":\"Vintage Caucasian\",\"colors\":[\"ivory\",\"black\",\"gold\",\"teal\"],\"style\":\"Geometric Tribal\",\"origin\":\"Caucasian\"}],\"no_match_attempts\":0,\"updated_at\":\"2026-03-28T17:03:53.675Z\"}}},\"conversation_memory\":{\"summary_text\":\"User: I'm redesigning a room with terracotta and cream. Need an anchor rug. | Assistant: For your 8x10 space with terracotta and cream tones, these antique Persian options harmonize beautifully, especially the Kashan with its rich rust and ivory floral design. These are strong color and size matches to anch… || User: Show me larger options. | Assistant: Larger options with warm rust and ivory hues are limited, but here are the closest matches slightly exceeding your size preference that still harmonize well.\",\"stable_facts\":[\"has_recent_recommendations\",\"wants anchor rug\",\"room colors terracotta and cream\"],\"open_threads\":[],\"last_user_intent\":\"recommendation\",\"version\":\"v1\"}}"
+              },
+              {
+                "type": "input_text",
+                "text": "CUSTOMER CONTEXT (stable facts):\n[\"has_recent_recommendations\",\"wants anchor rug\",\"room colors terracotta and cream\"]"
+              },
+              {
+                "type": "input_text",
+                "text": "RECENTLY SHOWN RUGS (avoid repeating unless clearly requested):\n[{\"id\":\"cfada3b8-86da-4b8b-bc16-26cd619f54ed\",\"label\":\"Antique Persian Heriz\",\"colors\":[\"red\",\"brown\",\"teal\"],\"style\":\"Heriz\",\"origin\":\"Persian\"},{\"id\":\"94df714b-5e7a-41e4-b775-9f7a7ac615d4\",\"label\":\"Antique Caucasian Kazak\",\"colors\":[\"rust\",\"blue\",\"ivory\"],\"style\":\"Kazak\",\"origin\":\"Caucasian\"},{\"id\":\"3653dd24-a5a1-457b-ba6d-443438157cfb\",\"label\":\"Caucasian Kilim Traditional\",\"colors\":[\"red\",\"ivory\",\"blue\"],\"style\":\"Kilim\",\"origin\":\"Caucasian\"},{\"id\":\"d3645d19-d29a-4395-9711-aa60fa81c5eb\",\"label\":\"Vintage Afghan Bokhara\",\"colors\":[\"red\",\"black\",\"ivory\"],\"style\":\"Bokhara\",\"origin\":\"Afghan\"},{\"id\":\"0c83104b-d6bb-43ea-beaa-adafd1ee38dc\",\"label\":\"Vintage Bokhara\",\"colors\":[\"black\",\"gray\",\"ivory\"],\"style\":\"Bokhara\",\"origin\":\"Central Asian\"},{\"id\":\"5b8254f3-182f-4245-aada-84250db3df92\",\"label\":\"Vintage Caucasian\",\"colors\":[\"ivory\",\"black\",\"gold\",\"teal\"],\"style\":\"Geometric Tribal\",\"origin\":\"Caucasian\"}]"
+              },
+              {
+                "type": "input_text",
+                "text": "LIKED ATTRIBUTES (weight these positively):\n{\"colors\":[\"rust\",\"ivory\"],\"styles\":[],\"origins\":[]}"
+              },
+              {
+                "type": "input_text",
+                "text": "RECENT TURNS CONTEXT:\n[{\"role\":\"user\",\"content\":\"I'm redesigning a room with terracotta and cream. Need an anchor rug.\",\"created_at\":\"2026-03-28T17:03:28.507Z\"},{\"role\":\"assistant\",\"content\":\"For your 8x10 space with terracotta and cream tones, these antique Persian options harmonize beautifully, especially the Kashan with its rich rust and ivory floral design. These are strong color and size matches to anchor your room.\",\"created_at\":\"2026-03-28T17:03:38.618Z\"},{\"role\":\"user\",\"content\":\"Show me larger options.\",\"created_at\":\"2026-03-28T17:03:45.003Z\"},{\"role\":\"assistant\",\"content\":\"Larger options with warm rust and ivory hues are limited, but here are the closest matches slightly exceeding your size preference that still harmonize well.\",\"created_at\":\"2026-03-28T17:03:53.674Z\"}]"
+              },
+              {
+                "type": "input_text",
+                "text": "AVAILABLE INVENTORY (authoritative). Each entry includes ID, Label, Size, and Description:\n[{\"id\":\"34a884c7-43c5-40c4-b1a8-600780538868\",\"label\":\"Antique Persian Heriz\",\"size\":\"8' x 10'\",\"origin\":\"Persian\",\"style\":\"Heriz\",\"mood\":\"traditional\",\"pattern\":[\"medallion center\",\"floral motif\",\"floral border\"],\"colors\":[\"rust\",\"ivory\",\"red\",\"brown\"],\"desc\":\"Rectangular antique Persian Heriz rug featuring a central medallion and floral motif in a warm rust and ivory color palette.\"},{\"id\":\"df1157e4-8db4-4345-97a6-02fe0fe79fde\",\"label\":\"Traditional Caucasian Kilim\",\"size\":\"8' x 10'\",\"origin\":\"Caucasian\",\"style\":\"Kilim\",\"mood\":\"traditional\",\"pattern\":[\"geometric design\",\"tribal design\"],\"colors\":[\"red\",\"white\",\"black\",\"multi\"],\"desc\":\"Rectangular Kilim flatweave with geometric and tribal designs in broad panels of red, white, black, and multicolor accents. The rug features a repeating diamond motif and multicolored stripes with a tribal aesthetic.\"},{\"id\":\"b9fa610b-c9e7-4bbb-9f5b-3492dd3cf695\",\"label\":\"Traditional Caucasian rug\",\"size\":\"8' x 10'\",\"origin\":\"Caucasian\",\"style\":\"Geometric Tribal\",\"mood\":\"traditional\",\"pattern\":[\"medallion center\",\"geometric design\"],\"colors\":[\"red\",\"ivory\",\"black\",\"rust\"],\"desc\":\"Rectangular rug with a bold geometric design characteristic of Caucasian weaving traditions. Dominated by red and orange hues with ivory and black accents, featuring medallion center and geometric motifs.\"},{\"id\":\"c820e2bb-3846-4817-b28e-65504b7d74c1\",\"label\":\"Vintage Caucasian Kazak\",\"size\":\"8' x 10'\",\"origin\":\"Caucasian\",\"style\":\"Kazak\",\"mood\":\"traditional\",\"pattern\":[\"medallion center\",\"geometric design\",\"tribal design\",\"floral border\"],\"colors\":[\"red\",\"ivory\",\"blue\",\"gold\"],\"desc\":\"A vintage Caucasian Kazak rug featuring a large central medallion with geometric and tribal motifs. The rug displays a strong palette of red, ivory, blue, and gold with a bold outer border ornamented with tribal design elements.\"},{\"id\":\"69c373f6-4636-47ca-9e77-2f9d5a853bc5\",\"label\":\"Vintage Caucasian Rug\",\"size\":\"8' x 10'\",\"origin\":\"Caucasian\",\"style\":\"Geometric Tribal\",\"mood\":\"traditional\",\"pattern\":[\"geometric design\",\"medallion center\"],\"colors\":[\"rust\",\"black\",\"ivory\",\"brown\"],\"desc\":\"A vintage Caucasian rug featuring prominent geometric designs in a rich palette of rust, black, ivory, brown, and gold. The pattern includes large medallions and intricate border motifs, typical of traditional Caucasian weaving.\"},{\"id\":\"e34c39f6-6bd3-4073-8654-2ceea2da6740\",\"label\":\"Vintage Persian\",\"size\":\"8' x 11'\",\"origin\":\"Persian\",\"style\":\"Geometric Tribal\",\"mood\":\"traditional\",\"pattern\":[\"all-over pattern\",\"geometric design\"],\"colors\":[\"gray\",\"black\"],\"desc\":\"This rug features a dense all-over geometric pattern typical of vintage Persian designs, with a prominent border framing the field.\"},{\"id\":\"0e46a189-880b-4142-bf43-b8638d484db7\",\"label\":\"Vintage Persian Heriz\",\"size\":\"8' x 10'\",\"origin\":\"Persian\",\"style\":\"Heriz\",\"mood\":\"traditional\",\"pattern\":[\"medallion center\",\"geometric design\",\"floral motif\",\"floral border\"],\"colors\":[\"rust\",\"ivory\",\"black\",\"blue\"],\"desc\":\"This is a rectangular vintage Persian Heriz rug featuring a large central medallion in ivory and black with surrounding rust and light blue floral motifs on a rust field and a light blue border. The design emphasizes geometric and medallion elements with a traditional aesthetic.\"},{\"id\":\"4f992ad3-eb67-4283-a41c-6670101ef5c6\",\"label\":\"Traditional Persian Heriz\",\"size\":\"8' x 10'\",\"origin\":\"Persian\",\"style\":\"Heriz\",\"mood\":\"traditional\",\"pattern\":[\"geometric design\",\"floral motif\",\"floral border\"],\"colors\":[\"blue\",\"red\",\"ivory\",\"brown\"],\"desc\":\"This rectangular rug features a classic Heriz design with a prominent floral and vine pattern, set against a light blue field and framed by a red border adorned with floral motifs. The overall composition blends traditional Persian aesthetics with a rich color palette.\"},{\"id\":\"42e84b9d-fdeb-48be-99b2-90aa9b3b5c71\",\"label\":\"Vintage Moroccan Rug\",\"size\":\"8' x 10'\",\"origin\":\"Moroccan\",\"style\":\"Geometric\",\"mood\":\"eclectic\",\"pattern\":[\"geometric design\"],\"colors\":[\"red\",\"rust\",\"black\",\"brown\"],\"desc\":\"A vibrant vintage Moroccan rug with geometric tribal motifs in red, orange, and black tones, displayed with several decorative pillows. The rug features a bold pattern with a warm color palette.\"},{\"id\":\"735c23cf-2f40-4b3f-a1fb-06e983dcc2f9\",\"label\":\"Antique Central Asian Suzani Design\",\"size\":\"8' x 10'\",\"origin\":\"Central Asian\",\"style\":\"Geometric Tribal\",\"mood\":\"traditional\",\"pattern\":[\"medallion center\",\"geometric design\",\"floral motif\"],\"colors\":[\"blue\",\"rust\",\"green\",\"ivory\"],\"desc\":\"This antique rug features a bold composition with a central medallion and surrounding panels filled with stylized floral and geometric elements in a Suzani textile-inspired design. The color palette includes deep indigo, rust, green, and ivory tones with an accented patterned border.\"},{\"id\":\"0c83104b-d6bb-43ea-beaa-adafd1ee38dc\",\"label\":\"Vintage Bokhara\",\"size\":\"8' x 11'\",\"origin\":\"Central Asian\",\"style\":\"Bokhara\",\"mood\":\"traditional\",\"pattern\":[\"all-over pattern\"],\"colors\":[\"black\",\"gray\",\"ivory\"],\"desc\":\"This rug features a classic Bokhara design with an all-over geometric pattern, typical of Central Asian craftsmanship. The color palette includes prominent tones and traditional motif arrangements, giving it a vintage appeal.\"},{\"id\":\"5b8254f3-182f-4245-aada-84250db3df92\",\"label\":\"Vintage Caucasian\",\"size\":\"8' x 11'\",\"origin\":\"Caucasian\",\"style\":\"Geometric Tribal\",\"mood\":\"traditional\",\"pattern\":[\"geometric design\",\"medallion center\"],\"colors\":[\"ivory\",\"black\",\"gold\",\"teal\"],\"desc\":\"This rug features a runner shape with geometric motifs and a prominent medallion design. Its color palette includes ivory, black, gold, and teal, contributing to a traditional aesthetic.\"},{\"id\":\"cfada3b8-86da-4b8b-bc16-26cd619f54ed\",\"label\":\"Antique Persian Heriz\",\"size\":\"8' x 11'\",\"origin\":\"Persian\",\"style\":\"Heriz\",\"mood\":\"traditional\",\"pattern\":[\"medallion center\",\"geometric design\"],\"colors\":[\"red\",\"brown\",\"teal\"],\"desc\":\"This is an antique Persian Heriz rug featuring a striking geometric medallion design with rich red, brown, and teal colors. The intricate pattern and aged appearance suggest its traditional craftsmanship.\"},{\"id\":\"3653dd24-a5a1-457b-ba6d-443438157cfb\",\"label\":\"Caucasian Kilim Traditional\",\"size\":\"8' x 11'\",\"origin\":\"Caucasian\",\"style\":\"Kilim\",\"mood\":\"traditional\",\"pattern\":[\"geometric design\"],\"colors\":[\"red\",\"ivory\",\"blue\"],\"desc\":\"This is a traditional flatweave kilim featuring geometric designs and bold colors, displayed in an exhibition setting. The rug demonstrates a typical Caucasian style with intricate patterns.\"},{\"id\":\"d3645d19-d29a-4395-9711-aa60fa81c5eb\",\"label\":\"Vintage Afghan Bokhara\",\"size\":\"8' x 11'\",\"origin\":\"Afghan\",\"style\":\"Bokhara\",\"mood\":\"traditional\",\"pattern\":[\"geometric design\"],\"colors\":[\"red\",\"black\",\"ivory\"],\"desc\":\"This is a vintage Afghan Bokhara rug featuring a rich red field with a repeating gul motif, characteristic of its tribal design. The intricate pattern and geometric border add to its traditional appeal.\"},{\"id\":\"94df714b-5e7a-41e4-b775-9f7a7ac615d4\",\"label\":\"Antique Caucasian Kazak\",\"size\":\"8' x 11'\",\"origin\":\"Caucasian\",\"style\":\"Kazak\",\"mood\":\"traditional\",\"pattern\":[\"geometric design\"],\"colors\":[\"rust\",\"blue\",\"ivory\"],\"desc\":\"This is an antique Caucasian Kazak rug, featuring a rich geometric design with bold motifs. The predominant colors are rust, blue, and ivory, giving it a traditional and vibrant aesthetic.\"}]"
+              }
+            ]
+          },
+          {
+            "role": "user",
+            "content": [
+              {
+                "type": "input_text",
+                "text": "User request:\nI like the pattern but not that color direction.\n\nHard constraints:\n{\"size\":{\"widthIn\":96,\"lengthIn\":120,\"toleranceIn\":12},\"colors\":[\"ivory\"],\"styles\":[\"heriz\",\"kazak\",\"kilim\",\"bokhara\",\"geometric tribal\"],\"strictness\":{\"size\":\"prefer\",\"colors\":\"prefer\",\"styles\":\"prefer\",\"shape\":\"prefer\"},\"avoid_preferences\":{\"colors\":[\"teal\",\"rust\",\"blue\",\"black\",\"gray\",\"gold\"],\"shapes\":[]}}"
+              }
+            ]
+          },
+          {
+            "role": "system",
+            "content": [
+              {
+                "type": "input_text",
+                "text": "Constraint mismatch expansion is active: {\"expanded_from_zero_match\":true,\"unmet_constraints\":[\"colors\"],\"disclosure_hint\":\"We don't have exact ivory color matches right now, so I'm showing the closest available alternatives.\"}. You MUST open assistant_message with one concise, honest disclosure that exact matches were unavailable, and that disclosure must appear before any rug descriptions. Keep the tone constructive and helpful, then pivot to what is available."
+              }
+            ]
+          }
+        ],
+        "max_output_tokens": 800,
+        "text": {
+          "format": {
+            "type": "json_schema",
+            "name": "recommendation_response",
+            "schema": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "mode",
+                "assistant_message",
+                "questions",
+                "recommendations",
+                "notes"
+              ],
+              "properties": {
+                "mode": {
+                  "type": "string",
+                  "enum": [
+                    "recommendations",
+                    "clarifying_question",
+                    "no_match",
+                    "disambiguation"
+                  ]
+                },
+                "assistant_message": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 420
+                },
+                "questions": {
+                  "type": "array",
+                  "minItems": 0,
+                  "maxItems": 2,
+                  "items": {
+                    "type": "string",
+                    "maxLength": 140
+                  }
+                },
+                "recommendations": {
+                  "type": "array",
+                  "minItems": 0,
+                  "maxItems": 10,
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                      "rug_id",
+                      "sku",
+                      "title",
+                      "origin",
+                      "style",
+                      "mood",
+                      "size_text",
+                      "match_reasons",
+                      "confidence",
+                      "confidence_tier",
+                      "confidence_factors",
+                      "why_not"
+                    ],
+                    "properties": {
+                      "rug_id": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 80
+                      },
+                      "sku": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "maxLength": 80
+                      },
+                      "title": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 160
+                      },
+                      "origin": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "maxLength": 60
+                      },
+                      "style": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "maxLength": 80
+                      },
+                      "mood": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "maxLength": 32
+                      },
+                      "size_text": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "maxLength": 64
+                      },
+                      "match_reasons": {
+                        "type": "array",
+                        "minItems": 1,
+                        "maxItems": 3,
+                        "items": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 180
+                        }
+                      },
+                      "confidence": {
+                        "type": "number"
+                      },
+                      "confidence_tier": {
+                        "type": "string",
+                        "enum": [
+                          "high",
+                          "medium",
+                          "low"
+                        ]
+                      },
+                      "confidence_factors": {
+                        "type": "array",
+                        "minItems": 0,
+                        "maxItems": 3,
+                        "items": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 100
+                        }
+                      },
+                      "why_not": {
+                        "type": "array",
+                        "minItems": 0,
+                        "maxItems": 2,
+                        "items": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 160
+                        }
+                      }
+                    }
+                  }
+                },
+                "notes": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "maxLength": 220
+                }
+              }
+            },
+            "strict": true
+          }
+        }
+      },
+      "response_status": 200,
+      "response_payload": {
+        "id": "resp_0284d6200443bdcc0069c80a03e610819f822a5131ba71f77c",
+        "object": "response",
+        "created_at": 1774717443,
+        "status": "completed",
+        "background": false,
+        "billing": {
+          "payer": "developer"
+        },
+        "completed_at": 1774717450,
+        "error": null,
+        "frequency_penalty": 0,
+        "incomplete_details": null,
+        "instructions": null,
+        "max_output_tokens": 800,
+        "max_tool_calls": null,
+        "model": "gpt-4.1-mini-2025-04-14",
+        "output": [
+          {
+            "id": "msg_0284d6200443bdcc0069c80a043fa0819fa901335c3cf8643b",
+            "type": "message",
+            "status": "completed",
+            "content": [
+              {
+                "type": "output_text",
+                "annotations": [],
+                "logprobs": [],
+                "text": "{\"mode\":\"recommendations\",\"assistant_message\":\"Exact ivory color matches are not available currently, but here are close pattern matches that respect your style preferences.\",\"questions\":[],\"recommendations\":[{\"rug_id\":\"b9fa610b-c9e7-4bbb-9f5b-3492dd3cf695\",\"sku\":null,\"title\":\"Traditional Caucasian rug\",\"origin\":\"Caucasian\",\"style\":\"Geometric Tribal\",\"mood\":\"traditional\",\"size_text\":\"8' x 10'\",\"match_reasons\":[\"Strong geometric tribal style matching your preference.\",\"Muted ivory and rust color palette maintains a neutral and warm feel despite avoiding teal and blue.\",\"Rectangular 8' x 10' size fits well within preferred dimensions.\"],\"confidence\":0.75,\"confidence_tier\":\"medium\",\"confidence_factors\":[\"style match\",\"partial color match\",\"size compliance\"],\"why_not\":[\"Contains rust which you preferred to avoid but it complements the ivory tones.\"]},{\"rug_id\":\"69c373f6-4636-47ca-9e77-2f9d5a853bc5\",\"sku\":null,\"title\":\"Vintage Caucasian Rug\",\"origin\":\"Caucasian\",\"style\":\"Geometric Tribal\",\"mood\":\"traditional\",\"size_text\":\"8' x 10'\",\"match_reasons\":[\"Rich geometric tribal pattern matches style criteria.\",\"Uses rust and ivory prominently, aligning with preference for ivory and pattern.\",\"Classic vintage appeal adds character fitting for an anchor rug.\"],\"confidence\":0.7,\"confidence_tier\":\"medium\",\"confidence_factors\":[\"pattern match\",\"partial ivory color presence\",\"style fit\"],\"why_not\":[\"Rust color is present, which you preferred to avoid.\"]},{\"rug_id\":\"0e46a189-880b-4142-bf43-b8638d484db7\",\"sku\":null,\"title\":\"Vintage Persian Heriz\",\"origin\":\"Persian\",\"style\":\"Heriz\",\"mood\":\"traditional\",\"size_text\":\"8' x 10'\",\"match_reasons\":[\"Heriz style matches your desired style direction.\",\"Ivory and rust hues are included, providing warm and traditional tones.\",\"Strong geometric and floral combination in the pattern fits preference.\"],\"confidence\":0.7,\"confidence_tier\":\"medium\",\"confidence_factors\":[\"style match\",\"pattern match\",\"color partially fitting\"],\"why_not\":[\"Contains rust and light blue accents which you preferred to avoid.\"]}],\"notes\":\"No exact ivory dominant rugs available; these options balance style and pattern within your other preferences. Let me know if you'd like to see pieces with slightly broader color tolerance or other style nuances.\"}"
+              }
+            ],
+            "role": "assistant"
+          }
+        ],
+        "parallel_tool_calls": true,
+        "presence_penalty": 0,
+        "previous_response_id": null,
+        "prompt_cache_key": null,
+        "prompt_cache_retention": null,
+        "reasoning": {
+          "effort": null,
+          "summary": null
+        },
+        "safety_identifier": null,
+        "service_tier": "default",
+        "store": true,
+        "temperature": 1,
+        "text": {
+          "format": {
+            "type": "json_schema",
+            "description": null,
+            "name": "recommendation_response",
+            "schema": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "mode",
+                "assistant_message",
+                "questions",
+                "recommendations",
+                "notes"
+              ],
+              "properties": {
+                "mode": {
+                  "type": "string",
+                  "enum": [
+                    "recommendations",
+                    "clarifying_question",
+                    "no_match",
+                    "disambiguation"
+                  ]
+                },
+                "assistant_message": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 420
+                },
+                "questions": {
+                  "type": "array",
+                  "minItems": 0,
+                  "maxItems": 2,
+                  "items": {
+                    "type": "string",
+                    "maxLength": 140
+                  }
+                },
+                "recommendations": {
+                  "type": "array",
+                  "minItems": 0,
+                  "maxItems": 10,
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                      "rug_id",
+                      "sku",
+                      "title",
+                      "origin",
+                      "style",
+                      "mood",
+                      "size_text",
+                      "match_reasons",
+                      "confidence",
+                      "confidence_tier",
+                      "confidence_factors",
+                      "why_not"
+                    ],
+                    "properties": {
+                      "rug_id": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 80
+                      },
+                      "sku": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "maxLength": 80
+                      },
+                      "title": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 160
+                      },
+                      "origin": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "maxLength": 60
+                      },
+                      "style": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "maxLength": 80
+                      },
+                      "mood": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "maxLength": 32
+                      },
+                      "size_text": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "maxLength": 64
+                      },
+                      "match_reasons": {
+                        "type": "array",
+                        "minItems": 1,
+                        "maxItems": 3,
+                        "items": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 180
+                        }
+                      },
+                      "confidence": {
+                        "type": "number"
+                      },
+                      "confidence_tier": {
+                        "type": "string",
+                        "enum": [
+                          "high",
+                          "medium",
+                          "low"
+                        ]
+                      },
+                      "confidence_factors": {
+                        "type": "array",
+                        "minItems": 0,
+                        "maxItems": 3,
+                        "items": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 100
+                        }
+                      },
+                      "why_not": {
+                        "type": "array",
+                        "minItems": 0,
+                        "maxItems": 2,
+                        "items": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 160
+                        }
+                      }
+                    }
+                  }
+                },
+                "notes": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "maxLength": 220
+                }
+              }
+            },
+            "strict": true
+          },
+          "verbosity": "medium"
+        },
+        "tool_choice": "auto",
+        "tools": [],
+        "top_logprobs": 0,
+        "top_p": 1,
+        "truncation": "disabled",
+        "usage": {
+          "input_tokens": 5100,
+          "input_tokens_details": {
+            "cached_tokens": 0
+          },
+          "output_tokens": 531,
+          "output_tokens_details": {
+            "reasoning_tokens": 0
+          },
+          "total_tokens": 5631
+        },
+        "user": null,
+        "metadata": {}
+      },
+      "parsed_response": {
+        "mode": "recommendations",
+        "assistant_message": "We don't have exact ivory color matches right now, so I'm showing the closest available alternatives. Exact ivory color matches are not available currently, but here are close pattern matches that respect your style preferences.",
+        "questions": [],
+        "recommendations": [
+          {
+            "rug_id": "b9fa610b-c9e7-4bbb-9f5b-3492dd3cf695",
+            "sku": null,
+            "title": "Traditional Caucasian rug",
+            "origin": "Caucasian",
+            "style": "Geometric Tribal",
+            "mood": "traditional",
+            "size_text": "8' x 10'",
+            "match_reasons": [
+              "Rectangular rug with a bold geometric design characteristic of Caucasian weaving traditions. Dominated by red and orange hues with ivory and black accents, featuring medallion center and geometric motifs.",
+              "Size closely matches your requested dimensions."
+            ],
+            "confidence": 0.75,
+            "confidence_tier": "medium",
+            "confidence_factors": [
+              "Strong size alignment",
+              "Detailed listing context available"
+            ],
+            "why_not": [],
+            "primary_image_url": "https://nlypymygmysfgxekhudr.supabase.co/storage/v1/object/public/rug-images/1f3d032b-8411-48a9-8a44-1f3cb9df67a5/b9fa610b-c9e7-4bbb-9f5b-3492dd3cf695/primary-1773985432236.jpg",
+            "primary_image_caption": null
+          },
+          {
+            "rug_id": "69c373f6-4636-47ca-9e77-2f9d5a853bc5",
+            "sku": null,
+            "title": "Vintage Caucasian Rug",
+            "origin": "Caucasian",
+            "style": "Geometric Tribal",
+            "mood": "traditional",
+            "size_text": "8' x 10'",
+            "match_reasons": [
+              "A vintage Caucasian rug featuring prominent geometric designs in a rich palette of rust, black, ivory, brown, and gold. The pattern includes large medallions and intricate border motifs, typical of traditional Caucasian weaving.",
+              "Size closely matches your requested dimensions."
+            ],
+            "confidence": 0.75,
+            "confidence_tier": "medium",
+            "confidence_factors": [
+              "Strong size alignment",
+              "Detailed listing context available"
+            ],
+            "why_not": [],
+            "primary_image_url": "https://nlypymygmysfgxekhudr.supabase.co/storage/v1/object/public/rug-images/1f3d032b-8411-48a9-8a44-1f3cb9df67a5/69c373f6-4636-47ca-9e77-2f9d5a853bc5/primary-1773985448230.jpg",
+            "primary_image_caption": null
+          },
+          {
+            "rug_id": "0e46a189-880b-4142-bf43-b8638d484db7",
+            "sku": null,
+            "title": "Vintage Persian Heriz",
+            "origin": "Persian",
+            "style": "Heriz",
+            "mood": "traditional",
+            "size_text": "8' x 10'",
+            "match_reasons": [
+              "This is a rectangular vintage Persian Heriz rug featuring a large central medallion in ivory and black with surrounding rust and light blue floral motifs on a rust field and a light blue border. The design emphasizes geometric and medallion elements with a traditional aesthetic.",
+              "Size closely matches your requested dimensions."
+            ],
+            "confidence": 0.75,
+            "confidence_tier": "medium",
+            "confidence_factors": [
+              "Strong size alignment",
+              "Detailed listing context available"
+            ],
+            "why_not": [],
+            "primary_image_url": "https://nlypymygmysfgxekhudr.supabase.co/storage/v1/object/public/rug-images/1f3d032b-8411-48a9-8a44-1f3cb9df67a5/0e46a189-880b-4142-bf43-b8638d484db7/primary-1773984821502.jpg",
+            "primary_image_caption": null
+          },
+          {
+            "rug_id": "34a884c7-43c5-40c4-b1a8-600780538868",
+            "sku": null,
+            "title": "Antique Persian Heriz",
+            "origin": "Persian",
+            "style": "Heriz",
+            "mood": "traditional",
+            "primary_image_url": "https://nlypymygmysfgxekhudr.supabase.co/storage/v1/object/public/rug-images/1f3d032b-8411-48a9-8a44-1f3cb9df67a5/34a884c7-43c5-40c4-b1a8-600780538868/primary-1773985395105.jpg",
+            "primary_image_caption": null,
+            "size_text": "8' x 10'",
+            "match_reasons": [
+              "Rectangular antique Persian Heriz rug featuring a central medallion and floral motif in a warm rust and ivory color palette.",
+              "Size closely matches your requested dimensions."
+            ],
+            "confidence": 0.75,
+            "confidence_tier": "medium",
+            "confidence_factors": [
+              "Strong size alignment",
+              "Detailed listing context available"
+            ],
+            "why_not": []
+          },
+          {
+            "rug_id": "df1157e4-8db4-4345-97a6-02fe0fe79fde",
+            "sku": null,
+            "title": "Traditional Caucasian Kilim",
+            "origin": "Caucasian",
+            "style": "Kilim",
+            "mood": "traditional",
+            "primary_image_url": "https://nlypymygmysfgxekhudr.supabase.co/storage/v1/object/public/rug-images/1f3d032b-8411-48a9-8a44-1f3cb9df67a5/df1157e4-8db4-4345-97a6-02fe0fe79fde/primary-1773985436286.png",
+            "primary_image_caption": null,
+            "size_text": "8' x 10'",
+            "match_reasons": [
+              "Rectangular Kilim flatweave with geometric and tribal designs in broad panels of red, white, black, and multicolor accents. The rug features a repeating diamond motif and multicolored stripes with a tribal aesthetic.",
+              "Size closely matches your requested dimensions."
+            ],
+            "confidence": 0.75,
+            "confidence_tier": "medium",
+            "confidence_factors": [
+              "Strong size alignment",
+              "Detailed listing context available"
+            ],
+            "why_not": []
+          },
+          {
+            "rug_id": "c820e2bb-3846-4817-b28e-65504b7d74c1",
+            "sku": null,
+            "title": "Vintage Caucasian Kazak",
+            "origin": "Caucasian",
+            "style": "Kazak",
+            "mood": "traditional",
+            "primary_image_url": "https://nlypymygmysfgxekhudr.supabase.co/storage/v1/object/public/rug-images/1f3d032b-8411-48a9-8a44-1f3cb9df67a5/c820e2bb-3846-4817-b28e-65504b7d74c1/primary-1773985424302.jpg",
+            "primary_image_caption": null,
+            "size_text": "8' x 10'",
+            "match_reasons": [
+              "A vintage Caucasian Kazak rug featuring a large central medallion with geometric and tribal motifs. The rug displays a strong palette of red, ivory, blue, and gold with a bold outer border ornamented with tribal design elements.",
+              "Size closely matches your requested dimensions."
+            ],
+            "confidence": 0.75,
+            "confidence_tier": "medium",
+            "confidence_factors": [
+              "Strong size alignment",
+              "Detailed listing context available"
+            ],
+            "why_not": []
+          }
+        ],
+        "notes": "No exact ivory dominant rugs available; these options balance style and pattern within your other preferences. Let me know if you'd like to see pieces with slightly broader color tolerance or other style nuances. | CONSTRAINT_MISMATCH_EXPANDED"
+      },
+      "fallback_reason": null,
+      "error": null,
+      "incomplete_detected": false,
+      "retry_attempted": false,
+      "retry_succeeded": false,
+      "text_postprocess_applied": false
+    },
+    "result": {
+      "mode": "recommendations",
+      "notes": "No exact ivory dominant rugs available; these options balance style and pattern within your other preferences. Let me know if you'd like to see pieces with slightly broader color tolerance or other style nuances. | CONSTRAINT_MISMATCH_EXPANDED",
+      "recommendation_ids": [
+        "b9fa610b-c9e7-4bbb-9f5b-3492dd3cf695",
+        "69c373f6-4636-47ca-9e77-2f9d5a853bc5",
+        "0e46a189-880b-4142-bf43-b8638d484db7",
+        "34a884c7-43c5-40c4-b1a8-600780538868",
+        "df1157e4-8db4-4345-97a6-02fe0fe79fde",
+        "c820e2bb-3846-4817-b28e-65504b7d74c1"
+      ],
+      "recommendation_count": 6,
+      "relaxed_size_tolerance_in": null
+    },
+    "error": null
+  }
+}

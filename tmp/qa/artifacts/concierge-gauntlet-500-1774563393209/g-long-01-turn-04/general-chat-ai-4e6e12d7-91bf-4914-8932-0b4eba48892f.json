@@ -1,0 +1,119 @@
+{
+  "trace_id": "4e6e12d7-91bf-4914-8932-0b4eba48892f",
+  "channel": "general-chat-ai",
+  "created_at": "2026-03-26T22:17:13.890Z",
+  "payload": {
+    "mode": "general_chat",
+    "flow_path": [
+      "handleGeneralChatTurn",
+      "buildPromptLayers",
+      "generateGeneralChatResponse"
+    ],
+    "ai_trace": {
+      "called": true,
+      "model": "gpt-4.1-mini",
+      "prompt_layers": [
+        {
+          "id": "SYSTEM_PROMPT_BASE",
+          "role": "system",
+          "chars": 758,
+          "preview": "# AI System Prompt — Rug Concierge You are an experienced rug consultant helping retail customers in a showroom environ…"
+        },
+        {
+          "id": "TASK_PROMPT_GENERAL_CHAT",
+          "role": "system",
+          "chars": 820,
+          "preview": "# General Chat Prompt — Rug Concierge You are the retail concierge for an in-store rug showroom. Handle free-form custo…"
+        },
+        {
+          "id": "TASK_PROMPT_GENERAL_CHAT",
+          "role": "system",
+          "chars": 19,
+          "preview": "Respond in English."
+        },
+        {
+          "id": "ROLE_PROMPT_RETAIL_CUSTOMER",
+          "role": "system",
+          "chars": 89,
+          "preview": "Role: retail customer. Be approachable and clear, with practical guidance and next steps."
+        },
+        {
+          "id": "CHAT_MEMORY_CONTEXT",
+          "role": "system",
+          "chars": 723,
+          "preview": "CHAT MEMORY CONTEXT: { \"summary_text\": \"User: Show me what you have | Assistant: Here are the best options based on wha…"
+        },
+        {
+          "id": "RECENT_TURNS_CONTEXT",
+          "role": "system",
+          "chars": 604,
+          "preview": "RECENT TURNS CONTEXT: [ { \"role\": \"user\", \"content\": \"Find me a geometric rug around 6x9\", \"created_at\": \"2026-03-26T22…"
+        },
+        {
+          "id": "LATEST_USER_MESSAGE",
+          "role": "user",
+          "chars": 21,
+          "preview": "I like this direction"
+        }
+      ],
+      "request_payload_preview": {
+        "model": "gpt-4.1-mini",
+        "message_groups": 2,
+        "system_groups": 1,
+        "user_groups": 1,
+        "system_blocks": 6,
+        "user_blocks": 1,
+        "schema_name": "general_chat_response",
+        "schema_strict": true,
+        "max_output_tokens": 500
+      },
+      "response_status": 200,
+      "response_payload_preview": {
+        "has_output_text": false,
+        "output_items": 1,
+        "content_blocks": 1,
+        "has_error": false,
+        "error_type": null
+      },
+      "parsed_response": {
+        "assistant_message": "I'm glad you like the geometric rugs around 6x9 feet. Would you like me to show you some smaller sizes or perhaps explore different color schemes in this style?",
+        "notes": null,
+        "memory_hints": [
+          "User prefers geometric rugs around 6x9 size",
+          "User is open to exploring smaller sizes"
+        ]
+      },
+      "fallback_reason": null,
+      "error": null,
+      "incomplete_detected": false,
+      "retry_attempted": false,
+      "retry_succeeded": false,
+      "text_postprocess_applied": false
+    },
+    "context_packet_stats": {
+      "field_counts": {
+        "stable_facts": 0,
+        "open_threads": 2,
+        "customer_context": 0,
+        "recently_shown_rugs": 10,
+        "shown_rug_ids": 12,
+        "recent_turns": 4
+      },
+      "char_counts": {
+        "summary_text": 416,
+        "stable_facts_total": 0,
+        "open_threads_total": 141,
+        "customer_context_total": 0,
+        "recently_shown_total": 920,
+        "shown_rug_ids_total": 432,
+        "liked_attributes_total": 9,
+        "recent_turns_total": 198,
+        "latest_user_message": 21,
+        "total": 1705
+      }
+    },
+    "timing_ms": {
+      "generate_general_chat_ms": 1237
+    }
+  }
+}

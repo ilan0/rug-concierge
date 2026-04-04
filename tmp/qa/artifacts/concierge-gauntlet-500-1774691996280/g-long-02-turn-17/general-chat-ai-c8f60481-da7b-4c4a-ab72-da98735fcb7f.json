@@ -1,0 +1,121 @@
+{
+  "trace_id": "c8f60481-da7b-4c4a-ab72-da98735fcb7f",
+  "channel": "general-chat-ai",
+  "created_at": "2026-03-28T10:06:05.699Z",
+  "payload": {
+    "mode": "general_chat",
+    "flow_path": [
+      "handleGeneralChatTurn",
+      "buildPromptLayers",
+      "generateGeneralChatResponse"
+    ],
+    "ai_trace": {
+      "called": true,
+      "model": "gpt-4.1-mini",
+      "prompt_layers": [
+        {
+          "id": "SYSTEM_PROMPT_BASE",
+          "role": "system",
+          "chars": 758,
+          "preview": "# AI System Prompt — Rug Concierge You are an experienced rug consultant helping retail customers in a showroom environ…"
+        },
+        {
+          "id": "TASK_PROMPT_GENERAL_CHAT",
+          "role": "system",
+          "chars": 962,
+          "preview": "# General Chat Prompt — Rug Concierge You are the retail concierge for an in-store rug showroom. Handle free-form custo…"
+        },
+        {
+          "id": "TASK_PROMPT_GENERAL_CHAT",
+          "role": "system",
+          "chars": 19,
+          "preview": "Respond in English."
+        },
+        {
+          "id": "ROLE_PROMPT_RETAIL_CUSTOMER",
+          "role": "system",
+          "chars": 107,
+          "preview": "Role: retail customer. Be approachable, warm, and concise, with practical guidance and a natural next step."
+        },
+        {
+          "id": "CHAT_MEMORY_CONTEXT",
+          "role": "system",
+          "chars": 1591,
+          "preview": "CHAT MEMORY CONTEXT: { \"summary_text\": \"…me to show you more options near this size or explore diffe… || User: ¿Qué es…"
+        },
+        {
+          "id": "RECENT_TURNS_CONTEXT",
+          "role": "system",
+          "chars": 764,
+          "preview": "RECENT TURNS CONTEXT: [ { \"role\": \"user\", \"content\": \"Too traditional for me\", \"created_at\": \"2026-03-28T10:05:44.619Z\"…"
+        },
+        {
+          "id": "LATEST_USER_MESSAGE",
+          "role": "user",
+          "chars": 19,
+          "preview": "Any closer matches?"
+        }
+      ],
+      "request_payload_preview": {
+        "model": "gpt-4.1-mini",
+        "message_groups": 2,
+        "system_groups": 1,
+        "user_groups": 1,
+        "system_blocks": 6,
+        "user_blocks": 1,
+        "schema_name": "general_chat_response",
+        "schema_strict": true,
+        "max_output_tokens": 500
+      },
+      "response_status": 200,
+      "response_payload_preview": {
+        "has_output_text": false,
+        "output_items": 1,
+        "content_blocks": 1,
+        "has_error": false,
+        "error_type": null
+      },
+      "parsed_response": {
+        "assistant_message": "I can look for more modern 8x10 rugs with simple patterns to match your preference. Would you prefer something in neutral tones or with a bit of color?",
+        "notes": null,
+        "memory_hints": [
+          "User prefers modern rugs",
+          "Looking for 8x10 size",
+          "Rug should not be too busy",
+          "Seeking closer matches to current recommendation"
+        ]
+      },
+      "fallback_reason": null,
+      "error": null,
+      "incomplete_detected": false,
+      "retry_attempted": false,
+      "retry_succeeded": false,
+      "text_postprocess_applied": false
+    },
+    "context_packet_stats": {
+      "field_counts": {
+        "stable_facts": 5,
+        "open_threads": 6,
+        "customer_context": 5,
+        "recently_shown_rugs": 3,
+        "shown_rug_ids": 12,
+        "recent_turns": 4
+      },
+      "char_counts": {
+        "summary_text": 900,
+        "stable_facts_total": 98,
+        "open_threads_total": 353,
+        "customer_context_total": 98,
+        "recently_shown_total": 277,
+        "shown_rug_ids_total": 432,
+        "liked_attributes_total": 24,
+        "recent_turns_total": 358,
+        "latest_user_message": 19,
+        "total": 2127
+      }
+    },
+    "timing_ms": {
+      "generate_general_chat_ms": 1133
+    }
+  }
+}

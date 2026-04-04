@@ -1,0 +1,119 @@
+{
+  "trace_id": "e15cf27d-b1e3-4d3c-9c5a-c68b7228c132",
+  "channel": "general-chat-ai",
+  "created_at": "2026-03-26T23:21:21.475Z",
+  "payload": {
+    "mode": "general_chat",
+    "flow_path": [
+      "handleGeneralChatTurn",
+      "buildPromptLayers",
+      "generateGeneralChatResponse"
+    ],
+    "ai_trace": {
+      "called": true,
+      "model": "gpt-4.1-mini",
+      "prompt_layers": [
+        {
+          "id": "SYSTEM_PROMPT_BASE",
+          "role": "system",
+          "chars": 758,
+          "preview": "# AI System Prompt — Rug Concierge You are an experienced rug consultant helping retail customers in a showroom environ…"
+        },
+        {
+          "id": "TASK_PROMPT_GENERAL_CHAT",
+          "role": "system",
+          "chars": 820,
+          "preview": "# General Chat Prompt — Rug Concierge You are the retail concierge for an in-store rug showroom. Handle free-form custo…"
+        },
+        {
+          "id": "TASK_PROMPT_GENERAL_CHAT",
+          "role": "system",
+          "chars": 19,
+          "preview": "Respond in English."
+        },
+        {
+          "id": "ROLE_PROMPT_RETAIL_CUSTOMER",
+          "role": "system",
+          "chars": 89,
+          "preview": "Role: retail customer. Be approachable and clear, with practical guidance and next steps."
+        },
+        {
+          "id": "CHAT_MEMORY_CONTEXT",
+          "role": "system",
+          "chars": 647,
+          "preview": "CHAT MEMORY CONTEXT: { \"summary_text\": \"User: I need a modern 8x10 rug | Assistant: For a modern 8x10 rug, the availabl…"
+        },
+        {
+          "id": "RECENT_TURNS_CONTEXT",
+          "role": "system",
+          "chars": 786,
+          "preview": "RECENT TURNS CONTEXT: [ { \"role\": \"user\", \"content\": \"I need a modern 8x10 rug\", \"created_at\": \"2026-03-26T23:21:02.630…"
+        },
+        {
+          "id": "LATEST_USER_MESSAGE",
+          "role": "user",
+          "chars": 21,
+          "preview": "This feels too formal"
+        }
+      ],
+      "request_payload_preview": {
+        "model": "gpt-4.1-mini",
+        "message_groups": 2,
+        "system_groups": 1,
+        "user_groups": 1,
+        "system_blocks": 6,
+        "user_blocks": 1,
+        "schema_name": "general_chat_response",
+        "schema_strict": true,
+        "max_output_tokens": 500
+      },
+      "response_status": 200,
+      "response_payload_preview": {
+        "has_output_text": false,
+        "output_items": 1,
+        "content_blocks": 1,
+        "has_error": false,
+        "error_type": null
+      },
+      "parsed_response": {
+        "assistant_message": "I understand you're looking for a more casual modern rug style in an 8x10 size. I can explore options with a relaxed, informal look or similar dimensions if you'd like. Should I go ahead and find those for you?",
+        "notes": null,
+        "memory_hints": [
+          "User wants less formal modern rug options",
+          "Offer casual or similar-sized alternatives"
+        ]
+      },
+      "fallback_reason": null,
+      "error": null,
+      "incomplete_detected": false,
+      "retry_attempted": false,
+      "retry_succeeded": false,
+      "text_postprocess_applied": false
+    },
+    "context_packet_stats": {
+      "field_counts": {
+        "stable_facts": 1,
+        "open_threads": 2,
+        "customer_context": 1,
+        "recently_shown_rugs": 1,
+        "shown_rug_ids": 1,
+        "recent_turns": 4
+      },
+      "char_counts": {
+        "summary_text": 413,
+        "stable_facts_total": 12,
+        "open_threads_total": 48,
+        "customer_context_total": 12,
+        "recently_shown_total": 89,
+        "shown_rug_ids_total": 36,
+        "liked_attributes_total": 6,
+        "recent_turns_total": 380,
+        "latest_user_message": 21,
+        "total": 981
+      }
+    },
+    "timing_ms": {
+      "generate_general_chat_ms": 1271
+    }
+  }
+}

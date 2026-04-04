@@ -1,0 +1,632 @@
+{
+  "trace_id": "10ca8062-6deb-4380-9046-70fba0703130",
+  "channel": "chat-route",
+  "created_at": "2026-03-26T18:25:18.723Z",
+  "payload": {
+    "flow_path": [
+      "/api/chat POST",
+      "getOrCreateSession",
+      "updateRecommendationStateForTurn",
+      "routeTurnMode",
+      "handlerDispatch",
+      "updateConversationMemory",
+      "saveSession"
+    ],
+    "request": {
+      "session_id": "991daa6e-87ba-41f6-9c38-8fa6eca3d009",
+      "role": "retail_customer",
+      "tenant_id": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5",
+      "tenant_subdomain": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5",
+      "tenant_hostname": "127.0.0.1",
+      "message": "Keep going",
+      "constraints": null
+    },
+    "routing": {
+      "mode": "recommendation",
+      "intent": "followup",
+      "rule_id": "RECOMMENDATION_FOLLOWUP",
+      "confidence": "low",
+      "needs_clarification": false,
+      "parser": {
+        "model": "gpt-4.1-mini",
+        "latency_ms": 99,
+        "status": "fallback",
+        "parse_status": "fallback",
+        "fallback": "OpenAI request failed",
+        "fallback_reason": "OpenAI request failed",
+        "normalized_payload": {
+          "intent": "followup",
+          "mode": "recommendation_followup",
+          "followup_intent": "more_like_this",
+          "constraints": {
+            "size": null,
+            "colors": [],
+            "styles": [],
+            "shape": null
+          },
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          },
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          },
+          "session_facts": [],
+          "rug_reference_ambiguous": false,
+          "confidence": "low"
+        },
+        "normalized_parse_payload": {
+          "intent": "followup",
+          "mode": "recommendation_followup",
+          "followup_intent": "more_like_this",
+          "constraints": {
+            "size": null,
+            "colors": [],
+            "styles": [],
+            "shape": null
+          },
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          },
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          },
+          "session_facts": [],
+          "rug_reference_ambiguous": false,
+          "confidence": "low"
+        },
+        "response_status": 400,
+        "incomplete_detected": false,
+        "error": "OpenAI request failed with status 400"
+      },
+      "policy": {
+        "intent": "followup",
+        "compiled_policy": {
+          "intent": "followup",
+          "mode": "recommendation_followup",
+          "discovery_requested": false,
+          "followup_intent": "more_like_this",
+          "hard_constraints": {
+            "size": {
+              "widthIn": 72,
+              "lengthIn": 108,
+              "toleranceIn": 10
+            },
+            "colors": [],
+            "styles": [
+              "geometric"
+            ],
+            "strictness": {
+              "size": "prefer",
+              "colors": "prefer",
+              "styles": "prefer",
+              "shape": "prefer"
+            }
+          },
+          "persisted_hard_constraints": {
+            "size": {
+              "widthIn": 72,
+              "lengthIn": 108,
+              "toleranceIn": 10
+            },
+            "colors": [],
+            "styles": [
+              "geometric"
+            ],
+            "strictness": {
+              "size": "prefer",
+              "colors": "prefer",
+              "styles": "prefer",
+              "shape": "prefer"
+            }
+          },
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          },
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          },
+          "confidence": "low",
+          "policy_source": "none",
+          "must_prefer_avoid": {
+            "must": [],
+            "prefer": [
+              "size",
+              "styles"
+            ],
+            "avoid": {
+              "colors": [],
+              "styles": [],
+              "shapes": []
+            }
+          }
+        },
+        "policy_source": "none",
+        "must_prefer_avoid": {
+          "must": [],
+          "prefer": [
+            "size",
+            "styles"
+          ],
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          }
+        },
+        "must-prefer-avoid": {
+          "must": [],
+          "prefer": [
+            "size",
+            "styles"
+          ],
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          }
+        },
+        "constraint_modes": {
+          "size": "prefer",
+          "colors": "prefer",
+          "styles": "prefer",
+          "shape": "prefer",
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          }
+        }
+      },
+      "parser_trace": {
+        "called": true,
+        "model": "gpt-4.1-mini",
+        "status": "fallback",
+        "response_status": 400,
+        "fallback": "OpenAI request failed",
+        "fallback_reason": "OpenAI request failed",
+        "incomplete_detected": false,
+        "latency_ms": 99,
+        "normalized_payload": {
+          "intent": "followup",
+          "mode": "recommendation_followup",
+          "followup_intent": "more_like_this",
+          "constraints": {
+            "size": null,
+            "colors": [],
+            "styles": [],
+            "shape": null
+          },
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          },
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          },
+          "session_facts": [],
+          "rug_reference_ambiguous": false,
+          "confidence": "low"
+        },
+        "parsed": {
+          "intent": "followup",
+          "mode": "recommendation_followup",
+          "followup_intent": "more_like_this",
+          "constraints": {
+            "size": null,
+            "colors": [],
+            "styles": [],
+            "shape": null
+          },
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          },
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          },
+          "session_facts": [],
+          "rug_reference_ambiguous": false,
+          "confidence": "low"
+        },
+        "error": "OpenAI request failed with status 400"
+      },
+      "compiled_policy": {
+        "intent": "followup",
+        "mode": "recommendation_followup",
+        "discovery_requested": false,
+        "followup_intent": "more_like_this",
+        "hard_constraints": {
+          "size": {
+            "widthIn": 72,
+            "lengthIn": 108,
+            "toleranceIn": 10
+          },
+          "colors": [],
+          "styles": [
+            "geometric"
+          ],
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          }
+        },
+        "persisted_hard_constraints": {
+          "size": {
+            "widthIn": 72,
+            "lengthIn": 108,
+            "toleranceIn": 10
+          },
+          "colors": [],
+          "styles": [
+            "geometric"
+          ],
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          }
+        },
+        "strictness": {
+          "size": "prefer",
+          "colors": "prefer",
+          "styles": "prefer",
+          "shape": "prefer"
+        },
+        "avoid": {
+          "colors": [],
+          "styles": [],
+          "shapes": []
+        },
+        "confidence": "low",
+        "policy_source": "none",
+        "must_prefer_avoid": {
+          "must": [],
+          "prefer": [
+            "size",
+            "styles"
+          ],
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          }
+        }
+      },
+      "policy_source": "none",
+      "must_prefer_avoid": {
+        "must": [],
+        "prefer": [
+          "size",
+          "styles"
+        ],
+        "avoid": {
+          "colors": [],
+          "styles": [],
+          "shapes": []
+        }
+      },
+      "must-prefer-avoid": {
+        "must": [],
+        "prefer": [
+          "size",
+          "styles"
+        ],
+        "avoid": {
+          "colors": [],
+          "styles": [],
+          "shapes": []
+        }
+      },
+      "handler": "handleRecommendationTurn",
+      "prompt_layer_preview": [
+        "TASK_PROMPT_RECOMMENDATION",
+        "SYSTEM_PROMPT_BASE",
+        "TASK_PROMPT_RECOMMENDATION",
+        "TASK_PROMPT_RECOMMENDATION",
+        "STRUCTURED_OUTPUT_RECOMMENDATION",
+        "CHAT_MEMORY_CONTEXT",
+        "CHAT_MEMORY_CONTEXT",
+        "CHAT_MEMORY_CONTEXT",
+        "CHAT_MEMORY_CONTEXT",
+        "RECENT_TURNS_CONTEXT",
+        "INVENTORY_CONTEXT",
+        "LATEST_USER_MESSAGE_WITH_HARD_CONSTRAINTS"
+      ]
+    },
+    "reaction": {
+      "detected_reaction": null,
+      "referenced_rug_id": null,
+      "rug_reference_ambiguous": false,
+      "liked_attributes_before": {
+        "colors": [],
+        "styles": [
+          "geometric"
+        ],
+        "origins": []
+      },
+      "liked_attributes_after": {
+        "colors": [],
+        "styles": [
+          "geometric"
+        ],
+        "origins": []
+      },
+      "liked_rug_ids_before": [],
+      "liked_rug_ids_after": [],
+      "dismissed_rug_ids_before": [],
+      "dismissed_rug_ids_after": []
+    },
+    "state_snapshot": {
+      "recommendation_state": {
+        "hard_constraints": {
+          "size": {
+            "widthIn": 72,
+            "lengthIn": 108,
+            "toleranceIn": 10
+          },
+          "colors": [],
+          "styles": [
+            "geometric"
+          ],
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          }
+        },
+        "soft_preferences": {},
+        "runtime": {
+          "last_result_mode": "recommendation",
+          "last_relaxed_size_tolerance_in": null,
+          "last_blockers": [],
+          "last_recommended_size_in": {
+            "width_in": 72,
+            "length_in": 108
+          },
+          "liked_rug_ids": [],
+          "dismissed_rug_ids": [],
+          "shown_rug_ids": [
+            "3e188674-4625-445b-be9a-3d2bc2752a50",
+            "258fde89-ed87-4103-b1e8-224f267e0f3e",
+            "40e91751-d4aa-4ce2-b226-bfd5f37bb50a",
+            "08ca5e39-c162-4d88-9d7e-484e90489d85",
+            "66ca8129-8843-4e42-bdf5-9e3ce23d4128",
+            "83a1b270-c6b7-48e6-94a0-9bc99d85736b",
+            "aea4955c-97f3-4e4a-a9b4-2db2fdf38a15",
+            "903d2865-527a-4e12-9721-7e540ced0445",
+            "94df714b-5e7a-41e4-b775-9f7a7ac615d4",
+            "21520501-b868-489c-bb06-55c638ddf3d4",
+            "dbf2bf0c-8cb5-4ea7-9d6c-fa3439793b0b",
+            "e15492cf-a32d-412a-b855-c0e02542aefe"
+          ],
+          "liked_attributes": {
+            "colors": [],
+            "styles": [
+              "geometric"
+            ],
+            "origins": []
+          },
+          "recently_shown_rugs": [
+            {
+              "id": "b1b00766-b4bc-4d8b-ab4d-46be26589902",
+              "label": "Antique Persian Bakhtiari",
+              "colors": [
+                "blue",
+                "gold",
+                "red",
+                "brown"
+              ],
+              "style": "Bakhtiari",
+              "origin": "Persian"
+            },
+            {
+              "id": "ce5219c0-653f-411a-a5a8-1ad9935e1a0d",
+              "label": "Antique Caucasian Karabagh",
+              "colors": [
+                "red",
+                "gold",
+                "blue"
+              ],
+              "style": "Karabagh",
+              "origin": "Caucasian"
+            },
+            {
+              "id": "4bc59440-4d03-4698-8275-2a78247cd3b7",
+              "label": "Antique Persian Heriz",
+              "colors": [
+                "red",
+                "black",
+                "gold",
+                "green"
+              ],
+              "style": "Heriz",
+              "origin": "Persian"
+            },
+            {
+              "id": "2679516c-6cfa-46e6-b94e-00095796ac73",
+              "label": "Antique Persian Kerman",
+              "colors": [
+                "red",
+                "blue",
+                "ivory"
+              ],
+              "style": "Kerman",
+              "origin": "Persian"
+            },
+            {
+              "id": "a3181b27-19c9-45cd-ac2d-04b83368ca6f",
+              "label": "Antique Persian Qom",
+              "colors": [
+                "rust",
+                "blue",
+                "ivory"
+              ],
+              "style": "Qom",
+              "origin": "Persian"
+            },
+            {
+              "id": "a93b286f-4e3b-44f1-aec8-b2f43d6ba5dd",
+              "label": "Antique Persian Sarouk",
+              "colors": [
+                "red",
+                "blue",
+                "gold"
+              ],
+              "style": "Sarouk",
+              "origin": "Persian"
+            },
+            {
+              "id": "09ffdd96-6a94-40a4-9c59-c0e752e37b66",
+              "label": "Antique Persian Sultanabad",
+              "colors": [
+                "ivory",
+                "blue",
+                "rust"
+              ],
+              "style": "Sultanabad",
+              "origin": "Persian"
+            },
+            {
+              "id": "60baaf09-68fd-4825-b357-066d5a672188",
+              "label": "Antique Persian Sultanabad",
+              "colors": [
+                "rust",
+                "ivory",
+                "red",
+                "green"
+              ],
+              "style": "Sultanabad",
+              "origin": "Persian"
+            },
+            {
+              "id": "a7b5dec1-3502-4147-810b-2cf991e80b4a",
+              "label": "Antique Persian Sultanabad",
+              "colors": [
+                "brown",
+                "red",
+                "blue"
+              ],
+              "style": "Sultanabad",
+              "origin": "Persian"
+            },
+            {
+              "id": "b5b08191-958b-4792-8935-a1344a5e3ac3",
+              "label": "Antique Persian Tabriz",
+              "colors": [
+                "red",
+                "gold",
+                "teal"
+              ],
+              "style": "Tabriz",
+              "origin": "Persian"
+            }
+          ],
+          "no_match_attempts": 0,
+          "updated_at": "2026-03-26T18:25:07.891Z"
+        }
+      },
+      "conversation_memory": {
+        "summary_text": "User: Show me a broad spread | Assistant: Here are the best options based on what you've told me: What kind of space are you decorating so I can narrow these down for you? || User: Find me a geometric rug around 6x9 | Assistant: For a geometric rug around 6x9, here are the closest matches fitting your preferences: || User: Show me something smaller | Assistant: For around 6' x 9', these are the closest available fits in stock: || User: I like this direction | Assistant: Great to hear that! Would you like me to show you more geometric rugs in similar sizes or styles?",
+        "stable_facts": [
+          "preference I like this direction"
+        ],
+        "open_threads": [
+          "Would you like me to show you more geometric rugs in similar sizes or styles?",
+          "Here are the best options based on what you've told me: What kind of space are you decorating so I can narrow these dow…"
+        ],
+        "last_user_intent": "general_chat",
+        "no_match_attempts": 0,
+        "updated_at": "2026-03-26T18:25:07.891Z",
+        "version": "v1"
+      }
+    },
+    "memory_snapshot_before": {
+      "summary_text": "User: Show me a broad spread | Assistant: Here are the best options based on what you've told me: What kind of space are you decorating so I can narrow these down for you? || User: Find me a geometric rug around 6x9 | Assistant: For a geometric rug around 6x9, here are the closest matches fitting your preferences: || User: Show me something smaller | Assistant: For around 6' x 9', these are the closest available fits in stock: || User: I like this direction | Assistant: Great to hear that! Would you like me to show you more geometric rugs in similar sizes or styles?",
+      "stable_facts": [
+        "preference I like this direction"
+      ],
+      "open_threads": [
+        "Would you like me to show you more geometric rugs in similar sizes or styles?",
+        "Here are the best options based on what you've told me: What kind of space are you decorating so I can narrow these dow…"
+      ],
+      "last_user_intent": "general_chat",
+      "no_match_attempts": 0,
+      "updated_at": "2026-03-26T18:25:07.891Z",
+      "version": "v1"
+    },
+    "memory_snapshot_after": {
+      "summary_text": "User: Show me a broad spread | Assistant: Here are the best options based on what you've told me: What kind of space are you decorating so I can narrow these down for you? || User: Find me a geometric rug around 6x9 | Assistant: For a geometric rug around 6x9, here are the closest matches fitting your preferences: || User: Show me something smaller | Assistant: For around 6' x 9', these are the closest available fits in stock: || User: I like this direction | Assistant: Great to hear that! Would you like me to show you more geometric rugs in similar sizes or styles? || User: Keep going | Assistant: Continuing with geometric rugs around 6' x 9', here are additional options to consider:",
+      "stable_facts": [
+        "preference I like this direction"
+      ],
+      "open_threads": [
+        "Would you like me to show you more geometric rugs in similar sizes or styles?",
+        "Here are the best options based on what you've told me: What kind of space are you decorating so I can narrow these dow…"
+      ],
+      "last_user_intent": "recommendation",
+      "no_match_attempts": 0,
+      "updated_at": "2026-03-26T18:25:18.322Z",
+      "version": "v1"
+    },
+    "ai_context_packet_stats": {
+      "field_counts": {
+        "stable_facts": 1,
+        "open_threads": 2,
+        "customer_context": 1,
+        "recently_shown_rugs": 10,
+        "shown_rug_ids": 12,
+        "recent_turns": 4
+      },
+      "char_counts": {
+        "summary_text": 572,
+        "stable_facts_total": 32,
+        "open_threads_total": 197,
+        "customer_context_total": 32,
+        "recently_shown_total": 936,
+        "shown_rug_ids_total": 432,
+        "liked_attributes_total": 9,
+        "recent_turns_total": 209,
+        "latest_user_message": 10,
+        "total": 1997
+      }
+    },
+    "response": {
+      "session_id": "991daa6e-87ba-41f6-9c38-8fa6eca3d009",
+      "role": "retail_customer",
+      "mode": "recommendation",
+      "fine_mode": "recommendation",
+      "response_mode": "recommendation",
+      "notes": null
+    },
+    "timing_ms": {
+      "total_ms": 10225
+    }
+  }
+}

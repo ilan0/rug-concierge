@@ -1,0 +1,579 @@
+{
+  "trace_id": "28cb04f0-3408-4ce6-a0cc-29cee1bd1620",
+  "channel": "chat-route",
+  "created_at": "2026-03-28T20:43:06.703Z",
+  "payload": {
+    "flow_path": [
+      "/api/chat POST",
+      "getOrCreateSession",
+      "updateRecommendationStateForTurn",
+      "routeTurnMode",
+      "handlerDispatch",
+      "updateConversationMemory",
+      "saveSession"
+    ],
+    "request": {
+      "session_id": "ba14ecb3-a6b6-4357-bbf8-c9264ddfeed1",
+      "role": "retail_customer",
+      "tenant_id": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5",
+      "tenant_subdomain": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5",
+      "tenant_hostname": "127.0.0.1",
+      "message": "How often should I rotate a rug?",
+      "constraints": null
+    },
+    "routing": {
+      "mode": "general_chat",
+      "intent": "educate",
+      "rule_id": "GENERAL_ADVICE_OR_EDUCATION",
+      "confidence": "low",
+      "needs_clarification": false,
+      "parser": {
+        "model": "gpt-4.1-mini",
+        "latency_ms": 1507,
+        "status": "success",
+        "parse_status": "success",
+        "fallback": null,
+        "fallback_reason": null,
+        "normalized_payload": {
+          "intent": "educate",
+          "mode": "advice",
+          "followup_intent": "none",
+          "constraints": {
+            "size": null,
+            "colors": [],
+            "styles": [],
+            "shape": null
+          },
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          },
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          },
+          "session_facts": [
+            "has_recent_recommendations"
+          ],
+          "rug_reference_ambiguous": false,
+          "confidence": "low"
+        },
+        "normalized_parse_payload": {
+          "intent": "educate",
+          "mode": "advice",
+          "followup_intent": "none",
+          "constraints": {
+            "size": null,
+            "colors": [],
+            "styles": [],
+            "shape": null
+          },
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          },
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          },
+          "session_facts": [
+            "has_recent_recommendations"
+          ],
+          "rug_reference_ambiguous": false,
+          "confidence": "low"
+        },
+        "response_status": 200,
+        "incomplete_detected": false,
+        "error": null
+      },
+      "policy": {
+        "intent": "educate",
+        "compiled_policy": {
+          "intent": "educate",
+          "mode": "advice",
+          "discovery_requested": false,
+          "followup_intent": "none",
+          "hard_constraints": {
+            "strictness": {
+              "size": "prefer",
+              "colors": "prefer",
+              "styles": "prefer",
+              "shape": "prefer"
+            }
+          },
+          "persisted_hard_constraints": {
+            "colors": [
+              "ivory",
+              "gray",
+              "brown"
+            ],
+            "styles": [],
+            "strictness": {
+              "size": "prefer",
+              "colors": "prefer",
+              "styles": "prefer",
+              "shape": "prefer"
+            },
+            "avoid_preferences": {
+              "colors": [
+                "red",
+                "rust",
+                "pink",
+                "purple"
+              ]
+            }
+          },
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          },
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          },
+          "confidence": "low",
+          "policy_source": "none",
+          "must_prefer_avoid": {
+            "must": [],
+            "prefer": [],
+            "avoid": {
+              "colors": [],
+              "styles": [],
+              "shapes": []
+            }
+          }
+        },
+        "policy_source": "none",
+        "must_prefer_avoid": {
+          "must": [],
+          "prefer": [],
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          }
+        },
+        "must-prefer-avoid": {
+          "must": [],
+          "prefer": [],
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          }
+        },
+        "constraint_modes": {
+          "size": "prefer",
+          "colors": "prefer",
+          "styles": "prefer",
+          "shape": "prefer",
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          }
+        }
+      },
+      "parser_trace": {
+        "called": true,
+        "model": "gpt-4.1-mini",
+        "status": "success",
+        "response_status": 200,
+        "fallback": null,
+        "fallback_reason": null,
+        "incomplete_detected": false,
+        "latency_ms": 1507,
+        "normalized_payload": {
+          "intent": "educate",
+          "mode": "advice",
+          "followup_intent": "none",
+          "constraints": {
+            "size": null,
+            "colors": [],
+            "styles": [],
+            "shape": null
+          },
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          },
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          },
+          "session_facts": [
+            "has_recent_recommendations"
+          ],
+          "rug_reference_ambiguous": false,
+          "confidence": "low"
+        },
+        "parsed": {
+          "intent": "educate",
+          "mode": "advice",
+          "followup_intent": "none",
+          "constraints": {
+            "size": null,
+            "colors": [],
+            "styles": [],
+            "shape": null
+          },
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          },
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          },
+          "session_facts": [
+            "has_recent_recommendations"
+          ],
+          "rug_reference_ambiguous": false,
+          "confidence": "low"
+        },
+        "error": null
+      },
+      "compiled_policy": {
+        "intent": "educate",
+        "mode": "advice",
+        "discovery_requested": false,
+        "followup_intent": "none",
+        "hard_constraints": {
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          }
+        },
+        "persisted_hard_constraints": {
+          "colors": [
+            "ivory",
+            "gray",
+            "brown"
+          ],
+          "styles": [],
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          },
+          "avoid_preferences": {
+            "colors": [
+              "red",
+              "rust",
+              "pink",
+              "purple"
+            ]
+          }
+        },
+        "strictness": {
+          "size": "prefer",
+          "colors": "prefer",
+          "styles": "prefer",
+          "shape": "prefer"
+        },
+        "avoid": {
+          "colors": [],
+          "styles": [],
+          "shapes": []
+        },
+        "confidence": "low",
+        "policy_source": "none",
+        "must_prefer_avoid": {
+          "must": [],
+          "prefer": [],
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          }
+        }
+      },
+      "policy_source": "none",
+      "must_prefer_avoid": {
+        "must": [],
+        "prefer": [],
+        "avoid": {
+          "colors": [],
+          "styles": [],
+          "shapes": []
+        }
+      },
+      "must-prefer-avoid": {
+        "must": [],
+        "prefer": [],
+        "avoid": {
+          "colors": [],
+          "styles": [],
+          "shapes": []
+        }
+      },
+      "handler": "handleGeneralChatTurn",
+      "prompt_layer_preview": [
+        "SYSTEM_PROMPT_BASE",
+        "TASK_PROMPT_GENERAL_CHAT",
+        "TASK_PROMPT_GENERAL_CHAT",
+        "ROLE_PROMPT_RETAIL_CUSTOMER",
+        "CHAT_MEMORY_CONTEXT",
+        "RECENT_TURNS_CONTEXT",
+        "LATEST_USER_MESSAGE"
+      ]
+    },
+    "reaction": {
+      "detected_reaction": null,
+      "referenced_rug_id": null,
+      "rug_reference_ambiguous": false,
+      "liked_attributes_before": {
+        "colors": [
+          "ivory",
+          "gray",
+          "brown"
+        ],
+        "styles": [],
+        "origins": []
+      },
+      "liked_attributes_after": {
+        "colors": [
+          "ivory",
+          "gray",
+          "brown"
+        ],
+        "styles": [],
+        "origins": []
+      },
+      "liked_rug_ids_before": [],
+      "liked_rug_ids_after": [],
+      "dismissed_rug_ids_before": [],
+      "dismissed_rug_ids_after": []
+    },
+    "state_snapshot": {
+      "recommendation_state": {
+        "hard_constraints": {
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          }
+        },
+        "soft_preferences": {},
+        "runtime": {
+          "last_result_mode": "recommendation",
+          "last_relaxed_size_tolerance_in": null,
+          "last_blockers": [],
+          "last_recommended_size_in": {
+            "width_in": 108,
+            "length_in": 144
+          },
+          "liked_rug_ids": [],
+          "dismissed_rug_ids": [],
+          "shown_rug_ids": [
+            "0c83104b-d6bb-43ea-beaa-adafd1ee38dc",
+            "9e907acc-59b6-46a0-9233-65f83e6e983f",
+            "e34c39f6-6bd3-4073-8654-2ceea2da6740",
+            "3cedae19-32e0-4c75-91ba-67af2579cf12",
+            "318ad585-f38e-4875-b762-df2f8ef79318",
+            "5b8254f3-182f-4245-aada-84250db3df92",
+            "6cc59e20-2833-4a10-b640-6affd812f3d8",
+            "581623da-8585-4d13-b4be-29188b1e80bf",
+            "3d028dce-a64a-40c9-92de-caf3e9a4487d"
+          ],
+          "liked_attributes": {
+            "colors": [
+              "ivory",
+              "gray",
+              "brown"
+            ],
+            "styles": [],
+            "origins": []
+          },
+          "recently_shown_rugs": [
+            {
+              "id": "581623da-8585-4d13-b4be-29188b1e80bf",
+              "label": "Caucasian Kazak",
+              "colors": [
+                "black",
+                "white",
+                "ivory",
+                "gray"
+              ],
+              "style": "Kazak",
+              "origin": "Caucasian"
+            },
+            {
+              "id": "9e907acc-59b6-46a0-9233-65f83e6e983f",
+              "label": "Persian Traditional",
+              "colors": [
+                "black",
+                "gray"
+              ],
+              "style": "Floral",
+              "origin": "Persian"
+            },
+            {
+              "id": "e34c39f6-6bd3-4073-8654-2ceea2da6740",
+              "label": "Vintage Persian",
+              "colors": [
+                "gray",
+                "black"
+              ],
+              "style": "Geometric Tribal",
+              "origin": "Persian"
+            },
+            {
+              "id": "3d028dce-a64a-40c9-92de-caf3e9a4487d",
+              "label": "Caucasian Shirvan Traditional",
+              "colors": [
+                "black",
+                "white"
+              ],
+              "style": "Shirvan",
+              "origin": "Caucasian"
+            },
+            {
+              "id": "0c83104b-d6bb-43ea-beaa-adafd1ee38dc",
+              "label": "Vintage Bokhara",
+              "colors": [
+                "black",
+                "gray",
+                "ivory"
+              ],
+              "style": "Bokhara",
+              "origin": "Central Asian"
+            },
+            {
+              "id": "5b8254f3-182f-4245-aada-84250db3df92",
+              "label": "Vintage Caucasian",
+              "colors": [
+                "ivory",
+                "black",
+                "gold",
+                "teal"
+              ],
+              "style": "Geometric Tribal",
+              "origin": "Caucasian"
+            }
+          ],
+          "no_match_attempts": 0,
+          "updated_at": "2026-03-28T20:42:58.256Z"
+        }
+      },
+      "conversation_memory": {
+        "summary_text": "User: Need something calm and neutral | Assistant: For a calm and neutral aesthetic, these ivory, gray, and brown rugs offer a soothing palette and traditional designs that enhance serenity in your space. If you'd like, should I show more in this same direction, or adju… || User: Any closer matches? | Assistant: These rugs align closely with your size and color preferences, offering calm ivory, gray, and brown tones ideal for a neutral setting. The Vintage Bokhara stands out with its timeless Central Asian craftsmanship and sub… || User: This feels too formal | Assistant: For a less formal, calm, and neutral look, these ivory, gray, and brown rugs offer softer traditional and geometric tones that feel more relaxed. The Caucasian Kazak stands out for its bold yet casual geometric design t…",
+        "stable_facts": [
+          "dislike formal style",
+          "recently viewed Vintage Bokhara",
+          "recently viewed Persian Traditional",
+          "recently viewed Vintage Persian",
+          "wants calm style",
+          "wants neutral colors"
+        ],
+        "open_threads": [
+          "Would you like to see more options with similar casual elegance?",
+          "Any closer matches?",
+          "Would you like me to show more options in this palette, or explore other colors or sizes?",
+          "If you'd like, should I show more in this same direction, or adjust color and size next?"
+        ],
+        "last_user_intent": "recommendation",
+        "no_match_attempts": 0,
+        "updated_at": "2026-03-28T20:42:58.256Z",
+        "version": "v1"
+      }
+    },
+    "memory_snapshot_before": {
+      "summary_text": "User: Need something calm and neutral | Assistant: For a calm and neutral aesthetic, these ivory, gray, and brown rugs offer a soothing palette and traditional designs that enhance serenity in your space. If you'd like, should I show more in this same direction, or adju… || User: Any closer matches? | Assistant: These rugs align closely with your size and color preferences, offering calm ivory, gray, and brown tones ideal for a neutral setting. The Vintage Bokhara stands out with its timeless Central Asian craftsmanship and sub… || User: This feels too formal | Assistant: For a less formal, calm, and neutral look, these ivory, gray, and brown rugs offer softer traditional and geometric tones that feel more relaxed. The Caucasian Kazak stands out for its bold yet casual geometric design t…",
+      "stable_facts": [
+        "dislike formal style",
+        "recently viewed Vintage Bokhara",
+        "recently viewed Persian Traditional",
+        "recently viewed Vintage Persian",
+        "wants calm style",
+        "wants neutral colors"
+      ],
+      "open_threads": [
+        "Would you like to see more options with similar casual elegance?",
+        "Any closer matches?",
+        "Would you like me to show more options in this palette, or explore other colors or sizes?",
+        "If you'd like, should I show more in this same direction, or adjust color and size next?"
+      ],
+      "last_user_intent": "recommendation",
+      "no_match_attempts": 0,
+      "updated_at": "2026-03-28T20:42:58.256Z",
+      "version": "v1"
+    },
+    "memory_snapshot_after": {
+      "summary_text": "…ance serenity in your space. If you'd like, should I show more in this same direction, or adju… || User: Any closer matches? | Assistant: These rugs align closely with your size and color preferences, offering calm ivory, gray, and brown tones ideal for a neutral setting. The Vintage Bokhara stands out with its timeless Central Asian craftsmanship and sub… || User: This feels too formal | Assistant: For a less formal, calm, and neutral look, these ivory, gray, and brown rugs offer softer traditional and geometric tones that feel more relaxed. The Caucasian Kazak stands out for its bold yet casual geometric design t… || User: How often should I rotate a rug? | Assistant: Rotating a rug every 3 to 6 months helps ensure even wear and fading from sunlight, extending its life and appearance. If the rug is in a high-traffic area or exposed to direct sunlight, consider rotating it more freque…",
+      "stable_facts": [
+        "has_recent_recommendations",
+        "dislike formal style",
+        "recently viewed Vintage Bokhara",
+        "recently viewed Persian Traditional",
+        "recently viewed Vintage Persian",
+        "wants calm style",
+        "wants neutral colors"
+      ],
+      "open_threads": [
+        "How often should I rotate a rug?",
+        "Would you like me to show you rugs suited for various placements?",
+        "Would you like to see more options with similar casual elegance?",
+        "Any closer matches?",
+        "Would you like me to show more options in this palette, or explore other colors or sizes?",
+        "If you'd like, should I show more in this same direction, or adjust color and size next?"
+      ],
+      "last_user_intent": "general_chat",
+      "no_match_attempts": 0,
+      "updated_at": "2026-03-28T20:43:06.302Z",
+      "version": "v1"
+    },
+    "ai_context_packet_stats": {
+      "field_counts": {
+        "stable_facts": 6,
+        "open_threads": 4,
+        "customer_context": 6,
+        "recently_shown_rugs": 6,
+        "shown_rug_ids": 9,
+        "recent_turns": 4
+      },
+      "char_counts": {
+        "summary_text": 799,
+        "stable_facts_total": 153,
+        "open_threads_total": 260,
+        "customer_context_total": 153,
+        "recently_shown_total": 551,
+        "shown_rug_ids_total": 324,
+        "liked_attributes_total": 14,
+        "recent_turns_total": 600,
+        "latest_user_message": 32,
+        "total": 2562
+      }
+    },
+    "response": {
+      "session_id": "ba14ecb3-a6b6-4357-bbf8-c9264ddfeed1",
+      "role": "retail_customer",
+      "mode": "general_chat",
+      "fine_mode": "general_chat",
+      "response_mode": "general_chat",
+      "notes": "GENERAL_CHAT_AI_RUNTIME:real | Prompt layers assembled: SYSTEM_PROMPT_BASE -> TASK_PROMPT_GENERAL_CHAT -> TASK_PROMPT_GENERAL_CHAT -> ROLE_PROMPT_RETAIL_CUSTOMER -> CHAT_MEMORY_CONTEXT -> RECENT_TURNS_CONTEXT -> LATEST_USER_MESSAGE"
+    },
+    "timing_ms": {
+      "total_ms": 8071
+    }
+  }
+}

@@ -1,0 +1,202 @@
+{
+  "trace_id": "af028711-5b6f-4085-ab94-972627cbd99d",
+  "channel": "recommendation-pipeline",
+  "created_at": "2026-03-26T23:33:32.072Z",
+  "payload": {
+    "request_id": "af028711-5b6f-4085-ab94-972627cbd99d",
+    "flow_path": [
+      "runRecommendationPipeline",
+      "fetchInventoryCandidates",
+      "filterByHardConstraints",
+      "shapeCandidatesForAI",
+      "rankAndExplain",
+      "logRecommendationQaEvent"
+    ],
+    "source_route": "/api/chat",
+    "session_id": "87126e56-638e-40b8-b80d-5a05e8f0a56d",
+    "role": "retail_customer",
+    "tenant_id": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5",
+    "user_message": "Need a 30 by 40 runner",
+    "constraints": {
+      "size": {
+        "widthIn": 30,
+        "lengthIn": 40,
+        "toleranceIn": 3
+      },
+      "shape": "runner",
+      "strictness": {
+        "size": "prefer",
+        "colors": "prefer",
+        "styles": "prefer",
+        "shape": "prefer"
+      }
+    },
+    "prompt_context": {
+      "role": "retail_customer",
+      "chat_context": {
+        "structured_state": {
+          "recommendation_state": {
+            "hard_constraints": {
+              "size": {
+                "widthIn": 30,
+                "lengthIn": 40,
+                "toleranceIn": 3
+              },
+              "shape": "runner",
+              "strictness": {
+                "size": "prefer",
+                "colors": "prefer",
+                "styles": "prefer",
+                "shape": "prefer"
+              }
+            },
+            "soft_preferences": {},
+            "runtime": {
+              "liked_rug_ids": [],
+              "dismissed_rug_ids": [],
+              "liked_attributes": {
+                "colors": [],
+                "styles": [],
+                "origins": []
+              }
+            }
+          }
+        },
+        "conversation_memory": {
+          "summary_text": "",
+          "stable_facts": [],
+          "open_threads": [],
+          "last_user_intent": "unknown",
+          "version": "v1"
+        },
+        "customer_context": [],
+        "recently_shown_rugs": [],
+        "shown_rug_ids": [],
+        "liked_attributes": {
+          "colors": [],
+          "styles": [],
+          "origins": []
+        },
+        "recent_turns": []
+      },
+      "discovery_mode": false,
+      "expanded_due_to_thin_results": false,
+      "constraint_mismatch": {
+        "expanded_from_zero_match": true,
+        "unmet_constraints": [
+          "shape"
+        ],
+        "disclosure_hint": "We don't have any runners in the collection right now, so I'm showing the closest alternatives that could still work for a long, narrow space."
+      }
+    },
+    "query_trace": [
+      {
+        "variant": "base",
+        "query_variant_reason": "no_size_window_base_query",
+        "filters": {
+          "tenant_id": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5",
+          "status": "available",
+          "enrichment_status": "ready",
+          "limit": 220,
+          "size_bounds": null,
+          "color_prefilter_active": false,
+          "image_sql_filter_active": true,
+          "color_prefilter": "inactive",
+          "color_prefilter_state": "inactive",
+          "color_sql_prefilter_tokens": null
+        },
+        "row_count": 220,
+        "error": null
+      }
+    ],
+    "dynamic_limit": 220,
+    "policy_sql_filters": {
+      "tenant_id": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5",
+      "status": "available",
+      "enrichment_status": "ready",
+      "size_window": null,
+      "hard_constraints": {
+        "size": false,
+        "styles": false,
+        "shape": false
+      },
+      "image_sql_filter_active": true,
+      "color_prefilter_active": false,
+      "color_prefilter": "inactive",
+      "color_prefilter_state": "inactive",
+      "color_prefilter_tokens": [],
+      "discovery_mode": false,
+      "confidence": "high"
+    },
+    "query_variant_reason": "no_size_window_base_query",
+    "row_counts": {
+      "sql_rows_total": 220,
+      "sql_rows_by_variant": [
+        {
+          "variant": "base",
+          "query_variant_reason": "no_size_window_base_query",
+          "row_count": 220,
+          "error": null
+        }
+      ]
+    },
+    "discovery_mode": false,
+    "color_sql_prefilter_tokens": [],
+    "broadening_applied": true,
+    "broadening_stage": "full_alternative_expansion",
+    "no_match": {
+      "fallback_tier": "none",
+      "reasonableness_gate": "passed",
+      "reasonableness_gate_result": "passed",
+      "terminal_reason_code": null
+    },
+    "candidate_counts": {
+      "sql_candidates": 220,
+      "hard_filtered_candidates": 17,
+      "ai_candidates": 17
+    },
+    "timing_ms": {
+      "count_rough_inventory_size_ms": 185,
+      "fetch_inventory_candidates_ms": 726,
+      "filter_hard_constraints_ms": 0,
+      "shape_candidates_ms": 6,
+      "rank_and_explain_ms": 0,
+      "qa_log_ms": 2,
+      "total_ms": 920
+    },
+    "ai_trace": {
+      "called": false,
+      "model": "gpt-4.1-mini",
+      "prompt_layers": [],
+      "request_payload": null,
+      "response_status": null,
+      "response_payload": null,
+      "parsed_response": null,
+      "fallback_reason": "Deterministic fast path",
+      "error": null,
+      "incomplete_detected": false,
+      "retry_attempted": false,
+      "retry_succeeded": false,
+      "text_postprocess_applied": false
+    },
+    "result": {
+      "mode": "recommendations",
+      "notes": "Deterministic fast-path response. | CONSTRAINT_MISMATCH_EXPANDED",
+      "recommendation_ids": [
+        "258fde89-ed87-4103-b1e8-224f267e0f3e",
+        "a03748ac-f3fb-4e70-bed3-d37981a9fe6a",
+        "cd957fee-fbea-4370-b643-4f2bbb3fee44",
+        "3a27e15d-e9cb-4266-96e1-b594cf90356e",
+        "3d301965-0549-4ae5-9a11-9e31f9858126",
+        "4ae3bd2d-0ab6-40ae-9475-5181c3b4d5c8",
+        "9c36ae38-d529-4b27-9746-8c435c410a1c",
+        "16005e33-0d80-4256-9b3a-cea3e2a63e02",
+        "73f4628e-1ae9-4c54-a770-66899ca641f9",
+        "3e188674-4625-445b-be9a-3d2bc2752a50"
+      ],
+      "recommendation_count": 10,
+      "relaxed_size_tolerance_in": null
+    },
+    "error": null
+  }
+}

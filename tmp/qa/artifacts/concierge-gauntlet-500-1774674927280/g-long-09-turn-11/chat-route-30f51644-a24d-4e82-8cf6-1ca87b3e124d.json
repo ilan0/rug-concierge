@@ -1,0 +1,548 @@
+{
+  "trace_id": "30f51644-a24d-4e82-8cf6-1ca87b3e124d",
+  "channel": "chat-route",
+  "created_at": "2026-03-28T05:43:21.362Z",
+  "payload": {
+    "flow_path": [
+      "/api/chat POST",
+      "getOrCreateSession",
+      "updateRecommendationStateForTurn",
+      "routeTurnMode",
+      "handlerDispatch",
+      "updateConversationMemory",
+      "saveSession"
+    ],
+    "request": {
+      "session_id": "87af9d3a-0a08-4c4e-886c-91750794762b",
+      "role": "retail_customer",
+      "tenant_id": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5",
+      "tenant_subdomain": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5",
+      "tenant_hostname": "127.0.0.1",
+      "message": "I need exactly a 50x50 rug",
+      "constraints": null
+    },
+    "routing": {
+      "mode": "recommendation",
+      "intent": "recommend",
+      "rule_id": "EXPLICIT_RECOMMENDATION_REQUEST",
+      "confidence": "high",
+      "needs_clarification": false,
+      "parser": {
+        "model": "gpt-4.1-mini",
+        "latency_ms": 84,
+        "status": "fallback",
+        "parse_status": "fallback",
+        "fallback": "OpenAI request failed",
+        "fallback_reason": "OpenAI request failed",
+        "normalized_payload": {
+          "intent": "recommend",
+          "mode": "recommendation",
+          "followup_intent": "none",
+          "constraints": {
+            "size": {
+              "widthIn": 50,
+              "lengthIn": 50
+            },
+            "colors": [],
+            "styles": [],
+            "shape": null
+          },
+          "strictness": {
+            "size": "must",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          },
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          },
+          "session_facts": [],
+          "rug_reference_ambiguous": false,
+          "confidence": "high"
+        },
+        "normalized_parse_payload": {
+          "intent": "recommend",
+          "mode": "recommendation",
+          "followup_intent": "none",
+          "constraints": {
+            "size": {
+              "widthIn": 50,
+              "lengthIn": 50
+            },
+            "colors": [],
+            "styles": [],
+            "shape": null
+          },
+          "strictness": {
+            "size": "must",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          },
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          },
+          "session_facts": [],
+          "rug_reference_ambiguous": false,
+          "confidence": "high"
+        },
+        "response_status": 400,
+        "incomplete_detected": false,
+        "error": "OpenAI request failed with status 400"
+      },
+      "policy": {
+        "intent": "recommend",
+        "compiled_policy": {
+          "intent": "recommend",
+          "mode": "recommendation",
+          "discovery_requested": false,
+          "followup_intent": "none",
+          "hard_constraints": {
+            "size": {
+              "widthIn": 50,
+              "lengthIn": 50,
+              "toleranceIn": 0
+            },
+            "strictness": {
+              "size": "must",
+              "colors": "prefer",
+              "styles": "prefer",
+              "shape": "prefer"
+            }
+          },
+          "persisted_hard_constraints": {
+            "size": {
+              "widthIn": 50,
+              "lengthIn": 50,
+              "toleranceIn": 0
+            },
+            "strictness": {
+              "size": "must",
+              "colors": "prefer",
+              "styles": "prefer",
+              "shape": "prefer"
+            }
+          },
+          "strictness": {
+            "size": "must",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          },
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          },
+          "confidence": "high",
+          "policy_source": "parsed_turn",
+          "must_prefer_avoid": {
+            "must": [
+              "size"
+            ],
+            "prefer": [],
+            "avoid": {
+              "colors": [],
+              "styles": [],
+              "shapes": []
+            }
+          }
+        },
+        "policy_source": "parsed_turn",
+        "must_prefer_avoid": {
+          "must": [
+            "size"
+          ],
+          "prefer": [],
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          }
+        },
+        "must-prefer-avoid": {
+          "must": [
+            "size"
+          ],
+          "prefer": [],
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          }
+        },
+        "constraint_modes": {
+          "size": "must",
+          "colors": "prefer",
+          "styles": "prefer",
+          "shape": "prefer",
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          }
+        }
+      },
+      "parser_trace": {
+        "called": true,
+        "model": "gpt-4.1-mini",
+        "status": "fallback",
+        "response_status": 400,
+        "fallback": "OpenAI request failed",
+        "fallback_reason": "OpenAI request failed",
+        "incomplete_detected": false,
+        "latency_ms": 84,
+        "normalized_payload": {
+          "intent": "recommend",
+          "mode": "recommendation",
+          "followup_intent": "none",
+          "constraints": {
+            "size": {
+              "widthIn": 50,
+              "lengthIn": 50
+            },
+            "colors": [],
+            "styles": [],
+            "shape": null
+          },
+          "strictness": {
+            "size": "must",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          },
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          },
+          "session_facts": [],
+          "rug_reference_ambiguous": false,
+          "confidence": "high"
+        },
+        "parsed": {
+          "intent": "recommend",
+          "mode": "recommendation",
+          "followup_intent": "none",
+          "constraints": {
+            "size": {
+              "widthIn": 50,
+              "lengthIn": 50
+            },
+            "colors": [],
+            "styles": [],
+            "shape": null
+          },
+          "strictness": {
+            "size": "must",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          },
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          },
+          "session_facts": [],
+          "rug_reference_ambiguous": false,
+          "confidence": "high"
+        },
+        "error": "OpenAI request failed with status 400"
+      },
+      "compiled_policy": {
+        "intent": "recommend",
+        "mode": "recommendation",
+        "discovery_requested": false,
+        "followup_intent": "none",
+        "hard_constraints": {
+          "size": {
+            "widthIn": 50,
+            "lengthIn": 50,
+            "toleranceIn": 0
+          },
+          "strictness": {
+            "size": "must",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          }
+        },
+        "persisted_hard_constraints": {
+          "size": {
+            "widthIn": 50,
+            "lengthIn": 50,
+            "toleranceIn": 0
+          },
+          "strictness": {
+            "size": "must",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          }
+        },
+        "strictness": {
+          "size": "must",
+          "colors": "prefer",
+          "styles": "prefer",
+          "shape": "prefer"
+        },
+        "avoid": {
+          "colors": [],
+          "styles": [],
+          "shapes": []
+        },
+        "confidence": "high",
+        "policy_source": "parsed_turn",
+        "must_prefer_avoid": {
+          "must": [
+            "size"
+          ],
+          "prefer": [],
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          }
+        }
+      },
+      "policy_source": "parsed_turn",
+      "must_prefer_avoid": {
+        "must": [
+          "size"
+        ],
+        "prefer": [],
+        "avoid": {
+          "colors": [],
+          "styles": [],
+          "shapes": []
+        }
+      },
+      "must-prefer-avoid": {
+        "must": [
+          "size"
+        ],
+        "prefer": [],
+        "avoid": {
+          "colors": [],
+          "styles": [],
+          "shapes": []
+        }
+      },
+      "handler": "handleRecommendationTurn",
+      "prompt_layer_preview": [
+        "TASK_PROMPT_RECOMMENDATION",
+        "SYSTEM_PROMPT_BASE",
+        "TASK_PROMPT_RECOMMENDATION",
+        "TASK_PROMPT_RECOMMENDATION",
+        "STRUCTURED_OUTPUT_RECOMMENDATION",
+        "CHAT_MEMORY_CONTEXT",
+        "CHAT_MEMORY_CONTEXT",
+        "CHAT_MEMORY_CONTEXT",
+        "CHAT_MEMORY_CONTEXT",
+        "RECENT_TURNS_CONTEXT",
+        "INVENTORY_CONTEXT",
+        "LATEST_USER_MESSAGE_WITH_HARD_CONSTRAINTS"
+      ]
+    },
+    "reaction": {
+      "detected_reaction": null,
+      "referenced_rug_id": null,
+      "rug_reference_ambiguous": false,
+      "liked_attributes_before": {
+        "colors": [
+          "gray"
+        ],
+        "styles": [
+          "geometric"
+        ],
+        "origins": []
+      },
+      "liked_attributes_after": {
+        "colors": [
+          "gray"
+        ],
+        "styles": [
+          "geometric"
+        ],
+        "origins": []
+      },
+      "liked_rug_ids_before": [],
+      "liked_rug_ids_after": [],
+      "dismissed_rug_ids_before": [],
+      "dismissed_rug_ids_after": []
+    },
+    "state_snapshot": {
+      "recommendation_state": {
+        "hard_constraints": {
+          "size": {
+            "widthIn": 50,
+            "lengthIn": 50,
+            "toleranceIn": 0
+          },
+          "strictness": {
+            "size": "must",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          }
+        },
+        "soft_preferences": {},
+        "runtime": {
+          "last_result_mode": "recommendation",
+          "last_relaxed_size_tolerance_in": null,
+          "last_blockers": [],
+          "last_recommended_size_in": {
+            "width_in": 96,
+            "length_in": 96
+          },
+          "liked_rug_ids": [],
+          "dismissed_rug_ids": [],
+          "shown_rug_ids": [
+            "553b2b40-3d39-402d-b7c3-afe670484106",
+            "66ca8129-8843-4e42-bdf5-9e3ce23d4128",
+            "4c60b570-f26c-4dda-a1df-9626479843b0",
+            "7e2a3934-cc4d-44e6-840f-7614952917c5",
+            "3e188674-4625-445b-be9a-3d2bc2752a50",
+            "08ca5e39-c162-4d88-9d7e-484e90489d85",
+            "dbf2bf0c-8cb5-4ea7-9d6c-fa3439793b0b",
+            "b1b00766-b4bc-4d8b-ab4d-46be26589902",
+            "4bc59440-4d03-4698-8275-2a78247cd3b7",
+            "2679516c-6cfa-46e6-b94e-00095796ac73",
+            "a3181b27-19c9-45cd-ac2d-04b83368ca6f",
+            "a93b286f-4e3b-44f1-aec8-b2f43d6ba5dd"
+          ],
+          "liked_attributes": {
+            "colors": [
+              "gray"
+            ],
+            "styles": [
+              "geometric"
+            ],
+            "origins": []
+          },
+          "recently_shown_rugs": [
+            {
+              "id": "7e2a3934-cc4d-44e6-840f-7614952917c5",
+              "label": "Contemporary Round",
+              "colors": [
+                "black"
+              ],
+              "style": "Modern",
+              "origin": null
+            },
+            {
+              "id": "c7a2b2e4-1f37-4fc5-985e-ea28e577723a",
+              "label": "Contemporary Moroccan",
+              "colors": [
+                "purple",
+                "blue"
+              ],
+              "style": "Medallion",
+              "origin": "Moroccan"
+            }
+          ],
+          "no_match_attempts": 0,
+          "updated_at": "2026-03-28T05:43:11.178Z"
+        }
+      },
+      "conversation_memory": {
+        "summary_text": "…nce you're looking for a warm contrast to your gray sectional within the preferred size, these rugs offer a nice balance with warm tones and some gray accents. || User: How do I care for a wool rug? | Assistant: To care for a wool rug, vacuum regularly without using a beater bar to remove dirt and prevent wear. Address spills quickly by blotting with a clean cloth; avoid rubbing. Professional cleaning every 1-3 years helps main… || User: Need a round rug around 6 feet | Assistant: For a round rug close to 6 feet, consider these options which bring modern style and clean lines to your space. || User: Tell me more about that one | Assistant: I want to make sure I’m following correctly. Did you mean Contemporary Round or Contemporary Moroccan? || User: Keep going | Assistant: Here are two round rugs that fit your size preference and bring modern style with clean shapes to your living room.",
+        "stable_facts": [
+          "practical maintenance",
+          "room living room",
+          "palette warm",
+          "preference I like this direction"
+        ],
+        "open_threads": [
+          "Did you mean Contemporary Round or Contemporary Moroccan?",
+          "How do I care for a wool rug?",
+          "Would you like me to show you wool rug options from our collection?",
+          "Could you tell me about the room or space where you plan to place the rug?",
+          "What kind of space are you decorating so I can narrow these down for you?"
+        ],
+        "last_user_intent": "recommendation",
+        "no_match_attempts": 0,
+        "updated_at": "2026-03-28T05:43:11.178Z",
+        "version": "v1"
+      }
+    },
+    "memory_snapshot_before": {
+      "summary_text": "…nce you're looking for a warm contrast to your gray sectional within the preferred size, these rugs offer a nice balance with warm tones and some gray accents. || User: How do I care for a wool rug? | Assistant: To care for a wool rug, vacuum regularly without using a beater bar to remove dirt and prevent wear. Address spills quickly by blotting with a clean cloth; avoid rubbing. Professional cleaning every 1-3 years helps main… || User: Need a round rug around 6 feet | Assistant: For a round rug close to 6 feet, consider these options which bring modern style and clean lines to your space. || User: Tell me more about that one | Assistant: I want to make sure I’m following correctly. Did you mean Contemporary Round or Contemporary Moroccan? || User: Keep going | Assistant: Here are two round rugs that fit your size preference and bring modern style with clean shapes to your living room.",
+      "stable_facts": [
+        "practical maintenance",
+        "room living room",
+        "palette warm",
+        "preference I like this direction"
+      ],
+      "open_threads": [
+        "Did you mean Contemporary Round or Contemporary Moroccan?",
+        "How do I care for a wool rug?",
+        "Would you like me to show you wool rug options from our collection?",
+        "Could you tell me about the room or space where you plan to place the rug?",
+        "What kind of space are you decorating so I can narrow these down for you?"
+      ],
+      "last_user_intent": "recommendation",
+      "no_match_attempts": 0,
+      "updated_at": "2026-03-28T05:43:11.178Z",
+      "version": "v1"
+    },
+    "memory_snapshot_after": {
+      "summary_text": "…eater bar to remove dirt and prevent wear. Address spills quickly by blotting with a clean cloth; avoid rubbing. Professional cleaning every 1-3 years helps main… || User: Need a round rug around 6 feet | Assistant: For a round rug close to 6 feet, consider these options which bring modern style and clean lines to your space. || User: Tell me more about that one | Assistant: I want to make sure I’m following correctly. Did you mean Contemporary Round or Contemporary Moroccan? || User: Keep going | Assistant: Here are two round rugs that fit your size preference and bring modern style with clean shapes to your living room. || User: I need exactly a 50x50 rug | Assistant: We don't have an exact 4'2\" × 4'2\" match right now, so I'm showing the closest available alternatives. We don't have any rugs that are exactly 50x50 inches, but here are some options close in size that could work well i…",
+      "stable_facts": [
+        "practical maintenance",
+        "room living room",
+        "palette warm",
+        "preference I like this direction"
+      ],
+      "open_threads": [
+        "Did you mean Contemporary Round or Contemporary Moroccan?",
+        "How do I care for a wool rug?",
+        "Would you like me to show you wool rug options from our collection?",
+        "Could you tell me about the room or space where you plan to place the rug?",
+        "What kind of space are you decorating so I can narrow these down for you?"
+      ],
+      "last_user_intent": "recommendation",
+      "no_match_attempts": 0,
+      "updated_at": "2026-03-28T05:43:21.010Z",
+      "version": "v1"
+    },
+    "ai_context_packet_stats": {
+      "field_counts": {
+        "stable_facts": 4,
+        "open_threads": 5,
+        "customer_context": 4,
+        "recently_shown_rugs": 2,
+        "shown_rug_ids": 12,
+        "recent_turns": 4
+      },
+      "char_counts": {
+        "summary_text": 900,
+        "stable_facts_total": 81,
+        "open_threads_total": 300,
+        "customer_context_total": 81,
+        "recently_shown_total": 157,
+        "shown_rug_ids_total": 432,
+        "liked_attributes_total": 13,
+        "recent_turns_total": 254,
+        "latest_user_message": 26,
+        "total": 1812
+      }
+    },
+    "response": {
+      "session_id": "87af9d3a-0a08-4c4e-886c-91750794762b",
+      "role": "retail_customer",
+      "mode": "recommendation",
+      "fine_mode": "recommendation",
+      "response_mode": "recommendation",
+      "notes": "If the exact 50x50 size is firm, we can explore custom options or look for alternative shapes and sizes that fit your room well. | CONSTRAINT_MISMATCH_EXPANDED"
+    },
+    "timing_ms": {
+      "total_ms": 9826
+    }
+  }
+}

@@ -1,0 +1,817 @@
+{
+  "trace_id": "bbd62cb0-6abb-4d09-a15b-d532b232bb4a",
+  "channel": "recommendation-pipeline",
+  "created_at": "2026-04-03T10:53:25.371Z",
+  "payload": {
+    "request_id": "bbd62cb0-6abb-4d09-a15b-d532b232bb4a",
+    "flow_path": [
+      "runRecommendationPipeline",
+      "fetchInventoryCandidates",
+      "filterByHardConstraints",
+      "shapeCandidatesForAI",
+      "rankAndExplain",
+      "logRecommendationQaEvent"
+    ],
+    "source_route": "/api/chat",
+    "session_id": "1b3cf21d-7fb8-429f-84d4-8a5848850a00",
+    "role": "retail_customer",
+    "tenant_id": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5",
+    "user_message": "I need a hallway runner about 3 by 12.",
+    "constraints": {
+      "size": {
+        "widthIn": 36,
+        "lengthIn": 144,
+        "toleranceIn": 12
+      },
+      "shape": "runner",
+      "strictness": {
+        "size": "prefer",
+        "colors": "prefer",
+        "styles": "prefer",
+        "shape": "must"
+      }
+    },
+    "prompt_context": {
+      "role": "retail_customer",
+      "chat_context": {
+        "structured_state": {
+          "recommendation_state": {
+            "hard_constraints": {
+              "size": {
+                "widthIn": 36,
+                "lengthIn": 144,
+                "toleranceIn": 12
+              },
+              "shape": "runner",
+              "strictness": {
+                "size": "prefer",
+                "colors": "prefer",
+                "styles": "prefer",
+                "shape": "must"
+              }
+            },
+            "soft_preferences": {},
+            "runtime": {
+              "liked_rug_ids": [],
+              "dismissed_rug_ids": [],
+              "liked_attributes": {
+                "colors": [],
+                "styles": [],
+                "origins": []
+              }
+            }
+          }
+        },
+        "conversation_memory": {
+          "summary_text": "",
+          "stable_facts": [],
+          "open_threads": [],
+          "last_user_intent": "unknown",
+          "version": "v1"
+        },
+        "customer_context": [],
+        "recently_shown_rugs": [],
+        "shown_rug_ids": [],
+        "liked_attributes": {
+          "colors": [],
+          "styles": [],
+          "origins": []
+        },
+        "recent_turns": []
+      },
+      "discovery_mode": false,
+      "expanded_due_to_thin_results": false
+    },
+    "query_trace": [
+      {
+        "variant": "size_rotated",
+        "query_variant_reason": "size_window_rotated_dimensions_query",
+        "filters": {
+          "tenant_id": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5",
+          "status": "available",
+          "enrichment_status": "ready",
+          "limit": 235,
+          "size_bounds": {
+            "minWidthIn": 24,
+            "maxWidthIn": 48,
+            "minLengthIn": 132,
+            "maxLengthIn": 156,
+            "rotated": true
+          },
+          "color_prefilter_active": false,
+          "image_sql_filter_active": true,
+          "color_prefilter": "inactive",
+          "color_prefilter_state": "inactive",
+          "color_sql_prefilter_tokens": null
+        },
+        "row_count": 0,
+        "error": null
+      },
+      {
+        "variant": "size_direct",
+        "query_variant_reason": "size_window_direct_dimensions_query",
+        "filters": {
+          "tenant_id": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5",
+          "status": "available",
+          "enrichment_status": "ready",
+          "limit": 235,
+          "size_bounds": {
+            "minWidthIn": 24,
+            "maxWidthIn": 48,
+            "minLengthIn": 132,
+            "maxLengthIn": 156,
+            "rotated": false
+          },
+          "color_prefilter_active": false,
+          "image_sql_filter_active": true,
+          "color_prefilter": "inactive",
+          "color_prefilter_state": "inactive",
+          "color_sql_prefilter_tokens": null
+        },
+        "row_count": 5,
+        "error": null
+      }
+    ],
+    "dynamic_limit": 235,
+    "policy_sql_filters": {
+      "tenant_id": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5",
+      "status": "available",
+      "enrichment_status": "ready",
+      "size_window": {
+        "minWidthIn": 24,
+        "maxWidthIn": 48,
+        "minLengthIn": 132,
+        "maxLengthIn": 156
+      },
+      "hard_constraints": {
+        "size": true,
+        "styles": false,
+        "shape": true
+      },
+      "image_sql_filter_active": true,
+      "color_prefilter_active": false,
+      "color_prefilter": "inactive",
+      "color_prefilter_state": "inactive",
+      "color_prefilter_tokens": [],
+      "discovery_mode": false,
+      "confidence": "high"
+    },
+    "query_variant_reason": "size_window_active_query_direct_and_rotated",
+    "row_counts": {
+      "sql_rows_total": 5,
+      "sql_rows_by_variant": [
+        {
+          "variant": "size_rotated",
+          "query_variant_reason": "size_window_rotated_dimensions_query",
+          "row_count": 0,
+          "error": null
+        },
+        {
+          "variant": "size_direct",
+          "query_variant_reason": "size_window_direct_dimensions_query",
+          "row_count": 5,
+          "error": null
+        }
+      ]
+    },
+    "discovery_mode": false,
+    "color_sql_prefilter_tokens": [],
+    "broadening_applied": false,
+    "broadening_stage": "none",
+    "no_match": {
+      "fallback_tier": "none",
+      "reasonableness_gate": "passed",
+      "reasonableness_gate_result": "passed",
+      "terminal_reason_code": null
+    },
+    "candidate_counts": {
+      "sql_candidates": 5,
+      "hard_filtered_candidates": 4,
+      "ai_candidates": 4
+    },
+    "timing_ms": {
+      "count_rough_inventory_size_ms": 122,
+      "fetch_inventory_candidates_ms": 571,
+      "filter_hard_constraints_ms": 0,
+      "shape_candidates_ms": 2,
+      "rank_and_explain_ms": 13301,
+      "qa_log_ms": 3,
+      "total_ms": 13999
+    },
+    "ai_trace": {
+      "called": true,
+      "model": "gpt-4.1",
+      "prompt_layers": [
+        {
+          "id": "TASK_PROMPT_RECOMMENDATION",
+          "role": "system",
+          "chars": 3348,
+          "preview": "Do not open with generic transition language. Start with a request-anchored line that names the customer's actual focus…"
+        },
+        {
+          "id": "SYSTEM_PROMPT_BASE",
+          "role": "system",
+          "chars": 758,
+          "preview": "# AI System Prompt — Rug Concierge You are an experienced rug consultant helping retail customers in a showroom environ…"
+        },
+        {
+          "id": "TASK_PROMPT_RECOMMENDATION",
+          "role": "system",
+          "chars": 19,
+          "preview": "Respond in English."
+        },
+        {
+          "id": "TASK_PROMPT_RECOMMENDATION",
+          "role": "system",
+          "chars": 4607,
+          "preview": "# Recommendation Prompt You are a retail rug concierge for in-store customers. Recommend only from provided inventory c…"
+        },
+        {
+          "id": "STRUCTURED_OUTPUT_RECOMMENDATION",
+          "role": "system",
+          "chars": 452,
+          "preview": "# Recommendation Structured Output Add-on Use this prompt layer only for recommendation mode. Runtime JSON schema valid…"
+        },
+        {
+          "id": "CHAT_MEMORY_CONTEXT",
+          "role": "system",
+          "chars": 498,
+          "preview": "CHAT MEMORY CONTEXT: {\"structured_state\":{\"recommendation_state\":{\"hard_constraints\":{\"size\":{\"widthIn\":36,\"lengthIn\":1…"
+        },
+        {
+          "id": "INVENTORY_CONTEXT",
+          "role": "system",
+          "chars": 1841,
+          "preview": "AVAILABLE INVENTORY (authoritative). Each entry includes ID, Label, Size, and Description: [{\"id\":\"01917402-8054-431a-8…"
+        },
+        {
+          "id": "LATEST_USER_MESSAGE_WITH_HARD_CONSTRAINTS",
+          "role": "user",
+          "chars": 226,
+          "preview": "User request: I need a hallway runner about 3 by 12. Hard constraints: {\"size\":{\"widthIn\":36,\"lengthIn\":144,\"toleranceI…"
+        }
+      ],
+      "request_payload": {
+        "model": "gpt-4.1",
+        "input": [
+          {
+            "role": "system",
+            "content": [
+              {
+                "type": "input_text",
+                "text": "Do not open with generic transition language. Start with a request-anchored line that names the customer's actual focus (for example: size, style, color, room, or practical need).\nVoice: warm, confident, and tasteful. Sound like a helpful showroom consultant, not a search engine.\nKeep it concise but human: usually 2-4 short sentences in assistant_message. Avoid robotic filler and catalog-style phrasing.\nStart with one brief human acknowledgment tied to the customer's intent before listing options (for example: precise fit, browsing, practical need, or style pivot).\nFavor natural conversational phrasing with light contractions and plain language so the response reads like a real showroom conversation.\nUse natural conversational wording that feels personally helpful; avoid dry, transactional phrasing.\nVary sentence openings across turns and avoid repetitive scaffolding; keep the voice natural and conversational.\nAvoid repeatedly opening with the same formula (for example, repetitive 'since you're looking for...'). Rotate phrasing naturally.\nMake the first line feel like a real person responding in the moment (brief, warm, and specific to the request), not a reusable template.\nAvoid process narration phrasing such as 'I focused on...' or 'I pulled...'. Speak outcome-first from the customer's perspective.\nReference the customer's wording directly once (for example: 'since you want a calmer look' or 'for that 6x9 target').\nWhen recommending, highlight one standout reason the top piece is special and add a light point of view (for example, why you would start there).\nOnly claim attributes that are clearly supported by the returned card fields (title, size, origin, style, mood). Do not invent extra motif/color specifics in assistant_message.\nOnly discuss rugs that are in the current recommendation card list. Do not present a previously shown rug as a current option unless it is also in the current cards.\nIf the customer states an avoid preference (for example: no red, not too busy), do not praise or foreground that avoided direction.\nIf the customer asks for larger/smaller and exact directional matches are unavailable, say that directly before presenting closest alternatives. Never claim the returned set satisfies a directional request when it does not.\nWhen a customer asks conditionally (for example: 'if exact isn't available, show closest'), state clearly whether exact matches are available before listing options.\nIf at least one inventory candidate is provided in context, return mode='recommendations' instead of no_match.\nIf the customer mentions budget, state clearly that exact pricing must be confirmed with store staff and frame the shown rugs as the closest style/size shortlist.\nIf the customer mentions practical needs (kids, pets, high traffic, easy-clean), include one practical suitability note in the opening or first recommendation reason.\nEnd recommendations with exactly one natural next-step question (for example: show more like this, larger, or different color).\nOpening behavior guidance:\n- Color-led request: acknowledge requested color direction first, then present strongest in-stock matches.\n- Style/origin request: acknowledge requested style/origin first, then present closest available pieces.\n- Discovery request: acknowledge open browsing intent and present a varied compare set."
+              },
+              {
+                "type": "input_text",
+                "text": "# AI System Prompt — Rug Concierge\n\nYou are an experienced rug consultant helping retail customers in a showroom environment.\n\nCore behavior:\n- Be accurate, practical, and calm.\n- Use only information provided in conversation and inventory context.\n- If data is missing, say what is unknown.\n- Never invent rug attributes, inventory availability, or IDs.\n\nTone:\n- Professional and approachable.\n- Concise and specific.\n- Not salesy or exaggerated. Genuine enthusiasm is appropriate when a piece genuinely stands out in quality, origin, condition, or rarity.\n- Detect the language of the user's message and respond in that same language.\n\nTrust rules:\n- When unsure, say so directly.\n- Prefer clear guidance over speculation.\n- Keep responses plain text only."
+              },
+              {
+                "type": "input_text",
+                "text": "Respond in English."
+              },
+              {
+                "type": "input_text",
+                "text": "# Recommendation Prompt\n\nYou are a retail rug concierge for in-store customers.\nRecommend only from provided inventory context.\n\n## Core Rules\n\n- Inventory only. Never invent rugs or IDs.\n- Use `ai_description` as primary narrative relevance signal.\n- Use structured fields (`origin`, `style`, `mood`, `pattern`, `primary_colors`) to refine fit.\n- Respect hard constraints from backend state: `size`, `styles`, `shape`.\n- Treat color as a strong ranking signal, not a hard exclusion.\n- Rank color fit by dominance order: dominant field color first, secondary/border color second, accent/detail color third.\n- Color tie-breakers: prefer rugs matching dominant color over secondary-only matches; then prefer rugs matching both dominant and secondary; then prefer stronger style/origin fit and richer listing detail.\n- Treat room/material as soft preferences unless backend marks them hard in context.\n- If `ai_description` is missing, the rug may still be suggested when hard constraints fit; clearly state detail is pending.\n- Every reason must be specific to that rug and connect the rug's attributes to the customer's stated context (room, decor, practical needs).\n- When `customer_context` is provided, treat it as a first-class input and connect recommendations to it explicitly.\n- In discovery mode, present an inspiring range. Add at most one natural narrowing question only when it helps refine the next turn.\n- Do not begin with stock transition filler. Open with a request-anchored line that reflects the customer's stated focus (size, style, color, room, or practical need).\n- Match the language of the customer's latest message.\n- Sound warm, confident, and tasteful. Write like an expert showroom consultant, not a product filter.\n- Start with one brief human acknowledgment tied to the customer's intent before listing options.\n- Use natural conversational wording that feels personally helpful; avoid dry, transactional phrasing.\n- Keep `assistant_message` concise but human (usually 2-4 short sentences), include one specific standout detail for the top direction, and reference the customer's wording directly once.\n- Vary sentence openings across turns and avoid repetitive scaffolding; keep the voice natural and conversational.\n- Avoid repeatedly opening with the same formula (for example, repetitive \"since you're looking for...\"); rotate phrasing naturally.\n- Include a light point of view on the top option (why you would start there), not just neutral listing language.\n- Only claim attributes in `assistant_message` that are clearly supported by visible card fields (`title`, `size_text`, `origin`, `style`, `mood`). Do not add motif/color specifics unless clearly supported.\n- If the customer gives avoid preferences (for example: no red, not too busy), do not praise or foreground those avoided traits.\n- If the customer asks for larger/smaller and exact directional matches are unavailable, disclose that first and then show closest alternatives. Never claim the returned set satisfies the directional request when it does not.\n- If the customer asks conditionally (for example: \"if exact isn't available, show closest\"), explicitly state whether exact matches are available before listing options.\n- If the customer mentions budget, explicitly say exact pricing must be confirmed with store staff and frame results as style/size shortlist options.\n- If the customer mentions practical needs (kids, pets, high traffic, easy-clean), include one practical suitability note.\n- End recommendation responses with exactly one natural next-step question (for example: show more like this, bigger, smaller, or another color direction).\n- When exact matches are unavailable, disclose clearly in the first sentence and pivot constructively to what is available.\n- Opening behavior guidance:\n- Size-driven request: acknowledge the requested size/use-case first, then position options as best available fits.\n- Color-driven request: acknowledge requested color direction first, then prioritize dominance-aligned matches.\n- Style/origin request: acknowledge requested style/origin first, then position options as closest in-stock direction.\n- Discovery/browse request: acknowledge open browsing intent first, then frame results as a varied compare set.\n\n## Formatting\n\n- Plain text only inside string fields.\n- No markdown formatting.\n- Keep responses concise and complete.\n\n## Selection Order\n\n1. Respect backend hard constraints.\n2. Rank by fit to user intent and available rug attributes.\n3. Prefer grounded explanations over broad claims.\n4. Return `no_match` only when inventory is empty."
+              },
+              {
+                "type": "input_text",
+                "text": "# Recommendation Structured Output Add-on\n\nUse this prompt layer only for recommendation mode.\n\nRuntime JSON schema validation in code is authoritative.\nThe model output must match that schema exactly.\n\nRules:\n- JSON only (no prose outside JSON)\n- no extra keys\n- no markdown\n- concise, complete string values\n- use null only where schema allows null\n\nAny mismatch should be treated as invalid output and handled by backend sanitization/fallback logic."
+              },
+              {
+                "type": "input_text",
+                "text": "CHAT MEMORY CONTEXT:\n{\"structured_state\":{\"recommendation_state\":{\"hard_constraints\":{\"size\":{\"widthIn\":36,\"lengthIn\":144,\"toleranceIn\":12},\"shape\":\"runner\",\"strictness\":{\"size\":\"prefer\",\"colors\":\"prefer\",\"styles\":\"prefer\",\"shape\":\"must\"}},\"soft_preferences\":{},\"runtime\":{\"liked_rug_ids\":[],\"dismissed_rug_ids\":[],\"liked_attributes\":{\"colors\":[],\"styles\":[],\"origins\":[]}}}},\"conversation_memory\":{\"summary_text\":\"\",\"stable_facts\":[],\"open_threads\":[],\"last_user_intent\":\"unknown\",\"version\":\"v1\"}}"
+              },
+              {
+                "type": "input_text",
+                "text": "AVAILABLE INVENTORY (authoritative). Each entry includes ID, Label, Size, and Description:\n[{\"id\":\"01917402-8054-431a-83d3-16f1291f7e5e\",\"label\":\"Antique Persian Heriz Runner\",\"size\":\"3' x 12'\",\"origin\":\"Persian\",\"style\":\"Heriz\",\"mood\":\"traditional\",\"pattern\":[\"medallion center\",\"floral motif\",\"floral border\"],\"colors\":[\"rust\",\"blue\",\"ivory\"],\"desc\":\"This is an antique Persian Heriz runner showcasing a central medallion design with floral motifs and a detailed border. The color palette features rich rust, blue, and ivory tones.\"},{\"id\":\"a3456867-6251-4504-a62d-0476087b2687\",\"label\":\"Antique Persian Runner\",\"size\":\"3' x 12'\",\"origin\":\"Persian\",\"style\":\"Medallion\",\"mood\":\"traditional\",\"pattern\":[\"medallion center\",\"floral motif\",\"floral border\"],\"colors\":[\"brown\",\"blue\",\"green\"],\"desc\":\"This is an antique Persian runner featuring a central medallion design with intricate floral motifs and a detailed border. The color palette includes muted browns, blues, and hints of green, suitable for a traditional decor.\"},{\"id\":\"71090f52-53d0-4a1d-a06b-17288fe8d38c\",\"label\":\"Antique Persian Sultanabad Runner\",\"size\":\"3' x 12'\",\"origin\":\"Persian\",\"style\":\"Sultanabad\",\"mood\":\"traditional\",\"pattern\":[\"all-over pattern\",\"floral motif\"],\"colors\":[\"rust\",\"brown\",\"blue\",\"gold\"],\"desc\":\"This is an antique runner rug with a traditional Persian Sultanabad design, featuring a rich all-over floral motif. The rug's palette includes dominant rust and brown tones with accents of blue and gold, framed by a contrasting border.\"},{\"id\":\"119b9d9a-fe0c-4f12-b2ac-a783bb7bc29b\",\"label\":\"Contemporary Runner\",\"size\":\"3' x 12'\",\"origin\":null,\"style\":\"Minimal\",\"mood\":\"modern\",\"pattern\":[\"plain field\"],\"colors\":[\"green\"],\"desc\":\"This is a contemporary runner rug with a plain field in a solid green color. Its clean design fits well in modern spaces.\"}]"
+              }
+            ]
+          },
+          {
+            "role": "user",
+            "content": [
+              {
+                "type": "input_text",
+                "text": "User request:\nI need a hallway runner about 3 by 12.\n\nHard constraints:\n{\"size\":{\"widthIn\":36,\"lengthIn\":144,\"toleranceIn\":12},\"shape\":\"runner\",\"strictness\":{\"size\":\"prefer\",\"colors\":\"prefer\",\"styles\":\"prefer\",\"shape\":\"must\"}}"
+              }
+            ]
+          }
+        ],
+        "max_output_tokens": 800,
+        "text": {
+          "format": {
+            "type": "json_schema",
+            "name": "recommendation_response",
+            "schema": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "mode",
+                "assistant_message",
+                "questions",
+                "recommendations",
+                "notes"
+              ],
+              "properties": {
+                "mode": {
+                  "type": "string",
+                  "enum": [
+                    "recommendations",
+                    "clarifying_question",
+                    "no_match",
+                    "disambiguation"
+                  ]
+                },
+                "assistant_message": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 700
+                },
+                "questions": {
+                  "type": "array",
+                  "minItems": 0,
+                  "maxItems": 2,
+                  "items": {
+                    "type": "string",
+                    "maxLength": 140
+                  }
+                },
+                "recommendations": {
+                  "type": "array",
+                  "minItems": 0,
+                  "maxItems": 10,
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                      "rug_id",
+                      "sku",
+                      "title",
+                      "origin",
+                      "style",
+                      "mood",
+                      "size_text",
+                      "match_reasons",
+                      "confidence",
+                      "confidence_tier",
+                      "confidence_factors",
+                      "why_not"
+                    ],
+                    "properties": {
+                      "rug_id": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 80
+                      },
+                      "sku": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "maxLength": 80
+                      },
+                      "title": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 160
+                      },
+                      "origin": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "maxLength": 60
+                      },
+                      "style": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "maxLength": 80
+                      },
+                      "mood": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "maxLength": 32
+                      },
+                      "size_text": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "maxLength": 64
+                      },
+                      "match_reasons": {
+                        "type": "array",
+                        "minItems": 1,
+                        "maxItems": 3,
+                        "items": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 180
+                        }
+                      },
+                      "confidence": {
+                        "type": "number"
+                      },
+                      "confidence_tier": {
+                        "type": "string",
+                        "enum": [
+                          "high",
+                          "medium",
+                          "low"
+                        ]
+                      },
+                      "confidence_factors": {
+                        "type": "array",
+                        "minItems": 0,
+                        "maxItems": 3,
+                        "items": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 100
+                        }
+                      },
+                      "why_not": {
+                        "type": "array",
+                        "minItems": 0,
+                        "maxItems": 2,
+                        "items": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 160
+                        }
+                      }
+                    }
+                  }
+                },
+                "notes": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "maxLength": 220
+                }
+              }
+            },
+            "strict": true
+          }
+        }
+      },
+      "response_status": 200,
+      "response_payload": {
+        "id": "resp_0b363bb4cb1314740069cf9c1fe4308196909422ca684d5bdd",
+        "object": "response",
+        "created_at": 1775213599,
+        "status": "completed",
+        "background": false,
+        "billing": {
+          "payer": "developer"
+        },
+        "completed_at": 1775213605,
+        "error": null,
+        "frequency_penalty": 0,
+        "incomplete_details": null,
+        "instructions": null,
+        "max_output_tokens": 800,
+        "max_tool_calls": null,
+        "model": "gpt-4.1-2025-04-14",
+        "output": [
+          {
+            "id": "msg_0b363bb4cb1314740069cf9c2019a481968ece9a0fd05b1b81",
+            "type": "message",
+            "status": "completed",
+            "content": [
+              {
+                "type": "output_text",
+                "annotations": [],
+                "logprobs": [],
+                "text": "{\"mode\":\"recommendations\",\"assistant_message\":\"You’re looking for a hallway runner around 3 by 12 feet—perfect for most entrance or corridor spaces. All four options on hand are exactly 3' x 12', so you’re set for the right fit. The Antique Persian Heriz Runner stands out if you like a classic look with its rich rust and blue palette and bold medallion center that adds warmth and elegance. For something cleaner and modern, the Contemporary Runner in solid green has a fresh, minimal vibe that brightens up a hallway. Would you like a bit more traditional character or a sleeker, modern feel?\",\"questions\":[\"Are you leaning towards a traditional or modern look for your hallway?\",\"Do you have any color preferences for your runner?\"],\"recommendations\":[{\"rug_id\":\"01917402-8054-431a-83d3-16f1291f7e5e\",\"sku\":null,\"title\":\"Antique Persian Heriz Runner\",\"origin\":\"Persian\",\"style\":\"Heriz\",\"mood\":\"traditional\",\"size_text\":\"3' x 12'\",\"match_reasons\":[\"exact size match\",\"classic medallion design\",\"warm rust and blue palette\"],\"confidence\":0.98,\"confidence_tier\":\"high\",\"confidence_factors\":[\"size fit is ideal\",\"traditional style fits classic decors\"],\"why_not\":[]},{\"rug_id\":\"a3456867-6251-4504-a62d-0476087b2687\",\"sku\":null,\"title\":\"Antique Persian Runner\",\"origin\":\"Persian\",\"style\":\"Medallion\",\"mood\":\"traditional\",\"size_text\":\"3' x 12'\",\"match_reasons\":[\"exact size match\",\"muted brown and blue tones\",\"central medallion style\"],\"confidence\":0.95,\"confidence_tier\":\"high\",\"confidence_factors\":[\"classic size for hallway runner\",\"good fit for traditional decor\"],\"why_not\":[]},{\"rug_id\":\"71090f52-53d0-4a1d-a06b-17288fe8d38c\",\"sku\":null,\"title\":\"Antique Persian Sultanabad Runner\",\"origin\":\"Persian\",\"style\":\"Sultanabad\",\"mood\":\"traditional\",\"size_text\":\"3' x 12'\",\"match_reasons\":[\"exact size match\",\"rich all-over floral design\",\"rust and brown as dominant tones\"],\"confidence\":0.95,\"confidence_tier\":\"high\",\"confidence_factors\":[\"suitable size\",\"traditional floral motif\"],\"why_not\":[]},{\"rug_id\":\"119b9d9a-fe0c-4f12-b2ac-a783bb7bc29b\",\"sku\":null,\"title\":\"Contemporary Runner\",\"origin\":null,\"style\":\"Minimal\",\"mood\":\"modern\",\"size_text\":\"3' x 12'\",\"match_reasons\":[\"exact size match\",\"solid green for modern interiors\",\"minimalist look\"],\"confidence\":0.9,\"confidence_tier\":\"high\",\"confidence_factors\":[\"exact size\",\"strong modern appeal\"],\"why_not\":[]}],\"notes\":null}"
+              }
+            ],
+            "role": "assistant"
+          }
+        ],
+        "parallel_tool_calls": true,
+        "presence_penalty": 0,
+        "previous_response_id": null,
+        "prompt_cache_key": null,
+        "prompt_cache_retention": null,
+        "reasoning": {
+          "effort": null,
+          "summary": null
+        },
+        "safety_identifier": null,
+        "service_tier": "default",
+        "store": true,
+        "temperature": 1,
+        "text": {
+          "format": {
+            "type": "json_schema",
+            "description": null,
+            "name": "recommendation_response",
+            "schema": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "mode",
+                "assistant_message",
+                "questions",
+                "recommendations",
+                "notes"
+              ],
+              "properties": {
+                "mode": {
+                  "type": "string",
+                  "enum": [
+                    "recommendations",
+                    "clarifying_question",
+                    "no_match",
+                    "disambiguation"
+                  ]
+                },
+                "assistant_message": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 700
+                },
+                "questions": {
+                  "type": "array",
+                  "minItems": 0,
+                  "maxItems": 2,
+                  "items": {
+                    "type": "string",
+                    "maxLength": 140
+                  }
+                },
+                "recommendations": {
+                  "type": "array",
+                  "minItems": 0,
+                  "maxItems": 10,
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                      "rug_id",
+                      "sku",
+                      "title",
+                      "origin",
+                      "style",
+                      "mood",
+                      "size_text",
+                      "match_reasons",
+                      "confidence",
+                      "confidence_tier",
+                      "confidence_factors",
+                      "why_not"
+                    ],
+                    "properties": {
+                      "rug_id": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 80
+                      },
+                      "sku": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "maxLength": 80
+                      },
+                      "title": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 160
+                      },
+                      "origin": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "maxLength": 60
+                      },
+                      "style": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "maxLength": 80
+                      },
+                      "mood": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "maxLength": 32
+                      },
+                      "size_text": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "maxLength": 64
+                      },
+                      "match_reasons": {
+                        "type": "array",
+                        "minItems": 1,
+                        "maxItems": 3,
+                        "items": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 180
+                        }
+                      },
+                      "confidence": {
+                        "type": "number"
+                      },
+                      "confidence_tier": {
+                        "type": "string",
+                        "enum": [
+                          "high",
+                          "medium",
+                          "low"
+                        ]
+                      },
+                      "confidence_factors": {
+                        "type": "array",
+                        "minItems": 0,
+                        "maxItems": 3,
+                        "items": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 100
+                        }
+                      },
+                      "why_not": {
+                        "type": "array",
+                        "minItems": 0,
+                        "maxItems": 2,
+                        "items": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 160
+                        }
+                      }
+                    }
+                  }
+                },
+                "notes": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "maxLength": 220
+                }
+              }
+            },
+            "strict": true
+          },
+          "verbosity": "medium"
+        },
+        "tool_choice": "auto",
+        "tools": [],
+        "top_logprobs": 0,
+        "top_p": 1,
+        "truncation": "disabled",
+        "usage": {
+          "input_tokens": 2682,
+          "input_tokens_details": {
+            "cached_tokens": 2048
+          },
+          "output_tokens": 628,
+          "output_tokens_details": {
+            "reasoning_tokens": 0
+          },
+          "total_tokens": 3310
+        },
+        "user": null,
+        "metadata": {}
+      },
+      "parsed_response": {
+        "mode": "recommendations",
+        "assistant_message": "You’re looking for a hallway runner around 3 by 12 feet—perfect for most entrance or corridor spaces. All four options on hand are exactly 3' x 12', so you’re set for the right fit. The Antique Persian Heriz Runner stands out if you like a classic look with its rich rust and blue palette and bold medallion center that adds warmth and elegance. For something cleaner and modern, the Contemporary Runner in solid green has a fresh, minimal vibe that brightens up a hallway. Would you like a bit more traditional character or a sleeker, modern feel?",
+        "questions": [],
+        "recommendations": [
+          {
+            "rug_id": "01917402-8054-431a-83d3-16f1291f7e5e",
+            "sku": null,
+            "title": "Antique Persian Heriz Runner",
+            "origin": "Persian",
+            "style": "Heriz",
+            "mood": "traditional",
+            "size_text": "3' x 12'",
+            "match_reasons": [
+              "This is an antique Persian Heriz runner showcasing a central medallion design with floral motifs and a detailed border. The color palette features rich rust, blue, and ivory tones.",
+              "Size closely matches your requested dimensions.",
+              "Matches your stated preference around \"runner\"."
+            ],
+            "confidence": 0.79,
+            "confidence_tier": "high",
+            "confidence_factors": [
+              "Strong size alignment",
+              "Matches stated preferences",
+              "Detailed listing context available"
+            ],
+            "why_not": [],
+            "primary_image_url": "https://nlypymygmysfgxekhudr.supabase.co/storage/v1/object/public/rug-images/1f3d032b-8411-48a9-8a44-1f3cb9df67a5/01917402-8054-431a-83d3-16f1291f7e5e/primary-1774501652384.jpg",
+            "primary_image_caption": null
+          },
+          {
+            "rug_id": "a3456867-6251-4504-a62d-0476087b2687",
+            "sku": null,
+            "title": "Antique Persian Runner",
+            "origin": "Persian",
+            "style": "Medallion",
+            "mood": "traditional",
+            "size_text": "3' x 12'",
+            "match_reasons": [
+              "This is an antique Persian runner featuring a central medallion design with intricate floral motifs and a detailed border. The color palette includes muted browns, blues, and hints of green, suitable for a traditional decor.",
+              "Size closely matches your requested dimensions.",
+              "Matches your stated preference around \"runner\"."
+            ],
+            "confidence": 0.79,
+            "confidence_tier": "high",
+            "confidence_factors": [
+              "Strong size alignment",
+              "Matches stated preferences",
+              "Detailed listing context available"
+            ],
+            "why_not": [],
+            "primary_image_url": "https://nlypymygmysfgxekhudr.supabase.co/storage/v1/object/public/rug-images/1f3d032b-8411-48a9-8a44-1f3cb9df67a5/a3456867-6251-4504-a62d-0476087b2687/primary-1774498618041.jpg",
+            "primary_image_caption": null
+          },
+          {
+            "rug_id": "71090f52-53d0-4a1d-a06b-17288fe8d38c",
+            "sku": null,
+            "title": "Antique Persian Sultanabad Runner",
+            "origin": "Persian",
+            "style": "Sultanabad",
+            "mood": "traditional",
+            "size_text": "3' x 12'",
+            "match_reasons": [
+              "This is an antique runner rug with a traditional Persian Sultanabad design, featuring a rich all-over floral motif. The rug's palette includes dominant rust and brown tones with accents of blue and gold, framed by a contrasting border.",
+              "Size closely matches your requested dimensions.",
+              "Matches your stated preference around \"runner\"."
+            ],
+            "confidence": 0.79,
+            "confidence_tier": "high",
+            "confidence_factors": [
+              "Strong size alignment",
+              "Matches stated preferences",
+              "Detailed listing context available"
+            ],
+            "why_not": [],
+            "primary_image_url": "https://nlypymygmysfgxekhudr.supabase.co/storage/v1/object/public/rug-images/1f3d032b-8411-48a9-8a44-1f3cb9df67a5/71090f52-53d0-4a1d-a06b-17288fe8d38c/primary-1774501035257.jpg",
+            "primary_image_caption": null
+          },
+          {
+            "rug_id": "119b9d9a-fe0c-4f12-b2ac-a783bb7bc29b",
+            "sku": null,
+            "title": "Contemporary Runner",
+            "origin": null,
+            "style": "Minimal",
+            "mood": "modern",
+            "size_text": "3' x 12'",
+            "match_reasons": [
+              "This is a contemporary runner rug with a plain field in a solid green color. Its clean design fits well in modern spaces.",
+              "Size closely matches your requested dimensions.",
+              "Matches your stated preference around \"runner\"."
+            ],
+            "confidence": 0.79,
+            "confidence_tier": "high",
+            "confidence_factors": [
+              "Strong size alignment",
+              "Matches stated preferences",
+              "Detailed listing context available"
+            ],
+            "why_not": [],
+            "primary_image_url": "https://nlypymygmysfgxekhudr.supabase.co/storage/v1/object/public/rug-images/1f3d032b-8411-48a9-8a44-1f3cb9df67a5/119b9d9a-fe0c-4f12-b2ac-a783bb7bc29b/primary-1774656267377.webp",
+            "primary_image_caption": null
+          }
+        ],
+        "notes": null
+      },
+      "fallback_reason": null,
+      "error": null,
+      "incomplete_detected": true,
+      "retry_attempted": true,
+      "retry_succeeded": true,
+      "text_postprocess_applied": false
+    },
+    "result": {
+      "mode": "recommendations",
+      "notes": null,
+      "recommendation_ids": [
+        "01917402-8054-431a-83d3-16f1291f7e5e",
+        "a3456867-6251-4504-a62d-0476087b2687",
+        "71090f52-53d0-4a1d-a06b-17288fe8d38c",
+        "119b9d9a-fe0c-4f12-b2ac-a783bb7bc29b"
+      ],
+      "recommendation_count": 4,
+      "relaxed_size_tolerance_in": null
+    },
+    "error": null
+  }
+}

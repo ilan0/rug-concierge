@@ -1,0 +1,589 @@
+{
+  "trace_id": "ca119382-6f16-455d-83e2-47b45d27ceac",
+  "channel": "chat-route",
+  "created_at": "2026-03-28T07:34:09.217Z",
+  "payload": {
+    "flow_path": [
+      "/api/chat POST",
+      "getOrCreateSession",
+      "updateRecommendationStateForTurn",
+      "routeTurnMode",
+      "handlerDispatch",
+      "updateConversationMemory",
+      "saveSession"
+    ],
+    "request": {
+      "session_id": "8eaf8aea-b3ee-4cab-9a86-bfcede446416",
+      "role": "retail_customer",
+      "tenant_id": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5",
+      "tenant_subdomain": "1f3d032b-8411-48a9-8a44-1f3cb9df67a5",
+      "tenant_hostname": "127.0.0.1",
+      "message": "Find red rugs for an anchor setup",
+      "constraints": null
+    },
+    "routing": {
+      "mode": "recommendation",
+      "intent": "recommend",
+      "rule_id": "EXPLICIT_RECOMMENDATION_REQUEST",
+      "confidence": "high",
+      "needs_clarification": false,
+      "parser": {
+        "model": "gpt-4.1-mini",
+        "latency_ms": 123,
+        "status": "fallback",
+        "parse_status": "fallback",
+        "fallback": "OpenAI request failed",
+        "fallback_reason": "OpenAI request failed",
+        "normalized_payload": {
+          "intent": "recommend",
+          "mode": "recommendation",
+          "followup_intent": "none",
+          "constraints": {
+            "size": null,
+            "colors": [
+              "red"
+            ],
+            "styles": [],
+            "shape": null
+          },
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          },
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          },
+          "session_facts": [
+            "palette red"
+          ],
+          "rug_reference_ambiguous": false,
+          "confidence": "high"
+        },
+        "normalized_parse_payload": {
+          "intent": "recommend",
+          "mode": "recommendation",
+          "followup_intent": "none",
+          "constraints": {
+            "size": null,
+            "colors": [
+              "red"
+            ],
+            "styles": [],
+            "shape": null
+          },
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          },
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          },
+          "session_facts": [
+            "palette red"
+          ],
+          "rug_reference_ambiguous": false,
+          "confidence": "high"
+        },
+        "response_status": 400,
+        "incomplete_detected": false,
+        "error": "OpenAI request failed with status 400"
+      },
+      "policy": {
+        "intent": "recommend",
+        "compiled_policy": {
+          "intent": "recommend",
+          "mode": "recommendation",
+          "discovery_requested": false,
+          "followup_intent": "none",
+          "hard_constraints": {
+            "size": {
+              "widthIn": 96,
+              "lengthIn": 120,
+              "toleranceIn": 12
+            },
+            "colors": [
+              "red"
+            ],
+            "strictness": {
+              "size": "must",
+              "colors": "prefer",
+              "styles": "prefer",
+              "shape": "prefer"
+            }
+          },
+          "persisted_hard_constraints": {
+            "size": {
+              "widthIn": 96,
+              "lengthIn": 120,
+              "toleranceIn": 12
+            },
+            "colors": [
+              "red"
+            ],
+            "strictness": {
+              "size": "must",
+              "colors": "prefer",
+              "styles": "prefer",
+              "shape": "prefer"
+            }
+          },
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          },
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          },
+          "confidence": "high",
+          "policy_source": "parsed_turn",
+          "must_prefer_avoid": {
+            "must": [
+              "size"
+            ],
+            "prefer": [
+              "colors"
+            ],
+            "avoid": {
+              "colors": [],
+              "styles": [],
+              "shapes": []
+            }
+          }
+        },
+        "policy_source": "parsed_turn",
+        "must_prefer_avoid": {
+          "must": [
+            "size"
+          ],
+          "prefer": [
+            "colors"
+          ],
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          }
+        },
+        "must-prefer-avoid": {
+          "must": [
+            "size"
+          ],
+          "prefer": [
+            "colors"
+          ],
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          }
+        },
+        "constraint_modes": {
+          "size": "prefer",
+          "colors": "prefer",
+          "styles": "prefer",
+          "shape": "prefer",
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          }
+        }
+      },
+      "parser_trace": {
+        "called": true,
+        "model": "gpt-4.1-mini",
+        "status": "fallback",
+        "response_status": 400,
+        "fallback": "OpenAI request failed",
+        "fallback_reason": "OpenAI request failed",
+        "incomplete_detected": false,
+        "latency_ms": 123,
+        "normalized_payload": {
+          "intent": "recommend",
+          "mode": "recommendation",
+          "followup_intent": "none",
+          "constraints": {
+            "size": null,
+            "colors": [
+              "red"
+            ],
+            "styles": [],
+            "shape": null
+          },
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          },
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          },
+          "session_facts": [
+            "palette red"
+          ],
+          "rug_reference_ambiguous": false,
+          "confidence": "high"
+        },
+        "parsed": {
+          "intent": "recommend",
+          "mode": "recommendation",
+          "followup_intent": "none",
+          "constraints": {
+            "size": null,
+            "colors": [
+              "red"
+            ],
+            "styles": [],
+            "shape": null
+          },
+          "strictness": {
+            "size": "prefer",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          },
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          },
+          "session_facts": [
+            "palette red"
+          ],
+          "rug_reference_ambiguous": false,
+          "confidence": "high"
+        },
+        "error": "OpenAI request failed with status 400"
+      },
+      "compiled_policy": {
+        "intent": "recommend",
+        "mode": "recommendation",
+        "discovery_requested": false,
+        "followup_intent": "none",
+        "hard_constraints": {
+          "size": {
+            "widthIn": 96,
+            "lengthIn": 120,
+            "toleranceIn": 12
+          },
+          "colors": [
+            "red"
+          ],
+          "strictness": {
+            "size": "must",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          }
+        },
+        "persisted_hard_constraints": {
+          "size": {
+            "widthIn": 96,
+            "lengthIn": 120,
+            "toleranceIn": 12
+          },
+          "colors": [
+            "red"
+          ],
+          "strictness": {
+            "size": "must",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          }
+        },
+        "strictness": {
+          "size": "prefer",
+          "colors": "prefer",
+          "styles": "prefer",
+          "shape": "prefer"
+        },
+        "avoid": {
+          "colors": [],
+          "styles": [],
+          "shapes": []
+        },
+        "confidence": "high",
+        "policy_source": "parsed_turn",
+        "must_prefer_avoid": {
+          "must": [
+            "size"
+          ],
+          "prefer": [
+            "colors"
+          ],
+          "avoid": {
+            "colors": [],
+            "styles": [],
+            "shapes": []
+          }
+        }
+      },
+      "policy_source": "parsed_turn",
+      "must_prefer_avoid": {
+        "must": [
+          "size"
+        ],
+        "prefer": [
+          "colors"
+        ],
+        "avoid": {
+          "colors": [],
+          "styles": [],
+          "shapes": []
+        }
+      },
+      "must-prefer-avoid": {
+        "must": [
+          "size"
+        ],
+        "prefer": [
+          "colors"
+        ],
+        "avoid": {
+          "colors": [],
+          "styles": [],
+          "shapes": []
+        }
+      },
+      "handler": "handleRecommendationTurn",
+      "prompt_layer_preview": [
+        "TASK_PROMPT_RECOMMENDATION",
+        "SYSTEM_PROMPT_BASE",
+        "TASK_PROMPT_RECOMMENDATION",
+        "TASK_PROMPT_RECOMMENDATION",
+        "STRUCTURED_OUTPUT_RECOMMENDATION",
+        "CHAT_MEMORY_CONTEXT",
+        "CHAT_MEMORY_CONTEXT",
+        "CHAT_MEMORY_CONTEXT",
+        "RECENT_TURNS_CONTEXT",
+        "INVENTORY_CONTEXT",
+        "LATEST_USER_MESSAGE_WITH_HARD_CONSTRAINTS"
+      ]
+    },
+    "reaction": {
+      "detected_reaction": null,
+      "referenced_rug_id": null,
+      "rug_reference_ambiguous": false,
+      "liked_attributes_before": {
+        "colors": [
+          "red"
+        ],
+        "styles": [],
+        "origins": []
+      },
+      "liked_attributes_after": {
+        "colors": [
+          "red"
+        ],
+        "styles": [],
+        "origins": []
+      },
+      "liked_rug_ids_before": [],
+      "liked_rug_ids_after": [],
+      "dismissed_rug_ids_before": [],
+      "dismissed_rug_ids_after": []
+    },
+    "state_snapshot": {
+      "recommendation_state": {
+        "hard_constraints": {
+          "size": {
+            "widthIn": 96,
+            "lengthIn": 120,
+            "toleranceIn": 12
+          },
+          "colors": [
+            "red"
+          ],
+          "strictness": {
+            "size": "must",
+            "colors": "prefer",
+            "styles": "prefer",
+            "shape": "prefer"
+          }
+        },
+        "soft_preferences": {},
+        "runtime": {
+          "last_result_mode": "recommendation",
+          "last_relaxed_size_tolerance_in": null,
+          "last_blockers": [],
+          "last_recommended_size_in": {
+            "width_in": 96,
+            "length_in": 120
+          },
+          "liked_rug_ids": [],
+          "dismissed_rug_ids": [],
+          "shown_rug_ids": [
+            "0805e27a-f004-4556-aa8f-a2181a72eed0",
+            "4ce0b126-4326-429d-88db-73543e40492e",
+            "77717cf0-4788-4705-b5a0-cce46f8300b7",
+            "4f992ad3-eb67-4283-a41c-6670101ef5c6",
+            "48f7a5a5-7abd-465e-bd47-434bcbe382f9",
+            "34a884c7-43c5-40c4-b1a8-600780538868",
+            "a9565492-db27-4a50-aaff-7810f66c282a"
+          ],
+          "liked_attributes": {
+            "colors": [],
+            "styles": [],
+            "origins": []
+          },
+          "recently_shown_rugs": [
+            {
+              "id": "0805e27a-f004-4556-aa8f-a2181a72eed0",
+              "label": "Antique Persian Kashan",
+              "colors": [
+                "rust",
+                "ivory",
+                "gold",
+                "blue"
+              ],
+              "style": "Kashan",
+              "origin": "Persian"
+            },
+            {
+              "id": "48f7a5a5-7abd-465e-bd47-434bcbe382f9",
+              "label": "Antique Persian Sultanabad",
+              "colors": [
+                "rust",
+                "blue",
+                "gold"
+              ],
+              "style": "Sultanabad",
+              "origin": "Persian"
+            },
+            {
+              "id": "34a884c7-43c5-40c4-b1a8-600780538868",
+              "label": "Antique Persian Heriz",
+              "colors": [
+                "rust",
+                "ivory",
+                "red",
+                "brown"
+              ],
+              "style": "Heriz",
+              "origin": "Persian"
+            },
+            {
+              "id": "a9565492-db27-4a50-aaff-7810f66c282a",
+              "label": "Antique Persian",
+              "colors": [
+                "rust",
+                "blue"
+              ],
+              "style": "Medallion",
+              "origin": "Persian"
+            }
+          ],
+          "no_match_attempts": 0,
+          "updated_at": "2026-03-28T07:33:57.186Z"
+        }
+      },
+      "conversation_memory": {
+        "summary_text": "…for cozy living room spaces. The Antique Persian Kashan stands out with its intricate floral motifs in a luxurious rust and gold palette. Let me know if you'… || User: Do you have anything similar? | Assistant: Here are rugs similar in size and traditional style with rich warm tones and intricate patterns, perfect for a cozy living room. || User: I prefer something cleaner | Assistant: For a cleaner look in warm tones, consider rugs with simpler geometric patterns or minimalistic designs in rust, gold, or soft red. Would you like me to show some examples from our collection that match this style? || User: What's the difference between a Heriz and a Serapi? | Assistant: Heriz rugs are known for their bold, geometric patterns and durable construction, typically featuring a central medallion with angular motifs. Serapi rugs, a type of Heriz, tend to have softer colors and more refined de…",
+        "stable_facts": [
+          "style serapi",
+          "preference I prefer something cleaner",
+          "room living room",
+          "palette warm"
+        ],
+        "open_threads": [
+          "What's the difference between a Heriz and a Serapi?",
+          "Both originate from Northwest Persia and offer robust craftsmanship; would you like me to show examples of each from ou…",
+          "Would you like me to show some examples from our collection that match this style?",
+          "Do you have anything similar?"
+        ],
+        "last_user_intent": "general_chat",
+        "no_match_attempts": 0,
+        "updated_at": "2026-03-28T07:33:57.186Z",
+        "version": "v1"
+      }
+    },
+    "memory_snapshot_before": {
+      "summary_text": "…for cozy living room spaces. The Antique Persian Kashan stands out with its intricate floral motifs in a luxurious rust and gold palette. Let me know if you'… || User: Do you have anything similar? | Assistant: Here are rugs similar in size and traditional style with rich warm tones and intricate patterns, perfect for a cozy living room. || User: I prefer something cleaner | Assistant: For a cleaner look in warm tones, consider rugs with simpler geometric patterns or minimalistic designs in rust, gold, or soft red. Would you like me to show some examples from our collection that match this style? || User: What's the difference between a Heriz and a Serapi? | Assistant: Heriz rugs are known for their bold, geometric patterns and durable construction, typically featuring a central medallion with angular motifs. Serapi rugs, a type of Heriz, tend to have softer colors and more refined de…",
+      "stable_facts": [
+        "style serapi",
+        "preference I prefer something cleaner",
+        "room living room",
+        "palette warm"
+      ],
+      "open_threads": [
+        "What's the difference between a Heriz and a Serapi?",
+        "Both originate from Northwest Persia and offer robust craftsmanship; would you like me to show examples of each from ou…",
+        "Would you like me to show some examples from our collection that match this style?",
+        "Do you have anything similar?"
+      ],
+      "last_user_intent": "general_chat",
+      "no_match_attempts": 0,
+      "updated_at": "2026-03-28T07:33:57.186Z",
+      "version": "v1"
+    },
+    "memory_snapshot_after": {
+      "summary_text": "…m tones and intricate patterns, perfect for a cozy living room. || User: I prefer something cleaner | Assistant: For a cleaner look in warm tones, consider rugs with simpler geometric patterns or minimalistic designs in rust, gold, or soft red. Would you like me to show some examples from our collection that match this style? || User: What's the difference between a Heriz and a Serapi? | Assistant: Heriz rugs are known for their bold, geometric patterns and durable construction, typically featuring a central medallion with angular motifs. Serapi rugs, a type of Heriz, tend to have softer colors and more refined de… || User: Find red rugs for an anchor setup | Assistant: These red rugs fit your 8x10 size anchor setup well, with traditional and pictorial designs that create warm, inviting focal points. The Antique Persian Hunting Scene stands out with its vivid red hunting imagery framed…",
+      "stable_facts": [
+        "palette red",
+        "style serapi",
+        "preference I prefer something cleaner",
+        "room living room",
+        "palette warm"
+      ],
+      "open_threads": [
+        "What's the difference between a Heriz and a Serapi?",
+        "Both originate from Northwest Persia and offer robust craftsmanship; would you like me to show examples of each from ou…",
+        "Would you like me to show some examples from our collection that match this style?",
+        "Do you have anything similar?"
+      ],
+      "last_user_intent": "recommendation",
+      "no_match_attempts": 0,
+      "updated_at": "2026-03-28T07:34:08.873Z",
+      "version": "v1"
+    },
+    "ai_context_packet_stats": {
+      "field_counts": {
+        "stable_facts": 4,
+        "open_threads": 4,
+        "customer_context": 4,
+        "recently_shown_rugs": 4,
+        "shown_rug_ids": 7,
+        "recent_turns": 4
+      },
+      "char_counts": {
+        "summary_text": 899,
+        "stable_facts_total": 77,
+        "open_threads_total": 282,
+        "customer_context_total": 77,
+        "recently_shown_total": 365,
+        "shown_rug_ids_total": 252,
+        "liked_attributes_total": 0,
+        "recent_turns_total": 571,
+        "latest_user_message": 33,
+        "total": 2304
+      }
+    },
+    "response": {
+      "session_id": "8eaf8aea-b3ee-4cab-9a86-bfcede446416",
+      "role": "retail_customer",
+      "mode": "recommendation",
+      "fine_mode": "recommendation",
+      "response_mode": "recommendation",
+      "notes": "Would you like to see more options in a cleaner pattern or perhaps from another traditional style to compare?"
+    },
+    "timing_ms": {
+      "total_ms": 11413
+    }
+  }
+}

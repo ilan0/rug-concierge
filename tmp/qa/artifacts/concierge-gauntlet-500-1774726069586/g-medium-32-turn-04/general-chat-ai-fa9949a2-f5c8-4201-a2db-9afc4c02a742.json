@@ -1,0 +1,120 @@
+{
+  "trace_id": "fa9949a2-f5c8-4201-a2db-9afc4c02a742",
+  "channel": "general-chat-ai",
+  "created_at": "2026-03-28T20:44:02.111Z",
+  "payload": {
+    "mode": "general_chat",
+    "flow_path": [
+      "handleGeneralChatTurn",
+      "buildPromptLayers",
+      "generateGeneralChatResponse"
+    ],
+    "ai_trace": {
+      "called": true,
+      "model": "gpt-4.1-mini",
+      "prompt_layers": [
+        {
+          "id": "SYSTEM_PROMPT_BASE",
+          "role": "system",
+          "chars": 758,
+          "preview": "# AI System Prompt — Rug Concierge You are an experienced rug consultant helping retail customers in a showroom environ…"
+        },
+        {
+          "id": "TASK_PROMPT_GENERAL_CHAT",
+          "role": "system",
+          "chars": 962,
+          "preview": "# General Chat Prompt — Rug Concierge You are the retail concierge for an in-store rug showroom. Handle free-form custo…"
+        },
+        {
+          "id": "TASK_PROMPT_GENERAL_CHAT",
+          "role": "system",
+          "chars": 19,
+          "preview": "Respond in English."
+        },
+        {
+          "id": "ROLE_PROMPT_RETAIL_CUSTOMER",
+          "role": "system",
+          "chars": 107,
+          "preview": "Role: retail customer. Be approachable, warm, and concise, with practical guidance and a natural next step."
+        },
+        {
+          "id": "CHAT_MEMORY_CONTEXT",
+          "role": "system",
+          "chars": 1256,
+          "preview": "CHAT MEMORY CONTEXT: { \"summary_text\": \"User: Show me green rugs | Assistant: You asked for Green tones, so I prioritiz…"
+        },
+        {
+          "id": "RECENT_TURNS_CONTEXT",
+          "role": "system",
+          "chars": 801,
+          "preview": "RECENT TURNS CONTEXT: [ { \"role\": \"user\", \"content\": \"Do you have anything similar?\", \"created_at\": \"2026-03-28T20:43:4…"
+        },
+        {
+          "id": "LATEST_USER_MESSAGE",
+          "role": "user",
+          "chars": 51,
+          "preview": "What's the difference between a Heriz and a Serapi?"
+        }
+      ],
+      "request_payload_preview": {
+        "model": "gpt-4.1-mini",
+        "message_groups": 2,
+        "system_groups": 1,
+        "user_groups": 1,
+        "system_blocks": 6,
+        "user_blocks": 1,
+        "schema_name": "general_chat_response",
+        "schema_strict": true,
+        "max_output_tokens": 500
+      },
+      "response_status": 200,
+      "response_payload_preview": {
+        "has_output_text": false,
+        "output_items": 1,
+        "content_blocks": 1,
+        "has_error": false,
+        "error_type": null
+      },
+      "parsed_response": {
+        "assistant_message": "Heriz rugs, made in northwest Iran, are known for their bold, geometric patterns and durable construction, often featuring a large central medallion and a more rustic feel. Serapi rugs, a subtype of Heriz from the Serapi village, are typically finer with more refined design details and a softer color palette while maintaining the strong geometric style. Would you like me to show you examples from our collection of to",
+        "notes": "Explained construction and style differences between Heriz and Serapi rugs, highlighting geographic origin and design details.",
+        "memory_hints": [
+          "Heriz rugs are bold and geometric with large medallions",
+          "Serapi rugs are a finer, softer subtype of Heriz",
+          "Both are from northwest Iran"
+        ]
+      },
+      "fallback_reason": null,
+      "error": null,
+      "incomplete_detected": false,
+      "retry_attempted": false,
+      "retry_succeeded": false,
+      "text_postprocess_applied": false
+    },
+    "context_packet_stats": {
+      "field_counts": {
+        "stable_facts": 3,
+        "open_threads": 4,
+        "customer_context": 3,
+        "recently_shown_rugs": 6,
+        "shown_rug_ids": 12,
+        "recent_turns": 4
+      },
+      "char_counts": {
+        "summary_text": 645,
+        "stable_facts_total": 86,
+        "open_threads_total": 317,
+        "customer_context_total": 86,
+        "recently_shown_total": 484,
+        "shown_rug_ids_total": 432,
+        "liked_attributes_total": 5,
+        "recent_turns_total": 395,
+        "latest_user_message": 51,
+        "total": 2069
+      }
+    },
+    "timing_ms": {
+      "generate_general_chat_ms": 2420
+    }
+  }
+}

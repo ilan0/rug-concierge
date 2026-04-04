@@ -1,0 +1,111 @@
+{
+  "trace_id": "e4a59b0d-6bd6-42ff-a2b1-46275cacbf34",
+  "channel": "general-chat-ai",
+  "created_at": "2026-03-26T15:14:28.871Z",
+  "payload": {
+    "mode": "general_chat",
+    "flow_path": [
+      "handleGeneralChatTurn",
+      "buildPromptLayers",
+      "generateGeneralChatResponse"
+    ],
+    "ai_trace": {
+      "called": true,
+      "model": "gpt-4.1-mini",
+      "prompt_layers": [
+        {
+          "id": "SYSTEM_PROMPT_BASE",
+          "role": "system",
+          "chars": 679,
+          "preview": "# AI System Prompt — Rug Concierge You are an experienced rug consultant helping retail customers in a showroom environ…"
+        },
+        {
+          "id": "TASK_PROMPT_GENERAL_CHAT",
+          "role": "system",
+          "chars": 769,
+          "preview": "# General Chat Prompt — Rug Concierge You are the retail concierge for an in-store rug showroom. Handle free-form custo…"
+        },
+        {
+          "id": "ROLE_PROMPT_RETAIL_CUSTOMER",
+          "role": "system",
+          "chars": 89,
+          "preview": "Role: retail customer. Be approachable and clear, with practical guidance and next steps."
+        },
+        {
+          "id": "CHAT_MEMORY_CONTEXT",
+          "role": "system",
+          "chars": 599,
+          "preview": "CHAT MEMORY CONTEXT: { \"summary_text\": \"User: Show me blue options | Assistant: You asked for blue tones, so these are…"
+        },
+        {
+          "id": "RECENT_TURNS_CONTEXT",
+          "role": "system",
+          "chars": 632,
+          "preview": "RECENT TURNS CONTEXT: [ { \"role\": \"user\", \"content\": \"Show me more\", \"created_at\": \"2026-03-26T15:14:00.356Z\" }, { \"rol…"
+        },
+        {
+          "id": "LATEST_USER_MESSAGE",
+          "role": "user",
+          "chars": 10,
+          "preview": "Keep going"
+        }
+      ],
+      "request_payload_preview": {
+        "model": "gpt-4.1-mini",
+        "message_groups": 2,
+        "system_groups": 1,
+        "user_groups": 1,
+        "system_blocks": 5,
+        "user_blocks": 1,
+        "schema_name": "general_chat_response",
+        "schema_strict": true,
+        "max_output_tokens": 500
+      },
+      "response_status": 200,
+      "response_payload_preview": {
+        "has_output_text": false,
+        "output_items": 1,
+        "content_blocks": 1,
+        "has_error": false,
+        "error_type": null
+      },
+      "parsed_response": {
+        "assistant_message": "Since you like the first blue option, would you like to see similar rugs in terms of color or style? I can continue showing more choices along those lines.",
+        "notes": null,
+        "memory_hints": [
+          "likes first blue rug",
+          "prefers blue palette"
+        ]
+      },
+      "fallback_reason": null,
+      "error": null,
+      "incomplete_detected": false,
+      "retry_attempted": false,
+      "retry_succeeded": false,
+      "text_postprocess_applied": false
+    },
+    "context_packet_stats": {
+      "field_counts": {
+        "stable_facts": 2,
+        "open_threads": 0,
+        "customer_context": 2,
+        "recently_shown_rugs": 10,
+        "recent_turns": 4
+      },
+      "char_counts": {
+        "summary_text": 390,
+        "stable_facts_total": 43,
+        "open_threads_total": 0,
+        "customer_context_total": 43,
+        "recently_shown_total": 963,
+        "liked_attributes_total": 24,
+        "recent_turns_total": 226,
+        "latest_user_message": 10,
+        "total": 1699
+      }
+    },
+    "timing_ms": {
+      "generate_general_chat_ms": 1140
+    }
+  }
+}
