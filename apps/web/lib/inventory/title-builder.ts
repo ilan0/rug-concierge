@@ -37,6 +37,25 @@ const PATTERN_STYLE_WORDS = new Set([
   "all-over",
 ]);
 
+const CONTEMPORARY_STYLE_DESCRIPTORS: ReadonlyArray<{
+  canonical: string;
+  aliases: readonly string[];
+}> = [
+  { canonical: "Minimal", aliases: ["minimal", "minimalist", "simple", "clean"] },
+  { canonical: "Plain", aliases: ["plain"] },
+  { canonical: "Abstract", aliases: ["abstract"] },
+  { canonical: "Geometric", aliases: ["geometric"] },
+  { canonical: "Transitional", aliases: ["transitional"] },
+  { canonical: "Decorative", aliases: ["decorative"] },
+  { canonical: "Contemporary", aliases: ["contemporary"] },
+  { canonical: "Modern", aliases: ["modern"] },
+  { canonical: "Textural", aliases: ["textural", "textured"] },
+  { canonical: "Tonal", aliases: ["tonal"] },
+  { canonical: "Neutral", aliases: ["neutral"] },
+  { canonical: "Organic", aliases: ["organic"] },
+  { canonical: "Linear", aliases: ["linear"] },
+];
+
 const TRADE_STYLE_ALIASES: ReadonlyArray<{ canonical: string; aliases: readonly string[] }> = [
   { canonical: "Heriz", aliases: ["heriz"] },
   { canonical: "Serapi", aliases: ["serapi", "serab"] },
@@ -235,6 +254,36 @@ function getStyleToken(styleRaw: string | null | undefined): string | null {
   return uniqueStyles.join(" ") || null;
 }
 
+function isContemporaryEraToken(token: string | null): boolean {
+  return token === "Contemporary" || token === "Decorative";
+}
+
+function getContemporaryDescriptiveStyleToken(styleRaw: string | null | undefined): string | null {
+  const plain = normalizeText(styleRaw);
+  if (!plain) return null;
+
+  const normalized = normalizeLookupText(plain);
+  if (!normalized) return null;
+
+  const matches: Array<{ canonical: string; index: number }> = [];
+  for (const descriptor of CONTEMPORARY_STYLE_DESCRIPTORS) {
+    let firstIndex = Number.POSITIVE_INFINITY;
+    for (const alias of descriptor.aliases) {
+      const index = wordBoundaryIndex(normalized, alias.toLowerCase());
+      if (index >= 0) {
+        firstIndex = Math.min(firstIndex, index);
+      }
+    }
+    if (Number.isFinite(firstIndex)) {
+      matches.push({ canonical: descriptor.canonical, index: firstIndex });
+    }
+  }
+
+  if (matches.length === 0) return null;
+  matches.sort((left, right) => left.index - right.index);
+  return matches[0]?.canonical ?? null;
+}
+
 function hasRoundKeyword(value: string | null | undefined): boolean {
   const text = normalizeLookupText(value);
   if (!text) return false;
@@ -284,7 +333,12 @@ export function buildTradeTitle(input: BuildTradeTitleInput): string | null {
 
   const eraToken = getEraToken(aiFields.age_category ?? null);
   const originToken = getOriginToken(aiFields.origin ?? null);
-  const styleToken = getStyleToken(aiFields.style ?? null);
+  const tradeStyleToken = getStyleToken(aiFields.style ?? null);
+  const styleToken =
+    tradeStyleToken ??
+    (isContemporaryEraToken(eraToken)
+      ? getContemporaryDescriptiveStyleToken(aiFields.style ?? null)
+      : null);
   const formatToken = getFormatToken({
     fallbackLabel: input.fallbackLabel,
     widthTotalIn: input.widthTotalIn,
