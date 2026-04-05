@@ -42,11 +42,11 @@ const CONTEMPORARY_STYLE_DESCRIPTORS: ReadonlyArray<{
   aliases: readonly string[];
 }> = [
   { canonical: "Minimal", aliases: ["minimal", "minimalist", "simple", "clean"] },
-  { canonical: "Plain", aliases: ["plain"] },
+  { canonical: "Plain", aliases: ["plain", "solid"] },
   { canonical: "Abstract", aliases: ["abstract"] },
   { canonical: "Geometric", aliases: ["geometric"] },
   { canonical: "Transitional", aliases: ["transitional"] },
-  { canonical: "Decorative", aliases: ["decorative"] },
+  { canonical: "Decorative", aliases: ["decorative", "patterned", "all-over", "all over"] },
   { canonical: "Contemporary", aliases: ["contemporary"] },
   { canonical: "Modern", aliases: ["modern"] },
   { canonical: "Textural", aliases: ["textural", "textured"] },
@@ -258,8 +258,8 @@ function isContemporaryEraToken(token: string | null): boolean {
   return token === "Contemporary" || token === "Decorative";
 }
 
-function getContemporaryDescriptiveStyleToken(styleRaw: string | null | undefined): string | null {
-  const plain = normalizeText(styleRaw);
+function getContemporaryDescriptiveStyleToken(value: string | null | undefined): string | null {
+  const plain = normalizeText(value);
   if (!plain) return null;
 
   const normalized = normalizeLookupText(plain);
@@ -334,10 +334,22 @@ export function buildTradeTitle(input: BuildTradeTitleInput): string | null {
   const eraToken = getEraToken(aiFields.age_category ?? null);
   const originToken = getOriginToken(aiFields.origin ?? null);
   const tradeStyleToken = getStyleToken(aiFields.style ?? null);
+  const contemporaryDescriptorSource = isContemporaryEraToken(eraToken)
+    ? [
+        normalizeText(aiFields.style ?? null),
+        Array.isArray(aiFields.pattern)
+          ? aiFields.pattern.map((value) => normalizeText(value)).filter(Boolean).join(" ")
+          : "",
+        normalizeText(aiFields.mood ?? null),
+        normalizeText(input.fallbackLabel ?? null),
+      ]
+        .filter((value) => value.length > 0)
+        .join(" ")
+    : "";
   const styleToken =
     tradeStyleToken ??
     (isContemporaryEraToken(eraToken)
-      ? getContemporaryDescriptiveStyleToken(aiFields.style ?? null)
+      ? getContemporaryDescriptiveStyleToken(contemporaryDescriptorSource)
       : null);
   const formatToken = getFormatToken({
     fallbackLabel: input.fallbackLabel,
