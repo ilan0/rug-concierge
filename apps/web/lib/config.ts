@@ -1,4 +1,5 @@
 import "server-only";
+import { DEFAULT_STORE_NAME } from "@/lib/constants/store-defaults";
 
 type NodeEnv = "development" | "production" | "test";
 
@@ -107,6 +108,7 @@ export const IS_PRODUCTION = NODE_ENV === "production";
 
 export {
   ENABLE_GENERAL_CHAT_AI,
+  DEFAULT_STORE_NAME,
   OPENAI_API_KEY,
   OPENAI_CHAT_MODEL,
   OPENAI_RECOMMENDATION_MODEL,
@@ -120,7 +122,6 @@ export {
 export const CHAT_MEMORY_V1 = true;
 export const CHAT_MEMORY_ENABLED = CHAT_MEMORY_V1;
 export const CHAT_PERSISTENCE_FAIL_OPEN = true;
-export const DEFAULT_STORE_NAME = "Rug Concierge";
 export const MAX_IN_MEMORY_SESSIONS = 500;
 export const OPENAI_MAX_OUTPUT_TOKENS_GENERAL_CHAT = 500;
 export const OPENAI_MAX_OUTPUT_TOKENS_RECOMMENDATION = 800;

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { readTenantBrandingFromSettings } from "@/lib/branding/tenant-branding";
-import { DEFAULT_STORE_NAME } from "@/lib/config";
+import { DEFAULT_STORE_NAME } from "@/lib/constants/store-defaults";
 import {
   getTenantSettingsById,
   readTenantPasscodeGatedFromSettings,

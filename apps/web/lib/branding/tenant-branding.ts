@@ -1,4 +1,4 @@
-import { DEFAULT_STORE_NAME } from "@/lib/config";
+import { DEFAULT_STORE_NAME } from "@/lib/constants/store-defaults";
 import { getTenantSettingsById } from "@/lib/tenant-settings";
 import { resolveTenantFromServerHeaders } from "@/lib/tenant/resolve-tenant";
 
