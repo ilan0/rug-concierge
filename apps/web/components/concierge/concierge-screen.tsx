@@ -22,6 +22,8 @@ const COMPOSER_REST_OFFSET_DESKTOP = 12;
 const COMPOSER_REST_OFFSET_MOBILE = 8;
 const CONTENT_SAFETY_GAP = 10;
 const INITIAL_COMPOSER_HEIGHT = 92;
+// Accounts for the New Chat pill (34px) + its bottom gap (10px) above the composer card.
+const NEW_CHAT_PILL_CLEARANCE_PX = 44;
 
 export function ConciergeScreen({
   variant = "concierge",
@@ -66,13 +68,20 @@ export function ConciergeScreen({
     ? COMPOSER_REST_OFFSET_MOBILE
     : COMPOSER_REST_OFFSET_DESKTOP;
   const shouldFloatComposer = !isHeroState;
+
   const composerClearancePx = useMemo(() => {
+    // When there are messages, the New Chat pill appears above the composer.
+    // Add its height to clearance so the last chat turn isn't hidden behind it.
+    const pillExtra = hasMessages ? NEW_CHAT_PILL_CLEARANCE_PX : 0;
     if (!shouldFloatComposer) return CONTENT_SAFETY_GAP;
-    return Math.max(
-      INITIAL_COMPOSER_HEIGHT + CONTENT_SAFETY_GAP,
-      composerHeightPx + keyboardInsetPx + composerRestOffsetPx + CONTENT_SAFETY_GAP
+    return (
+      Math.max(
+        INITIAL_COMPOSER_HEIGHT + CONTENT_SAFETY_GAP,
+        composerHeightPx + keyboardInsetPx + composerRestOffsetPx + CONTENT_SAFETY_GAP
+      ) + pillExtra
     );
-  }, [composerHeightPx, keyboardInsetPx, composerRestOffsetPx, shouldFloatComposer]);
+  }, [composerHeightPx, keyboardInsetPx, composerRestOffsetPx, shouldFloatComposer, hasMessages]);
+
   const railStyle = useMemo(
     () => ({
       width:
@@ -84,13 +93,7 @@ export function ConciergeScreen({
 
   return (
     <>
-      <SiteHeader
-        storeName={storeName}
-        storeLogoUrl={storeLogoUrl}
-        showNewChat={hasMessages}
-        isNewChatDisabled={controller.isLoading || controller.isResettingChat}
-        onNewChat={() => void controller.onNewChat()}
-      />
+      <SiteHeader storeName={storeName} storeLogoUrl={storeLogoUrl} />
       <AppShell
         variant="conversational"
         className="relative min-h-[calc(100svh-2rem)] !min-h-[calc(100dvh-2rem)] !pt-14 pb-6 [text-size-adjust:100%] [-webkit-text-size-adjust:100%]"
@@ -137,6 +140,9 @@ export function ConciergeScreen({
           showJumpToLatest={showJumpToLatest}
           onJumpToLatest={jumpToLatest ?? undefined}
           floating={shouldFloatComposer}
+          showNewChat={hasMessages && !controller.isLoading}
+          isNewChatDisabled={controller.isLoading || controller.isResettingChat}
+          onNewChat={() => void controller.onNewChat()}
         />
       </AppShell>
     </>
