@@ -67,20 +67,16 @@ export function ConciergeScreen({
   const composerRestOffsetPx = isSmallViewport
     ? COMPOSER_REST_OFFSET_MOBILE
     : COMPOSER_REST_OFFSET_DESKTOP;
-  const shouldFloatComposer = !isHeroState;
 
   const composerClearancePx = useMemo(() => {
-    // When there are messages, the New Chat pill appears above the composer.
-    // Add its height to clearance so the last chat turn isn't hidden behind it.
-    const pillExtra = hasMessages ? NEW_CHAT_PILL_CLEARANCE_PX : 0;
-    if (!shouldFloatComposer) return CONTENT_SAFETY_GAP;
+    const pillExtra = NEW_CHAT_PILL_CLEARANCE_PX;
     return (
       Math.max(
         INITIAL_COMPOSER_HEIGHT + CONTENT_SAFETY_GAP,
         composerHeightPx + keyboardInsetPx + composerRestOffsetPx + CONTENT_SAFETY_GAP
       ) + pillExtra
     );
-  }, [composerHeightPx, keyboardInsetPx, composerRestOffsetPx, shouldFloatComposer, hasMessages]);
+  }, [composerHeightPx, keyboardInsetPx, composerRestOffsetPx]);
 
   const railStyle = useMemo(
     () => ({
@@ -89,61 +85,115 @@ export function ConciergeScreen({
     }),
     []
   );
-  const emptyStatePromptLimit = isSmallViewport ? 2 : 3;
 
   return (
     <>
       <SiteHeader storeName={storeName} storeLogoUrl={storeLogoUrl} />
       <AppShell
         variant="conversational"
-        className="relative min-h-[calc(100svh-2rem)] !min-h-[calc(100dvh-2rem)] !pt-14 pb-6 [text-size-adjust:100%] [-webkit-text-size-adjust:100%]"
+        className={cn(
+          "relative !pt-14 pb-6 [text-size-adjust:100%] [-webkit-text-size-adjust:100%]",
+          isHeroState
+            ? "flex min-h-[calc(100dvh-2rem)] !min-h-[calc(100dvh-2rem)] flex-col"
+            : "min-h-[calc(100svh-2rem)] !min-h-[calc(100dvh-2rem)]"
+        )}
       >
         <div
           aria-hidden="true"
           className="pointer-events-none fixed inset-0 -z-10 bg-[radial-gradient(circle_at_12%_8%,rgba(255,241,218,0.55),transparent_40%),radial-gradient(circle_at_88%_12%,rgba(236,219,198,0.35),transparent_42%),linear-gradient(180deg,rgba(250,245,238,0.88),rgba(244,236,225,0.9))]"
         />
 
-        <div
-          className={cn(
-            "mx-auto [text-size-adjust:100%] [-webkit-text-size-adjust:100%]",
-            isHeroState ? "mt-2" : "mt-0"
-          )}
-          style={railStyle}
-        >
-          <ChatThread
-            turns={controller.turns}
-            isLoading={controller.isLoading}
-            showSlowNotice={controller.showSlowNotice}
-            emptyStatePrompts={controller.starterPrompts.slice(0, emptyStatePromptLimit)}
-            bodyTextClassName={BODY_SIZE}
-            onChoosePrompt={controller.submitWithPrompt}
-            onJumpToLatestVisibilityChange={setShowJumpToLatest}
-            onJumpToLatestHandlerChange={onJumpToLatestHandlerChange}
-          />
+        {isHeroState ? (
+          // Hero: vertically centered, single composed block
+          <div className="flex flex-1 flex-col items-center justify-center py-6">
+            <div className="mx-auto w-full" style={railStyle}>
+              {/* Welcome moment */}
+              <div className="mb-8 text-center [text-size-adjust:100%] [-webkit-text-size-adjust:100%]">
+                <h1 className="font-serif text-[38px] font-semibold tracking-tight text-foreground sm:text-[44px]">
+                  {storeName}
+                </h1>
+                <p className="mt-2 text-[15px] font-light italic text-muted-foreground">
+                  Every piece in the collection, at your fingertips.
+                </p>
+              </div>
 
-          <div aria-hidden="true" style={{ height: `${composerClearancePx}px` }} />
-        </div>
+              {/* Empty state chat card + chips */}
+              <ChatThread
+                turns={controller.turns}
+                isLoading={controller.isLoading}
+                showSlowNotice={controller.showSlowNotice}
+                emptyStatePrompts={controller.starterPrompts}
+                bodyTextClassName={BODY_SIZE}
+                onChoosePrompt={controller.submitWithPrompt}
+                onJumpToLatestVisibilityChange={setShowJumpToLatest}
+                onJumpToLatestHandlerChange={onJumpToLatestHandlerChange}
+              />
 
-        <MessageComposer
-          variant={variant}
-          message={controller.message}
-          isLoading={controller.isLoading}
-          canSubmit={controller.canSubmit}
-          error={controller.error}
-          canRetry={Boolean(controller.lastFailedMessage)}
-          bottomOffsetPx={keyboardInsetPx}
-          restingOffsetPx={composerRestOffsetPx}
-          onHeightChange={onComposerHeightChange}
-          onMessageChange={controller.setMessage}
-          onSubmit={controller.onSubmit}
-          onRetry={() => void controller.onRetryLastMessage()}
-          showJumpToLatest={showJumpToLatest}
-          onJumpToLatest={jumpToLatest ?? undefined}
-          floating={shouldFloatComposer}
-          showNewChat={hasMessages && !controller.isLoading}
-          isNewChatDisabled={controller.isLoading || controller.isResettingChat}
-          onNewChat={() => void controller.onNewChat()}
-        />
+              {/* In-flow composer */}
+              <MessageComposer
+                variant={variant}
+                message={controller.message}
+                isLoading={controller.isLoading}
+                canSubmit={controller.canSubmit}
+                error={controller.error}
+                canRetry={Boolean(controller.lastFailedMessage)}
+                bottomOffsetPx={0}
+                restingOffsetPx={0}
+                onHeightChange={onComposerHeightChange}
+                onMessageChange={controller.setMessage}
+                onSubmit={controller.onSubmit}
+                onRetry={() => void controller.onRetryLastMessage()}
+                showJumpToLatest={false}
+                floating={false}
+                showNewChat={false}
+                isNewChatDisabled={false}
+                onNewChat={() => void controller.onNewChat()}
+              />
+            </div>
+          </div>
+        ) : (
+          // Active: normal scrolling chat with floating composer
+          <>
+            <div
+              className="mx-auto [text-size-adjust:100%] [-webkit-text-size-adjust:100%]"
+              style={railStyle}
+            >
+              <ChatThread
+                turns={controller.turns}
+                isLoading={controller.isLoading}
+                showSlowNotice={controller.showSlowNotice}
+                emptyStatePrompts={controller.starterPrompts}
+                bodyTextClassName={BODY_SIZE}
+                onChoosePrompt={controller.submitWithPrompt}
+                onJumpToLatestVisibilityChange={setShowJumpToLatest}
+                onJumpToLatestHandlerChange={onJumpToLatestHandlerChange}
+              />
+
+              <div aria-hidden="true" style={{ height: `${composerClearancePx}px` }} />
+            </div>
+
+            <MessageComposer
+              variant={variant}
+              message={controller.message}
+              isLoading={controller.isLoading}
+              canSubmit={controller.canSubmit}
+              error={controller.error}
+              canRetry={Boolean(controller.lastFailedMessage)}
+              bottomOffsetPx={keyboardInsetPx}
+              restingOffsetPx={composerRestOffsetPx}
+              onHeightChange={onComposerHeightChange}
+              onMessageChange={controller.setMessage}
+              onSubmit={controller.onSubmit}
+              onRetry={() => void controller.onRetryLastMessage()}
+              showJumpToLatest={showJumpToLatest}
+              onJumpToLatest={jumpToLatest ?? undefined}
+              floating={true}
+              showNewChat={hasMessages && !controller.isLoading}
+              isNewChatDisabled={controller.isLoading || controller.isResettingChat}
+              onNewChat={() => void controller.onNewChat()}
+            />
+          </>
+        )}
       </AppShell>
     </>
   );

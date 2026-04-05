@@ -108,7 +108,7 @@ export function MessageComposer(input: MessageComposerProps) {
       <div ref={containerRef} className="w-full">
         {/* New Chat pill */}
         {showNewChat ? (
-          <div className="mb-2.5 flex justify-center animate-in fade-in duration-150">
+          <div className="mb-1.5 flex justify-center animate-in fade-in duration-150">
             <button
               type="button"
               onClick={onNewChat}

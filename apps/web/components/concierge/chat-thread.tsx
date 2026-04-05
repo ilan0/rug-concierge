@@ -31,7 +31,7 @@ export function ChatThread(input: ChatThreadProps) {
   const {
     turns,
     isLoading,
-    showSlowNotice,
+    showSlowNotice: _showSlowNotice,
     emptyStatePrompts,
     bodyTextClassName,
     onChoosePrompt,
@@ -124,26 +124,20 @@ export function ChatThread(input: ChatThreadProps) {
     <section className="relative">
       <section className="flex flex-col gap-7">
         {turns.length === 0 ? (
-          <article className="max-w-full rounded-3xl border border-border/45 bg-background/60 px-5 py-5 shadow-[0_4px_14px_rgba(36,20,5,0.06)]">
-            <div className="mb-3 flex items-center justify-between gap-2">
-              <p className="text-[11px] font-semibold tracking-[0.08em] text-muted-foreground">
-                Concierge
-              </p>
-            </div>
+          <article className="max-w-full rounded-3xl border border-border/60 bg-background/60 px-5 py-5 shadow-[0_2px_16px_rgba(36,20,5,0.09)]">
             <p className={cn("whitespace-pre-wrap text-foreground", bodyTextClassName)}>
               What are you looking for today?
             </p>
-            <div className="mt-5 flex max-w-full flex-col gap-3 sm:max-w-[42rem] sm:flex-row sm:flex-wrap">
+            <div className="mt-5 flex flex-row flex-wrap justify-center gap-2">
               {emptyStatePrompts.map((prompt) => (
-                <Button
+                <button
                   key={prompt.id}
                   type="button"
-                  variant="outline"
-                  className="h-auto min-h-[52px] w-full justify-start whitespace-normal break-words rounded-2xl border-primary/35 bg-primary/6 px-5 py-3 text-left text-[17px] leading-[1.35] text-foreground shadow-sm hover:border-primary/55 hover:bg-primary/12 hover:text-foreground sm:w-auto sm:max-w-full sm:justify-center sm:text-center"
+                  className="h-9 rounded-full border border-border/50 bg-transparent px-4 text-sm font-medium text-foreground/70 transition-colors hover:border-primary/45 hover:bg-primary/8 hover:text-foreground"
                   onClick={() => onChoosePrompt(prompt)}
                 >
                   {prompt.label}
-                </Button>
+                </button>
               ))}
             </div>
           </article>
@@ -262,11 +256,6 @@ export function ChatThread(input: ChatThreadProps) {
           <article className="rounded-3xl bg-background/60 p-5">
             <div className="h-3 w-full animate-pulse rounded-md bg-muted" />
             <div className="mt-2 h-3 w-2/3 animate-pulse rounded-md bg-muted" />
-            {showSlowNotice ? (
-              <p className="mt-3 text-xs text-muted-foreground">
-                Still working on this request. Large inventory queries may take 10-20 seconds.
-              </p>
-            ) : null}
           </article>
         ) : null}
       </section>
