@@ -54,11 +54,14 @@ export function updateRecommendationStateForTurn(
   const resets = parseConstraintResetDirectives(input.message);
   const existing = session.recommendation_state.hard_constraints;
   const existingSoft = session.recommendation_state.soft_preferences ?? {};
+  const roomRescopeShift =
+    Boolean(inferredSoft.room) &&
+    inferredSoft.room !== existingSoft.room;
   const resetAdjustedExisting: HardConstraints = {
-    size: resets.clearSize ? undefined : existing.size,
+    size: resets.clearSize || roomRescopeShift ? undefined : existing.size,
     colors: resets.clearColors ? undefined : existing.colors,
     styles: resets.clearStyles ? undefined : existing.styles,
-    shape: resets.clearShape ? undefined : existing.shape,
+    shape: resets.clearShape || roomRescopeShift ? undefined : existing.shape,
     strictness: resets.clearAll ? undefined : existing.strictness,
     avoid_preferences: resets.clearAll ? undefined : existing.avoid_preferences,
   };

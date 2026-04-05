@@ -13,6 +13,35 @@ import { OPENAI_CHAT_MODEL } from "@/lib/config";
 import type { ChatTurnHandlerInput, GeneralChatResponse } from "@/lib/chat/types";
 import { writeE2eTraceArtifact } from "@/lib/qa/e2e-trace";
 
+function roomLabelFromSessionFact(value: string): string | null {
+  const normalized = value.toLowerCase().trim();
+  const match = normalized.match(
+    /\b(living room|dining room|bedroom|kitchen|hallway|entryway|office)\b/
+  );
+  return match?.[1] ?? null;
+}
+
+function roomLabelFromPreference(
+  room: ChatTurnHandlerInput["session"]["recommendation_state"]["soft_preferences"]["room"]
+): string | null {
+  if (!room) return null;
+  return room.replace(/_/g, " ");
+}
+
+function resolveBrowsingPivot(input: ChatTurnHandlerInput): string | null {
+  const fromPreference = roomLabelFromPreference(
+    input.session.recommendation_state.soft_preferences.room
+  );
+  if (fromPreference) return fromPreference;
+
+  const stableFacts = input.session.conversation_memory.stable_facts ?? [];
+  for (const fact of stableFacts) {
+    const room = roomLabelFromSessionFact(fact);
+    if (room) return room;
+  }
+  return null;
+}
+
 // General/freeform chat mode.
 export async function handleGeneralChatTurn(
   input: ChatTurnHandlerInput
@@ -25,12 +54,16 @@ export async function handleGeneralChatTurn(
         : undefined) ?? null;
     const selectedLabel =
       selected?.label && selected.label.trim().length > 0 ? selected.label.trim() : null;
+    const browsingPivot = resolveBrowsingPivot(input);
+    const continuedBrowsingLine = browsingPivot
+      ? `While staff handles that one, want me to pull a few options for your ${browsingPivot} too?`
+      : "While staff handles that one, want me to keep exploring a few more options with you?";
     return {
       mode: "general_chat",
       assistant_message:
         selectedLabel
-          ? `Love that pick on ${selectedLabel}. A staff member can finalize pricing and checkout with you now, and I can pull that rug's details back up anytime.`
-          : "Love that pick. A staff member can finalize pricing and checkout with you now, and I can pull the selected rug details back up anytime.",
+          ? `Great pick on ${selectedLabel}. A staff member can finalize pricing and next steps with you now. ${continuedBrowsingLine}`
+          : `Great choice. A staff member can finalize pricing and next steps with you now. ${continuedBrowsingLine}`,
       notes: "PURCHASE_INTENT_HANDOFF",
     };
   }

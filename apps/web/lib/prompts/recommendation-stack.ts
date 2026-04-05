@@ -119,6 +119,18 @@ const RECOMMENDATION_LAYER_DEFINITIONS: RecommendationLayerDefinition[] = [
     id: PROMPT_LAYER.taskRecommendation,
     role: "system",
     include: () => true,
+    text: () =>
+      [
+        "Interaction context: this concierge runs on a tablet in a physical rug gallery.",
+        "Shown rug cards are interactive: customers can tap a card for full details and share it to keep track of options.",
+        "When suggesting a closer look or save action, reference those card interactions naturally.",
+        "Do not tell customers to 'see it in person' or 'view it on the floor' because they are already in the store using the tablet.",
+      ].join("\n"),
+  },
+  {
+    id: PROMPT_LAYER.taskRecommendation,
+    role: "system",
+    include: () => true,
     text: (input) =>
       detectResponseLanguage(input.userMessage) === "es"
         ? "Respond in Spanish. Keep rug titles and IDs exactly as provided."

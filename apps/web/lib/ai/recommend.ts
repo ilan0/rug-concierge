@@ -698,17 +698,17 @@ function buildGroundedRecommendationNarrative(input: {
           : hasStyleDirection
             ? "Aqui tienes opciones en inventario siguiendo esa direccion de estilo."
             : hasSizeDirection
-              ? "Aqui tienes opciones en inventario en ese rango de tamano."
+            ? "Aqui tienes opciones disponibles en ese rango de tamano."
               : "Aqui tienes opciones disponibles para comparar."
       : input.discoveryMode
         ? "Here is a varied set to compare."
         : hasColorDirection || hasAvoidColorDirection
-          ? "Here are in-stock options aligned to that color direction."
+          ? "Here are available options aligned to that color direction."
           : hasStyleDirection
-            ? "Here are in-stock options aligned to that style direction."
+            ? "Here are available options aligned to that style direction."
             : hasSizeDirection
-              ? "Here are in-stock options in that size direction."
-              : "Here are in-stock options to compare.";
+              ? "Here are available options in that size direction."
+              : "Here are available options to compare.";
 
   const topDetails = [
     top.title,
@@ -819,18 +819,9 @@ function enforceRecommendationConversationalFinish(input: {
   }
 
   assistant = assistant
-    .replace(
-      /\bhere are in-stock options aligned to that color direction\b\.?/gi,
-      "Here are in-stock options to compare."
-    )
-    .replace(
-      /\bhere are in-stock options aligned to that style direction\b\.?/gi,
-      "Here are in-stock options to compare."
-    )
-    .replace(
-      /\bhere are in-stock options in that size direction\b\.?/gi,
-      "Here are in-stock options to compare."
-    )
+    .replace(/\bhere are in-stock options aligned to that color direction\b\.?/gi, "")
+    .replace(/\bhere are in-stock options aligned to that style direction\b\.?/gi, "")
+    .replace(/\bhere are in-stock options in that size direction\b\.?/gi, "")
     .replace(/\bthis is the closest in-stock option right now\b\.?/gi, "")
     .replace(/\bi would start with\b/gi, "A strong place to start is")
     .replace(/\s+/g, " ")
@@ -1003,55 +994,11 @@ function enforceRecommendationConversationalFinish(input: {
       assistant = assistant.replace(pattern, "").trim();
     }
 
-    const colorLead =
-      language === "es"
-        ? "No puedo confirmar el balance exacto de color solo con el resumen de la tarjeta, asi que te muestro las opciones mas cercanas para comparar."
-        : "I can’t confirm exact color balance from card summaries alone, so I’m showing the closest in-stock options to compare.";
-    const normalizedAssistant = normalizeText(assistant);
-    if (
-      !/\b(color balance|card summaries|closest in-stock options to compare|balance exacto de color)\b/i.test(
-        normalizedAssistant
-      )
-    ) {
-      assistant = `${colorLead} ${assistant}`.trim();
-    }
-  }
-
-  if (budgetSignal) {
-    const budgetLead =
-      language === "es"
-        ? "Para presupuesto exacto, el equipo de tienda confirma precio final en persona."
-        : "For exact budget confirmation, store staff confirms final pricing in person.";
-    assistant = `${budgetLead} ${assistant}`.trim();
-  }
-
-  let fallbackQuestion: string | null = null;
-  if (!assistant.includes("?")) {
-    fallbackQuestion = buildRecommendationNextStepQuestion({
-      constraints: input.constraints,
-      userMessage: input.userMessage,
-      discoveryMode: input.discoveryMode,
-      language,
-    });
-    assistant = `${assistant} ${fallbackQuestion}`.trim();
-  }
-
-  let clampedAssistant = clampAssistantMessage(assistant);
-  if (fallbackQuestion && !clampedAssistant.includes("?")) {
-    const maxBaseLength = Math.max(
-      0,
-      MAX_ASSISTANT_MESSAGE_CHARS - fallbackQuestion.length - 1
-    );
-    const base = toPlainText(clampedAssistant)
-      .slice(0, maxBaseLength)
-      .replace(/[,:;.\-\s]+$/g, "")
-      .trim();
-    clampedAssistant = `${base} ${fallbackQuestion}`.trim();
   }
 
   return {
     ...input.response,
-    assistant_message: clampAssistantMessage(clampedAssistant),
+    assistant_message: clampAssistantMessage(assistant),
   };
 }
 
@@ -1138,7 +1085,7 @@ function buildFallbackLeadIn(
       return "Aqui tienes una seleccion variada disponible ahora para comparar direcciones:";
     }
     if (hasFollowupSignal || hasConstraintSignal) {
-      return "Aqui tienes las opciones disponibles mas cercanas para comparar ahora:";
+      return "Aqui tienes las opciones disponibles mas cercanas ahora:";
     }
     return "Aqui tienes una seleccion de piezas disponibles para revisar:";
   }
@@ -1147,9 +1094,9 @@ function buildFallbackLeadIn(
     return "Here is a varied in-stock set so you can compare different directions:";
   }
   if (hasFollowupSignal || hasConstraintSignal) {
-    return "Here are in-stock options to compare now:";
+    return "Here are available options right now:";
   }
-  return "Here is a set of in-stock options to review:";
+  return "Here is a set of available options to review:";
 }
 
 function applyConstraintMismatchDisclosure(input: {
@@ -1184,34 +1131,20 @@ function applyConstraintMismatchDisclosure(input: {
   }
 
   const current = toPlainText(input.response.assistant_message);
-  let hint =
-    "I’m showing in-stock options to compare what is available now.";
-  if (
-    unmet.has("size") &&
-    input.constraints.size &&
-    Math.max(input.constraints.size.widthIn, input.constraints.size.lengthIn) >
-      MAX_REASONABLE_REQUEST_LONG_SIDE_IN
-  ) {
-    hint =
-      "That requested scale is beyond what we currently carry, so I’m showing the largest in-stock options available.";
-  } else if (unmet.has("practical")) {
-    hint =
-      "I know practical use is important. I don’t have enough in-stock options that clearly match every practical detail, so I’m showing the closest available set to compare.";
-  }
-  if (!hint) {
+  const hint = toPlainText(mismatch.disclosure_hint ?? "");
+  if (hint.length === 0) {
     return input.response;
-  }
-  if (unmet.has("colors")) {
-    hint =
-      "I can’t verify exact color balance from card summaries alone, so I’m showing the closest in-stock options to compare side by side.";
   }
 
   const normalizedCurrent = current.toLowerCase();
   const normalizedHint = hint.toLowerCase();
   const alreadyHasEquivalentDisclosure =
-    /\b(don't have|do not have)\b/.test(normalizedCurrent) &&
-    /\b(exact|exactly)\b/.test(normalizedCurrent) &&
-    /\b(closest|alternative)\b/.test(normalizedCurrent);
+    /\b(don't have|do not have|exact(?:ly)?|closest|alternative|available)\b/.test(
+      normalizedCurrent
+    ) &&
+    mismatch.unmet_constraints.some((constraint) =>
+      normalizedCurrent.includes(constraint.toLowerCase())
+    );
   if (alreadyHasEquivalentDisclosure) {
     return {
       ...input.response,
@@ -1234,75 +1167,14 @@ function enforcePracticalTruthMessage(input: {
   response: RecommendationResponse;
   userMessage: string;
 }): RecommendationResponse {
-  if (input.response.mode !== "recommendations") {
-    return input.response;
-  }
-  const practicalSignal =
-    /\b(kid|kids|child|children|dog|dogs|pet|pets|high traffic|durable|easy to clean|low maintenance|beach house|tough)\b/i.test(
-      normalizeText(input.userMessage)
-    );
-  if (!practicalSignal) {
-    return input.response;
-  }
-
-  const assistant = toPlainText(input.response.assistant_message);
-  const hasPracticalLanguage =
-    /\b(durable|easy to clean|easy-care|high traffic|practical|low maintenance|hide wear)\b/i.test(
-      assistant
-    );
-  const alreadyHonestAboutLimits =
-    /\b(limited|closest|exact match|don't have|do not have|available alternatives)\b/i.test(
-      assistant
-    );
-  if (alreadyHonestAboutLimits || hasPracticalLanguage) {
-    return input.response;
-  }
-
-  const language = detectResponseLanguage(input.userMessage);
-  const lead =
-    language === "es"
-      ? "Si el uso diario es clave, puedo priorizar en la siguiente ronda opciones mas practicas y faciles de mantener."
-      : "If daily wear is the priority, I can prioritize more practical, lower-maintenance options in the next pass.";
-
-  return {
-    ...input.response,
-    assistant_message: clampAssistantMessage(`${lead} ${assistant}`.trim()),
-  };
+  return input.response;
 }
 
 function enforceImpossibleSizeDisclosure(input: {
   response: RecommendationResponse;
   userMessage: string;
 }): RecommendationResponse {
-  if (input.response.mode !== "recommendations") {
-    return input.response;
-  }
-  const impossibleSizeSignal =
-    /\b(50x50|50 by 50|100 by 100|100x100|100 feet|30 by 40|20-foot|20 foot)\b/i.test(
-      normalizeText(input.userMessage)
-    );
-  if (!impossibleSizeSignal) {
-    return input.response;
-  }
-
-  const assistant = toPlainText(input.response.assistant_message);
-  const hasDisclosure =
-    /\b(don't have|do not have|don't carry|largest|closest|exact match)\b/i.test(
-      assistant
-    );
-  if (hasDisclosure) {
-    return input.response;
-  }
-
-  const language = detectResponseLanguage(input.userMessage);
-  const lead =
-    language === "es"
-      ? "No tenemos una coincidencia exacta para ese tamano, asi que te muestro las opciones mas cercanas disponibles."
-      : "We don't have an exact match at that size, so I’m showing the closest available options.";
-  return {
-    ...input.response,
-    assistant_message: clampAssistantMessage(`${lead} ${assistant}`.trim()),
-  };
+  return input.response;
 }
 
 function warnIfLikelyTruncatedAssistantMessage(input: {

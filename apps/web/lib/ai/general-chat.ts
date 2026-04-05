@@ -8,7 +8,6 @@ import {
   toPreviewText,
   withRetryInstruction,
 } from "@/lib/ai/response-quality";
-import { detectResponseLanguage } from "@/lib/ai/language";
 import type { ChatAiContextPacket } from "@/lib/chat/context-packet";
 import type { RoleType } from "@/lib/chat/types";
 import {
@@ -279,29 +278,6 @@ function clampAssistantMessage(message: string): string {
   return `${truncated.slice(0, MAX_ASSISTANT_MESSAGE_CHARS - 3).trim()}...`;
 }
 
-function trimToLengthPreservingWords(message: string, maxChars: number): string {
-  const plain = toPlainText(message);
-  if (plain.length <= maxChars) return plain;
-  if (maxChars <= 3) return plain.slice(0, maxChars);
-
-  const sliced = plain.slice(0, maxChars).trim();
-  const boundaryMatches = [...sliced.matchAll(/[.!?]/g)];
-  const lastBoundary = boundaryMatches.at(-1);
-  if (lastBoundary && typeof lastBoundary.index === "number") {
-    const boundaryEnd = lastBoundary.index + 1;
-    if (boundaryEnd >= Math.floor(maxChars * 0.5)) {
-      return sliced.slice(0, boundaryEnd).trim();
-    }
-  }
-
-  const lastSpace = sliced.lastIndexOf(" ");
-  if (lastSpace > Math.floor(maxChars * 0.45)) {
-    return `${sliced.slice(0, lastSpace).trim()}...`;
-  }
-
-  return `${sliced.slice(0, maxChars - 3).trim()}...`;
-}
-
 function sanitizeHints(hints: string[]): string[] {
   const seen = new Set<string>();
   const output: string[] = [];
@@ -319,94 +295,12 @@ function sanitizeHints(hints: string[]): string[] {
   return output;
 }
 
-function shouldOfferCollectionExamples(message: string): boolean {
-  const text = normalizeText(message).toLowerCase();
-  if (!text) return false;
-
-  const domainTopic =
-    /\b(rug|rugs|kilim|oushak|heriz|serapi|persian|afghan|turkish|style|styles|origin|construction|weave|wool|silk|care|clean|vacuum|pile|flatweave|tribal|geometric|traditional|modern|bohemian|transitional|alfombra|alfombras|estilo|estilos|origen|tejido)\b/.test(
-      text
-    );
-  if (!domainTopic) return false;
-
-  return /\b(what|how|difference|compare|tell|care|clean|explain|is|are)\b/.test(text);
-}
-
-function withCollectionBridge(assistantMessage: string, latestUserMessage: string): string {
-  const assistant = toPlainText(assistantMessage);
-  if (!shouldOfferCollectionExamples(latestUserMessage)) {
-    return clampAssistantMessage(assistant);
-  }
-
-  const lower = assistant.toLowerCase();
-  const alreadyBridges =
-    /\b(show)\b[\s\S]{0,120}\b(collection|examples)\b/.test(
-      lower
-    ) ||
-    /\bwould you like\b[\s\S]{0,120}\bshow\b[\s\S]{0,120}\b(collection|examples)\b/.test(
-      lower
-    );
-  if (alreadyBridges) return clampAssistantMessage(assistant);
-
-  const compareMatch = /\bdifference between\s+([a-z0-9\s-]+?)\s+and\s+([a-z0-9\s-]+)\??$/i.exec(
-    normalizeText(latestUserMessage)
-  );
-  const language = detectResponseLanguage(latestUserMessage);
-  const bridge =
-    compareMatch && compareMatch[1] && compareMatch[2]
-      ? language === "es"
-        ? `Si quieres, puedo mostrar ejemplos lado a lado de ${compareMatch[1].trim()} y ${compareMatch[2].trim()} de nuestra coleccion ahora.`
-        : `If you'd like, I can show side-by-side ${compareMatch[1].trim()} and ${compareMatch[2].trim()} examples from our collection now.`
-      : language === "es"
-        ? "Si quieres, puedo mostrar ejemplos de nuestra coleccion actual ahora."
-        : "If you'd like, I can show examples from our current collection now.";
-  const availableForAssistant = MAX_ASSISTANT_MESSAGE_CHARS - bridge.length - 1;
-  if (availableForAssistant <= 0) {
-    return clampAssistantMessage(bridge);
-  }
-  const base = trimToLengthPreservingWords(assistant, availableForAssistant);
-  return `${base} ${bridge}`.trim();
-}
-
-function ensureWarmGeneralChatOpening(
-  assistantMessage: string,
-  latestUserMessage: string
-): string {
-  const assistant = toPlainText(assistantMessage);
-  const lower = assistant.toLowerCase();
-  if (
-    /^(great question|glad|happy to|absolutely|of course|love that|thanks for)/i.test(
-      lower
-    )
-  ) {
-    return assistant;
-  }
-  const isQuestion = /\?/.test(latestUserMessage.trim());
-  const warmLead =
-    detectResponseLanguage(latestUserMessage) === "es"
-      ? isQuestion
-        ? "Buena pregunta, encantado de ayudarte."
-        : "Con gusto te ayudo con eso."
-      : isQuestion
-        ? "Great question, happy to break this down."
-        : "Happy to help with this.";
-  return `${warmLead} ${assistant}`.trim();
-}
-
 function sanitizeResponse(
   response: GeneralChatModelResponse,
-  latestUserMessage: string
+  _latestUserMessage: string
 ): GeneralChatModelResponse {
-  const bridgedAssistant = withCollectionBridge(
-    response.assistant_message,
-    latestUserMessage
-  );
-  const assistantMessage = ensureWarmGeneralChatOpening(
-    bridgedAssistant,
-    latestUserMessage
-  );
   return {
-    assistant_message: clampAssistantMessage(assistantMessage),
+    assistant_message: clampAssistantMessage(toPlainText(response.assistant_message)),
     notes: response.notes ? toPlainText(response.notes) : null,
     memory_hints: sanitizeHints(response.memory_hints),
   };
@@ -421,13 +315,11 @@ function warnIfLikelyTruncatedAssistantMessage(message: string): void {
 
 function fallbackResponse(
   reason: string,
-  latestUserMessage: string
+  _latestUserMessage: string
 ): GeneralChatModelResponse {
   return {
-    assistant_message: withCollectionBridge(
+    assistant_message:
       "I can help with rug care, sizing, style guidance, and practical selection advice. Tell me what you want to focus on.",
-      latestUserMessage
-    ),
     notes: reason,
     memory_hints: [],
   };

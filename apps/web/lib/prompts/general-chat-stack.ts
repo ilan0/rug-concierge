@@ -60,6 +60,25 @@ const GENERAL_CHAT_LAYER_DEFINITIONS: GeneralChatLayerDefinition[] = [
     id: PROMPT_LAYER.taskGeneral,
     role: "system",
     include: () => true,
+    text: () =>
+      [
+        "Interaction context: this concierge runs on a tablet in a physical rug gallery.",
+        "Shown rug cards are interactive: customers can tap a card for full details and share it to keep track of options.",
+        "When suggesting a closer look or save action, reference those card interactions naturally.",
+        "Do not tell customers to 'see it in person' or 'view it on the floor' because they are already in the store using the tablet.",
+      ].join("\n"),
+  },
+  {
+    id: PROMPT_LAYER.taskGeneral,
+    role: "system",
+    include: () => true,
+    text: () =>
+      "If the customer signals purchase intent, acknowledge the selected rug briefly, hand pricing/checkout to store staff, and immediately invite continued browsing so the conversation stays open.",
+  },
+  {
+    id: PROMPT_LAYER.taskGeneral,
+    role: "system",
+    include: () => true,
     text: (input) =>
       detectResponseLanguage(input.contextPacket.latest_user_message) === "es"
         ? "Respond in Spanish."

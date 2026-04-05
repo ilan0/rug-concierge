@@ -179,9 +179,7 @@ function inferSemanticSignals(input: {
       (input.useInheritedBase && input.previous.size && !hasRoomDrivenRescope)
   );
   const hasExplicitShape = Boolean(
-    input.explicit.shape ||
-      input.parsedTurn.constraints.shape ||
-      (input.useInheritedBase && input.previous.shape)
+    input.explicit.shape || input.parsedTurn.constraints.shape
   );
   const hasExplicitColors = Boolean(
     input.explicit.colors?.length ||
@@ -558,8 +556,8 @@ function mergeHardConstraints(input: {
                   lengthIn: parsed.size.lengthIn,
                 }),
         }
-      : hasRoomRescopeSignal && semantic.inferred_size
-        ? semantic.inferred_size
+      : hasRoomRescopeSignal
+        ? semantic.inferred_size ?? undefined
         : base.size ?? semantic.inferred_size ?? undefined;
 
   let colors = explicit.colors
@@ -593,8 +591,8 @@ function mergeHardConstraints(input: {
   const shape =
     explicit.shape ??
     parsed.shape ??
-    base.shape ??
     semantic.inferred_shape ??
+    (hasRoomRescopeSignal ? undefined : base.shape) ??
     undefined;
   const parsedAvoid = {
     colors:
