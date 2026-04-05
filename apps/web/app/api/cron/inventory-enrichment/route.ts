@@ -8,6 +8,12 @@ import {
 export const runtime = "nodejs";
 
 function isVercelCronRequest(req: NextRequest): boolean {
+  const configuredCronSecret = process.env.CRON_SECRET?.trim() ?? "";
+  if (configuredCronSecret.length > 0) {
+    const authHeader = req.headers.get("authorization");
+    return authHeader === `Bearer ${configuredCronSecret}`;
+  }
+
   const cronHeader = req.headers.get("x-vercel-cron");
   return typeof cronHeader === "string" && cronHeader.trim().length > 0;
 }
