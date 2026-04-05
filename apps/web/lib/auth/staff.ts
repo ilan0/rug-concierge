@@ -4,11 +4,8 @@ import {
   buildDeviceAuthCookieValue,
   timingSafeCookieValueMatch,
 } from "@/lib/auth/device-auth";
-import { IS_PRODUCTION } from "@/lib/config";
-import {
-  getConfiguredTenantRuntimeSecrets,
-  getTenantRuntimeSecretsById,
-} from "@/lib/tenant-secrets";
+
+const IS_PRODUCTION = process.env.NODE_ENV === "production";
 
 export const STAFF_COOKIE = "staff_unlocked";
 
@@ -26,9 +23,14 @@ export function buildStaffUnlockCookieValue(input: {
   });
 }
 
+async function loadTenantSecretsReaders() {
+  return import("@/lib/tenant-secrets");
+}
+
 async function getExpectedStaffCookieValue(): Promise<
   { ok: true; value: string } | { ok: false; message: string }
 > {
+  const { getConfiguredTenantRuntimeSecrets } = await loadTenantSecretsReaders();
   const secretsResult = await getConfiguredTenantRuntimeSecrets();
   if (!secretsResult.ok) {
     return { ok: false, message: secretsResult.message };
@@ -54,6 +56,7 @@ async function getExpectedStaffCookieValue(): Promise<
 async function getExpectedStaffCookieValueForTenant(tenantId: string): Promise<
   { ok: true; value: string } | { ok: false; message: string }
 > {
+  const { getTenantRuntimeSecretsById } = await loadTenantSecretsReaders();
   const secretsResult = await getTenantRuntimeSecretsById(tenantId);
   if (!secretsResult.ok) {
     return { ok: false, message: secretsResult.message };
