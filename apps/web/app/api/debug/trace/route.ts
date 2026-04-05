@@ -3,8 +3,9 @@ import { existsSync } from "node:fs";
 import { readdir, readFile } from "node:fs/promises";
 import path from "node:path";
 import { z } from "zod";
-import { IS_PRODUCTION } from "@/lib/config";
 import { parseSearchParamsWithSchema } from "@/lib/http/route-validation";
+
+const IS_PRODUCTION = process.env.NODE_ENV === "production";
 
 const DEBUG_TRACE_QUERY_SCHEMA = z
   .object({
