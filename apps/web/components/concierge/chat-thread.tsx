@@ -131,8 +131,7 @@ export function ChatThread(input: ChatThreadProps) {
               </p>
             </div>
             <p className={cn("whitespace-pre-wrap text-foreground", bodyTextClassName)}>
-              Tell me about your space, preferred look, or size range and I&apos;ll start
-              with options that fit.
+              What are you looking for today?
             </p>
             <div className="mt-5 flex max-w-full flex-col gap-3 sm:max-w-[42rem] sm:flex-row sm:flex-wrap">
               {emptyStatePrompts.map((prompt) => (
