@@ -1,19 +1,5 @@
 import type { UiChatResponseBody, UiRecommendationItem } from "@/lib/types/chat-ui";
 
-export type DebugTraceSummary = {
-  routeTrace: unknown | null;
-  pipelineTrace: unknown | null;
-  generalChatTrace: unknown | null;
-};
-
-export type DebugMeta = {
-  runId: string;
-  caseId: string;
-  routeTraceId: string | null;
-  trace: DebugTraceSummary | null;
-  traceError: string | null;
-};
-
 export type Turn = {
   id: string;
   role: "user" | "assistant";
@@ -24,9 +10,6 @@ export type Turn = {
   questions?: string[];
   constraintSnapshot?: UiChatResponseBody["recommendation_state"] | null;
   createdAt: string;
-  debug?: DebugMeta | null;
 };
-
-export type OperatorView = "debug";
 
 export type ConciergeVariant = "concierge";

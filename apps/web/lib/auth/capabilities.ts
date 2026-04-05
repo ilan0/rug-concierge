@@ -5,8 +5,6 @@ export const APP_CAPABILITIES = [
   "chat.recommend",
   "inventory.read",
   "inventory.intake",
-  "debug.trace.read",
-  "debug.trace.capture",
 ] as const;
 
 export type AppCapability = (typeof APP_CAPABILITIES)[number];
@@ -20,8 +18,6 @@ const ROLE_CAPABILITY_MAP: Record<AppRole, readonly AppCapability[]> = {
     "chat.recommend",
     "inventory.read",
     "inventory.intake",
-    "debug.trace.read",
-    "debug.trace.capture",
   ],
   developer: ALL_CAPABILITIES,
 };

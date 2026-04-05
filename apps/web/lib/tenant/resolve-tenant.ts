@@ -354,63 +354,6 @@ async function lookupTenantBySubdomain(
   }
 }
 
-async function lookupLocalDefaultTenant(hostname: string): Promise<TenantResolutionResult> {
-  const cacheKey = "__local_default_tenant__";
-  const now = Date.now();
-  const cached = tenantCache.get(cacheKey);
-  if (cached && cached.expiresAtMs > now) {
-    return {
-      ok: true,
-      tenantId: cached.tenantId,
-      hostname,
-      subdomain: cached.tenantId,
-    };
-  }
-
-  const query = await supabaseAdmin
-    .from("tenants")
-    .select("id")
-    .order("created_at", { ascending: true })
-    .limit(1)
-    .maybeSingle();
-
-  if (query.error) {
-    return {
-      ok: false,
-      status: 503,
-      code: "tenant_query_failed",
-      message: "Unable to resolve local tenant.",
-      hostname,
-      subdomain: null,
-    };
-  }
-
-  const tenantId =
-    query.data && typeof query.data.id === "string" ? query.data.id.trim() : "";
-  if (!tenantId) {
-    return {
-      ok: false,
-      status: 404,
-      code: "tenant_not_found",
-      message: "No tenants are configured.",
-      hostname,
-      subdomain: null,
-    };
-  }
-
-  tenantCache.set(cacheKey, {
-    tenantId,
-    expiresAtMs: Date.now() + TENANT_CACHE_TTL_MS,
-  });
-
-  return {
-    ok: true,
-    tenantId,
-    hostname,
-    subdomain: tenantId,
-  };
-}
-
 export async function resolveTenantFromHeaders(
   input: RequestHeaderValues
 ): Promise<TenantResolutionResult> {
@@ -428,9 +371,6 @@ export async function resolveTenantFromHeaders(
 
   const subdomain = parseSubdomainFromHostname(hostname);
   if (!subdomain) {
-    if (isLocalHost(hostname)) {
-      return lookupLocalDefaultTenant(hostname);
-    }
     return {
       ok: false,
       status: 404,

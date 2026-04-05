@@ -1,5 +1,4 @@
 import "server-only";
-import { DEFAULT_STORE_NAME } from "@/lib/constants/store-defaults";
 
 type NodeEnv = "development" | "production" | "test";
 
@@ -108,7 +107,6 @@ export const IS_PRODUCTION = NODE_ENV === "production";
 
 export {
   ENABLE_GENERAL_CHAT_AI,
-  DEFAULT_STORE_NAME,
   OPENAI_API_KEY,
   OPENAI_CHAT_MODEL,
   OPENAI_RECOMMENDATION_MODEL,

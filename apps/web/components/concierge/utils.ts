@@ -1,5 +1,5 @@
 import type { UiChatResponseBody } from "@/lib/types/chat-ui";
-import type { DebugTraceSummary, ConciergeVariant } from "@/components/concierge/types";
+import type { ConciergeVariant } from "@/components/concierge/types";
 import type { HardConstraints } from "@/lib/types/recommendation";
 
 export type StarterPrompt = {
@@ -89,28 +89,4 @@ export function toSlug(value: string): string {
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "")
     .slice(0, 120);
-}
-
-export function summarizeTracePayload(payload: unknown): DebugTraceSummary {
-  if (!payload || typeof payload !== "object") {
-    return { routeTrace: null, pipelineTrace: null, generalChatTrace: null };
-  }
-
-  const data = payload as {
-    traces?: Array<{ channel?: string | null; payload?: unknown }>;
-  };
-  if (!Array.isArray(data.traces)) {
-    return { routeTrace: null, pipelineTrace: null, generalChatTrace: null };
-  }
-
-  const routeTrace =
-    data.traces.find((trace) => trace?.channel === "chat-route")?.payload ?? null;
-  const pipelineTrace =
-    data.traces.find((trace) => trace?.channel === "recommendation-pipeline")
-      ?.payload ?? null;
-  const generalChatTrace =
-    data.traces.find((trace) => trace?.channel === "general-chat-ai")?.payload ??
-    null;
-
-  return { routeTrace, pipelineTrace, generalChatTrace };
 }

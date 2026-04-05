@@ -1,7 +1,6 @@
 type ErrorMappingContext =
   | "chat"
   | "intake"
-  | "debug_trace"
   | "generic";
 
 type ApiErrorMappingInput = {
@@ -82,10 +81,6 @@ export function mapApiErrorToFriendlyMessage(
     if (input.context === "intake") {
       return "Intake save failed right now. Please retry in a moment.";
     }
-  }
-
-  if (input.context === "debug_trace") {
-    return "Debug trace is unavailable for this turn. Try sending a new message with debug mode enabled.";
   }
 
   return input.fallbackMessage;

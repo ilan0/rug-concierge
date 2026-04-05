@@ -1,8 +1,7 @@
-import { DEFAULT_STORE_NAME } from "@/lib/constants/store-defaults";
 import { getTenantSettingsById } from "@/lib/tenant-settings";
 import { resolveTenantFromServerHeaders } from "@/lib/tenant/resolve-tenant";
 
-type BrandingSource = "tenant" | "default";
+type BrandingSource = "tenant" | "derived_subdomain" | "derived_tenant_id";
 
 type TenantBrandingSettings = {
   store_name?: unknown;
@@ -43,6 +42,23 @@ function isSafePublicImageUrl(value: string | null): string | null {
   } catch {
     return null;
   }
+}
+
+export function formatStoreNameFromSubdomain(
+  subdomain: string | null
+): string | null {
+  if (!subdomain) return null;
+  const normalized = subdomain
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9-]+/g, "")
+    .replace(/^-+|-+$/g, "");
+  if (!normalized) return null;
+  return normalized
+    .split("-")
+    .filter((token) => token.length > 0)
+    .map((token) => token.charAt(0).toUpperCase() + token.slice(1))
+    .join(" ");
 }
 
 export function readTenantBrandingFromSettings(settings: unknown): TenantBrandingValue {
@@ -90,13 +106,24 @@ export async function getResolvedBranding(input?: {
     tenantBranding = await fetchTenantBranding(tenantId);
   }
 
-  const storeName = tenantBranding.storeName ?? DEFAULT_STORE_NAME;
+  const derivedStoreNameFromSubdomain =
+    resolvedTenant?.ok && tenantId && resolvedTenant.tenantId === tenantId
+      ? formatStoreNameFromSubdomain(resolvedTenant.subdomain)
+      : null;
+  const derivedStoreNameFromTenantId = tenantId ?? null;
+
+  const storeName =
+    tenantBranding.storeName ??
+    derivedStoreNameFromSubdomain ??
+    derivedStoreNameFromTenantId ??
+    "";
   const storeLogoUrl = tenantBranding.storeLogoUrl ?? null;
 
-  const source: BrandingSource =
-    tenantBranding.storeName || tenantBranding.storeLogoUrl
-      ? "tenant"
-      : "default";
+  const source: BrandingSource = tenantBranding.storeName || tenantBranding.storeLogoUrl
+    ? "tenant"
+    : derivedStoreNameFromSubdomain
+      ? "derived_subdomain"
+      : "derived_tenant_id";
 
   return {
     tenantId,
