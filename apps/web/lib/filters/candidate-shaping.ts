@@ -729,6 +729,13 @@ export function shapeCandidatesForAI(
 
   scored.sort((a, b) => {
     if (b.baseScore !== a.baseScore) return b.baseScore - a.baseScore;
+    if (constraints.size) {
+      const aDistance = getSizeDistanceIn(a.rug, constraints);
+      const bDistance = getSizeDistanceIn(b.rug, constraints);
+      const aComparable = aDistance ?? Number.POSITIVE_INFINITY;
+      const bComparable = bDistance ?? Number.POSITIVE_INFINITY;
+      if (aComparable !== bComparable) return aComparable - bComparable;
+    }
     const aLabel = (a.rug.effective_fields?.label ?? a.rug.intake_label ?? "").toLowerCase();
     const bLabel = (b.rug.effective_fields?.label ?? b.rug.intake_label ?? "").toLowerCase();
     const labelDiff = aLabel.localeCompare(bLabel);
