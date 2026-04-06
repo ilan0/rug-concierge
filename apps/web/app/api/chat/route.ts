@@ -556,12 +556,6 @@ export async function POST(req: Request) {
       },
     };
 
-    await saveSession(updatedSession, {
-      tenantId,
-      mode: responseMode,
-      turns: [userTurn, assistantTurn],
-    });
-
     const promptLayerPreview = buildPromptLayers({
       mode: effectiveMode,
       role,
@@ -685,18 +679,55 @@ export async function POST(req: Request) {
       });
     }
 
-    const response = NextResponse.json({
+    const encoder = new TextEncoder();
+    const sseEvent = (event: string, data: unknown): Uint8Array =>
+      encoder.encode(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`);
+
+    const fullText = handlerResultWithLanguage.assistant_message;
+    const chunks = fullText.match(/.{1,4}/g) ?? [fullText];
+
+    const cardsPayload = {
       session_id: sessionId,
       role,
       mode: responseMode,
       fine_mode: fineMode,
       recommendation_state: updatedSession.recommendation_state,
       response: publicHandlerResult,
+    };
+
+    const stream = new ReadableStream({
+      async start(controller) {
+        try {
+          for (const chunk of chunks) {
+            controller.enqueue(sseEvent("text", chunk));
+            await new Promise((r) => setTimeout(r, 8));
+          }
+          controller.enqueue(sseEvent("cards", cardsPayload));
+          controller.enqueue(sseEvent("done", {}));
+        } finally {
+          controller.close();
+          // Fire-and-forget: persist session after stream closes.
+          saveSession(updatedSession, {
+            tenantId,
+            mode: responseMode,
+            turns: [userTurn, assistantTurn],
+          }).catch(() => { /* ignore */ });
+        }
+      },
+    });
+
+    const streamResponse = new Response(stream, {
+      headers: {
+        "Content-Type": "text/event-stream",
+        "Cache-Control": "no-cache, no-transform",
+        "Connection": "keep-alive",
+        "X-Accel-Buffering": "no",
+      },
     });
     if (traceMeta) {
-      response.headers.set("x-chat-route-trace-id", routeTraceId);
+      streamResponse.headers.set("x-chat-route-trace-id", routeTraceId);
     }
-    return response;
+    return streamResponse;
   } catch (error) {
     if (error instanceof SessionTenantMismatchError) {
       return forbidden("Session tenant does not match the current store domain.");

@@ -8,7 +8,7 @@ import {
 } from "react";
 import {
   resetChatSession,
-  sendChatTurn,
+  streamChatTurn,
 } from "@/lib/concierge/client";
 import type { UiChatRequest, UiChatResponseBody } from "@/lib/types/chat-ui";
 import {
@@ -82,7 +82,7 @@ export function useConciergeController(input: UseConciergeControllerInput) {
       setShowSlowNotice(false);
       return undefined;
     }
-    const timer = window.setTimeout(() => setShowSlowNotice(true), 8000);
+    const timer = window.setTimeout(() => setShowSlowNotice(true), 5000);
     return () => window.clearTimeout(timer);
   }, [isLoading]);
 
@@ -176,55 +176,99 @@ export function useConciergeController(input: UseConciergeControllerInput) {
     if (!userMessage.trim()) return;
     setError(null);
     setIsLoading(true);
-    const shouldAppendUserTurn = options.appendUserTurn ?? true;
-    if (!options.preserveFailedMessage) {
-      setLastFailedMessage(null);
+    if (!options.preserveFailedMessage) setLastFailedMessage(null);
+
+    // Append user turn immediately.
+    if (options.appendUserTurn ?? true) {
+      setTurns((prev) => [
+        ...prev,
+        {
+          id: crypto.randomUUID(),
+          role: "user",
+          text: userMessage,
+          createdAt: new Date().toISOString(),
+        },
+      ]);
     }
 
-    if (shouldAppendUserTurn) {
-      const userTurn: Turn = {
-        id: crypto.randomUUID(),
-        role: "user",
-        text: userMessage,
+    // Create a streaming placeholder assistant turn that fills in token-by-token.
+    const assistantTurnId = crypto.randomUUID();
+    setTurns((prev) => [
+      ...prev,
+      {
+        id: assistantTurnId,
+        role: "assistant",
+        text: "",
+        isStreaming: true,
         createdAt: new Date().toISOString(),
-      };
-      setTurns((prev) => [...prev, userTurn]);
-    }
+      },
+    ]);
 
     try {
-      const { payload } = await sendChatTurn(
-        buildChatRequestPayload(userMessage, options.constraints)
+      await streamChatTurn(
+        buildChatRequestPayload(userMessage, options.constraints),
+        {
+          onText: (chunk) => {
+            setTurns((prev) =>
+              prev.map((t) =>
+                t.id === assistantTurnId ? { ...t, text: t.text + chunk } : t
+              )
+            );
+          },
+          onCards: (payload) => {
+            setSessionId(payload.session_id);
+            setRecommendationState(payload.recommendation_state ?? null);
+            const response = payload.response;
+            setTurns((prev) =>
+              prev.map((t) =>
+                t.id === assistantTurnId
+                  ? {
+                      ...t,
+                      isStreaming: false,
+                      coarseMode: payload.mode,
+                      fineMode: payload.fine_mode,
+                      recommendations:
+                        "recommendations" in response
+                          ? response.recommendations
+                          : undefined,
+                      questions:
+                        "questions" in response ? response.questions : undefined,
+                      constraintSnapshot: getConstraintSnapshot(
+                        payload.recommendation_state
+                      ),
+                    }
+                  : t
+              )
+            );
+          },
+          onDone: () => {
+            setTurns((prev) =>
+              prev.map((t) =>
+                t.id === assistantTurnId ? { ...t, isStreaming: false } : t
+              )
+            );
+            if (options.preserveFailedMessage) setLastFailedMessage(null);
+          },
+          onError: (message) => {
+            setTurns((prev) => prev.filter((t) => t.id !== assistantTurnId));
+            setError(message);
+            if (!options.preserveFailedMessage) setLastFailedMessage(userMessage);
+          },
+        }
       );
-
-      setSessionId(payload.session_id);
-      setRecommendationState(payload.recommendation_state ?? null);
-
-      const response = payload.response;
-      const assistantTurn: Turn = {
-        id: crypto.randomUUID(),
-        role: "assistant",
-        text: response.assistant_message,
-        coarseMode: payload.mode,
-        fineMode: payload.fine_mode,
-        recommendations:
-          "recommendations" in response ? response.recommendations : undefined,
-        questions: "questions" in response ? response.questions : undefined,
-        constraintSnapshot: getConstraintSnapshot(payload.recommendation_state),
-        createdAt: new Date().toISOString(),
-      };
-
-      setTurns((prev) => [...prev, assistantTurn]);
-      if (options.preserveFailedMessage) {
-        setLastFailedMessage(null);
-      }
     } catch (nextError) {
+      setTurns((prev) => prev.filter((t) => t.id !== assistantTurnId));
       const details =
         nextError instanceof Error ? nextError.message : "Failed to send message.";
       setError(details);
-      if (!options.preserveFailedMessage) {
-        setLastFailedMessage(userMessage);
-      }
+      if (!options.preserveFailedMessage) setLastFailedMessage(userMessage);
     } finally {
+      // Clean up any unresolved streaming flag (e.g. stream closed without done event).
+      setTurns((prev) =>
+        prev.map((t) =>
+          t.id === assistantTurnId && t.isStreaming ? { ...t, isStreaming: false } : t
+        )
+      );
       setIsLoading(false);
     }
   };

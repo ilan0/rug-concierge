@@ -33,7 +33,7 @@ export function ChatThread(input: ChatThreadProps) {
   const {
     turns,
     isLoading,
-    showSlowNotice: _showSlowNotice,
+    showSlowNotice,
     emptyStatePrompts,
     bodyTextClassName,
     onChoosePrompt,
@@ -174,18 +174,34 @@ export function ChatThread(input: ChatThreadProps) {
                 </div>
 
                 {turn.role === "assistant" ? (
-                  <div
-                    className={cn(
-                      "text-foreground [&_li]:my-1 [&_ol]:list-decimal [&_ol]:pl-5 [&_p]:whitespace-pre-wrap [&_ul]:list-disc [&_ul]:pl-5",
-                      hasRecommendations
-                        ? bodyTextClassName
-                        : "max-w-[72ch] text-[17px] leading-[1.62] sm:text-[18px] sm:leading-[1.65]"
-                    )}
-                  >
-                    <ReactMarkdown remarkPlugins={[remarkGfm]} skipHtml>
-                      {turn.text}
-                    </ReactMarkdown>
-                  </div>
+                  turn.isStreaming && turn.text === "" ? (
+                    showSlowNotice ? (
+                      <p className="text-[15px] italic text-muted-foreground">
+                        Searching the collection…
+                      </p>
+                    ) : (
+                      <div>
+                        <div className="h-3 w-full animate-pulse rounded-md bg-muted" />
+                        <div className="mt-2 h-3 w-2/3 animate-pulse rounded-md bg-muted" />
+                      </div>
+                    )
+                  ) : (
+                    <div
+                      className={cn(
+                        "text-foreground [&_li]:my-1 [&_ol]:list-decimal [&_ol]:pl-5 [&_p]:whitespace-pre-wrap [&_ul]:list-disc [&_ul]:pl-5",
+                        hasRecommendations
+                          ? bodyTextClassName
+                          : "max-w-[72ch] text-[17px] leading-[1.62] sm:text-[18px] sm:leading-[1.65]"
+                      )}
+                    >
+                      <ReactMarkdown remarkPlugins={[remarkGfm]} skipHtml>
+                        {turn.text}
+                      </ReactMarkdown>
+                      {turn.isStreaming && (
+                        <span className="ml-0.5 inline-block h-[1.1em] w-[2px] animate-pulse bg-foreground/40 align-text-bottom" />
+                      )}
+                    </div>
+                  )
                 ) : (
                   <p className={cn("whitespace-pre-wrap text-foreground", bodyTextClassName)}>
                     {turn.text}
@@ -259,7 +275,7 @@ export function ChatThread(input: ChatThreadProps) {
           })
         )}
 
-        {isLoading ? (
+        {isLoading && !turns.some((t) => t.isStreaming) ? (
           <article className="rounded-3xl bg-background/60 p-5">
             <div className="h-3 w-full animate-pulse rounded-md bg-muted" />
             <div className="mt-2 h-3 w-2/3 animate-pulse rounded-md bg-muted" />

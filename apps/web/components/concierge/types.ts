@@ -4,6 +4,7 @@ export type Turn = {
   id: string;
   role: "user" | "assistant";
   text: string;
+  isStreaming?: boolean;
   coarseMode?: UiChatResponseBody["mode"];
   fineMode?: UiChatResponseBody["fine_mode"];
   recommendations?: UiRecommendationItem[];

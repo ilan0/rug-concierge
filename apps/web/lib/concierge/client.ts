@@ -1,70 +1,91 @@
 import type { UiChatRequest, UiChatResponseBody } from "@/lib/types/chat-ui";
 import { mapApiErrorToFriendlyMessage } from "@/lib/ui/error-messages";
 
-type SendChatTurnResult = {
-  payload: UiChatResponseBody;
-  headers: {
-    chatRouteTraceId: string | null;
-  };
-};
-
 type ResetChatSessionResult = {
   success: true;
   new_session_id: string;
 };
 
-export async function sendChatTurn(
-  input: UiChatRequest
-): Promise<SendChatTurnResult> {
-  // `role` is the canonical request field for chat clients.
+type StreamChatTurnCallbacks = {
+  onText: (chunk: string) => void;
+  onCards: (payload: UiChatResponseBody) => void;
+  onDone: () => void;
+  onError: (message: string) => void;
+};
+
+export async function streamChatTurn(
+  input: UiChatRequest,
+  callbacks: StreamChatTurnCallbacks
+): Promise<void> {
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
+    "Accept": "text/event-stream",
   };
 
-  const response = await fetch("/api/chat", {
-    method: "POST",
-    headers,
-    body: JSON.stringify(input),
-  });
-
-  const text = await response.text();
-  let payload: unknown = null;
+  let response: Response;
   try {
-    payload = JSON.parse(text);
+    response = await fetch("/api/chat", {
+      method: "POST",
+      headers,
+      body: JSON.stringify(input),
+    });
   } catch {
-    payload = null;
+    callbacks.onError("Unable to reach the server. Please check your connection.");
+    return;
   }
 
   if (!response.ok) {
-    const payloadError =
-      payload && typeof payload === "object" && "error" in payload
-        ? String((payload as { error: unknown }).error)
-        : null;
-    const payloadCode =
-      payload && typeof payload === "object" && "code" in payload
-        ? String((payload as { code: unknown }).code)
-        : null;
-    const message =
-      mapApiErrorToFriendlyMessage({
-        status: response.status,
-        code: payloadCode,
-        rawMessage: payloadError,
-        context: "chat",
-        fallbackMessage: "Unable to process chat request right now.",
-      });
-    throw new Error(message);
+    const text = await response.text().catch(() => "");
+    let payloadError: string | null = null;
+    try {
+      const parsed = JSON.parse(text);
+      if (parsed && typeof parsed === "object" && "error" in parsed) {
+        payloadError = String(parsed.error);
+      }
+    } catch { /* ignore */ }
+    const message = mapApiErrorToFriendlyMessage({
+      status: response.status,
+      rawMessage: payloadError,
+      context: "chat",
+      fallbackMessage: "Unable to process chat request right now.",
+    });
+    callbacks.onError(message);
+    return;
   }
 
-  if (!payload || typeof payload !== "object") {
-    throw new Error("Invalid chat response payload.");
+  const reader = response.body?.getReader();
+  if (!reader) {
+    callbacks.onError("Stream unavailable.");
+    return;
   }
 
-  return {
-    payload: payload as UiChatResponseBody,
-    headers: {
-      chatRouteTraceId: response.headers.get("x-chat-route-trace-id"),
-    },
-  };
+  const decoder = new TextDecoder();
+  let buffer = "";
+
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+
+      buffer += decoder.decode(value, { stream: true });
+      const parts = buffer.split("\n\n");
+      buffer = parts.pop() ?? "";
+
+      for (const part of parts) {
+        const eventMatch = part.match(/^event: (\w+)\ndata: (.+)$/);
+        if (!eventMatch) continue;
+        const [, event, data] = eventMatch;
+        try {
+          const parsed = JSON.parse(data);
+          if (event === "text") callbacks.onText(parsed as string);
+          else if (event === "cards") callbacks.onCards(parsed as UiChatResponseBody);
+          else if (event === "done") callbacks.onDone();
+        } catch { /* ignore malformed chunks */ }
+      }
+    }
+  } finally {
+    reader.releaseLock();
+  }
 }
 
 export async function resetChatSession(input: {
