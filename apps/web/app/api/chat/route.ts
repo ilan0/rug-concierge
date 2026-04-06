@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { handleGeneralChatTurn } from "@/lib/chat/handlers/general-chat";
 import { handleRecommendationTurn } from "@/lib/chat/handlers/recommendation";
+import { streamGeneralChatMessage } from "@/lib/ai/general-chat";
 import { routeTurnMode } from "@/lib/chat/router";
 import { parseTurn, type TurnParserTrace } from "@/lib/ai/turn-parser";
 import { detectResponseLanguage } from "@/lib/ai/language";
@@ -389,329 +390,377 @@ export async function POST(req: Request) {
       trace_meta: traceMeta ?? undefined,
     } as const;
 
-    const handlerResult =
-      effectiveMode === "recommendation"
-        ? await handleRecommendationTurn(handlerInput)
-        : await handleGeneralChatTurn(handlerInput);
-    const handlerResultWithLanguage = {
-      ...handlerResult,
-      assistant_message: enforceAssistantLanguageMatch({
-        userMessage: turnMessage,
-        assistantMessage: handlerResult.assistant_message,
-      }),
-    };
-
-    const responseMode = effectiveMode;
-    const fineMode =
-      routeDecision.needs_clarification && effectiveMode === "general_chat"
-        ? "clarifying_question"
-        : handlerResultWithLanguage.mode;
-    const publicHandlerResult =
-      "runtime_update" in handlerResultWithLanguage
-        ? (() => {
-            const next = {
-              ...handlerResultWithLanguage,
-            } as Record<string, unknown>;
-            delete next.runtime_update;
-            return next;
-          })()
-        : handlerResultWithLanguage;
-
-    const assistantTurn: SessionMessage = {
-      role: "assistant",
-      content: handlerResultWithLanguage.assistant_message,
-      created_at: new Date().toISOString(),
-    };
-
-    const nextConversationMemory = memoryEnabled
-      ? mergeConversationMemory(sessionForHandler.conversation_memory, {
-          userMessage: userTurn.content,
-          assistantMessage: handlerResultWithLanguage.assistant_message,
-          lastUserIntent: responseMode,
-          noMatchAttempts:
-            effectiveMode === "recommendation"
-              ? handlerResultWithLanguage.mode === "no_match"
-                ? startingNoMatchAttempts + 1
-                : 0
-              : currentNoMatchAttempts,
-          sessionFacts: Array.from(
-            new Set([
-              ...(parsedTurn.session_facts ?? []),
-              ...extractStableFactsFromUserMessage(userTurn.content),
-            ])
-          ),
-        })
-      : nextSession.conversation_memory;
-
-    const previousRuntime =
-      sessionForHandlerWithReaction.recommendation_state.runtime ?? {};
-    const likedRugIdsBefore = normalizeList(previousRuntime.liked_rug_ids ?? []).slice(0, 12);
-    const dismissedRugIdsBefore = normalizeList(previousRuntime.dismissed_rug_ids ?? []).slice(
-      0,
-      12
-    );
-    const runtimeUpdate =
-      "runtime_update" in handlerResultWithLanguage
-        ? handlerResultWithLanguage.runtime_update
-        : null;
-    const nextRecentlyShownRugs = Array.isArray(runtimeUpdate?.recently_shown_rugs)
-      ? runtimeUpdate.recently_shown_rugs
-      : previousRuntime.recently_shown_rugs ?? [];
-    const nextLikedRugIds = Array.isArray(runtimeUpdate?.liked_rug_ids)
-      ? runtimeUpdate.liked_rug_ids
-      : previousRuntime.liked_rug_ids ?? [];
-    const nextDismissedRugIds = Array.isArray(runtimeUpdate?.dismissed_rug_ids)
-      ? runtimeUpdate.dismissed_rug_ids
-      : previousRuntime.dismissed_rug_ids ?? [];
-    const nextShownRugIds = Array.isArray(runtimeUpdate?.shown_rug_ids)
-      ? runtimeUpdate.shown_rug_ids
-      : previousRuntime.shown_rug_ids ?? [];
-    const nextLikedAttributesSource =
-      runtimeUpdate?.liked_attributes ??
-      previousRuntime.liked_attributes ?? {
-        colors: [],
-        styles: [],
-        origins: [],
-      };
-    const nextLikedAttributes = {
-      colors: [...(nextLikedAttributesSource.colors ?? [])],
-      styles: [...(nextLikedAttributesSource.styles ?? [])],
-      origins: [...(nextLikedAttributesSource.origins ?? [])],
-    };
-    const likedAttributesBefore = {
-      colors: normalizeList(nextLikedAttributes.colors).slice(0, 8),
-      styles: normalizeList(nextLikedAttributes.styles).slice(0, 8),
-      origins: normalizeList(nextLikedAttributes.origins).slice(0, 8),
-    };
-
-    const reactionType = immediateReactionType;
-    const referencedRugId = immediateReferencedRugId;
-
-    const updatedSession: SessionData = {
-      ...nextSession,
-      role,
-      updated_at: new Date().toISOString(),
-      chat_history: trimChatHistory([...nextSession.chat_history, userTurn, assistantTurn]),
-      conversation_memory: nextConversationMemory,
-      recommendation_state: {
-        ...nextSession.recommendation_state,
-        hard_constraints: compiledPolicy.persisted_hard_constraints,
-        runtime: {
-          ...(nextSession.recommendation_state.runtime ?? {}),
-          last_result_mode:
-            handlerResultWithLanguage.mode === "recommendation" ||
-            handlerResultWithLanguage.mode === "no_match" ||
-            handlerResultWithLanguage.mode === "clarifying_question" ||
-            handlerResultWithLanguage.mode === "disambiguation"
-              ? handlerResultWithLanguage.mode
-              : nextSession.recommendation_state.runtime?.last_result_mode,
-          last_relaxed_size_tolerance_in:
-            "runtime_update" in handlerResultWithLanguage &&
-            handlerResultWithLanguage.runtime_update &&
-            Object.prototype.hasOwnProperty.call(
-              handlerResultWithLanguage.runtime_update,
-              "relaxed_size_tolerance_in"
-            )
-              ? handlerResultWithLanguage.runtime_update
-                  .relaxed_size_tolerance_in ?? null
-              : nextSession.recommendation_state.runtime
-                    ?.last_relaxed_size_tolerance_in ?? null,
-          last_blockers:
-            "runtime_update" in handlerResultWithLanguage &&
-            handlerResultWithLanguage.runtime_update?.blockers
-              ? handlerResultWithLanguage.runtime_update.blockers
-              : nextSession.recommendation_state.runtime?.last_blockers ?? [],
-          last_recommended_size_in:
-            "runtime_update" in handlerResultWithLanguage &&
-            handlerResultWithLanguage.runtime_update &&
-            Object.prototype.hasOwnProperty.call(
-              handlerResultWithLanguage.runtime_update,
-              "last_recommended_size_in"
-            ) &&
-            handlerResultWithLanguage.runtime_update.last_recommended_size_in
-              ? handlerResultWithLanguage.runtime_update.last_recommended_size_in
-              : nextSession.recommendation_state.runtime
-                    ?.last_recommended_size_in ?? null,
-          liked_rug_ids:
-            nextLikedRugIds,
-          dismissed_rug_ids:
-            nextDismissedRugIds,
-          shown_rug_ids: normalizeList(nextShownRugIds).slice(0, 80),
-          liked_attributes:
-            {
-              colors: normalizeList(nextLikedAttributes.colors ?? []).slice(0, 8),
-              styles: normalizeList(nextLikedAttributes.styles ?? []).slice(0, 8),
-              origins: normalizeList(nextLikedAttributes.origins ?? []).slice(0, 8),
-            },
-          recently_shown_rugs:
-            nextRecentlyShownRugs,
-          no_match_attempts:
-            effectiveMode === "recommendation"
-              ? handlerResultWithLanguage.mode === "no_match"
-                ? startingNoMatchAttempts + 1
-                : 0
-              : currentNoMatchAttempts,
-          updated_at: new Date().toISOString(),
-        },
-      },
-    };
-
-    const promptLayerPreview = buildPromptLayers({
-      mode: effectiveMode,
-      role,
-      session: nextSession,
-      userMessage,
-    });
-
-    const routeTraceId = crypto.randomUUID();
-    if (traceMeta) {
-      const parseStatus = parserTrace.fallback_reason
-        ? "fallback"
-        : parserTrace.error && parserTrace.error.trim().length > 0
-          ? "error"
-          : "success";
-      const constraintModes = {
-        size: compiledPolicy.strictness.size,
-        colors: compiledPolicy.strictness.colors,
-        styles: compiledPolicy.strictness.styles,
-        shape: compiledPolicy.strictness.shape,
-        avoid: compiledPolicy.avoid,
-      };
-      await writeE2eTraceArtifact({
-        meta: traceMeta,
-        channel: "chat-route",
-        trace_id: routeTraceId,
-        payload: {
-          flow_path: flowPath,
-          request: {
-            session_id: body.session_id ?? null,
-            role,
-            tenant_id: tenantId,
-            tenant_subdomain: tenantResolution.subdomain,
-            tenant_hostname: tenantResolution.hostname,
-            message: userMessage,
-            constraints: body.constraints ?? null,
-          },
-          routing: {
-            mode: effectiveMode,
-            intent: parsedTurn.intent,
-            rule_id: routeDecision.rule_id,
-            confidence: routeDecision.confidence,
-            needs_clarification: routeDecision.needs_clarification,
-            parser: {
-              model: parserTrace.model,
-              latency_ms: parserTrace.latency_ms,
-              status: parseStatus,
-              parse_status: parseStatus,
-              fallback: parserTrace.fallback_reason,
-              fallback_reason: parserTrace.fallback_reason,
-              normalized_payload: parserTrace.parsed,
-              normalized_parse_payload: parserTrace.parsed,
-              response_status: parserTrace.response_status,
-              incomplete_detected: parserTrace.incomplete_detected,
-              error: parserTrace.error,
-            },
-            policy: {
-              intent: compiledPolicy.intent,
-              compiled_policy: compiledPolicy,
-              policy_source: compiledPolicy.policy_source,
-              must_prefer_avoid: compiledPolicy.must_prefer_avoid,
-              "must-prefer-avoid": compiledPolicy.must_prefer_avoid,
-              constraint_modes: constraintModes,
-            },
-            parser_trace: {
-              called: parserTrace.called,
-              model: parserTrace.model,
-              status: parseStatus,
-              response_status: parserTrace.response_status,
-              fallback: parserTrace.fallback_reason,
-              fallback_reason: parserTrace.fallback_reason,
-              incomplete_detected: parserTrace.incomplete_detected,
-              latency_ms: parserTrace.latency_ms,
-              normalized_payload: parserTrace.parsed,
-              parsed: parserTrace.parsed,
-              error: parserTrace.error,
-            },
-            compiled_policy: compiledPolicy,
-            policy_source: compiledPolicy.policy_source,
-            must_prefer_avoid: compiledPolicy.must_prefer_avoid,
-            "must-prefer-avoid": compiledPolicy.must_prefer_avoid,
-            handler:
-              effectiveMode === "recommendation"
-                ? "handleRecommendationTurn"
-                : "handleGeneralChatTurn",
-            prompt_layer_preview: promptLayerPreview,
-          },
-          reaction: {
-            detected_reaction: reactionType,
-            referenced_rug_id: referencedRugId,
-            rug_reference_ambiguous: parsedTurn.rug_reference_ambiguous ?? false,
-            liked_attributes_before: likedAttributesBefore,
-            liked_attributes_after: {
-              colors: normalizeList(nextLikedAttributes.colors ?? []).slice(0, 8),
-              styles: normalizeList(nextLikedAttributes.styles ?? []).slice(0, 8),
-              origins: normalizeList(nextLikedAttributes.origins ?? []).slice(0, 8),
-            },
-            liked_rug_ids_before: likedRugIdsBefore,
-            liked_rug_ids_after: nextLikedRugIds,
-            dismissed_rug_ids_before: dismissedRugIdsBefore,
-            dismissed_rug_ids_after: nextDismissedRugIds,
-          },
-          state_snapshot: {
-            recommendation_state: nextSession.recommendation_state,
-            conversation_memory: nextSession.conversation_memory,
-          },
-          memory_snapshot_before: nextSession.conversation_memory,
-          memory_snapshot_after: updatedSession.conversation_memory,
-          ai_context_packet_stats: aiContextPacketStats,
-          response: {
-            session_id: sessionId,
-            role,
-            mode: responseMode,
-            fine_mode: fineMode,
-            response_mode: handlerResultWithLanguage.mode,
-            notes: handlerResultWithLanguage.notes ?? null,
-          },
-          timing_ms: {
-            total_ms: Date.now() - startedAt,
-          },
-        },
-      });
-    }
-
+    // ── SSE infrastructure ────────────────────────────────────────────────────
     const encoder = new TextEncoder();
     const sseEvent = (event: string, data: unknown): Uint8Array =>
       encoder.encode(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`);
 
-    const fullText = handlerResultWithLanguage.assistant_message;
-    const chunks = fullText.match(/.{1,4}/g) ?? [fullText];
+    const routeTraceId = crypto.randomUUID();
 
-    const cardsPayload = {
-      session_id: sessionId,
-      role,
-      mode: responseMode,
-      fine_mode: fineMode,
-      recommendation_state: updatedSession.recommendation_state,
-      response: publicHandlerResult,
-    };
-
+    // Return the SSE response *immediately* so the browser gets headers and the
+    // connection is open before any AI call begins.  All handler dispatch, state
+    // building, and session persistence happen inside start() below.
     const stream = new ReadableStream({
       async start(controller) {
+        let updatedSession: SessionData | null = null;
         try {
-          for (const chunk of chunks) {
-            controller.enqueue(sseEvent("text", chunk));
-            await new Promise((r) => setTimeout(r, 8));
+          // ── 1. Dispatch handler (or stream directly for general chat) ────────
+          let handlerResult: Awaited<ReturnType<typeof handleGeneralChatTurn>> | Awaited<ReturnType<typeof handleRecommendationTurn>>;
+
+          if (effectiveMode === "general_chat") {
+            // True streaming: pipe Chat Completions tokens directly to the SSE
+            // channel.  First token arrives in ~500 ms instead of 4–6 s.
+            const contextPacket =
+              handlerInput.ai_context_packet ??
+              buildAiContextPacket({
+                session: handlerInput.session,
+                latestUserMessage: handlerInput.message,
+              });
+
+            const streamedResponse = await streamGeneralChatMessage({
+              role: handlerInput.role,
+              contextPacket,
+              forceClarification: Boolean(handlerInput.needs_clarification),
+              onChunk: (chunk) => {
+                try {
+                  controller.enqueue(sseEvent("text", chunk));
+                } catch { /* stream already closed */ }
+              },
+            });
+
+            // Build a GeneralChatResponse-compatible object from the streamed result.
+            handlerResult = {
+              mode: handlerInput.needs_clarification
+                ? "clarifying_question"
+                : "general_chat",
+              assistant_message: streamedResponse.assistant_message,
+              notes: streamedResponse.notes ?? "GENERAL_CHAT_AI_RUNTIME:real:streamed",
+            } as Awaited<ReturnType<typeof handleGeneralChatTurn>>;
+          } else {
+            // Recommendation: run the full pipeline (blocking).
+            // The SSE response headers are already sent, so the browser shows
+            // a loading skeleton while we wait.  Text streams after the pipeline
+            // completes.
+            handlerResult = await handleRecommendationTurn(handlerInput);
+
+            // Stream the prose text in small chunks so the reveal feels live.
+            const prose = handlerResult.assistant_message ?? "";
+            const proseChunks = prose.match(/.{1,4}/g) ?? (prose ? [prose] : []);
+            for (const chunk of proseChunks) {
+              try {
+                controller.enqueue(sseEvent("text", chunk));
+              } catch { break; }
+              await new Promise((r) => setTimeout(r, 8));
+            }
           }
+
+          // ── 2. Language enforcement ──────────────────────────────────────────
+          const handlerResultWithLanguage = {
+            ...handlerResult,
+            assistant_message: enforceAssistantLanguageMatch({
+              userMessage: turnMessage,
+              assistantMessage: handlerResult.assistant_message,
+            }),
+          };
+
+          // ── 3. Derived response fields ───────────────────────────────────────
+          const responseMode = effectiveMode;
+          const fineMode =
+            routeDecision.needs_clarification && effectiveMode === "general_chat"
+              ? "clarifying_question"
+              : handlerResultWithLanguage.mode;
+          const publicHandlerResult =
+            "runtime_update" in handlerResultWithLanguage
+              ? (() => {
+                  const next = { ...handlerResultWithLanguage } as Record<string, unknown>;
+                  delete next.runtime_update;
+                  return next;
+                })()
+              : handlerResultWithLanguage;
+
+          const assistantTurn: SessionMessage = {
+            role: "assistant",
+            content: handlerResultWithLanguage.assistant_message,
+            created_at: new Date().toISOString(),
+          };
+
+          // ── 4. Session state update ──────────────────────────────────────────
+          const nextConversationMemory = memoryEnabled
+            ? mergeConversationMemory(sessionForHandler.conversation_memory, {
+                userMessage: userTurn.content,
+                assistantMessage: handlerResultWithLanguage.assistant_message,
+                lastUserIntent: responseMode,
+                noMatchAttempts:
+                  effectiveMode === "recommendation"
+                    ? handlerResultWithLanguage.mode === "no_match"
+                      ? startingNoMatchAttempts + 1
+                      : 0
+                    : currentNoMatchAttempts,
+                sessionFacts: Array.from(
+                  new Set([
+                    ...(parsedTurn.session_facts ?? []),
+                    ...extractStableFactsFromUserMessage(userTurn.content),
+                  ])
+                ),
+              })
+            : nextSession.conversation_memory;
+
+          const previousRuntime =
+            sessionForHandlerWithReaction.recommendation_state.runtime ?? {};
+          const likedRugIdsBefore = normalizeList(previousRuntime.liked_rug_ids ?? []).slice(0, 12);
+          const dismissedRugIdsBefore = normalizeList(
+            previousRuntime.dismissed_rug_ids ?? []
+          ).slice(0, 12);
+          const runtimeUpdate =
+            "runtime_update" in handlerResultWithLanguage
+              ? handlerResultWithLanguage.runtime_update
+              : null;
+          const nextRecentlyShownRugs = Array.isArray(runtimeUpdate?.recently_shown_rugs)
+            ? runtimeUpdate.recently_shown_rugs
+            : previousRuntime.recently_shown_rugs ?? [];
+          const nextLikedRugIds = Array.isArray(runtimeUpdate?.liked_rug_ids)
+            ? runtimeUpdate.liked_rug_ids
+            : previousRuntime.liked_rug_ids ?? [];
+          const nextDismissedRugIds = Array.isArray(runtimeUpdate?.dismissed_rug_ids)
+            ? runtimeUpdate.dismissed_rug_ids
+            : previousRuntime.dismissed_rug_ids ?? [];
+          const nextShownRugIds = Array.isArray(runtimeUpdate?.shown_rug_ids)
+            ? runtimeUpdate.shown_rug_ids
+            : previousRuntime.shown_rug_ids ?? [];
+          const nextLikedAttributesSource =
+            runtimeUpdate?.liked_attributes ??
+            previousRuntime.liked_attributes ?? {
+              colors: [],
+              styles: [],
+              origins: [],
+            };
+          const nextLikedAttributes = {
+            colors: [...(nextLikedAttributesSource.colors ?? [])],
+            styles: [...(nextLikedAttributesSource.styles ?? [])],
+            origins: [...(nextLikedAttributesSource.origins ?? [])],
+          };
+          const likedAttributesBefore = {
+            colors: normalizeList(nextLikedAttributes.colors).slice(0, 8),
+            styles: normalizeList(nextLikedAttributes.styles).slice(0, 8),
+            origins: normalizeList(nextLikedAttributes.origins).slice(0, 8),
+          };
+
+          const reactionType = immediateReactionType;
+          const referencedRugId = immediateReferencedRugId;
+
+          updatedSession = {
+            ...nextSession,
+            role,
+            updated_at: new Date().toISOString(),
+            chat_history: trimChatHistory([...nextSession.chat_history, userTurn, assistantTurn]),
+            conversation_memory: nextConversationMemory,
+            recommendation_state: {
+              ...nextSession.recommendation_state,
+              hard_constraints: compiledPolicy.persisted_hard_constraints,
+              runtime: {
+                ...(nextSession.recommendation_state.runtime ?? {}),
+                last_result_mode:
+                  handlerResultWithLanguage.mode === "recommendation" ||
+                  handlerResultWithLanguage.mode === "no_match" ||
+                  handlerResultWithLanguage.mode === "clarifying_question" ||
+                  handlerResultWithLanguage.mode === "disambiguation"
+                    ? handlerResultWithLanguage.mode
+                    : nextSession.recommendation_state.runtime?.last_result_mode,
+                last_relaxed_size_tolerance_in:
+                  "runtime_update" in handlerResultWithLanguage &&
+                  handlerResultWithLanguage.runtime_update &&
+                  Object.prototype.hasOwnProperty.call(
+                    handlerResultWithLanguage.runtime_update,
+                    "relaxed_size_tolerance_in"
+                  )
+                    ? handlerResultWithLanguage.runtime_update.relaxed_size_tolerance_in ?? null
+                    : nextSession.recommendation_state.runtime?.last_relaxed_size_tolerance_in ?? null,
+                last_blockers:
+                  "runtime_update" in handlerResultWithLanguage &&
+                  handlerResultWithLanguage.runtime_update?.blockers
+                    ? handlerResultWithLanguage.runtime_update.blockers
+                    : nextSession.recommendation_state.runtime?.last_blockers ?? [],
+                last_recommended_size_in:
+                  "runtime_update" in handlerResultWithLanguage &&
+                  handlerResultWithLanguage.runtime_update &&
+                  Object.prototype.hasOwnProperty.call(
+                    handlerResultWithLanguage.runtime_update,
+                    "last_recommended_size_in"
+                  ) &&
+                  handlerResultWithLanguage.runtime_update.last_recommended_size_in
+                    ? handlerResultWithLanguage.runtime_update.last_recommended_size_in
+                    : nextSession.recommendation_state.runtime?.last_recommended_size_in ?? null,
+                liked_rug_ids: nextLikedRugIds,
+                dismissed_rug_ids: nextDismissedRugIds,
+                shown_rug_ids: normalizeList(nextShownRugIds).slice(0, 80),
+                liked_attributes: {
+                  colors: normalizeList(nextLikedAttributes.colors ?? []).slice(0, 8),
+                  styles: normalizeList(nextLikedAttributes.styles ?? []).slice(0, 8),
+                  origins: normalizeList(nextLikedAttributes.origins ?? []).slice(0, 8),
+                },
+                recently_shown_rugs: nextRecentlyShownRugs,
+                no_match_attempts:
+                  effectiveMode === "recommendation"
+                    ? handlerResultWithLanguage.mode === "no_match"
+                      ? startingNoMatchAttempts + 1
+                      : 0
+                    : currentNoMatchAttempts,
+                updated_at: new Date().toISOString(),
+              },
+            },
+          };
+
+          // ── 5. E2E trace (only for QA runs) ─────────────────────────────────
+          if (traceMeta) {
+            const parseStatus = parserTrace.fallback_reason
+              ? "fallback"
+              : parserTrace.error && parserTrace.error.trim().length > 0
+                ? "error"
+                : "success";
+            const constraintModes = {
+              size: compiledPolicy.strictness.size,
+              colors: compiledPolicy.strictness.colors,
+              styles: compiledPolicy.strictness.styles,
+              shape: compiledPolicy.strictness.shape,
+              avoid: compiledPolicy.avoid,
+            };
+            const promptLayerPreview = buildPromptLayers({
+              mode: effectiveMode,
+              role,
+              session: nextSession,
+              userMessage,
+            });
+            await writeE2eTraceArtifact({
+              meta: traceMeta,
+              channel: "chat-route",
+              trace_id: routeTraceId,
+              payload: {
+                flow_path: flowPath,
+                request: {
+                  session_id: body.session_id ?? null,
+                  role,
+                  tenant_id: tenantId,
+                  tenant_subdomain: tenantResolution.subdomain,
+                  tenant_hostname: tenantResolution.hostname,
+                  message: userMessage,
+                  constraints: body.constraints ?? null,
+                },
+                routing: {
+                  mode: effectiveMode,
+                  intent: parsedTurn.intent,
+                  rule_id: routeDecision.rule_id,
+                  confidence: routeDecision.confidence,
+                  needs_clarification: routeDecision.needs_clarification,
+                  parser: {
+                    model: parserTrace.model,
+                    latency_ms: parserTrace.latency_ms,
+                    status: parseStatus,
+                    parse_status: parseStatus,
+                    fallback: parserTrace.fallback_reason,
+                    fallback_reason: parserTrace.fallback_reason,
+                    normalized_payload: parserTrace.parsed,
+                    normalized_parse_payload: parserTrace.parsed,
+                    response_status: parserTrace.response_status,
+                    incomplete_detected: parserTrace.incomplete_detected,
+                    error: parserTrace.error,
+                  },
+                  policy: {
+                    intent: compiledPolicy.intent,
+                    compiled_policy: compiledPolicy,
+                    policy_source: compiledPolicy.policy_source,
+                    must_prefer_avoid: compiledPolicy.must_prefer_avoid,
+                    "must-prefer-avoid": compiledPolicy.must_prefer_avoid,
+                    constraint_modes: constraintModes,
+                  },
+                  parser_trace: {
+                    called: parserTrace.called,
+                    model: parserTrace.model,
+                    status: parseStatus,
+                    response_status: parserTrace.response_status,
+                    fallback: parserTrace.fallback_reason,
+                    fallback_reason: parserTrace.fallback_reason,
+                    incomplete_detected: parserTrace.incomplete_detected,
+                    latency_ms: parserTrace.latency_ms,
+                    normalized_payload: parserTrace.parsed,
+                    parsed: parserTrace.parsed,
+                    error: parserTrace.error,
+                  },
+                  compiled_policy: compiledPolicy,
+                  policy_source: compiledPolicy.policy_source,
+                  must_prefer_avoid: compiledPolicy.must_prefer_avoid,
+                  "must-prefer-avoid": compiledPolicy.must_prefer_avoid,
+                  handler:
+                    effectiveMode === "recommendation"
+                      ? "handleRecommendationTurn"
+                      : "handleGeneralChatTurn",
+                  prompt_layer_preview: promptLayerPreview,
+                },
+                reaction: {
+                  detected_reaction: reactionType,
+                  referenced_rug_id: referencedRugId,
+                  rug_reference_ambiguous: parsedTurn.rug_reference_ambiguous ?? false,
+                  liked_attributes_before: likedAttributesBefore,
+                  liked_attributes_after: {
+                    colors: normalizeList(nextLikedAttributes.colors ?? []).slice(0, 8),
+                    styles: normalizeList(nextLikedAttributes.styles ?? []).slice(0, 8),
+                    origins: normalizeList(nextLikedAttributes.origins ?? []).slice(0, 8),
+                  },
+                  liked_rug_ids_before: likedRugIdsBefore,
+                  liked_rug_ids_after: nextLikedRugIds,
+                  dismissed_rug_ids_before: dismissedRugIdsBefore,
+                  dismissed_rug_ids_after: nextDismissedRugIds,
+                },
+                state_snapshot: {
+                  recommendation_state: nextSession.recommendation_state,
+                  conversation_memory: nextSession.conversation_memory,
+                },
+                memory_snapshot_before: nextSession.conversation_memory,
+                memory_snapshot_after: updatedSession.conversation_memory,
+                ai_context_packet_stats: aiContextPacketStats,
+                response: {
+                  session_id: sessionId,
+                  role,
+                  mode: responseMode,
+                  fine_mode: fineMode,
+                  response_mode: handlerResultWithLanguage.mode,
+                  notes: handlerResultWithLanguage.notes ?? null,
+                },
+                timing_ms: {
+                  total_ms: Date.now() - startedAt,
+                },
+              },
+            });
+          }
+
+          // ── 6. Emit cards + done ─────────────────────────────────────────────
+          const cardsPayload = {
+            session_id: sessionId,
+            role,
+            mode: responseMode,
+            fine_mode: fineMode,
+            recommendation_state: updatedSession.recommendation_state,
+            response: publicHandlerResult,
+          };
           controller.enqueue(sseEvent("cards", cardsPayload));
           controller.enqueue(sseEvent("done", {}));
+        } catch {
+          // Best-effort: tell the client something went wrong so it can surface
+          // an error state rather than hanging indefinitely.
+          try {
+            controller.enqueue(
+              sseEvent("error", { message: "Unable to process your message right now." })
+            );
+          } catch { /* controller already closed */ }
         } finally {
-          controller.close();
-          // Fire-and-forget: persist session after stream closes.
-          saveSession(updatedSession, {
-            tenantId,
-            mode: responseMode,
-            turns: [userTurn, assistantTurn],
-          }).catch(() => { /* ignore */ });
+          try { controller.close(); } catch { /* already closed */ }
+          // Fire-and-forget session persistence — must not block the stream.
+          if (updatedSession) {
+            saveSession(updatedSession, {
+              tenantId,
+              mode: effectiveMode,
+              turns: [userTurn, { role: "assistant", content: updatedSession.chat_history.at(-1)?.content ?? "", created_at: new Date().toISOString() }],
+            }).catch(() => { /* ignore */ });
+          }
         }
       },
     });

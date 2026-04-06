@@ -523,3 +523,161 @@ export async function generateGeneralChatResponse(input: {
     notes: sanitized.notes ? `${runtimeNote}; ${sanitized.notes}` : runtimeNote,
   };
 }
+
+const OPENAI_CHAT_COMPLETIONS_URL = "https://api.openai.com/v1/chat/completions";
+
+/**
+ * Streams a general chat response via Chat Completions API (stream: true).
+ *
+ * Calls `onChunk` for every text delta as it arrives — giving ~500 ms first-token
+ * latency instead of the 4–6 s full-JSON wait imposed by the Responses API.
+ *
+ * Returns the fully assembled GeneralChatModelResponse when the stream ends.
+ * Falls back to the non-streaming Responses-API path on any fetch/parse error.
+ */
+export async function streamGeneralChatMessage(input: {
+  role: RoleType;
+  contextPacket: ChatAiContextPacket;
+  forceClarification?: boolean;
+  onChunk: (chunk: string) => void;
+}): Promise<GeneralChatModelResponse> {
+  if (!ENABLE_GENERAL_CHAT_AI) {
+    const fb = fallbackResponse(
+      "GENERAL_CHAT_AI_RUNTIME:fallback_disabled",
+      input.contextPacket.latest_user_message
+    );
+    input.onChunk(fb.assistant_message);
+    return fb;
+  }
+
+  const prompts = getRecommendationPromptBundle();
+  const hasRecommendationHardConstraints = Boolean(
+    input.contextPacket.structured_state.recommendation_state.hard_constraints.size ||
+      (input.contextPacket.structured_state.recommendation_state.hard_constraints.colors?.length ?? 0) > 0 ||
+      (input.contextPacket.structured_state.recommendation_state.hard_constraints.styles?.length ?? 0) > 0 ||
+      input.contextPacket.structured_state.recommendation_state.hard_constraints.shape
+  );
+  const hasStructuredStateContext = hasRecommendationHardConstraints;
+  const hasMemoryContext =
+    input.contextPacket.conversation_memory.summary_text.length > 0 ||
+    input.contextPacket.conversation_memory.stable_facts.length > 0 ||
+    input.contextPacket.conversation_memory.open_threads.length > 0;
+
+  const promptSections = buildGeneralChatPromptSections({
+    role: input.role,
+    hasStructuredStateContext,
+    hasMemoryContext,
+    hasRecentTurns: input.contextPacket.recent_turns.length > 0,
+    prompts: { system: prompts.system, generalChat: prompts.generalChat },
+    contextPacket: input.contextPacket,
+    rolePrompt: getRolePrompt(input.role),
+  });
+
+  // Convert Responses-API section list to Chat Completions messages.
+  // Consecutive sections of the same role are merged with a double newline.
+  type ChatMessage = { role: "system" | "user"; content: string };
+  const messages: ChatMessage[] = [];
+  for (const section of promptSections) {
+    const last = messages[messages.length - 1];
+    if (last && last.role === section.role) {
+      last.content += "\n\n" + section.text;
+    } else {
+      messages.push({ role: section.role, content: section.text });
+    }
+  }
+  if (input.forceClarification) {
+    messages.push({
+      role: "system",
+      content:
+        "Routing context: the user shared constraints but intent is unclear. Ask one concise clarifying question to choose between inventory recommendations vs general advice.",
+    });
+  }
+
+  let response: Response;
+  try {
+    response = await fetch(OPENAI_CHAT_COMPLETIONS_URL, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${OPENAI_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: OPENAI_CHAT_MODEL,
+        messages,
+        stream: true,
+        max_tokens: getMaxOutputTokens("general_chat"),
+      }),
+      signal: AbortSignal.timeout(20_000),
+    });
+  } catch {
+    // Network / timeout — fall back to the Responses-API path (blocking).
+    const fb = await generateGeneralChatResponse({
+      role: input.role,
+      contextPacket: input.contextPacket,
+      forceClarification: input.forceClarification,
+    });
+    input.onChunk(fb.assistant_message);
+    return fb;
+  }
+
+  if (!response.ok || !response.body) {
+    const fb = await generateGeneralChatResponse({
+      role: input.role,
+      contextPacket: input.contextPacket,
+      forceClarification: input.forceClarification,
+    });
+    input.onChunk(fb.assistant_message);
+    return fb;
+  }
+
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder();
+  let fullText = "";
+  let buffer = "";
+
+  try {
+    outer: while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split("\n");
+      buffer = lines.pop() ?? "";
+      for (const line of lines) {
+        const trimmed = line.trim();
+        if (!trimmed.startsWith("data: ")) continue;
+        const data = trimmed.slice(6);
+        if (data === "[DONE]") break outer;
+        try {
+          const parsed = JSON.parse(data) as {
+            choices?: Array<{ delta?: { content?: string }; finish_reason?: string }>;
+          };
+          const delta = parsed.choices?.[0]?.delta?.content;
+          if (typeof delta === "string" && delta.length > 0) {
+            fullText += delta;
+            input.onChunk(delta);
+          }
+        } catch {
+          // Ignore malformed SSE data lines.
+        }
+      }
+    }
+  } finally {
+    try { reader.releaseLock(); } catch { /* ignore */ }
+  }
+
+  const finalMessage = clampAssistantMessage(toPlainText(fullText));
+  if (!finalMessage) {
+    const fb = fallbackResponse(
+      "GENERAL_CHAT_AI_RUNTIME:stream_empty",
+      input.contextPacket.latest_user_message
+    );
+    // Don't call onChunk again — we already streamed whatever arrived.
+    return fb;
+  }
+
+  return {
+    assistant_message: finalMessage,
+    notes: "GENERAL_CHAT_AI_RUNTIME:real:streamed",
+    memory_hints: [],
+  };
+}
