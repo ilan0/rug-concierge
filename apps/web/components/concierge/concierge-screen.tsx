@@ -6,9 +6,7 @@ import { MessageComposer } from "@/components/concierge/message-composer";
 import { useConciergeController } from "@/components/concierge/use-concierge-controller";
 import { useVisualViewportInset } from "@/components/concierge/use-visual-viewport-inset";
 import type { ConciergeVariant } from "@/components/concierge/types";
-import { AppShell } from "@/components/ui/app-shell";
 import { SiteHeader } from "@/components/ui/site-header";
-import { cn } from "@/lib/utils";
 
 type ConciergeScreenProps = {
   variant?: ConciergeVariant;
@@ -24,6 +22,11 @@ const CONTENT_SAFETY_GAP = 10;
 const INITIAL_COMPOSER_HEIGHT = 92;
 // Accounts for the New Chat pill (34px) + its bottom gap (10px) above the composer card.
 const NEW_CHAT_PILL_CLEARANCE_PX = 44;
+
+const RAIL_STYLE = {
+  width:
+    "min(820px, calc(100vw - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px) - 1.5rem))",
+} as const;
 
 export function ConciergeScreen({
   variant = "concierge",
@@ -63,47 +66,40 @@ export function ConciergeScreen({
 
   const hasMessages = controller.turns.length > 0;
   const isHeroState = controller.turns.length === 0 && !controller.isLoading;
+  const shouldFloatComposer = !isHeroState;
 
   const composerRestOffsetPx = isSmallViewport
     ? COMPOSER_REST_OFFSET_MOBILE
     : COMPOSER_REST_OFFSET_DESKTOP;
 
   const composerClearancePx = useMemo(() => {
-    const pillExtra = NEW_CHAT_PILL_CLEARANCE_PX;
+    if (!shouldFloatComposer) return CONTENT_SAFETY_GAP;
+    const pillExtra = hasMessages ? NEW_CHAT_PILL_CLEARANCE_PX : 0;
     return (
       Math.max(
         INITIAL_COMPOSER_HEIGHT + CONTENT_SAFETY_GAP,
         composerHeightPx + keyboardInsetPx + composerRestOffsetPx + CONTENT_SAFETY_GAP
       ) + pillExtra
     );
-  }, [composerHeightPx, keyboardInsetPx, composerRestOffsetPx]);
-
-  const railStyle = useMemo(
-    () => ({
-      width:
-        "min(820px, calc(100vw - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px) - 1.5rem))",
-    }),
-    []
-  );
+  }, [composerHeightPx, keyboardInsetPx, composerRestOffsetPx, shouldFloatComposer, hasMessages]);
 
   return (
     <>
       <SiteHeader storeName={storeName} storeLogoUrl={storeLogoUrl} />
-      {/* AppShell className is identical in both states — centering belongs to the inner hero wrapper */}
-      <AppShell
-        variant="conversational"
-        className="relative min-h-[calc(100svh-2rem)] !min-h-[calc(100dvh-2rem)] !pt-14 pb-6 [text-size-adjust:100%] [-webkit-text-size-adjust:100%]"
-      >
-        <div
-          aria-hidden="true"
-          className="pointer-events-none fixed inset-0 -z-10 bg-[radial-gradient(circle_at_12%_8%,rgba(255,241,218,0.55),transparent_40%),radial-gradient(circle_at_88%_12%,rgba(236,219,198,0.35),transparent_42%),linear-gradient(180deg,rgba(250,245,238,0.88),rgba(244,236,225,0.9))]"
-        />
 
+      <div
+        aria-hidden="true"
+        className="pointer-events-none fixed inset-0 -z-10 bg-[radial-gradient(circle_at_12%_8%,rgba(255,241,218,0.55),transparent_40%),radial-gradient(circle_at_88%_12%,rgba(236,219,198,0.35),transparent_42%),linear-gradient(180deg,rgba(250,245,238,0.88),rgba(244,236,225,0.9))]"
+      />
+
+      <main
+        className="relative pt-[48px] [text-size-adjust:100%] [-webkit-text-size-adjust:100%]"
+        style={{ minHeight: "calc(100dvh - 48px)" }}
+      >
         {isHeroState ? (
-          // Hero: explicit min-h so centering math is grounded in real available space.
-          // min-h-[calc(100dvh-48px)] = viewport minus the 48px fixed header.
-          <div className="flex min-h-[calc(100dvh-48px)] flex-col items-center justify-center px-3 py-8">
-            <div className="mx-auto w-full" style={railStyle}>
+          // Hero: fills available space below header; centers content vertically.
+          <div className="flex min-h-[calc(100dvh-48px)] flex-col items-center justify-center py-8">
+            <div className="mx-auto w-full" style={RAIL_STYLE}>
               {/* Welcome moment */}
               <div className="mb-8 text-center [text-size-adjust:100%] [-webkit-text-size-adjust:100%]">
                 <h1 className="font-serif text-[38px] font-semibold tracking-tight text-foreground sm:text-[44px]">
@@ -152,49 +148,50 @@ export function ConciergeScreen({
             </div>
           </div>
         ) : (
-          // Active: normal scrolling chat with floating composer
-          <>
-            <div
-              className="mx-auto [text-size-adjust:100%] [-webkit-text-size-adjust:100%]"
-              style={railStyle}
-            >
-              <ChatThread
-                turns={controller.turns}
-                isLoading={controller.isLoading}
-                showSlowNotice={controller.showSlowNotice}
-                emptyStatePrompts={controller.starterPrompts}
-                bodyTextClassName={BODY_SIZE}
-                onChoosePrompt={controller.submitWithPrompt}
-                onJumpToLatestVisibilityChange={setShowJumpToLatest}
-                onJumpToLatestHandlerChange={onJumpToLatestHandlerChange}
-              />
-
-              <div aria-hidden="true" style={{ height: `${composerClearancePx}px` }} />
-            </div>
-
-            <MessageComposer
-              variant={variant}
-              message={controller.message}
+          // Active: scrolling chat; floating composer rendered outside <main> below.
+          <div
+            className="mx-auto pb-6 [text-size-adjust:100%] [-webkit-text-size-adjust:100%]"
+            style={RAIL_STYLE}
+          >
+            <ChatThread
+              turns={controller.turns}
               isLoading={controller.isLoading}
-              canSubmit={controller.canSubmit}
-              error={controller.error}
-              canRetry={Boolean(controller.lastFailedMessage)}
-              bottomOffsetPx={keyboardInsetPx}
-              restingOffsetPx={composerRestOffsetPx}
-              onHeightChange={onComposerHeightChange}
-              onMessageChange={controller.setMessage}
-              onSubmit={controller.onSubmit}
-              onRetry={() => void controller.onRetryLastMessage()}
-              showJumpToLatest={showJumpToLatest}
-              onJumpToLatest={jumpToLatest ?? undefined}
-              floating={true}
-              showNewChat={hasMessages && !controller.isLoading}
-              isNewChatDisabled={controller.isLoading || controller.isResettingChat}
-              onNewChat={() => void controller.onNewChat()}
+              showSlowNotice={controller.showSlowNotice}
+              emptyStatePrompts={controller.starterPrompts}
+              bodyTextClassName={BODY_SIZE}
+              onChoosePrompt={controller.submitWithPrompt}
+              onJumpToLatestVisibilityChange={setShowJumpToLatest}
+              onJumpToLatestHandlerChange={onJumpToLatestHandlerChange}
             />
-          </>
+
+            <div aria-hidden="true" style={{ height: `${composerClearancePx}px` }} />
+          </div>
         )}
-      </AppShell>
+      </main>
+
+      {/* Floating composer lives outside <main> so it never affects scroll width */}
+      {shouldFloatComposer ? (
+        <MessageComposer
+          variant={variant}
+          message={controller.message}
+          isLoading={controller.isLoading}
+          canSubmit={controller.canSubmit}
+          error={controller.error}
+          canRetry={Boolean(controller.lastFailedMessage)}
+          bottomOffsetPx={keyboardInsetPx}
+          restingOffsetPx={composerRestOffsetPx}
+          onHeightChange={onComposerHeightChange}
+          onMessageChange={controller.setMessage}
+          onSubmit={controller.onSubmit}
+          onRetry={() => void controller.onRetryLastMessage()}
+          showJumpToLatest={showJumpToLatest}
+          onJumpToLatest={jumpToLatest ?? undefined}
+          floating={true}
+          showNewChat={hasMessages && !controller.isLoading}
+          isNewChatDisabled={controller.isLoading || controller.isResettingChat}
+          onNewChat={() => void controller.onNewChat()}
+        />
+      ) : null}
     </>
   );
 }

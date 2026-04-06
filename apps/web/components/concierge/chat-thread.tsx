@@ -161,9 +161,13 @@ export function ChatThread(input: ChatThreadProps) {
                 }
               >
                 <div className="mb-2 flex items-center justify-between gap-2">
-                  <p className="text-[11px] font-semibold tracking-[0.08em] text-muted-foreground">
-                    {ROLE_LABEL[turn.role]}
-                  </p>
+                  {turn.role === "user" ? (
+                    <p className="text-[11px] font-semibold tracking-[0.08em] text-muted-foreground">
+                      {ROLE_LABEL[turn.role]}
+                    </p>
+                  ) : (
+                    <div />
+                  )}
                   <time className="text-[11px] text-muted-foreground opacity-0 transition-opacity duration-150 group-hover:opacity-100 group-focus-within:opacity-100">
                     {formatTime(turn.createdAt)}
                   </time>

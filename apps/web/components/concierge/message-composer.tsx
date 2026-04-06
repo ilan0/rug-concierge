@@ -98,10 +98,7 @@ export function MessageComposer(input: MessageComposerProps) {
               width:
                 "min(820px, calc(100vw - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px) - 1.5rem))",
             }
-          : {
-              width:
-                "min(820px, calc(100vw - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px) - 1.5rem))",
-            }
+          : undefined
       }
     >
       {/* Outer wrapper — ref here so height includes pill + card + footer */}
