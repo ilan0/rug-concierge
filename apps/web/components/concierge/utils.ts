@@ -35,22 +35,9 @@ export const STARTER_PROMPTS: Record<ConciergeVariant, StarterPrompt[]> = {
       message: "Show me a range to react to",
     },
     {
-      id: "around-8x10",
-      label: "I have a size in mind",
-      message: "I need something around 8x10",
-      constraints: {
-        size: {
-          widthIn: 96,
-          lengthIn: 120,
-          toleranceIn: 12,
-        },
-        strictness: {
-          size: "prefer",
-          colors: "prefer",
-          styles: "prefer",
-          shape: "prefer",
-        },
-      },
+      id: "something-specific",
+      label: "I'm looking for something specific",
+      message: "I have something specific in mind",
     },
   ],
 };
