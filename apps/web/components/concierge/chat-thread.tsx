@@ -20,6 +20,8 @@ type ChatThreadProps = {
   onChoosePrompt: (prompt: StarterPrompt) => void;
   onJumpToLatestVisibilityChange?: (visible: boolean) => void;
   onJumpToLatestHandlerChange?: (handler: (() => void) | null) => void;
+  /** When true, suppresses card border/bg/shadow so the caller can wrap in its own surface. */
+  bareEmptyState?: boolean;
 };
 
 const ROLE_LABEL: Record<Turn["role"], string> = {
@@ -37,6 +39,7 @@ export function ChatThread(input: ChatThreadProps) {
     onChoosePrompt,
     onJumpToLatestVisibilityChange,
     onJumpToLatestHandlerChange,
+    bareEmptyState = false,
   } = input;
   const [isPinnedToBottom, setIsPinnedToBottom] = useState(true);
   const [showJumpToLatest, setShowJumpToLatest] = useState(false);
@@ -124,7 +127,7 @@ export function ChatThread(input: ChatThreadProps) {
     <section className="relative">
       <section className="flex flex-col gap-7">
         {turns.length === 0 ? (
-          <article className="max-w-full rounded-3xl border border-border/60 bg-background/60 px-5 py-5 shadow-[0_2px_16px_rgba(36,20,5,0.09)]">
+          <article className={bareEmptyState ? "max-w-full px-5 py-5" : "max-w-full rounded-3xl border border-border/60 bg-background/60 px-5 py-5 shadow-[0_2px_16px_rgba(36,20,5,0.09)]"}>
             <p className={cn("whitespace-pre-wrap text-foreground", bodyTextClassName)}>
               What are you looking for today?
             </p>

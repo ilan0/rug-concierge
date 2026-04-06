@@ -76,6 +76,7 @@ const RECOMMENDATION_LAYER_DEFINITIONS: RecommendationLayerDefinition[] = [
       [
         "Open with a natural, request-anchored sentence that directly reflects what the customer asked for.",
         "Do not use generic transition openers or reusable canned phrasing.",
+        "Never open a response with a greeting phrase such as 'A warm welcome', 'Welcome!', 'Hello!', or any salutation. The customer is already in the conversation. Open directly with the substance of your response.",
         "Voice: warm, confident, tasteful, and concise (usually 2-4 short sentences).",
         "Sound like a knowledgeable showroom consultant helping in real time, not a search engine summary.",
         "First sentence should include a brief warm acknowledgment tied to the request.",

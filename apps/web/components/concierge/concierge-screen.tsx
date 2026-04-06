@@ -89,14 +89,10 @@ export function ConciergeScreen({
   return (
     <>
       <SiteHeader storeName={storeName} storeLogoUrl={storeLogoUrl} />
+      {/* AppShell className is identical in both states — centering belongs to the inner hero wrapper */}
       <AppShell
         variant="conversational"
-        className={cn(
-          "relative !pt-14 pb-6 [text-size-adjust:100%] [-webkit-text-size-adjust:100%]",
-          isHeroState
-            ? "flex min-h-[calc(100dvh-2rem)] !min-h-[calc(100dvh-2rem)] flex-col"
-            : "min-h-[calc(100svh-2rem)] !min-h-[calc(100dvh-2rem)]"
-        )}
+        className="relative min-h-[calc(100svh-2rem)] !min-h-[calc(100dvh-2rem)] !pt-14 pb-6 [text-size-adjust:100%] [-webkit-text-size-adjust:100%]"
       >
         <div
           aria-hidden="true"
@@ -104,8 +100,9 @@ export function ConciergeScreen({
         />
 
         {isHeroState ? (
-          // Hero: vertically centered, single composed block
-          <div className="flex flex-1 flex-col items-center justify-center py-6">
+          // Hero: explicit min-h so centering math is grounded in real available space.
+          // min-h-[calc(100dvh-48px)] = viewport minus the 48px fixed header.
+          <div className="flex min-h-[calc(100dvh-48px)] flex-col items-center justify-center px-3 py-8">
             <div className="mx-auto w-full" style={railStyle}>
               {/* Welcome moment */}
               <div className="mb-8 text-center [text-size-adjust:100%] [-webkit-text-size-adjust:100%]">
@@ -117,38 +114,41 @@ export function ConciergeScreen({
                 </p>
               </div>
 
-              {/* Empty state chat card + chips */}
-              <ChatThread
-                turns={controller.turns}
-                isLoading={controller.isLoading}
-                showSlowNotice={controller.showSlowNotice}
-                emptyStatePrompts={controller.starterPrompts}
-                bodyTextClassName={BODY_SIZE}
-                onChoosePrompt={controller.submitWithPrompt}
-                onJumpToLatestVisibilityChange={setShowJumpToLatest}
-                onJumpToLatestHandlerChange={onJumpToLatestHandlerChange}
-              />
-
-              {/* In-flow composer */}
-              <MessageComposer
-                variant={variant}
-                message={controller.message}
-                isLoading={controller.isLoading}
-                canSubmit={controller.canSubmit}
-                error={controller.error}
-                canRetry={Boolean(controller.lastFailedMessage)}
-                bottomOffsetPx={0}
-                restingOffsetPx={0}
-                onHeightChange={onComposerHeightChange}
-                onMessageChange={controller.setMessage}
-                onSubmit={controller.onSubmit}
-                onRetry={() => void controller.onRetryLastMessage()}
-                showJumpToLatest={false}
-                floating={false}
-                showNewChat={false}
-                isNewChatDisabled={false}
-                onNewChat={() => void controller.onNewChat()}
-              />
+              {/* Unified card: greeting + chips + composer as one surface */}
+              <div className="overflow-hidden rounded-3xl border border-border/60 bg-background/60 shadow-[0_2px_16px_rgba(36,20,5,0.09)]">
+                <ChatThread
+                  turns={controller.turns}
+                  isLoading={controller.isLoading}
+                  showSlowNotice={controller.showSlowNotice}
+                  emptyStatePrompts={controller.starterPrompts}
+                  bodyTextClassName={BODY_SIZE}
+                  onChoosePrompt={controller.submitWithPrompt}
+                  onJumpToLatestVisibilityChange={setShowJumpToLatest}
+                  onJumpToLatestHandlerChange={onJumpToLatestHandlerChange}
+                  bareEmptyState={true}
+                />
+                <div className="px-3 pb-3 pt-0">
+                  <MessageComposer
+                    variant={variant}
+                    message={controller.message}
+                    isLoading={controller.isLoading}
+                    canSubmit={controller.canSubmit}
+                    error={controller.error}
+                    canRetry={Boolean(controller.lastFailedMessage)}
+                    bottomOffsetPx={0}
+                    restingOffsetPx={0}
+                    onHeightChange={onComposerHeightChange}
+                    onMessageChange={controller.setMessage}
+                    onSubmit={controller.onSubmit}
+                    onRetry={() => void controller.onRetryLastMessage()}
+                    showJumpToLatest={false}
+                    floating={false}
+                    showNewChat={false}
+                    isNewChatDisabled={false}
+                    onNewChat={() => void controller.onNewChat()}
+                  />
+                </div>
+              </div>
             </div>
           </div>
         ) : (

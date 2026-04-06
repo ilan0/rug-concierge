@@ -88,7 +88,7 @@ export function MessageComposer(input: MessageComposerProps) {
       className={
         floating
           ? "fixed bottom-0 z-40 -translate-x-1/2 [text-size-adjust:100%] [-webkit-text-size-adjust:100%]"
-          : "relative z-30 mx-auto mt-4 [text-size-adjust:100%] [-webkit-text-size-adjust:100%]"
+          : "relative z-30 w-full [text-size-adjust:100%] [-webkit-text-size-adjust:100%]"
       }
       style={
         floating
@@ -108,7 +108,7 @@ export function MessageComposer(input: MessageComposerProps) {
       <div ref={containerRef} className="w-full">
         {/* New Chat pill */}
         {showNewChat ? (
-          <div className="mb-1.5 flex justify-center animate-in fade-in duration-150">
+          <div className="mb-1 flex justify-center animate-in fade-in duration-150">
             <button
               type="button"
               onClick={onNewChat}
