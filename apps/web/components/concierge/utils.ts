@@ -35,9 +35,9 @@ export const STARTER_PROMPTS: Record<ConciergeVariant, StarterPrompt[]> = {
       message: "Show me the collection",
     },
     {
-      id: "help-me-find",
-      label: "Help me find the right rug",
-      message: "Help me find the right rug",
+      id: "rug-care-tips",
+      label: "Show me tips for rug care",
+      message: "Show me tips for rug care",
     },
   ],
 };
