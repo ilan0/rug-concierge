@@ -14,7 +14,7 @@ export const STARTER_PROMPTS: Record<ConciergeVariant, StarterPrompt[]> = {
     {
       id: "living-room-anchor",
       label: "Find me a living room rug",
-      message: "Help me find a living room anchor rug",
+      message: "Find me a living room rug",
       constraints: {
         size: {
           widthIn: 96,
@@ -30,13 +30,13 @@ export const STARTER_PROMPTS: Record<ConciergeVariant, StarterPrompt[]> = {
       },
     },
     {
-      id: "range-react",
+      id: "browse-collection",
       label: "Show me the collection",
-      message: "Show me a range to react to",
+      message: "Show me the collection",
     },
     {
       id: "something-specific",
-      label: "I'm looking for something specific",
+      label: "I have something specific in mind",
       message: "I have something specific in mind",
     },
   ],
