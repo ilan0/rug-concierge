@@ -36,7 +36,7 @@ function RugLoadingState() {
 
   return (
     <div className="flex items-center gap-3 py-0.5">
-      <RugSpinner size={26} />
+      <RugSpinner size={32} />
       <span
         className="text-[15px] text-muted-foreground"
         style={{
