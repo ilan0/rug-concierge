@@ -5,7 +5,7 @@ export function RugSpinner({ size = 28 }: { size?: number }) {
       height={size}
       viewBox="0 0 40 40"
       fill="none"
-      style={{ animation: "rugspin 3.5s linear infinite", flexShrink: 0 }}
+      className="animate-rugspin flex-shrink-0"
       aria-hidden="true"
     >
       {/* Top fringes — 6 organic strands with varied lengths and slight lean */}
