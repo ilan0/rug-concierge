@@ -21,7 +21,7 @@ const COMPOSER_REST_OFFSET_MOBILE = 8;
 const CONTENT_SAFETY_GAP = 10;
 const INITIAL_COMPOSER_HEIGHT = 92;
 // Accounts for the New Chat pill (34px) + its bottom gap (10px) above the composer card.
-const NEW_CHAT_PILL_CLEARANCE_PX = 44;
+const NEW_CHAT_PILL_CLEARANCE_PX = 20;
 
 const RAIL_STYLE = {
   width:
