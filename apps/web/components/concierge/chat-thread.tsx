@@ -3,6 +3,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { RecommendationCard } from "@/components/concierge/recommendation-card";
+import { RugSpinner } from "@/components/concierge/rug-spinner";
 import type { Turn } from "@/components/concierge/types";
 import {
   formatTime,
@@ -11,10 +12,48 @@ import {
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
+const LOADING_PHRASES = [
+  "Finding the right rugs for you…",
+  "Searching the collection…",
+  "Curating your options…",
+];
+
+function RugLoadingState() {
+  const [phraseIndex, setPhraseIndex] = useState(0);
+  const [visible, setVisible] = useState(true);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setVisible(false);
+      const timeout = setTimeout(() => {
+        setPhraseIndex((i) => (i + 1) % LOADING_PHRASES.length);
+        setVisible(true);
+      }, 380);
+      return () => clearTimeout(timeout);
+    }, 2500);
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <div className="flex items-center gap-3 py-0.5">
+      <RugSpinner size={26} />
+      <span
+        className="text-[15px] text-muted-foreground"
+        style={{
+          opacity: visible ? 1 : 0,
+          transition: "opacity 380ms ease",
+        }}
+      >
+        {LOADING_PHRASES[phraseIndex]}
+      </span>
+    </div>
+  );
+}
+
 type ChatThreadProps = {
   turns: Turn[];
   isLoading: boolean;
-  showSlowNotice: boolean;
+  showSlowNotice?: boolean;
   emptyStatePrompts: StarterPrompt[];
   bodyTextClassName: string;
   onChoosePrompt: (prompt: StarterPrompt) => void;
@@ -33,7 +72,6 @@ export function ChatThread(input: ChatThreadProps) {
   const {
     turns,
     isLoading,
-    showSlowNotice,
     emptyStatePrompts,
     bodyTextClassName,
     onChoosePrompt,
@@ -175,16 +213,7 @@ export function ChatThread(input: ChatThreadProps) {
 
                 {turn.role === "assistant" ? (
                   turn.isStreaming && turn.text === "" ? (
-                    showSlowNotice ? (
-                      <p className="text-[15px] italic text-muted-foreground">
-                        Searching the collection…
-                      </p>
-                    ) : (
-                      <div>
-                        <div className="h-3 w-full animate-pulse rounded-md bg-muted" />
-                        <div className="mt-2 h-3 w-2/3 animate-pulse rounded-md bg-muted" />
-                      </div>
-                    )
+                    <RugLoadingState />
                   ) : (
                     <div
                       className={cn(
@@ -276,9 +305,8 @@ export function ChatThread(input: ChatThreadProps) {
         )}
 
         {isLoading && !turns.some((t) => t.isStreaming) ? (
-          <article className="rounded-3xl bg-background/60 p-5">
-            <div className="h-3 w-full animate-pulse rounded-md bg-muted" />
-            <div className="mt-2 h-3 w-2/3 animate-pulse rounded-md bg-muted" />
+          <article className="rounded-3xl bg-background/60 px-5 py-4">
+            <RugLoadingState />
           </article>
         ) : null}
       </section>
