@@ -443,14 +443,10 @@ export async function POST(req: Request) {
             // completes.
             handlerResult = await handleRecommendationTurn(handlerInput);
 
-            // Stream the prose text in small chunks so the reveal feels live.
+            // Emit prose immediately — no fake delay. Cards fire right after.
             const prose = handlerResult.assistant_message ?? "";
-            const proseChunks = prose.match(/.{1,4}/g) ?? (prose ? [prose] : []);
-            for (const chunk of proseChunks) {
-              try {
-                controller.enqueue(sseEvent("text", chunk));
-              } catch { break; }
-              await new Promise((r) => setTimeout(r, 8));
+            if (prose) {
+              controller.enqueue(sseEvent("text", prose));
             }
           }
 
