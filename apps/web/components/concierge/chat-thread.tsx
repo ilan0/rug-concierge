@@ -20,20 +20,31 @@ const LOADING_PHRASES = [
 
 function RugLoadingState() {
   const [phraseIndex, setPhraseIndex] = useState(0);
+  const [visible, setVisible] = useState(true);
 
   useEffect(() => {
-    const id = setInterval(() => {
-      setPhraseIndex((i) => (i + 1) % LOADING_PHRASES.length);
-    }, 2500);
-    return () => clearInterval(id);
+    let timeoutId: ReturnType<typeof setTimeout> | null = null;
+
+    const intervalId = setInterval(() => {
+      setVisible(false);
+      timeoutId = setTimeout(() => {
+        setPhraseIndex((i) => (i + 1) % LOADING_PHRASES.length);
+        setVisible(true);
+      }, 300);
+    }, 2800);
+
+    return () => {
+      clearInterval(intervalId);
+      if (timeoutId !== null) clearTimeout(timeoutId);
+    };
   }, []);
 
   return (
     <div className="flex items-center gap-3 py-1">
       <RugSpinner size={32} />
       <span
-        key={phraseIndex}
-        className="animate-fadein text-[15px] text-muted-foreground"
+        className="text-[15px] text-muted-foreground"
+        style={{ opacity: visible ? 1 : 0, transition: "opacity 300ms ease" }}
       >
         {LOADING_PHRASES[phraseIndex]}
       </span>
