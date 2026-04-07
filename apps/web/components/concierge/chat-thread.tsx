@@ -30,7 +30,7 @@ function RugLoadingState() {
       timeoutId = setTimeout(() => {
         setPhraseIndex((i) => (i + 1) % LOADING_PHRASES.length);
         setVisible(true);
-      }, 300);
+      }, 160);
     }, 2800);
 
     return () => {
@@ -43,8 +43,8 @@ function RugLoadingState() {
     <div className="flex items-center gap-3 py-1">
       <RugSpinner size={32} />
       <span
-        className="text-[15px] text-muted-foreground"
-        style={{ opacity: visible ? 1 : 0, transition: "opacity 300ms ease" }}
+        className="text-[15px] text-foreground/55"
+        style={{ opacity: visible ? 1 : 0, transition: "opacity 160ms ease" }}
       >
         {LOADING_PHRASES[phraseIndex]}
       </span>
@@ -197,21 +197,25 @@ export function ChatThread(input: ChatThreadProps) {
                 className={
                   turn.role === "user"
                     ? "group ml-auto max-w-[92%] rounded-3xl border border-border/45 bg-[#e7dccf]/82 px-6 py-5 shadow-[0_1px_2px_rgba(50,30,12,0.12)] sm:max-w-[86%]"
-                    : "group max-w-full rounded-3xl border border-border/45 bg-background/58 px-4 py-4 sm:px-5 sm:py-5"
+                    : turn.isStreaming && turn.text === ""
+                      ? "group max-w-full rounded-3xl border border-border/45 bg-background/58 px-5 py-4"
+                      : "group max-w-full rounded-3xl border border-border/45 bg-background/58 px-4 py-4 sm:px-5 sm:py-5"
                 }
               >
-                <div className="mb-2 flex items-center justify-between gap-2">
-                  {turn.role === "user" ? (
-                    <p className="text-[11px] font-semibold tracking-[0.08em] text-muted-foreground">
-                      {ROLE_LABEL[turn.role]}
-                    </p>
-                  ) : (
-                    <div />
-                  )}
-                  <time className="text-[11px] text-muted-foreground opacity-0 transition-opacity duration-150 group-hover:opacity-100 group-focus-within:opacity-100">
-                    {formatTime(turn.createdAt)}
-                  </time>
-                </div>
+                {!(turn.role === "assistant" && turn.isStreaming && turn.text === "") && (
+                  <div className="mb-2 flex items-center justify-between gap-2">
+                    {turn.role === "user" ? (
+                      <p className="text-[11px] font-semibold tracking-[0.08em] text-muted-foreground">
+                        {ROLE_LABEL[turn.role]}
+                      </p>
+                    ) : (
+                      <div />
+                    )}
+                    <time className="text-[11px] text-muted-foreground opacity-0 transition-opacity duration-150 group-hover:opacity-100 group-focus-within:opacity-100">
+                      {formatTime(turn.createdAt)}
+                    </time>
+                  </div>
+                )}
 
                 {turn.role === "assistant" ? (
                   turn.isStreaming && turn.text === "" ? (
