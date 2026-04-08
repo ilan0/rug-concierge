@@ -3,9 +3,9 @@ import type {
   ReviewReasonCode,
 } from "@/lib/inventory/enrichment-state";
 
-export type InventoryStatusFilter = "all" | "available" | "on_hold";
+export type InventoryStatusFilter = "all" | "available" | "not_available";
 
-export type InventoryRugStatus = "available" | "on_hold";
+export type InventoryRugStatus = "available" | "not_available";
 
 export type InventorySort = "newest" | "oldest";
 export type InventorySizePreset =

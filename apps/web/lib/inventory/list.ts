@@ -194,8 +194,14 @@ function applySqlFilters<T extends InventorySqlQuery<T>>(
 ): T {
   let next = query;
 
-  if (filters.status !== "all") {
-    next = next.eq("status", filters.status);
+  const booleanExpressions: string[] = [];
+
+  if (filters.status === "available") {
+    next = next.eq("status", "available").eq("enrichment_status", "ready");
+  } else if (filters.status === "not_available") {
+    booleanExpressions.push(
+      "or(status.eq.not_available,status.is.null,enrichment_status.neq.ready,enrichment_status.is.null)"
+    );
   }
 
   const searchTokens = filters.q
@@ -218,7 +224,6 @@ function applySqlFilters<T extends InventorySqlQuery<T>>(
     next = next.lte("length_total_in", filters.lengthMax);
   }
 
-  const booleanExpressions: string[] = [];
   if (searchTokens.length > 0) {
     const tokenExpressions = searchTokens.map((token) => {
       const pattern = `*${token}*`;
@@ -354,7 +359,8 @@ export async function getInventoryStats(
       .from("rugs")
       .select("id", { count: "exact", head: true })
       .eq("tenant_id", normalizedTenantId)
-      .eq("status", "available"),
+      .eq("status", "available")
+      .eq("enrichment_status", "ready"),
   ]);
 
   if (totalResult.error || availableResult.error) {

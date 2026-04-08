@@ -25,7 +25,7 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 }
 
 function toInventoryRugStatusOrNull(value: unknown): InventoryRugStatus | null {
-  return value === "available" || value === "on_hold" ? value : null;
+  return value === "available" || value === "not_available" ? value : null;
 }
 
 function toAiStructuredFields(value: unknown) {

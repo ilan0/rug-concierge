@@ -29,7 +29,7 @@ const RUG_ID_PARAMS_SCHEMA = z.object({ id: z.string().uuid() }).strict();
 const PATCH_BODY_SCHEMA = z
   .object({
     stock_id: z.string().max(80).nullable().optional(),
-    status: z.enum(["available", "on_hold"]).optional(),
+    status: z.enum(["available", "not_available"]).optional(),
     staff_overrides: staffOverridesSchema.optional(),
   })
   .strict();
@@ -238,6 +238,16 @@ export async function PATCH(
     if (computedTitle) {
       updatePayload.intake_label = computedTitle;
     }
+  }
+
+  const nextEnrichmentStatus =
+    typeof updatePayload.enrichment_status === "string"
+      ? updatePayload.enrichment_status
+      : existing.enrichment_status;
+  if (nextEnrichmentStatus !== "ready") {
+    updatePayload.status = "not_available";
+  } else if (updatePayload.status === "available") {
+    updatePayload.status = "available";
   }
 
   let updated = existing;

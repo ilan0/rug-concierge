@@ -98,15 +98,18 @@ export async function POST(
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 
-  await setRugProcessingState({
+  const processingState = await setRugProcessingState({
     tenantId,
     rugId: params.value.id,
+    currentStatus: existing.status,
+    currentEnrichmentStatus: existing.enrichment_status,
     supabase: supabaseAdmin,
   });
 
   const enqueueResult = await enqueueInventoryEnrichmentJob({
     tenantId,
     rugId: params.value.id,
+    restoreAvailableOnReady: processingState.restoreAvailableOnReady,
     supabase: supabaseAdmin,
   });
   if (!enqueueResult.ok) {

@@ -51,7 +51,7 @@ function toStringOrNull(value: unknown): string | null {
 function toInventoryRugStatusOrNull(
   value: unknown
 ): InventoryRugStatus | null {
-  return value === "available" || value === "on_hold" ? value : null;
+  return value === "available" || value === "not_available" ? value : null;
 }
 
 function toNumberOrNull(value: unknown): number | null {

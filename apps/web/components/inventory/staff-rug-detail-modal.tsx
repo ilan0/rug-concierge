@@ -134,6 +134,16 @@ function formatList(value: string[] | null | undefined): string {
   return value.join(" · ");
 }
 
+function toEffectiveAvailabilityStatus(input: {
+  status: InventoryRugStatus | null;
+  enrichmentStatus: StaffInventoryRugDetail["enrichment_status"];
+}): InventoryRugStatus {
+  if (input.status === "available" && input.enrichmentStatus === "ready") {
+    return "available";
+  }
+  return "not_available";
+}
+
 function detailToDraft(detail: StaffInventoryRugDetail): EditDraft {
   return {
     label: detail.effective_fields.label ?? "",
@@ -144,7 +154,10 @@ function detailToDraft(detail: StaffInventoryRugDetail): EditDraft {
     age_category: detail.effective_fields.age_category ?? "",
     mood: detail.effective_fields.mood ?? "",
     stock_id: detail.stock_id ?? "",
-    status: detail.status === "on_hold" ? "on_hold" : "available",
+    status: toEffectiveAvailabilityStatus({
+      status: detail.status,
+      enrichmentStatus: detail.enrichment_status,
+    }),
   };
 }
 
@@ -280,6 +293,13 @@ export function StaffRugDetailModal({
   const baselineDraft = useMemo(() => (detail ? detailToDraft(detail) : null), [detail]);
   const hasUnsavedChanges =
     editMode && draft && baselineDraft ? !draftsEqual(draft, baselineDraft) : false;
+  const effectiveAvailability = detail
+    ? toEffectiveAvailabilityStatus({
+        status: detail.status,
+        enrichmentStatus: detail.enrichment_status,
+      })
+    : "not_available";
+  const isReadyForAvailabilityToggle = detail?.enrichment_status === "ready";
 
   const resetDraftFromDetail = () => {
     if (!detail) return;
@@ -436,9 +456,13 @@ export function StaffRugDetailModal({
 
   const onAvailabilityToggle = async (nextAvailable: boolean) => {
     if (!detail || saving || reAnalyzing || deleting) return;
-    const currentAvailable = detail.status === "available";
+    const currentAvailable = effectiveAvailability === "available";
     if (currentAvailable === nextAvailable) return;
-    const nextStatus = nextAvailable ? "available" : "on_hold";
+    if (nextAvailable && !isReadyForAvailabilityToggle) {
+      toast.info("This rug will become available automatically once enrichment is ready.");
+      return;
+    }
+    const nextStatus = nextAvailable ? "available" : "not_available";
     if (hasUnsavedChanges) {
       setPendingAvailabilityStatus(nextStatus);
       promptUnsavedChanges("availability-toggle");
@@ -559,19 +583,24 @@ export function StaffRugDetailModal({
                     <button
                       type="button"
                       className={
-                        detail.status === "available"
+                        effectiveAvailability === "available"
                           ? "rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-800 ring-1 ring-emerald-200"
                           : "rounded-full px-3 py-1 text-xs font-medium text-muted-foreground hover:bg-accent"
                       }
                       onClick={() => void onAvailabilityToggle(true)}
-                      disabled={saving || reAnalyzing || deleting}
+                      disabled={
+                        saving ||
+                        reAnalyzing ||
+                        deleting ||
+                        !isReadyForAvailabilityToggle
+                      }
                     >
                       Available
                     </button>
                     <button
                       type="button"
                       className={
-                        detail.status !== "available"
+                        effectiveAvailability !== "available"
                           ? "rounded-full bg-rose-100 px-3 py-1 text-xs font-semibold text-rose-800 ring-1 ring-rose-200"
                           : "rounded-full px-3 py-1 text-xs font-medium text-muted-foreground hover:bg-accent"
                       }

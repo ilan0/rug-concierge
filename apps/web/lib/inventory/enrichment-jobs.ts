@@ -12,6 +12,7 @@ import {
   sanitizeFallbackTradeLabel,
 } from "@/lib/inventory/title-builder";
 import { requestVisionEnrichment } from "@/lib/inventory/vision-enrichment";
+import type { InventoryRugStatus } from "@/lib/types/inventory";
 
 export const INVENTORY_ENRICHMENT_WORKER_CLAIM_LIMIT = 5;
 export const INVENTORY_ENRICHMENT_WORKER_RUN_BUDGET_MS = 45_000;
@@ -31,12 +32,14 @@ type InventoryEnrichmentJobRow = {
   lock_owner: string | null;
   created_at: string;
   updated_at: string;
+  restore_available_on_ready: boolean;
 };
 
 export type EnqueueInventoryEnrichmentJobInput = {
   tenantId: string;
   rugId: string;
   maxAttempts?: number;
+  restoreAvailableOnReady?: boolean;
   supabase?: SupabaseClient;
 };
 
@@ -111,6 +114,7 @@ function parseJobRow(value: unknown): InventoryEnrichmentJobRow | null {
   const maxAttempts = toIntegerOrNull(row.max_attempts);
   const createdAt = toStringOrNull(row.created_at);
   const updatedAt = toStringOrNull(row.updated_at);
+  const restoreAvailableOnReady = row.restore_available_on_ready !== false;
 
   if (
     !id ||
@@ -138,12 +142,21 @@ function parseJobRow(value: unknown): InventoryEnrichmentJobRow | null {
     lock_owner: toStringOrNull(row.lock_owner),
     created_at: createdAt,
     updated_at: updatedAt,
+    restore_available_on_ready: restoreAvailableOnReady,
   };
 }
 
 function getRetryDelayMs(nextAttemptCount: number): number {
   const index = Math.max(0, Math.min(RETRY_DELAYS_MS.length - 1, nextAttemptCount - 1));
   return RETRY_DELAYS_MS[index];
+}
+
+function isMissingRestoreAvailabilityColumnError(message: string): boolean {
+  const normalized = message.toLowerCase();
+  return (
+    normalized.includes("restore_available_on_ready") &&
+    (normalized.includes("column") || normalized.includes("schema cache"))
+  );
 }
 
 function normalizeText(value: string | null | undefined): string {
@@ -175,6 +188,7 @@ async function updateRugReviewState(input: {
   rugId: string;
   enrichmentStatus: "ready" | "needs_review" | "processing";
   reviewReasonCode: ReviewReasonCode | null;
+  status?: InventoryRugStatus;
   intakeLabel?: string | null;
   aiDescription?: string | null;
   aiStructuredFields?: unknown;
@@ -192,6 +206,9 @@ async function updateRugReviewState(input: {
   }
   if (Object.prototype.hasOwnProperty.call(input, "aiStructuredFields")) {
     payload.ai_structured_fields = input.aiStructuredFields ?? null;
+  }
+  if (Object.prototype.hasOwnProperty.call(input, "status")) {
+    payload.status = input.status ?? null;
   }
 
   await input.supabase
@@ -259,6 +276,7 @@ async function scheduleRetryOrFail(input: {
     rugId: input.job.rug_id,
     enrichmentStatus: "needs_review",
     reviewReasonCode: "ANALYSIS_FAILED",
+    status: "not_available",
   });
   await updateJobState({
     supabase: input.supabase,
@@ -318,6 +336,7 @@ async function processOneJob(input: {
       rugId: input.job.rug_id,
       enrichmentStatus: "needs_review",
       reviewReasonCode: "ANALYSIS_FAILED",
+      status: "not_available",
     });
     await updateJobState({
       supabase: input.supabase,
@@ -356,6 +375,7 @@ async function processOneJob(input: {
       rugId: input.job.rug_id,
       enrichmentStatus: "needs_review",
       reviewReasonCode: "NON_RUG_DETECTED",
+      status: "not_available",
       intakeLabel: "Non-Rug Image, Needs Review",
       aiDescription: enrichment.aiDescription,
       aiStructuredFields: enrichment.aiStructuredFields,
@@ -384,6 +404,7 @@ async function processOneJob(input: {
       rugId: input.job.rug_id,
       enrichmentStatus: "ready",
       reviewReasonCode: null,
+      status: input.job.restore_available_on_ready ? "available" : "not_available",
       intakeLabel: deterministicTitle,
       aiDescription: enrichment.aiDescription,
       aiStructuredFields: enrichment.aiStructuredFields,
@@ -408,6 +429,7 @@ async function processOneJob(input: {
     rugId: input.job.rug_id,
     enrichmentStatus: "needs_review",
     reviewReasonCode: "ANALYSIS_INCOMPLETE",
+    status: "not_available",
     intakeLabel: fallbackOrExistingTitle,
     aiDescription: enrichment.aiDescription,
     aiStructuredFields: enrichment.aiStructuredFields,
@@ -429,24 +451,39 @@ export async function enqueueInventoryEnrichmentJob(
 ): Promise<EnqueueInventoryEnrichmentJobResult> {
   const supabase = getSupabase(input.supabase);
   const maxAttempts = clampMaxAttempts(input.maxAttempts);
+  const restoreAvailableOnReady = input.restoreAvailableOnReady ?? true;
 
-  const result = await supabase
+  const basePayload = {
+    tenant_id: input.tenantId,
+    rug_id: input.rugId,
+    state: "queued" as const,
+    attempt_count: 0,
+    max_attempts: maxAttempts,
+    next_attempt_at: null,
+    last_error: null,
+    locked_at: null,
+    lock_owner: null,
+    updated_at: nowIso(),
+  };
+
+  let result = await supabase
     .from("inventory_enrichment_jobs")
     .upsert(
       {
-        tenant_id: input.tenantId,
-        rug_id: input.rugId,
-        state: "queued",
-        attempt_count: 0,
-        max_attempts: maxAttempts,
-        next_attempt_at: null,
-        last_error: null,
-        locked_at: null,
-        lock_owner: null,
-        updated_at: nowIso(),
+        ...basePayload,
+        restore_available_on_ready: restoreAvailableOnReady,
       },
       { onConflict: "rug_id" }
     );
+
+  if (
+    result.error &&
+    isMissingRestoreAvailabilityColumnError(result.error.message ?? "")
+  ) {
+    result = await supabase
+      .from("inventory_enrichment_jobs")
+      .upsert(basePayload, { onConflict: "rug_id" });
+  }
 
   if (result.error) {
     return { ok: false, error: result.error.message ?? "Unable to enqueue job." };
@@ -605,16 +642,37 @@ export async function runInventoryEnrichmentWorker(input: {
 export async function setRugProcessingState(input: {
   tenantId: string;
   rugId: string;
+  currentStatus?: InventoryRugStatus | null;
+  currentEnrichmentStatus?: "processing" | "ready" | "needs_review" | null;
   supabase?: SupabaseClient;
-}): Promise<void> {
+}): Promise<{ restoreAvailableOnReady: boolean }> {
   const supabase = getSupabase(input.supabase);
+  let status = input.currentStatus ?? null;
+  let enrichmentStatus = input.currentEnrichmentStatus ?? null;
+
+  if (!status || !enrichmentStatus) {
+    const existing = await fetchRugRecordById({
+      supabase,
+      tenantId: input.tenantId,
+      id: input.rugId,
+    });
+    status = existing?.status ?? status ?? null;
+    enrichmentStatus = existing?.enrichment_status ?? enrichmentStatus ?? null;
+  }
+
+  const restoreAvailableOnReady =
+    status === "available" && enrichmentStatus === "ready";
+
   await updateRugReviewState({
     supabase,
     tenantId: input.tenantId,
     rugId: input.rugId,
     enrichmentStatus: "processing",
     reviewReasonCode: null,
+    status: "not_available",
   });
+
+  return { restoreAvailableOnReady };
 }
 
 export function deriveRugLabelForDuplicate(rug: RugRecord | null): string | null {

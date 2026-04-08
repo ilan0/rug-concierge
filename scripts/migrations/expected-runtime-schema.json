@@ -45,6 +45,7 @@
       "last_error",
       "locked_at",
       "lock_owner",
+      "restore_available_on_ready",
       "created_at",
       "updated_at"
     ],

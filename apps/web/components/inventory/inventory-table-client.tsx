@@ -27,22 +27,34 @@ function formatDate(value: string | null): string {
   return INVENTORY_DATE_FORMATTER.format(parsed);
 }
 
-export function StatusBadge({ status }: { status: string | null }) {
-  if (status === "available")
+function toEffectiveAvailability(input: {
+  status: string | null;
+  enrichmentStatus: string | null;
+}): "available" | "not_available" {
+  if (input.status === "available" && input.enrichmentStatus === "ready") {
+    return "available";
+  }
+  return "not_available";
+}
+
+export function StatusBadge(input: {
+  status: string | null;
+  enrichmentStatus: string | null;
+}) {
+  const effective = toEffectiveAvailability(input);
+  if (effective === "available")
     return (
       <span className="inline-flex items-center gap-1.5 text-sm font-medium text-emerald-700">
         <span className="size-2 shrink-0 rounded-full bg-emerald-500" />
         Available
       </span>
     );
-  if (status === "on_hold")
-    return (
-      <span className="inline-flex items-center gap-1.5 text-sm font-medium text-amber-700">
-        <span className="size-2 shrink-0 rounded-full bg-amber-500" />
-        On Hold
-      </span>
-    );
-  return <span className="text-sm text-muted-foreground">{status ?? "-"}</span>;
+  return (
+    <span className="inline-flex items-center gap-1.5 text-sm font-medium text-red-700">
+      <span className="size-2 shrink-0 rounded-full bg-red-500" />
+      Not Available
+    </span>
+  );
 }
 
 function readiness(row: InventoryBrowserRow): {
@@ -162,7 +174,10 @@ export function InventoryTableClient({ rows }: InventoryTableClientProps) {
                     </span>
 
                     <span className="text-muted-foreground">Status</span>
-                    <StatusBadge status={row.status} />
+                    <StatusBadge
+                      status={row.status}
+                      enrichmentStatus={row.enrichment_status}
+                    />
 
                     <span className="text-muted-foreground">Size</span>
                     <span>{formatRugSize(row.width_total_in, row.length_total_in) || "-"}</span>
@@ -274,7 +289,10 @@ export function InventoryTableClient({ rows }: InventoryTableClientProps) {
                         {formatRugSize(row.width_total_in, row.length_total_in) || "-"}
                       </td>
                       <td className="p-3 align-top">
-                        <StatusBadge status={row.status} />
+                        <StatusBadge
+                          status={row.status}
+                          enrichmentStatus={row.enrichment_status}
+                        />
                       </td>
                       <td className="hidden p-3 align-top 2xl:table-cell">
                         {formatDate(row.created_at)}

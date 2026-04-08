@@ -33,7 +33,7 @@ const DEFAULT_FILTERS: InventoryFilters = {
 const ALLOWED_STATUS: InventoryStatusFilter[] = [
   "all",
   "available",
-  "on_hold",
+  "not_available",
 ];
 
 const ALLOWED_SORT: InventorySort[] = [

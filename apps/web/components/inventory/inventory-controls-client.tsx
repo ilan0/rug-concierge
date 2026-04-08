@@ -59,16 +59,20 @@ type SizeInputParts = {
   inches: string;
 };
 
-const STATUS_OPTIONS: Array<{ value: InventoryStatusFilter; label: string }> = [
-  { value: "available", label: "Available" },
-  { value: "all", label: "All" },
-  { value: "on_hold", label: "On Hold" },
-];
-
 const SORT_OPTIONS: Array<{ value: InventorySort; label: string }> = [
   { value: "newest", label: "Newest" },
   { value: "oldest", label: "Oldest" },
 ];
+
+function statusFromToggles(input: {
+  showAvailable: boolean;
+  showNotAvailable: boolean;
+}): InventoryStatusFilter | null {
+  if (input.showAvailable && input.showNotAvailable) return "all";
+  if (input.showAvailable) return "available";
+  if (input.showNotAvailable) return "not_available";
+  return null;
+}
 
 function chipClass(active: boolean): string {
   return active
@@ -394,13 +398,10 @@ export function InventoryControlsClient({
       });
     }
 
-    if (filters.status !== "available") {
+    if (filters.status !== "available" && filters.status !== "all") {
       items.push({
         key: "status",
-        label:
-          filters.status === "on_hold"
-            ? "On Hold"
-            : filters.status.charAt(0).toUpperCase() + filters.status.slice(1),
+        label: "Not Available",
         onRemove: () => applyPatch({ status: "available" }),
       });
     }
@@ -468,6 +469,9 @@ export function InventoryControlsClient({
     hasInput(lengthMinInput) ||
     hasInput(lengthMaxInput);
 
+  const showAvailable = filters.status !== "not_available";
+  const showNotAvailable = filters.status !== "available";
+
   const renderCustomBound = (
     label: string,
     value: SizeInputParts,
@@ -522,16 +526,34 @@ export function InventoryControlsClient({
           Status
         </p>
         <div className="flex flex-wrap gap-1.5">
-          {STATUS_OPTIONS.map((option) => (
-            <button
-              key={option.value}
-              type="button"
-              className={chipClass(filters.status === option.value)}
-              onClick={() => applyPatch({ status: option.value })}
-            >
-              {option.label}
-            </button>
-          ))}
+          <button
+            type="button"
+            className={chipClass(showAvailable)}
+            onClick={() => {
+              const nextStatus = statusFromToggles({
+                showAvailable: !showAvailable,
+                showNotAvailable,
+              });
+              if (!nextStatus) return;
+              applyPatch({ status: nextStatus });
+            }}
+          >
+            Available
+          </button>
+          <button
+            type="button"
+            className={chipClass(showNotAvailable)}
+            onClick={() => {
+              const nextStatus = statusFromToggles({
+                showAvailable,
+                showNotAvailable: !showNotAvailable,
+              });
+              if (!nextStatus) return;
+              applyPatch({ status: nextStatus });
+            }}
+          >
+            Not Available
+          </button>
         </div>
       </div>
 

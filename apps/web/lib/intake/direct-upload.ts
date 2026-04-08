@@ -472,7 +472,7 @@ export async function finalizeIntakeFromStorage(
     .insert({
       id: rugId,
       tenant_id: input.tenantId,
-      status: "available",
+      status: "not_available",
       stock_id: normalizedStockId,
       intake_label: null,
       ai_description: null,
@@ -537,6 +537,7 @@ export async function finalizeIntakeFromStorage(
   const enqueueResult = await enqueueInventoryEnrichmentJob({
     tenantId: input.tenantId,
     rugId,
+    restoreAvailableOnReady: true,
   });
   if (!enqueueResult.ok) {
     await cleanupFailedFinalize({
@@ -561,7 +562,7 @@ export async function finalizeIntakeFromStorage(
         stock_id: normalizedStockId,
         width_total_in: input.claims.widthTotalIn,
         length_total_in: input.claims.lengthTotalIn,
-        status: "available",
+        status: "not_available",
         enrichment_status: "processing",
         review_reason_code: null,
         primary_image_url: rugImagePathToPublicUrl(supabaseAdmin, input.storagePath),
