@@ -404,7 +404,7 @@ async function processOneJob(input: {
       rugId: input.job.rug_id,
       enrichmentStatus: "ready",
       reviewReasonCode: null,
-      status: input.job.restore_available_on_ready ? "available" : "not_available",
+      status: "available",
       intakeLabel: deterministicTitle,
       aiDescription: enrichment.aiDescription,
       aiStructuredFields: enrichment.aiStructuredFields,
