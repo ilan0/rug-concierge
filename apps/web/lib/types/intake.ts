@@ -12,6 +12,32 @@ export type IntakeCreateRequest = {
   image: File;
 };
 
+export type IntakeUploadSessionRequest = {
+  stock_id?: string | null;
+  width_ft: number;
+  width_in: number;
+  length_ft: number;
+  length_in: number;
+  file: {
+    filename: string;
+    mime_type: string;
+    bytes: number;
+  };
+};
+
+export type IntakeUploadSessionResponse = {
+  upload_url: string;
+  storage_path: string;
+  finalize_token: string;
+  expires_at: string;
+};
+
+export type IntakeFinalizeRequest = {
+  storage_path: string;
+  finalize_token: string;
+  client_sha256?: string | null;
+};
+
 export type IntakeCreatedRug = {
   id: string;
   stock_id: string | null;
@@ -29,6 +55,8 @@ export type IntakeCreateResponse = {
   rug: IntakeCreatedRug;
   ai_status: "processing";
 };
+
+export type IntakeFinalizeResponse = IntakeCreateResponse;
 
 export type IntakeDuplicateImageResponse = {
   error: string;

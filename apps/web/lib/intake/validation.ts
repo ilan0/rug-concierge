@@ -11,7 +11,8 @@ export type ValidatedDimensions = {
 
 export const INTAKE_LABEL_MAX_CHARS = 120;
 export const INTAKE_IMAGE_MAX_BYTES = 10 * 1024 * 1024;
-const ALLOWED_IMAGE_TYPES = new Set([
+export const INTAKE_DIRECT_UPLOAD_MAX_BYTES = 80 * 1024 * 1024;
+export const ALLOWED_INTAKE_IMAGE_TYPES = [
   "image/jpeg",
   "image/jpg",
   "image/png",
@@ -19,7 +20,9 @@ const ALLOWED_IMAGE_TYPES = new Set([
   "image/heic",
   "image/heif",
   "image/avif",
-]);
+] as const;
+
+const ALLOWED_IMAGE_TYPES: ReadonlySet<string> = new Set(ALLOWED_INTAKE_IMAGE_TYPES);
 
 export function normalizeIntakeLabel(value: unknown): string {
   return typeof value === "string" ? value.trim() : "";
@@ -125,4 +128,47 @@ export function validateImageFile(
     return { ok: false, error: "image must be 10MB or smaller." };
   }
   return { ok: true, file: value };
+}
+
+export function validateImageUploadMetadata(input: {
+  mimeType: unknown;
+  bytes: unknown;
+  maxBytes?: number;
+}):
+  | { ok: true; mimeType: string; bytes: number }
+  | { ok: false; error: string } {
+  const mimeType =
+    typeof input.mimeType === "string" ? input.mimeType.trim().toLowerCase() : "";
+  if (!mimeType || !ALLOWED_IMAGE_TYPES.has(mimeType)) {
+    return {
+      ok: false,
+      error:
+        "file.mime_type must be one of: jpeg, jpg, png, webp, heic, heif, or avif.",
+    };
+  }
+
+  const maxBytes =
+    typeof input.maxBytes === "number" && Number.isFinite(input.maxBytes)
+      ? Math.floor(input.maxBytes)
+      : INTAKE_DIRECT_UPLOAD_MAX_BYTES;
+  if (
+    typeof input.bytes !== "number" ||
+    !Number.isFinite(input.bytes) ||
+    !Number.isInteger(input.bytes) ||
+    input.bytes <= 0
+  ) {
+    return { ok: false, error: "file.bytes must be a positive whole number." };
+  }
+  if (input.bytes > maxBytes) {
+    return {
+      ok: false,
+      error: `file.bytes must be ${Math.floor(maxBytes / 1024 / 1024)}MB or smaller.`,
+    };
+  }
+
+  return {
+    ok: true,
+    mimeType,
+    bytes: input.bytes,
+  };
 }

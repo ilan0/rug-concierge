@@ -42,7 +42,9 @@ type IntakeFieldErrors = {
 
 type BatchItemState =
   | "queued"
+  | "preparing"
   | "uploading"
+  | "finalizing"
   | "created"
   | "duplicate_rejected"
   | "error";
@@ -194,7 +196,9 @@ function recomputeLocalDuplicateFlags(items: BatchItem[]): BatchItem[] {
 
 function batchStateLabel(state: BatchItemState): string {
   if (state === "queued") return "Queued";
+  if (state === "preparing") return "Preparing";
   if (state === "uploading") return "Uploading";
+  if (state === "finalizing") return "Finalizing";
   if (state === "created") return "Created";
   if (state === "duplicate_rejected") return "Duplicate";
   return "Error";
@@ -202,7 +206,9 @@ function batchStateLabel(state: BatchItemState): string {
 
 function batchStateTone(state: BatchItemState): string {
   if (state === "created") return "bg-emerald-100 text-emerald-800 border-emerald-200";
+  if (state === "preparing") return "bg-sky-100 text-sky-800 border-sky-200";
   if (state === "uploading") return "bg-amber-100 text-amber-800 border-amber-200";
+  if (state === "finalizing") return "bg-indigo-100 text-indigo-800 border-indigo-200";
   if (state === "duplicate_rejected") return "bg-orange-100 text-orange-800 border-orange-200";
   if (state === "error") return "bg-red-100 text-red-800 border-red-200";
   return "bg-secondary text-foreground/80 border-border/60";
@@ -566,7 +572,7 @@ export function IntakeScreen() {
       }
 
       updateBatchItem(item.id, {
-        state: "uploading",
+        state: "preparing",
         message: null,
         createdRug: null,
       });
@@ -579,6 +585,13 @@ export function IntakeScreen() {
           length_ft: dimensions.value.lengthFt,
           length_in: dimensions.value.lengthIn,
           image: item.file,
+        }, {
+          onStageChange: (stage) => {
+            updateBatchItem(item.id, {
+              state: stage,
+              message: null,
+            });
+          },
         });
 
         created += 1;

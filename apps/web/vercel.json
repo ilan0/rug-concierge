@@ -3,6 +3,10 @@
     {
       "path": "/api/cron/inventory-enrichment",
       "schedule": "* * * * *"
+    },
+    {
+      "path": "/api/cron/intake-orphan-cleanup",
+      "schedule": "15 3 * * *"
     }
   ]
 }

@@ -190,6 +190,12 @@ function normalizeHostname(value: string): string {
 function parseSubdomain(hostOrUrl: string): string {
   const hostname = normalizeHostname(hostOrUrl);
   const labels = hostname.split(".").filter(Boolean);
+  if (hostname.endsWith(".localhost")) {
+    if (labels.length < 2) {
+      throw new Error(`Expected a subdomain hostname, got: ${hostname}`);
+    }
+    return labels[0] ?? "";
+  }
   if (labels.length < 3) {
     throw new Error(`Expected a subdomain hostname, got: ${hostname}`);
   }
@@ -381,12 +387,19 @@ async function submitSingleRug(input: {
 
   await form.getByPlaceholder("e.g. HER-1082").fill(input.row.stock_id);
 
-  const responsePromise = input.page.waitForResponse(
-    (resp) =>
-      resp.url().includes("/api/inventory/intake") &&
-      resp.request().method().toUpperCase() === "POST",
-    { timeout: 90_000 }
-  );
+  const responsePromise = input.page.waitForResponse((resp) => {
+    if (resp.request().method().toUpperCase() !== "POST") return false;
+    const url = resp.url();
+    if (url.includes("/api/inventory/intake/finalize")) return true;
+    if (
+      url.includes("/api/inventory/intake") &&
+      !url.includes("/upload-session") &&
+      !url.includes("/finalize")
+    ) {
+      return true;
+    }
+    return false;
+  }, { timeout: 120_000 });
 
   await form.getByRole("button", { name: "Add to inventory" }).click();
 
