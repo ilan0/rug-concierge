@@ -143,21 +143,19 @@ export function RugDetailModal({
             </div>
           )}
 
-          <DialogFooter className="shrink-0 gap-2 border-t border-border/55 px-4 py-3 sm:px-6">
-            {onShare ? (
+          {onShare ? (
+            <DialogFooter className="shrink-0 gap-2 border-t border-border/55 px-4 py-3 sm:px-6">
               <Button
                 type="button"
                 variant="outline"
+                className="min-h-11 px-4"
                 onClick={onShare}
                 disabled={isLoading || !detail}
               >
                 Share
               </Button>
-            ) : null}
-            <Button type="button" variant="ghost" onClick={() => onOpenChange(false)}>
-              Close
-            </Button>
-          </DialogFooter>
+            </DialogFooter>
+          ) : null}
         </div>
       </DialogContent>
     </Dialog>

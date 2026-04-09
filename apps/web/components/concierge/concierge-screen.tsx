@@ -20,10 +20,8 @@ type ConciergeScreenProps = {
 const BODY_SIZE = "text-[18px] leading-7 sm:text-[19px] sm:leading-[30px]";
 const COMPOSER_REST_OFFSET_DESKTOP = 12;
 const COMPOSER_REST_OFFSET_MOBILE = 8;
-const CONTENT_SAFETY_GAP = 20;
-const INITIAL_COMPOSER_HEIGHT = 104;
-// Accounts for the New Chat pill (34px) + its bottom gap (10px) above the composer card.
-const NEW_CHAT_PILL_CLEARANCE_PX = 20;
+const CONTENT_BOTTOM_PADDING_DESKTOP = 176;
+const CONTENT_BOTTOM_PADDING_MOBILE = 164;
 
 export function ConciergeScreen({
   variant = "concierge",
@@ -33,7 +31,6 @@ export function ConciergeScreen({
 }: ConciergeScreenProps) {
   const controller = useConciergeController({ variant, tenantId });
   const keyboardInsetPx = useVisualViewportInset();
-  const [composerHeightPx, setComposerHeightPx] = useState(INITIAL_COMPOSER_HEIGHT);
   const [isSmallViewport, setIsSmallViewport] = useState(false);
   const [showJumpToLatest, setShowJumpToLatest] = useState(false);
   const [jumpToLatest, setJumpToLatest] = useState<(() => void) | null>(null);
@@ -52,9 +49,7 @@ export function ConciergeScreen({
     return () => mediaQuery.removeListener(sync);
   }, []);
 
-  const onComposerHeightChange = useCallback((nextHeight: number) => {
-    setComposerHeightPx((prev) => (prev === nextHeight ? prev : nextHeight));
-  }, []);
+  const onComposerHeightChange = useCallback(() => {}, []);
   const onJumpToLatestHandlerChange = useCallback(
     (handler: (() => void) | null) => {
       setJumpToLatest(() => handler);
@@ -80,15 +75,10 @@ export function ConciergeScreen({
     return () => window.clearTimeout(timer);
   }, [hasMessages]);
 
-  const composerClearancePx = useMemo(() => {
-    const pillExtra = hasMessages ? NEW_CHAT_PILL_CLEARANCE_PX : 0;
-    return (
-      Math.max(
-        INITIAL_COMPOSER_HEIGHT + CONTENT_SAFETY_GAP,
-        composerHeightPx + keyboardInsetPx + composerRestOffsetPx + CONTENT_SAFETY_GAP
-      ) + pillExtra
-    );
-  }, [composerHeightPx, keyboardInsetPx, composerRestOffsetPx, hasMessages]);
+  const contentBottomPaddingPx = useMemo(
+    () => (isSmallViewport ? CONTENT_BOTTOM_PADDING_MOBILE : CONTENT_BOTTOM_PADDING_DESKTOP) + keyboardInsetPx,
+    [isSmallViewport, keyboardInsetPx]
+  );
 
   return (
     <>
@@ -136,6 +126,7 @@ export function ConciergeScreen({
           // Active: scrolling chat; floating composer rendered outside <main> below.
           <div
             className="mx-auto w-[calc(100vw-24px)] max-w-[920px] pb-6 [text-size-adjust:100%] [-webkit-text-size-adjust:100%] sm:w-[min(860px,calc(100vw-40px))] xl:w-[920px] concierge-bubble-enter"
+            style={{ paddingBottom: `${contentBottomPaddingPx}px` }}
           >
             <ChatThread
               turns={controller.turns}
@@ -148,7 +139,6 @@ export function ConciergeScreen({
               onJumpToLatestHandlerChange={onJumpToLatestHandlerChange}
             />
 
-            <div aria-hidden="true" style={{ height: `${composerClearancePx}px` }} />
           </div>
         )}
       </main>

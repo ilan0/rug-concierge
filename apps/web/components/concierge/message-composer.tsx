@@ -106,6 +106,16 @@ export function MessageComposer(input: MessageComposerProps) {
   const showJumpControl = showJumpToLatest && typeof onJumpToLatest === "function";
   const showNewChatControl =
     showNewChat && !isCompactViewport && (!showJumpControl || !isCompactViewport);
+  const utilityRowVisible = showJumpControl || showNewChatControl;
+  const utilityBottomMarginPx = isCompactViewport && utilityRowVisible ? 4 : 8;
+  const dockVerticalPaddingPx = isCompactViewport
+    ? utilityRowVisible
+      ? 4
+      : 6
+    : utilityRowVisible
+      ? 6
+      : 8;
+  const dockMaxHeight = isCompactViewport ? 104 : 112;
 
   return (
     <section
@@ -129,22 +139,29 @@ export function MessageComposer(input: MessageComposerProps) {
       <div ref={containerRef} className="w-full">
         {/* Composer card */}
         <div
-          className="w-full rounded-[24px] border border-[var(--border-primary)] bg-[var(--surface)]/92 p-3 shadow-[0_12px_32px_rgba(42,27,11,0.12)] supports-[backdrop-filter:blur(0px)]:backdrop-blur-[8px] sm:p-4"
-          style={{ minHeight: "104px", paddingBottom: "calc(0.75rem + env(safe-area-inset-bottom, 0px))" }}
+          className="w-full rounded-[20px] border border-[var(--border-primary)] bg-[var(--surface)]/92 px-3 shadow-[0_8px_22px_rgba(46,34,24,0.08)] supports-[backdrop-filter:blur(0px)]:backdrop-blur-[8px]"
+          style={{
+            maxHeight: `${dockMaxHeight}px`,
+            paddingTop: `${dockVerticalPaddingPx}px`,
+            paddingBottom: `calc(${dockVerticalPaddingPx}px + env(safe-area-inset-bottom, 0px))`,
+          }}
         >
-          {showJumpControl || showNewChatControl ? (
-            <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+          {utilityRowVisible ? (
+            <div
+              className="flex items-center justify-between gap-2"
+              style={{ minHeight: "36px", marginBottom: `${utilityBottomMarginPx}px` }}
+            >
               {showNewChatControl ? (
                 <button
                   type="button"
                   onClick={onNewChat}
                   disabled={isNewChatDisabled}
                   className={cn(
-                    "concierge-hoverable flex h-11 min-w-[160px] items-center justify-center gap-2 rounded-[20px] border border-[var(--border-primary)] bg-[var(--surface)] px-4 text-[16px] font-medium leading-5 text-[var(--text-secondary)] transition active:scale-[0.995] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-gold)] focus-visible:ring-offset-2",
+                    "concierge-hoverable flex h-9 min-w-[140px] items-center justify-center gap-2 rounded-xl border border-[var(--border-primary)] bg-[var(--surface-2)] px-[14px] text-[14px] font-medium leading-5 text-[var(--text-secondary)] transition active:scale-[0.995] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-gold)] focus-visible:ring-offset-2",
                     "disabled:cursor-not-allowed disabled:opacity-40"
                   )}
                 >
-                  <RotateCcw className="size-4" />
+                  <RotateCcw className="size-[14px]" />
                   New conversation
                 </button>
               ) : (
@@ -154,11 +171,11 @@ export function MessageComposer(input: MessageComposerProps) {
               {showJumpControl ? (
                 <button
                   type="button"
-                  className="concierge-hoverable flex h-11 min-w-[152px] items-center justify-center gap-2 rounded-[20px] border border-[var(--border-primary)] bg-[var(--surface)] px-4 text-[16px] font-medium leading-5 text-[var(--text-secondary)] transition active:scale-[0.995] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-gold)] focus-visible:ring-offset-2"
+                  className="concierge-hoverable flex h-9 min-w-[132px] items-center justify-center gap-2 rounded-xl border border-[var(--border-primary)] bg-[var(--surface-2)] px-[14px] text-[14px] font-medium leading-5 text-[var(--text-secondary)] transition active:scale-[0.995] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-gold)] focus-visible:ring-offset-2"
                   aria-label="Jump to latest"
                   onClick={onJumpToLatest}
                 >
-                  <ArrowDown className="size-4" />
+                  <ArrowDown className="size-[14px]" />
                   <span>Jump to latest</span>
                 </button>
               ) : null}

@@ -49,7 +49,7 @@ export function SiteHeader({ storeName, storeLogoUrl, showBranding = true }: Sit
 
   return (
     <>
-      <header className="fixed left-0 right-0 top-0 z-50 border-b border-[var(--divider-subtle)] bg-[var(--surface)]/92 backdrop-blur-sm">
+      <header className="fixed left-0 right-0 top-0 z-50 border-b border-[var(--divider-subtle)] bg-[color-mix(in_srgb,var(--surface)_96%,transparent)] backdrop-blur-0 sm:backdrop-blur-[2px]">
         <div className="mx-auto flex h-14 max-w-[920px] items-center justify-between px-3 sm:h-16 sm:px-5">
           {showBranding ? (
             <div className="flex min-w-0 items-center gap-2.5">
