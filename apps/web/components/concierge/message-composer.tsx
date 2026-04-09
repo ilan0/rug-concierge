@@ -1,4 +1,4 @@
-import { useEffect, useRef, type FormEvent } from "react";
+import { useEffect, useRef, type FormEvent, type KeyboardEvent } from "react";
 import { ArrowDown, RotateCcw } from "lucide-react";
 import type { ConciergeVariant } from "@/components/concierge/types";
 import { Button } from "@/components/ui/button";
@@ -50,6 +50,14 @@ export function MessageComposer(input: MessageComposerProps) {
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   // Measures the full wrapper height (pill + card + footer) for clearance calculation.
   const containerRef = useRef<HTMLDivElement | null>(null);
+
+  const handleTextareaKeyDown = (event: KeyboardEvent<HTMLTextAreaElement>) => {
+    if (event.key !== "Enter" || event.shiftKey) return;
+    if (event.nativeEvent.isComposing) return;
+    if (!canSubmit || isLoading) return;
+    event.preventDefault();
+    event.currentTarget.form?.requestSubmit();
+  };
 
   useEffect(() => {
     const node = textareaRef.current;
@@ -149,6 +157,7 @@ export function MessageComposer(input: MessageComposerProps) {
                 ref={textareaRef}
                 value={message}
                 onChange={(event) => onMessageChange(event.target.value)}
+                onKeyDown={handleTextareaKeyDown}
                 placeholder="Describe what you're looking for…"
                 rows={1}
                 maxLength={2000}

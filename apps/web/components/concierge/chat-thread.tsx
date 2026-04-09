@@ -17,12 +17,7 @@ function RugLoadingState() {
     <div className="flex items-center gap-3 py-1">
       <RugSpinner size={32} />
       <span className="inline-flex min-h-[1.6rem] min-w-[24ch] items-baseline text-[15px] text-foreground/70">
-        <span className="animate-concierge-loader-breathe">Searching the collection</span>
-        <span aria-hidden="true" className="ml-0.5 inline-flex">
-          <span className="animate-concierge-loader-dot [animation-delay:0ms]">.</span>
-          <span className="animate-concierge-loader-dot [animation-delay:220ms]">.</span>
-          <span className="animate-concierge-loader-dot [animation-delay:440ms]">.</span>
-        </span>
+        <span className="animate-concierge-loader-breathe">Searching the collection...</span>
       </span>
     </div>
   );
