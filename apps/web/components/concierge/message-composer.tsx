@@ -107,15 +107,8 @@ export function MessageComposer(input: MessageComposerProps) {
   const showNewChatControl =
     showNewChat && !isCompactViewport && (!showJumpControl || !isCompactViewport);
   const utilityRowVisible = showJumpControl || showNewChatControl;
-  const utilityBottomMarginPx = isCompactViewport && utilityRowVisible ? 4 : 8;
-  const dockVerticalPaddingPx = isCompactViewport
-    ? utilityRowVisible
-      ? 4
-      : 6
-    : utilityRowVisible
-      ? 6
-      : 8;
-  const dockMaxHeight = isCompactViewport ? 104 : 112;
+  const utilityBottomMarginPx = utilityRowVisible ? 8 : 0;
+  const dockVerticalPaddingPx = isCompactViewport ? 8 : 10;
 
   return (
     <section
@@ -141,7 +134,7 @@ export function MessageComposer(input: MessageComposerProps) {
         <div
           className="w-full rounded-[20px] border border-[var(--border-primary)] bg-[var(--surface)]/92 px-3 shadow-[0_8px_22px_rgba(46,34,24,0.08)] supports-[backdrop-filter:blur(0px)]:backdrop-blur-[8px]"
           style={{
-            maxHeight: `${dockMaxHeight}px`,
+            minHeight: "104px",
             paddingTop: `${dockVerticalPaddingPx}px`,
             paddingBottom: `calc(${dockVerticalPaddingPx}px + env(safe-area-inset-bottom, 0px))`,
           }}
@@ -149,7 +142,7 @@ export function MessageComposer(input: MessageComposerProps) {
           {utilityRowVisible ? (
             <div
               className="flex items-center justify-between gap-2"
-              style={{ minHeight: "36px", marginBottom: `${utilityBottomMarginPx}px` }}
+              style={{ minHeight: "44px", marginBottom: `${utilityBottomMarginPx}px` }}
             >
               {showNewChatControl ? (
                 <button
@@ -157,7 +150,7 @@ export function MessageComposer(input: MessageComposerProps) {
                   onClick={onNewChat}
                   disabled={isNewChatDisabled}
                   className={cn(
-                    "concierge-hoverable flex h-9 min-w-[140px] items-center justify-center gap-2 rounded-xl border border-[var(--border-primary)] bg-[var(--surface-2)] px-[14px] text-[14px] font-medium leading-5 text-[var(--text-secondary)] transition active:scale-[0.995] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-gold)] focus-visible:ring-offset-2",
+                    "concierge-hoverable flex h-11 min-w-[146px] items-center justify-center gap-2 rounded-xl border border-[var(--border-primary)] bg-[var(--surface-2)] px-[14px] text-[14px] font-medium leading-5 text-[var(--text-secondary)] transition active:scale-[0.995] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-gold)] focus-visible:ring-offset-2",
                     "disabled:cursor-not-allowed disabled:opacity-40"
                   )}
                 >
@@ -171,7 +164,7 @@ export function MessageComposer(input: MessageComposerProps) {
               {showJumpControl ? (
                 <button
                   type="button"
-                  className="concierge-hoverable flex h-9 min-w-[132px] items-center justify-center gap-2 rounded-xl border border-[var(--border-primary)] bg-[var(--surface-2)] px-[14px] text-[14px] font-medium leading-5 text-[var(--text-secondary)] transition active:scale-[0.995] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-gold)] focus-visible:ring-offset-2"
+                  className="concierge-hoverable flex h-11 min-w-[132px] items-center justify-center gap-2 rounded-xl border border-[var(--border-primary)] bg-[var(--surface-2)] px-[14px] text-[14px] font-medium leading-5 text-[var(--text-secondary)] transition active:scale-[0.995] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-gold)] focus-visible:ring-offset-2"
                   aria-label="Jump to latest"
                   onClick={onJumpToLatest}
                 >

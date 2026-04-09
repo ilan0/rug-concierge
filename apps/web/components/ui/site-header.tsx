@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Lock } from "lucide-react";
 import StaffPinModal from "@/components/kiosk/staff-pin-modal";
+import { StoreLogoMark } from "@/components/ui/store-logo-mark";
 import {
   readStaffPinLockedUntilMs,
   secondsUntilStaffPinUnlock,
@@ -17,7 +18,6 @@ type SiteHeaderProps = {
 
 export function SiteHeader({ storeName, storeLogoUrl, showBranding = true }: SiteHeaderProps) {
   const router = useRouter();
-  const [showLogo, setShowLogo] = useState(Boolean(storeLogoUrl));
   const [showPinModal, setShowPinModal] = useState(false);
   const [pinCooldownSeconds, setPinCooldownSeconds] = useState(() => {
     const lockedUntil = readStaffPinLockedUntilMs();
@@ -52,17 +52,14 @@ export function SiteHeader({ storeName, storeLogoUrl, showBranding = true }: Sit
       <header className="fixed left-0 right-0 top-0 z-50 border-b border-[var(--divider-subtle)] bg-[color-mix(in_srgb,var(--surface)_96%,transparent)] backdrop-blur-0 sm:backdrop-blur-[2px]">
         <div className="mx-auto flex h-14 max-w-[920px] items-center justify-between px-3 sm:h-16 sm:px-5">
           {showBranding ? (
-            <div className="flex min-w-0 items-center gap-2.5">
-              {showLogo && storeLogoUrl ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={storeLogoUrl}
-                  alt={`${storeName} logo`}
-                  className="h-7 w-auto flex-shrink-0 object-contain sm:h-8"
-                  onError={() => setShowLogo(false)}
-                />
-              ) : null}
-              <span className="truncate font-serif text-[18px] font-semibold leading-[1.2] tracking-tight text-[var(--text-primary)] sm:text-[20px]">
+            <div className="flex min-w-0 items-center gap-3">
+              <StoreLogoMark
+                storeName={storeName}
+                logoUrl={storeLogoUrl}
+                containerClassName="h-11 w-11 rounded-xl"
+                fallbackTextClassName="text-sm"
+              />
+              <span className="max-w-[180px] truncate text-[18px] font-medium leading-[1.2] text-[var(--text-primary)] sm:max-w-[320px] sm:text-[20px]">
                 {storeName}
               </span>
             </div>

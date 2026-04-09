@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { StoreLogoMark } from "@/components/ui/store-logo-mark";
 import { cn } from "@/lib/utils";
 
 type StoreHeroLockupProps = {
@@ -10,35 +10,19 @@ type StoreHeroLockupProps = {
 };
 
 export function StoreHeroLockup({ storeName, storeLogoUrl, className }: StoreHeroLockupProps) {
-  const [showLogo, setShowLogo] = useState(Boolean(storeLogoUrl));
-
-  useEffect(() => {
-    setShowLogo(Boolean(storeLogoUrl));
-  }, [storeLogoUrl]);
-
   return (
     <section className={cn("flex flex-col items-center text-center", className)}>
-      <div className="flex w-full flex-col items-center gap-5 lg:flex-row lg:justify-center lg:gap-6">
-        {showLogo && storeLogoUrl ? (
-          <div className="flex h-[56px] w-[116px] items-center justify-center sm:h-[64px] sm:w-[132px] lg:h-[72px] lg:w-[150px]">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={storeLogoUrl}
-              alt={`${storeName} logo`}
-              className="max-h-full w-full object-contain"
-              onError={() => setShowLogo(false)}
-            />
-          </div>
-        ) : null}
-
-        <h1 className="max-w-[16ch] font-serif text-[36px] font-semibold leading-[1.1] tracking-tight text-[var(--text-primary)] sm:text-[48px] sm:leading-[1.08] lg:max-w-none lg:text-[56px] lg:leading-[1.07]">
+      <StoreLogoMark
+        storeName={storeName}
+        logoUrl={storeLogoUrl}
+        containerClassName="h-[88px] w-[88px] rounded-2xl"
+        fallbackTextClassName="text-[28px] tracking-[0.1em]"
+      />
+      <div className="mt-5 max-w-[22ch]">
+        <h1 className="overflow-hidden text-balance font-serif text-[42px] leading-[44px] tracking-tight text-[var(--text-primary)] [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:2] sm:text-[48px] sm:leading-[52px] lg:text-[60px] lg:leading-[62px] xl:text-[72px] xl:leading-[74px]">
           {storeName}
         </h1>
       </div>
-
-      <p className="mt-5 max-w-[48ch] text-[16px] font-light italic leading-8 text-[var(--text-secondary)] sm:mt-6">
-        Every piece in the collection, at your fingertips.
-      </p>
     </section>
   );
 }

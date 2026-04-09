@@ -1,20 +1,22 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState, type FormEvent } from "react";
+import { AttractModePanel } from "@/components/concierge/attract-mode-panel";
 import { ChatThread } from "@/components/concierge/chat-thread";
+import { IdlePromptModal } from "@/components/concierge/idle-prompt-modal";
 import { MessageComposer } from "@/components/concierge/message-composer";
-import { StoreHeroLockup } from "@/components/concierge/store-hero-lockup";
 import { useConciergeController } from "@/components/concierge/use-concierge-controller";
+import { useIdlePrompt } from "@/components/concierge/use-idle-prompt";
 import { useVisualViewportInset } from "@/components/concierge/use-visual-viewport-inset";
 import type { ConciergeVariant } from "@/components/concierge/types";
 import { SiteHeader } from "@/components/ui/site-header";
-import { cn } from "@/lib/utils";
 
 type ConciergeScreenProps = {
   variant?: ConciergeVariant;
   tenantId: string;
   storeName: string;
   storeLogoUrl: string | null;
+  attractImageUrls: string[];
 };
 
 const BODY_SIZE = "text-[18px] leading-7 sm:text-[19px] sm:leading-[30px]";
@@ -28,13 +30,14 @@ export function ConciergeScreen({
   tenantId,
   storeName,
   storeLogoUrl,
+  attractImageUrls,
 }: ConciergeScreenProps) {
   const controller = useConciergeController({ variant, tenantId });
   const keyboardInsetPx = useVisualViewportInset();
   const [isSmallViewport, setIsSmallViewport] = useState(false);
   const [showJumpToLatest, setShowJumpToLatest] = useState(false);
   const [jumpToLatest, setJumpToLatest] = useState<(() => void) | null>(null);
-  const [heroTransitioning, setHeroTransitioning] = useState(false);
+  const idle = useIdlePrompt();
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -58,35 +61,52 @@ export function ConciergeScreen({
   );
 
   const hasMessages = controller.turns.length > 0;
-  const isHeroState = controller.turns.length === 0 && !controller.isLoading;
-  const shouldFloatComposer = true;
+  const shouldRenderActiveChat = idle.viewMode === "active_chat";
 
   const composerRestOffsetPx = isSmallViewport
     ? COMPOSER_REST_OFFSET_MOBILE
     : COMPOSER_REST_OFFSET_DESKTOP;
-
-  useEffect(() => {
-    if (!hasMessages) {
-      setHeroTransitioning(false);
-      return;
-    }
-    setHeroTransitioning(true);
-    const timer = window.setTimeout(() => setHeroTransitioning(false), 160);
-    return () => window.clearTimeout(timer);
-  }, [hasMessages]);
 
   const contentBottomPaddingPx = useMemo(
     () => (isSmallViewport ? CONTENT_BOTTOM_PADDING_MOBILE : CONTENT_BOTTOM_PADDING_DESKTOP) + keyboardInsetPx,
     [isSmallViewport, keyboardInsetPx]
   );
 
+  const onStartOver = useCallback(() => {
+    idle.registerActivity();
+    idle.returnToAttractMode();
+    controller.onReset();
+    setShowJumpToLatest(false);
+    setJumpToLatest(null);
+  }, [controller, idle]);
+
+  const onMessageChange = useCallback(
+    (value: string) => {
+      idle.registerActivity();
+      controller.setMessage(value);
+    },
+    [controller, idle]
+  );
+
+  const onSubmit = useCallback(
+    (event: FormEvent<HTMLFormElement>) => {
+      idle.registerActivity();
+      void controller.onSubmit(event);
+    },
+    [controller, idle]
+  );
+
+  const onChoosePrompt = useCallback(
+    (prompt: (typeof controller.starterPrompts)[number]) => {
+      idle.registerActivity();
+      controller.submitWithPrompt(prompt);
+    },
+    [controller, idle]
+  );
+
   return (
     <>
-      <SiteHeader
-        storeName={storeName}
-        storeLogoUrl={storeLogoUrl}
-        showBranding={!isHeroState && !heroTransitioning}
-      />
+      <SiteHeader storeName={storeName} storeLogoUrl={storeLogoUrl} showBranding={true} />
 
       <div
         aria-hidden="true"
@@ -97,33 +117,14 @@ export function ConciergeScreen({
         className="relative pt-14 [text-size-adjust:100%] [-webkit-text-size-adjust:100%] sm:pt-16"
         style={{ minHeight: "calc(100dvh - 56px)" }}
       >
-        {isHeroState || heroTransitioning ? (
-          // Hero: fills available space below header; centers content vertically.
-          <div className={cn("flex min-h-[calc(100dvh-56px)] flex-col items-center justify-center py-8 sm:min-h-[calc(100dvh-64px)] sm:py-10 transition-opacity duration-150", hasMessages ? "opacity-0" : "opacity-100")}>
-            <div className="mx-auto w-[calc(100vw-24px)] max-w-[920px] sm:w-[min(860px,calc(100vw-40px))] xl:w-[920px]">
-              {/* Welcome moment */}
-              <div className="mb-8 px-2 [text-size-adjust:100%] [-webkit-text-size-adjust:100%] sm:mb-10 sm:px-4">
-                <StoreHeroLockup storeName={storeName} storeLogoUrl={storeLogoUrl} />
-              </div>
-
-              {/* Unified card: greeting + chips as one surface */}
-              <div className="overflow-hidden rounded-3xl border border-[var(--border-primary)] bg-[var(--surface)] shadow-[0_8px_24px_rgba(35,24,10,0.08)]">
-                <ChatThread
-                  turns={controller.turns}
-                  isLoading={controller.isLoading}
-                  showSlowNotice={controller.showSlowNotice}
-                  emptyStatePrompts={controller.starterPrompts}
-                  bodyTextClassName={BODY_SIZE}
-                  onChoosePrompt={controller.submitWithPrompt}
-                  onJumpToLatestVisibilityChange={setShowJumpToLatest}
-                  onJumpToLatestHandlerChange={onJumpToLatestHandlerChange}
-                  bareEmptyState={true}
-                />
-              </div>
-            </div>
-          </div>
+        {idle.viewMode === "attract_mode" ? (
+          <AttractModePanel
+            storeName={storeName}
+            storeLogoUrl={storeLogoUrl}
+            backgroundImageUrls={attractImageUrls}
+            onStart={idle.startActiveChat}
+          />
         ) : (
-          // Active: scrolling chat; floating composer rendered outside <main> below.
           <div
             className="mx-auto w-[calc(100vw-24px)] max-w-[920px] pb-6 [text-size-adjust:100%] [-webkit-text-size-adjust:100%] sm:w-[min(860px,calc(100vw-40px))] xl:w-[920px] concierge-bubble-enter"
             style={{ paddingBottom: `${contentBottomPaddingPx}px` }}
@@ -134,7 +135,7 @@ export function ConciergeScreen({
               showSlowNotice={controller.showSlowNotice}
               emptyStatePrompts={controller.starterPrompts}
               bodyTextClassName={BODY_SIZE}
-              onChoosePrompt={controller.submitWithPrompt}
+              onChoosePrompt={onChoosePrompt}
               onJumpToLatestVisibilityChange={setShowJumpToLatest}
               onJumpToLatestHandlerChange={onJumpToLatestHandlerChange}
             />
@@ -143,8 +144,7 @@ export function ConciergeScreen({
         )}
       </main>
 
-      {/* Floating composer lives outside <main> so it never affects scroll width */}
-      {shouldFloatComposer ? (
+      {shouldRenderActiveChat ? (
         <MessageComposer
           variant={variant}
           message={controller.message}
@@ -155,17 +155,23 @@ export function ConciergeScreen({
           bottomOffsetPx={keyboardInsetPx}
           restingOffsetPx={composerRestOffsetPx}
           onHeightChange={onComposerHeightChange}
-          onMessageChange={controller.setMessage}
-          onSubmit={controller.onSubmit}
+          onMessageChange={onMessageChange}
+          onSubmit={onSubmit}
           onRetry={() => void controller.onRetryLastMessage()}
           showJumpToLatest={showJumpToLatest}
           onJumpToLatest={jumpToLatest ?? undefined}
           floating={true}
           showNewChat={hasMessages && !controller.isLoading}
           isNewChatDisabled={controller.isLoading || controller.isResettingChat}
-          onNewChat={() => void controller.onNewChat()}
+          onNewChat={onStartOver}
         />
       ) : null}
+
+      <IdlePromptModal
+        open={idle.showIdlePrompt}
+        onContinue={idle.continueChat}
+        onStartOver={onStartOver}
+      />
     </>
   );
 }

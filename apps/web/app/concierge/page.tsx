@@ -1,6 +1,7 @@
 import { ConciergeScreen } from "@/components/concierge/concierge-screen";
 import { AccessGuard } from "@/components/ui/access-guard";
 import { isStaffUnlocked } from "@/lib/auth/staff";
+import { getAttractModeImageUrls } from "@/lib/branding/attract-images";
 import { getResolvedBranding } from "@/lib/branding/tenant-branding";
 import { getServerUiTenantId } from "@/lib/ui/server-role";
 import { redirect } from "next/navigation";
@@ -22,6 +23,7 @@ export default async function ConciergePage() {
   }
 
   const branding = await getResolvedBranding({ tenantId });
+  const attractImageUrls = await getAttractModeImageUrls({ tenantId });
 
   return (
     <>
@@ -29,6 +31,7 @@ export default async function ConciergePage() {
         tenantId={tenantId}
         storeName={branding.storeName}
         storeLogoUrl={branding.storeLogoUrl}
+        attractImageUrls={attractImageUrls}
       />
     </>
   );

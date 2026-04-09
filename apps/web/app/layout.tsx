@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
-import { Manrope, Instrument_Serif } from "next/font/google";
+import { Instrument_Serif, Inter } from "next/font/google";
 import "./globals.css";
 import { LayoutHeader } from "@/components/kiosk/layout-header";
 import { AppToaster } from "@/components/ui/sonner";
 import { isStaffUnlocked } from "@/lib/auth/staff";
 
-const manrope = Manrope({
+const inter = Inter({
   subsets: ["latin"],
   variable: "--font-sans",
 });
@@ -37,7 +37,7 @@ export default async function RootLayout({
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
       </head>
-      <body className={`${manrope.variable} ${instrumentSerif.variable} min-h-screen bg-background font-sans text-foreground antialiased`}>
+      <body className={`${inter.variable} ${instrumentSerif.variable} min-h-screen bg-background font-sans text-foreground antialiased`}>
         <LayoutHeader initialUnlocked={unlocked} />
         {children}
         <AppToaster />

@@ -10,11 +10,15 @@
   --user-bubble: #e8d8c6;
   --text-primary: #2e2218;
   --text-secondary: #6b5a4b;
-  --border-primary: #e5dbcf;
+  --border: #e5dbcf;
+  --divider: #eee6dd;
+  --border-primary: var(--border);
   --border-interactive: #d8ccbc;
-  --divider-subtle: #eee6dd;
+  --divider-subtle: var(--divider);
   --accent-gold: #c9a14a;
+  --accent-gold-hover: #b8923e;
   --accent-gold-soft: #e9d6a5;
+  --scrim: rgba(34, 22, 12, 0.46);
   --error-bg-warm: #f7ece8;
   --error-border-warm: #e7cfc8;
   --error-text-warm: #6a2e24;
@@ -51,9 +55,10 @@ html {
 body {
   color: var(--text-primary);
   font-family:
+    Inter,
+    var(--font-sans),
     "Avenir Next",
     Avenir,
-    var(--font-sans),
     "Helvetica Neue",
     Helvetica,
     Arial,
