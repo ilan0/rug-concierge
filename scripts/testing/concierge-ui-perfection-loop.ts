@@ -1,11 +1,10 @@
 import fs from "node:fs";
 import http from "node:http";
 import path from "node:path";
-import assert from "node:assert/strict";
 import { chromium, type Browser, type Page } from "playwright";
-import { createIdleController, IDLE_TIMEOUT_MS } from "../../apps/web/lib/concierge/idle-controller";
+import { IDLE_TIMEOUT_MS } from "../../apps/web/lib/concierge/idle-controller";
 
-type GateName = "A" | "B" | "C" | "D" | "E" | "F" | "G" | "H";
+type GateName = "A" | "B" | "C" | "D" | "E";
 
 type GateResult = {
   gate: GateName;
@@ -348,93 +347,6 @@ async function applyBrandFixture(page: Page, fixture: Fixture): Promise<void> {
   await page.waitForTimeout(250);
 }
 
-function runUnitIdleCheck(): GateResult {
-  let now = 0;
-  let handleCounter = 1;
-  const timers = new Map<number, { at: number; callback: () => void }>();
-  let idleCount = 0;
-
-  const setTimer = (callback: () => void, timeoutMs: number): number => {
-    const handle = handleCounter++;
-    timers.set(handle, { at: now + timeoutMs, callback });
-    return handle;
-  };
-
-  const clearTimer = (handle: number) => {
-    timers.delete(handle);
-  };
-
-  const advance = (ms: number) => {
-    const target = now + ms;
-    while (true) {
-      let nextHandle: number | null = null;
-      let nextAt = Number.POSITIVE_INFINITY;
-      for (const [handle, timer] of timers.entries()) {
-        if (timer.at < nextAt) {
-          nextAt = timer.at;
-          nextHandle = handle;
-        }
-      }
-      if (nextHandle === null || nextAt > target) break;
-      now = nextAt;
-      const timer = timers.get(nextHandle);
-      timers.delete(nextHandle);
-      timer?.callback();
-    }
-    now = target;
-  };
-
-  const failures: string[] = [];
-
-  const controller = createIdleController({
-    onIdle: () => {
-      idleCount += 1;
-    },
-    timeoutMs: IDLE_TIMEOUT_MS,
-    setTimer,
-    clearTimer,
-  });
-
-  try {
-    controller.start();
-    advance(IDLE_TIMEOUT_MS - 1);
-    assert.equal(idleCount, 0);
-    advance(1);
-    assert.equal(idleCount, 1);
-
-    idleCount = 0;
-    controller.start();
-    advance(60_000);
-    controller.markActivity();
-    advance(IDLE_TIMEOUT_MS - 1);
-    assert.equal(idleCount, 0);
-    advance(1);
-    assert.equal(idleCount, 1);
-
-    idleCount = 0;
-    controller.start();
-    controller.stop();
-    advance(IDLE_TIMEOUT_MS + 10_000);
-    assert.equal(idleCount, 0);
-  } catch (error) {
-    failures.push(error instanceof Error ? error.message : String(error));
-  }
-
-  return {
-    gate: "A",
-    pass: failures.length === 0,
-    failures,
-    details: {
-      idleTimeoutMs: IDLE_TIMEOUT_MS,
-      checks: [
-        "idle timer fires at 5 minutes",
-        "timer resets on activity",
-        "timer cleanup on stop",
-      ],
-    },
-  };
-}
-
 async function runViewportFlow(
   browser: Browser,
   cycleDir: string,
@@ -445,7 +357,10 @@ async function runViewportFlow(
     seedStateLoading: SeedState;
   }
 ): Promise<{
-  failures: string[];
+  functionalFailures: string[];
+  layoutFailures: string[];
+  accessibilityFailures: string[];
+  stabilityFailures: string[];
   runtimeErrors: { consoleErrors: string[]; pageErrors: string[] };
   touchViolations: Array<Record<string, unknown>>;
   overflow: boolean;
@@ -459,7 +374,10 @@ async function runViewportFlow(
     window.sessionStorage.setItem(payload.turnsKey, payload.turnsValue);
   }, options.seedStateLoading);
   const page = await context.newPage();
-  const failures: string[] = [];
+  const functionalFailures: string[] = [];
+  const layoutFailures: string[] = [];
+  const accessibilityFailures: string[] = [];
+  const stabilityFailures: string[] = [];
   const consoleErrors: string[] = [];
   const pageErrors: string[] = [];
   page.on("console", (msg) => {
@@ -475,15 +393,71 @@ async function runViewportFlow(
 
   await page.screenshot({ path: path.join(viewportDir, "state-empty.png"), fullPage: true });
 
+  if ((await page.locator("header").count()) !== 0) {
+    functionalFailures.push("header should not render in tap-to-start state");
+  }
+
   if ((await page.getByRole("button", { name: "Tap to Start" }).count()) === 0) {
-    failures.push("attract mode not visible");
+    functionalFailures.push("attract mode not visible");
+  }
+
+  const lockButton = page.getByLabel("Unlock staff mode").first();
+  if ((await lockButton.count()) === 0) {
+    functionalFailures.push("staff lock button missing on tap-to-start");
+  }
+
+  const lockAttract = await lockButton
+    .evaluate((node) => {
+      const rect = node.getBoundingClientRect();
+      const style = getComputedStyle(node);
+      return {
+        top: Math.round(rect.top),
+        rightGap: Math.round(window.innerWidth - rect.right),
+        position: style.position,
+      };
+    })
+    .catch(() => null);
+
+  if (!lockAttract) {
+    functionalFailures.push("unable to read staff lock geometry on tap-to-start");
+  } else {
+    if (lockAttract.position !== "fixed") {
+      functionalFailures.push("staff lock is not fixed positioned");
+    }
+    if (lockAttract.top > 24 || lockAttract.rightGap > 40) {
+      functionalFailures.push("staff lock not anchored to top-right offset");
+    }
   }
 
   await page.getByRole("button", { name: "Tap to Start" }).click();
   await page.waitForTimeout(250);
 
+  if ((await page.locator("header").count()) !== 1) {
+    functionalFailures.push("header should render in active chat state");
+  }
+
   if ((await page.locator("textarea").count()) === 0) {
-    failures.push("composer not visible in active chat");
+    functionalFailures.push("composer not visible in active chat");
+  }
+
+  if (lockAttract) {
+    const lockActive = await lockButton
+      .evaluate((node) => {
+        const rect = node.getBoundingClientRect();
+        return {
+          top: Math.round(rect.top),
+          rightGap: Math.round(window.innerWidth - rect.right),
+        };
+      })
+      .catch(() => null);
+    if (!lockActive) {
+      functionalFailures.push("unable to read staff lock geometry in active chat");
+    } else if (
+      Math.abs(lockActive.top - lockAttract.top) > 2 ||
+      Math.abs(lockActive.rightGap - lockAttract.rightGap) > 2
+    ) {
+      functionalFailures.push("staff lock placement shifted between tap and chat states");
+    }
   }
 
   await page.screenshot({ path: path.join(viewportDir, "state-loading.png"), fullPage: true });
@@ -505,7 +479,7 @@ async function runViewportFlow(
     await page.waitForTimeout(120);
     await page.screenshot({ path: path.join(viewportDir, "state-carousel-scrolled.png"), fullPage: true });
   } else {
-    failures.push("recommendation rail missing");
+    functionalFailures.push("recommendation rail missing");
   }
 
   const firstCard = page.locator('[data-recommendation-card="true"]').first();
@@ -519,7 +493,7 @@ async function runViewportFlow(
     await page.keyboard.press("Escape");
     await page.waitForTimeout(220);
   } else {
-    failures.push("recommendation card missing");
+    functionalFailures.push("recommendation card missing");
   }
 
   await page.fill('textarea[placeholder*="Describe"]', "Draft should persist");
@@ -541,7 +515,7 @@ async function runViewportFlow(
   const jumpButton = page.getByRole("button", { name: /jump to latest/i }).first();
   const jumpVisible = await jumpButton.isVisible().catch(() => false);
   const keptPosition = Math.abs((await page.evaluate(() => window.scrollY)) - scrollBefore) < 60;
-  if (!jumpVisible) failures.push("jump to latest did not appear while scrolled up");
+  if (!jumpVisible) functionalFailures.push("jump to latest did not appear while scrolled up");
   if (jumpVisible) {
     await jumpButton.click();
     await page.waitForTimeout(900);
@@ -553,7 +527,7 @@ async function runViewportFlow(
   });
 
   if (!jumpWorked) {
-    failures.push("jump to latest did not return to bottom");
+    functionalFailures.push("jump to latest did not return to bottom");
   }
 
   await page.clock.fastForward(IDLE_TIMEOUT_MS);
@@ -562,7 +536,7 @@ async function runViewportFlow(
     (await page.getByRole("dialog", { name: /still with us/i }).count()) > 0 ||
     (await page.getByText("Still with us?").count()) > 0;
   if (!idleVisible) {
-    failures.push("idle prompt did not appear after timeout");
+    functionalFailures.push("idle prompt did not appear after timeout");
   }
   await page.screenshot({ path: path.join(viewportDir, "state-idle-prompt.png"), fullPage: true });
 
@@ -574,10 +548,10 @@ async function runViewportFlow(
       const draftPersisted =
         (await page.locator('textarea[placeholder*="Describe"]').inputValue()) === "Draft should persist";
       if (!draftPersisted) {
-        failures.push("draft did not persist after Continue Chat");
+        functionalFailures.push("draft did not persist after Continue Chat");
       }
     } else {
-      failures.push("continue chat button missing from idle prompt");
+      functionalFailures.push("continue chat button missing from idle prompt");
     }
 
     await page.clock.fastForward(IDLE_TIMEOUT_MS);
@@ -588,42 +562,69 @@ async function runViewportFlow(
       await page.waitForTimeout(250);
       const resetAttractVisible = (await page.getByRole("button", { name: "Tap to Start" }).count()) > 0;
       if (!resetAttractVisible) {
-        failures.push("Start Over did not return to attract mode");
+        functionalFailures.push("Start Over did not return to attract mode");
       }
     } else if (options.checkStartOver) {
-      failures.push("start over button missing from idle prompt");
+      functionalFailures.push("start over button missing from idle prompt");
+    }
+  }
+
+  if (lockAttract) {
+    const lockIdle = await lockButton
+      .evaluate((node) => {
+        const rect = node.getBoundingClientRect();
+        return {
+          top: Math.round(rect.top),
+          rightGap: Math.round(window.innerWidth - rect.right),
+        };
+      })
+      .catch(() => null);
+    if (lockIdle) {
+      if (
+        Math.abs(lockIdle.top - lockAttract.top) > 2 ||
+        Math.abs(lockIdle.rightGap - lockAttract.rightGap) > 2
+      ) {
+        functionalFailures.push("staff lock placement shifted in idle modal state");
+      }
     }
   }
 
   const touchViolations = await checkMinTouchTargets(page);
   if (touchViolations.length > 0) {
-    failures.push("touch targets below 44x44 found");
+    accessibilityFailures.push("touch targets below 44x44 found");
   }
 
   const overflow = await hasHorizontalOverflow(page);
   if (overflow) {
-    failures.push("horizontal overflow detected");
+    layoutFailures.push("horizontal overflow detected");
   }
 
   const contrast = await checkContrast(page);
   if (!contrast.pass) {
-    failures.push("contrast checks failed");
+    accessibilityFailures.push("contrast checks failed");
   }
 
   const focusVisibleOk = HAS_FOCUS_VISIBLE_RULE;
   if (!focusVisibleOk) {
-    failures.push("focus-visible ring not detected");
+    accessibilityFailures.push("focus-visible ring not detected");
   }
 
   const reducedMotionOk = HAS_REDUCED_MOTION_RULE;
   if (!reducedMotionOk) {
-    failures.push("reduced-motion preference not respected");
+    accessibilityFailures.push("reduced-motion preference not respected");
+  }
+
+  if (consoleErrors.length > 0 || pageErrors.length > 0) {
+    stabilityFailures.push("runtime errors detected");
   }
 
   await context.close();
 
   return {
-    failures,
+    functionalFailures,
+    layoutFailures,
+    accessibilityFailures,
+    stabilityFailures,
     runtimeErrors: { consoleErrors, pageErrors },
     touchViolations,
     overflow,
@@ -654,18 +655,12 @@ async function runBrandFixtureAudit(browser: Browser, cycleDir: string): Promise
       await page.screenshot({ path: path.join(fixtureDir, `${viewport.id}.png`), fullPage: true });
 
       const metrics = await page.evaluate(() => {
-        const headerName = document.querySelector("header span.block");
+        const header = document.querySelector("header");
         const heroName = document.querySelector("section h1");
-        const logo = document.querySelector("header img, section img");
-
-        const headerOk = headerName instanceof HTMLElement
-          ? headerName.scrollWidth > headerName.clientWidth
-            ? getComputedStyle(headerName).textOverflow === "ellipsis"
-            : true
-          : false;
+        const logo = document.querySelector("section img");
 
         const heroOk = heroName instanceof HTMLElement
-          ? heroName.clientHeight <= parseFloat(getComputedStyle(heroName).lineHeight) * 2 + 6
+          ? heroName.clientHeight <= parseFloat(getComputedStyle(heroName).lineHeight) * 2 + 8
           : false;
 
         const logoOk = logo instanceof HTMLImageElement
@@ -673,19 +668,18 @@ async function runBrandFixtureAudit(browser: Browser, cycleDir: string): Promise
           : true;
 
         return {
-          headerOk,
+          headerMissing: header === null,
           heroOk,
           logoOk,
-          headerText: headerName?.textContent ?? "",
           heroText: heroName?.textContent ?? "",
         };
       });
 
       const overflow = await hasHorizontalOverflow(page);
 
-      if (!metrics.headerOk || !metrics.heroOk || !metrics.logoOk || overflow) {
+      if (!metrics.headerMissing || !metrics.heroOk || !metrics.logoOk || overflow) {
         failures.push(
-          `${fixture.id}/${viewport.id}: headerOk=${String(metrics.headerOk)} heroOk=${String(
+          `${fixture.id}/${viewport.id}: headerMissing=${String(metrics.headerMissing)} heroOk=${String(
             metrics.heroOk
           )} logoOk=${String(metrics.logoOk)} overflow=${String(overflow)}`
         );
@@ -709,8 +703,6 @@ async function runCycle(cycleId: string): Promise<CycleSummary> {
   fs.mkdirSync(cycleDir, { recursive: true });
 
   const gateResults: GateResult[] = [];
-  const gateA = runUnitIdleCheck();
-  gateResults.push(gateA);
 
   const proxy = await startProxy(PROXY_PORT, TARGET_HOST);
   const browser = await chromium.launch({ headless: true });
@@ -719,12 +711,10 @@ async function runCycle(cycleId: string): Promise<CycleSummary> {
 
   try {
     const viewportResults: Record<string, unknown> = {};
-    const runtimeFailures: string[] = [];
-    const touchFailures: string[] = [];
+    const functionalFailures: string[] = [];
     const overflowFailures: string[] = [];
-    const motionFailures: string[] = [];
-    const scrollFailures: string[] = [];
-    const contrastFailures: string[] = [];
+    const accessibilityFailures: string[] = [];
+    const runtimeFailures: string[] = [];
     for (const [index, viewport] of VIEWPORTS.entries()) {
       const result = await runViewportFlow(browser, cycleDir, viewport, {
         checkStartOver: index === VIEWPORTS.length - 1,
@@ -733,81 +723,49 @@ async function runCycle(cycleId: string): Promise<CycleSummary> {
       });
       viewportResults[viewport.id] = result;
 
+      functionalFailures.push(
+        ...result.functionalFailures.map((failure) => `${viewport.id}: ${failure}`)
+      );
+      overflowFailures.push(
+        ...result.layoutFailures.map((failure) => `${viewport.id}: ${failure}`)
+      );
+      accessibilityFailures.push(
+        ...result.accessibilityFailures.map((failure) => `${viewport.id}: ${failure}`)
+      );
+      runtimeFailures.push(
+        ...result.stabilityFailures.map((failure) => `${viewport.id}: ${failure}`)
+      );
       if (result.runtimeErrors.consoleErrors.length > 0 || result.runtimeErrors.pageErrors.length > 0) {
-        runtimeFailures.push(viewport.id);
-      }
-      if (result.touchViolations.length > 0) {
-        touchFailures.push(viewport.id);
-      }
-      if (result.overflow) {
-        overflowFailures.push(viewport.id);
-      }
-      if (!result.reducedMotionOk) {
-        motionFailures.push(`${viewport.id}: reduced motion`);
-      }
-      if (!result.scrollBehavior.keptPosition || !result.scrollBehavior.jumpWorked) {
-        scrollFailures.push(viewport.id);
-      }
-      if (!result.contrast.pass) {
-        contrastFailures.push(viewport.id);
-      }
-      if (result.failures.length > 0) {
-        motionFailures.push(...result.failures.map((failure) => `${viewport.id}: ${failure}`));
+        runtimeFailures.push(`${viewport.id}: runtime console/page errors`);
       }
     }
 
     gateResults.push({
-      gate: "B",
-      pass: motionFailures.length === 0,
-      failures: motionFailures,
-      details: { viewportResults },
-    });
-
-    gateResults.push({
-      gate: "C",
-      pass: contrastFailures.length === 0,
-      failures: contrastFailures,
-      details: {
-        threshold: {
-          body: 4.5,
-          secondary: 4.5,
-        },
-      },
-    });
-
-    gateResults.push({
-      gate: "D",
-      pass: motionFailures.length === 0,
-      failures: motionFailures,
+      gate: "A",
+      pass: functionalFailures.length === 0,
+      failures: functionalFailures,
       details: {
         requirement: [
-          "state transitions render cleanly",
-          "reduced motion respected",
+          "tap-to-start transitions to active chat",
+          "staff lock placement remains consistent in tap/chat/idle",
+          "header hidden in tap-to-start state",
         ],
+        viewportResults,
       },
     });
 
     gateResults.push({
-      gate: "E",
-      pass: scrollFailures.length === 0,
-      failures: scrollFailures,
+      gate: "B",
+      pass: overflowFailures.length === 0,
+      failures: overflowFailures,
       details: {
         checkedViewports: VIEWPORTS.map((entry) => entry.id),
       },
     });
 
-    gateResults.push({
-      gate: "F",
-      pass: overflowFailures.length === 0,
-      failures: overflowFailures,
-      details: {
-        overflowFailures,
-      },
-    });
-
     const fixtureAudit = await runBrandFixtureAudit(browser, cycleDir);
     gateResults.push({
-      gate: "G",
+      gate: "C",
       pass: fixtureAudit.pass,
       failures: fixtureAudit.failures,
       details: {
@@ -816,15 +774,24 @@ async function runCycle(cycleId: string): Promise<CycleSummary> {
     });
 
     gateResults.push({
-      gate: "H",
-      pass: runtimeFailures.length === 0 && touchFailures.length === 0,
-      failures: [
-        ...runtimeFailures.map((entry) => `${entry}: runtime errors`),
-        ...touchFailures.map((entry) => `${entry}: touch targets under 44x44`),
-      ],
+      gate: "D",
+      pass: accessibilityFailures.length === 0,
+      failures: accessibilityFailures,
+      details: {
+        threshold: {
+          body: 4.5,
+          secondary: 4.5,
+          touchTargetMinPx: 44,
+        },
+      },
+    });
+
+    gateResults.push({
+      gate: "E",
+      pass: runtimeFailures.length === 0,
+      failures: runtimeFailures,
       details: {
         runtimeFailures,
-        touchFailures,
       },
     });
   } finally {

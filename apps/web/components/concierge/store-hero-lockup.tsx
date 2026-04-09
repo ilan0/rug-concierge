@@ -13,20 +13,19 @@ const FALLBACK_STORE_NAME = "Rug Gallery Concierge";
 
 export function StoreHeroLockup({ storeName, storeLogoUrl, className }: StoreHeroLockupProps) {
   const displayStoreName = storeName.trim().length > 0 ? storeName : FALLBACK_STORE_NAME;
+
   return (
-    <section className={cn("flex flex-col items-center text-center lg:flex-row lg:items-center lg:gap-5 lg:text-left", className)}>
+    <section className={cn("flex flex-col items-center text-center", className)}>
       <StoreLogoMark
         storeName={displayStoreName}
         logoUrl={storeLogoUrl}
-        containerClassName="h-[88px] w-[88px] rounded-2xl"
-        imageClassName="p-2"
-        fallbackTextClassName="text-[27px] tracking-[0.1em]"
+        containerClassName="h-[68px] w-[68px] rounded-[14px] sm:h-[84px] sm:w-[84px] sm:rounded-[18px]"
+        imageClassName="p-2 sm:p-2.5"
+        fallbackTextClassName="text-[23px] tracking-[0.08em] sm:text-[27px]"
       />
-      <div className="mt-5 max-w-[24ch] lg:mt-0 lg:max-w-[27ch]">
-        <h1 className="overflow-hidden text-balance font-serif text-[clamp(2.1rem,8vw,2.95rem)] leading-[1.02] tracking-[-0.014em] text-[var(--text-primary)] [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:2] sm:text-[clamp(2.3rem,5.8vw,3.25rem)] lg:text-[clamp(2.5rem,3.2vw,3.85rem)]">
-          {displayStoreName}
-        </h1>
-      </div>
+      <h1 className="mt-3 max-w-[30ch] overflow-hidden text-balance font-serif text-[clamp(1.5rem,3.1vw,2.15rem)] leading-[1.12] tracking-[-0.012em] text-[var(--text-primary)] [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:2]">
+        {displayStoreName}
+      </h1>
     </section>
   );
 }

@@ -5,6 +5,7 @@ import { AttractModePanel } from "@/components/concierge/attract-mode-panel";
 import { ChatThread } from "@/components/concierge/chat-thread";
 import { IdlePromptModal } from "@/components/concierge/idle-prompt-modal";
 import { MessageComposer } from "@/components/concierge/message-composer";
+import { StaffLockButton } from "@/components/concierge/staff-lock-button";
 import { useConciergeController } from "@/components/concierge/use-concierge-controller";
 import { useIdlePrompt } from "@/components/concierge/use-idle-prompt";
 import { useVisualViewportInset } from "@/components/concierge/use-visual-viewport-inset";
@@ -62,6 +63,7 @@ export function ConciergeScreen({
 
   const hasMessages = controller.turns.length > 0;
   const shouldRenderActiveChat = idle.viewMode === "active_chat";
+  const shouldShowHeader = shouldRenderActiveChat;
 
   const composerRestOffsetPx = isSmallViewport
     ? COMPOSER_REST_OFFSET_MOBILE
@@ -106,7 +108,10 @@ export function ConciergeScreen({
 
   return (
     <>
-      <SiteHeader storeName={storeName} storeLogoUrl={storeLogoUrl} showBranding={true} />
+      {shouldShowHeader ? (
+        <SiteHeader storeName={storeName} storeLogoUrl={storeLogoUrl} showBranding={true} />
+      ) : null}
+      <StaffLockButton />
 
       <div
         aria-hidden="true"
@@ -114,8 +119,8 @@ export function ConciergeScreen({
       />
 
       <main
-        className="relative pt-14 [text-size-adjust:100%] [-webkit-text-size-adjust:100%] sm:pt-16"
-        style={{ minHeight: "calc(100dvh - 56px)" }}
+        className="relative [text-size-adjust:100%] [-webkit-text-size-adjust:100%]"
+        style={{ minHeight: "100dvh", paddingTop: shouldShowHeader ? undefined : 0 }}
       >
         {idle.viewMode === "attract_mode" ? (
           <AttractModePanel
@@ -126,7 +131,7 @@ export function ConciergeScreen({
           />
         ) : (
           <div
-            className="mx-auto w-[calc(100vw-24px)] max-w-[920px] pb-6 [text-size-adjust:100%] [-webkit-text-size-adjust:100%] sm:w-[min(860px,calc(100vw-40px))] xl:w-[920px] concierge-bubble-enter"
+            className="mx-auto w-[calc(100vw-24px)] max-w-[920px] pb-6 pt-14 [text-size-adjust:100%] [-webkit-text-size-adjust:100%] sm:w-[min(860px,calc(100vw-40px))] sm:pt-16 xl:w-[920px] concierge-bubble-enter"
             style={{ paddingBottom: `${contentBottomPaddingPx}px` }}
           >
             <ChatThread

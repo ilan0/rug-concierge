@@ -10,19 +10,19 @@ type AttractModePanelProps = {
   onStart: () => void;
 };
 
-function AttractBackdrop(input: { imageUrls: string[] }) {
+function AttractCanvasBackdrop(input: { imageUrls: string[] }) {
   const images = input.imageUrls.slice(0, 3);
   if (images.length === 0) {
     return (
       <div
         aria-hidden="true"
-        className="absolute inset-0 rounded-[34px] bg-[linear-gradient(145deg,rgba(233,214,165,0.23),rgba(243,236,227,0.75)),radial-gradient(circle_at_16%_18%,rgba(201,161,74,0.16),transparent_42%),radial-gradient(circle_at_82%_76%,rgba(46,34,24,0.06),transparent_48%)]"
+        className="absolute inset-0 bg-[linear-gradient(136deg,rgba(62,46,31,0.34),rgba(40,29,18,0.46)),radial-gradient(circle_at_17%_20%,rgba(201,161,74,0.2),transparent_38%),radial-gradient(circle_at_84%_78%,rgba(233,214,165,0.16),transparent_40%),linear-gradient(172deg,#4a3928_0%,#3d2e21_52%,#2f2319_100%)]"
       />
     );
   }
 
   return (
-    <div aria-hidden="true" className="absolute inset-0 overflow-hidden rounded-[34px]">
+    <div aria-hidden="true" className="absolute inset-0 overflow-hidden">
       {images.map((src, index) => (
         // eslint-disable-next-line @next/next/no-img-element
         <img
@@ -30,20 +30,20 @@ function AttractBackdrop(input: { imageUrls: string[] }) {
           src={src}
           alt=""
           className={cn(
-            "absolute inset-0 h-full w-full object-cover opacity-42",
-            index === 1 && "translate-x-[12%] translate-y-[4%] scale-[1.08]",
-            index === 2 && "-translate-x-[10%] -translate-y-[2%] scale-[1.12]"
+            "absolute inset-0 h-full w-full object-cover",
+            index === 1 && "translate-x-[11%] translate-y-[2%] scale-[1.07]",
+            index === 2 && "-translate-x-[8%] -translate-y-[2%] scale-[1.1]"
           )}
           style={{
-            filter: "saturate(0.55) blur(1.5px)",
+            filter: "saturate(0.55) blur(2px)",
+            opacity: index === 0 ? 0.86 : 0.32,
             mixBlendMode: index === 0 ? "normal" : "multiply",
           }}
           loading="eager"
           decoding="async"
         />
       ))}
-      <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(248,244,238,0.26),rgba(248,244,238,0.48),rgba(248,244,238,0.84))]" />
-      <div className="absolute inset-0 bg-[color:rgba(248,244,238,0.32)]" />
+      <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(32,24,18,0.3),rgba(32,24,18,0.36),rgba(32,24,18,0.42))]" />
     </div>
   );
 }
@@ -55,21 +55,26 @@ export function AttractModePanel({
   onStart,
 }: AttractModePanelProps) {
   return (
-    <section className="flex min-h-[calc(100dvh-56px)] items-center justify-center px-3 py-7 sm:min-h-[calc(100dvh-64px)] sm:px-8 sm:py-8">
-      <div className="relative h-[min(540px,calc(100dvh-180px))] w-[min(820px,calc(100vw-80px))] overflow-hidden rounded-[34px] border border-[var(--border-primary)] bg-[color:rgba(252,250,247,0.93)] shadow-[0_14px_28px_rgba(46,34,24,0.09)]">
-        <AttractBackdrop imageUrls={backgroundImageUrls} />
-        <div className="relative z-[1] flex h-full flex-col items-center justify-center px-5 py-9 text-center sm:px-10">
-          <StoreHeroLockup storeName={storeName} storeLogoUrl={storeLogoUrl} />
-          <h2 className="mt-6 font-serif text-[38px] leading-[40px] tracking-[-0.015em] text-[var(--text-primary)] sm:text-[52px] sm:leading-[54px] lg:text-[60px] lg:leading-[62px]">
-            Rug Concierge
-          </h2>
-          <p className="mt-4 max-w-[40ch] text-[18px] leading-7 text-[color:color-mix(in_srgb,var(--text-secondary)_92%,white)] sm:text-[20px] sm:leading-8">
-            Tap to begin a guided rug discovery session
-          </p>
+    <section className="relative flex min-h-[100dvh] items-center justify-center overflow-hidden px-4 pb-[max(24px,env(safe-area-inset-bottom))] pt-[max(24px,env(safe-area-inset-top))] sm:px-8">
+      <AttractCanvasBackdrop imageUrls={backgroundImageUrls} />
+      <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(58,44,29,0.3),rgba(40,29,19,0.42))]" />
+
+      <div className="relative z-[1] w-[min(760px,calc(100vw-32px))] rounded-[20px] border border-[#DCCFBE] bg-[color:rgba(250,246,240,0.9)] px-[22px] pb-[28px] pt-[32px] shadow-[0_24px_64px_rgba(32,24,17,0.24)] sm:w-[min(680px,calc(100vw-56px))] sm:rounded-[24px] sm:px-[56px] sm:pb-[44px] sm:pt-[56px]">
+        <StoreHeroLockup storeName={storeName} storeLogoUrl={storeLogoUrl} />
+
+        <h2 className="mt-[26px] text-balance text-center font-serif text-[clamp(34px,5.2vw,58px)] font-medium leading-[1.06] tracking-[-0.02em] text-[var(--text-primary)]">
+          Discover In-Stock Rugs
+        </h2>
+
+        <p className="mx-auto mt-[14px] max-w-[44ch] text-balance text-center text-[clamp(16px,1.9vw,20px)] leading-[1.4] text-[color:color-mix(in_srgb,var(--text-secondary)_90%,#4e3d2f)]">
+          Curated recommendations for your room and style preferences.
+        </p>
+
+        <div className="mt-[30px] flex justify-center">
           <button
             type="button"
             onClick={onStart}
-            className="mt-9 h-14 min-h-11 w-[240px] rounded-[28px] border border-[var(--accent-gold-soft)] bg-[var(--accent-gold)] text-[18px] font-medium leading-5 tracking-[0.01em] text-[var(--text-primary)] shadow-[0_8px_16px_rgba(185,146,62,0.2)] transition hover:bg-[var(--accent-gold-hover)] active:scale-[0.995] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-gold)] focus-visible:ring-offset-2 sm:h-[68px] sm:w-[320px] sm:rounded-[34px] sm:text-[24px] sm:leading-7 lg:h-[60px] lg:w-[280px] lg:rounded-[30px] lg:text-[20px] lg:leading-6"
+            className="min-h-14 rounded-full border border-[#C9B28D] bg-[linear-gradient(180deg,#f7ebd2_0%,#ecd9b4_100%)] px-6 text-[18px] font-semibold text-[var(--text-primary)] shadow-[0_8px_22px_rgba(58,42,23,0.16)] transition active:scale-[0.985] focus-visible:outline-none focus-visible:shadow-[0_0_0_3px_rgba(201,161,74,0.30)] md:hover:brightness-[0.985] sm:h-[62px] sm:px-[30px]"
           >
             Tap to Start
           </button>
