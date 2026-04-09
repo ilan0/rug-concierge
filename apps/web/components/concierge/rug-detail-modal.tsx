@@ -61,7 +61,7 @@ export function RugDetailModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[90dvh] w-[min(96vw,62rem)] overflow-hidden border-border/70 bg-card/96 p-0 shadow-[0_18px_46px_rgba(31,18,6,0.2)] backdrop-blur supports-[backdrop-filter]:bg-card/90">
+      <DialogContent className="max-h-[90dvh] w-[min(96vw,62rem)] overflow-hidden border-[var(--border-primary)] bg-[color:rgba(252,250,247,0.96)] p-0 shadow-[0_16px_38px_rgba(31,18,6,0.18)] backdrop-blur supports-[backdrop-filter]:bg-[color:rgba(252,250,247,0.9)]">
         <div className="flex h-[min(86dvh,46rem)] min-h-[26rem] flex-col">
           {isLoading ? (
             <div className="flex min-h-0 flex-1 flex-col px-4 py-4 sm:px-6 sm:py-5">
@@ -69,8 +69,8 @@ export function RugDetailModal({
                 <DialogTitle>Loading rug details...</DialogTitle>
                 <DialogDescription>Fetching image and details.</DialogDescription>
               </DialogHeader>
-              <div className="mt-4 min-h-0 flex-1 overflow-hidden rounded-xl border border-border/70 bg-muted/70">
-                <div className="h-full w-full animate-pulse bg-gradient-to-br from-muted via-muted/80 to-muted/60" />
+              <div className="mt-4 min-h-0 flex-1 overflow-hidden rounded-xl border border-[var(--border-primary)] bg-[var(--surface-2)]">
+                <div className="h-full w-full animate-pulse bg-gradient-to-br from-[var(--surface-2)] via-[color:color-mix(in_srgb,var(--surface-2)_78%,white)] to-[var(--surface)]" />
               </div>
             </div>
           ) : error ? (
@@ -83,17 +83,17 @@ export function RugDetailModal({
           ) : detail ? (
             <div className="flex min-h-0 flex-1 flex-col px-4 py-4 sm:px-6 sm:py-5">
               <DialogHeader className="shrink-0 pb-2">
-                <DialogTitle className="line-clamp-2 font-serif text-[1.8rem] leading-tight sm:text-[2rem]">
+                <DialogTitle className="line-clamp-2 font-serif text-[1.72rem] leading-tight tracking-[-0.013em] sm:text-[1.95rem]">
                   {displayLabel}
                 </DialogTitle>
-                <DialogDescription className="italic text-foreground/75">
+                <DialogDescription className="italic text-[var(--text-secondary)]">
                   Size: {detail.size_display}
                 </DialogDescription>
               </DialogHeader>
 
               <div className="grid min-h-0 flex-1 gap-3 md:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)]">
-                <div className="min-h-0 overflow-hidden rounded-xl border border-border/70 bg-muted">
-                  <div className="h-full w-full bg-muted/70 p-2 sm:p-3">
+                <div className="min-h-0 overflow-hidden rounded-xl border border-[var(--border-primary)] bg-[var(--surface-2)]">
+                  <div className="h-full w-full bg-[color:color-mix(in_srgb,var(--surface-2)_88%,white)] p-2 sm:p-3">
                     <RugImage
                       src={detail.primary_image_url}
                       alt={displayLabel}
@@ -104,12 +104,12 @@ export function RugDetailModal({
                   </div>
                 </div>
 
-                <div className="min-h-0 rounded-xl border border-border/60 bg-background/70 p-3 sm:p-4">
+                <div className="min-h-0 rounded-xl border border-[var(--border-primary)] bg-[color:color-mix(in_srgb,var(--surface)_88%,white)] p-3 sm:p-4">
                   <section className="space-y-2">
-                    <h3 className="text-xs font-semibold uppercase tracking-[0.08em] text-primary">
+                    <h3 className="text-xs font-semibold uppercase tracking-[0.08em] text-[var(--text-secondary)]">
                       Description
                     </h3>
-                    <p className="text-sm leading-6 text-foreground/90 [display:-webkit-box] [overflow:hidden] [-webkit-box-orient:vertical] [-webkit-line-clamp:12]">
+                    <p className="text-sm leading-6 text-[var(--text-primary)] [display:-webkit-box] [overflow:hidden] [-webkit-box-orient:vertical] [-webkit-line-clamp:12]">
                       {detail.ai_description ??
                         "Description is being generated. Check back shortly."}
                     </p>
@@ -121,7 +121,7 @@ export function RugDetailModal({
                         {valueChips.map((chip) => (
                           <span
                             key={`${detail.id}-${chip}`}
-                            className="rounded-full border border-border/55 bg-background/70 px-2.5 py-1 text-xs font-medium text-muted-foreground"
+                            className="rounded-full border border-[var(--border-primary)] bg-[var(--surface)] px-2.5 py-1 text-xs font-medium text-[var(--text-secondary)]"
                           >
                             {chip}
                           </span>
@@ -144,11 +144,11 @@ export function RugDetailModal({
           )}
 
           {onShare ? (
-            <DialogFooter className="shrink-0 gap-2 border-t border-border/55 px-4 py-3 sm:px-6">
+            <DialogFooter className="shrink-0 gap-2 border-t border-[var(--divider-subtle)] px-4 py-3 sm:px-6">
               <Button
                 type="button"
                 variant="outline"
-                className="min-h-11 px-4"
+                className="min-h-11 border-[var(--border-primary)] bg-[var(--surface)] px-4 text-[var(--text-secondary)] hover:bg-[var(--surface-2)]"
                 onClick={onShare}
                 disabled={isLoading || !detail}
               >

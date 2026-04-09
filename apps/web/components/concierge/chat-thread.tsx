@@ -14,10 +14,10 @@ import { cn } from "@/lib/utils";
 
 function RugLoadingState() {
   return (
-    <div className="rounded-3xl border border-[var(--border-primary)] bg-[var(--assistant-bubble)] px-5 py-5 sm:px-6 sm:py-6">
+    <div className="rounded-3xl border border-[var(--border-primary)] bg-[var(--assistant-bubble)] px-5 py-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.6)] sm:px-6 sm:py-6">
       <div className="flex items-center gap-3">
         <RugSpinner size={28} />
-        <span className="text-[15px] leading-5 text-[var(--text-secondary)]">Searching the collection...</span>
+        <span className="text-[15px] leading-5 tracking-[0.01em] text-[var(--text-secondary)]">Searching the collection...</span>
       </div>
       <div className="mt-4 space-y-2.5">
         <div className="concierge-loading-line h-4 w-[72%] rounded bg-[var(--surface-2)]" />
@@ -140,18 +140,18 @@ export function ChatThread(input: ChatThreadProps) {
 
   return (
     <section className="relative">
-      <section className="flex flex-col gap-8">
+      <section className="flex flex-col gap-7 sm:gap-8">
         {turns.length === 0 ? (
-          <article className={bareEmptyState ? "max-w-full px-6 py-6 sm:px-7 sm:py-7" : "max-w-full rounded-3xl border border-[var(--border-primary)] bg-[var(--surface)] px-6 py-6 shadow-[0_8px_24px_rgba(35,24,10,0.08)] sm:px-7 sm:py-7"}>
-            <p className="whitespace-pre-wrap text-[30px] leading-[1.22] tracking-tight text-[var(--text-primary)] sm:text-[34px] sm:leading-[1.18]">
+          <article className={bareEmptyState ? "max-w-full px-6 py-6 sm:px-7 sm:py-7" : "max-w-full rounded-3xl border border-[var(--border-primary)] bg-[var(--surface)] px-6 py-6 shadow-[0_8px_20px_rgba(35,24,10,0.08)] sm:px-7 sm:py-7"}>
+            <p className="whitespace-pre-wrap font-serif text-[31px] leading-[1.16] tracking-[-0.013em] text-[var(--text-primary)] sm:text-[35px] sm:leading-[1.14]">
               What are you looking for today?
             </p>
-            <div className="mt-5 flex flex-row flex-wrap justify-center gap-3">
+            <div className="mt-6 flex flex-row flex-wrap justify-center gap-3">
               {emptyStatePrompts.map((prompt) => (
                 <button
                   key={prompt.id}
                   type="button"
-                  className="min-h-11 rounded-full border border-[var(--border-primary)] bg-[var(--surface)] px-5 text-[16px] font-medium leading-5 text-[var(--text-secondary)] transition active:scale-[0.995] disabled:cursor-not-allowed disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-gold)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--surface)] concierge-hoverable"
+                  className="min-h-11 rounded-full border border-[var(--border-primary)] bg-[color:color-mix(in_srgb,var(--surface)_92%,white)] px-5 text-[15px] font-medium leading-5 tracking-[0.01em] text-[var(--text-secondary)] transition active:scale-[0.995] disabled:cursor-not-allowed disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-gold)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--surface)] concierge-hoverable"
                   onClick={() => onChoosePrompt(prompt)}
                 >
                   {prompt.label}
@@ -171,22 +171,22 @@ export function ChatThread(input: ChatThreadProps) {
                 key={turn.id}
                 className={
                   turn.role === "user"
-                    ? "group concierge-bubble-enter ml-auto max-w-[92%] rounded-[24px] border border-[var(--border-primary)] bg-[var(--user-bubble)] px-5 py-5 sm:max-w-[86%] sm:px-6 sm:py-[22px]"
+                    ? "group concierge-bubble-enter ml-auto max-w-[92%] rounded-[24px] border border-[var(--border-primary)] bg-[var(--user-bubble)] px-5 py-5 shadow-[0_8px_16px_rgba(35,24,10,0.07)] sm:max-w-[86%] sm:px-6 sm:py-[22px]"
                     : turn.isStreaming && turn.text === ""
-                      ? "group concierge-bubble-enter max-w-full rounded-[24px] border border-[var(--border-primary)] bg-[var(--assistant-bubble)] px-5 py-5 sm:px-6 sm:py-[22px]"
-                      : "group concierge-bubble-enter max-w-full rounded-[24px] border border-[var(--border-primary)] bg-[var(--assistant-bubble)] px-5 py-5 sm:px-6 sm:py-[22px]"
+                      ? "group concierge-bubble-enter max-w-full rounded-[24px] border border-[var(--border-primary)] bg-[var(--assistant-bubble)] px-5 py-5 shadow-[0_8px_16px_rgba(35,24,10,0.06)] sm:px-6 sm:py-[22px]"
+                      : "group concierge-bubble-enter max-w-full rounded-[24px] border border-[var(--border-primary)] bg-[var(--assistant-bubble)] px-5 py-5 shadow-[0_8px_16px_rgba(35,24,10,0.06)] sm:px-6 sm:py-[22px]"
                 }
               >
                 {!(turn.role === "assistant" && turn.isStreaming && turn.text === "") && (
                   <div className="mb-2 flex items-center justify-between gap-2">
                     {turn.role === "user" ? (
-                      <p className="text-[14px] font-semibold leading-5 tracking-[0.04em] text-[var(--text-secondary)]">
+                      <p className="text-[13px] font-semibold leading-5 tracking-[0.06em] text-[var(--text-secondary)]">
                         {ROLE_LABEL[turn.role]}
                       </p>
                     ) : (
                       <div />
                     )}
-                    <time className="text-[14px] leading-5 text-[var(--text-secondary)] opacity-70 transition-opacity duration-150 group-hover:opacity-100 group-focus-within:opacity-100">
+                    <time className="text-[13px] leading-5 tracking-[0.01em] text-[var(--text-secondary)] opacity-70 transition-opacity duration-150 group-hover:opacity-100 group-focus-within:opacity-100">
                       {formatTime(turn.createdAt)}
                     </time>
                   </div>
@@ -219,8 +219,8 @@ export function ChatThread(input: ChatThreadProps) {
                 )}
 
                 {turn.role === "assistant" && turn.questions && turn.questions.length > 0 ? (
-                  <div className="mt-5 rounded-2xl border border-[var(--accent-gold-soft)] bg-[var(--surface)] p-4">
-                    <p className="text-[14px] font-semibold leading-5 tracking-[0.06em] text-[var(--text-primary)]">
+                  <div className="mt-5 rounded-2xl border border-[var(--accent-gold-soft)] bg-[color:color-mix(in_srgb,var(--surface)_90%,white)] p-4">
+                    <p className="text-[13px] font-semibold leading-5 tracking-[0.08em] text-[var(--text-primary)]">
                       Clarifying Questions
                     </p>
                     <ul className="mt-2 list-disc space-y-1.5 pl-5 text-[18px] leading-7 text-[var(--text-primary)]">

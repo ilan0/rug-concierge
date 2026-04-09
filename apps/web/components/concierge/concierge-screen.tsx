@@ -110,7 +110,7 @@ export function ConciergeScreen({
 
       <div
         aria-hidden="true"
-        className="pointer-events-none fixed inset-0 -z-10 bg-[radial-gradient(circle_at_12%_8%,rgba(255,241,218,0.55),transparent_40%),radial-gradient(circle_at_88%_12%,rgba(236,219,198,0.35),transparent_42%),linear-gradient(180deg,rgba(250,245,238,0.88),rgba(244,236,225,0.9))]"
+        className="pointer-events-none fixed inset-0 -z-10 bg-[radial-gradient(circle_at_12%_8%,rgba(255,241,218,0.42),transparent_42%),radial-gradient(circle_at_88%_12%,rgba(236,219,198,0.24),transparent_44%),linear-gradient(180deg,rgba(250,245,238,0.9),rgba(244,236,225,0.92))]"
       />
 
       <main

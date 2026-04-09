@@ -20,15 +20,15 @@ export function IdlePromptModal({ open, onContinue, onStartOver }: IdlePromptMod
           aria-modal="true"
           aria-labelledby="idle-prompt-title"
           aria-describedby="idle-prompt-body"
-          className="w-[min(560px,92vw)] max-w-[420px] rounded-[30px] border border-[var(--border-primary)] bg-[var(--surface)] p-[22px] shadow-[0_20px_40px_rgba(25,16,9,0.22)] sm:max-w-[560px] sm:p-7"
+          className="w-[min(560px,92vw)] max-w-[420px] rounded-[30px] border border-[var(--border-primary)] bg-[var(--surface)] p-[22px] shadow-[0_14px_34px_rgba(30,19,9,0.2)] sm:max-w-[560px] sm:p-7"
         >
-          <div className="mx-auto flex h-11 w-11 items-center justify-center rounded-full border border-[var(--accent-gold-soft)] bg-[var(--surface-2)] text-[var(--accent-gold)]">
+          <div className="mx-auto flex h-11 w-11 items-center justify-center rounded-full border border-[var(--accent-gold-soft)] bg-[color:color-mix(in_srgb,var(--surface-2)_86%,white)] text-[var(--accent-gold)]">
             <Clock3 className="h-5 w-5" />
           </div>
 
           <h2
             id="idle-prompt-title"
-            className="mt-4 text-center font-serif text-[34px] leading-[36px] tracking-tight text-[var(--text-primary)] sm:text-[46px] sm:leading-[48px] xl:text-[56px] xl:leading-[58px]"
+            className="mt-4 text-center font-serif text-[34px] leading-[36px] tracking-[-0.015em] text-[var(--text-primary)] sm:text-[46px] sm:leading-[48px] xl:text-[56px] xl:leading-[58px]"
           >
             Still with us?
           </h2>
@@ -43,14 +43,14 @@ export function IdlePromptModal({ open, onContinue, onStartOver }: IdlePromptMod
             <button
               type="button"
               onClick={onContinue}
-              className="h-14 min-h-11 w-full rounded-2xl bg-[var(--accent-gold)] px-4 text-[18px] font-medium leading-5 text-[var(--text-primary)] transition hover:bg-[var(--accent-gold-hover)] active:scale-[0.995] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-gold)] focus-visible:ring-offset-2"
+              className="h-14 min-h-11 w-full rounded-2xl border border-[var(--accent-gold-soft)] bg-[var(--accent-gold)] px-4 text-[18px] font-medium leading-5 tracking-[0.01em] text-[var(--text-primary)] transition hover:bg-[var(--accent-gold-hover)] active:scale-[0.995] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-gold)] focus-visible:ring-offset-2"
             >
               Continue Chat
             </button>
             <button
               type="button"
               onClick={onStartOver}
-              className="h-[46px] min-h-11 w-full rounded-2xl border border-[var(--border-primary)] bg-[var(--surface-2)] px-4 text-[16px] font-medium leading-5 text-[var(--text-secondary)] transition hover:border-[var(--accent-gold-soft)] active:scale-[0.995] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-gold)] focus-visible:ring-offset-2"
+              className="h-[46px] min-h-11 w-full rounded-2xl border border-[var(--border-primary)] bg-[color:color-mix(in_srgb,var(--surface-2)_90%,white)] px-4 text-[16px] font-medium leading-5 text-[var(--text-secondary)] transition hover:border-[var(--accent-gold-soft)] active:scale-[0.995] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-gold)] focus-visible:ring-offset-2"
             >
               Start Over
             </button>

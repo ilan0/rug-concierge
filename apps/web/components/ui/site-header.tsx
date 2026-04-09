@@ -52,18 +52,19 @@ export function SiteHeader({ storeName, storeLogoUrl, showBranding = true }: Sit
 
   return (
     <>
-      <header className="fixed left-0 right-0 top-0 z-50 border-b border-[var(--divider-subtle)] bg-[color-mix(in_srgb,var(--surface)_96%,transparent)] backdrop-blur-0 sm:backdrop-blur-[2px]">
-        <div className="mx-auto flex h-14 max-w-[980px] items-center justify-between px-3 sm:h-16 sm:px-6">
+      <header className="fixed left-0 right-0 top-0 z-50 border-b border-[var(--divider-subtle)] bg-[color-mix(in_srgb,var(--surface)_94%,transparent)] backdrop-blur-[1px] sm:backdrop-blur-[3px]">
+        <div className="mx-auto flex h-14 max-w-[940px] items-center justify-between px-3 sm:h-16 sm:px-5">
           {showBranding ? (
-            <div className="flex min-w-0 items-center gap-3.5">
+            <div className="flex min-w-0 items-center gap-3">
               <StoreLogoMark
                 storeName={displayStoreName}
                 logoUrl={storeLogoUrl}
                 containerClassName="h-11 w-11 rounded-xl"
-                fallbackTextClassName="text-sm tracking-[0.08em]"
+                imageClassName="p-1.5"
+                fallbackTextClassName="text-sm tracking-[0.07em]"
               />
               <div className="min-w-0">
-                <span className="block max-w-[clamp(9rem,58vw,27rem)] truncate text-[17px] font-medium leading-tight text-[var(--text-primary)] sm:text-[19px]">
+                <span className="block max-w-[clamp(9rem,56vw,25rem)] truncate text-[17px] font-medium leading-tight tracking-[-0.01em] text-[var(--text-primary)] sm:text-[19px]">
                   {displayStoreName}
                 </span>
               </div>
@@ -76,7 +77,7 @@ export function SiteHeader({ storeName, storeLogoUrl, showBranding = true }: Sit
             type="button"
             onClick={() => setShowPinModal(true)}
             aria-label="Unlock staff mode"
-            className="relative flex h-11 min-w-11 items-center justify-center rounded-full border border-[var(--border-primary)] bg-[var(--surface)] text-[var(--text-secondary)] transition hover:border-[var(--border-interactive)] hover:bg-[var(--surface-2)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-gold)] focus-visible:ring-offset-2"
+            className="relative flex h-11 min-w-11 items-center justify-center rounded-full border border-[var(--border-primary)] bg-[color:rgba(252,250,247,0.96)] text-[var(--text-secondary)] shadow-[0_2px_8px_rgba(46,34,24,0.06)] transition hover:border-[var(--border-interactive)] hover:bg-[var(--surface-2)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-gold)] focus-visible:ring-offset-2"
           >
             <Lock className="size-5" />
             {pinCooldownSeconds > 0 ? (

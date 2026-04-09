@@ -19,10 +19,11 @@ export function StoreHeroLockup({ storeName, storeLogoUrl, className }: StoreHer
         storeName={displayStoreName}
         logoUrl={storeLogoUrl}
         containerClassName="h-[88px] w-[88px] rounded-2xl"
+        imageClassName="p-2"
         fallbackTextClassName="text-[27px] tracking-[0.1em]"
       />
-      <div className="mt-5 max-w-[24ch] lg:mt-0 lg:max-w-[26ch]">
-        <h1 className="overflow-hidden text-balance font-serif text-[clamp(2.1rem,8vw,3rem)] leading-[1.03] tracking-tight text-[var(--text-primary)] [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:2] sm:text-[clamp(2.35rem,5.8vw,3.35rem)] lg:text-[clamp(2.6rem,3.4vw,4rem)]">
+      <div className="mt-5 max-w-[24ch] lg:mt-0 lg:max-w-[27ch]">
+        <h1 className="overflow-hidden text-balance font-serif text-[clamp(2.1rem,8vw,2.95rem)] leading-[1.02] tracking-[-0.014em] text-[var(--text-primary)] [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:2] sm:text-[clamp(2.3rem,5.8vw,3.25rem)] lg:text-[clamp(2.5rem,3.2vw,3.85rem)]">
           {displayStoreName}
         </h1>
       </div>

@@ -134,7 +134,7 @@ export function RecommendationCard({
     <>
       <Card
         data-recommendation-card="true"
-        className="concierge-hoverable relative z-[1] cursor-pointer overflow-hidden rounded-[24px] border border-[var(--border-primary)] bg-[var(--surface)] shadow-[0_8px_22px_rgba(35,22,8,0.08)] transition active:scale-[0.995] hover:z-[30] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-gold)] focus-visible:ring-offset-2"
+        className="concierge-hoverable relative z-[1] cursor-pointer overflow-hidden rounded-[24px] border border-[var(--border-primary)] bg-[var(--surface)] shadow-[0_8px_18px_rgba(35,22,8,0.08)] transition active:scale-[0.995] hover:z-[30] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-gold)] focus-visible:ring-offset-2"
         onClick={onOpenDetails}
         role="button"
         tabIndex={0}
@@ -155,7 +155,7 @@ export function RecommendationCard({
           />
         </div>
         <CardHeader className="pb-1 pt-[18px] sm:pt-[22px]">
-          <CardTitle className="line-clamp-2 text-[30px] font-semibold leading-[34px] tracking-tight text-[var(--text-primary)] sm:text-[34px] sm:leading-[38px]">
+          <CardTitle className="line-clamp-2 text-[29px] font-semibold leading-[33px] tracking-[-0.012em] text-[var(--text-primary)] sm:text-[32px] sm:leading-[36px]">
             {item.title}
           </CardTitle>
         </CardHeader>

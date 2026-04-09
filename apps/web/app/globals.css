@@ -68,9 +68,9 @@ body {
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   background:
-    radial-gradient(circle at 10% 8%, rgba(255, 241, 220, 0.52), transparent 40%),
-    radial-gradient(circle at 88% 10%, rgba(233, 215, 194, 0.26), transparent 44%),
-    linear-gradient(172deg, var(--bg) 0%, #f4ece2 100%);
+    radial-gradient(circle at 14% 8%, rgba(255, 243, 224, 0.38), transparent 41%),
+    radial-gradient(circle at 84% 10%, rgba(234, 217, 197, 0.2), transparent 44%),
+    linear-gradient(176deg, var(--bg) 0%, #f5ede3 100%);
 }
 
 button:focus-visible,
@@ -94,6 +94,8 @@ textarea:focus-visible {
   h4 {
     @apply text-foreground;
     font-family: var(--font-serif), "Instrument Serif", "Playfair Display", Georgia, serif;
+    letter-spacing: -0.012em;
+    font-weight: 500;
   }
 
   p {
@@ -218,7 +220,7 @@ textarea:focus-visible {
   @media (hover: hover) {
     .concierge-hoverable:hover {
       border-color: var(--border-interactive);
-      filter: brightness(0.97);
+      filter: brightness(0.975);
     }
   }
 

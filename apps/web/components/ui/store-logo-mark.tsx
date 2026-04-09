@@ -47,7 +47,7 @@ export function StoreLogoMark({
         <img
           src={logoUrl}
           alt=""
-          className={cn("h-full w-full object-contain", imageClassName)}
+          className={cn("h-full w-full object-contain p-1.5", imageClassName)}
           loading="eager"
           decoding="async"
           onError={() => setShowImage(false)}
