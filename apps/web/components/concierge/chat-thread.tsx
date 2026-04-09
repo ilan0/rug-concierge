@@ -21,23 +21,17 @@ const LOADING_ROTATE_MS = 3600;
 const LOADING_FADE_MS = 260;
 
 function RugLoadingState() {
-  const [activePhraseIndex, setActivePhraseIndex] = useState(0);
-  const [nextPhraseIndex, setNextPhraseIndex] = useState(1);
-  const [isTransitioning, setIsTransitioning] = useState(false);
+  const [phraseIndex, setPhraseIndex] = useState(0);
+  const [visible, setVisible] = useState(true);
 
   useEffect(() => {
     let timeoutId: ReturnType<typeof setTimeout> | null = null;
 
     const intervalId = setInterval(() => {
-      setIsTransitioning(true);
-      setNextPhraseIndex((activePhraseIndex + 1) % LOADING_PHRASES.length);
+      setVisible(false);
       timeoutId = setTimeout(() => {
-        setActivePhraseIndex((index) => {
-          const next = (index + 1) % LOADING_PHRASES.length;
-          setNextPhraseIndex((next + 1) % LOADING_PHRASES.length);
-          return next;
-        });
-        setIsTransitioning(false);
+        setPhraseIndex((index) => (index + 1) % LOADING_PHRASES.length);
+        setVisible(true);
       }, LOADING_FADE_MS);
     }, LOADING_ROTATE_MS);
 
@@ -45,31 +39,19 @@ function RugLoadingState() {
       clearInterval(intervalId);
       if (timeoutId !== null) clearTimeout(timeoutId);
     };
-  }, [activePhraseIndex]);
+  }, []);
 
   return (
     <div className="flex items-center gap-3 py-1">
       <RugSpinner size={32} />
-      <span className="relative inline-block min-h-[1.6rem] text-[15px] text-foreground/55">
-        <span
-          className={cn(
-            "transition-opacity",
-            isTransitioning ? "opacity-0" : "opacity-100"
-          )}
-          style={{ transitionDuration: `${LOADING_FADE_MS}ms` }}
-        >
-          {LOADING_PHRASES[activePhraseIndex]}
-        </span>
-        <span
-          aria-hidden="true"
-          className={cn(
-            "pointer-events-none absolute inset-0 transition-opacity",
-            isTransitioning ? "opacity-100" : "opacity-0"
-          )}
-          style={{ transitionDuration: `${LOADING_FADE_MS}ms` }}
-        >
-          {LOADING_PHRASES[nextPhraseIndex]}
-        </span>
+      <span
+        className={cn(
+          "inline-block min-h-[1.6rem] min-w-[22ch] text-[15px] text-foreground/55 transition-opacity",
+          visible ? "opacity-100" : "opacity-0"
+        )}
+        style={{ transitionDuration: `${LOADING_FADE_MS}ms` }}
+      >
+        {LOADING_PHRASES[phraseIndex]}
       </span>
     </div>
   );
