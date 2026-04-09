@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { ChatThread } from "@/components/concierge/chat-thread";
 import { MessageComposer } from "@/components/concierge/message-composer";
+import { StoreHeroLockup } from "@/components/concierge/store-hero-lockup";
 import { useConciergeController } from "@/components/concierge/use-concierge-controller";
 import { useVisualViewportInset } from "@/components/concierge/use-visual-viewport-inset";
 import type { ConciergeVariant } from "@/components/concierge/types";
@@ -98,16 +99,11 @@ export function ConciergeScreen({
       >
         {isHeroState ? (
           // Hero: fills available space below header; centers content vertically.
-          <div className="flex min-h-[calc(100dvh-48px)] flex-col items-center justify-center py-8">
+          <div className="flex min-h-[calc(100dvh-48px)] flex-col items-center justify-center py-10 sm:py-12">
             <div className="mx-auto w-full" style={RAIL_STYLE}>
               {/* Welcome moment */}
-              <div className="mb-8 text-center [text-size-adjust:100%] [-webkit-text-size-adjust:100%]">
-                <h1 className="font-serif text-[38px] font-semibold tracking-tight text-foreground sm:text-[44px]">
-                  {storeName}
-                </h1>
-                <p className="mt-2 text-[15px] font-light italic text-muted-foreground">
-                  Every piece in the collection, at your fingertips.
-                </p>
+              <div className="mb-10 px-3 [text-size-adjust:100%] [-webkit-text-size-adjust:100%] sm:mb-11 sm:px-4">
+                <StoreHeroLockup storeName={storeName} storeLogoUrl={storeLogoUrl} />
               </div>
 
               {/* Unified card: greeting + chips + composer as one surface */}
