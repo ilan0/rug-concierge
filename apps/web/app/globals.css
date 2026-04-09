@@ -10,9 +10,9 @@
   --user-bubble: #e8d8c6;
   --text-primary: #2e2218;
   --text-secondary: #6b5a4b;
-  --border: #e5dbcf;
+  --border-color: #e5dbcf;
   --divider: #eee6dd;
-  --border-primary: var(--border);
+  --border-primary: var(--border-color);
   --border-interactive: #d8ccbc;
   --divider-subtle: var(--divider);
   --accent-gold: #c9a14a;
@@ -55,8 +55,8 @@ html {
 body {
   color: var(--text-primary);
   font-family:
-    Inter,
     var(--font-sans),
+    Inter,
     "Avenir Next",
     Avenir,
     "Helvetica Neue",
@@ -68,9 +68,9 @@ body {
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   background:
-    radial-gradient(circle at 10% 10%, rgba(255, 241, 220, 0.7), transparent 38%),
-    radial-gradient(circle at 95% 15%, rgba(233, 215, 194, 0.42), transparent 40%),
-    linear-gradient(170deg, var(--bg) 0%, #f4ece2 100%);
+    radial-gradient(circle at 10% 8%, rgba(255, 241, 220, 0.52), transparent 40%),
+    radial-gradient(circle at 88% 10%, rgba(233, 215, 194, 0.26), transparent 44%),
+    linear-gradient(172deg, var(--bg) 0%, #f4ece2 100%);
 }
 
 button:focus-visible,
@@ -92,8 +92,8 @@ textarea:focus-visible {
   h2,
   h3,
   h4 {
-    @apply font-serif text-foreground;
-    font-family: var(--font-serif), "Times New Roman", serif;
+    @apply text-foreground;
+    font-family: var(--font-serif), "Instrument Serif", "Playfair Display", Georgia, serif;
   }
 
   p {

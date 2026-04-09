@@ -20,7 +20,7 @@ export function IdlePromptModal({ open, onContinue, onStartOver }: IdlePromptMod
           aria-modal="true"
           aria-labelledby="idle-prompt-title"
           aria-describedby="idle-prompt-body"
-          className="w-[min(560px,92vw)] max-w-[420px] rounded-[30px] border border-[var(--border)] bg-[var(--surface)] p-[22px] shadow-[0_22px_44px_rgba(25,16,9,0.24)] sm:max-w-[560px] sm:p-7"
+          className="w-[min(560px,92vw)] max-w-[420px] rounded-[30px] border border-[var(--border-primary)] bg-[var(--surface)] p-[22px] shadow-[0_20px_40px_rgba(25,16,9,0.22)] sm:max-w-[560px] sm:p-7"
         >
           <div className="mx-auto flex h-11 w-11 items-center justify-center rounded-full border border-[var(--accent-gold-soft)] bg-[var(--surface-2)] text-[var(--accent-gold)]">
             <Clock3 className="h-5 w-5" />
@@ -28,13 +28,13 @@ export function IdlePromptModal({ open, onContinue, onStartOver }: IdlePromptMod
 
           <h2
             id="idle-prompt-title"
-            className="mt-4 text-center font-serif text-[34px] leading-[36px] tracking-tight text-[var(--text-primary)] sm:text-[56px] sm:leading-[58px] lg:text-[46px] lg:leading-[48px]"
+            className="mt-4 text-center font-serif text-[34px] leading-[36px] tracking-tight text-[var(--text-primary)] sm:text-[46px] sm:leading-[48px] xl:text-[56px] xl:leading-[58px]"
           >
             Still with us?
           </h2>
           <p
             id="idle-prompt-body"
-            className="mt-3 text-center text-[18px] leading-7 text-[var(--text-secondary)] sm:text-[22px] sm:leading-8 lg:text-[19px] lg:leading-[30px]"
+            className="mt-3 text-center text-[18px] leading-7 text-[var(--text-secondary)] sm:text-[20px] sm:leading-8 lg:text-[19px] lg:leading-[30px]"
           >
             This kiosk has been idle for 5 minutes. Your conversation is still saved.
           </p>
@@ -50,7 +50,7 @@ export function IdlePromptModal({ open, onContinue, onStartOver }: IdlePromptMod
             <button
               type="button"
               onClick={onStartOver}
-              className="h-[46px] min-h-11 w-full rounded-2xl border border-[var(--border)] bg-[var(--surface-2)] px-4 text-[16px] font-medium leading-5 text-[var(--text-secondary)] transition hover:border-[var(--accent-gold-soft)] active:scale-[0.995] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-gold)] focus-visible:ring-offset-2"
+              className="h-[46px] min-h-11 w-full rounded-2xl border border-[var(--border-primary)] bg-[var(--surface-2)] px-4 text-[16px] font-medium leading-5 text-[var(--text-secondary)] transition hover:border-[var(--accent-gold-soft)] active:scale-[0.995] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-gold)] focus-visible:ring-offset-2"
             >
               Start Over
             </button>
@@ -60,4 +60,3 @@ export function IdlePromptModal({ open, onContinue, onStartOver }: IdlePromptMod
     </div>
   );
 }
-

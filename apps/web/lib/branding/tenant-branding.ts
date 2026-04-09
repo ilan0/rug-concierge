@@ -1,7 +1,7 @@
 import { getTenantSettingsById } from "@/lib/tenant-settings";
 import { resolveTenantFromServerHeaders } from "@/lib/tenant/resolve-tenant";
 
-type BrandingSource = "tenant" | "derived_subdomain" | "derived_tenant_id";
+type BrandingSource = "tenant" | "derived_subdomain" | "fallback_default";
 
 type TenantBrandingSettings = {
   store_name?: unknown;
@@ -18,6 +18,8 @@ export type ResolvedBranding = {
   storeLogoUrl: string | null;
   source: BrandingSource;
 };
+
+export const DEFAULT_STORE_NAME = "Rug Gallery Concierge";
 
 type TenantBrandingValue = {
   storeName: string | null;
@@ -110,20 +112,18 @@ export async function getResolvedBranding(input?: {
     resolvedTenant?.ok && tenantId && resolvedTenant.tenantId === tenantId
       ? formatStoreNameFromSubdomain(resolvedTenant.subdomain)
       : null;
-  const derivedStoreNameFromTenantId = tenantId ?? null;
 
   const storeName =
     tenantBranding.storeName ??
     derivedStoreNameFromSubdomain ??
-    derivedStoreNameFromTenantId ??
-    "";
+    DEFAULT_STORE_NAME;
   const storeLogoUrl = tenantBranding.storeLogoUrl ?? null;
 
   const source: BrandingSource = tenantBranding.storeName || tenantBranding.storeLogoUrl
     ? "tenant"
     : derivedStoreNameFromSubdomain
       ? "derived_subdomain"
-      : "derived_tenant_id";
+      : "fallback_default";
 
   return {
     tenantId,

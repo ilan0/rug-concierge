@@ -11,6 +11,8 @@ type StoreLogoMarkProps = {
   fallbackTextClassName?: string;
 };
 
+const FALLBACK_STORE_NAME = "Rug Gallery Concierge";
+
 function monogramFromStoreName(storeName: string): string {
   const tokens = storeName
     .trim()
@@ -28,13 +30,14 @@ export function StoreLogoMark({
   imageClassName,
   fallbackTextClassName,
 }: StoreLogoMarkProps) {
+  const normalizedStoreName = storeName.trim().length > 0 ? storeName : FALLBACK_STORE_NAME;
   const [showImage, setShowImage] = useState(Boolean(logoUrl));
-  const monogram = useMemo(() => monogramFromStoreName(storeName), [storeName]);
+  const monogram = useMemo(() => monogramFromStoreName(normalizedStoreName), [normalizedStoreName]);
 
   return (
     <div
       className={cn(
-        "overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--surface-2)]",
+        "overflow-hidden rounded-2xl border border-[var(--border-primary)] bg-[var(--surface-2)]",
         containerClassName
       )}
       aria-hidden="true"
@@ -62,4 +65,3 @@ export function StoreLogoMark({
     </div>
   );
 }
-

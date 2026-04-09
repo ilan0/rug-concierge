@@ -109,6 +109,7 @@ export function MessageComposer(input: MessageComposerProps) {
   const utilityRowVisible = showJumpControl || showNewChatControl;
   const utilityBottomMarginPx = utilityRowVisible ? 8 : 0;
   const dockVerticalPaddingPx = isCompactViewport ? 8 : 10;
+  const dockMinHeightPx = isCompactViewport ? 104 : 112;
 
   return (
     <section
@@ -134,7 +135,7 @@ export function MessageComposer(input: MessageComposerProps) {
         <div
           className="w-full rounded-[20px] border border-[var(--border-primary)] bg-[var(--surface)]/92 px-3 shadow-[0_8px_22px_rgba(46,34,24,0.08)] supports-[backdrop-filter:blur(0px)]:backdrop-blur-[8px]"
           style={{
-            minHeight: "104px",
+            minHeight: `${dockMinHeightPx}px`,
             paddingTop: `${dockVerticalPaddingPx}px`,
             paddingBottom: `calc(${dockVerticalPaddingPx}px + env(safe-area-inset-bottom, 0px))`,
           }}
@@ -191,7 +192,7 @@ export function MessageComposer(input: MessageComposerProps) {
               <Button
                 type="submit"
                 disabled={!canSubmit}
-                className="h-14 min-w-24 shrink-0 rounded-2xl border border-[var(--accent-gold-soft)] bg-[var(--accent-gold-soft)] px-5 text-[16px] font-medium leading-5 text-[var(--text-primary)] transition hover:bg-[var(--accent-gold)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-gold)] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
+                className="h-14 min-w-24 shrink-0 rounded-2xl border border-[var(--accent-gold-soft)] bg-[var(--accent-gold)] px-5 text-[16px] font-medium leading-5 text-[var(--text-primary)] transition hover:bg-[var(--accent-gold-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-gold)] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {isLoading ? "Sending..." : "Send"}
               </Button>

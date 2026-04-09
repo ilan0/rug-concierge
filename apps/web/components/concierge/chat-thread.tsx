@@ -143,7 +143,7 @@ export function ChatThread(input: ChatThreadProps) {
       <section className="flex flex-col gap-8">
         {turns.length === 0 ? (
           <article className={bareEmptyState ? "max-w-full px-6 py-6 sm:px-7 sm:py-7" : "max-w-full rounded-3xl border border-[var(--border-primary)] bg-[var(--surface)] px-6 py-6 shadow-[0_8px_24px_rgba(35,24,10,0.08)] sm:px-7 sm:py-7"}>
-            <p className={cn("whitespace-pre-wrap text-[30px] leading-[1.25] tracking-tight text-[var(--text-primary)] sm:text-[34px] sm:leading-[1.2]", bodyTextClassName)}>
+            <p className="whitespace-pre-wrap text-[30px] leading-[1.22] tracking-tight text-[var(--text-primary)] sm:text-[34px] sm:leading-[1.18]">
               What are you looking for today?
             </p>
             <div className="mt-5 flex flex-row flex-wrap justify-center gap-3">

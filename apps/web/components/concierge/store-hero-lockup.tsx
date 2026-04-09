@@ -9,18 +9,21 @@ type StoreHeroLockupProps = {
   className?: string;
 };
 
+const FALLBACK_STORE_NAME = "Rug Gallery Concierge";
+
 export function StoreHeroLockup({ storeName, storeLogoUrl, className }: StoreHeroLockupProps) {
+  const displayStoreName = storeName.trim().length > 0 ? storeName : FALLBACK_STORE_NAME;
   return (
-    <section className={cn("flex flex-col items-center text-center", className)}>
+    <section className={cn("flex flex-col items-center text-center lg:flex-row lg:items-center lg:gap-5 lg:text-left", className)}>
       <StoreLogoMark
-        storeName={storeName}
+        storeName={displayStoreName}
         logoUrl={storeLogoUrl}
         containerClassName="h-[88px] w-[88px] rounded-2xl"
-        fallbackTextClassName="text-[28px] tracking-[0.1em]"
+        fallbackTextClassName="text-[27px] tracking-[0.1em]"
       />
-      <div className="mt-5 max-w-[22ch]">
-        <h1 className="overflow-hidden text-balance font-serif text-[42px] leading-[44px] tracking-tight text-[var(--text-primary)] [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:2] sm:text-[48px] sm:leading-[52px] lg:text-[60px] lg:leading-[62px] xl:text-[72px] xl:leading-[74px]">
-          {storeName}
+      <div className="mt-5 max-w-[24ch] lg:mt-0 lg:max-w-[26ch]">
+        <h1 className="overflow-hidden text-balance font-serif text-[clamp(2.1rem,8vw,3rem)] leading-[1.03] tracking-tight text-[var(--text-primary)] [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:2] sm:text-[clamp(2.35rem,5.8vw,3.35rem)] lg:text-[clamp(2.6rem,3.4vw,4rem)]">
+          {displayStoreName}
         </h1>
       </div>
     </section>

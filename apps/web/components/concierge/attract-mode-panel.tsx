@@ -55,21 +55,21 @@ export function AttractModePanel({
   onStart,
 }: AttractModePanelProps) {
   return (
-    <section className="flex min-h-[calc(100dvh-56px)] items-center justify-center px-3 py-6 sm:min-h-[calc(100dvh-64px)] sm:px-8 sm:py-8">
-      <div className="relative h-[min(540px,calc(100dvh-180px))] w-[min(820px,calc(100vw-80px))] overflow-hidden rounded-[34px] border border-[var(--border)] bg-[color:rgba(252,250,247,0.92)] shadow-[0_18px_34px_rgba(46,34,24,0.1)]">
+    <section className="flex min-h-[calc(100dvh-56px)] items-center justify-center px-3 py-7 sm:min-h-[calc(100dvh-64px)] sm:px-8 sm:py-8">
+      <div className="relative h-[min(540px,calc(100dvh-180px))] w-[min(820px,calc(100vw-80px))] overflow-hidden rounded-[34px] border border-[var(--border-primary)] bg-[color:rgba(252,250,247,0.92)] shadow-[0_16px_32px_rgba(46,34,24,0.09)]">
         <AttractBackdrop imageUrls={backgroundImageUrls} />
-        <div className="relative z-[1] flex h-full flex-col items-center justify-center px-5 py-8 text-center sm:px-10">
+        <div className="relative z-[1] flex h-full flex-col items-center justify-center px-5 py-9 text-center sm:px-10">
           <StoreHeroLockup storeName={storeName} storeLogoUrl={storeLogoUrl} />
-          <h2 className="mt-5 font-serif text-[42px] leading-[44px] tracking-tight text-[var(--text-primary)] sm:text-[60px] sm:leading-[62px] lg:text-[72px] lg:leading-[74px]">
+          <h2 className="mt-6 font-serif text-[40px] leading-[42px] tracking-tight text-[var(--text-primary)] sm:text-[56px] sm:leading-[58px] lg:text-[64px] lg:leading-[66px]">
             Rug Concierge
           </h2>
-          <p className="mt-4 max-w-[38ch] text-[18px] leading-7 text-[var(--text-secondary)] sm:text-[22px] sm:leading-8">
+          <p className="mt-4 max-w-[38ch] text-[18px] leading-7 text-[var(--text-secondary)] sm:text-[21px] sm:leading-8">
             Tap to begin a guided rug discovery session
           </p>
           <button
             type="button"
             onClick={onStart}
-            className="mt-8 h-14 min-h-11 w-[240px] rounded-[28px] bg-[var(--accent-gold)] text-[18px] font-medium leading-5 text-[var(--text-primary)] transition hover:bg-[var(--accent-gold-hover)] active:scale-[0.995] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-gold)] focus-visible:ring-offset-2 sm:h-[68px] sm:w-[320px] sm:rounded-[34px] sm:text-[26px] sm:leading-7 lg:h-[60px] lg:w-[280px] lg:rounded-[30px] lg:text-[20px] lg:leading-6"
+            className="mt-9 h-14 min-h-11 w-[240px] rounded-[28px] bg-[var(--accent-gold)] text-[18px] font-medium leading-5 text-[var(--text-primary)] transition hover:bg-[var(--accent-gold-hover)] active:scale-[0.995] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-gold)] focus-visible:ring-offset-2 sm:h-[68px] sm:w-[320px] sm:rounded-[34px] sm:text-[24px] sm:leading-7 lg:h-[60px] lg:w-[280px] lg:rounded-[30px] lg:text-[20px] lg:leading-6"
           >
             Tap to Start
           </button>
@@ -78,4 +78,3 @@ export function AttractModePanel({
     </section>
   );
 }
-
