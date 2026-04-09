@@ -224,7 +224,6 @@ export function useConciergeController(input: UseConciergeControllerInput) {
                 t.id === assistantTurnId
                   ? {
                       ...t,
-                      isStreaming: false,
                       coarseMode: payload.mode,
                       fineMode: payload.fine_mode,
                       recommendations:

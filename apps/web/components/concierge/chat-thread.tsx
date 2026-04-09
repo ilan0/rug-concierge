@@ -17,36 +17,59 @@ const LOADING_PHRASES = [
   "Searching the collection…",
   "Curating your options…",
 ];
+const LOADING_ROTATE_MS = 3600;
+const LOADING_FADE_MS = 260;
 
 function RugLoadingState() {
-  const [phraseIndex, setPhraseIndex] = useState(0);
-  const [visible, setVisible] = useState(true);
+  const [activePhraseIndex, setActivePhraseIndex] = useState(0);
+  const [nextPhraseIndex, setNextPhraseIndex] = useState(1);
+  const [isTransitioning, setIsTransitioning] = useState(false);
 
   useEffect(() => {
     let timeoutId: ReturnType<typeof setTimeout> | null = null;
 
     const intervalId = setInterval(() => {
-      setVisible(false);
+      setIsTransitioning(true);
+      setNextPhraseIndex((activePhraseIndex + 1) % LOADING_PHRASES.length);
       timeoutId = setTimeout(() => {
-        setPhraseIndex((i) => (i + 1) % LOADING_PHRASES.length);
-        setVisible(true);
-      }, 160);
-    }, 2800);
+        setActivePhraseIndex((index) => {
+          const next = (index + 1) % LOADING_PHRASES.length;
+          setNextPhraseIndex((next + 1) % LOADING_PHRASES.length);
+          return next;
+        });
+        setIsTransitioning(false);
+      }, LOADING_FADE_MS);
+    }, LOADING_ROTATE_MS);
 
     return () => {
       clearInterval(intervalId);
       if (timeoutId !== null) clearTimeout(timeoutId);
     };
-  }, []);
+  }, [activePhraseIndex]);
 
   return (
     <div className="flex items-center gap-3 py-1">
       <RugSpinner size={32} />
-      <span
-        className="text-[15px] text-foreground/55"
-        style={{ opacity: visible ? 1 : 0, transition: "opacity 160ms ease" }}
-      >
-        {LOADING_PHRASES[phraseIndex]}
+      <span className="relative inline-block min-h-[1.6rem] text-[15px] text-foreground/55">
+        <span
+          className={cn(
+            "transition-opacity",
+            isTransitioning ? "opacity-0" : "opacity-100"
+          )}
+          style={{ transitionDuration: `${LOADING_FADE_MS}ms` }}
+        >
+          {LOADING_PHRASES[activePhraseIndex]}
+        </span>
+        <span
+          aria-hidden="true"
+          className={cn(
+            "pointer-events-none absolute inset-0 transition-opacity",
+            isTransitioning ? "opacity-100" : "opacity-0"
+          )}
+          style={{ transitionDuration: `${LOADING_FADE_MS}ms` }}
+        >
+          {LOADING_PHRASES[nextPhraseIndex]}
+        </span>
       </span>
     </div>
   );
@@ -310,11 +333,6 @@ export function ChatThread(input: ChatThreadProps) {
           })
         )}
 
-        {isLoading && !turns.some((t) => t.isStreaming) ? (
-          <article className="rounded-3xl bg-background/60 px-5 py-4">
-            <RugLoadingState />
-          </article>
-        ) : null}
       </section>
     </section>
   );
