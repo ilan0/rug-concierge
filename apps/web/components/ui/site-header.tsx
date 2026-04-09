@@ -12,9 +12,10 @@ import {
 type SiteHeaderProps = {
   storeName: string;
   storeLogoUrl: string | null;
+  showBranding?: boolean;
 };
 
-export function SiteHeader({ storeName, storeLogoUrl }: SiteHeaderProps) {
+export function SiteHeader({ storeName, storeLogoUrl, showBranding = true }: SiteHeaderProps) {
   const router = useRouter();
   const [showLogo, setShowLogo] = useState(Boolean(storeLogoUrl));
   const [showPinModal, setShowPinModal] = useState(false);
@@ -48,32 +49,36 @@ export function SiteHeader({ storeName, storeLogoUrl }: SiteHeaderProps) {
 
   return (
     <>
-      <header className="fixed left-0 right-0 top-0 z-50 border-b border-border/35 bg-background/88 backdrop-blur-sm">
-        <div className="mx-auto flex h-12 max-w-5xl items-center justify-between px-4 sm:px-6 lg:px-8">
-          <div className="flex min-w-0 items-center gap-2.5">
-            {showLogo && storeLogoUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={storeLogoUrl}
-                alt={`${storeName} logo`}
-                className="h-7 w-auto flex-shrink-0 object-contain"
-                onError={() => setShowLogo(false)}
-              />
-            ) : null}
-            <span className="truncate font-serif text-[15px] font-semibold tracking-tight text-foreground">
-              {storeName}
-            </span>
-          </div>
+      <header className="fixed left-0 right-0 top-0 z-50 border-b border-[var(--divider-subtle)] bg-[var(--surface)]/92 backdrop-blur-sm">
+        <div className="mx-auto flex h-14 max-w-[920px] items-center justify-between px-3 sm:h-16 sm:px-5">
+          {showBranding ? (
+            <div className="flex min-w-0 items-center gap-2.5">
+              {showLogo && storeLogoUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={storeLogoUrl}
+                  alt={`${storeName} logo`}
+                  className="h-7 w-auto flex-shrink-0 object-contain sm:h-8"
+                  onError={() => setShowLogo(false)}
+                />
+              ) : null}
+              <span className="truncate font-serif text-[18px] font-semibold leading-[1.2] tracking-tight text-[var(--text-primary)] sm:text-[20px]">
+                {storeName}
+              </span>
+            </div>
+          ) : (
+            <div />
+          )}
 
           <button
             type="button"
             onClick={() => setShowPinModal(true)}
             aria-label="Unlock staff mode"
-            className="relative flex size-8 items-center justify-center rounded-full"
+            className="relative flex h-11 min-w-11 items-center justify-center rounded-full border border-transparent text-[var(--text-secondary)] transition hover:border-[var(--border-interactive)] hover:bg-[var(--surface-2)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-gold)] focus-visible:ring-offset-2"
           >
-            <Lock className="size-4 text-muted-foreground/35" />
+            <Lock className="size-5" />
             {pinCooldownSeconds > 0 ? (
-              <span className="absolute -right-0.5 -top-0.5 size-2 rounded-full bg-amber-500 ring-2 ring-background" />
+              <span className="absolute right-1.5 top-1.5 size-2 rounded-full bg-[var(--accent-gold)]" />
             ) : null}
           </button>
         </div>

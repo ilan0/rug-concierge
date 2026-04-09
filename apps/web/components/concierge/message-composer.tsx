@@ -1,4 +1,4 @@
-import { useEffect, useRef, type FormEvent, type KeyboardEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from "react";
 import { ArrowDown, RotateCcw } from "lucide-react";
 import type { ConciergeVariant } from "@/components/concierge/types";
 import { Button } from "@/components/ui/button";
@@ -50,6 +50,7 @@ export function MessageComposer(input: MessageComposerProps) {
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   // Measures the full wrapper height (pill + card + footer) for clearance calculation.
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const [isCompactViewport, setIsCompactViewport] = useState(false);
 
   const handleTextareaKeyDown = (event: KeyboardEvent<HTMLTextAreaElement>) => {
     if (event.key !== "Enter" || event.shiftKey) return;
@@ -58,6 +59,19 @@ export function MessageComposer(input: MessageComposerProps) {
     event.preventDefault();
     event.currentTarget.form?.requestSubmit();
   };
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const mediaQuery = window.matchMedia("(max-width: 640px)");
+    const sync = () => setIsCompactViewport(mediaQuery.matches);
+    sync();
+    if (typeof mediaQuery.addEventListener === "function") {
+      mediaQuery.addEventListener("change", sync);
+      return () => mediaQuery.removeEventListener("change", sync);
+    }
+    mediaQuery.addListener(sync);
+    return () => mediaQuery.removeListener(sync);
+  }, []);
 
   useEffect(() => {
     const node = textareaRef.current;
@@ -89,13 +103,17 @@ export function MessageComposer(input: MessageComposerProps) {
     };
   }, [onHeightChange, error, isLoading, message, bottomOffsetPx, restingOffsetPx, showNewChat]);
 
+  const showJumpControl = showJumpToLatest && typeof onJumpToLatest === "function";
+  const showNewChatControl =
+    showNewChat && !isCompactViewport && (!showJumpControl || !isCompactViewport);
+
   return (
     <section
       data-concierge-composer="true"
       data-floating-composer={floating ? "true" : "false"}
       className={
         floating
-          ? "fixed bottom-0 z-40 -translate-x-1/2 [text-size-adjust:100%] [-webkit-text-size-adjust:100%]"
+          ? "fixed bottom-0 z-40 w-[calc(100vw-24px)] max-w-[920px] -translate-x-1/2 [text-size-adjust:100%] [-webkit-text-size-adjust:100%] sm:w-[min(860px,calc(100vw-40px))] xl:w-[920px]"
           : "relative z-30 w-full [text-size-adjust:100%] [-webkit-text-size-adjust:100%]"
       }
       style={
@@ -103,56 +121,52 @@ export function MessageComposer(input: MessageComposerProps) {
           ? {
               bottom: `${Math.max(0, bottomOffsetPx + restingOffsetPx)}px`,
               left: "calc(50% + (env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px)) / 2)",
-              width:
-                "min(820px, calc(100vw - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px) - 1.5rem))",
             }
           : undefined
       }
     >
       {/* Outer wrapper — ref here so height includes pill + card + footer */}
       <div ref={containerRef} className="w-full">
-        {/* New Chat pill */}
-        {showNewChat ? (
-          <div className="mb-1 flex justify-center animate-in fade-in duration-150">
-            <button
-              type="button"
-              onClick={onNewChat}
-              disabled={isNewChatDisabled}
-              className={cn(
-                "flex h-[34px] items-center gap-1.5 rounded-full border border-border/40 bg-transparent px-4 text-[13px] font-medium text-foreground/55 shadow-[0_1px_4px_rgba(36,20,5,0.07)] transition-colors",
-                "hover:border-primary/40 hover:bg-primary/6 hover:text-foreground/80",
-                "disabled:cursor-not-allowed disabled:opacity-40"
-              )}
-            >
-              <RotateCcw className="size-[13px]" />
-              New conversation
-            </button>
-          </div>
-        ) : null}
-
         {/* Composer card */}
         <div
-          className="w-full rounded-[20px] border border-border/70 bg-card/95 p-2 shadow-[0_12px_28px_rgba(42,27,11,0.16)] supports-[backdrop-filter:blur(0px)]:bg-card/88 supports-[backdrop-filter:blur(0px)]:backdrop-blur sm:p-2.5"
-          style={{ paddingBottom: "calc(0.45rem + env(safe-area-inset-bottom, 0px))" }}
+          className="w-full rounded-[24px] border border-[var(--border-primary)] bg-[var(--surface)]/92 p-3 shadow-[0_12px_32px_rgba(42,27,11,0.12)] supports-[backdrop-filter:blur(0px)]:backdrop-blur-[8px] sm:p-4"
+          style={{ minHeight: "104px", paddingBottom: "calc(0.75rem + env(safe-area-inset-bottom, 0px))" }}
         >
-          {showJumpToLatest && onJumpToLatest ? (
-            <div className="mb-2 flex justify-end">
-              <Button
-                type="button"
-                variant="secondary"
-                size="sm"
-                className="h-9 w-9 rounded-full border border-border/55 bg-background/95 p-0 shadow-md backdrop-blur-sm transition-colors hover:bg-background sm:w-auto sm:px-3"
-                aria-label="Jump to latest"
-                onClick={onJumpToLatest}
-              >
-                <ArrowDown className="size-4 sm:hidden" />
-                <span className="hidden sm:inline">Jump to latest</span>
-              </Button>
+          {showJumpControl || showNewChatControl ? (
+            <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+              {showNewChatControl ? (
+                <button
+                  type="button"
+                  onClick={onNewChat}
+                  disabled={isNewChatDisabled}
+                  className={cn(
+                    "concierge-hoverable flex h-11 min-w-[160px] items-center justify-center gap-2 rounded-[20px] border border-[var(--border-primary)] bg-[var(--surface)] px-4 text-[16px] font-medium leading-5 text-[var(--text-secondary)] transition active:scale-[0.995] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-gold)] focus-visible:ring-offset-2",
+                    "disabled:cursor-not-allowed disabled:opacity-40"
+                  )}
+                >
+                  <RotateCcw className="size-4" />
+                  New conversation
+                </button>
+              ) : (
+                <span />
+              )}
+
+              {showJumpControl ? (
+                <button
+                  type="button"
+                  className="concierge-hoverable flex h-11 min-w-[152px] items-center justify-center gap-2 rounded-[20px] border border-[var(--border-primary)] bg-[var(--surface)] px-4 text-[16px] font-medium leading-5 text-[var(--text-secondary)] transition active:scale-[0.995] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-gold)] focus-visible:ring-offset-2"
+                  aria-label="Jump to latest"
+                  onClick={onJumpToLatest}
+                >
+                  <ArrowDown className="size-4" />
+                  <span>Jump to latest</span>
+                </button>
+              ) : null}
             </div>
           ) : null}
 
           <form onSubmit={onSubmit}>
-            <div className="flex items-end">
+            <div className="flex items-end gap-[10px]">
               <Textarea
                 ref={textareaRef}
                 value={message}
@@ -162,34 +176,29 @@ export function MessageComposer(input: MessageComposerProps) {
                 rows={1}
                 maxLength={2000}
                 disabled={isLoading}
-                className="min-h-[42px] resize-none border-border/40 bg-background/70 px-3 py-2 text-base leading-[1.55]"
+                className="min-h-[56px] resize-none rounded-2xl border-[var(--border-primary)] bg-[var(--surface-2)] px-4 py-3 text-[18px] leading-7 text-[var(--text-primary)] placeholder:text-[color:var(--text-secondary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-gold)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--surface)]"
               />
               <Button
                 type="submit"
                 disabled={!canSubmit}
-                className="ml-2 h-[42px] shrink-0 rounded-xl px-4"
+                className="h-14 min-w-24 shrink-0 rounded-2xl border border-[var(--accent-gold-soft)] bg-[var(--accent-gold-soft)] px-5 text-[16px] font-medium leading-5 text-[var(--text-primary)] transition hover:bg-[var(--accent-gold)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-gold)] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {isLoading ? "Sending..." : "Send"}
               </Button>
             </div>
           </form>
           {error ? (
-            <div className="mt-3 space-y-2">
-              <Alert variant="destructive">
-                <AlertTitle>Message failed</AlertTitle>
-                <AlertDescription>{error}</AlertDescription>
+            <div className="mt-3 space-y-3">
+              <Alert className="border-[var(--error-border-warm)] bg-[var(--error-bg-warm)] text-[var(--error-text-warm)]">
+                <AlertTitle className="text-[16px] font-semibold leading-5">Message failed</AlertTitle>
+                <AlertDescription className="text-[15px] leading-6">{error}</AlertDescription>
               </Alert>
-              <Button type="button" variant="outline" disabled={!canRetry || isLoading} onClick={onRetry}>
-                Retry
+              <Button type="button" variant="outline" className="min-h-11 border-[var(--error-border-warm)] text-[var(--error-text-warm)]" disabled={!canRetry || isLoading} onClick={onRetry}>
+                Retry message
               </Button>
             </div>
           ) : null}
         </div>
-
-        {/* Powered by RugDesk */}
-        <p className="pt-1.5 text-center text-[11px] select-none text-muted-foreground/35">
-          Powered by RugDesk
-        </p>
       </div>
     </section>
   );

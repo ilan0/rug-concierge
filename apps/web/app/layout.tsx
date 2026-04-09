@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Manrope, Fraunces } from "next/font/google";
+import { Manrope, Instrument_Serif } from "next/font/google";
 import "./globals.css";
 import { LayoutHeader } from "@/components/kiosk/layout-header";
 import { AppToaster } from "@/components/ui/sonner";
@@ -10,8 +10,9 @@ const manrope = Manrope({
   variable: "--font-sans",
 });
 
-const fraunces = Fraunces({
+const instrumentSerif = Instrument_Serif({
   subsets: ["latin"],
+  weight: "400",
   variable: "--font-serif",
 });
 
@@ -36,7 +37,7 @@ export default async function RootLayout({
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
       </head>
-      <body className={`${manrope.variable} ${fraunces.variable} min-h-screen bg-background font-sans text-foreground antialiased`}>
+      <body className={`${manrope.variable} ${instrumentSerif.variable} min-h-screen bg-background font-sans text-foreground antialiased`}>
         <LayoutHeader initialUnlocked={unlocked} />
         {children}
         <AppToaster />

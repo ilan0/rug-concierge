@@ -36,10 +36,6 @@ function isRugDetailData(value: unknown): value is RugDetailData {
 export function RecommendationCard({
   item,
 }: RecommendationCardProps) {
-  const tags = [item.origin, item.style, item.mood].filter(
-    (value): value is string => typeof value === "string" && value.trim().length > 0
-  );
-
   const [detailOpen, setDetailOpen] = useState(false);
   const [detailLoading, setDetailLoading] = useState(false);
   const [detailError, setDetailError] = useState<string | null>(null);
@@ -138,7 +134,7 @@ export function RecommendationCard({
     <>
       <Card
         data-recommendation-card="true"
-        className="cursor-pointer overflow-hidden rounded-3xl border-border/55 bg-background/82 shadow-[0_2px_10px_rgba(35,22,8,0.08)] transition hover:-translate-y-[1px] hover:border-primary/35 hover:shadow-[0_8px_20px_rgba(238,189,43,0.14)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/45"
+        className="concierge-hoverable relative z-[1] cursor-pointer overflow-hidden rounded-[24px] border border-[var(--border-primary)] bg-[var(--surface)] shadow-[0_8px_22px_rgba(35,22,8,0.08)] transition active:scale-[0.995] hover:z-[30] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-gold)] focus-visible:ring-offset-2"
         onClick={onOpenDetails}
         role="button"
         tabIndex={0}
@@ -149,41 +145,29 @@ export function RecommendationCard({
           }
         }}
       >
-        <div className="h-60 w-full overflow-hidden bg-muted">
+        <div className="aspect-[4/3] w-full overflow-hidden bg-[var(--surface-2)]">
           <RugImage
             src={item.primary_image_url}
             alt={item.primary_image_caption ?? item.title}
-            className="h-full w-full bg-muted/70 p-2"
-            fit="contain"
+            className="h-full w-full"
+            fit="cover"
             placeholderLabel="No rug image"
           />
         </div>
-        <CardHeader className="pb-1 pt-3">
-          <CardTitle className="line-clamp-2 text-[20px] leading-[1.25]">
+        <CardHeader className="pb-1 pt-[18px] sm:pt-[22px]">
+          <CardTitle className="line-clamp-2 text-[30px] font-semibold leading-[34px] tracking-tight text-[var(--text-primary)] sm:text-[34px] sm:leading-[38px]">
             {item.title}
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-3 pb-4 pt-1 text-[17px] leading-[1.6]">
-          <p className="space-y-1.5">
-            <span className="block text-[11px] font-semibold uppercase tracking-[0.08em] text-primary">
+        <CardContent className="space-y-2 pb-[18px] pt-1 sm:pb-[22px]">
+          <p className="space-y-1">
+            <span className="block text-[14px] font-semibold uppercase leading-5 tracking-[0.06em] text-[var(--text-secondary)]">
               Size
             </span>
-            <span className="block whitespace-nowrap text-lg font-medium leading-[1.2] sm:text-xl">
+            <span className="block whitespace-nowrap text-[22px] font-medium leading-[1.25] text-[var(--text-primary)]">
               {item.size_text ?? "-"}
             </span>
           </p>
-          {tags.length > 0 ? (
-            <div className="flex flex-wrap gap-1.5">
-              {tags.slice(0, 2).map((tag) => (
-                <span
-                  key={`${item.rug_id}-${tag}`}
-                  className="rounded-full border border-border/55 bg-background px-2.5 py-0.5 text-[11px] font-medium text-foreground/75"
-                >
-                  {tag}
-                </span>
-              ))}
-            </div>
-          ) : null}
         </CardContent>
       </Card>
 

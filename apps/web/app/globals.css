@@ -3,6 +3,21 @@
 @tailwind utilities;
 
 :root {
+  --bg: #f8f4ee;
+  --surface: #fcfaf7;
+  --surface-2: #f3ece3;
+  --assistant-bubble: #fdfbf8;
+  --user-bubble: #e8d8c6;
+  --text-primary: #2e2218;
+  --text-secondary: #6b5a4b;
+  --border-primary: #e5dbcf;
+  --border-interactive: #d8ccbc;
+  --divider-subtle: #eee6dd;
+  --accent-gold: #c9a14a;
+  --accent-gold-soft: #e9d6a5;
+  --error-bg-warm: #f7ece8;
+  --error-border-warm: #e7cfc8;
+  --error-text-warm: #6a2e24;
   --background: 34 46% 97%;
   --foreground: 24 34% 14%;
   --card: 32 52% 99%;
@@ -34,7 +49,15 @@ html {
 }
 
 body {
-  color: hsl(var(--foreground));
+  color: var(--text-primary);
+  font-family:
+    "Avenir Next",
+    Avenir,
+    var(--font-sans),
+    "Helvetica Neue",
+    Helvetica,
+    Arial,
+    sans-serif;
   font-size: 16px;
   line-height: 1.6;
   text-rendering: optimizeLegibility;
@@ -42,7 +65,21 @@ body {
   background:
     radial-gradient(circle at 10% 10%, rgba(255, 241, 220, 0.7), transparent 38%),
     radial-gradient(circle at 95% 15%, rgba(233, 215, 194, 0.42), transparent 40%),
-    linear-gradient(170deg, #f9f4ee 0%, #f4ece2 100%);
+    linear-gradient(170deg, var(--bg) 0%, #f4ece2 100%);
+}
+
+button:focus-visible,
+[role="button"]:focus-visible,
+a:focus-visible,
+input:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid var(--accent-gold) !important;
+  outline-offset: 2px !important;
+}
+
+input:focus-visible,
+textarea:focus-visible {
+  box-shadow: 0 0 0 3px rgba(201, 161, 74, 0.2);
 }
 
 @layer base {
@@ -51,6 +88,7 @@ body {
   h3,
   h4 {
     @apply font-serif text-foreground;
+    font-family: var(--font-serif), "Times New Roman", serif;
   }
 
   p {
@@ -125,10 +163,69 @@ body {
     animation: concierge-loader-breathe 2.2s ease-in-out infinite;
   }
 
+  @keyframes concierge-bubble-enter {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes concierge-shimmer {
+    0% {
+      opacity: 0.35;
+    }
+    50% {
+      opacity: 0.7;
+    }
+    100% {
+      opacity: 0.35;
+    }
+  }
+
+  .concierge-bubble-enter {
+    animation: concierge-bubble-enter 220ms ease-out both;
+  }
+
+  .concierge-loading-line {
+    animation: concierge-shimmer 1.2s ease-in-out infinite;
+  }
+
+  .concierge-focus-ring {
+    outline: 2px solid var(--accent-gold);
+    outline-offset: 2px;
+    box-shadow: 0 0 0 3px rgba(201, 161, 74, 0.2);
+  }
+
+  .concierge-rail {
+    scroll-snap-type: x mandatory;
+  }
+
+  @media (pointer: coarse) {
+    .concierge-rail {
+      scroll-snap-type: x proximity;
+    }
+  }
+
+  @media (hover: hover) {
+    .concierge-hoverable:hover {
+      border-color: var(--border-interactive);
+      filter: brightness(0.97);
+    }
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .animate-concierge-loader-breathe {
       animation: none !important;
       opacity: 1 !important;
+    }
+
+    .concierge-bubble-enter,
+    .concierge-loading-line {
+      animation: none !important;
     }
   }
 }

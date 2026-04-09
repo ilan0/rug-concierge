@@ -14,11 +14,15 @@ import { cn } from "@/lib/utils";
 
 function RugLoadingState() {
   return (
-    <div className="flex items-center gap-3 py-1">
-      <RugSpinner size={32} />
-      <span className="inline-flex min-h-[1.6rem] min-w-[24ch] items-baseline text-[15px] text-foreground/70">
-        <span className="animate-concierge-loader-breathe">Searching the collection...</span>
-      </span>
+    <div className="rounded-3xl border border-[var(--border-primary)] bg-[var(--assistant-bubble)] px-5 py-5 sm:px-6 sm:py-6">
+      <div className="flex items-center gap-3">
+        <RugSpinner size={28} />
+        <span className="text-[15px] leading-5 text-[var(--text-secondary)]">Searching the collection...</span>
+      </div>
+      <div className="mt-4 space-y-2.5">
+        <div className="concierge-loading-line h-4 w-[72%] rounded bg-[var(--surface-2)]" />
+        <div className="concierge-loading-line h-4 w-[46%] rounded bg-[var(--surface-2)]" />
+      </div>
     </div>
   );
 }
@@ -66,7 +70,7 @@ export function ChatThread(input: ChatThreadProps) {
   const updatePinnedState = useCallback(() => {
     if (typeof window === "undefined") return;
     const doc = document.documentElement;
-    const thresholdPx = 56;
+    const thresholdPx = 120;
     const distanceToBottom = doc.scrollHeight - (window.scrollY + window.innerHeight);
     const pinned = distanceToBottom <= thresholdPx;
     setIsPinnedToBottom(pinned);
@@ -136,18 +140,18 @@ export function ChatThread(input: ChatThreadProps) {
 
   return (
     <section className="relative">
-      <section className="flex flex-col gap-7">
+      <section className="flex flex-col gap-8">
         {turns.length === 0 ? (
-          <article className={bareEmptyState ? "max-w-full px-5 py-5" : "max-w-full rounded-3xl border border-border/60 bg-background/60 px-5 py-5 shadow-[0_2px_16px_rgba(36,20,5,0.09)]"}>
-            <p className={cn("whitespace-pre-wrap text-foreground", bodyTextClassName)}>
+          <article className={bareEmptyState ? "max-w-full px-6 py-6 sm:px-7 sm:py-7" : "max-w-full rounded-3xl border border-[var(--border-primary)] bg-[var(--surface)] px-6 py-6 shadow-[0_8px_24px_rgba(35,24,10,0.08)] sm:px-7 sm:py-7"}>
+            <p className={cn("whitespace-pre-wrap text-[30px] leading-[1.25] tracking-tight text-[var(--text-primary)] sm:text-[34px] sm:leading-[1.2]", bodyTextClassName)}>
               What are you looking for today?
             </p>
-            <div className="mt-5 flex flex-row flex-wrap justify-center gap-2">
+            <div className="mt-5 flex flex-row flex-wrap justify-center gap-3">
               {emptyStatePrompts.map((prompt) => (
                 <button
                   key={prompt.id}
                   type="button"
-                  className="h-9 rounded-full border border-border/50 bg-transparent px-4 text-sm font-medium text-foreground/70 transition-colors hover:border-primary/45 hover:bg-primary/8 hover:text-foreground"
+                  className="min-h-11 rounded-full border border-[var(--border-primary)] bg-[var(--surface)] px-5 text-[16px] font-medium leading-5 text-[var(--text-secondary)] transition active:scale-[0.995] disabled:cursor-not-allowed disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-gold)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--surface)] concierge-hoverable"
                   onClick={() => onChoosePrompt(prompt)}
                 >
                   {prompt.label}
@@ -167,22 +171,22 @@ export function ChatThread(input: ChatThreadProps) {
                 key={turn.id}
                 className={
                   turn.role === "user"
-                    ? "group ml-auto max-w-[92%] rounded-3xl border border-border/45 bg-[#e7dccf]/82 px-6 py-5 shadow-[0_1px_2px_rgba(50,30,12,0.12)] sm:max-w-[86%]"
+                    ? "group concierge-bubble-enter ml-auto max-w-[92%] rounded-[24px] border border-[var(--border-primary)] bg-[var(--user-bubble)] px-5 py-5 sm:max-w-[86%] sm:px-6 sm:py-[22px]"
                     : turn.isStreaming && turn.text === ""
-                      ? "group max-w-full rounded-3xl border border-border/45 bg-background/58 px-5 py-4"
-                      : "group max-w-full rounded-3xl border border-border/45 bg-background/58 px-4 py-4 sm:px-5 sm:py-5"
+                      ? "group concierge-bubble-enter max-w-full rounded-[24px] border border-[var(--border-primary)] bg-[var(--assistant-bubble)] px-5 py-5 sm:px-6 sm:py-[22px]"
+                      : "group concierge-bubble-enter max-w-full rounded-[24px] border border-[var(--border-primary)] bg-[var(--assistant-bubble)] px-5 py-5 sm:px-6 sm:py-[22px]"
                 }
               >
                 {!(turn.role === "assistant" && turn.isStreaming && turn.text === "") && (
                   <div className="mb-2 flex items-center justify-between gap-2">
                     {turn.role === "user" ? (
-                      <p className="text-[11px] font-semibold tracking-[0.08em] text-muted-foreground">
+                      <p className="text-[14px] font-semibold leading-5 tracking-[0.04em] text-[var(--text-secondary)]">
                         {ROLE_LABEL[turn.role]}
                       </p>
                     ) : (
                       <div />
                     )}
-                    <time className="text-[11px] text-muted-foreground opacity-0 transition-opacity duration-150 group-hover:opacity-100 group-focus-within:opacity-100">
+                    <time className="text-[14px] leading-5 text-[var(--text-secondary)] opacity-70 transition-opacity duration-150 group-hover:opacity-100 group-focus-within:opacity-100">
                       {formatTime(turn.createdAt)}
                     </time>
                   </div>
@@ -197,7 +201,7 @@ export function ChatThread(input: ChatThreadProps) {
                         "text-foreground [&_li]:my-1 [&_ol]:list-decimal [&_ol]:pl-5 [&_p]:whitespace-pre-wrap [&_ul]:list-disc [&_ul]:pl-5",
                         hasRecommendations
                           ? bodyTextClassName
-                          : "max-w-[72ch] text-[17px] leading-[1.62] sm:text-[18px] sm:leading-[1.65]"
+                          : "max-w-[72ch] text-[18px] leading-7 sm:text-[19px] sm:leading-[30px]"
                       )}
                     >
                       <ReactMarkdown remarkPlugins={[remarkGfm]} skipHtml>
@@ -215,11 +219,11 @@ export function ChatThread(input: ChatThreadProps) {
                 )}
 
                 {turn.role === "assistant" && turn.questions && turn.questions.length > 0 ? (
-                  <div className="mt-5 rounded-xl border border-primary/30 bg-primary/8 p-3">
-                    <p className="text-xs font-semibold uppercase tracking-[0.08em] text-foreground/80">
+                  <div className="mt-5 rounded-2xl border border-[var(--accent-gold-soft)] bg-[var(--surface)] p-4">
+                    <p className="text-[14px] font-semibold leading-5 tracking-[0.06em] text-[var(--text-primary)]">
                       Clarifying Questions
                     </p>
-                    <ul className="mt-1.5 list-disc space-y-1 pl-5 text-[17px] leading-[1.55] text-foreground/90">
+                    <ul className="mt-2 list-disc space-y-1.5 pl-5 text-[18px] leading-7 text-[var(--text-primary)]">
                       {turn.questions.map((question) => (
                         <li key={question}>{question}</li>
                       ))}
@@ -234,7 +238,7 @@ export function ChatThread(input: ChatThreadProps) {
                         type="button"
                         variant="outline"
                         size="icon"
-                        className="h-8 w-8 rounded-full"
+                        className="h-12 w-12 rounded-full border-[var(--border-primary)] bg-[var(--surface)] text-[var(--text-secondary)] transition hover:border-[var(--border-interactive)] hover:bg-[var(--surface-2)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-gold)] focus-visible:ring-offset-2"
                         onClick={(event) => {
                           event.stopPropagation();
                           scrollRecommendationRow(turn.id, "left");
@@ -247,7 +251,7 @@ export function ChatThread(input: ChatThreadProps) {
                         type="button"
                         variant="outline"
                         size="icon"
-                        className="h-8 w-8 rounded-full"
+                        className="h-12 w-12 rounded-full border-[var(--border-primary)] bg-[var(--surface)] text-[var(--text-secondary)] transition hover:border-[var(--border-interactive)] hover:bg-[var(--surface-2)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-gold)] focus-visible:ring-offset-2"
                         onClick={(event) => {
                           event.stopPropagation();
                           scrollRecommendationRow(turn.id, "right");
@@ -261,12 +265,12 @@ export function ChatThread(input: ChatThreadProps) {
                       ref={(element) => {
                         recommendationRowRefs.current[turn.id] = element;
                       }}
-                      className="flex snap-x snap-mandatory gap-4 overflow-x-auto pb-2 [scrollbar-width:thin]"
+                      className="concierge-rail flex gap-[18px] overflow-x-auto pb-2 [scrollbar-width:thin]"
                     >
                       {turn.recommendations?.map((item) => (
                         <div
                           key={item.rug_id}
-                          className="min-w-[82%] snap-start sm:min-w-[360px] md:min-w-[400px] lg:min-w-[430px]"
+                          className="min-w-[300px] max-w-[300px] snap-start sm:min-w-[440px] sm:max-w-[440px]"
                         >
                           <RecommendationCard
                             item={item}

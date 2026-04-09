@@ -8,6 +8,7 @@ import { useConciergeController } from "@/components/concierge/use-concierge-con
 import { useVisualViewportInset } from "@/components/concierge/use-visual-viewport-inset";
 import type { ConciergeVariant } from "@/components/concierge/types";
 import { SiteHeader } from "@/components/ui/site-header";
+import { cn } from "@/lib/utils";
 
 type ConciergeScreenProps = {
   variant?: ConciergeVariant;
@@ -16,18 +17,13 @@ type ConciergeScreenProps = {
   storeLogoUrl: string | null;
 };
 
-const BODY_SIZE = "text-[18px] leading-[1.65]";
+const BODY_SIZE = "text-[18px] leading-7 sm:text-[19px] sm:leading-[30px]";
 const COMPOSER_REST_OFFSET_DESKTOP = 12;
 const COMPOSER_REST_OFFSET_MOBILE = 8;
-const CONTENT_SAFETY_GAP = 10;
-const INITIAL_COMPOSER_HEIGHT = 92;
+const CONTENT_SAFETY_GAP = 20;
+const INITIAL_COMPOSER_HEIGHT = 104;
 // Accounts for the New Chat pill (34px) + its bottom gap (10px) above the composer card.
 const NEW_CHAT_PILL_CLEARANCE_PX = 20;
-
-const RAIL_STYLE = {
-  width:
-    "min(820px, calc(100vw - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px) - 1.5rem))",
-} as const;
 
 export function ConciergeScreen({
   variant = "concierge",
@@ -41,6 +37,7 @@ export function ConciergeScreen({
   const [isSmallViewport, setIsSmallViewport] = useState(false);
   const [showJumpToLatest, setShowJumpToLatest] = useState(false);
   const [jumpToLatest, setJumpToLatest] = useState<(() => void) | null>(null);
+  const [heroTransitioning, setHeroTransitioning] = useState(false);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -67,14 +64,23 @@ export function ConciergeScreen({
 
   const hasMessages = controller.turns.length > 0;
   const isHeroState = controller.turns.length === 0 && !controller.isLoading;
-  const shouldFloatComposer = !isHeroState;
+  const shouldFloatComposer = true;
 
   const composerRestOffsetPx = isSmallViewport
     ? COMPOSER_REST_OFFSET_MOBILE
     : COMPOSER_REST_OFFSET_DESKTOP;
 
+  useEffect(() => {
+    if (!hasMessages) {
+      setHeroTransitioning(false);
+      return;
+    }
+    setHeroTransitioning(true);
+    const timer = window.setTimeout(() => setHeroTransitioning(false), 160);
+    return () => window.clearTimeout(timer);
+  }, [hasMessages]);
+
   const composerClearancePx = useMemo(() => {
-    if (!shouldFloatComposer) return CONTENT_SAFETY_GAP;
     const pillExtra = hasMessages ? NEW_CHAT_PILL_CLEARANCE_PX : 0;
     return (
       Math.max(
@@ -82,11 +88,15 @@ export function ConciergeScreen({
         composerHeightPx + keyboardInsetPx + composerRestOffsetPx + CONTENT_SAFETY_GAP
       ) + pillExtra
     );
-  }, [composerHeightPx, keyboardInsetPx, composerRestOffsetPx, shouldFloatComposer, hasMessages]);
+  }, [composerHeightPx, keyboardInsetPx, composerRestOffsetPx, hasMessages]);
 
   return (
     <>
-      <SiteHeader storeName={storeName} storeLogoUrl={storeLogoUrl} />
+      <SiteHeader
+        storeName={storeName}
+        storeLogoUrl={storeLogoUrl}
+        showBranding={!isHeroState && !heroTransitioning}
+      />
 
       <div
         aria-hidden="true"
@@ -94,20 +104,20 @@ export function ConciergeScreen({
       />
 
       <main
-        className="relative pt-[48px] [text-size-adjust:100%] [-webkit-text-size-adjust:100%]"
-        style={{ minHeight: "calc(100dvh - 48px)" }}
+        className="relative pt-14 [text-size-adjust:100%] [-webkit-text-size-adjust:100%] sm:pt-16"
+        style={{ minHeight: "calc(100dvh - 56px)" }}
       >
-        {isHeroState ? (
+        {isHeroState || heroTransitioning ? (
           // Hero: fills available space below header; centers content vertically.
-          <div className="flex min-h-[calc(100dvh-48px)] flex-col items-center justify-center py-10 sm:py-12">
-            <div className="mx-auto w-full" style={RAIL_STYLE}>
+          <div className={cn("flex min-h-[calc(100dvh-56px)] flex-col items-center justify-center py-8 sm:min-h-[calc(100dvh-64px)] sm:py-10 transition-opacity duration-150", hasMessages ? "opacity-0" : "opacity-100")}>
+            <div className="mx-auto w-[calc(100vw-24px)] max-w-[920px] sm:w-[min(860px,calc(100vw-40px))] xl:w-[920px]">
               {/* Welcome moment */}
-              <div className="mb-10 px-3 [text-size-adjust:100%] [-webkit-text-size-adjust:100%] sm:mb-11 sm:px-4">
+              <div className="mb-8 px-2 [text-size-adjust:100%] [-webkit-text-size-adjust:100%] sm:mb-10 sm:px-4">
                 <StoreHeroLockup storeName={storeName} storeLogoUrl={storeLogoUrl} />
               </div>
 
-              {/* Unified card: greeting + chips + composer as one surface */}
-              <div className="overflow-hidden rounded-3xl border border-border/60 bg-background/60 shadow-[0_2px_16px_rgba(36,20,5,0.09)]">
+              {/* Unified card: greeting + chips as one surface */}
+              <div className="overflow-hidden rounded-3xl border border-[var(--border-primary)] bg-[var(--surface)] shadow-[0_8px_24px_rgba(35,24,10,0.08)]">
                 <ChatThread
                   turns={controller.turns}
                   isLoading={controller.isLoading}
@@ -119,35 +129,13 @@ export function ConciergeScreen({
                   onJumpToLatestHandlerChange={onJumpToLatestHandlerChange}
                   bareEmptyState={true}
                 />
-                <div className="px-3 pb-3 pt-0">
-                  <MessageComposer
-                    variant={variant}
-                    message={controller.message}
-                    isLoading={controller.isLoading}
-                    canSubmit={controller.canSubmit}
-                    error={controller.error}
-                    canRetry={Boolean(controller.lastFailedMessage)}
-                    bottomOffsetPx={0}
-                    restingOffsetPx={0}
-                    onHeightChange={onComposerHeightChange}
-                    onMessageChange={controller.setMessage}
-                    onSubmit={controller.onSubmit}
-                    onRetry={() => void controller.onRetryLastMessage()}
-                    showJumpToLatest={false}
-                    floating={false}
-                    showNewChat={false}
-                    isNewChatDisabled={false}
-                    onNewChat={() => void controller.onNewChat()}
-                  />
-                </div>
               </div>
             </div>
           </div>
         ) : (
           // Active: scrolling chat; floating composer rendered outside <main> below.
           <div
-            className="mx-auto pb-6 [text-size-adjust:100%] [-webkit-text-size-adjust:100%]"
-            style={RAIL_STYLE}
+            className="mx-auto w-[calc(100vw-24px)] max-w-[920px] pb-6 [text-size-adjust:100%] [-webkit-text-size-adjust:100%] sm:w-[min(860px,calc(100vw-40px))] xl:w-[920px] concierge-bubble-enter"
           >
             <ChatThread
               turns={controller.turns}
