@@ -12,46 +12,17 @@ import {
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
-const LOADING_PHRASES = [
-  "Finding the right rugs for you…",
-  "Searching the collection…",
-  "Curating your options…",
-];
-const LOADING_ROTATE_MS = 3600;
-const LOADING_FADE_MS = 260;
-
 function RugLoadingState() {
-  const [phraseIndex, setPhraseIndex] = useState(0);
-  const [visible, setVisible] = useState(true);
-
-  useEffect(() => {
-    let timeoutId: ReturnType<typeof setTimeout> | null = null;
-
-    const intervalId = setInterval(() => {
-      setVisible(false);
-      timeoutId = setTimeout(() => {
-        setPhraseIndex((index) => (index + 1) % LOADING_PHRASES.length);
-        setVisible(true);
-      }, LOADING_FADE_MS);
-    }, LOADING_ROTATE_MS);
-
-    return () => {
-      clearInterval(intervalId);
-      if (timeoutId !== null) clearTimeout(timeoutId);
-    };
-  }, []);
-
   return (
     <div className="flex items-center gap-3 py-1">
       <RugSpinner size={32} />
-      <span
-        className={cn(
-          "inline-block min-h-[1.6rem] min-w-[22ch] text-[15px] text-foreground/55 transition-opacity",
-          visible ? "opacity-100" : "opacity-0"
-        )}
-        style={{ transitionDuration: `${LOADING_FADE_MS}ms` }}
-      >
-        {LOADING_PHRASES[phraseIndex]}
+      <span className="inline-flex min-h-[1.6rem] min-w-[24ch] items-baseline text-[15px] text-foreground/70">
+        <span className="animate-concierge-loader-breathe">Searching the collection</span>
+        <span aria-hidden="true" className="ml-0.5 inline-flex">
+          <span className="animate-concierge-loader-dot [animation-delay:0ms]">.</span>
+          <span className="animate-concierge-loader-dot [animation-delay:220ms]">.</span>
+          <span className="animate-concierge-loader-dot [animation-delay:440ms]">.</span>
+        </span>
       </span>
     </div>
   );

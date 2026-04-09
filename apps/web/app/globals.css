@@ -110,4 +110,41 @@ body {
   .animate-shake {
     animation: shake 0.35s ease;
   }
+
+  @keyframes concierge-loader-breathe {
+    0%,
+    100% {
+      opacity: 0.76;
+    }
+    50% {
+      opacity: 1;
+    }
+  }
+
+  @keyframes concierge-loader-dot {
+    0%,
+    20% {
+      opacity: 0.2;
+    }
+    45%,
+    100% {
+      opacity: 1;
+    }
+  }
+
+  .animate-concierge-loader-breathe {
+    animation: concierge-loader-breathe 1.8s ease-in-out infinite;
+  }
+
+  .animate-concierge-loader-dot {
+    animation: concierge-loader-dot 0.9s ease-in-out infinite;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .animate-concierge-loader-breathe,
+    .animate-concierge-loader-dot {
+      animation: none !important;
+      opacity: 1 !important;
+    }
+  }
 }
