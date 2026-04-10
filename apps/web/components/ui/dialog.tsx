@@ -40,13 +40,13 @@ const DialogContent = React.forwardRef<
     <DialogPrimitive.Content
       ref={ref}
       className={cn(
-        "fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border border-[var(--border-primary)] bg-[var(--surface)] p-6 shadow-[0_16px_36px_rgba(31,18,6,0.2)] duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out sm:rounded-lg",
+        "fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border border-[var(--active-border,var(--border-primary))] bg-[var(--active-surface,var(--surface))] p-6 shadow-[var(--active-shadow-2,0_16px_36px_rgba(31,18,6,0.2))] duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out sm:rounded-lg",
         className
       )}
       {...props}
     >
       {children}
-      <DialogPrimitive.Close className="absolute right-4 top-4 flex h-11 w-11 items-center justify-center rounded-full border border-[var(--border-primary)] bg-[var(--surface)] text-[var(--text-secondary)] opacity-90 ring-offset-background transition hover:border-[var(--border-interactive)] hover:bg-[var(--surface-2)] hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-[var(--accent-gold)]">
+      <DialogPrimitive.Close className="absolute right-4 top-4 flex h-11 w-11 items-center justify-center rounded-full border border-[var(--active-border,var(--border-primary))] bg-[var(--active-surface,var(--surface))] text-[var(--active-text-soft,var(--text-secondary))] opacity-90 ring-offset-background transition hover:border-[var(--active-border-strong,var(--border-interactive))] hover:bg-[var(--active-surface-2,var(--surface-2))] hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-[var(--active-accent,var(--accent-gold))]">
         <X className="h-[18px] w-[18px]" />
         <span className="sr-only">Close</span>
       </DialogPrimitive.Close>

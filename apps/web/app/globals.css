@@ -18,7 +18,7 @@
   --accent-gold: #c9a14a;
   --accent-gold-hover: #b8923e;
   --accent-gold-soft: #e9d6a5;
-  --scrim: rgba(34, 22, 12, 0.46);
+  --scrim: rgba(34, 22, 12, 0.5);
   --error-bg-warm: #f7ece8;
   --error-border-warm: #e7cfc8;
   --error-text-warm: #6a2e24;
@@ -42,6 +42,23 @@
   --input: 26 30% 84%;
   --ring: 45 85% 55%;
   --radius: 1rem;
+}
+
+.concierge-active-theme {
+  --active-bg: #efe5d8;
+  --active-bg-2: #e7dac8;
+  --active-surface: #fbf7f1;
+  --active-surface-2: #f3ebdd;
+  --active-assistant: #fcf8f2;
+  --active-user: #e8d9c8;
+  --active-border: #decfb9;
+  --active-border-strong: #d3c2aa;
+  --active-text: #2f241a;
+  --active-text-soft: #6c5a49;
+  --active-accent: #c9a14a;
+  --active-accent-hover: #b8923e;
+  --active-shadow-1: 0 6px 18px rgba(41, 29, 14, 0.08);
+  --active-shadow-2: 0 18px 42px rgba(31, 21, 9, 0.18);
 }
 
 * {

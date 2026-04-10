@@ -24,8 +24,8 @@ type ConciergeScreenProps = {
 const BODY_SIZE = "text-[18px] leading-7 sm:text-[19px] sm:leading-[30px]";
 const COMPOSER_REST_OFFSET_DESKTOP = 12;
 const COMPOSER_REST_OFFSET_MOBILE = 8;
-const CONTENT_BOTTOM_PADDING_DESKTOP = 176;
-const CONTENT_BOTTOM_PADDING_MOBILE = 164;
+const CONTENT_BOTTOM_PADDING_DESKTOP = 188;
+const CONTENT_BOTTOM_PADDING_MOBILE = 172;
 
 export function ConciergeScreen({
   variant = "concierge",
@@ -125,7 +125,10 @@ export function ConciergeScreen({
       />
 
       <main
-        className="relative [text-size-adjust:100%] [-webkit-text-size-adjust:100%]"
+        className={cn(
+          "relative [text-size-adjust:100%] [-webkit-text-size-adjust:100%]",
+          shouldRenderActiveChat ? "concierge-active-theme" : ""
+        )}
         style={{ minHeight: "100dvh", paddingTop: shouldShowHeader ? undefined : 0 }}
       >
         {idle.viewMode === "attract_mode" ? (
@@ -137,7 +140,7 @@ export function ConciergeScreen({
           />
         ) : (
           <div
-            className="mx-auto w-[calc(100vw-24px)] max-w-[920px] pb-6 pt-14 [text-size-adjust:100%] [-webkit-text-size-adjust:100%] sm:w-[min(860px,calc(100vw-40px))] sm:pt-16 xl:w-[920px] concierge-bubble-enter"
+            className="mx-auto w-[calc(100vw-24px)] max-w-[940px] pb-6 pt-16 [text-size-adjust:100%] [-webkit-text-size-adjust:100%] sm:w-[min(860px,calc(100vw-40px))] sm:pt-[72px] xl:w-[940px] concierge-bubble-enter"
             style={{ paddingBottom: `${contentBottomPaddingPx}px` }}
           >
             <ChatThread

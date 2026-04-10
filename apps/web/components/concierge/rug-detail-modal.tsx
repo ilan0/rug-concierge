@@ -61,39 +61,45 @@ export function RugDetailModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[90dvh] w-[min(96vw,62rem)] overflow-hidden border-[var(--border-primary)] bg-[color:rgba(252,250,247,0.96)] p-0 shadow-[0_16px_38px_rgba(31,18,6,0.18)] backdrop-blur supports-[backdrop-filter]:bg-[color:rgba(252,250,247,0.9)]">
-        <div className="flex h-[min(86dvh,46rem)] min-h-[26rem] flex-col">
+      <DialogContent className="!top-auto !bottom-0 !w-screen !max-w-none !translate-y-0 overflow-hidden rounded-t-[24px] border-[var(--active-border)] bg-[color:color-mix(in_srgb,var(--active-surface)_95%,white)] p-0 shadow-[var(--active-shadow-2)] backdrop-blur supports-[backdrop-filter]:bg-[color:color-mix(in_srgb,var(--active-surface)_92%,white)] sm:!top-[50%] sm:!bottom-auto sm:!w-[min(94vw,940px)] sm:!max-w-[940px] sm:!translate-y-[-50%] sm:rounded-[28px] lg:!w-[min(92vw,1080px)] lg:!max-w-[1080px]">
+        <div className="flex h-[min(92dvh,860px)] min-h-[28rem] flex-col sm:h-[min(84dvh,760px)]">
           {isLoading ? (
-            <div className="flex min-h-0 flex-1 flex-col px-4 py-4 sm:px-6 sm:py-5">
+            <div className="flex min-h-0 flex-1 flex-col px-[18px] py-[18px] sm:px-6 sm:py-6">
               <DialogHeader className="shrink-0">
-                <DialogTitle>Loading rug details...</DialogTitle>
-                <DialogDescription>Fetching image and details.</DialogDescription>
+                <DialogTitle className="font-serif text-[34px] leading-[38px] text-[var(--active-text)] sm:text-[42px] sm:leading-[46px]">
+                  Loading rug details...
+                </DialogTitle>
+                <DialogDescription className="text-[var(--active-text-soft)]">
+                  Fetching image and details.
+                </DialogDescription>
               </DialogHeader>
-              <div className="mt-4 min-h-0 flex-1 overflow-hidden rounded-xl border border-[var(--border-primary)] bg-[var(--surface-2)]">
-                <div className="h-full w-full animate-pulse bg-gradient-to-br from-[var(--surface-2)] via-[color:color-mix(in_srgb,var(--surface-2)_78%,white)] to-[var(--surface)]" />
+              <div className="mt-4 min-h-0 flex-1 overflow-hidden rounded-2xl border border-[var(--active-border)] bg-[var(--active-surface-2)]">
+                <div className="h-full w-full animate-pulse bg-gradient-to-br from-[var(--active-surface-2)] via-[color:color-mix(in_srgb,var(--active-surface-2)_78%,white)] to-[var(--active-surface)]" />
               </div>
             </div>
           ) : error ? (
-            <div className="flex min-h-0 flex-1 flex-col px-4 py-4 sm:px-6 sm:py-5">
+            <div className="flex min-h-0 flex-1 flex-col px-[18px] py-[18px] sm:px-6 sm:py-6">
               <DialogHeader className="shrink-0">
-                <DialogTitle>Unable to load details</DialogTitle>
-                <DialogDescription>{error}</DialogDescription>
+                <DialogTitle className="font-serif text-[34px] leading-[38px] text-[var(--active-text)] sm:text-[42px] sm:leading-[46px]">
+                  Unable to load details
+                </DialogTitle>
+                <DialogDescription className="text-[var(--active-text-soft)]">{error}</DialogDescription>
               </DialogHeader>
             </div>
           ) : detail ? (
-            <div className="flex min-h-0 flex-1 flex-col px-4 py-4 sm:px-6 sm:py-5">
-              <DialogHeader className="shrink-0 pb-2">
-                <DialogTitle className="line-clamp-2 font-serif text-[1.72rem] leading-tight tracking-[-0.013em] sm:text-[1.95rem]">
+            <div className="flex min-h-0 flex-1 flex-col px-[18px] py-[18px] sm:px-6 sm:py-6">
+              <DialogHeader className="shrink-0 gap-1 pb-3 text-left">
+                <DialogTitle className="line-clamp-2 font-serif text-[34px] leading-[38px] tracking-[-0.013em] text-[var(--active-text)] sm:text-[42px] sm:leading-[46px] lg:text-[48px] lg:leading-[52px]">
                   {displayLabel}
                 </DialogTitle>
-                <DialogDescription className="italic text-[var(--text-secondary)]">
+                <DialogDescription className="text-[17px] leading-[26px] italic text-[var(--active-text-soft)]">
                   Size: {detail.size_display}
                 </DialogDescription>
               </DialogHeader>
 
-              <div className="grid min-h-0 flex-1 gap-3 md:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)]">
-                <div className="min-h-0 overflow-hidden rounded-xl border border-[var(--border-primary)] bg-[var(--surface-2)]">
-                  <div className="h-full w-full bg-[color:color-mix(in_srgb,var(--surface-2)_88%,white)] p-2 sm:p-3">
+              <div className="grid min-h-0 flex-1 gap-4 md:grid-cols-[minmax(0,1.38fr)_minmax(0,1fr)]">
+                <div className="min-h-[18rem] overflow-hidden rounded-2xl border border-[var(--active-border)] bg-[var(--active-surface-2)]">
+                  <div className="h-full w-full bg-[color:color-mix(in_srgb,var(--active-surface-2)_86%,white)] p-3 sm:p-4">
                     <RugImage
                       src={detail.primary_image_url}
                       alt={displayLabel}
@@ -104,12 +110,12 @@ export function RugDetailModal({
                   </div>
                 </div>
 
-                <div className="min-h-0 rounded-xl border border-[var(--border-primary)] bg-[color:color-mix(in_srgb,var(--surface)_88%,white)] p-3 sm:p-4">
+                <div className="min-h-0 rounded-2xl border border-[var(--active-border)] bg-[color:color-mix(in_srgb,var(--active-surface)_88%,white)] p-4 sm:p-5">
                   <section className="space-y-2">
-                    <h3 className="text-xs font-semibold uppercase tracking-[0.08em] text-[var(--text-secondary)]">
+                    <h3 className="text-[12px] font-semibold uppercase tracking-[0.08em] text-[var(--active-text-soft)]">
                       Description
                     </h3>
-                    <p className="text-sm leading-6 text-[var(--text-primary)] [display:-webkit-box] [overflow:hidden] [-webkit-box-orient:vertical] [-webkit-line-clamp:12]">
+                    <p className="text-[16px] leading-[26px] text-[var(--active-text)] sm:text-[17px] sm:leading-[28px] [display:-webkit-box] [overflow:hidden] [-webkit-box-orient:vertical] [-webkit-line-clamp:12]">
                       {detail.ai_description ??
                         "Description is being generated. Check back shortly."}
                     </p>
@@ -121,7 +127,7 @@ export function RugDetailModal({
                         {valueChips.map((chip) => (
                           <span
                             key={`${detail.id}-${chip}`}
-                            className="rounded-full border border-[var(--border-primary)] bg-[var(--surface)] px-2.5 py-1 text-xs font-medium text-[var(--text-secondary)]"
+                            className="rounded-full border border-[var(--active-border)] bg-[var(--active-surface)] px-2.5 py-1 text-xs font-medium text-[var(--active-text-soft)]"
                           >
                             {chip}
                           </span>
@@ -133,10 +139,12 @@ export function RugDetailModal({
               </div>
             </div>
           ) : (
-            <div className="flex min-h-0 flex-1 flex-col px-4 py-4 sm:px-6 sm:py-5">
+            <div className="flex min-h-0 flex-1 flex-col px-[18px] py-[18px] sm:px-6 sm:py-6">
               <DialogHeader className="shrink-0">
-                <DialogTitle>Rug details unavailable</DialogTitle>
-                <DialogDescription>
+                <DialogTitle className="font-serif text-[34px] leading-[38px] text-[var(--active-text)] sm:text-[42px] sm:leading-[46px]">
+                  Rug details unavailable
+                </DialogTitle>
+                <DialogDescription className="text-[var(--active-text-soft)]">
                   We could not load this rug right now. Please try again.
                 </DialogDescription>
               </DialogHeader>
@@ -144,11 +152,11 @@ export function RugDetailModal({
           )}
 
           {onShare ? (
-            <DialogFooter className="shrink-0 gap-2 border-t border-[var(--divider-subtle)] px-4 py-3 sm:px-6">
+            <DialogFooter className="shrink-0 gap-2 border-t border-[var(--divider-subtle)] px-[18px] py-3 sm:px-6">
               <Button
                 type="button"
                 variant="outline"
-                className="min-h-11 border-[var(--border-primary)] bg-[var(--surface)] px-4 text-[var(--text-secondary)] hover:bg-[var(--surface-2)]"
+                className="min-h-11 border-[var(--active-border)] bg-[var(--active-surface)] px-4 text-[var(--active-text-soft)] hover:bg-[var(--active-surface-2)]"
                 onClick={onShare}
                 disabled={isLoading || !detail}
               >

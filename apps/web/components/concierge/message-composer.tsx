@@ -117,7 +117,7 @@ export function MessageComposer(input: MessageComposerProps) {
       data-floating-composer={floating ? "true" : "false"}
       className={
         floating
-          ? "fixed bottom-0 z-40 w-[calc(100vw-24px)] max-w-[920px] -translate-x-1/2 [text-size-adjust:100%] [-webkit-text-size-adjust:100%] sm:w-[min(860px,calc(100vw-40px))] xl:w-[920px]"
+          ? "fixed bottom-0 z-40 w-[calc(100vw-24px)] max-w-[940px] -translate-x-1/2 [text-size-adjust:100%] [-webkit-text-size-adjust:100%] sm:w-[min(860px,calc(100vw-40px))] xl:w-[940px]"
           : "relative z-30 w-full [text-size-adjust:100%] [-webkit-text-size-adjust:100%]"
       }
       style={
@@ -133,7 +133,7 @@ export function MessageComposer(input: MessageComposerProps) {
       <div ref={containerRef} className="w-full">
         {/* Composer card */}
         <div
-          className="w-full rounded-[20px] border border-[var(--border-primary)] bg-[color:color-mix(in_srgb,var(--surface)_95%,transparent)] px-3 shadow-[0_10px_22px_rgba(46,34,24,0.08)] supports-[backdrop-filter:blur(0px)]:backdrop-blur-[8px]"
+          className="w-full rounded-[20px] border border-[var(--active-border)] bg-[color:color-mix(in_srgb,var(--active-surface)_95%,transparent)] px-3 shadow-[0_8px_22px_rgba(46,34,24,0.08)] supports-[backdrop-filter:blur(0px)]:backdrop-blur-[8px]"
           style={{
             minHeight: `${dockMinHeightPx}px`,
             paddingTop: `${dockVerticalPaddingPx}px`,
@@ -151,7 +151,7 @@ export function MessageComposer(input: MessageComposerProps) {
                   onClick={onNewChat}
                   disabled={isNewChatDisabled}
                   className={cn(
-                    "concierge-hoverable flex h-11 min-w-[146px] items-center justify-center gap-2 rounded-xl border border-[var(--border-primary)] bg-[color:color-mix(in_srgb,var(--surface-2)_90%,white)] px-[14px] text-[14px] font-medium leading-5 tracking-[0.01em] text-[var(--text-secondary)] transition active:scale-[0.995] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-gold)] focus-visible:ring-offset-2",
+                    "concierge-hoverable flex h-11 min-w-[146px] items-center justify-center gap-2 rounded-xl border border-[var(--active-border)] bg-[color:color-mix(in_srgb,var(--active-surface-2)_90%,white)] px-[14px] text-[14px] font-medium leading-5 tracking-[0.01em] text-[var(--active-text-soft)] transition active:scale-[0.995] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--active-accent)] focus-visible:ring-offset-2",
                     "disabled:cursor-not-allowed disabled:opacity-40"
                   )}
                 >
@@ -165,7 +165,7 @@ export function MessageComposer(input: MessageComposerProps) {
               {showJumpControl ? (
                 <button
                   type="button"
-                  className="concierge-hoverable flex h-11 min-w-[132px] items-center justify-center gap-2 rounded-xl border border-[var(--border-primary)] bg-[color:color-mix(in_srgb,var(--surface-2)_90%,white)] px-[14px] text-[14px] font-medium leading-5 tracking-[0.01em] text-[var(--text-secondary)] transition active:scale-[0.995] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-gold)] focus-visible:ring-offset-2"
+                  className="concierge-hoverable flex h-11 min-w-[132px] items-center justify-center gap-2 rounded-xl border border-[var(--active-border)] bg-[color:color-mix(in_srgb,var(--active-surface-2)_90%,white)] px-[14px] text-[14px] font-medium leading-5 tracking-[0.01em] text-[var(--active-text-soft)] transition active:scale-[0.995] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--active-accent)] focus-visible:ring-offset-2"
                   aria-label="Jump to latest"
                   onClick={onJumpToLatest}
                 >
@@ -187,12 +187,12 @@ export function MessageComposer(input: MessageComposerProps) {
                 rows={1}
                 maxLength={2000}
                 disabled={isLoading}
-                className="min-h-[56px] resize-none rounded-2xl border-[var(--border-primary)] bg-[var(--surface-2)] px-4 py-3 text-[18px] leading-7 text-[var(--text-primary)] placeholder:text-[color:var(--text-secondary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-gold)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--surface)]"
+                className="min-h-[56px] resize-none rounded-2xl border-[var(--active-border)] bg-[var(--active-surface-2)] px-4 py-3 text-[18px] leading-7 text-[var(--active-text)] placeholder:text-[color:var(--active-text-soft)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--active-accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--active-surface)]"
               />
               <Button
                 type="submit"
                 disabled={!canSubmit}
-                className="h-14 min-w-24 shrink-0 rounded-2xl border border-[var(--accent-gold-soft)] bg-[var(--accent-gold)] px-5 text-[15px] font-semibold leading-5 tracking-[0.01em] text-[var(--text-primary)] shadow-[0_8px_14px_rgba(185,146,62,0.2)] transition hover:bg-[var(--accent-gold-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-gold)] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
+                className="h-14 min-w-24 shrink-0 rounded-2xl border border-[var(--accent-gold-soft)] bg-[var(--active-accent)] px-5 text-[15px] font-semibold leading-5 tracking-[0.01em] text-[var(--active-text)] shadow-[0_8px_14px_rgba(185,146,62,0.2)] transition hover:bg-[var(--active-accent-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--active-accent)] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {isLoading ? "Sending..." : "Send"}
               </Button>
