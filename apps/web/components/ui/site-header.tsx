@@ -21,7 +21,7 @@ export function SiteHeader({ storeName, storeLogoUrl, showBranding = true }: Sit
             <StoreLogoMark
               storeName={displayStoreName}
               logoUrl={storeLogoUrl}
-              containerClassName="h-10 w-10 rounded-xl border-[#d9cab3] bg-[color:color-mix(in_srgb,var(--active-surface-2)_90%,white)] shadow-[inset_0_1px_0_rgba(255,255,255,0.55)]"
+              containerClassName="h-10 w-10 rounded-xl border-transparent bg-[color:color-mix(in_srgb,var(--active-surface-2)_90%,white)] shadow-[inset_0_0_0_1px_rgba(226,212,191,0.9),inset_0_1px_0_rgba(255,255,255,0.55)]"
               imageClassName="p-1.5"
               fallbackTextClassName="text-sm tracking-[0.07em]"
             />
