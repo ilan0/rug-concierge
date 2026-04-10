@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { CONCIERGE_CLASSNAMES } from "@/components/concierge/design-system";
 import type { UiRecommendationItem } from "@/lib/types/chat-ui";
 import { RugImage } from "@/components/ui/rug-image";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -162,7 +163,8 @@ export function RecommendationCard({
         ref={cardRef}
         data-recommendation-card="true"
         className={cn(
-          "concierge-hoverable relative z-[1] cursor-pointer overflow-hidden rounded-[24px] border border-[var(--active-border)] bg-[var(--active-surface)] shadow-[var(--active-shadow-1)] transition duration-150 active:scale-[0.995] hover:z-[30] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--active-accent)] focus-visible:ring-offset-2",
+          "concierge-hoverable relative z-[1] cursor-pointer overflow-hidden rounded-[24px] border border-[var(--active-border)] bg-[var(--active-surface)] shadow-[var(--active-shadow-1)] transition duration-150 active:scale-[0.995] hover:z-[30]",
+          CONCIERGE_CLASSNAMES.focusRing,
           (isTapActive || isFocusPulse) &&
             "border-[var(--active-border-strong)] ring-2 ring-[color:rgba(201,161,74,0.28)] ring-offset-2 ring-offset-[var(--active-surface)]"
         )}

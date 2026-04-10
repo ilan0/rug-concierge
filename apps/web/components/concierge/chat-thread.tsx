@@ -2,6 +2,9 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import {
+  CONCIERGE_CLASSNAMES,
+} from "@/components/concierge/design-system";
 import { RecommendationCard } from "@/components/concierge/recommendation-card";
 import { RugSpinner } from "@/components/concierge/rug-spinner";
 import type { Turn } from "@/components/concierge/types";
@@ -14,7 +17,12 @@ import { cn } from "@/lib/utils";
 
 function RugLoadingState() {
   return (
-    <div className="rounded-[24px] border border-[var(--active-border)] bg-[var(--active-assistant)] px-5 py-5 shadow-[var(--active-shadow-1)] sm:px-6 sm:py-6">
+    <div
+      className={cn(
+        CONCIERGE_CLASSNAMES.assistantSurface,
+        "px-5 py-5 sm:px-6 sm:py-6"
+      )}
+    >
       <div className="flex items-center gap-3">
         <RugSpinner size={28} />
         <span className="text-[15px] leading-5 tracking-[0.01em] text-[var(--active-text-soft)]">Searching the collection...</span>
@@ -157,7 +165,10 @@ export function ChatThread(input: ChatThreadProps) {
                 <button
                   key={prompt.id}
                   type="button"
-                  className="min-h-[46px] rounded-[23px] border border-[var(--active-border)] bg-[color:color-mix(in_srgb,var(--active-surface)_90%,white)] px-5 text-[15px] font-medium leading-5 tracking-[0.01em] text-[var(--active-text-soft)] transition active:scale-[0.995] disabled:cursor-not-allowed disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--active-accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--active-surface)] concierge-hoverable"
+                  className={cn(
+                    "concierge-hoverable min-h-[46px] rounded-[23px] border border-[var(--active-border)] bg-[color:color-mix(in_srgb,var(--active-surface)_90%,white)] px-5 text-[15px] font-medium leading-5 tracking-[0.01em] text-[var(--active-text-soft)] transition active:scale-[0.995] disabled:cursor-not-allowed disabled:opacity-60 focus-visible:ring-offset-[var(--active-surface)]",
+                    CONCIERGE_CLASSNAMES.focusRing
+                  )}
                   onClick={() => onChoosePrompt(prompt)}
                 >
                   {prompt.label}
@@ -177,10 +188,19 @@ export function ChatThread(input: ChatThreadProps) {
                 key={turn.id}
                 className={
                   turn.role === "user"
-                    ? "group concierge-bubble-enter ml-auto max-w-[88%] rounded-[24px] border border-[var(--active-border)] bg-[var(--active-user)] px-5 py-5 shadow-[var(--active-shadow-1)] sm:max-w-[78%] sm:px-6 sm:py-[22px]"
+                    ? cn(
+                        "group concierge-bubble-enter ml-auto max-w-[88%] px-5 py-5 sm:max-w-[78%] sm:px-6 sm:py-[22px]",
+                        CONCIERGE_CLASSNAMES.userSurface
+                      )
                     : turn.isStreaming && turn.text === ""
-                      ? "group concierge-bubble-enter max-w-full rounded-[24px] border border-[var(--active-border)] bg-[var(--active-assistant)] px-5 py-5 shadow-[var(--active-shadow-1)] sm:px-6 sm:py-[22px]"
-                      : "group concierge-bubble-enter max-w-full rounded-[24px] border border-[var(--active-border)] bg-[var(--active-assistant)] px-5 py-5 shadow-[var(--active-shadow-1)] sm:px-6 sm:py-[22px]"
+                      ? cn(
+                          "group concierge-bubble-enter max-w-full px-5 py-5 sm:px-6 sm:py-[22px]",
+                          CONCIERGE_CLASSNAMES.assistantSurface
+                        )
+                      : cn(
+                          "group concierge-bubble-enter max-w-full px-5 py-5 sm:px-6 sm:py-[22px]",
+                          CONCIERGE_CLASSNAMES.assistantSurface
+                        )
                 }
               >
                 {!(turn.role === "assistant" && turn.isStreaming && turn.text === "") && (
@@ -244,7 +264,10 @@ export function ChatThread(input: ChatThreadProps) {
                         type="button"
                         variant="outline"
                         size="icon"
-                        className="h-11 w-11 rounded-full border-[var(--active-border)] bg-[var(--active-surface)] text-[var(--active-text-soft)] transition hover:border-[var(--active-border-strong)] hover:bg-[var(--active-surface-2)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--active-accent)] focus-visible:ring-offset-2"
+                        className={cn(
+                          CONCIERGE_CLASSNAMES.iconButton,
+                          CONCIERGE_CLASSNAMES.focusRing
+                        )}
                         onClick={(event) => {
                           event.stopPropagation();
                           scrollRecommendationRow(turn.id, "left");
@@ -257,7 +280,10 @@ export function ChatThread(input: ChatThreadProps) {
                         type="button"
                         variant="outline"
                         size="icon"
-                        className="h-11 w-11 rounded-full border-[var(--active-border)] bg-[var(--active-surface)] text-[var(--active-text-soft)] transition hover:border-[var(--active-border-strong)] hover:bg-[var(--active-surface-2)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--active-accent)] focus-visible:ring-offset-2"
+                        className={cn(
+                          CONCIERGE_CLASSNAMES.iconButton,
+                          CONCIERGE_CLASSNAMES.focusRing
+                        )}
                         onClick={(event) => {
                           event.stopPropagation();
                           scrollRecommendationRow(turn.id, "right");

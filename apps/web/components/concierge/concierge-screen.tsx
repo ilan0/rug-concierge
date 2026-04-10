@@ -6,6 +6,7 @@ import { ChatThread } from "@/components/concierge/chat-thread";
 import { IdlePromptModal } from "@/components/concierge/idle-prompt-modal";
 import { MessageComposer } from "@/components/concierge/message-composer";
 import { StaffLockButton } from "@/components/concierge/staff-lock-button";
+import { CONCIERGE_LAYOUT } from "@/components/concierge/design-system";
 import { useConciergeController } from "@/components/concierge/use-concierge-controller";
 import { useIdlePrompt } from "@/components/concierge/use-idle-prompt";
 import { useVisualViewportInset } from "@/components/concierge/use-visual-viewport-inset";
@@ -24,8 +25,6 @@ type ConciergeScreenProps = {
 const BODY_SIZE = "text-[18px] leading-7 sm:text-[19px] sm:leading-[30px]";
 const COMPOSER_REST_OFFSET_DESKTOP = 12;
 const COMPOSER_REST_OFFSET_MOBILE = 8;
-const CONTENT_BOTTOM_PADDING_DESKTOP = 188;
-const CONTENT_BOTTOM_PADDING_MOBILE = 172;
 
 export function ConciergeScreen({
   variant = "concierge",
@@ -71,7 +70,10 @@ export function ConciergeScreen({
     : COMPOSER_REST_OFFSET_DESKTOP;
 
   const contentBottomPaddingPx = useMemo(
-    () => (isSmallViewport ? CONTENT_BOTTOM_PADDING_MOBILE : CONTENT_BOTTOM_PADDING_DESKTOP) + keyboardInsetPx,
+    () =>
+      (isSmallViewport
+        ? CONCIERGE_LAYOUT.contentBottomPaddingMobilePx
+        : CONCIERGE_LAYOUT.contentBottomPaddingDesktopPx) + keyboardInsetPx,
     [isSmallViewport, keyboardInsetPx]
   );
 

@@ -1,5 +1,9 @@
 import { useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from "react";
 import { ArrowDown, RotateCcw } from "lucide-react";
+import {
+  CONCIERGE_CLASSNAMES,
+  CONCIERGE_LAYOUT,
+} from "@/components/concierge/design-system";
 import type { ConciergeVariant } from "@/components/concierge/types";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -109,7 +113,9 @@ export function MessageComposer(input: MessageComposerProps) {
   const utilityRowVisible = showJumpControl || showNewChatControl;
   const utilityBottomMarginPx = utilityRowVisible ? 8 : 0;
   const dockVerticalPaddingPx = isCompactViewport ? 8 : 10;
-  const dockMinHeightPx = isCompactViewport ? 104 : 112;
+  const dockMinHeightPx = isCompactViewport
+    ? CONCIERGE_LAYOUT.dockMaxHeightMobilePx
+    : CONCIERGE_LAYOUT.dockMaxHeightDesktopPx;
 
   return (
     <section
@@ -151,7 +157,9 @@ export function MessageComposer(input: MessageComposerProps) {
                   onClick={onNewChat}
                   disabled={isNewChatDisabled}
                   className={cn(
-                    "concierge-hoverable flex h-11 min-w-[146px] items-center justify-center gap-2 rounded-xl border border-[var(--active-border)] bg-[color:color-mix(in_srgb,var(--active-surface-2)_90%,white)] px-[14px] text-[14px] font-medium leading-5 tracking-[0.01em] text-[var(--active-text-soft)] transition active:scale-[0.995] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--active-accent)] focus-visible:ring-offset-2",
+                    "min-w-[146px]",
+                    CONCIERGE_CLASSNAMES.utilityButton,
+                    CONCIERGE_CLASSNAMES.focusRing,
                     "disabled:cursor-not-allowed disabled:opacity-40"
                   )}
                 >
@@ -165,7 +173,11 @@ export function MessageComposer(input: MessageComposerProps) {
               {showJumpControl ? (
                 <button
                   type="button"
-                  className="concierge-hoverable flex h-11 min-w-[132px] items-center justify-center gap-2 rounded-xl border border-[var(--active-border)] bg-[color:color-mix(in_srgb,var(--active-surface-2)_90%,white)] px-[14px] text-[14px] font-medium leading-5 tracking-[0.01em] text-[var(--active-text-soft)] transition active:scale-[0.995] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--active-accent)] focus-visible:ring-offset-2"
+                  className={cn(
+                    "min-w-[132px]",
+                    CONCIERGE_CLASSNAMES.utilityButton,
+                    CONCIERGE_CLASSNAMES.focusRing
+                  )}
                   aria-label="Jump to latest"
                   onClick={onJumpToLatest}
                 >
@@ -187,12 +199,18 @@ export function MessageComposer(input: MessageComposerProps) {
                 rows={1}
                 maxLength={2000}
                 disabled={isLoading}
-                className="min-h-[56px] resize-none rounded-2xl border-[var(--active-border)] bg-[var(--active-surface-2)] px-4 py-3 text-[18px] leading-7 text-[var(--active-text)] placeholder:text-[color:var(--active-text-soft)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--active-accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--active-surface)]"
+                className={cn(
+                  "min-h-[56px] resize-none rounded-2xl border-[var(--active-border)] bg-[var(--active-surface-2)] px-4 py-3 text-[18px] leading-7 text-[var(--active-text)] placeholder:text-[color:var(--active-text-soft)] focus-visible:ring-offset-[var(--active-surface)]",
+                  CONCIERGE_CLASSNAMES.focusRing
+                )}
               />
               <Button
                 type="submit"
                 disabled={!canSubmit}
-                className="h-14 min-w-24 shrink-0 rounded-2xl border border-[var(--accent-gold-soft)] bg-[var(--active-accent)] px-5 text-[15px] font-semibold leading-5 tracking-[0.01em] text-[var(--active-text)] shadow-[0_8px_14px_rgba(185,146,62,0.2)] transition hover:bg-[var(--active-accent-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--active-accent)] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
+                className={cn(
+                  "h-14 min-w-24 shrink-0 rounded-2xl border border-[var(--accent-gold-soft)] bg-[var(--active-accent)] px-5 text-[15px] font-semibold leading-5 tracking-[0.01em] text-[var(--active-text)] shadow-[0_8px_14px_rgba(185,146,62,0.2)] transition hover:bg-[var(--active-accent-hover)] disabled:cursor-not-allowed disabled:opacity-60",
+                  CONCIERGE_CLASSNAMES.focusRing
+                )}
               >
                 {isLoading ? "Sending..." : "Send"}
               </Button>
