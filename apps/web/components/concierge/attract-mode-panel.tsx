@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useRef, useState } from "react";
 import { StoreHeroLockup } from "@/components/concierge/store-hero-lockup";
 import { cn } from "@/lib/utils";
 
@@ -54,16 +55,57 @@ export function AttractModePanel({
   backgroundImageUrls,
   onStart,
 }: AttractModePanelProps) {
+  const [isExiting, setIsExiting] = useState(false);
+  const timeoutRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current !== null) {
+        window.clearTimeout(timeoutRef.current);
+      }
+    };
+  }, []);
+
+  const handleStart = () => {
+    if (isExiting) return;
+    const prefersReducedMotion =
+      typeof window !== "undefined" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const delayMs = prefersReducedMotion ? 0 : 220;
+
+    setIsExiting(true);
+    timeoutRef.current = window.setTimeout(() => {
+      onStart();
+      timeoutRef.current = null;
+      setIsExiting(false);
+    }, delayMs);
+  };
+
   return (
-    <section className="relative flex min-h-[100dvh] items-center justify-center overflow-hidden px-4 pb-[max(24px,env(safe-area-inset-bottom))] pt-[max(24px,env(safe-area-inset-top))] sm:px-8">
+    <section
+      data-attract-mode="true"
+      className={cn(
+        "relative flex min-h-[100dvh] items-center justify-center overflow-hidden px-4 pb-[max(24px,env(safe-area-inset-bottom))] pt-[max(24px,env(safe-area-inset-top))] transition-opacity duration-200 ease-out sm:px-8",
+        isExiting ? "opacity-0" : "opacity-100"
+      )}
+    >
       <AttractCanvasBackdrop imageUrls={backgroundImageUrls} />
       <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(58,44,29,0.3),rgba(40,29,19,0.42))]" />
 
-      <div className="relative z-[1] w-[min(760px,calc(100vw-32px))] rounded-[20px] border border-[#DCCFBE] bg-[color:rgba(250,246,240,0.9)] px-[22px] pb-[28px] pt-[32px] shadow-[0_24px_64px_rgba(32,24,17,0.24)] sm:w-[min(680px,calc(100vw-56px))] sm:rounded-[24px] sm:px-[56px] sm:pb-[44px] sm:pt-[56px]">
+      <div
+        className={cn(
+          "relative z-[1] w-[min(760px,calc(100vw-32px))] rounded-[20px] border border-[#DCCFBE] bg-[color:rgba(250,246,240,0.9)] px-[22px] pb-[28px] pt-[32px] shadow-[0_24px_64px_rgba(32,24,17,0.24)] transition-transform duration-200 ease-out sm:w-[min(680px,calc(100vw-56px))] sm:rounded-[24px] sm:px-[56px] sm:pb-[44px] sm:pt-[56px]",
+          isExiting ? "translate-y-1" : "translate-y-0"
+        )}
+      >
         <StoreHeroLockup storeName={storeName} storeLogoUrl={storeLogoUrl} />
 
         <h2 className="mt-[26px] text-balance text-center font-serif text-[clamp(34px,5.2vw,58px)] font-medium leading-[1.06] tracking-[-0.02em] text-[var(--text-primary)]">
-          Discover In-Stock Rugs
+          Discover{" "}
+          <span className="whitespace-nowrap">
+            In‑Stock
+          </span>{" "}
+          Rugs
         </h2>
 
         <p className="mx-auto mt-[14px] max-w-[44ch] text-balance text-center text-[clamp(16px,1.9vw,20px)] leading-[1.4] text-[color:color-mix(in_srgb,var(--text-secondary)_90%,#4e3d2f)]">
@@ -73,7 +115,8 @@ export function AttractModePanel({
         <div className="mt-[30px] flex justify-center">
           <button
             type="button"
-            onClick={onStart}
+            onClick={handleStart}
+            disabled={isExiting}
             className="min-h-14 rounded-full border border-[#C9B28D] bg-[linear-gradient(180deg,#f7ebd2_0%,#ecd9b4_100%)] px-6 text-[18px] font-semibold text-[var(--text-primary)] shadow-[0_8px_22px_rgba(58,42,23,0.16)] transition active:scale-[0.985] focus-visible:outline-none focus-visible:shadow-[0_0_0_3px_rgba(201,161,74,0.30)] md:hover:brightness-[0.985] sm:h-[62px] sm:px-[30px]"
           >
             Tap to Start

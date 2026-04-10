@@ -5,14 +5,31 @@ import { createIdleController, IDLE_TIMEOUT_MS } from "@/lib/concierge/idle-cont
 
 export type ConciergeViewMode = "attract_mode" | "active_chat";
 
-export function useIdlePrompt() {
+type UseIdlePromptOptions = {
+  hasMessages: boolean;
+};
+
+export function useIdlePrompt(options: UseIdlePromptOptions) {
   const [viewMode, setViewMode] = useState<ConciergeViewMode>("attract_mode");
   const [showIdlePrompt, setShowIdlePrompt] = useState(false);
   const controllerRef = useRef<ReturnType<typeof createIdleController> | null>(null);
+  const hasMessagesRef = useRef(options.hasMessages);
+
+  useEffect(() => {
+    hasMessagesRef.current = options.hasMessages;
+  }, [options.hasMessages]);
 
   useEffect(() => {
     controllerRef.current = createIdleController({
-      onIdle: () => setShowIdlePrompt((current) => (current ? current : true)),
+      onIdle: () => {
+        if (!hasMessagesRef.current) {
+          setShowIdlePrompt(false);
+          setViewMode("attract_mode");
+          controllerRef.current?.stop();
+          return;
+        }
+        setShowIdlePrompt((current) => (current ? current : true));
+      },
       timeoutMs: IDLE_TIMEOUT_MS,
       setTimer: (handler, timeoutMs) => window.setTimeout(handler, timeoutMs),
       clearTimer: (handle) => window.clearTimeout(handle),
@@ -86,4 +103,3 @@ export function useIdlePrompt() {
     idleTimeoutMs: IDLE_TIMEOUT_MS,
   };
 }
-

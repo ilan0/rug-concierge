@@ -11,6 +11,7 @@ import { useIdlePrompt } from "@/components/concierge/use-idle-prompt";
 import { useVisualViewportInset } from "@/components/concierge/use-visual-viewport-inset";
 import type { ConciergeVariant } from "@/components/concierge/types";
 import { SiteHeader } from "@/components/ui/site-header";
+import { cn } from "@/lib/utils";
 
 type ConciergeScreenProps = {
   variant?: ConciergeVariant;
@@ -34,11 +35,12 @@ export function ConciergeScreen({
   attractImageUrls,
 }: ConciergeScreenProps) {
   const controller = useConciergeController({ variant, tenantId });
+  const hasMessages = controller.turns.length > 0;
+  const idle = useIdlePrompt({ hasMessages });
   const keyboardInsetPx = useVisualViewportInset();
   const [isSmallViewport, setIsSmallViewport] = useState(false);
   const [showJumpToLatest, setShowJumpToLatest] = useState(false);
   const [jumpToLatest, setJumpToLatest] = useState<(() => void) | null>(null);
-  const idle = useIdlePrompt();
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -61,7 +63,6 @@ export function ConciergeScreen({
     []
   );
 
-  const hasMessages = controller.turns.length > 0;
   const shouldRenderActiveChat = idle.viewMode === "active_chat";
   const shouldShowHeader = shouldRenderActiveChat;
 
@@ -115,7 +116,12 @@ export function ConciergeScreen({
 
       <div
         aria-hidden="true"
-        className="pointer-events-none fixed inset-0 -z-10 bg-[radial-gradient(circle_at_12%_8%,rgba(255,241,218,0.42),transparent_42%),radial-gradient(circle_at_88%_12%,rgba(236,219,198,0.24),transparent_44%),linear-gradient(180deg,rgba(250,245,238,0.9),rgba(244,236,225,0.92))]"
+        className={cn(
+          "pointer-events-none fixed inset-0 -z-10 transition-all duration-300",
+          shouldRenderActiveChat
+            ? "bg-[radial-gradient(circle_at_14%_8%,rgba(244,229,204,0.52),transparent_42%),radial-gradient(circle_at_88%_14%,rgba(219,196,164,0.24),transparent_44%),linear-gradient(180deg,#efe5d8_0%,#e6dac9_100%)] opacity-100"
+            : "bg-[linear-gradient(180deg,rgba(43,32,22,0.24),rgba(43,32,22,0.32))] opacity-0"
+        )}
       />
 
       <main
