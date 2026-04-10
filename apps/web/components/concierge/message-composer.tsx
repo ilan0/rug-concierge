@@ -139,7 +139,7 @@ export function MessageComposer(input: MessageComposerProps) {
       <div ref={containerRef} className="w-full">
         {/* Composer card */}
         <div
-          className="w-full rounded-[20px] border border-[color:color-mix(in_srgb,var(--active-border)_72%,white)] bg-[color:color-mix(in_srgb,var(--active-surface)_95%,transparent)] px-3 shadow-[0_8px_22px_rgba(46,34,24,0.08)] supports-[backdrop-filter:blur(0px)]:backdrop-blur-[8px]"
+          className="w-full rounded-[20px] border border-[var(--active-border)] bg-[color:color-mix(in_srgb,var(--active-surface)_95%,transparent)] px-3 shadow-[0_8px_22px_rgba(46,34,24,0.08)] supports-[backdrop-filter:blur(0px)]:backdrop-blur-[8px]"
           style={{
             minHeight: `${dockMinHeightPx}px`,
             paddingTop: `${dockVerticalPaddingPx}px`,
@@ -200,7 +200,7 @@ export function MessageComposer(input: MessageComposerProps) {
                 maxLength={2000}
                 disabled={isLoading}
                 className={cn(
-                  "min-h-[56px] resize-none rounded-2xl border-[color:color-mix(in_srgb,var(--active-border)_66%,white)] bg-[var(--active-surface-2)] px-4 py-3 text-[18px] leading-7 text-[var(--active-text)] placeholder:text-[color:var(--active-text-soft)] focus-visible:ring-offset-[var(--active-surface)]",
+                  "min-h-[56px] resize-none rounded-2xl border-[var(--active-border)] bg-[var(--active-surface-2)] px-4 py-3 text-[18px] leading-7 text-[var(--active-text)] placeholder:text-[color:var(--active-text-soft)] focus-visible:ring-offset-[var(--active-surface)]",
                   CONCIERGE_CLASSNAMES.focusRing
                 )}
               />
