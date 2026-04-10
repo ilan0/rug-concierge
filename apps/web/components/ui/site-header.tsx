@@ -12,6 +12,9 @@ const FALLBACK_STORE_NAME = "Rug Gallery Concierge";
 
 export function SiteHeader({ storeName, storeLogoUrl, showBranding = true }: SiteHeaderProps) {
   const displayStoreName = storeName.trim().length > 0 ? storeName : FALLBACK_STORE_NAME;
+  const logoContainerClassName = storeLogoUrl
+    ? "h-10 w-10 rounded-xl border-transparent bg-transparent shadow-none"
+    : "h-10 w-10 rounded-xl border-[#d9cab3] bg-[color:color-mix(in_srgb,var(--active-surface-2)_90%,white)] shadow-[inset_0_0_0_1px_rgba(226,212,191,0.9),inset_0_1px_0_rgba(255,255,255,0.55)]";
 
   return (
     <header className="fixed left-0 right-0 top-0 z-40 border-b border-[var(--divider-subtle)] bg-[color-mix(in_srgb,var(--active-surface)_95%,transparent)] backdrop-blur-[0px] sm:backdrop-blur-[2px]">
@@ -21,7 +24,7 @@ export function SiteHeader({ storeName, storeLogoUrl, showBranding = true }: Sit
             <StoreLogoMark
               storeName={displayStoreName}
               logoUrl={storeLogoUrl}
-              containerClassName="h-10 w-10 rounded-xl border-transparent bg-[color:color-mix(in_srgb,var(--active-surface-2)_90%,white)] shadow-[inset_0_0_0_1px_rgba(226,212,191,0.9),inset_0_1px_0_rgba(255,255,255,0.55)]"
+              containerClassName={logoContainerClassName}
               imageClassName="p-1.5"
               fallbackTextClassName="text-sm tracking-[0.07em]"
             />
