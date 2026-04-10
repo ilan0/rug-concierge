@@ -10,10 +10,10 @@
   --user-bubble: #e8d8c6;
   --text-primary: #2e2218;
   --text-secondary: #6b5a4b;
-  --border-color: #eadecf;
+  --border-color: #e5dbcf;
   --divider: #eee6dd;
   --border-primary: var(--border-color);
-  --border-interactive: #dccfbe;
+  --border-interactive: #d8ccbc;
   --divider-subtle: var(--divider);
   --accent-gold: #c9a14a;
   --accent-gold-hover: #b8923e;
@@ -51,8 +51,8 @@
   --active-surface-2: #f3ebdd;
   --active-assistant: #fcf8f2;
   --active-user: #e8d9c8;
-  --active-border: #e3d6c4;
-  --active-border-strong: #d4c2a8;
+  --active-border: #decfb9;
+  --active-border-strong: #d3c2aa;
   --active-text: #2f241a;
   --active-text-soft: #6c5a49;
   --active-accent: #c9a14a;
