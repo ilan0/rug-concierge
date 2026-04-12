@@ -13,14 +13,13 @@ export const CONCIERGE_LAYOUT = {
 
 export const CONCIERGE_CLASSNAMES = {
   focusRing:
-    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--active-accent)] focus-visible:ring-offset-2",
+    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--active-accent,var(--accent-gold))] focus-visible:ring-offset-2",
   iconButton:
-    "h-11 w-11 rounded-full border-[var(--active-border)] bg-[var(--active-surface)] text-[var(--active-text-soft)] transition hover:border-[var(--active-border-strong)] hover:bg-[var(--active-surface-2)]",
+    "h-11 w-11 rounded-full border-[var(--active-border,var(--border-primary))] bg-[var(--active-surface,var(--surface))] text-[var(--active-text-soft,var(--text-secondary))] transition hover:border-[var(--active-border-strong,var(--border-interactive))] hover:bg-[var(--active-surface-2,var(--surface-2))]",
   utilityButton:
-    "concierge-hoverable flex h-11 items-center justify-center gap-2 rounded-xl border border-[var(--active-border)] bg-[color:color-mix(in_srgb,var(--active-surface-2)_90%,white)] px-[14px] text-[14px] font-medium leading-5 tracking-[0.01em] text-[var(--active-text-soft)] transition active:scale-[0.995]",
+    "concierge-hoverable flex h-11 items-center justify-center gap-2 rounded-xl border border-[var(--active-border,var(--border-primary))] bg-[color:color-mix(in_srgb,var(--active-surface-2,var(--surface-2))_92%,white)] px-[14px] text-[14px] font-medium leading-5 tracking-[0.01em] text-[var(--active-text-soft,var(--text-secondary))] transition active:scale-[0.995]",
   assistantSurface:
-    "rounded-[24px] border border-[var(--active-border)] bg-[var(--active-assistant)] shadow-[var(--active-shadow-1)]",
+    "rounded-[24px] border border-[var(--active-border,var(--border-primary))] bg-[var(--active-assistant,var(--assistant-bubble))] shadow-[var(--active-shadow-1,0_6px_18px_rgba(41,29,14,0.08))]",
   userSurface:
-    "rounded-[24px] border border-[var(--active-border)] bg-[var(--active-user)] shadow-[var(--active-shadow-1)]",
+    "rounded-[24px] border border-[var(--active-border,var(--border-primary))] bg-[var(--active-user,var(--user-bubble))] shadow-[var(--active-shadow-1,0_6px_18px_rgba(41,29,14,0.08))]",
 } as const;
-
