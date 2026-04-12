@@ -4,7 +4,7 @@ import { resolveTenantFromRequest } from "@/lib/tenant/resolve-tenant";
 import { getStaffUnlockStateFromRequest } from "@/lib/auth/staff";
 import {
   checkRateLimit,
-  inventoryWriteRateLimit,
+  inventoryIntakeRateLimit,
 } from "@/lib/rate-limit";
 import {
   finalizeIntakeFromStorage,
@@ -79,8 +79,8 @@ export async function POST(req: NextRequest) {
     req.headers.get("x-real-ip") ??
     "unknown";
   const rateLimitResult = await checkRateLimit(
-    inventoryWriteRateLimit,
-    `inventory:intake:finalize:${ip}`
+    inventoryIntakeRateLimit,
+    `inventory:intake:${tenantId}:${ip}`
   );
   if (!rateLimitResult.allowed) {
     return NextResponse.json(

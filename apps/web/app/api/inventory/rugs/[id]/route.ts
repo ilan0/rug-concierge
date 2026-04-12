@@ -10,7 +10,7 @@ import {
   checkLocalRateLimit,
   checkRateLimit,
   inventoryReadRateLimit,
-  inventoryWriteRateLimit,
+  inventoryRugWriteRateLimit,
 } from "@/lib/rate-limit";
 import { staffOverridesSchema } from "@/lib/inventory/schemas";
 import { mergeStaffOverrides } from "@/lib/inventory/resolve-fields";
@@ -44,6 +44,7 @@ function staffAuthMisconfiguredResponse(message: string) {
 
 async function enforceInventoryRateLimit(
   req: NextRequest,
+  tenantId: string,
   scope: "read" | "write"
 ): Promise<NextResponse | null> {
   const ip =
@@ -51,21 +52,24 @@ async function enforceInventoryRateLimit(
     req.headers.get("x-real-ip") ??
     "unknown";
 
-  const key = `inventory:rug:${scope}:${ip}`;
+  const key =
+    scope === "read"
+      ? `inventory:rug:read:${ip}`
+      : `inventory:rug:write:${tenantId}:${ip}`;
   const rateLimitResult =
     scope === "read"
       ? inventoryReadRateLimit
         ? await checkRateLimit(inventoryReadRateLimit, key)
         : checkLocalRateLimit({
             key,
-            maxRequests: 120,
+            maxRequests: 600,
             windowMs: 10 * 60 * 1000,
           })
-      : inventoryWriteRateLimit
-        ? await checkRateLimit(inventoryWriteRateLimit, key)
+      : inventoryRugWriteRateLimit
+        ? await checkRateLimit(inventoryRugWriteRateLimit, key)
         : checkLocalRateLimit({
             key,
-            maxRequests: 30,
+            maxRequests: 60,
             windowMs: 10 * 60 * 1000,
           });
 
@@ -109,7 +113,7 @@ export async function GET(
   if (!staffUnlockState.unlocked) {
     return staffLockedResponse();
   }
-  const rateLimited = await enforceInventoryRateLimit(req, "read");
+  const rateLimited = await enforceInventoryRateLimit(req, tenantId, "read");
   if (rateLimited) return rateLimited;
 
   const params = await parseRouteParamsWithSchema(
@@ -152,7 +156,7 @@ export async function PATCH(
   if (!staffUnlockState.unlocked) {
     return staffLockedResponse();
   }
-  const rateLimited = await enforceInventoryRateLimit(req, "write");
+  const rateLimited = await enforceInventoryRateLimit(req, tenantId, "write");
   if (rateLimited) return rateLimited;
 
   const params = await parseRouteParamsWithSchema(
@@ -297,7 +301,7 @@ export async function DELETE(
   if (!staffUnlockState.unlocked) {
     return staffLockedResponse();
   }
-  const rateLimited = await enforceInventoryRateLimit(req, "write");
+  const rateLimited = await enforceInventoryRateLimit(req, tenantId, "write");
   if (rateLimited) return rateLimited;
 
   const params = await parseRouteParamsWithSchema(

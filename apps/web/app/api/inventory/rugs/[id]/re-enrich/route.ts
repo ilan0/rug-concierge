@@ -7,7 +7,7 @@ import { resolveTenantFromRequest } from "@/lib/tenant/resolve-tenant";
 import {
   checkLocalRateLimit,
   checkRateLimit,
-  inventoryWriteRateLimit,
+  inventoryRugWriteRateLimit,
 } from "@/lib/rate-limit";
 import {
   fetchRugRecordById,
@@ -68,11 +68,14 @@ export async function POST(
     req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
     req.headers.get("x-real-ip") ??
     "unknown";
-  const rateLimitResult = inventoryWriteRateLimit
-    ? await checkRateLimit(inventoryWriteRateLimit, `inventory:re-enrich:${ip}`)
+  const rateLimitResult = inventoryRugWriteRateLimit
+    ? await checkRateLimit(
+        inventoryRugWriteRateLimit,
+        `inventory:rug:write:${tenantId}:${ip}`
+      )
     : checkLocalRateLimit({
-        key: `inventory:re-enrich:${ip}`,
-        maxRequests: 30,
+        key: `inventory:rug:write:${tenantId}:${ip}`,
+        maxRequests: 60,
         windowMs: 10 * 60 * 1000,
       });
   if (!rateLimitResult.allowed) {

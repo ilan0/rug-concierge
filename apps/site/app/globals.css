@@ -1,0 +1,148 @@
+:root {
+  --bg-1: #f4efe7;
+  --bg-2: #ece1d2;
+  --ink: #2c241c;
+  --muted: #675747;
+  --gold: #b88a37;
+  --gold-dark: #9e742a;
+  --border: #d6c8b3;
+  --card: #faf6ef;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  min-height: 100dvh;
+  font-family:
+    "Avenir Next",
+    Avenir,
+    "Segoe UI",
+    Roboto,
+    Helvetica,
+    Arial,
+    sans-serif;
+  color: var(--ink);
+  background:
+    radial-gradient(circle at 12% 8%, rgba(255, 255, 255, 0.55), transparent 40%),
+    radial-gradient(circle at 82% 18%, rgba(235, 214, 175, 0.3), transparent 42%),
+    linear-gradient(165deg, var(--bg-1), var(--bg-2));
+}
+
+.site-shell {
+  min-height: 100dvh;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+}
+
+.card {
+  width: min(760px, 100%);
+  border: 1px solid var(--border);
+  border-radius: 28px;
+  background: color-mix(in srgb, var(--card) 92%, #fff);
+  padding: 34px 30px;
+  box-shadow:
+    0 2px 0 rgba(255, 255, 255, 0.8) inset,
+    0 18px 42px rgba(55, 38, 12, 0.14);
+}
+
+.eyebrow {
+  margin: 0 0 10px;
+  font-size: 13px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+h1 {
+  margin: 0;
+  font-size: clamp(30px, 5vw, 54px);
+  line-height: 1.04;
+  letter-spacing: -0.02em;
+  font-weight: 600;
+}
+
+.lead {
+  margin: 16px 0 0;
+  color: var(--muted);
+  font-size: clamp(17px, 2.1vw, 20px);
+  line-height: 1.6;
+  max-width: 58ch;
+}
+
+.actions {
+  margin-top: 26px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 46px;
+  padding: 0 18px;
+  border-radius: 999px;
+  text-decoration: none;
+  font-size: 15px;
+  font-weight: 600;
+  transition: transform 120ms ease, background 120ms ease, color 120ms ease;
+}
+
+.button:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 3px;
+}
+
+.button:active {
+  transform: translateY(1px);
+}
+
+.button-primary {
+  color: #21180d;
+  background: linear-gradient(180deg, #e8c787, #cf9f4f);
+  border: 1px solid #b88739;
+}
+
+.button-primary:hover {
+  background: linear-gradient(180deg, #e3c181, #c89545);
+}
+
+.button-secondary {
+  color: var(--ink);
+  background: transparent;
+  border: 1px solid var(--border);
+}
+
+.button-secondary:hover {
+  border-color: var(--gold-dark);
+  color: #3b2d1c;
+}
+
+@media (max-width: 640px) {
+  .site-shell {
+    padding: 16px;
+  }
+
+  .card {
+    padding: 26px 20px;
+    border-radius: 22px;
+  }
+
+  .actions {
+    flex-direction: column;
+  }
+
+  .button {
+    width: 100%;
+  }
+}

@@ -123,22 +123,31 @@ function parseDimensionsFromStrings(input: {
       };
     }
   | { ok: false; error: string } {
-  const parsedWidthFt = parseDimensionField(input.widthFt, "width_ft");
+  const normalizedWidthFt =
+    input.widthFt.trim().length > 0 ? input.widthFt : "0";
+  const normalizedWidthIn =
+    input.widthIn.trim().length > 0 ? input.widthIn : "0";
+  const normalizedLengthFt =
+    input.lengthFt.trim().length > 0 ? input.lengthFt : "0";
+  const normalizedLengthIn =
+    input.lengthIn.trim().length > 0 ? input.lengthIn : "0";
+
+  const parsedWidthFt = parseDimensionField(normalizedWidthFt, "width_ft");
   if (parsedWidthFt === null) {
     return { ok: false, error: `${input.contextLabel}: invalid width feet.` };
   }
 
-  const parsedWidthIn = parseDimensionField(input.widthIn, "width_in");
+  const parsedWidthIn = parseDimensionField(normalizedWidthIn, "width_in");
   if (parsedWidthIn === null) {
     return { ok: false, error: `${input.contextLabel}: invalid width inches.` };
   }
 
-  const parsedLengthFt = parseDimensionField(input.lengthFt, "length_ft");
+  const parsedLengthFt = parseDimensionField(normalizedLengthFt, "length_ft");
   if (parsedLengthFt === null) {
     return { ok: false, error: `${input.contextLabel}: invalid length feet.` };
   }
 
-  const parsedLengthIn = parseDimensionField(input.lengthIn, "length_in");
+  const parsedLengthIn = parseDimensionField(normalizedLengthIn, "length_in");
   if (parsedLengthIn === null) {
     return { ok: false, error: `${input.contextLabel}: invalid length inches.` };
   }
@@ -507,16 +516,26 @@ export function IntakeScreen() {
       return;
     }
 
-    const sharedDimensions = parseDimensionsFromStrings({
-      widthFt: batchWidthFt,
-      widthIn: batchWidthIn,
-      lengthFt: batchLengthFt,
-      lengthIn: batchLengthIn,
-      contextLabel: "Shared dimensions",
-    });
-    if (!sharedDimensions.ok) {
-      setBatchError(sharedDimensions.error);
-      return;
+    const snapshot = recomputeLocalDuplicateFlags(batchItems);
+    const requiresSharedDimensions = snapshot.some(
+      (item) => !item.localDuplicate && !item.overrideDimensions
+    );
+
+    let sharedDimensions:
+      | ReturnType<typeof parseDimensionsFromStrings>
+      | null = null;
+    if (requiresSharedDimensions) {
+      sharedDimensions = parseDimensionsFromStrings({
+        widthFt: batchWidthFt,
+        widthIn: batchWidthIn,
+        lengthFt: batchLengthFt,
+        lengthIn: batchLengthIn,
+        contextLabel: "Shared dimensions",
+      });
+      if (!sharedDimensions.ok) {
+        setBatchError(sharedDimensions.error);
+        return;
+      }
     }
 
     setBatchError(null);
@@ -526,7 +545,6 @@ export function IntakeScreen() {
     setNotice(null);
     setIsBatchSubmitting(true);
 
-    const snapshot = recomputeLocalDuplicateFlags(batchItems);
     setBatchItems((prev) =>
       prev.map((item) => ({
         ...item,
@@ -559,7 +577,14 @@ export function IntakeScreen() {
             lengthIn: item.overrideLengthIn,
             contextLabel: `Photo ${index + 1}`,
           })
-        : sharedDimensions;
+        : sharedDimensions ??
+          parseDimensionsFromStrings({
+            widthFt: batchWidthFt,
+            widthIn: batchWidthIn,
+            lengthFt: batchLengthFt,
+            lengthIn: batchLengthIn,
+            contextLabel: "Shared dimensions",
+          });
 
       if (!dimensions.ok) {
         errors += 1;

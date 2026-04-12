@@ -65,7 +65,7 @@ export function checkLocalRateLimit(input: {
 
 export const chatRateLimit = new Ratelimit({
   redis,
-  limiter: Ratelimit.slidingWindow(20, "10 m"),
+  limiter: Ratelimit.slidingWindow(60, "10 m"),
   prefix: "rl:chat",
   analytics: false,
 });
@@ -86,14 +86,21 @@ export const recommendRateLimit = new Ratelimit({
 
 export const inventoryReadRateLimit = new Ratelimit({
   redis,
-  limiter: Ratelimit.slidingWindow(120, "10 m"),
+  limiter: Ratelimit.slidingWindow(600, "10 m"),
   prefix: "rl:inventory:read",
   analytics: false,
 });
 
-export const inventoryWriteRateLimit = new Ratelimit({
+export const inventoryIntakeRateLimit = new Ratelimit({
   redis,
-  limiter: Ratelimit.fixedWindow(30, "10 m"),
-  prefix: "rl:inventory:write",
+  limiter: Ratelimit.slidingWindow(800, "10 m"),
+  prefix: "rl:inventory:intake",
+  analytics: false,
+});
+
+export const inventoryRugWriteRateLimit = new Ratelimit({
+  redis,
+  limiter: Ratelimit.fixedWindow(60, "10 m"),
+  prefix: "rl:inventory:rug:write",
   analytics: false,
 });

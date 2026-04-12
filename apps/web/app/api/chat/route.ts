@@ -138,8 +138,26 @@ export async function POST(req: Request) {
       req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
       req.headers.get("x-real-ip") ??
       "unknown";
+
+    const tenantResolution = await resolveTenantFromRequest(req);
+    if (!tenantResolution.ok) {
+      return NextResponse.json(
+        {
+          error: tenantResolution.message,
+          code:
+            tenantResolution.status === 404
+              ? "TENANT_NOT_FOUND"
+              : "TENANT_RESOLUTION_FAILED",
+        },
+        { status: tenantResolution.status }
+      );
+    }
+
     if (!isLocalE2eTraceRun) {
-      const chatRateLimitResult = await checkRateLimit(chatRateLimit, `chat:${ip}`);
+      const chatRateLimitResult = await checkRateLimit(
+        chatRateLimit,
+        `chat:${tenantResolution.tenantId}:${ip}`
+      );
       if (!chatRateLimitResult.allowed) {
         return NextResponse.json(
           {
@@ -192,20 +210,6 @@ export async function POST(req: Request) {
       incomplete_detected: false,
       latency_ms: null,
     };
-
-    const tenantResolution = await resolveTenantFromRequest(req);
-    if (!tenantResolution.ok) {
-      return NextResponse.json(
-        {
-          error: tenantResolution.message,
-          code:
-            tenantResolution.status === 404
-              ? "TENANT_NOT_FOUND"
-              : "TENANT_RESOLUTION_FAILED",
-        },
-        { status: tenantResolution.status }
-      );
-    }
 
     const session = await getOrCreateSession(sessionId, role, {
       tenantId: tenantResolution.tenantId,
