@@ -16,34 +16,34 @@ const sans = Manrope({
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://rugdesk.app"),
-  title: "Rugdesk | Luxury rug showroom software",
+  title: "Rugdesk | A digital rug salesman for your website",
   description:
-    "Rugdesk helps premium rug showrooms guide customers, organize saved favorites, and follow up with more clarity.",
+    "Rugdesk helps premium rug stores turn website visitors into real customer inquiries, book showroom visits, and digitize inventory faster.",
   alternates: {
     canonical: "/",
   },
   openGraph: {
-    title: "Rugdesk | Luxury rug showroom software",
+    title: "Rugdesk | A digital rug salesman for your website",
     description:
-      "Help customers find the right rug, save what they love, and give your staff a clearer way to follow up.",
+      "Help website visitors find rugs they like, save favorites, request a visit, and give your staff a clear next step.",
     url: "https://rugdesk.app",
     siteName: "Rugdesk",
     type: "website",
     images: [
       {
-        url: "/media/hero/hero-composite.webp",
+        url: "/media/hero/hero-online-leads.webp",
         width: 1536,
         height: 1024,
-        alt: "Rugdesk showroom concierge preview.",
+        alt: "Rugdesk helping an online shopper browse rugs from home.",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Rugdesk | Luxury rug showroom software",
+    title: "Rugdesk | A digital rug salesman for your website",
     description:
-      "Help customers find the right rug, save what they love, and follow up with more clarity.",
-    images: ["/media/hero/hero-composite.webp"],
+      "Turn website traffic into serious customer interest with a digital rug salesman and faster inventory digitization.",
+    images: ["/media/hero/hero-online-leads.webp"],
   },
 };
 

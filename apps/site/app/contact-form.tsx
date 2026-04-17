@@ -54,16 +54,14 @@ export function ContactForm() {
 
       setStatus({
         type: "success",
-        message:
-          "Thanks. We will get back to you shortly.",
+        message: "Thanks. We will get back to you shortly.",
       });
       form.reset();
     } catch (error) {
       console.error(error);
       setStatus({
         type: "error",
-        message:
-          "The form could not send right now. Please email hello@rugdesk.app instead.",
+        message: "The form could not send right now. Please try again shortly.",
       });
     }
   }
@@ -72,8 +70,7 @@ export function ContactForm() {
     <form className="contact-form" onSubmit={handleSubmit} noValidate>
       <input type="hidden" name="_cc" value="" />
       <p className="form-note">
-        Send a note and we will reach out with the right next step for your
-        showroom.
+        Send a note and we will reach out with the right next step for your store.
       </p>
 
       <div className="contact-grid">
@@ -103,7 +100,7 @@ export function ContactForm() {
             name="message"
             required
             rows={5}
-            placeholder="Tell us a little about your showroom and what you want to improve."
+            placeholder="Tell us a little about your store and what you want to improve."
           />
         </label>
       </div>
