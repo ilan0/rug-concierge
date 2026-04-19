@@ -1,0 +1,333 @@
+[
+  {
+    "id": "4cdfbb91-457c-4692-9c7a-a9358d29232f",
+    "intake_label": "Persian Traditional",
+    "ai_description": "A traditional Persian rug featuring a vibrant floral motif with a red field and intricate borders. The rug showcases detailed central medallion and floral border patterns, typical of Persian craftsmanship.",
+    "stock_id": "AUTO-4CDFBB91",
+    "width_total_in": 86,
+    "length_total_in": 97,
+    "ai_structured_fields": {
+      "mood": "traditional",
+      "is_rug": true,
+      "origin": "Persian",
+      "pattern": [
+        "medallion center",
+        "floral motif",
+        "floral border"
+      ],
+      "age_category": "traditional",
+      "primary_colors": [
+        "red",
+        "black",
+        "gold",
+        "blue"
+      ],
+      "is_rug_confidence": "high"
+    },
+    "publicUrl": "https://nlypymygmysfgxekhudr.supabase.co/storage/v1/object/public/rug-images/d0d97eca-5384-4f35-a970-db7031c188b0/88c2f79e-7453-494a-94d4-644efaa0a328/primary-1775920547766.jpg",
+    "localFile": "4cdfbb91-457c-4692-9c7a-a9358d29232f.jpg"
+  },
+  {
+    "id": "8718025b-c48d-49a5-a84d-bb652f13e261",
+    "intake_label": "Persian Isfahan Traditional",
+    "ai_description": "A finely woven Persian Isfahan rug featuring an intricate floral medallion design on a dark field. The rug showcases rich colors and detailed borders, typical of traditional Isfahan craftsmanship.",
+    "stock_id": "AUTO-8718025B",
+    "width_total_in": 86,
+    "length_total_in": 97,
+    "ai_structured_fields": {
+      "mood": "traditional",
+      "style": "Isfahan",
+      "is_rug": true,
+      "origin": "Persian",
+      "pattern": [
+        "medallion center",
+        "floral motif"
+      ],
+      "age_category": "traditional",
+      "primary_colors": [
+        "black",
+        "ivory",
+        "red",
+        "blue"
+      ],
+      "is_rug_confidence": "high"
+    },
+    "publicUrl": "https://nlypymygmysfgxekhudr.supabase.co/storage/v1/object/public/rug-images/d0d97eca-5384-4f35-a970-db7031c188b0/44ce97fa-b400-4431-b054-e723d78396f2/primary-1775920547765.jpg",
+    "localFile": "8718025b-c48d-49a5-a84d-bb652f13e261.jpg"
+  },
+  {
+    "id": "bd13c21d-2e38-4bf8-9f1a-21ecca6f6975",
+    "intake_label": "Persian Nain Traditional",
+    "ai_description": "This is a traditional Persian rug featuring a central medallion design with vibrant blue and ivory tones. It displays intricate floral motifs and a detailed border.",
+    "stock_id": "AUTO-BD13C21D",
+    "width_total_in": 86,
+    "length_total_in": 97,
+    "ai_structured_fields": {
+      "mood": "traditional",
+      "style": "Nain",
+      "is_rug": true,
+      "origin": "Persian",
+      "pattern": [
+        "medallion center",
+        "floral motif",
+        "floral border"
+      ],
+      "age_category": "traditional",
+      "primary_colors": [
+        "blue",
+        "ivory",
+        "red",
+        "brown"
+      ],
+      "is_rug_confidence": "high"
+    },
+    "publicUrl": "https://nlypymygmysfgxekhudr.supabase.co/storage/v1/object/public/rug-images/d0d97eca-5384-4f35-a970-db7031c188b0/7657128a-7f8f-4c5e-b5cc-f524cdb85a34/primary-1775920556364.jpg",
+    "localFile": "bd13c21d-2e38-4bf8-9f1a-21ecca6f6975.jpg"
+  },
+  {
+    "id": "e098aa8a-ad83-45ee-bcec-1241575a6575",
+    "intake_label": "Contemporary Persian Qom",
+    "ai_description": "This is a Persian rug with a floral motif on an ivory field, surrounded by a detailed border. The design is intricate, characteristic of a Qom style.",
+    "stock_id": "AUTO-E098AA8A",
+    "width_total_in": 86,
+    "length_total_in": 97,
+    "ai_structured_fields": {
+      "mood": "traditional",
+      "style": "Qom",
+      "is_rug": true,
+      "origin": "Persian",
+      "pattern": [
+        "floral motif",
+        "floral border"
+      ],
+      "age_category": "contemporary",
+      "primary_colors": [
+        "ivory",
+        "red",
+        "blue"
+      ],
+      "is_rug_confidence": "high"
+    },
+    "publicUrl": "https://nlypymygmysfgxekhudr.supabase.co/storage/v1/object/public/rug-images/d0d97eca-5384-4f35-a970-db7031c188b0/d154ab8c-9421-4638-a2a2-23b0cb2e0a04/primary-1775920556308.jpg",
+    "localFile": "e098aa8a-ad83-45ee-bcec-1241575a6575.jpg"
+  },
+  {
+    "id": "c263728d-b5d2-4f9d-9c0c-0012ffbb40f4",
+    "intake_label": "Persian Kashan Traditional",
+    "ai_description": "This is a traditional Persian Kashan rug featuring a classic floral motif with a central medallion. The dominant colors include ivory, navy blue, and accents of pink.",
+    "stock_id": "AUTO-C263728D",
+    "width_total_in": 86,
+    "length_total_in": 97,
+    "ai_structured_fields": {
+      "mood": "traditional",
+      "style": "Kashan",
+      "is_rug": true,
+      "origin": "Persian",
+      "pattern": [
+        "medallion center",
+        "floral motif",
+        "floral border"
+      ],
+      "age_category": "traditional",
+      "primary_colors": [
+        "ivory",
+        "blue",
+        "pink"
+      ],
+      "is_rug_confidence": "high"
+    },
+    "publicUrl": "https://nlypymygmysfgxekhudr.supabase.co/storage/v1/object/public/rug-images/d0d97eca-5384-4f35-a970-db7031c188b0/7c79823c-fb8d-479c-bdfb-a2588fe311a7/primary-1775920563456.jpg",
+    "localFile": "c263728d-b5d2-4f9d-9c0c-0012ffbb40f4.jpg"
+  },
+  {
+    "id": "0dcea968-4b4b-4076-8211-560277512fd2",
+    "intake_label": "Contemporary Pakistani Decorative",
+    "ai_description": "A contemporary Pakistani rug featuring a subtle floral motif on an ivory field, framed by a simple border. It's displayed in a stacked arrangement within a store setting.",
+    "stock_id": "AUTO-0DCEA968",
+    "width_total_in": 86,
+    "length_total_in": 97,
+    "ai_structured_fields": {
+      "mood": "traditional",
+      "is_rug": true,
+      "origin": "Pakistani",
+      "pattern": [
+        "all-over pattern",
+        "floral motif"
+      ],
+      "age_category": "contemporary",
+      "primary_colors": [
+        "ivory",
+        "brown"
+      ],
+      "is_rug_confidence": "high"
+    },
+    "publicUrl": "https://nlypymygmysfgxekhudr.supabase.co/storage/v1/object/public/rug-images/d0d97eca-5384-4f35-a970-db7031c188b0/7951bc53-c8f4-432b-b670-07db570952d9/primary-1775920563832.jpg",
+    "localFile": "0dcea968-4b4b-4076-8211-560277512fd2.jpg"
+  },
+  {
+    "id": "9683697b-f9c3-47ea-bdf9-a2386e5cc2da",
+    "intake_label": "Persian Tabriz Traditional",
+    "ai_description": "A finely-knotted Persian Tabriz rug featuring a central medallion with intricate floral motifs on a blue field. The rug is bordered with elaborate floral patterns, showcasing a blend of traditional craftsmanship.",
+    "stock_id": "AUTO-9683697B",
+    "width_total_in": 86,
+    "length_total_in": 97,
+    "ai_structured_fields": {
+      "mood": "traditional",
+      "style": "Tabriz",
+      "is_rug": true,
+      "origin": "Persian",
+      "pattern": [
+        "medallion center",
+        "floral motif",
+        "floral border"
+      ],
+      "age_category": "traditional",
+      "primary_colors": [
+        "blue",
+        "ivory",
+        "red",
+        "gold"
+      ],
+      "is_rug_confidence": "high"
+    },
+    "publicUrl": "https://nlypymygmysfgxekhudr.supabase.co/storage/v1/object/public/rug-images/d0d97eca-5384-4f35-a970-db7031c188b0/feacdcbf-d8df-44a1-8189-ca0876768989/primary-1775920563456.jpg",
+    "localFile": "9683697b-f9c3-47ea-bdf9-a2386e5cc2da.jpg"
+  },
+  {
+    "id": "e1d5a050-b8e1-49d0-aa26-57753e9a4874",
+    "intake_label": "Persian Kashan Traditional",
+    "ai_description": "A traditional Persian Kashan rug featuring a central medallion design in red, blue, and ivory tones. It showcases intricate floral motifs and detailed borders with fringe edges, suitable for classic decor settings.",
+    "stock_id": "AUTO-E1D5A050",
+    "width_total_in": 86,
+    "length_total_in": 97,
+    "ai_structured_fields": {
+      "mood": "traditional",
+      "style": "Kashan",
+      "is_rug": true,
+      "origin": "Persian",
+      "pattern": [
+        "medallion center",
+        "floral motif",
+        "floral border"
+      ],
+      "age_category": "traditional",
+      "primary_colors": [
+        "red",
+        "blue",
+        "ivory"
+      ],
+      "is_rug_confidence": "high"
+    },
+    "publicUrl": "https://nlypymygmysfgxekhudr.supabase.co/storage/v1/object/public/rug-images/d0d97eca-5384-4f35-a970-db7031c188b0/8dff6013-458b-451b-858f-afc9186f1d2c/primary-1775920570828.jpg",
+    "localFile": "e1d5a050-b8e1-49d0-aa26-57753e9a4874.jpg"
+  },
+  {
+    "id": "6e6042d9-e4ef-46e0-9153-ee1fb39a888d",
+    "intake_label": "Persian Tabriz Traditional",
+    "ai_description": "This is a Persian Tabriz rug featuring a central medallion with floral motifs and a red field. It has intricate ivory borders and a refined traditional design.",
+    "stock_id": "AUTO-6E6042D9",
+    "width_total_in": 86,
+    "length_total_in": 97,
+    "ai_structured_fields": {
+      "mood": "traditional",
+      "style": "Tabriz",
+      "is_rug": true,
+      "origin": "Persian",
+      "pattern": [
+        "medallion center",
+        "floral motif"
+      ],
+      "age_category": "traditional",
+      "primary_colors": [
+        "red",
+        "ivory",
+        "blue"
+      ],
+      "is_rug_confidence": "high"
+    },
+    "publicUrl": "https://nlypymygmysfgxekhudr.supabase.co/storage/v1/object/public/rug-images/d0d97eca-5384-4f35-a970-db7031c188b0/c35d109e-2386-49e6-90e6-50b2218a6412/primary-1775920576803.jpg",
+    "localFile": "6e6042d9-e4ef-46e0-9153-ee1fb39a888d.jpg"
+  },
+  {
+    "id": "c565910d-18b7-4d03-b30f-f8016c586b1b",
+    "intake_label": "Persian Kashan Traditional",
+    "ai_description": "This rug features an intricate floral motif typical of traditional Persian Kashan designs. It has a rich color palette dominated by navy, with ivory and rust accents.",
+    "stock_id": "AUTO-C565910D",
+    "width_total_in": 86,
+    "length_total_in": 97,
+    "ai_structured_fields": {
+      "mood": "traditional",
+      "style": "Kashan",
+      "is_rug": true,
+      "origin": "Persian",
+      "pattern": [
+        "floral motif"
+      ],
+      "age_category": "traditional",
+      "primary_colors": [
+        "blue",
+        "ivory",
+        "rust"
+      ],
+      "is_rug_confidence": "high"
+    },
+    "publicUrl": "https://nlypymygmysfgxekhudr.supabase.co/storage/v1/object/public/rug-images/d0d97eca-5384-4f35-a970-db7031c188b0/b2be9918-a542-47e5-b009-8b68c913dc87/primary-1775920580006.jpg",
+    "localFile": "c565910d-18b7-4d03-b30f-f8016c586b1b.jpg"
+  },
+  {
+    "id": "989b3ff8-4f89-491a-a6c1-e74fdf43b22c",
+    "intake_label": "Persian Isfahan Traditional",
+    "ai_description": "This is a finely detailed Persian Isfahan rug featuring a central medallion surrounded by intricate floral motifs over a rich blue field. The border complements the design with floral patterns.",
+    "stock_id": "AUTO-989B3FF8",
+    "width_total_in": 97,
+    "length_total_in": 121,
+    "ai_structured_fields": {
+      "mood": "traditional",
+      "style": "Isfahan",
+      "is_rug": true,
+      "origin": "Persian",
+      "pattern": [
+        "medallion center",
+        "floral motif",
+        "floral border"
+      ],
+      "age_category": "traditional",
+      "primary_colors": [
+        "blue",
+        "gold",
+        "ivory"
+      ],
+      "is_rug_confidence": "high"
+    },
+    "publicUrl": "https://nlypymygmysfgxekhudr.supabase.co/storage/v1/object/public/rug-images/d0d97eca-5384-4f35-a970-db7031c188b0/0de00c70-ed3f-482b-bbf5-3b94a69d6737/primary-1775920655788.jpg",
+    "localFile": "989b3ff8-4f89-491a-a6c1-e74fdf43b22c.jpg"
+  },
+  {
+    "id": "b9ccc142-e1dc-4b71-91d4-f14d756a2822",
+    "intake_label": "Persian Kashan Traditional",
+    "ai_description": "A rectangular Persian Kashan rug featuring a central medallion design with floral motifs. Predominantly red and black with ivory and blue accents, showcasing a traditional aesthetic.",
+    "stock_id": "AUTO-B9CCC142",
+    "width_total_in": 97,
+    "length_total_in": 121,
+    "ai_structured_fields": {
+      "mood": "traditional",
+      "style": "Kashan",
+      "is_rug": true,
+      "origin": "Persian",
+      "pattern": [
+        "medallion center",
+        "floral motif"
+      ],
+      "age_category": "traditional",
+      "primary_colors": [
+        "red",
+        "black",
+        "ivory",
+        "blue"
+      ],
+      "is_rug_confidence": "high"
+    },
+    "publicUrl": "https://nlypymygmysfgxekhudr.supabase.co/storage/v1/object/public/rug-images/d0d97eca-5384-4f35-a970-db7031c188b0/3029f279-7862-422c-84f9-b25fe5d76fb8/primary-1775920663957.jpg",
+    "localFile": "b9ccc142-e1dc-4b71-91d4-f14d756a2822.jpg"
+  }
+]

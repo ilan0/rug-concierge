@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { CANONICAL_COLORS } from "@/lib/config/color-taxonomy";
+import { RUG_CONFIDENCE_VALUES } from "@/lib/inventory/confidence";
 
 export const RUG_ORIGIN_VALUES = [
   "Persian",
@@ -44,7 +45,9 @@ const canonicalColorArrayField = () =>
 export const aiStructuredFieldsSchema = z
   .object({
     origin: z.enum(RUG_ORIGIN_VALUES).nullable().optional(),
+    origin_confidence: z.enum(RUG_CONFIDENCE_VALUES).nullable().optional(),
     style: z.string().trim().min(1).max(80).nullable().optional(),
+    style_confidence: z.enum(RUG_CONFIDENCE_VALUES).nullable().optional(),
     pattern: stringArrayField(8, 48),
     primary_colors: canonicalColorArrayField(),
     age_category: z.enum(RUG_AGE_CATEGORY_VALUES).nullable().optional(),

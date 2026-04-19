@@ -41,11 +41,14 @@ export type RugAgeCategory =
   | "new";
 
 export type RugMood = "traditional" | "transitional" | "eclectic" | "modern";
-export type RugDetectionConfidence = "low" | "medium" | "high";
+export type RugConfidence = "low" | "medium" | "high";
+export type RugDetectionConfidence = RugConfidence;
 
 export type RugAiStructuredFields = {
   origin?: RugOrigin | null;
+  origin_confidence?: RugConfidence | null;
   style?: string | null;
+  style_confidence?: RugConfidence | null;
   pattern?: string[] | null;
   primary_colors?: string[] | null;
   age_category?: RugAgeCategory | null;

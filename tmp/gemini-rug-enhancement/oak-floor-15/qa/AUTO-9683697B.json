@@ -1,0 +1,10 @@
+{
+  "verdict": "fail",
+  "same_rug": true,
+  "color_preserved": false,
+  "pattern_preserved": true,
+  "border_fringe_preserved": true,
+  "artifacts_present": false,
+  "composition_improved": true,
+  "notes": "The enhanced image preserves the same rug with the exact pattern and borders, but its colors are significantly altered. The original has warm natural tones and a mix of vibrant turquoise, beige, and earth colors. The enhanced image shifts colors toward a much cooler, desaturated tone and the floor is also altered to grayish white, which changes the rug's appearance and does not preserve the white/"
+}

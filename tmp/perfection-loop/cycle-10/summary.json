@@ -1,0 +1,620 @@
+{
+  "cycleId": "cycle-10",
+  "pass": false,
+  "gateResults": [
+    {
+      "gate": "A",
+      "pass": true,
+      "failures": [],
+      "details": {
+        "idleTimeoutMs": 300000,
+        "checks": [
+          "idle timer fires at 5 minutes",
+          "timer resets on activity",
+          "timer cleanup on stop"
+        ]
+      }
+    },
+    {
+      "gate": "B",
+      "pass": false,
+      "failures": [
+        "mobile-390x844: reduced motion",
+        "mobile-390x844: jump to latest did not return to bottom",
+        "mobile-390x844: focus-visible ring not detected",
+        "mobile-390x844: reduced-motion preference not respected",
+        "tablet-768x1024: reduced motion",
+        "tablet-768x1024: jump to latest did not return to bottom",
+        "tablet-768x1024: focus-visible ring not detected",
+        "tablet-768x1024: reduced-motion preference not respected",
+        "tablet-1024x768: reduced motion",
+        "tablet-1024x768: jump to latest did not return to bottom",
+        "tablet-1024x768: focus-visible ring not detected",
+        "tablet-1024x768: reduced-motion preference not respected",
+        "desktop-1366x1024: reduced motion",
+        "desktop-1366x1024: jump to latest did not return to bottom",
+        "desktop-1366x1024: focus-visible ring not detected",
+        "desktop-1366x1024: reduced-motion preference not respected",
+        "desktop-1728x1117: reduced motion",
+        "desktop-1728x1117: jump to latest did not return to bottom",
+        "desktop-1728x1117: reduced-motion preference not respected"
+      ],
+      "details": {
+        "viewportResults": {
+          "mobile-390x844": {
+            "failures": [
+              "jump to latest did not return to bottom",
+              "focus-visible ring not detected",
+              "reduced-motion preference not respected"
+            ],
+            "runtimeErrors": {
+              "consoleErrors": [],
+              "pageErrors": []
+            },
+            "touchViolations": [],
+            "overflow": false,
+            "reducedMotionOk": false,
+            "scrollBehavior": {
+              "keptPosition": true,
+              "jumpWorked": false
+            },
+            "contrast": {
+              "pass": true,
+              "checks": [
+                {
+                  "label": "primary-on-bg",
+                  "ratio": 14.11,
+                  "minRatio": 7,
+                  "pass": true
+                },
+                {
+                  "label": "secondary-on-bg",
+                  "ratio": 6.01,
+                  "minRatio": 4.5,
+                  "pass": true
+                },
+                {
+                  "label": "primary-on-surface-2",
+                  "ratio": 13.19,
+                  "minRatio": 4.5,
+                  "pass": true
+                },
+                {
+                  "label": "secondary-on-surface",
+                  "ratio": 6.32,
+                  "minRatio": 4.5,
+                  "pass": true
+                }
+              ]
+            }
+          },
+          "tablet-768x1024": {
+            "failures": [
+              "jump to latest did not return to bottom",
+              "focus-visible ring not detected",
+              "reduced-motion preference not respected"
+            ],
+            "runtimeErrors": {
+              "consoleErrors": [],
+              "pageErrors": []
+            },
+            "touchViolations": [],
+            "overflow": false,
+            "reducedMotionOk": false,
+            "scrollBehavior": {
+              "keptPosition": true,
+              "jumpWorked": false
+            },
+            "contrast": {
+              "pass": true,
+              "checks": [
+                {
+                  "label": "primary-on-bg",
+                  "ratio": 14.11,
+                  "minRatio": 7,
+                  "pass": true
+                },
+                {
+                  "label": "secondary-on-bg",
+                  "ratio": 6.01,
+                  "minRatio": 4.5,
+                  "pass": true
+                },
+                {
+                  "label": "primary-on-surface-2",
+                  "ratio": 13.19,
+                  "minRatio": 4.5,
+                  "pass": true
+                },
+                {
+                  "label": "secondary-on-surface",
+                  "ratio": 6.32,
+                  "minRatio": 4.5,
+                  "pass": true
+                }
+              ]
+            }
+          },
+          "tablet-1024x768": {
+            "failures": [
+              "jump to latest did not return to bottom",
+              "focus-visible ring not detected",
+              "reduced-motion preference not respected"
+            ],
+            "runtimeErrors": {
+              "consoleErrors": [],
+              "pageErrors": []
+            },
+            "touchViolations": [],
+            "overflow": false,
+            "reducedMotionOk": false,
+            "scrollBehavior": {
+              "keptPosition": true,
+              "jumpWorked": false
+            },
+            "contrast": {
+              "pass": true,
+              "checks": [
+                {
+                  "label": "primary-on-bg",
+                  "ratio": 14.11,
+                  "minRatio": 7,
+                  "pass": true
+                },
+                {
+                  "label": "secondary-on-bg",
+                  "ratio": 6.01,
+                  "minRatio": 4.5,
+                  "pass": true
+                },
+                {
+                  "label": "primary-on-surface-2",
+                  "ratio": 13.19,
+                  "minRatio": 4.5,
+                  "pass": true
+                },
+                {
+                  "label": "secondary-on-surface",
+                  "ratio": 6.32,
+                  "minRatio": 4.5,
+                  "pass": true
+                }
+              ]
+            }
+          },
+          "desktop-1366x1024": {
+            "failures": [
+              "jump to latest did not return to bottom",
+              "focus-visible ring not detected",
+              "reduced-motion preference not respected"
+            ],
+            "runtimeErrors": {
+              "consoleErrors": [],
+              "pageErrors": []
+            },
+            "touchViolations": [],
+            "overflow": false,
+            "reducedMotionOk": false,
+            "scrollBehavior": {
+              "keptPosition": true,
+              "jumpWorked": false
+            },
+            "contrast": {
+              "pass": true,
+              "checks": [
+                {
+                  "label": "primary-on-bg",
+                  "ratio": 14.11,
+                  "minRatio": 7,
+                  "pass": true
+                },
+                {
+                  "label": "secondary-on-bg",
+                  "ratio": 6.01,
+                  "minRatio": 4.5,
+                  "pass": true
+                },
+                {
+                  "label": "primary-on-surface-2",
+                  "ratio": 13.19,
+                  "minRatio": 4.5,
+                  "pass": true
+                },
+                {
+                  "label": "secondary-on-surface",
+                  "ratio": 6.32,
+                  "minRatio": 4.5,
+                  "pass": true
+                }
+              ]
+            }
+          },
+          "desktop-1728x1117": {
+            "failures": [
+              "jump to latest did not return to bottom",
+              "reduced-motion preference not respected"
+            ],
+            "runtimeErrors": {
+              "consoleErrors": [],
+              "pageErrors": []
+            },
+            "touchViolations": [],
+            "overflow": false,
+            "reducedMotionOk": false,
+            "scrollBehavior": {
+              "keptPosition": true,
+              "jumpWorked": false
+            },
+            "contrast": {
+              "pass": true,
+              "checks": [
+                {
+                  "label": "primary-on-bg",
+                  "ratio": 14.11,
+                  "minRatio": 7,
+                  "pass": true
+                },
+                {
+                  "label": "secondary-on-bg",
+                  "ratio": 6.01,
+                  "minRatio": 4.5,
+                  "pass": true
+                },
+                {
+                  "label": "primary-on-surface-2",
+                  "ratio": 13.19,
+                  "minRatio": 4.5,
+                  "pass": true
+                },
+                {
+                  "label": "secondary-on-surface",
+                  "ratio": 6.32,
+                  "minRatio": 4.5,
+                  "pass": true
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "gate": "C",
+      "pass": true,
+      "failures": [],
+      "details": {
+        "threshold": {
+          "body": 4.5,
+          "secondary": 4.5
+        }
+      }
+    },
+    {
+      "gate": "D",
+      "pass": false,
+      "failures": [
+        "mobile-390x844: reduced motion",
+        "mobile-390x844: jump to latest did not return to bottom",
+        "mobile-390x844: focus-visible ring not detected",
+        "mobile-390x844: reduced-motion preference not respected",
+        "tablet-768x1024: reduced motion",
+        "tablet-768x1024: jump to latest did not return to bottom",
+        "tablet-768x1024: focus-visible ring not detected",
+        "tablet-768x1024: reduced-motion preference not respected",
+        "tablet-1024x768: reduced motion",
+        "tablet-1024x768: jump to latest did not return to bottom",
+        "tablet-1024x768: focus-visible ring not detected",
+        "tablet-1024x768: reduced-motion preference not respected",
+        "desktop-1366x1024: reduced motion",
+        "desktop-1366x1024: jump to latest did not return to bottom",
+        "desktop-1366x1024: focus-visible ring not detected",
+        "desktop-1366x1024: reduced-motion preference not respected",
+        "desktop-1728x1117: reduced motion",
+        "desktop-1728x1117: jump to latest did not return to bottom",
+        "desktop-1728x1117: reduced-motion preference not respected"
+      ],
+      "details": {
+        "requirement": [
+          "state transitions render cleanly",
+          "reduced motion respected"
+        ]
+      }
+    },
+    {
+      "gate": "E",
+      "pass": false,
+      "failures": [
+        "mobile-390x844",
+        "tablet-768x1024",
+        "tablet-1024x768",
+        "desktop-1366x1024",
+        "desktop-1728x1117"
+      ],
+      "details": {
+        "checkedViewports": [
+          "mobile-390x844",
+          "tablet-768x1024",
+          "tablet-1024x768",
+          "desktop-1366x1024",
+          "desktop-1728x1117"
+        ]
+      }
+    },
+    {
+      "gate": "F",
+      "pass": true,
+      "failures": [],
+      "details": {
+        "overflowFailures": []
+      }
+    },
+    {
+      "gate": "G",
+      "pass": true,
+      "failures": [],
+      "details": {
+        "fixtures": [
+          {
+            "fixture": "short-square",
+            "viewport": "mobile-390x844",
+            "overflow": false,
+            "headerOk": true,
+            "heroOk": true,
+            "logoOk": true,
+            "headerText": "Noor Rugs",
+            "heroText": "Noor Rugs"
+          },
+          {
+            "fixture": "short-square",
+            "viewport": "tablet-768x1024",
+            "overflow": false,
+            "headerOk": true,
+            "heroOk": true,
+            "logoOk": true,
+            "headerText": "Noor Rugs",
+            "heroText": "Noor Rugs"
+          },
+          {
+            "fixture": "short-square",
+            "viewport": "tablet-1024x768",
+            "overflow": false,
+            "headerOk": true,
+            "heroOk": true,
+            "logoOk": true,
+            "headerText": "Noor Rugs",
+            "heroText": "Noor Rugs"
+          },
+          {
+            "fixture": "short-square",
+            "viewport": "desktop-1366x1024",
+            "overflow": false,
+            "headerOk": true,
+            "heroOk": true,
+            "logoOk": true,
+            "headerText": "Noor Rugs",
+            "heroText": "Noor Rugs"
+          },
+          {
+            "fixture": "short-square",
+            "viewport": "desktop-1728x1117",
+            "overflow": false,
+            "headerOk": true,
+            "heroOk": true,
+            "logoOk": true,
+            "headerText": "Noor Rugs",
+            "heroText": "Noor Rugs"
+          },
+          {
+            "fixture": "medium-wide",
+            "viewport": "mobile-390x844",
+            "overflow": false,
+            "headerOk": true,
+            "heroOk": true,
+            "logoOk": true,
+            "headerText": "Metropolitan Rug Atelier",
+            "heroText": "Metropolitan Rug Atelier"
+          },
+          {
+            "fixture": "medium-wide",
+            "viewport": "tablet-768x1024",
+            "overflow": false,
+            "headerOk": true,
+            "heroOk": true,
+            "logoOk": true,
+            "headerText": "Metropolitan Rug Atelier",
+            "heroText": "Metropolitan Rug Atelier"
+          },
+          {
+            "fixture": "medium-wide",
+            "viewport": "tablet-1024x768",
+            "overflow": false,
+            "headerOk": true,
+            "heroOk": true,
+            "logoOk": true,
+            "headerText": "Metropolitan Rug Atelier",
+            "heroText": "Metropolitan Rug Atelier"
+          },
+          {
+            "fixture": "medium-wide",
+            "viewport": "desktop-1366x1024",
+            "overflow": false,
+            "headerOk": true,
+            "heroOk": true,
+            "logoOk": true,
+            "headerText": "Metropolitan Rug Atelier",
+            "heroText": "Metropolitan Rug Atelier"
+          },
+          {
+            "fixture": "medium-wide",
+            "viewport": "desktop-1728x1117",
+            "overflow": false,
+            "headerOk": true,
+            "heroOk": true,
+            "logoOk": true,
+            "headerText": "Metropolitan Rug Atelier",
+            "heroText": "Metropolitan Rug Atelier"
+          },
+          {
+            "fixture": "long-tall",
+            "viewport": "mobile-390x844",
+            "overflow": false,
+            "headerOk": true,
+            "heroOk": true,
+            "logoOk": true,
+            "headerText": "The International House of Antique and Contemporary Rugs",
+            "heroText": "The International House of Antique and Contemporary Rugs"
+          },
+          {
+            "fixture": "long-tall",
+            "viewport": "tablet-768x1024",
+            "overflow": false,
+            "headerOk": true,
+            "heroOk": true,
+            "logoOk": true,
+            "headerText": "The International House of Antique and Contemporary Rugs",
+            "heroText": "The International House of Antique and Contemporary Rugs"
+          },
+          {
+            "fixture": "long-tall",
+            "viewport": "tablet-1024x768",
+            "overflow": false,
+            "headerOk": true,
+            "heroOk": true,
+            "logoOk": true,
+            "headerText": "The International House of Antique and Contemporary Rugs",
+            "heroText": "The International House of Antique and Contemporary Rugs"
+          },
+          {
+            "fixture": "long-tall",
+            "viewport": "desktop-1366x1024",
+            "overflow": false,
+            "headerOk": true,
+            "heroOk": true,
+            "logoOk": true,
+            "headerText": "The International House of Antique and Contemporary Rugs",
+            "heroText": "The International House of Antique and Contemporary Rugs"
+          },
+          {
+            "fixture": "long-tall",
+            "viewport": "desktop-1728x1117",
+            "overflow": false,
+            "headerOk": true,
+            "heroOk": true,
+            "logoOk": true,
+            "headerText": "The International House of Antique and Contemporary Rugs",
+            "heroText": "The International House of Antique and Contemporary Rugs"
+          },
+          {
+            "fixture": "missing-logo",
+            "viewport": "mobile-390x844",
+            "overflow": false,
+            "headerOk": true,
+            "heroOk": true,
+            "logoOk": true,
+            "headerText": "Maison Loom",
+            "heroText": "Maison Loom"
+          },
+          {
+            "fixture": "missing-logo",
+            "viewport": "tablet-768x1024",
+            "overflow": false,
+            "headerOk": true,
+            "heroOk": true,
+            "logoOk": true,
+            "headerText": "Maison Loom",
+            "heroText": "Maison Loom"
+          },
+          {
+            "fixture": "missing-logo",
+            "viewport": "tablet-1024x768",
+            "overflow": false,
+            "headerOk": true,
+            "heroOk": true,
+            "logoOk": true,
+            "headerText": "Maison Loom",
+            "heroText": "Maison Loom"
+          },
+          {
+            "fixture": "missing-logo",
+            "viewport": "desktop-1366x1024",
+            "overflow": false,
+            "headerOk": true,
+            "heroOk": true,
+            "logoOk": true,
+            "headerText": "Maison Loom",
+            "heroText": "Maison Loom"
+          },
+          {
+            "fixture": "missing-logo",
+            "viewport": "desktop-1728x1117",
+            "overflow": false,
+            "headerOk": true,
+            "heroOk": true,
+            "logoOk": true,
+            "headerText": "Maison Loom",
+            "heroText": "Maison Loom"
+          },
+          {
+            "fixture": "broken-logo",
+            "viewport": "mobile-390x844",
+            "overflow": false,
+            "headerOk": true,
+            "heroOk": true,
+            "logoOk": true,
+            "headerText": "Heritage Loom Works",
+            "heroText": "Heritage Loom Works"
+          },
+          {
+            "fixture": "broken-logo",
+            "viewport": "tablet-768x1024",
+            "overflow": false,
+            "headerOk": true,
+            "heroOk": true,
+            "logoOk": true,
+            "headerText": "Heritage Loom Works",
+            "heroText": "Heritage Loom Works"
+          },
+          {
+            "fixture": "broken-logo",
+            "viewport": "tablet-1024x768",
+            "overflow": false,
+            "headerOk": true,
+            "heroOk": true,
+            "logoOk": true,
+            "headerText": "Heritage Loom Works",
+            "heroText": "Heritage Loom Works"
+          },
+          {
+            "fixture": "broken-logo",
+            "viewport": "desktop-1366x1024",
+            "overflow": false,
+            "headerOk": true,
+            "heroOk": true,
+            "logoOk": true,
+            "headerText": "Heritage Loom Works",
+            "heroText": "Heritage Loom Works"
+          },
+          {
+            "fixture": "broken-logo",
+            "viewport": "desktop-1728x1117",
+            "overflow": false,
+            "headerOk": true,
+            "heroOk": true,
+            "logoOk": true,
+            "headerText": "Heritage Loom Works",
+            "heroText": "Heritage Loom Works"
+          }
+        ]
+      }
+    },
+    {
+      "gate": "H",
+      "pass": true,
+      "failures": [],
+      "details": {
+        "runtimeFailures": [],
+        "touchFailures": []
+      }
+    }
+  ]
+}

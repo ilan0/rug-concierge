@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Gemini Rug Enhancement Review</title>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #f6f1ea; color: #2f241a; margin: 0; padding: 24px; }
+    h1 { margin: 0 0 8px; }
+    p.meta { margin: 0 0 24px; color: #6c5a49; }
+    .grid { display: grid; gap: 20px; }
+    .card { background: #fffaf4; border: 1px solid #decfb9; border-radius: 18px; padding: 18px; box-shadow: 0 10px 24px rgba(47, 36, 26, 0.06); }
+    .card header { display: flex; gap: 12px; align-items: baseline; flex-wrap: wrap; margin-bottom: 14px; }
+    .card h2 { margin: 0; font-size: 18px; }
+    .card p { margin: 0; color: #6c5a49; }
+    .images { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-bottom: 14px; }
+    figure { margin: 0; }
+    figcaption { margin-bottom: 6px; font-size: 13px; color: #6c5a49; }
+    img { width: 100%; background: #f3ebdd; border-radius: 12px; border: 1px solid #decfb9; }
+    .missing { min-height: 220px; display: grid; place-items: center; border-radius: 12px; border: 1px dashed #decfb9; background: #f8f4ee; color: #6c5a49; }
+    dl { margin: 0; display: grid; gap: 8px; }
+    dl div { display: grid; grid-template-columns: 120px 1fr; gap: 10px; }
+    dt { font-weight: 600; }
+    dd { margin: 0; color: #6c5a49; }
+    .badge { display: inline-flex; align-items: center; border-radius: 999px; padding: 4px 10px; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; }
+    .badge-pass { background: #e7f4ea; color: #205b31; }
+    .badge-borderline { background: #f9f0d8; color: #7c5c10; }
+    .badge-fail, .badge-error { background: #f7e7e5; color: #8b2d1f; }
+    .badge-skipped, .badge-pending { background: #ece7df; color: #5a4b3e; }
+  </style>
+</head>
+<body>
+  <h1>Gemini Rug Enhancement Review</h1>
+  <p class="meta">Generated 2026-04-18T20:24:15.955Z · 5 rugs · enhancement model gemini-2.5-flash-image (default)</p>
+  <section class="grid">
+        <article class="card">
+          <header>
+            <h2>AUTO-0DCEA968</h2>
+            <p>Contemporary Pakistani Decorative</p>
+            <span class="badge badge-borderline">borderline</span>
+          </header>
+          <div class="images">
+            <figure>
+              <figcaption>Original</figcaption>
+              <img src="originals/AUTO-0DCEA968.jpg" alt="Original rug photo for AUTO-0DCEA968">
+            </figure>
+            <figure>
+              <figcaption>Enhanced</figcaption>
+              <img src="enhanced/AUTO-0DCEA968.png" alt="Enhanced rug photo for AUTO-0DCEA968">
+            </figure>
+          </div>
+          <dl>
+            <div><dt>Enhancement</dt><dd>success</dd></div>
+            <div><dt>QA</dt><dd>borderline</dd></div>
+            <div><dt>Notes</dt><dd>The rug is clearly the same based on pattern and colors. The composition in the second image is improved by isolating the rug on a plain background, which removes background distractions. However, the fringe at the bottom of the rug appears removed or significantly altered in the second image, which affects fidelity. The color and pattern remain consistent. No AI artifacts are evident, but the rug</dd></div>
+          </dl>
+        </article>
+      
+
+        <article class="card">
+          <header>
+            <h2>AUTO-34009335</h2>
+            <p>Persian Qom</p>
+            <span class="badge badge-fail">fail</span>
+          </header>
+          <div class="images">
+            <figure>
+              <figcaption>Original</figcaption>
+              <img src="originals/AUTO-34009335.jpg" alt="Original rug photo for AUTO-34009335">
+            </figure>
+            <figure>
+              <figcaption>Enhanced</figcaption>
+              <img src="enhanced/AUTO-34009335.png" alt="Enhanced rug photo for AUTO-34009335">
+            </figure>
+          </div>
+          <dl>
+            <div><dt>Enhancement</dt><dd>success</dd></div>
+            <div><dt>QA</dt><dd>fail</dd></div>
+            <div><dt>Notes</dt><dd>The rug in image 2 appears significantly altered in color saturation and balance, with colors appearing washed out compared to image 1. The background and lighting are changed to a flat gray floor, removing all contextual detail. The rug looks flatter and less vibrant, thus losing the original rug&#39;s texture and color fidelity. The perspective and proportions have changed greatly due to the topdown</dd></div>
+          </dl>
+        </article>
+      
+
+        <article class="card">
+          <header>
+            <h2>AUTO-3711B41A</h2>
+            <p>Persian Tabriz Traditional</p>
+            <span class="badge badge-pass">pass</span>
+          </header>
+          <div class="images">
+            <figure>
+              <figcaption>Original</figcaption>
+              <img src="originals/AUTO-3711B41A.jpg" alt="Original rug photo for AUTO-3711B41A">
+            </figure>
+            <figure>
+              <figcaption>Enhanced</figcaption>
+              <img src="enhanced/AUTO-3711B41A.png" alt="Enhanced rug photo for AUTO-3711B41A">
+            </figure>
+          </div>
+          <dl>
+            <div><dt>Enhancement</dt><dd>success</dd></div>
+            <div><dt>QA</dt><dd>pass</dd></div>
+            <div><dt>Notes</dt><dd>The enhanced image removes the distracting presence of the person on the rug in the original image, and also adjusts the background to a more neutral and less cluttered surface, improving overall composition. The rug&#39;s colors, patterns, fringe, and details are preserved without noticeable changes or artifacts.</dd></div>
+          </dl>
+        </article>
+      
+
+        <article class="card">
+          <header>
+            <h2>AUTO-3F72FBA0</h2>
+            <p>Vintage Turkish Oushak</p>
+            <span class="badge badge-fail">fail</span>
+          </header>
+          <div class="images">
+            <figure>
+              <figcaption>Original</figcaption>
+              <img src="originals/AUTO-3F72FBA0.jpg" alt="Original rug photo for AUTO-3F72FBA0">
+            </figure>
+            <figure>
+              <figcaption>Enhanced</figcaption>
+              <img src="enhanced/AUTO-3F72FBA0.png" alt="Enhanced rug photo for AUTO-3F72FBA0">
+            </figure>
+          </div>
+          <dl>
+            <div><dt>Enhancement</dt><dd>success</dd></div>
+            <div><dt>QA</dt><dd>fail</dd></div>
+            <div><dt>Notes</dt><dd>The enhanced image removes the background clutter and isolates the rug, but it alters the rug&#39;s color and lighting significantly, giving it a washed-out appearance. There are visible AI artifacts in the form of unnatural smoothness and color shifts. The original texture and natural lighting are changed, making the rug appear less authentic.</dd></div>
+          </dl>
+        </article>
+      
+
+        <article class="card">
+          <header>
+            <h2>AUTO-40FEE6A6</h2>
+            <p>Persian Kashan Traditional</p>
+            <span class="badge badge-borderline">borderline</span>
+          </header>
+          <div class="images">
+            <figure>
+              <figcaption>Original</figcaption>
+              <img src="originals/AUTO-40FEE6A6.jpg" alt="Original rug photo for AUTO-40FEE6A6">
+            </figure>
+            <figure>
+              <figcaption>Enhanced</figcaption>
+              <img src="enhanced/AUTO-40FEE6A6.png" alt="Enhanced rug photo for AUTO-40FEE6A6">
+            </figure>
+          </div>
+          <dl>
+            <div><dt>Enhancement</dt><dd>success</dd></div>
+            <div><dt>QA</dt><dd>borderline</dd></div>
+            <div><dt>Notes</dt><dd>The enhanced image shows the same rug with the same pattern and border details preserved. However, the color appears to be significantly altered, appearing much less saturated and more washed out in the enhanced image. The background distraction is removed and the composition looks cleaner, but the color change is material and affects fidelity to the original rug&#39;s appearance.</dd></div>
+          </dl>
+        </article>
+      </section>
+</body>
+</html>

@@ -1,0 +1,61 @@
+{
+  "generated_at": "2026-04-19T02:29:27.227Z",
+  "tenant_id": "d0d97eca-5384-4f35-a970-db7031c188b0",
+  "limit": 2,
+  "dry_run": false,
+  "enhancement_model": "gemini-3.1-flash-image-preview",
+  "enhancement_quality": "512",
+  "enhancement_prompt_hash": "56bb190f4108a8da01aa9b086315163d7600c05df23378e8111e91bbda237901",
+  "entries": [
+    {
+      "rug_id": "0dcea968-4b4b-4076-8211-560277512fd2",
+      "stock_id": "AUTO-0DCEA968",
+      "intake_label": "Contemporary Pakistani Decorative",
+      "original": {
+        "storage_path": "d0d97eca-5384-4f35-a970-db7031c188b0/7951bc53-c8f4-432b-b670-07db570952d9/primary-1775920563832.jpg",
+        "public_url": "https://nlypymygmysfgxekhudr.supabase.co/storage/v1/object/public/rug-images/d0d97eca-5384-4f35-a970-db7031c188b0/7951bc53-c8f4-432b-b670-07db570952d9/primary-1775920563832.jpg",
+        "local_path": "tmp/gemini-rug-enhancement/nano-banana-2-512-2/originals/AUTO-0DCEA968.jpg",
+        "content_type": "image/jpeg",
+        "download_status": "success",
+        "error": null
+      },
+      "enhancement": {
+        "model": "gemini-3.1-flash-image-preview",
+        "quality": "512",
+        "size": "512",
+        "output_format": "image/jpeg",
+        "prompt_hash": "56bb190f4108a8da01aa9b086315163d7600c05df23378e8111e91bbda237901",
+        "local_path": "tmp/gemini-rug-enhancement/nano-banana-2-512-2/enhanced/AUTO-0DCEA968.jpg",
+        "status": "success",
+        "timing_ms": 9945,
+        "attempts": 1,
+        "error": null
+      }
+    },
+    {
+      "rug_id": "34009335-3406-4dc8-8ad1-13abc068c041",
+      "stock_id": "AUTO-34009335",
+      "intake_label": "Persian Qom",
+      "original": {
+        "storage_path": "d0d97eca-5384-4f35-a970-db7031c188b0/674bd8bd-a0c2-4cf0-912e-847cd510933c/primary-1775920581642.jpg",
+        "public_url": "https://nlypymygmysfgxekhudr.supabase.co/storage/v1/object/public/rug-images/d0d97eca-5384-4f35-a970-db7031c188b0/674bd8bd-a0c2-4cf0-912e-847cd510933c/primary-1775920581642.jpg",
+        "local_path": "tmp/gemini-rug-enhancement/nano-banana-2-512-2/originals/AUTO-34009335.jpg",
+        "content_type": "image/jpeg",
+        "download_status": "success",
+        "error": null
+      },
+      "enhancement": {
+        "model": "gemini-3.1-flash-image-preview",
+        "quality": "512",
+        "size": "512",
+        "output_format": "image/jpeg",
+        "prompt_hash": "56bb190f4108a8da01aa9b086315163d7600c05df23378e8111e91bbda237901",
+        "local_path": "tmp/gemini-rug-enhancement/nano-banana-2-512-2/enhanced/AUTO-34009335.jpg",
+        "status": "success",
+        "timing_ms": 8607,
+        "attempts": 1,
+        "error": null
+      }
+    }
+  ]
+}

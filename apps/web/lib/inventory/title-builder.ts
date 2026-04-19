@@ -1,6 +1,14 @@
+import {
+  confidenceForValue,
+  isConfidenceAtLeast,
+  type RugConfidence,
+} from "@/lib/inventory/confidence";
+
 export type TradeTitleAiFields = {
   origin?: string | null;
+  origin_confidence?: RugConfidence | null;
   style?: string | null;
+  style_confidence?: RugConfidence | null;
   pattern?: string[] | null;
   primary_colors?: string[] | null;
   age_category?: string | null;
@@ -208,6 +216,13 @@ function getOriginToken(origin: string | null | undefined): string | null {
   return titleCaseToken(normalized);
 }
 
+function getFieldConfidence(
+  value: string | null | undefined,
+  confidence: RugConfidence | null | undefined
+): RugConfidence | null {
+  return confidenceForValue(Boolean(normalizeText(value)), confidence);
+}
+
 function getStyleToken(styleRaw: string | null | undefined): string | null {
   const plain = normalizeText(styleRaw);
   if (!plain) return null;
@@ -317,6 +332,55 @@ function getFormatToken(input: {
   return null;
 }
 
+function getGenericDescriptorToken(input: {
+  pattern: string[] | null | undefined;
+  mood: string | null | undefined;
+  ageCategory: string | null | undefined;
+  fallbackLabel: string | null | undefined;
+}): string | null {
+  const patternTokens = Array.isArray(input.pattern)
+    ? input.pattern.map((item) => normalizeLookupText(item))
+    : [];
+  if (patternTokens.includes("medallion center")) return "Medallion";
+  if (patternTokens.includes("tribal design")) return "Tribal";
+  if (patternTokens.includes("floral motif") || patternTokens.includes("floral border")) {
+    return "Floral";
+  }
+  if (patternTokens.includes("all over pattern") || patternTokens.includes("all-over pattern")) {
+    return "All-Over";
+  }
+  if (patternTokens.includes("geometric design")) return "Geometric";
+
+  const eraToken = getEraToken(input.ageCategory);
+  const descriptorSource = [
+    normalizeText(input.mood),
+    normalizeText(input.fallbackLabel),
+  ]
+    .filter((value) => value.length > 0)
+    .join(" ");
+
+  if (patternTokens.includes("plain field")) {
+    if (isContemporaryEraToken(eraToken)) {
+      return "Plain";
+    }
+    if (normalizeLookupText(input.mood) === "modern") return "Minimal";
+    return "Plain";
+  }
+
+  if (isContemporaryEraToken(eraToken)) {
+    return getContemporaryDescriptiveStyleToken(descriptorSource);
+  }
+
+  if (normalizeLookupText(input.mood) === "modern") return "Modern";
+  if (normalizeLookupText(input.mood) === "transitional") return "Transitional";
+  if (normalizeLookupText(input.mood) === "eclectic") return "Eclectic";
+  return null;
+}
+
+function getFallbackShapeToken(formatToken: string | null): string {
+  return formatToken ?? "Rug";
+}
+
 export function sanitizeFallbackTradeLabel(label: string | null | undefined): string | null {
   const normalized = normalizeText(label);
   if (!normalized) return null;
@@ -332,8 +396,20 @@ export function buildTradeTitle(input: BuildTradeTitleInput): string | null {
   const aiFields = input.aiFields ?? {};
 
   const eraToken = getEraToken(aiFields.age_category ?? null);
-  const originToken = getOriginToken(aiFields.origin ?? null);
-  const tradeStyleToken = getStyleToken(aiFields.style ?? null);
+  const originConfidence = getFieldConfidence(
+    aiFields.origin ?? null,
+    aiFields.origin_confidence ?? null
+  );
+  const styleConfidence = getFieldConfidence(
+    aiFields.style ?? null,
+    aiFields.style_confidence ?? null
+  );
+  const originToken = isConfidenceAtLeast(originConfidence, "high")
+    ? getOriginToken(aiFields.origin ?? null)
+    : null;
+  const tradeStyleToken = isConfidenceAtLeast(styleConfidence, "medium")
+    ? getStyleToken(aiFields.style ?? null)
+    : null;
   const contemporaryDescriptorSource = isContemporaryEraToken(eraToken)
     ? [
         normalizeText(aiFields.style ?? null),
@@ -368,7 +444,36 @@ export function buildTradeTitle(input: BuildTradeTitleInput): string | null {
       : [eraToken, originToken, dedupedStyle];
 
   const tokens = uniqueTokens([...leadingTokens, formatToken]);
-  if (tokens.length <= 1) return null;
+  const shouldUseExactTokens = Boolean(originToken && tradeStyleToken);
+  if (shouldUseExactTokens && tokens.length > 1) {
+    return tokens.map((token) => titleCaseToken(token)).join(" ");
+  }
 
-  return tokens.map((token) => titleCaseToken(token)).join(" ");
+  if (tradeStyleToken) {
+    const softenedTokens = uniqueTokens([
+      eraToken ?? titleCaseToken(normalizeText(aiFields.mood ?? null)),
+      `${tradeStyleToken}-Style`,
+      getFallbackShapeToken(formatToken),
+    ]);
+    if (softenedTokens.length > 1) {
+      return softenedTokens.map((token) => titleCaseToken(token)).join(" ");
+    }
+  }
+
+  const descriptorToken = getGenericDescriptorToken({
+    pattern: aiFields.pattern ?? null,
+    mood: aiFields.mood ?? null,
+    ageCategory: aiFields.age_category ?? null,
+    fallbackLabel: input.fallbackLabel,
+  });
+  const genericTokens = uniqueTokens([
+    eraToken ?? titleCaseToken(normalizeText(aiFields.mood ?? null)),
+    descriptorToken,
+    getFallbackShapeToken(formatToken),
+  ]);
+  if (genericTokens.length > 1) {
+    return genericTokens.map((token) => titleCaseToken(token)).join(" ");
+  }
+
+  return null;
 }

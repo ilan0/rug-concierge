@@ -3,6 +3,7 @@ import type {
   RugAiStructuredFields,
   StaffOverrides,
 } from "@/lib/types/inventory";
+import { confidenceForValue, isConfidenceAtLeast } from "@/lib/inventory/confidence";
 import { resolveStyleValue } from "@/lib/inventory/style-normalization";
 
 function hasOwn(obj: object, key: string): boolean {
@@ -30,8 +31,22 @@ export function resolveEffectiveFields(
 ): EffectiveRugFields {
   const normalizedOverrides = normalizeOverrides(staffOverrides);
   const base = aiFields ?? {};
+  const rawAiStyle =
+    isConfidenceAtLeast(
+      confidenceForValue(Boolean(base.style), base.style_confidence ?? null),
+      "medium"
+    )
+      ? base.style ?? null
+      : null;
+  const rawAiOrigin =
+    isConfidenceAtLeast(
+      confidenceForValue(Boolean(base.origin), base.origin_confidence ?? null),
+      "medium"
+    )
+      ? base.origin ?? null
+      : null;
   const normalizedAiStyle = resolveStyleValue({
-    styleRaw: base.style ?? null,
+    styleRaw: rawAiStyle,
     pattern: base.pattern ?? [],
     mood: base.mood ?? null,
     aiDescription,
@@ -45,7 +60,7 @@ export function resolveEffectiveFields(
     origin:
       (hasOwn(normalizedOverrides, "origin")
         ? normalizedOverrides.origin
-        : base.origin) ?? null,
+        : rawAiOrigin) ?? null,
     style:
       (hasOwn(normalizedOverrides, "style")
         ? normalizedOverrides.style

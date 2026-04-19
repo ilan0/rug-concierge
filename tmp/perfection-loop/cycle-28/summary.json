@@ -1,0 +1,544 @@
+{
+  "cycleId": "cycle-28",
+  "pass": false,
+  "gateResults": [
+    {
+      "gate": "A",
+      "pass": false,
+      "failures": [
+        "mobile-390x844: idle modal should not show when active chat has zero messages",
+        "mobile-390x844: idle should return to tap-to-start when no messages exist",
+        "tablet-768x1024: idle modal should not show when active chat has zero messages",
+        "tablet-768x1024: idle should return to tap-to-start when no messages exist",
+        "tablet-1024x768: idle modal should not show when active chat has zero messages",
+        "tablet-1024x768: idle should return to tap-to-start when no messages exist",
+        "desktop-1366x1024: idle modal should not show when active chat has zero messages",
+        "desktop-1366x1024: idle should return to tap-to-start when no messages exist",
+        "desktop-1728x1117: idle modal should not show when active chat has zero messages",
+        "desktop-1728x1117: idle should return to tap-to-start when no messages exist"
+      ],
+      "details": {
+        "requirement": [
+          "tap-to-start transitions to active chat",
+          "staff lock placement remains consistent in tap/chat/idle",
+          "header hidden in tap-to-start state"
+        ],
+        "viewportResults": {
+          "mobile-390x844": {
+            "functionalFailures": [
+              "idle modal should not show when active chat has zero messages",
+              "idle should return to tap-to-start when no messages exist"
+            ],
+            "layoutFailures": [],
+            "accessibilityFailures": [],
+            "stabilityFailures": [],
+            "runtimeErrors": {
+              "consoleErrors": [],
+              "pageErrors": []
+            },
+            "touchViolations": [],
+            "overflow": false,
+            "reducedMotionOk": true,
+            "scrollBehavior": {
+              "keptPosition": true,
+              "jumpWorked": true
+            },
+            "contrast": {
+              "pass": true,
+              "checks": [
+                {
+                  "label": "primary-on-bg",
+                  "ratio": 14.11,
+                  "minRatio": 7,
+                  "pass": true
+                },
+                {
+                  "label": "secondary-on-bg",
+                  "ratio": 6.01,
+                  "minRatio": 4.5,
+                  "pass": true
+                },
+                {
+                  "label": "primary-on-surface-2",
+                  "ratio": 13.19,
+                  "minRatio": 4.5,
+                  "pass": true
+                },
+                {
+                  "label": "secondary-on-surface",
+                  "ratio": 6.32,
+                  "minRatio": 4.5,
+                  "pass": true
+                }
+              ]
+            }
+          },
+          "tablet-768x1024": {
+            "functionalFailures": [
+              "idle modal should not show when active chat has zero messages",
+              "idle should return to tap-to-start when no messages exist"
+            ],
+            "layoutFailures": [],
+            "accessibilityFailures": [],
+            "stabilityFailures": [],
+            "runtimeErrors": {
+              "consoleErrors": [],
+              "pageErrors": []
+            },
+            "touchViolations": [],
+            "overflow": false,
+            "reducedMotionOk": true,
+            "scrollBehavior": {
+              "keptPosition": true,
+              "jumpWorked": true
+            },
+            "contrast": {
+              "pass": true,
+              "checks": [
+                {
+                  "label": "primary-on-bg",
+                  "ratio": 14.11,
+                  "minRatio": 7,
+                  "pass": true
+                },
+                {
+                  "label": "secondary-on-bg",
+                  "ratio": 6.01,
+                  "minRatio": 4.5,
+                  "pass": true
+                },
+                {
+                  "label": "primary-on-surface-2",
+                  "ratio": 13.19,
+                  "minRatio": 4.5,
+                  "pass": true
+                },
+                {
+                  "label": "secondary-on-surface",
+                  "ratio": 6.32,
+                  "minRatio": 4.5,
+                  "pass": true
+                }
+              ]
+            }
+          },
+          "tablet-1024x768": {
+            "functionalFailures": [
+              "idle modal should not show when active chat has zero messages",
+              "idle should return to tap-to-start when no messages exist"
+            ],
+            "layoutFailures": [],
+            "accessibilityFailures": [],
+            "stabilityFailures": [],
+            "runtimeErrors": {
+              "consoleErrors": [],
+              "pageErrors": []
+            },
+            "touchViolations": [],
+            "overflow": false,
+            "reducedMotionOk": true,
+            "scrollBehavior": {
+              "keptPosition": true,
+              "jumpWorked": true
+            },
+            "contrast": {
+              "pass": true,
+              "checks": [
+                {
+                  "label": "primary-on-bg",
+                  "ratio": 14.11,
+                  "minRatio": 7,
+                  "pass": true
+                },
+                {
+                  "label": "secondary-on-bg",
+                  "ratio": 6.01,
+                  "minRatio": 4.5,
+                  "pass": true
+                },
+                {
+                  "label": "primary-on-surface-2",
+                  "ratio": 13.19,
+                  "minRatio": 4.5,
+                  "pass": true
+                },
+                {
+                  "label": "secondary-on-surface",
+                  "ratio": 6.32,
+                  "minRatio": 4.5,
+                  "pass": true
+                }
+              ]
+            }
+          },
+          "desktop-1366x1024": {
+            "functionalFailures": [
+              "idle modal should not show when active chat has zero messages",
+              "idle should return to tap-to-start when no messages exist"
+            ],
+            "layoutFailures": [],
+            "accessibilityFailures": [],
+            "stabilityFailures": [],
+            "runtimeErrors": {
+              "consoleErrors": [],
+              "pageErrors": []
+            },
+            "touchViolations": [],
+            "overflow": false,
+            "reducedMotionOk": true,
+            "scrollBehavior": {
+              "keptPosition": true,
+              "jumpWorked": true
+            },
+            "contrast": {
+              "pass": true,
+              "checks": [
+                {
+                  "label": "primary-on-bg",
+                  "ratio": 14.11,
+                  "minRatio": 7,
+                  "pass": true
+                },
+                {
+                  "label": "secondary-on-bg",
+                  "ratio": 6.01,
+                  "minRatio": 4.5,
+                  "pass": true
+                },
+                {
+                  "label": "primary-on-surface-2",
+                  "ratio": 13.19,
+                  "minRatio": 4.5,
+                  "pass": true
+                },
+                {
+                  "label": "secondary-on-surface",
+                  "ratio": 6.32,
+                  "minRatio": 4.5,
+                  "pass": true
+                }
+              ]
+            }
+          },
+          "desktop-1728x1117": {
+            "functionalFailures": [
+              "idle modal should not show when active chat has zero messages",
+              "idle should return to tap-to-start when no messages exist"
+            ],
+            "layoutFailures": [],
+            "accessibilityFailures": [],
+            "stabilityFailures": [],
+            "runtimeErrors": {
+              "consoleErrors": [],
+              "pageErrors": []
+            },
+            "touchViolations": [],
+            "overflow": false,
+            "reducedMotionOk": true,
+            "scrollBehavior": {
+              "keptPosition": true,
+              "jumpWorked": true
+            },
+            "contrast": {
+              "pass": true,
+              "checks": [
+                {
+                  "label": "primary-on-bg",
+                  "ratio": 14.11,
+                  "minRatio": 7,
+                  "pass": true
+                },
+                {
+                  "label": "secondary-on-bg",
+                  "ratio": 6.01,
+                  "minRatio": 4.5,
+                  "pass": true
+                },
+                {
+                  "label": "primary-on-surface-2",
+                  "ratio": 13.19,
+                  "minRatio": 4.5,
+                  "pass": true
+                },
+                {
+                  "label": "secondary-on-surface",
+                  "ratio": 6.32,
+                  "minRatio": 4.5,
+                  "pass": true
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "gate": "B",
+      "pass": true,
+      "failures": [],
+      "details": {
+        "checkedViewports": [
+          "mobile-390x844",
+          "tablet-768x1024",
+          "tablet-1024x768",
+          "desktop-1366x1024",
+          "desktop-1728x1117"
+        ]
+      }
+    },
+    {
+      "gate": "C",
+      "pass": true,
+      "failures": [],
+      "details": {
+        "fixtures": [
+          {
+            "fixture": "short-square",
+            "viewport": "mobile-390x844",
+            "overflow": false,
+            "headerMissing": true,
+            "heroOk": true,
+            "logoOk": true,
+            "heroText": "Noor Rugs"
+          },
+          {
+            "fixture": "short-square",
+            "viewport": "tablet-768x1024",
+            "overflow": false,
+            "headerMissing": true,
+            "heroOk": true,
+            "logoOk": true,
+            "heroText": "Noor Rugs"
+          },
+          {
+            "fixture": "short-square",
+            "viewport": "tablet-1024x768",
+            "overflow": false,
+            "headerMissing": true,
+            "heroOk": true,
+            "logoOk": true,
+            "heroText": "Noor Rugs"
+          },
+          {
+            "fixture": "short-square",
+            "viewport": "desktop-1366x1024",
+            "overflow": false,
+            "headerMissing": true,
+            "heroOk": true,
+            "logoOk": true,
+            "heroText": "Noor Rugs"
+          },
+          {
+            "fixture": "short-square",
+            "viewport": "desktop-1728x1117",
+            "overflow": false,
+            "headerMissing": true,
+            "heroOk": true,
+            "logoOk": true,
+            "heroText": "Noor Rugs"
+          },
+          {
+            "fixture": "medium-wide",
+            "viewport": "mobile-390x844",
+            "overflow": false,
+            "headerMissing": true,
+            "heroOk": true,
+            "logoOk": true,
+            "heroText": "Metropolitan Rug Atelier"
+          },
+          {
+            "fixture": "medium-wide",
+            "viewport": "tablet-768x1024",
+            "overflow": false,
+            "headerMissing": true,
+            "heroOk": true,
+            "logoOk": true,
+            "heroText": "Metropolitan Rug Atelier"
+          },
+          {
+            "fixture": "medium-wide",
+            "viewport": "tablet-1024x768",
+            "overflow": false,
+            "headerMissing": true,
+            "heroOk": true,
+            "logoOk": true,
+            "heroText": "Metropolitan Rug Atelier"
+          },
+          {
+            "fixture": "medium-wide",
+            "viewport": "desktop-1366x1024",
+            "overflow": false,
+            "headerMissing": true,
+            "heroOk": true,
+            "logoOk": true,
+            "heroText": "Metropolitan Rug Atelier"
+          },
+          {
+            "fixture": "medium-wide",
+            "viewport": "desktop-1728x1117",
+            "overflow": false,
+            "headerMissing": true,
+            "heroOk": true,
+            "logoOk": true,
+            "heroText": "Metropolitan Rug Atelier"
+          },
+          {
+            "fixture": "long-tall",
+            "viewport": "mobile-390x844",
+            "overflow": false,
+            "headerMissing": true,
+            "heroOk": true,
+            "logoOk": true,
+            "heroText": "The International House of Antique and Contemporary Rugs"
+          },
+          {
+            "fixture": "long-tall",
+            "viewport": "tablet-768x1024",
+            "overflow": false,
+            "headerMissing": true,
+            "heroOk": true,
+            "logoOk": true,
+            "heroText": "The International House of Antique and Contemporary Rugs"
+          },
+          {
+            "fixture": "long-tall",
+            "viewport": "tablet-1024x768",
+            "overflow": false,
+            "headerMissing": true,
+            "heroOk": true,
+            "logoOk": true,
+            "heroText": "The International House of Antique and Contemporary Rugs"
+          },
+          {
+            "fixture": "long-tall",
+            "viewport": "desktop-1366x1024",
+            "overflow": false,
+            "headerMissing": true,
+            "heroOk": true,
+            "logoOk": true,
+            "heroText": "The International House of Antique and Contemporary Rugs"
+          },
+          {
+            "fixture": "long-tall",
+            "viewport": "desktop-1728x1117",
+            "overflow": false,
+            "headerMissing": true,
+            "heroOk": true,
+            "logoOk": true,
+            "heroText": "The International House of Antique and Contemporary Rugs"
+          },
+          {
+            "fixture": "missing-logo",
+            "viewport": "mobile-390x844",
+            "overflow": false,
+            "headerMissing": true,
+            "heroOk": true,
+            "logoOk": true,
+            "heroText": "Maison Loom"
+          },
+          {
+            "fixture": "missing-logo",
+            "viewport": "tablet-768x1024",
+            "overflow": false,
+            "headerMissing": true,
+            "heroOk": true,
+            "logoOk": true,
+            "heroText": "Maison Loom"
+          },
+          {
+            "fixture": "missing-logo",
+            "viewport": "tablet-1024x768",
+            "overflow": false,
+            "headerMissing": true,
+            "heroOk": true,
+            "logoOk": true,
+            "heroText": "Maison Loom"
+          },
+          {
+            "fixture": "missing-logo",
+            "viewport": "desktop-1366x1024",
+            "overflow": false,
+            "headerMissing": true,
+            "heroOk": true,
+            "logoOk": true,
+            "heroText": "Maison Loom"
+          },
+          {
+            "fixture": "missing-logo",
+            "viewport": "desktop-1728x1117",
+            "overflow": false,
+            "headerMissing": true,
+            "heroOk": true,
+            "logoOk": true,
+            "heroText": "Maison Loom"
+          },
+          {
+            "fixture": "broken-logo",
+            "viewport": "mobile-390x844",
+            "overflow": false,
+            "headerMissing": true,
+            "heroOk": true,
+            "logoOk": true,
+            "heroText": "Heritage Loom Works"
+          },
+          {
+            "fixture": "broken-logo",
+            "viewport": "tablet-768x1024",
+            "overflow": false,
+            "headerMissing": true,
+            "heroOk": true,
+            "logoOk": true,
+            "heroText": "Heritage Loom Works"
+          },
+          {
+            "fixture": "broken-logo",
+            "viewport": "tablet-1024x768",
+            "overflow": false,
+            "headerMissing": true,
+            "heroOk": true,
+            "logoOk": true,
+            "heroText": "Heritage Loom Works"
+          },
+          {
+            "fixture": "broken-logo",
+            "viewport": "desktop-1366x1024",
+            "overflow": false,
+            "headerMissing": true,
+            "heroOk": true,
+            "logoOk": true,
+            "heroText": "Heritage Loom Works"
+          },
+          {
+            "fixture": "broken-logo",
+            "viewport": "desktop-1728x1117",
+            "overflow": false,
+            "headerMissing": true,
+            "heroOk": true,
+            "logoOk": true,
+            "heroText": "Heritage Loom Works"
+          }
+        ]
+      }
+    },
+    {
+      "gate": "D",
+      "pass": true,
+      "failures": [],
+      "details": {
+        "threshold": {
+          "body": 4.5,
+          "secondary": 4.5,
+          "touchTargetMinPx": 44
+        }
+      }
+    },
+    {
+      "gate": "E",
+      "pass": true,
+      "failures": [],
+      "details": {
+        "runtimeFailures": []
+      }
+    }
+  ]
+}

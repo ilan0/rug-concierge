@@ -1,0 +1,396 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>OpenAI Rug Enhancement Review</title>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #f6f1ea; color: #2f241a; margin: 0; padding: 24px; }
+    h1 { margin: 0 0 8px; }
+    p.meta { margin: 0 0 24px; color: #6c5a49; }
+    .grid { display: grid; gap: 20px; }
+    .card { background: #fffaf4; border: 1px solid #decfb9; border-radius: 18px; padding: 18px; box-shadow: 0 10px 24px rgba(47, 36, 26, 0.06); }
+    .card header { display: flex; gap: 12px; align-items: baseline; flex-wrap: wrap; margin-bottom: 14px; }
+    .card h2 { margin: 0; font-size: 18px; }
+    .card p { margin: 0; color: #6c5a49; }
+    .images { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-bottom: 14px; }
+    figure { margin: 0; }
+    figcaption { margin-bottom: 6px; font-size: 13px; color: #6c5a49; }
+    img { width: 100%; background: #f3ebdd; border-radius: 12px; border: 1px solid #decfb9; }
+    .missing { min-height: 220px; display: grid; place-items: center; border-radius: 12px; border: 1px dashed #decfb9; background: #f8f4ee; color: #6c5a49; }
+    dl { margin: 0; display: grid; gap: 8px; }
+    dl div { display: grid; grid-template-columns: 120px 1fr; gap: 10px; }
+    dt { font-weight: 600; }
+    dd { margin: 0; color: #6c5a49; }
+    .badge { display: inline-flex; align-items: center; border-radius: 999px; padding: 4px 10px; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; }
+    .badge-pass { background: #e7f4ea; color: #205b31; }
+    .badge-borderline { background: #f9f0d8; color: #7c5c10; }
+    .badge-fail, .badge-error { background: #f7e7e5; color: #8b2d1f; }
+    .badge-skipped, .badge-pending { background: #ece7df; color: #5a4b3e; }
+  </style>
+</head>
+<body>
+  <h1>OpenAI Rug Enhancement Review</h1>
+  <p class="meta">Generated 2026-04-18T18:48:40.841Z · 15 rugs · enhancement model gpt-image-1.5 (low)</p>
+  <section class="grid">
+        <article class="card">
+          <header>
+            <h2>AUTO-0DCEA968</h2>
+            <p>Contemporary Pakistani Decorative</p>
+            <span class="badge badge-borderline">borderline</span>
+          </header>
+          <div class="images">
+            <figure>
+              <figcaption>Original</figcaption>
+              <img src="originals/AUTO-0DCEA968.jpg" alt="Original rug photo for AUTO-0DCEA968">
+            </figure>
+            <figure>
+              <figcaption>Enhanced</figcaption>
+              <img src="enhanced/AUTO-0DCEA968.webp" alt="Enhanced rug photo for AUTO-0DCEA968">
+            </figure>
+          </div>
+          <dl>
+            <div><dt>Enhancement</dt><dd>success</dd></div>
+            <div><dt>QA</dt><dd>borderline</dd></div>
+            <div><dt>Notes</dt><dd>The enhanced image shows the same rug pattern and border, and the fringe is preserved accurately. However, the color has shifted to a much brighter and more uniform tone, losing the warmer and slightly varied hues of the original. The lighting and composition are cleaner and more professional, but the rug&#39;s original color fidelity is not well preserved, making it a borderline case.</dd></div>
+          </dl>
+        </article>
+      
+
+        <article class="card">
+          <header>
+            <h2>AUTO-34009335</h2>
+            <p>Persian Qom</p>
+            <span class="badge badge-fail">fail</span>
+          </header>
+          <div class="images">
+            <figure>
+              <figcaption>Original</figcaption>
+              <img src="originals/AUTO-34009335.jpg" alt="Original rug photo for AUTO-34009335">
+            </figure>
+            <figure>
+              <figcaption>Enhanced</figcaption>
+              <img src="enhanced/AUTO-34009335.webp" alt="Enhanced rug photo for AUTO-34009335">
+            </figure>
+          </div>
+          <dl>
+            <div><dt>Enhancement</dt><dd>success</dd></div>
+            <div><dt>QA</dt><dd>fail</dd></div>
+            <div><dt>Notes</dt><dd>The rug in the enhanced image has different colors and pattern scaling compared to the original. The border and fringe appear altered, with the enhanced image showing a more symmetrical, cleaned-up and possibly digitally modified version that does not match the natural wear and color of the original rug. The perspective and presence of feet in the original are removed, but the rug itself is not a</dd></div>
+          </dl>
+        </article>
+      
+
+        <article class="card">
+          <header>
+            <h2>AUTO-3711B41A</h2>
+            <p>Persian Tabriz Traditional</p>
+            <span class="badge badge-fail">fail</span>
+          </header>
+          <div class="images">
+            <figure>
+              <figcaption>Original</figcaption>
+              <img src="originals/AUTO-3711B41A.jpg" alt="Original rug photo for AUTO-3711B41A">
+            </figure>
+            <figure>
+              <figcaption>Enhanced</figcaption>
+              <img src="enhanced/AUTO-3711B41A.webp" alt="Enhanced rug photo for AUTO-3711B41A">
+            </figure>
+          </div>
+          <dl>
+            <div><dt>Enhancement</dt><dd>success</dd></div>
+            <div><dt>QA</dt><dd>fail</dd></div>
+            <div><dt>Notes</dt><dd>The enhanced rug in image 2 has a noticeably different central medallion pattern and border design compared to the original rug in image 1. The borders and fringe are also different. The color tones differ significantly, with the original having a richer purple background and more intricate color details, while the enhanced image has a lighter overall tone and altered colors. Additionally, the rug</dd></div>
+          </dl>
+        </article>
+      
+
+        <article class="card">
+          <header>
+            <h2>AUTO-3F72FBA0</h2>
+            <p>Vintage Turkish Oushak</p>
+            <span class="badge badge-borderline">borderline</span>
+          </header>
+          <div class="images">
+            <figure>
+              <figcaption>Original</figcaption>
+              <img src="originals/AUTO-3F72FBA0.jpg" alt="Original rug photo for AUTO-3F72FBA0">
+            </figure>
+            <figure>
+              <figcaption>Enhanced</figcaption>
+              <img src="enhanced/AUTO-3F72FBA0.webp" alt="Enhanced rug photo for AUTO-3F72FBA0">
+            </figure>
+          </div>
+          <dl>
+            <div><dt>Enhancement</dt><dd>success</dd></div>
+            <div><dt>QA</dt><dd>borderline</dd></div>
+            <div><dt>Notes</dt><dd>The enhanced image has improved lighting and a cleaner background, with the rug fully visible. However, the perspective and visible details differ somewhat due to the different angles and lighting, and some texture detail appears softened. The rug is the same with colors and pattern preserved, and fringes intact, but the fidelity is slightly impacted by these changes.</dd></div>
+          </dl>
+        </article>
+      
+
+        <article class="card">
+          <header>
+            <h2>AUTO-40FEE6A6</h2>
+            <p>Persian Kashan Traditional</p>
+            <span class="badge badge-fail">fail</span>
+          </header>
+          <div class="images">
+            <figure>
+              <figcaption>Original</figcaption>
+              <img src="originals/AUTO-40FEE6A6.jpg" alt="Original rug photo for AUTO-40FEE6A6">
+            </figure>
+            <figure>
+              <figcaption>Enhanced</figcaption>
+              <img src="enhanced/AUTO-40FEE6A6.webp" alt="Enhanced rug photo for AUTO-40FEE6A6">
+            </figure>
+          </div>
+          <dl>
+            <div><dt>Enhancement</dt><dd>success</dd></div>
+            <div><dt>QA</dt><dd>fail</dd></div>
+            <div><dt>Notes</dt><dd>The rug is the same based on pattern and border. However, the color scheme is significantly altered in the enhanced image; the reddish field became more orange and the adjacent background color switched from cream to a much whiter tone. The rug proportions also appear different due to cropping and perspective changes. Lighting is more even in the enhanced image, but the color change and altered fr</dd></div>
+          </dl>
+        </article>
+      
+
+        <article class="card">
+          <header>
+            <h2>AUTO-43B6C1ED</h2>
+            <p>Persian Isfahan Traditional</p>
+            <span class="badge badge-fail">fail</span>
+          </header>
+          <div class="images">
+            <figure>
+              <figcaption>Original</figcaption>
+              <img src="originals/AUTO-43B6C1ED.jpg" alt="Original rug photo for AUTO-43B6C1ED">
+            </figure>
+            <figure>
+              <figcaption>Enhanced</figcaption>
+              <img src="enhanced/AUTO-43B6C1ED.webp" alt="Enhanced rug photo for AUTO-43B6C1ED">
+            </figure>
+          </div>
+          <dl>
+            <div><dt>Enhancement</dt><dd>success</dd></div>
+            <div><dt>QA</dt><dd>fail</dd></div>
+            <div><dt>Notes</dt><dd>The rugs in the two images are different. They have distinct central patterns, color tones, and border designs. The first rug has a red central field with a floral medallion and a beige ornate border, while the second rug has a maroon central field with different floral patterns and a wider beige border featuring different motifs. The fringes appear similar but the rugs themselves are not the same</dd></div>
+          </dl>
+        </article>
+      
+
+        <article class="card">
+          <header>
+            <h2>AUTO-4A7D8EE7</h2>
+            <p>Vintage Persian Heriz</p>
+            <span class="badge badge-fail">fail</span>
+          </header>
+          <div class="images">
+            <figure>
+              <figcaption>Original</figcaption>
+              <img src="originals/AUTO-4A7D8EE7.jpg" alt="Original rug photo for AUTO-4A7D8EE7">
+            </figure>
+            <figure>
+              <figcaption>Enhanced</figcaption>
+              <img src="enhanced/AUTO-4A7D8EE7.webp" alt="Enhanced rug photo for AUTO-4A7D8EE7">
+            </figure>
+          </div>
+          <dl>
+            <div><dt>Enhancement</dt><dd>success</dd></div>
+            <div><dt>QA</dt><dd>fail</dd></div>
+            <div><dt>Notes</dt><dd>The enhanced image shows a rug with a very different color tone and pattern variant, including changes in the central design and border. The fringe is altered and appears neater and more uniform compared to the original. The original&#39;s imperfections, tape pieces, and background details are missing, indicating significant modification beyond just lighting or composition adjustment. These changes do</dd></div>
+          </dl>
+        </article>
+      
+
+        <article class="card">
+          <header>
+            <h2>AUTO-4CDFBB91</h2>
+            <p>Persian Traditional</p>
+            <span class="badge badge-pass">pass</span>
+          </header>
+          <div class="images">
+            <figure>
+              <figcaption>Original</figcaption>
+              <img src="originals/AUTO-4CDFBB91.jpg" alt="Original rug photo for AUTO-4CDFBB91">
+            </figure>
+            <figure>
+              <figcaption>Enhanced</figcaption>
+              <img src="enhanced/AUTO-4CDFBB91.webp" alt="Enhanced rug photo for AUTO-4CDFBB91">
+            </figure>
+          </div>
+          <dl>
+            <div><dt>Enhancement</dt><dd>success</dd></div>
+            <div><dt>QA</dt><dd>pass</dd></div>
+            <div><dt>Notes</dt><dd>The enhancement removes background distractions and focuses on the central rug, improving composition and lighting. The rug&#39;s colors, pattern, and fringe remain consistent with the original. No visible artifacts or alterations to the rug itself.</dd></div>
+          </dl>
+        </article>
+      
+
+        <article class="card">
+          <header>
+            <h2>AUTO-68AB9CF9</h2>
+            <p>Contemporary Plain Round</p>
+            <span class="badge badge-fail">fail</span>
+          </header>
+          <div class="images">
+            <figure>
+              <figcaption>Original</figcaption>
+              <img src="originals/AUTO-68AB9CF9.jpg" alt="Original rug photo for AUTO-68AB9CF9">
+            </figure>
+            <figure>
+              <figcaption>Enhanced</figcaption>
+              <img src="enhanced/AUTO-68AB9CF9.webp" alt="Enhanced rug photo for AUTO-68AB9CF9">
+            </figure>
+          </div>
+          <dl>
+            <div><dt>Enhancement</dt><dd>success</dd></div>
+            <div><dt>QA</dt><dd>fail</dd></div>
+            <div><dt>Notes</dt><dd>The rug is the same in pattern and shape, but the color in the enhancement is much redder and more saturated, which does not preserve the original coloration. The background is cleaner and more uniform in the enhanced image, improving composition and focus on the rug.</dd></div>
+          </dl>
+        </article>
+      
+
+        <article class="card">
+          <header>
+            <h2>AUTO-6E6042D9</h2>
+            <p>Persian Tabriz Traditional</p>
+            <span class="badge badge-fail">fail</span>
+          </header>
+          <div class="images">
+            <figure>
+              <figcaption>Original</figcaption>
+              <img src="originals/AUTO-6E6042D9.jpg" alt="Original rug photo for AUTO-6E6042D9">
+            </figure>
+            <figure>
+              <figcaption>Enhanced</figcaption>
+              <img src="enhanced/AUTO-6E6042D9.webp" alt="Enhanced rug photo for AUTO-6E6042D9">
+            </figure>
+          </div>
+          <dl>
+            <div><dt>Enhancement</dt><dd>success</dd></div>
+            <div><dt>QA</dt><dd>fail</dd></div>
+            <div><dt>Notes</dt><dd>The second image shows a rug with a different pattern and color scheme compared to the first image. The original rug has a complex floral pattern with a more dominant black and white border, while the enhanced image rug has a simpler pattern and lighter border colors. The fringe and border designs do not match either. The setting and background of the images also differ. Therefore, the second rug,</dd></div>
+          </dl>
+        </article>
+      
+
+        <article class="card">
+          <header>
+            <h2>AUTO-7A8EDBBD</h2>
+            <p>Persian Kashan Traditional</p>
+            <span class="badge badge-borderline">borderline</span>
+          </header>
+          <div class="images">
+            <figure>
+              <figcaption>Original</figcaption>
+              <img src="originals/AUTO-7A8EDBBD.jpg" alt="Original rug photo for AUTO-7A8EDBBD">
+            </figure>
+            <figure>
+              <figcaption>Enhanced</figcaption>
+              <img src="enhanced/AUTO-7A8EDBBD.webp" alt="Enhanced rug photo for AUTO-7A8EDBBD">
+            </figure>
+          </div>
+          <dl>
+            <div><dt>Enhancement</dt><dd>success</dd></div>
+            <div><dt>QA</dt><dd>borderline</dd></div>
+            <div><dt>Notes</dt><dd>The rug appears to be the same in both images with the same pattern and colors preserved. The enhanced image has better lighting and a cleaner background which improves visual composition. However, the fringe in the enhanced image is neater and more uniform compared to the original, which may indicate some alteration or cleaning rather than a pure photo enhancement. This detail makes the result a</dd></div>
+          </dl>
+        </article>
+      
+
+        <article class="card">
+          <header>
+            <h2>AUTO-8718025B</h2>
+            <p>Persian Isfahan Traditional</p>
+            <span class="badge badge-fail">fail</span>
+          </header>
+          <div class="images">
+            <figure>
+              <figcaption>Original</figcaption>
+              <img src="originals/AUTO-8718025B.jpg" alt="Original rug photo for AUTO-8718025B">
+            </figure>
+            <figure>
+              <figcaption>Enhanced</figcaption>
+              <img src="enhanced/AUTO-8718025B.webp" alt="Enhanced rug photo for AUTO-8718025B">
+            </figure>
+          </div>
+          <dl>
+            <div><dt>Enhancement</dt><dd>success</dd></div>
+            <div><dt>QA</dt><dd>fail</dd></div>
+            <div><dt>Notes</dt><dd>The rugs in the two images differ significantly in pattern, border design, fringe length, and overall color scheme. The first image shows a rug with a densely floral central medallion on a black background and a multicolored floral border with a fringe of considerable length. The second image shows a rug with a much sparser central medallion with a stepped outline, different floral motifs, vastly,</dd></div>
+          </dl>
+        </article>
+      
+
+        <article class="card">
+          <header>
+            <h2>AUTO-8DC4725C</h2>
+            <p>Vintage Persian Heriz</p>
+            <span class="badge badge-pass">pass</span>
+          </header>
+          <div class="images">
+            <figure>
+              <figcaption>Original</figcaption>
+              <img src="originals/AUTO-8DC4725C.jpg" alt="Original rug photo for AUTO-8DC4725C">
+            </figure>
+            <figure>
+              <figcaption>Enhanced</figcaption>
+              <img src="enhanced/AUTO-8DC4725C.webp" alt="Enhanced rug photo for AUTO-8DC4725C">
+            </figure>
+          </div>
+          <dl>
+            <div><dt>Enhancement</dt><dd>success</dd></div>
+            <div><dt>QA</dt><dd>pass</dd></div>
+            <div><dt>Notes</dt><dd>The enhanced image preserves the exact pattern, colors, and borders of the original rug, including the fringe. The enhancements remove background distractions, improve lighting, and present the rug in a clearer, more professional manner without altering the rug itself.</dd></div>
+          </dl>
+        </article>
+      
+
+        <article class="card">
+          <header>
+            <h2>AUTO-9683697B</h2>
+            <p>Persian Tabriz Traditional</p>
+            <span class="badge badge-fail">fail</span>
+          </header>
+          <div class="images">
+            <figure>
+              <figcaption>Original</figcaption>
+              <img src="originals/AUTO-9683697B.jpg" alt="Original rug photo for AUTO-9683697B">
+            </figure>
+            <figure>
+              <figcaption>Enhanced</figcaption>
+              <img src="enhanced/AUTO-9683697B.webp" alt="Enhanced rug photo for AUTO-9683697B">
+            </figure>
+          </div>
+          <dl>
+            <div><dt>Enhancement</dt><dd>success</dd></div>
+            <div><dt>QA</dt><dd>fail</dd></div>
+            <div><dt>Notes</dt><dd>The rug in image 2 has a different border color and design compared to image 1. The rug&#39;s pattern and colors do not match exactly, and the fringe is different. The lighting and angle are also significantly different, making it look like a different rug rather than a simple enhancement of the original.</dd></div>
+          </dl>
+        </article>
+      
+
+        <article class="card">
+          <header>
+            <h2>AUTO-97D816BD</h2>
+            <p>Turkish Oushak Traditional</p>
+            <span class="badge badge-fail">fail</span>
+          </header>
+          <div class="images">
+            <figure>
+              <figcaption>Original</figcaption>
+              <img src="originals/AUTO-97D816BD.jpg" alt="Original rug photo for AUTO-97D816BD">
+            </figure>
+            <figure>
+              <figcaption>Enhanced</figcaption>
+              <img src="enhanced/AUTO-97D816BD.webp" alt="Enhanced rug photo for AUTO-97D816BD">
+            </figure>
+          </div>
+          <dl>
+            <div><dt>Enhancement</dt><dd>success</dd></div>
+            <div><dt>QA</dt><dd>fail</dd></div>
+            <div><dt>Notes</dt><dd>The enhanced image shows a rug with a completely different border color and pattern compared to the original. The fringes are also different in appearance, and the background wood color is lighter and more uniform in the enhanced image. The main rug colors and design elements do not match the original, indicating this is not the same rug and thus the enhancement fails to preserve the original rug.</dd></div>
+          </dl>
+        </article>
+      </section>
+</body>
+</html>

@@ -65,7 +65,7 @@ export function checkLocalRateLimit(input: {
 
 export const chatRateLimit = new Ratelimit({
   redis,
-  limiter: Ratelimit.slidingWindow(60, "10 m"),
+  limiter: Ratelimit.slidingWindow(50, "10 m"),
   prefix: "rl:chat",
   analytics: false,
 });

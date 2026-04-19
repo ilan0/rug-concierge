@@ -1,0 +1,10 @@
+{
+  "verdict": "fail",
+  "same_rug": true,
+  "color_preserved": false,
+  "pattern_preserved": true,
+  "border_fringe_preserved": false,
+  "artifacts_present": false,
+  "composition_improved": false,
+  "notes": "The enhanced image shows the same rug but significantly changes the scene. It removes surrounding rugs and other objects, changes the lighting to a flat, artificial look, and the rug colors appear washed out and less natural. The background and floor are completely replaced by a uniform gray, and the fringe is trimmed or missing. These changes alter the appearance and context of the rug, failing a"
+}

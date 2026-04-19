@@ -1,0 +1,287 @@
+{
+  "runA": {
+    "runId": "full-run-1",
+    "pass": true,
+    "gateResults": [
+      {
+        "gate": "A",
+        "pass": true,
+        "details": {
+          "idleTimeoutMs": 300000,
+          "checks": [
+            "fires at exactly 5min",
+            "resets on activity",
+            "cleanup on stop/unmount path"
+          ]
+        }
+      },
+      {
+        "gate": "B",
+        "pass": true,
+        "details": {
+          "attractVisible": true,
+          "idleBeforeStart": 0,
+          "composerVisible": true,
+          "draftAfterContinue": "draft that should survive idle",
+          "turnCountBefore": 2,
+          "turnCountAfterContinue": 2,
+          "scrollBefore": 16,
+          "scrollAfterContinue": 16,
+          "attractAfterReset": true,
+          "freshTurnCount": 1
+        }
+      },
+      {
+        "gate": "C",
+        "pass": true,
+        "details": {
+          "recommendationsReady": true,
+          "modalInteraction": true,
+          "idleShown": true,
+          "idleShownAgain": true
+        }
+      },
+      {
+        "gate": "D",
+        "pass": true,
+        "details": {
+          "fixtures": [
+            {
+              "fixture": "short-square",
+              "overflow": false,
+              "textWrapOk": true,
+              "textWrapMetrics": {
+                "ok": true,
+                "headerOneLine": true,
+                "heroTwoLinesOrLess": true,
+                "headerClientHeight": 22,
+                "headerLineHeight": 21.6,
+                "heroClientHeight": 44,
+                "heroLineHeight": 44
+              }
+            },
+            {
+              "fixture": "medium-wide",
+              "overflow": false,
+              "textWrapOk": true,
+              "textWrapMetrics": {
+                "ok": true,
+                "headerOneLine": true,
+                "heroTwoLinesOrLess": true,
+                "headerClientHeight": 22,
+                "headerLineHeight": 21.6,
+                "heroClientHeight": 88,
+                "heroLineHeight": 44
+              }
+            },
+            {
+              "fixture": "long-tall",
+              "overflow": false,
+              "textWrapOk": true,
+              "textWrapMetrics": {
+                "ok": true,
+                "headerOneLine": true,
+                "heroTwoLinesOrLess": true,
+                "headerClientHeight": 22,
+                "headerLineHeight": 21.6,
+                "heroClientHeight": 88,
+                "heroLineHeight": 44
+              }
+            },
+            {
+              "fixture": "missing-logo",
+              "overflow": false,
+              "textWrapOk": true,
+              "textWrapMetrics": {
+                "ok": true,
+                "headerOneLine": true,
+                "heroTwoLinesOrLess": true,
+                "headerClientHeight": 22,
+                "headerLineHeight": 21.6,
+                "heroClientHeight": 88,
+                "heroLineHeight": 44
+              }
+            },
+            {
+              "fixture": "broken-logo",
+              "overflow": false,
+              "textWrapOk": true,
+              "textWrapMetrics": {
+                "ok": true,
+                "headerOneLine": true,
+                "heroTwoLinesOrLess": true,
+                "headerClientHeight": 22,
+                "headerLineHeight": 21.6,
+                "heroClientHeight": 88,
+                "heroLineHeight": 44
+              }
+            }
+          ]
+        }
+      },
+      {
+        "gate": "E",
+        "pass": true,
+        "details": {
+          "smallTargets": [],
+          "focusVisibleOk": true,
+          "reducedMotionResult": {
+            "ok": true,
+            "animationName": "none"
+          }
+        }
+      },
+      {
+        "gate": "F",
+        "pass": true,
+        "details": {
+          "consoleErrors": [],
+          "pageErrors": []
+        }
+      }
+    ]
+  },
+  "runB": {
+    "runId": "full-run-2",
+    "pass": true,
+    "gateResults": [
+      {
+        "gate": "A",
+        "pass": true,
+        "details": {
+          "idleTimeoutMs": 300000,
+          "checks": [
+            "fires at exactly 5min",
+            "resets on activity",
+            "cleanup on stop/unmount path"
+          ]
+        }
+      },
+      {
+        "gate": "B",
+        "pass": true,
+        "details": {
+          "attractVisible": true,
+          "idleBeforeStart": 0,
+          "composerVisible": true,
+          "draftAfterContinue": "draft that should survive idle",
+          "turnCountBefore": 2,
+          "turnCountAfterContinue": 2,
+          "scrollBefore": 16,
+          "scrollAfterContinue": 16,
+          "attractAfterReset": true,
+          "freshTurnCount": 1
+        }
+      },
+      {
+        "gate": "C",
+        "pass": true,
+        "details": {
+          "recommendationsReady": true,
+          "modalInteraction": true,
+          "idleShown": true,
+          "idleShownAgain": true
+        }
+      },
+      {
+        "gate": "D",
+        "pass": true,
+        "details": {
+          "fixtures": [
+            {
+              "fixture": "short-square",
+              "overflow": false,
+              "textWrapOk": true,
+              "textWrapMetrics": {
+                "ok": true,
+                "headerOneLine": true,
+                "heroTwoLinesOrLess": true,
+                "headerClientHeight": 22,
+                "headerLineHeight": 21.6,
+                "heroClientHeight": 44,
+                "heroLineHeight": 44
+              }
+            },
+            {
+              "fixture": "medium-wide",
+              "overflow": false,
+              "textWrapOk": true,
+              "textWrapMetrics": {
+                "ok": true,
+                "headerOneLine": true,
+                "heroTwoLinesOrLess": true,
+                "headerClientHeight": 22,
+                "headerLineHeight": 21.6,
+                "heroClientHeight": 88,
+                "heroLineHeight": 44
+              }
+            },
+            {
+              "fixture": "long-tall",
+              "overflow": false,
+              "textWrapOk": true,
+              "textWrapMetrics": {
+                "ok": true,
+                "headerOneLine": true,
+                "heroTwoLinesOrLess": true,
+                "headerClientHeight": 22,
+                "headerLineHeight": 21.6,
+                "heroClientHeight": 88,
+                "heroLineHeight": 44
+              }
+            },
+            {
+              "fixture": "missing-logo",
+              "overflow": false,
+              "textWrapOk": true,
+              "textWrapMetrics": {
+                "ok": true,
+                "headerOneLine": true,
+                "heroTwoLinesOrLess": true,
+                "headerClientHeight": 22,
+                "headerLineHeight": 21.6,
+                "heroClientHeight": 88,
+                "heroLineHeight": 44
+              }
+            },
+            {
+              "fixture": "broken-logo",
+              "overflow": false,
+              "textWrapOk": true,
+              "textWrapMetrics": {
+                "ok": true,
+                "headerOneLine": true,
+                "heroTwoLinesOrLess": true,
+                "headerClientHeight": 22,
+                "headerLineHeight": 21.6,
+                "heroClientHeight": 88,
+                "heroLineHeight": 44
+              }
+            }
+          ]
+        }
+      },
+      {
+        "gate": "E",
+        "pass": true,
+        "details": {
+          "smallTargets": [],
+          "focusVisibleOk": true,
+          "reducedMotionResult": {
+            "ok": true,
+            "animationName": "none"
+          }
+        }
+      },
+      {
+        "gate": "F",
+        "pass": true,
+        "details": {
+          "consoleErrors": [],
+          "pageErrors": []
+        }
+      }
+    ]
+  },
+  "twoConsecutiveGreen": true
+}

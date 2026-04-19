@@ -210,10 +210,12 @@ export async function PATCH(
           mergedOverrides?.origin ??
           existing.ai_structured_fields?.origin ??
           null,
+        origin_confidence: existing.ai_structured_fields?.origin_confidence ?? null,
         style:
           mergedOverrides?.style ??
           existing.ai_structured_fields?.style ??
           null,
+        style_confidence: existing.ai_structured_fields?.style_confidence ?? null,
         age_category:
           mergedOverrides?.age_category ??
           existing.ai_structured_fields?.age_category ??

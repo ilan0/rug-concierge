@@ -87,11 +87,6 @@ export function resolveStyleValue(input: {
     return normalized.slice(0, 80) || null;
   }
 
-  const descriptionStyle = input.aiDescription
-    ? findCanonicalStyleName(toPlainText(input.aiDescription))
-    : null;
-  if (descriptionStyle) return descriptionStyle;
-
   const patternStyle = derivePatternDrivenStyle({
     pattern: input.pattern,
     mood: input.mood,

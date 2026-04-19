@@ -19,7 +19,7 @@ export const INVENTORY_ENRICHMENT_WORKER_RUN_BUDGET_MS = 45_000;
 
 const RETRY_DELAYS_MS = [60_000, 5 * 60_000, 15 * 60_000] as const;
 
-type InventoryEnrichmentJobRow = {
+export type InventoryEnrichmentJobRow = {
   id: string;
   tenant_id: string;
   rug_id: string;
@@ -63,6 +63,8 @@ export type InventoryEnrichmentWorkerSummary = {
   outcomes: Record<InventoryEnrichmentJobOutcome, number>;
   errors: string[];
 };
+
+export type VisionEnrichmentRequester = typeof requestVisionEnrichment;
 
 function getSupabase(input?: SupabaseClient): SupabaseClient {
   return input ?? supabaseAdmin;
@@ -302,9 +304,10 @@ async function loadPrimaryImageUrl(input: {
   return map.get(input.rugId)?.primary_image_url ?? null;
 }
 
-async function processOneJob(input: {
+export async function processInventoryEnrichmentJob(input: {
   supabase: SupabaseClient;
   job: InventoryEnrichmentJobRow;
+  requestVisionEnrichmentFn?: VisionEnrichmentRequester;
 }): Promise<InventoryEnrichmentJobOutcome> {
   const rug = await fetchRugRecordById({
     supabase: input.supabase,
@@ -349,7 +352,8 @@ async function processOneJob(input: {
     return "needs_review_failed";
   }
 
-  const enrichment = await requestVisionEnrichment({
+  const requestVision = input.requestVisionEnrichmentFn ?? requestVisionEnrichment;
+  const enrichment = await requestVision({
     imageUrl: primaryImageUrl,
     widthTotalIn: rug.width_total_in,
     lengthTotalIn: rug.length_total_in,
@@ -572,6 +576,7 @@ export async function runInventoryEnrichmentWorker(input: {
   claimLimit?: number;
   runBudgetMs?: number;
   supabase?: SupabaseClient;
+  requestVisionEnrichmentFn?: VisionEnrichmentRequester;
 }): Promise<InventoryEnrichmentWorkerSummary> {
   const supabase = getSupabase(input.supabase);
   const runBudgetMs = Math.max(10_000, Math.min(55_000, input.runBudgetMs ?? INVENTORY_ENRICHMENT_WORKER_RUN_BUDGET_MS));
@@ -604,7 +609,11 @@ export async function runInventoryEnrichmentWorker(input: {
     }
 
     try {
-      const outcome = await processOneJob({ supabase, job });
+      const outcome = await processInventoryEnrichmentJob({
+        supabase,
+        job,
+        requestVisionEnrichmentFn: input.requestVisionEnrichmentFn,
+      });
       outcomes[outcome] += 1;
     } catch (error) {
       const message =

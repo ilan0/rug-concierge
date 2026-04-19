@@ -1,0 +1,10 @@
+{
+  "verdict": "borderline",
+  "same_rug": true,
+  "color_preserved": false,
+  "pattern_preserved": true,
+  "border_fringe_preserved": true,
+  "artifacts_present": false,
+  "composition_improved": true,
+  "notes": "The enhanced image shows the same rug with the same pattern and border details preserved. However, the color appears to be significantly altered, appearing much less saturated and more washed out in the enhanced image. The background distraction is removed and the composition looks cleaner, but the color change is material and affects fidelity to the original rug's appearance."
+}

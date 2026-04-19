@@ -1,11 +1,11 @@
 {
-  "generated_at": "2026-04-08T18:53:32.212Z",
+  "generated_at": "2026-04-18T19:38:56.944Z",
   "passed": true,
   "checks": [
     {
       "name": "migration file count > 0",
       "passed": true,
-      "details": "12"
+      "details": "13"
     },
     {
       "name": "migration file names are lexically ordered",
@@ -73,6 +73,11 @@
       "details": "ok"
     },
     {
+      "name": "transaction markers: 20260418_public_schema_rls_hardening.sql",
+      "passed": true,
+      "details": "ok"
+    },
+    {
       "name": "fresh apply SQL artifact generated",
       "passed": true,
       "details": "tmp/migrations/fresh-apply.sql"
@@ -83,9 +88,34 @@
       "details": "ok"
     },
     {
-      "name": "live schema comparison skipped",
+      "name": "live schema matches expected columns: tenants",
       "passed": true,
-      "details": "SUPABASE_URL + admin key not configured; static migration checks only"
+      "details": "ok"
+    },
+    {
+      "name": "live schema matches expected columns: rugs",
+      "passed": true,
+      "details": "ok"
+    },
+    {
+      "name": "live schema matches expected columns: rug_images",
+      "passed": true,
+      "details": "ok"
+    },
+    {
+      "name": "live schema matches expected columns: inventory_enrichment_jobs",
+      "passed": true,
+      "details": "ok"
+    },
+    {
+      "name": "live schema matches expected columns: chat_sessions",
+      "passed": true,
+      "details": "ok"
+    },
+    {
+      "name": "live schema matches expected columns: chat_messages",
+      "passed": true,
+      "details": "ok"
     }
   ],
   "fresh_apply_sql": "tmp/migrations/fresh-apply.sql"

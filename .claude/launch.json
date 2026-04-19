@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "rug-icon-preview",
+      "runtimeExecutable": "sh",
+      "runtimeArgs": ["-c", "cd /Users/ilannabatkhorian/Documents/rug-concierge && python3 -m http.server 7788"],
+      "port": 7788
+    }
+  ]
+}

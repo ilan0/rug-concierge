@@ -1,0 +1,85 @@
+{
+  "generatedAt": "2026-04-17T14:16:44.880Z",
+  "entries": [
+    {
+      "type": "generated",
+      "createdAt": "2026-04-17T14:16:44.880Z",
+      "target": "staff-handoff",
+      "attempt": 1,
+      "candidatePath": "apps/site/public/media/source/generated-pivot/staff-handoff/attempt-01-2026-04-17T14-15-56-086Z.webp",
+      "prompt": "Use case: ui-mockup\nAsset type: homepage section visual for store-side handoff\nPrimary request: create a premium product visual showing store staff clearly seeing who is interested, which rugs they liked, and what to do next.\nScene/backdrop: internal store-facing interface, warm and premium, not a CRM dashboard.\nSubject: one interested-customer card with contact details, a short note, and linked rug thumbnails showing saved interest.\nStyle/medium: realistic product-adjacent mockup, calm and trustworthy.\nComposition/framing: clear split between interested customer and rug proof, immediately understandable.\nConstraints: no people, no charts, no fake analytics, no giant dashboard, traditional rugs only, minimal text.\nAvoid: customer-facing email template, generic CRM admin feel, enterprise software styling.",
+      "accepted": true,
+      "model": "gpt-image-1.5",
+      "quality": "high",
+      "acceptedAt": "2026-04-17T14:18:56.305Z",
+      "finalPath": "apps/site/public/media/product/staff-handoff.webp"
+    },
+    {
+      "type": "generated",
+      "createdAt": "2026-04-17T14:16:47.338Z",
+      "target": "customer-interest",
+      "attempt": 1,
+      "candidatePath": "apps/site/public/media/source/generated-pivot/customer-interest/attempt-01-2026-04-17T14-15-56-072Z.webp",
+      "prompt": "Use case: ui-mockup\nAsset type: homepage section visual for online customer interest\nPrimary request: create a premium product visual showing an online shopper saving rugs and leaving clear interest for the store.\nScene/backdrop: warm minimal premium interface, built for a high-end rug store website.\nSubject: elegant rug recommendation cards with one or two saved states plus a subtle customer-interest cue, such as saved list tied to contact or appointment interest. Focus on traditional high-end rugs.\nStyle/medium: believable product-adjacent mockup, restrained, warm, trustworthy.\nComposition/framing: clear visual story from recommendations to saved interest, no clutter, no busy dashboard.\nConstraints: no people, no charts, no CRM dashboard, minimal text, traditional rugs only, no generic ecommerce feel.\nAvoid: giant heart icon gimmicks, cursor hands, fake analytics, commodity decor rugs.",
+      "accepted": true,
+      "model": "gpt-image-1.5",
+      "quality": "high",
+      "acceptedAt": "2026-04-17T14:18:56.304Z",
+      "finalPath": "apps/site/public/media/product/customer-interest.webp"
+    },
+    {
+      "type": "generated",
+      "createdAt": "2026-04-17T14:16:48.187Z",
+      "target": "appointment-booking",
+      "attempt": 1,
+      "candidatePath": "apps/site/public/media/source/generated-pivot/appointment-booking/attempt-01-2026-04-17T14-15-56-072Z.webp",
+      "prompt": "Use case: ui-mockup\nAsset type: homepage section visual for appointment booking\nPrimary request: create a premium product visual showing an online shopper booking a showroom appointment after finding rugs they like.\nScene/backdrop: warm premium interface for a high-end rug store website.\nSubject: a clean appointment request card tied to specific rugs or a shortlist, with a subtle calendar/time selection feel and a private showroom visit theme.\nStyle/medium: believable premium product mockup.\nComposition/framing: one main appointment card and supporting rug visuals, clear and calm.\nConstraints: no people, no generic scheduling dashboard, no clinical calendar software look, minimal text, traditional rugs only.\nAvoid: enterprise calendar app feel, fake charts, loud UI, generic SaaS widgets.",
+      "accepted": true,
+      "model": "gpt-image-1.5",
+      "quality": "high",
+      "acceptedAt": "2026-04-17T14:18:56.313Z",
+      "finalPath": "apps/site/public/media/product/appointment-booking.webp"
+    },
+    {
+      "type": "generated",
+      "createdAt": "2026-04-17T14:16:53.365Z",
+      "target": "hero-online",
+      "attempt": 1,
+      "candidatePath": "apps/site/public/media/source/generated-pivot/hero-online/attempt-01-2026-04-17T14-15-56-072Z.webp",
+      "prompt": "Use case: photorealistic-natural\nAsset type: landing page hero image for a luxury rug-store lead generation website\nPrimary request: create a premium editorial-style hero image showing RugDesk as a digital rug salesman for online shoppers.\nScene/backdrop: elegant high-end home interior or refined study setting, clearly a customer browsing from home rather than inside a showroom. Warm neutral surroundings, luxury rug visible in the room, calm expensive atmosphere.\nSubject: one laptop or tablet on a table showing a believable rug concierge interface with a short customer request and matching rug recommendations. Keep the device screen readable in structure but not dependent on tiny text. The device should feel natural and premium.\nStyle/medium: photorealistic editorial photography, warm, trustworthy, luxurious, not illustration.\nComposition/framing: wide cinematic composition with generous negative space for homepage headline and CTA, device on one side, room context on the other. Leave a stable hero media zone that could later hold motion in the same frame.\nLighting/mood: warm daylight or soft residential evening light, premium and calm.\nConstraints: no clear faces, no cheesy smiling stock people, no logos, no generic office, no futuristic glow, no dashboard charts, no warped rugs, no kiosk feeling.\nAvoid: store kiosk look, SaaS dashboard look, corporate office vibe, unreadable microcopy, gimmicky AI motifs.",
+      "accepted": true,
+      "model": "gpt-image-1.5",
+      "quality": "high",
+      "acceptedAt": "2026-04-17T14:18:56.299Z",
+      "finalPath": "apps/site/public/media/hero/hero-online-leads.webp"
+    },
+    {
+      "type": "accepted",
+      "createdAt": "2026-04-17T14:18:56.300Z",
+      "target": "hero-online",
+      "candidatePath": "apps/site/public/media/source/generated-pivot/hero-online/attempt-01-2026-04-17T14-15-56-072Z.webp",
+      "finalPath": "apps/site/public/media/hero/hero-online-leads.webp"
+    },
+    {
+      "type": "accepted",
+      "createdAt": "2026-04-17T14:18:56.305Z",
+      "target": "customer-interest",
+      "candidatePath": "apps/site/public/media/source/generated-pivot/customer-interest/attempt-01-2026-04-17T14-15-56-072Z.webp",
+      "finalPath": "apps/site/public/media/product/customer-interest.webp"
+    },
+    {
+      "type": "accepted",
+      "createdAt": "2026-04-17T14:18:56.306Z",
+      "target": "staff-handoff",
+      "candidatePath": "apps/site/public/media/source/generated-pivot/staff-handoff/attempt-01-2026-04-17T14-15-56-086Z.webp",
+      "finalPath": "apps/site/public/media/product/staff-handoff.webp"
+    },
+    {
+      "type": "accepted",
+      "createdAt": "2026-04-17T14:18:56.314Z",
+      "target": "appointment-booking",
+      "candidatePath": "apps/site/public/media/source/generated-pivot/appointment-booking/attempt-01-2026-04-17T14-15-56-072Z.webp",
+      "finalPath": "apps/site/public/media/product/appointment-booking.webp"
+    }
+  ]
+}

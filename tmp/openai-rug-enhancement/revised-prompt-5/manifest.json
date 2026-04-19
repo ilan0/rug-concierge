@@ -1,0 +1,225 @@
+{
+  "generated_at": "2026-04-18T19:12:53.353Z",
+  "tenant_id": "d0d97eca-5384-4f35-a970-db7031c188b0",
+  "limit": 5,
+  "dry_run": false,
+  "enhancement_prompt_hash": "ac6f07898fd674de77963b86125ed5ffd3764c80c42073365a46cde75affadcc",
+  "qa_prompt_hash": "a57679f3f9fc9d7136f127c60f08ae56eb3f4fee8f1984bc336fa2d83a2c5493",
+  "entries": [
+    {
+      "rug_id": "0dcea968-4b4b-4076-8211-560277512fd2",
+      "stock_id": "AUTO-0DCEA968",
+      "intake_label": "Contemporary Pakistani Decorative",
+      "original": {
+        "storage_path": "d0d97eca-5384-4f35-a970-db7031c188b0/7951bc53-c8f4-432b-b670-07db570952d9/primary-1775920563832.jpg",
+        "public_url": "https://nlypymygmysfgxekhudr.supabase.co/storage/v1/object/public/rug-images/d0d97eca-5384-4f35-a970-db7031c188b0/7951bc53-c8f4-432b-b670-07db570952d9/primary-1775920563832.jpg",
+        "local_path": "tmp/openai-rug-enhancement/revised-prompt-5/originals/AUTO-0DCEA968.jpg",
+        "content_type": "image/jpeg",
+        "download_status": "success",
+        "error": null
+      },
+      "enhancement": {
+        "model": "gpt-image-1.5",
+        "quality": "low",
+        "size": "1024x1024",
+        "output_format": "webp",
+        "prompt_hash": "ac6f07898fd674de77963b86125ed5ffd3764c80c42073365a46cde75affadcc",
+        "local_path": "tmp/openai-rug-enhancement/revised-prompt-5/enhanced/AUTO-0DCEA968.webp",
+        "status": "success",
+        "timing_ms": 17823,
+        "attempts": 1,
+        "error": null
+      },
+      "qa": {
+        "model": "gpt-4.1-mini",
+        "prompt_hash": "a57679f3f9fc9d7136f127c60f08ae56eb3f4fee8f1984bc336fa2d83a2c5493",
+        "local_path": "tmp/openai-rug-enhancement/revised-prompt-5/qa/AUTO-0DCEA968.json",
+        "status": "success",
+        "timing_ms": 17568,
+        "result": {
+          "verdict": "fail",
+          "same_rug": true,
+          "color_preserved": false,
+          "pattern_preserved": true,
+          "border_fringe_preserved": true,
+          "artifacts_present": false,
+          "composition_improved": false,
+          "notes": "The rug is the same as the pattern and border match perfectly. However, the color in the enhanced image is warmer and more saturated, showing a significant change from the original. The lighting and white balance are altered, making the rug appear newer and brighter than in the original. This changes the rug's appearance beyond a faithful enhancement. No noticeable artifacts are present, but the '"
+        },
+        "error": null
+      }
+    },
+    {
+      "rug_id": "34009335-3406-4dc8-8ad1-13abc068c041",
+      "stock_id": "AUTO-34009335",
+      "intake_label": "Persian Qom",
+      "original": {
+        "storage_path": "d0d97eca-5384-4f35-a970-db7031c188b0/674bd8bd-a0c2-4cf0-912e-847cd510933c/primary-1775920581642.jpg",
+        "public_url": "https://nlypymygmysfgxekhudr.supabase.co/storage/v1/object/public/rug-images/d0d97eca-5384-4f35-a970-db7031c188b0/674bd8bd-a0c2-4cf0-912e-847cd510933c/primary-1775920581642.jpg",
+        "local_path": "tmp/openai-rug-enhancement/revised-prompt-5/originals/AUTO-34009335.jpg",
+        "content_type": "image/jpeg",
+        "download_status": "success",
+        "error": null
+      },
+      "enhancement": {
+        "model": "gpt-image-1.5",
+        "quality": "low",
+        "size": "1024x1024",
+        "output_format": "webp",
+        "prompt_hash": "ac6f07898fd674de77963b86125ed5ffd3764c80c42073365a46cde75affadcc",
+        "local_path": "tmp/openai-rug-enhancement/revised-prompt-5/enhanced/AUTO-34009335.webp",
+        "status": "success",
+        "timing_ms": 17512,
+        "attempts": 1,
+        "error": null
+      },
+      "qa": {
+        "model": "gpt-4.1-mini",
+        "prompt_hash": "a57679f3f9fc9d7136f127c60f08ae56eb3f4fee8f1984bc336fa2d83a2c5493",
+        "local_path": "tmp/openai-rug-enhancement/revised-prompt-5/qa/AUTO-34009335.json",
+        "status": "success",
+        "timing_ms": 5847,
+        "result": {
+          "verdict": "fail",
+          "same_rug": true,
+          "color_preserved": false,
+          "pattern_preserved": true,
+          "border_fringe_preserved": false,
+          "artifacts_present": false,
+          "composition_improved": true,
+          "notes": "The enhanced image shows the same rug but the colors have shifted significantly, appearing less vibrant and more muted. The white balance and saturation have changed, making the rug look flatter and less textured. The fringe appears cleaner and straighter compared to the original. The composition is more centered and less cluttered, but the material color fidelity is not preserved."
+        },
+        "error": null
+      }
+    },
+    {
+      "rug_id": "3711b41a-ba1b-4175-9331-9ae7524a28a8",
+      "stock_id": "AUTO-3711B41A",
+      "intake_label": "Persian Tabriz Traditional",
+      "original": {
+        "storage_path": "d0d97eca-5384-4f35-a970-db7031c188b0/71a07004-d8c6-47d4-8b84-5251cb00d05b/primary-1775920580033.jpg",
+        "public_url": "https://nlypymygmysfgxekhudr.supabase.co/storage/v1/object/public/rug-images/d0d97eca-5384-4f35-a970-db7031c188b0/71a07004-d8c6-47d4-8b84-5251cb00d05b/primary-1775920580033.jpg",
+        "local_path": "tmp/openai-rug-enhancement/revised-prompt-5/originals/AUTO-3711B41A.jpg",
+        "content_type": "image/jpeg",
+        "download_status": "success",
+        "error": null
+      },
+      "enhancement": {
+        "model": "gpt-image-1.5",
+        "quality": "low",
+        "size": "1024x1024",
+        "output_format": "webp",
+        "prompt_hash": "ac6f07898fd674de77963b86125ed5ffd3764c80c42073365a46cde75affadcc",
+        "local_path": "tmp/openai-rug-enhancement/revised-prompt-5/enhanced/AUTO-3711B41A.webp",
+        "status": "success",
+        "timing_ms": 32576,
+        "attempts": 1,
+        "error": null
+      },
+      "qa": {
+        "model": "gpt-4.1-mini",
+        "prompt_hash": "a57679f3f9fc9d7136f127c60f08ae56eb3f4fee8f1984bc336fa2d83a2c5493",
+        "local_path": "tmp/openai-rug-enhancement/revised-prompt-5/qa/AUTO-3711B41A.json",
+        "status": "success",
+        "timing_ms": 9769,
+        "result": {
+          "verdict": "fail",
+          "same_rug": true,
+          "color_preserved": false,
+          "pattern_preserved": true,
+          "border_fringe_preserved": true,
+          "artifacts_present": false,
+          "composition_improved": false,
+          "notes": "The enhanced image shows the same rug but with significant changes in color and contrast, making it appear brighter and less natural. The rich dark purple background and yellow/gold tones are washed out compared to the original. The lighting in the enhanced image is more even but this changes the rug's original appearance substantially, failing fidelity standards for keeping the rug's true look. P"
+        },
+        "error": null
+      }
+    },
+    {
+      "rug_id": "3f72fba0-f688-4623-b578-ed7d09ad82ad",
+      "stock_id": "AUTO-3F72FBA0",
+      "intake_label": "Vintage Turkish Oushak",
+      "original": {
+        "storage_path": "d0d97eca-5384-4f35-a970-db7031c188b0/73196b2f-81a4-4680-b007-60e1970618e5/primary-1775920672005.jpg",
+        "public_url": "https://nlypymygmysfgxekhudr.supabase.co/storage/v1/object/public/rug-images/d0d97eca-5384-4f35-a970-db7031c188b0/73196b2f-81a4-4680-b007-60e1970618e5/primary-1775920672005.jpg",
+        "local_path": "tmp/openai-rug-enhancement/revised-prompt-5/originals/AUTO-3F72FBA0.jpg",
+        "content_type": "image/jpeg",
+        "download_status": "success",
+        "error": null
+      },
+      "enhancement": {
+        "model": "gpt-image-1.5",
+        "quality": "low",
+        "size": "1024x1024",
+        "output_format": "webp",
+        "prompt_hash": "ac6f07898fd674de77963b86125ed5ffd3764c80c42073365a46cde75affadcc",
+        "local_path": "tmp/openai-rug-enhancement/revised-prompt-5/enhanced/AUTO-3F72FBA0.webp",
+        "status": "success",
+        "timing_ms": 24221,
+        "attempts": 1,
+        "error": null
+      },
+      "qa": {
+        "model": "gpt-4.1-mini",
+        "prompt_hash": "a57679f3f9fc9d7136f127c60f08ae56eb3f4fee8f1984bc336fa2d83a2c5493",
+        "local_path": "tmp/openai-rug-enhancement/revised-prompt-5/qa/AUTO-3F72FBA0.json",
+        "status": "success",
+        "timing_ms": 6926,
+        "result": {
+          "verdict": "pass",
+          "same_rug": true,
+          "color_preserved": true,
+          "pattern_preserved": true,
+          "border_fringe_preserved": true,
+          "artifacts_present": false,
+          "composition_improved": true,
+          "notes": "The enhanced image shows the same rug with identical color, pattern, and fringe details. The composition is improved with a more centered and less cluttered background, providing a better view of the rug without altering its appearance."
+        },
+        "error": null
+      }
+    },
+    {
+      "rug_id": "40fee6a6-0267-471d-a36d-b13da2392542",
+      "stock_id": "AUTO-40FEE6A6",
+      "intake_label": "Persian Kashan Traditional",
+      "original": {
+        "storage_path": "d0d97eca-5384-4f35-a970-db7031c188b0/d95afcf1-c8b8-4866-845b-aa95da4ed76e/primary-1775920585642.jpg",
+        "public_url": "https://nlypymygmysfgxekhudr.supabase.co/storage/v1/object/public/rug-images/d0d97eca-5384-4f35-a970-db7031c188b0/d95afcf1-c8b8-4866-845b-aa95da4ed76e/primary-1775920585642.jpg",
+        "local_path": "tmp/openai-rug-enhancement/revised-prompt-5/originals/AUTO-40FEE6A6.jpg",
+        "content_type": "image/jpeg",
+        "download_status": "success",
+        "error": null
+      },
+      "enhancement": {
+        "model": "gpt-image-1.5",
+        "quality": "low",
+        "size": "1024x1024",
+        "output_format": "webp",
+        "prompt_hash": "ac6f07898fd674de77963b86125ed5ffd3764c80c42073365a46cde75affadcc",
+        "local_path": "tmp/openai-rug-enhancement/revised-prompt-5/enhanced/AUTO-40FEE6A6.webp",
+        "status": "success",
+        "timing_ms": 22733,
+        "attempts": 1,
+        "error": null
+      },
+      "qa": {
+        "model": "gpt-4.1-mini",
+        "prompt_hash": "a57679f3f9fc9d7136f127c60f08ae56eb3f4fee8f1984bc336fa2d83a2c5493",
+        "local_path": "tmp/openai-rug-enhancement/revised-prompt-5/qa/AUTO-40FEE6A6.json",
+        "status": "success",
+        "timing_ms": 8934,
+        "result": {
+          "verdict": "fail",
+          "same_rug": true,
+          "color_preserved": false,
+          "pattern_preserved": true,
+          "border_fringe_preserved": true,
+          "artifacts_present": false,
+          "composition_improved": true,
+          "notes": "The enhanced image has changed the color of the rug to a more reddish shade and warmer tone, losing the original subtle salmon and cream balance. The pattern and fringe are preserved, but the white balance and saturation are materially altered, making the rug look quite different in color. Composition and background distraction are improved, but the significant color shift causes a fail."
+        },
+        "error": null
+      }
+    }
+  ]
+}

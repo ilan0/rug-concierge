@@ -1,0 +1,63 @@
+[
+  {
+    "gate": "F",
+    "state": "empty-mobile",
+    "pass": true,
+    "detail": "ok"
+  },
+  {
+    "gate": "B",
+    "state": "empty-mobile",
+    "pass": true,
+    "detail": []
+  },
+  {
+    "gate": "D",
+    "state": "loading-to-response",
+    "pass": true,
+    "detail": "smooth"
+  },
+  {
+    "gate": "F",
+    "state": "active-desktop",
+    "pass": true,
+    "detail": "ok"
+  },
+  {
+    "gate": "B",
+    "state": "active-desktop",
+    "pass": false,
+    "detail": [
+      {
+        "tag": "button",
+        "text": "New conversation",
+        "width": 191,
+        "height": 40,
+        "hidden": false
+      }
+    ]
+  },
+  {
+    "gate": "E",
+    "state": "jump-visible",
+    "pass": true,
+    "detail": "count=1"
+  },
+  {
+    "gate": "H",
+    "state": "retry-target",
+    "pass": true,
+    "detail": {
+      "x": 29.5,
+      "y": 955,
+      "width": 139.546875,
+      "height": 44
+    }
+  },
+  {
+    "gate": "F",
+    "state": "active-mobile",
+    "pass": true,
+    "detail": "ok"
+  }
+]

@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tap to Start Concept</title>
+  <style>
+    :root {
+      --bg: #f6f1e8;
+      --overlay: rgba(27, 22, 17, 0.35);
+      --card: rgba(248, 244, 237, 0.90);
+      --text: #221b14;
+      --muted: #65564a;
+      --border: rgba(197, 176, 149, 0.45);
+      --gold: #b6934c;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Iowan Old Style", "Times New Roman", serif;
+      color: var(--text);
+      background:
+        radial-gradient(1200px 600px at 20% 10%, rgba(255,255,255,0.35), transparent 70%),
+        linear-gradient(140deg, rgba(79,56,35,0.55), rgba(32,23,15,0.42)),
+        url('https://images.unsplash.com/photo-1543163521-1bf539c55dd2?auto=format&fit=crop&w=1800&q=80') center/cover no-repeat fixed;
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+    }
+
+    .veil {
+      position: fixed;
+      inset: 0;
+      background:
+        linear-gradient(to bottom, rgba(25, 18, 12, 0.42) 0%, rgba(25, 18, 12, 0.2) 28%, rgba(25, 18, 12, 0.34) 100%);
+      backdrop-filter: blur(2px) saturate(0.88);
+      pointer-events: none;
+    }
+
+    .panel {
+      position: relative;
+      width: min(900px, calc(100vw - 96px));
+      border-radius: 28px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      box-shadow: 0 30px 70px rgba(21, 15, 10, 0.35);
+      padding: 56px 72px 48px;
+      text-align: center;
+      backdrop-filter: blur(6px);
+    }
+
+    .crest {
+      width: 76px;
+      height: 76px;
+      border-radius: 20px;
+      margin: 0 auto 20px;
+      background: linear-gradient(145deg, #f5ebdd, #e6d4bc);
+      border: 1px solid rgba(145, 113, 64, 0.38);
+      display: grid;
+      place-items: center;
+      color: #6d5437;
+      font-size: 22px;
+      letter-spacing: 0.03em;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(38px, 5vw, 62px);
+      line-height: 1.05;
+      letter-spacing: -0.02em;
+      font-weight: 600;
+    }
+
+    .store {
+      margin-top: 10px;
+      font-family: "Avenir Next", "Helvetica Neue", Arial, sans-serif;
+      font-size: clamp(17px, 2vw, 21px);
+      color: var(--muted);
+      max-width: 36ch;
+      margin-inline: auto;
+      line-height: 1.3;
+    }
+
+    .cta {
+      margin: 34px auto 20px;
+      width: fit-content;
+      min-height: 64px;
+      padding: 18px 34px;
+      border-radius: 999px;
+      border: 1px solid rgba(144, 111, 60, 0.34);
+      background: linear-gradient(180deg, #f7efe4, #efe2d0);
+      box-shadow: 0 10px 24px rgba(56, 38, 17, 0.16);
+      font-family: "Avenir Next", "Helvetica Neue", Arial, sans-serif;
+      font-size: 20px;
+      font-weight: 600;
+      color: #2c2218;
+      letter-spacing: 0.01em;
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .cta .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: var(--gold);
+      box-shadow: 0 0 0 6px rgba(182, 147, 76, 0.15);
+    }
+
+    .sub {
+      margin: 0;
+      font-family: "Avenir Next", "Helvetica Neue", Arial, sans-serif;
+      font-size: 15px;
+      color: #6f6053;
+      letter-spacing: 0.005em;
+    }
+
+    .lock {
+      position: fixed;
+      right: 18px;
+      bottom: 14px;
+      width: 22px;
+      height: 22px;
+      border-radius: 999px;
+      border: 1px solid rgba(245, 238, 227, 0.35);
+      color: rgba(255, 248, 236, 0.42);
+      display: grid;
+      place-items: center;
+      font-size: 12px;
+      line-height: 1;
+      background: rgba(36, 27, 20, 0.22);
+      backdrop-filter: blur(2px);
+      user-select: none;
+    }
+
+    @media (max-width: 768px) {
+      .panel {
+        width: calc(100vw - 36px);
+        padding: 32px 22px 28px;
+        border-radius: 22px;
+      }
+      .crest {
+        width: 60px;
+        height: 60px;
+        border-radius: 16px;
+        margin-bottom: 14px;
+      }
+      h1 { font-size: clamp(30px, 8vw, 44px); }
+      .store { font-size: 16px; }
+      .cta { min-height: 58px; font-size: 18px; width: 100%; justify-content: center; }
+      .sub { font-size: 14px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="veil"></div>
+  <main class="panel" aria-label="Tap to start panel">
+    <div class="crest">JJ</div>
+    <h1>Tap to Start</h1>
+    <p class="store">J & J Oriental Rug Gallery</p>
+    <button class="cta" aria-label="Begin browsing rugs"><span class="dot"></span>Begin Rug Discovery</button>
+    <p class="sub">Explore in-stock rugs with guided recommendations</p>
+  </main>
+  <div class="lock" aria-hidden="true">🔒</div>
+</body>
+</html>

@@ -1,0 +1,105 @@
+{
+  "outDir": "/Users/ilannabatkhorian/Documents/rug-concierge/tmp/qa/concierge-redesign/run13c",
+  "pass": true,
+  "failures": [],
+  "results": [
+    {
+      "viewport": "390x844",
+      "emptyOverflow": false,
+      "activeOverflow": false,
+      "responded": true,
+      "modalLoadingCaptured": true,
+      "modalAudit": {
+        "modalFound": true,
+        "smallTargets": [],
+        "closeCount": 1
+      },
+      "headerGate": {
+        "ok": true,
+        "borderBottomWidth": "1px",
+        "backdropFilter": "blur(0px)",
+        "backgroundColor": "color(srgb 0.988235 0.980392 0.968627 / 0.96)"
+      },
+      "dockCheck": {
+        "ok": true,
+        "targetBottom": 617,
+        "dockTop": 742
+      },
+      "consoleErrors": [],
+      "pageErrors": []
+    },
+    {
+      "viewport": "768x1024",
+      "emptyOverflow": false,
+      "activeOverflow": false,
+      "responded": true,
+      "modalLoadingCaptured": true,
+      "modalAudit": {
+        "modalFound": true,
+        "smallTargets": [],
+        "closeCount": 1
+      },
+      "headerGate": {
+        "ok": true,
+        "borderBottomWidth": "1px",
+        "backdropFilter": "blur(2px)",
+        "backgroundColor": "color(srgb 0.988235 0.980392 0.968627 / 0.96)"
+      },
+      "dockCheck": {
+        "ok": true,
+        "skipped": true
+      },
+      "consoleErrors": [],
+      "pageErrors": []
+    },
+    {
+      "viewport": "1366x1024",
+      "emptyOverflow": false,
+      "activeOverflow": false,
+      "responded": true,
+      "modalLoadingCaptured": true,
+      "modalAudit": {
+        "modalFound": true,
+        "smallTargets": [],
+        "closeCount": 1
+      },
+      "headerGate": {
+        "ok": true,
+        "borderBottomWidth": "1px",
+        "backdropFilter": "blur(2px)",
+        "backgroundColor": "color(srgb 0.988235 0.980392 0.968627 / 0.96)"
+      },
+      "dockCheck": {
+        "ok": true,
+        "targetBottom": 817,
+        "dockTop": 900
+      },
+      "consoleErrors": [],
+      "pageErrors": []
+    },
+    {
+      "viewport": "1728x1117",
+      "emptyOverflow": false,
+      "activeOverflow": false,
+      "responded": true,
+      "modalLoadingCaptured": true,
+      "modalAudit": {
+        "modalFound": true,
+        "smallTargets": [],
+        "closeCount": 1
+      },
+      "headerGate": {
+        "ok": true,
+        "borderBottomWidth": "1px",
+        "backdropFilter": "blur(2px)",
+        "backgroundColor": "color(srgb 0.988235 0.980392 0.968627 / 0.96)"
+      },
+      "dockCheck": {
+        "ok": true,
+        "skipped": true
+      },
+      "consoleErrors": [],
+      "pageErrors": []
+    }
+  ]
+}
