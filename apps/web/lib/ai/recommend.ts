@@ -1676,9 +1676,19 @@ function disambiguateDuplicateRecommendationTitles(
     if ((counts.get(key) ?? 0) <= 1) return rec;
 
     const differentiator =
-      rec.origin && rec.origin.trim().length > 0
+      (rec.origin && rec.origin.trim().length > 0
         ? rec.origin.trim()
-        : `ID ${rec.rug_id.slice(0, 6)}`;
+        : null) ??
+      (rec.style && rec.style.trim().length > 0
+        ? rec.style.trim()
+        : null) ??
+      (rec.mood && rec.mood.trim().length > 0
+        ? rec.mood.trim()
+        : null);
+
+    if (!differentiator) {
+      return rec;
+    }
 
     return {
       ...rec,
