@@ -1665,36 +1665,7 @@ function parseRecommendationResponse(payload: unknown): RecommendationResponse |
 function disambiguateDuplicateRecommendationTitles(
   recommendations: RecommendationResponse["recommendations"]
 ): RecommendationResponse["recommendations"] {
-  const counts = new Map<string, number>();
-  for (const rec of recommendations) {
-    const key = `${rec.title.toLowerCase()}|${(rec.size_text ?? "").toLowerCase()}`;
-    counts.set(key, (counts.get(key) ?? 0) + 1);
-  }
-
-  return recommendations.map((rec) => {
-    const key = `${rec.title.toLowerCase()}|${(rec.size_text ?? "").toLowerCase()}`;
-    if ((counts.get(key) ?? 0) <= 1) return rec;
-
-    const differentiator =
-      (rec.origin && rec.origin.trim().length > 0
-        ? rec.origin.trim()
-        : null) ??
-      (rec.style && rec.style.trim().length > 0
-        ? rec.style.trim()
-        : null) ??
-      (rec.mood && rec.mood.trim().length > 0
-        ? rec.mood.trim()
-        : null);
-
-    if (!differentiator) {
-      return rec;
-    }
-
-    return {
-      ...rec,
-      title: `${rec.title} (${differentiator})`,
-    };
-  });
+  return recommendations;
 }
 
 function filterRecommendationsByAvoidStyles(input: {
