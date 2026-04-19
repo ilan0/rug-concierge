@@ -18,6 +18,7 @@
     "audit:inventory-enrichment": "npm --workspace apps/web exec tsx ../../scripts/testing/audit-inventory-enrichment.ts",
     "reconcile:inventory-enrichment": "npm --workspace apps/web exec tsx ../../scripts/reconcile-inventory-enrichment.ts",
     "reprocess:inventory-enrichment": "NODE_OPTIONS='--conditions=react-server' npm --workspace apps/web exec tsx ../../scripts/reprocess-inventory-enrichment.ts",
+    "backfill:rug-image-enhancement": "NODE_OPTIONS='--conditions=react-server' npm --workspace apps/web exec tsx ../../scripts/backfill-rug-image-enhancement.ts",
     "build:live-intake-dataset": "npm exec tsx -- scripts/testing/live-intake/build-live-intake-dataset.ts",
     "run:live-intake-ui": "npm exec tsx -- scripts/testing/live-intake/run-live-intake-ui.ts",
     "check:docs": "node scripts/check-docs-drift.mjs",

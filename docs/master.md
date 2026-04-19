@@ -179,6 +179,7 @@ Customer-facing flows include only rugs that are both:
 ## Image And Storage Model
 - Storage bucket: `rug-images`
 - `rug_images.path` stores the object path, not the full URL
+- `rug_images.original_path` preserves the original uploaded intake image after `path` is swapped to the enhanced display image
 - `rug_images.image_sha256` stores the exact uploaded image hash for duplicate detection
 - One primary image row is expected per rug in the current intake model
 
@@ -192,6 +193,7 @@ Customer-facing flows include only rugs that are both:
 - enrichment queue: `apps/web/lib/inventory/enrichment-jobs.ts`
 - title builder: `apps/web/lib/inventory/title-builder.ts`
 - vision enrichment: `apps/web/lib/inventory/vision-enrichment.ts`
+- image enhancement: `apps/web/lib/inventory/image-enhancement.ts`
 
 ## Environment Variables
 Required runtime variables:
@@ -199,7 +201,10 @@ Required runtime variables:
 - `SUPABASE_SECRET_KEY`
 - `OPENAI_API_KEY`
 - `OPENAI_CHAT_MODEL`
+- `OPENAI_RECOMMENDATION_MODEL`
 - `OPENAI_VISION_MODEL`
+- `GEMINI_API_KEY`
+- `GEMINI_IMAGE_ENHANCEMENT_MODEL`
 - `UPSTASH_REDIS_REST_URL`
 - `UPSTASH_REDIS_REST_TOKEN`
 - `ENABLE_GENERAL_CHAT_AI`
@@ -218,6 +223,7 @@ Branding source order:
 ## Scripts
 - `scripts/seed-demo-rugs.ts`: seed demo inventory
 - `scripts/re-enrich-rugs.ts`: batch re-enrichment for existing rugs
+- `scripts/backfill-rug-image-enhancement.ts`: one-time enhancement backfill for existing ready/available rugs
 - `scripts/purge-tenant-inventory.ts`: destructive tenant-specific inventory reset
 - `scripts/testing/color-audit.ts`: audit live tenant color vocabulary before/after canonicalization
 - `scripts/testing/concierge-rework-scenarios.ts`: deterministic parser/policy/size-guard scenario checks

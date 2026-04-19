@@ -324,16 +324,21 @@ export async function DELETE(
 
   const imageRows = await supabaseAdmin
     .from("rug_images")
-    .select("path")
+    .select("path, original_path")
     .eq("tenant_id", tenantId)
     .eq("rug_id", params.value.id);
   if (imageRows.error) {
     return internalError("Unable to read rug images before delete.");
   }
 
-  const storagePaths = (Array.isArray(imageRows.data) ? imageRows.data : [])
-    .map((row) => (typeof row?.path === "string" ? row.path.trim() : ""))
-    .filter((path) => path.length > 0);
+  const storagePaths = [...new Set(
+    (Array.isArray(imageRows.data) ? imageRows.data : []).flatMap((row) => {
+      const activePath = typeof row?.path === "string" ? row.path.trim() : "";
+      const originalPath =
+        typeof row?.original_path === "string" ? row.original_path.trim() : "";
+      return [activePath, originalPath].filter((path) => path.length > 0);
+    })
+  )];
 
   if (storagePaths.length > 0) {
     const storageRemove = await supabaseAdmin.storage

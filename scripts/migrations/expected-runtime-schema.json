@@ -32,7 +32,12 @@
       "rug_id",
       "path",
       "image_sha256",
-      "created_at"
+      "created_at",
+      "original_path",
+      "enhancement_status",
+      "enhancement_model",
+      "enhanced_at",
+      "enhancement_error"
     ],
     "inventory_enrichment_jobs": [
       "id",

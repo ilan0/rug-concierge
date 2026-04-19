@@ -49,6 +49,15 @@ function parseArgs(argv: string[]) {
   };
 }
 
+function isLikelyMissingColumnError(message: string): boolean {
+  const normalized = message.toLowerCase();
+  return (
+    normalized.includes("does not exist") ||
+    normalized.includes("schema cache") ||
+    normalized.includes("could not find the")
+  );
+}
+
 async function cleanup(input: {
   supabase: ReturnType<typeof createClient>;
   tenantId: string;
@@ -86,6 +95,8 @@ async function main() {
       process.env[key] = value;
     }
   }
+  process.env.GEMINI_API_KEY ||= "smoke-test-gemini-key";
+  process.env.GEMINI_IMAGE_ENHANCEMENT_MODEL ||= "gemini-2.5-flash-image";
   const { tenantId } = parseArgs(process.argv.slice(2));
   const [
     {
@@ -142,12 +153,25 @@ async function main() {
     }
     createdRugId = rugInsert.data.id;
 
-    const rugImageInsert = await supabase.from("rug_images").insert({
+    let rugImageInsert = await supabase.from("rug_images").insert({
       tenant_id: tenantId,
       rug_id: createdRugId,
       path: storagePath,
+      original_path: storagePath,
       image_sha256: imageSha256,
+      enhancement_status: "not_started",
     });
+    if (
+      rugImageInsert.error &&
+      isLikelyMissingColumnError(rugImageInsert.error.message ?? "")
+    ) {
+      rugImageInsert = await supabase.from("rug_images").insert({
+        tenant_id: tenantId,
+        rug_id: createdRugId,
+        path: storagePath,
+        image_sha256: imageSha256,
+      });
+    }
     if (rugImageInsert.error) {
       throw new Error(`Unable to create smoke rug image: ${rugImageInsert.error.message}`);
     }
@@ -188,6 +212,11 @@ async function main() {
           is_rug: true,
           is_rug_confidence: "high",
         },
+      }),
+      enhanceRugPrimaryImageFn: async () => ({
+        displayPath: storagePath,
+        originalPath: storagePath,
+        model: "gemini-smoke-test",
       }),
     });
     assert.equal(outcome, "ready");

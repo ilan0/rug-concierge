@@ -6,7 +6,8 @@ import {
   type ReviewReasonCode,
 } from "@/lib/inventory/enrichment-state";
 import { fetchRugRecordById, type RugRecord } from "@/lib/inventory/rug-record";
-import { fetchPrimaryRugImagesForRugs } from "@/lib/storage/rug-images";
+import { enhanceRugPrimaryImage, resetRugImageEnhancementState } from "@/lib/inventory/image-enhancement";
+import { fetchSourceRugImageUrlsForRugs } from "@/lib/storage/rug-images";
 import {
   buildTradeTitle,
   sanitizeFallbackTradeLabel,
@@ -65,6 +66,7 @@ export type InventoryEnrichmentWorkerSummary = {
 };
 
 export type VisionEnrichmentRequester = typeof requestVisionEnrichment;
+export type ImageEnhancementRequester = typeof enhanceRugPrimaryImage;
 
 function getSupabase(input?: SupabaseClient): SupabaseClient {
   return input ?? supabaseAdmin;
@@ -255,6 +257,7 @@ async function scheduleRetryOrFail(input: {
   supabase: SupabaseClient;
   job: InventoryEnrichmentJobRow;
   errorMessage: string;
+  reviewReasonCode?: ReviewReasonCode;
 }): Promise<InventoryEnrichmentJobOutcome> {
   const nextAttemptCount = input.job.attempt_count + 1;
 
@@ -277,7 +280,7 @@ async function scheduleRetryOrFail(input: {
     tenantId: input.job.tenant_id,
     rugId: input.job.rug_id,
     enrichmentStatus: "needs_review",
-    reviewReasonCode: "ANALYSIS_FAILED",
+    reviewReasonCode: input.reviewReasonCode ?? "ANALYSIS_FAILED",
     status: "not_available",
   });
   await updateJobState({
@@ -291,23 +294,24 @@ async function scheduleRetryOrFail(input: {
   return "needs_review_failed";
 }
 
-async function loadPrimaryImageUrl(input: {
+async function loadSourceImageUrl(input: {
   supabase: SupabaseClient;
   tenantId: string;
   rugId: string;
 }): Promise<string | null> {
-  const map = await fetchPrimaryRugImagesForRugs({
+  const map = await fetchSourceRugImageUrlsForRugs({
     supabase: input.supabase,
     tenantId: input.tenantId,
     rugIds: [input.rugId],
   });
-  return map.get(input.rugId)?.primary_image_url ?? null;
+  return map.get(input.rugId) ?? null;
 }
 
 export async function processInventoryEnrichmentJob(input: {
   supabase: SupabaseClient;
   job: InventoryEnrichmentJobRow;
   requestVisionEnrichmentFn?: VisionEnrichmentRequester;
+  enhanceRugPrimaryImageFn?: ImageEnhancementRequester;
 }): Promise<InventoryEnrichmentJobOutcome> {
   const rug = await fetchRugRecordById({
     supabase: input.supabase,
@@ -326,7 +330,7 @@ export async function processInventoryEnrichmentJob(input: {
     return "skipped_missing_rug";
   }
 
-  const primaryImageUrl = await loadPrimaryImageUrl({
+  const primaryImageUrl = await loadSourceImageUrl({
     supabase: input.supabase,
     tenantId: input.job.tenant_id,
     rugId: input.job.rug_id,
@@ -394,6 +398,24 @@ export async function processInventoryEnrichmentJob(input: {
     return "needs_review_non_rug";
   }
 
+  const enhancePrimaryImage = input.enhanceRugPrimaryImageFn ?? enhanceRugPrimaryImage;
+  try {
+    await enhancePrimaryImage({
+      supabase: input.supabase,
+      tenantId: input.job.tenant_id,
+      rugId: input.job.rug_id,
+    });
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "Image enhancement failed.";
+    return scheduleRetryOrFail({
+      supabase: input.supabase,
+      job: input.job,
+      errorMessage: message,
+      reviewReasonCode: "IMAGE_ENHANCEMENT_FAILED",
+    });
+  }
+
   const deterministicTitle = buildTradeTitle({
     aiFields: enrichment.aiStructuredFields,
     widthTotalIn: rug.width_total_in,
@@ -408,7 +430,7 @@ export async function processInventoryEnrichmentJob(input: {
       rugId: input.job.rug_id,
       enrichmentStatus: "ready",
       reviewReasonCode: null,
-      status: "available",
+      status: input.job.restore_available_on_ready ? "available" : "not_available",
       intakeLabel: deterministicTitle,
       aiDescription: enrichment.aiDescription,
       aiStructuredFields: enrichment.aiStructuredFields,
@@ -577,6 +599,7 @@ export async function runInventoryEnrichmentWorker(input: {
   runBudgetMs?: number;
   supabase?: SupabaseClient;
   requestVisionEnrichmentFn?: VisionEnrichmentRequester;
+  enhanceRugPrimaryImageFn?: ImageEnhancementRequester;
 }): Promise<InventoryEnrichmentWorkerSummary> {
   const supabase = getSupabase(input.supabase);
   const runBudgetMs = Math.max(10_000, Math.min(55_000, input.runBudgetMs ?? INVENTORY_ENRICHMENT_WORKER_RUN_BUDGET_MS));
@@ -613,6 +636,7 @@ export async function runInventoryEnrichmentWorker(input: {
         supabase,
         job,
         requestVisionEnrichmentFn: input.requestVisionEnrichmentFn,
+        enhanceRugPrimaryImageFn: input.enhanceRugPrimaryImageFn,
       });
       outcomes[outcome] += 1;
     } catch (error) {
@@ -679,6 +703,12 @@ export async function setRugProcessingState(input: {
     enrichmentStatus: "processing",
     reviewReasonCode: null,
     status: "not_available",
+  });
+
+  await resetRugImageEnhancementState({
+    supabase,
+    tenantId: input.tenantId,
+    rugId: input.rugId,
   });
 
   return { restoreAvailableOnReady };

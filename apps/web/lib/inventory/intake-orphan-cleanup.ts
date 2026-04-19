@@ -119,7 +119,7 @@ async function loadReferencedPathsForTenant(
     const to = from + LIST_PAGE_SIZE - 1;
     const query = await supabaseAdmin
       .from("rug_images")
-      .select("path")
+      .select("path, original_path")
       .eq("tenant_id", tenantId)
       .range(from, to);
 
@@ -131,9 +131,13 @@ async function loadReferencedPathsForTenant(
     }
 
     for (const row of query.data) {
-      const path = typeof row.path === "string" ? row.path.trim() : "";
-      if (!path) continue;
-      referenced.add(normalizePath(path));
+      const activePath = typeof row.path === "string" ? row.path.trim() : "";
+      const originalPath =
+        typeof row.original_path === "string" ? row.original_path.trim() : "";
+      for (const path of [activePath, originalPath]) {
+        if (!path) continue;
+        referenced.add(normalizePath(path));
+      }
     }
 
     if (query.data.length < LIST_PAGE_SIZE) {

@@ -154,7 +154,7 @@ async function fetchTenantStoragePaths(input: {
 }): Promise<string[]> {
   const result = await input.supabase
     .from("rug_images")
-    .select("path")
+    .select("path, original_path")
     .eq("tenant_id", input.tenantId);
   if (result.error || !Array.isArray(result.data)) {
     throw new Error(
@@ -162,9 +162,14 @@ async function fetchTenantStoragePaths(input: {
     );
   }
 
-  return result.data
-    .map((row) => (typeof row.path === "string" ? row.path.trim() : ""))
-    .filter((value) => value.length > 0);
+  return [...new Set(
+    result.data.flatMap((row) => {
+      const activePath = typeof row.path === "string" ? row.path.trim() : "";
+      const originalPath =
+        typeof row.original_path === "string" ? row.original_path.trim() : "";
+      return [activePath, originalPath].filter((value) => value.length > 0);
+    })
+  )];
 }
 
 async function removeStoragePaths(input: {

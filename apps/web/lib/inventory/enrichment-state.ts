@@ -10,6 +10,7 @@ export const REVIEW_REASON_CODES = [
   "ANALYSIS_INCOMPLETE",
   "ANALYSIS_FAILED",
   "NON_RUG_DETECTED",
+  "IMAGE_ENHANCEMENT_FAILED",
 ] as const;
 
 export type ReviewReasonCode = (typeof REVIEW_REASON_CODES)[number];
@@ -51,6 +52,9 @@ export function reviewReasonMessage(
   }
   if (code === "NON_RUG_DETECTED") {
     return "Image appears to be non-rug content - verify manually before publishing.";
+  }
+  if (code === "IMAGE_ENHANCEMENT_FAILED") {
+    return "Image enhancement failed - retry processing or review the original photo manually.";
   }
   return "Needs review - please verify this rug manually.";
 }

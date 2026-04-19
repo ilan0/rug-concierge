@@ -501,7 +501,12 @@ export async function finalizeIntakeFromStorage(
       tenant_id: input.tenantId,
       rug_id: rugId,
       path: input.storagePath,
+      original_path: input.storagePath,
       image_sha256: imageSha256,
+      enhancement_status: "not_started",
+      enhancement_model: null,
+      enhanced_at: null,
+      enhancement_error: null,
     })
     .select("rug_id")
     .single();
